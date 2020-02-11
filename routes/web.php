@@ -1,0 +1,176 @@
+<?php
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| contains the "web" middleware group. Now create something great!
+|
+*/
+
+
+Route::get('seguridad/login', 'seguridad\LoginController@index')->name('login');
+Route::post('seguridad/login', 'seguridad\LoginController@login')->name('login_post');
+Route::get('seguridad/logout', 'seguridad\LoginController@logout')->name('logout');
+Route::get('/','inicioController@Index')->name('inicio');
+Route::group(['prefix' => 'admin', 'namespace' => 'admin', 'middleware' => ['auth', 'superadmin']], function () {
+    Route::get('', 'adminController@index');
+    Route::get('permission', 'permissionController@index')->name('permission');
+    Route::get('permission/create', 'permissionController@create')->name('create_permission');
+    /*RUTAS DEL MENU*/
+    Route::get('menu', 'menuController@index')->name('menu');
+    Route::get('menu/create', 'menuController@create')->name('crear_menu');
+    Route::post('menu', 'menuController@store')->name('guardar_menu');
+    Route::get('menu/{id}/edit', 'menuController@edit')->name('editar_menu');
+    Route::put('menu/{id}', 'menuController@update')->name('actualizar_menu');
+    Route::get('menu/{id}/destroy', 'menuController@destroy')->name('eliminar_menu');
+    Route::post('menu/guardar-orden', 'menuController@guardarOrden')->name('guardar_orden');
+    /*RUTAS ROL*/
+    Route::get('rol', 'rolController@index')->name('rol');
+    Route::get('rol/create', 'rolController@create')->name('crear_rol');
+    Route::post('rol', 'rolController@store')->name('guardar_rol');
+    Route::get('rol/{id}/edit', 'rolController@edit')->name('editar_rol');
+    Route::put('rol/{id}', 'rolController@update')->name('actualizar_rol');
+    Route::delete('rol/{id}', 'rolController@destroy')->name('eliminar_rol');
+    /*RUTAS MENU_ROL*/
+    Route::get('menu-rol', 'menurolController@index')->name('menu_rol');
+    Route::post('menu-rol', 'menurolController@store')->name('guardar_menu_rol');
+
+});
+
+Route::group(['middleware' => ['auth']], function() {
+    /* RUTAS PROGRAMACION DE TURNOS */
+Route::get('shiftprogramming/copyRol','shiftprogrammingController@copyRol')->name('copiarRol');
+Route::post('shiftprogramming/subirArchivo', 'shiftprogrammingController@subirArchivo')->name('subir_archivo');
+Route::post('shiftprogramming/guardar', 'shiftprogrammingController@guardar')->name('guardar_programacion');
+Route::get('shiftprogramming/archivo/{id}', 'shiftprogrammingController@pdf')->name('pdf_nuevo');
+Route::get('shiftprogramming/turnos', 'shiftprogrammingController@turnos')->name('turnos');
+Route::get('shiftprogramming/newRow','shiftprogrammingController@newRow')->name('nuevo_renglon');
+Route::get('shiftprogramming/workShift','shiftprogrammingController@workShift')->name('recuperar_turno');
+Route::get('shiftprogramming/recoverPDF','shiftprogrammingController@recoverPDF')->name('recuperarPDF');
+Route::get('shiftprogramming/copyRol','shiftprogrammingController@copyRol')->name('copiarRol');
+Route::get('shiftprogramming/rotRol','shiftprogrammingController@rotRol')->name('rotarRol');
+Route::get('shiftprogramming/editRol','shiftprogrammingController@editRol')->name('editarRol');
+Route::get('shiftprogramming/newShift','shiftprogrammingController@newShift')->name('nueva_planeacion');
+Route::get('shiftprogramming/{id}', 'shiftprogrammingController@index')->name('programacion');
+});
+/* RUTAS DE USUARIO */
+Route::get('user', 'userController@index')->name('usuario');
+Route::get('user/create', 'userController@create')->name('crear_usuario');
+Route::post('user', 'userController@store')->name('guardar_usuario');
+Route::get('user/{id}/edit', 'userController@edit')->name('editar_usuario');
+Route::put('user/{id}', 'userController@update')->name('actualizar_usuario');
+Route::delete('user/{id}', 'userController@destroy')->name('eliminar_usuario');
+
+/* RUTAS DE EMPLEADOS */
+Route::get('employee', 'employeeController@index')->name('empleado');
+Route::get('employee/create', 'employeeController@create')->name('crear_empleado');
+Route::post('employee', 'employeeController@store')->name('guardar_empleado');
+Route::get('employee/{id}/edit', 'employeeController@edit')->name('editar_empleado');
+Route::put('employee/{id}', 'employeeController@update')->name('actualizar_empleado');
+Route::delete('employee/{id}', 'employeeController@destroy')->name('eliminar_empleado');
+
+/* RUTAS DE GRUPOS TURNOS */
+Route::get('group', 'groupController@index')->name('grupo');
+Route::get('group/{id}/mostrar', 'groupController@mostrar')->name('ver_grupo');
+Route::get('group/create', 'groupController@create')->name('crear_grupo');
+Route::post('group', 'groupController@store')->name('guardar_grupo');
+Route::get('group/{id}/edit', 'groupController@edit')->name('editar_grupo');
+Route::put('group/{id}', 'groupController@update')->name('actualizar_grupo');
+Route::delete('group/{id}', 'groupController@destroy')->name('eliminar_grupo');
+
+/* RUTAS DE PLANTILLA HORARIOS */
+Route::get('schedule', 'scheduleController@index')->name('plantilla');
+Route::get('schedule/create', 'scheduleController@create')->name('crear_plantilla');
+Route::post('schedule', 'scheduleController@store')->name('guardar_plantilla');
+Route::get('schedule/{id}/edit', 'scheduleController@edit')->name('editar_plantilla');
+Route::put('schedule/{id}', 'scheduleController@update')->name('actualizar_plantilla');
+Route::delete('schedule/{id}', 'scheduleController@destroy')->name('eliminar_plantilla');
+
+/* RUTAS DE ASIGNACION HORARIOS */
+Route::get('assign', 'assignController@index')->name('asignacion');
+Route::get('assign/create/{id}', 'assignController@create')->name('crear_asignacion');
+Route::post('assign', 'assignController@store')->name('guardar_asignacion');
+Route::get('assign/{id}/edit', 'assignController@edit')->name('editar_asignacion');
+Route::put('assign/{id}', 'assignController@update')->name('actualizar_asignacion');
+Route::delete('assign/{id}', 'assignController@destroy')->name('eliminar_asignacion');
+
+/* RUTAS AREAS */
+Route::get('area', 'areaController@index')->name('area');
+Route::get('area/create', 'areaController@create')->name('crear_area');
+Route::post('area', 'areaController@store')->name('guardar_area');
+Route::get('area/{id}/edit', 'areaController@edit')->name('editar_area');
+Route::put('area/{id}', 'areaController@update')->name('actualizar_area');
+Route::delete('area/{id}', 'areaController@destroy')->name('eliminar_area');
+
+/* RUTAS DEPARTAMENTOS */
+Route::get('department', 'departmentController@index')->name('departamento');
+Route::get('department/create', 'departmentController@create')->name('crear_departamento');
+Route::post('department', 'departmentController@store')->name('guardar_departamento');
+Route::get('department/{id}/edit', 'departmentController@edit')->name('editar_departamento');
+Route::put('department/{id}', 'departmentController@update')->name('actualizar_departamento');
+Route::delete('department/{id}', 'departmentController@destroy')->name('eliminar_departamento');
+
+/* RUTAS PUESTOS */
+Route::get('job', 'jobController@index')->name('puesto');
+Route::get('job/create', 'jobController@create')->name('crear_puesto');
+Route::post('job', 'jobController@store')->name('guardar_puesto');
+Route::get('job/{id}/edit', 'jobController@edit')->name('editar_puesto');
+Route::put('job/{id}', 'jobController@update')->name('actualizar_puesto');
+Route::delete('job/{id}', 'jobController@destroy')->name('eliminar_puesto');
+
+/* RUTAS CAPTURA INCIDENTES */
+Route::get('incidents', 'incidentController@index')->name('incidentes');
+Route::get('incidents/create', 'incidentController@create')->name('crear_incidente');
+Route::post('incidents', 'incidentController@store')->name('guardar_incidente');
+Route::get('incidents/{id}/edit', 'incidentController@edit')->name('editar_incidente');
+Route::put('incidents/{id}', 'incidentController@update')->name('actualizar_incidente');
+Route::delete('incidents/{id}', 'incidentController@destroy')->name('eliminar_incidente');
+
+
+/* RUTAS DIAS FESTIVOS */
+Route::get('holidays', 'holidayController@index')->name('festivo');
+Route::get('holidays/create', 'holidayController@create')->name('crear_festivo');
+Route::post('holidays', 'holidayController@store')->name('guardar_festivo');
+Route::get('holidays/{id}/edit', 'holidayController@edit')->name('editar_festivo');
+Route::put('holidays/{id}', 'holidayController@update')->name('actualizar_festivo');
+Route::delete('holidays/{id}', 'holidayController@destroy')->name('eliminar_festivo');
+
+/* RUTAS TIPOS INCIDENTES */
+Route::get('type_incidents', 'typeincidentController@index')->name('tipo_incidentes');
+Route::get('type_incidents/create', 'typeincidentController@create')->name('crear_tipoincidente');
+Route::post('type_incidents', 'typeincidentController@store')->name('guardar_tipoincidente');
+Route::get('type_incidents/{id}/edit', 'typeincidentController@edit')->name('editar_tipoincidente');
+Route::put('type_incidents/{id}', 'typeincidentController@update')->name('actualizar_tipoincidente');
+Route::delete('type_incidents/{id}', 'typeincidentController@destroy')->name('eliminar_tipoincidente');
+
+/* RUTAS PERMISO */
+Route::get('permission', 'permissionController@index')->name('permiso');
+Route::get('permission/create', 'permissionController@create')->name('crear_permiso');
+Route::post('permission', 'permissionController@store')->name('guardar_permiso');
+Route::get('permission/{id}/edit', 'permissionController@edit')->name('editar_permiso');
+Route::put('permission/{id}', 'permissionController@update')->name('actualizar_permiso');
+Route::delete('permission/{id}', 'permissionController@destroy')->name('eliminar_permiso');
+
+/* RUTAS TURNO */
+Route::get('workshift', 'workshiftController@index')->name('turno');
+Route::get('workshift/create', 'workshiftController@create')->name('crear_turno');
+Route::post('workshift', 'workshiftController@store')->name('guardar_turno');
+Route::get('workshift/{id}/edit', 'workshiftController@edit')->name('editar_turno');
+Route::put('workshift/{id}', 'workshiftController@update')->name('actualizar_turno');
+Route::delete('workshift/{id}', 'workshiftController@destroy')->name('eliminar_turno');
+
+
+
+
+
+/* RUTAS PERMISO_ROL */
+Route::get('permiso-rol', 'permisorolController@index')->name('permiso_rol');
+Route::get('permiso-rol', 'permisorolController@store')->name('guardar_permiso_rol');
+
+
+
+Route::get('/home', 'HomeController@index')->name('home');
