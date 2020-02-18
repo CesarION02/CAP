@@ -57,6 +57,11 @@ Route::get('shiftprogramming/editRol','shiftprogrammingController@editRol')->nam
 Route::get('shiftprogramming/newShift','shiftprogrammingController@newShift')->name('nueva_planeacion');
 Route::get('shiftprogramming/{id}', 'shiftprogrammingController@index')->name('programacion');
 });
+
+/* RUTAS DE REPORTES */
+Route::get('report/reportES/{type}', 'ReporteController@reporteESplanta')->name('reporteESplanta');
+Route::get('report/generarReporteES','ReporteController@generarReporteES')->name('generarreporteESplanta');
+
 /* RUTAS DE USUARIO */
 Route::get('user', 'userController@index')->name('usuario');
 Route::get('user/create', 'userController@create')->name('crear_usuario');

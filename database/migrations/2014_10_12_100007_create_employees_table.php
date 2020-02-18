@@ -18,9 +18,9 @@ class CreateEmployeesTable extends Migration
             $table->string('name');
             $table->integer('num_employee');
             $table->integer('nip')->nullable();
-            $table->integer('way_register_id')->unsigned();
-            $table->integer('way_pay_id')->unsigned();
-            $table->integer('job_id')->unsigned();
+            $table->integer('way_register_id')->unsigned()->nullable();
+            $table->integer('way_pay_id')->unsigned()->nullable();
+            $table->integer('job_id')->unsigned()->nullable();
             $table->integer('is_delete')->default(0);
 
             $table->foreign('way_register_id')->references('id')->on('way_register')->onDelete('cascade');
