@@ -150,7 +150,10 @@ class ReporteController extends Controller
                 $lDepts = department::select('id','name')->where('is_delete', false)->get();
                 break;
             case 4:
-                $lEmployees = employees::select('id', 'name', 'num_employee')->where('is_delete', false)->get();
+                $lEmployees = employees::select('id', 'name', 'num_employee')
+                                        ->where('is_delete', false)
+                                        ->orderBy('name', 'ASC')
+                                        ->get();
                 break;
             
             default:
