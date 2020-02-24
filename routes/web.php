@@ -59,8 +59,8 @@ Route::get('shiftprogramming/{id}', 'shiftprogrammingController@index')->name('p
 });
 
 /* RUTAS DE REPORTES */
-Route::get('report/reportES/{type}', 'ReporteController@reporteESplanta')->name('reporteESplanta');
-Route::get('report/generarReporteES','ReporteController@generarReporteES')->name('generarreporteESplanta');
+Route::get('report/reportES/{type}', 'ReporteController@esReport')->name('reporteES');
+Route::get('report/generarReporteES','ReporteController@reporteESView')->name('generarreporteES');
 Route::get('report/generarReporteRegs/{type}','ReporteController@registriesReport')->name('generarreporteRegs');
 Route::get('report/reporteRegistros','ReporteController@reporteRegistrosView')->name('generarreporteRegistros');
 

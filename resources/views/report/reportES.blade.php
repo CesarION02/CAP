@@ -1,10 +1,9 @@
 @extends("theme.$theme.layout")
+@section('styles1')
+    <link rel="stylesheet" href="{{asset("assets/css/chosen.min.css")}}">
+@endsection
 @section('title')
 Reporte Entradas/Salidas
-@endsection
-
-@section("scripts")
-<script src="{{asset("assets/pages/scripts/report/generar.js")}}" type="text/javascript"></script>
 @endsection
 
 @section('content')
@@ -14,59 +13,93 @@ Reporte Entradas/Salidas
         @include('includes.mensaje')
         <div class="box box-danger">
             <div class="box-header with-border">
-                <h3 class="box-title">Reporte Entradas/Salidas</h3>
+                <h3 class="box-title">Reporte de Entradas Salidas</h3>
                 <div class="box-tools pull-right">
                 </div>
             </div>
-                <div class="box-body">
-                <input type="hidden" id="type" name="type" value={{$type}}>
-                @if($type == 1)
+            <form action="{{ route('generarreporteES') }}">
+                <input type="hidden" id="reportType" name="reportType" value={{ $reportType }}>
+                <div class="box-body" id="reportApp">
                     <div class="row">
-                        <label for="departamento" class="col-lg-3 control-label">Departamentos:</label>
-                        <div class="col-lg-8">              
-                            <select name="departamento" id="departamento">  
-                                <option value=0>Seleccionar Departamento</option>
-                                @foreach($departments as $department => $index)    
-                                    <option value="{{$index}}">{{$department}}</option>
-                                @endforeach
-                            </select>
+                        <div class="col-md-5 col-md-offset-1">
+                            <label for="start_date">Fecha inicio:</label>
+                            <input type="date" name="start_date" id="start_date" :value="startDate">
                         </div>
-        
-                    </div>  
-                @else
-                    <div class="row">
-                        <label for="empleado" class="col-lg-3 control-label">Departamentos:</label>
-                        <div class="col-lg-8">              
-                            <select name="empleado" id="empleado">  
-                                <option value=0>Seleccionar Empleado</option>
-                                @foreach($employees as $employee)    
-                                    <option value="{{$employee->idEmp}}">{{$employee->nameEmp}}</option>
-                                @endforeach
-                            </select>
+                        <div class="col-md-5">
+                            <label for="end_date">Fecha fin:</label>
+                            <input type="date" name="end_date" id="end_date" :value="endDate">
                         </div>
-    
-                    </div> 
-                @endif 
-                    <div class="row">
-                        <label for="start_date" class="col-lg-3 control-label">Fecha Inicio:</label>
-                        <div class="col-lg-3">
-                            <input type="date" name="start_date" id="start_date">
-                        </div>  
-                        <label for="end_date" class="col-lg-2 control-label">Fecha Fin:</label>
-                        <div class="col-lg-3">
-                            <input type="date" name="end_date" id="end_date">
-                        </div> 
                     </div>
-                
+                    <br>
+                    <div class="row" v-if="oData.reportType == 1">
+                        <div class="col-md-10 col-md-offset-1">
+                            <label for="cars">Elige Área(s):</label>
+                            
+                            <select data-placeholder="Selecciona opciones..." style="width: 60%" class="chosen-select" id="cars" name="vals[]" multiple>
+                                <option v-for="area in oData.areas" :value="area.id">@{{ area.name }}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row" v-else-if="oData.reportType == 2">
+                        <div class="col-md-10 col-md-offset-1">
+                            <label for="cars">Elige Grupo(s):</label>
+                            
+                            <select data-placeholder="Selecciona opciones..." style="width: 60%" class="chosen-select" id="cars" name="vals[]" multiple>
+                                <option v-for="group in oData.deptsGroups" :value="group.id">@{{ group.name }}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row" v-else-if="oData.reportType == 3">
+                        <div class="col-md-10 col-md-offset-1">
+                            <label for="cars">Elige Departamento(s):</label>
+                            
+                            <select data-placeholder="Selecciona opciones..." style="width: 60%" class="chosen-select" id="cars" name="vals[]" multiple>
+                                <option v-for="dept in oData.departaments" :value="dept.id">@{{ dept.name }}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row" v-else-if="oData.reportType == 4">
+                        <div class="col-md-10 col-md-offset-1">
+                            <label for="cars">Elige Empleado(s):</label>
+                            
+                            <select data-placeholder="Selecciona opciones..." style="width: 60%" class="chosen-select" id="cars" name="vals[]" multiple>
+                                <option v-for="employee in oData.employees" :value="employee.id">@{{ employee.name + ' ' + employee.num_employee }}</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
                 <div class="box-footer">
                     <div class="col-lg-3"></div>
                     <div class="col-lg-6">
-                        <button class="btn btn-warning" id="generar" name="generar" onclick="generar()">Generar</button>
+                        <button class="btn btn-warning" id="generar" name="generar" type="submit">Generar</button>
                     </div>
                 </div>
-            
+            </form>
         </div>
     </div>
 </div> 
+@endsection
+
+@section("scripts")
+    <script src="{{ asset("assets/pages/scripts/report/generar.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/js/chosen.jquery.min.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/js/vue.js") }}" type="text/javascript"></script>
+    
+    <script>
+        function GlobalData () {
+            this.reportType = <?php echo json_encode($reportType) ?>;
+            this.areas = <?php echo json_encode($lAreas) ?>;
+            this.deptsGroups = <?php echo json_encode($lDepsGroups) ?>;
+            this.departaments = <?php echo json_encode($lDepts) ?>;
+            this.employees = <?php echo json_encode($lEmployees) ?>;
+        }
+        
+        var oData = new GlobalData();
+    </script>
+
+    <script src="{{asset("assets/js/vues/report_regs.js")}}" type="text/javascript"></script>
+
+    <script>
+        $(".chosen-select").chosen();
+    </script>
 @endsection

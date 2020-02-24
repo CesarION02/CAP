@@ -108,18 +108,20 @@ class shiftprogrammingController extends Controller
     public function newShift(Request $request){
         $departments = DB::table('jobs')
                         ->join('departments','departments.id','=','jobs.department_id')
+                        ->join('department_group','department_group.id','=','departments.dept_group_id')
                         ->orderBy('departments.id')
                         ->orderBy('jobs.id')
                         ->where('jobs.is_delete','0')
-                        ->where('departments.area_id',$request->typearea)
+                        ->where('departments.dept_group_id',$request->typearea)
                         ->select('jobs.id AS idJob','jobs.name AS nameJob','departments.id AS idDepartment','departments.name AS nameDepartment')
                         ->get();
         $employees = DB::table('employees')
                         ->join('jobs','jobs.id','=','employees.job_id')
                         ->join('departments','departments.id','=','jobs.department_id')
+                        ->join('department_group','department_group.id','=','departments.dept_group_id')
                         ->orderBy('employees.job_id')
                         ->where('employees.is_delete','0')
-                        ->where('departments.area_id',$request->typearea)
+                        ->where('departments.dept_group_id',$request->typearea)
                         ->select('jobs.id AS idJob','jobs.name AS nameJob','employees.name AS nameEmployee','employees.id AS idEmployee')
                         ->get();
         $group_workshift = DB::table('group_workshifts')
@@ -134,9 +136,10 @@ class shiftprogrammingController extends Controller
         $employees = DB::table('employees')
                         ->join('jobs','jobs.id','=','employees.job_id')
                         ->join('departments','departments.id','=','jobs.department_id')
+                        ->join('department_group','department_group.id','=','departments.dept_group_id')
                         ->orderBy('employees.job_id')
                         ->where('employees.is_delete','0')
-                        ->where('departments.area_id',$request->typearea)
+                        ->where('departments.dept_group_id',$request->typearea)
                         ->select('jobs.id AS idJob','jobs.name AS nameJob','employees.name AS nameEmployee','employees.id AS idEmployee')
                         ->get();
         $workshifts = DB::table('group_workshifts_lines')
@@ -166,9 +169,10 @@ class shiftprogrammingController extends Controller
         $employees = DB::table('employees')
                         ->join('jobs','jobs.id','=','employees.job_id')
                         ->join('departments','departments.id','=','jobs.department_id')
+                        ->join('department_group','department_group.id','=','departments.dept_group_id')
                         ->orderBy('employees.job_id')
                         ->where('employees.is_delete','0')
-                        ->where('departments.area_id',$request->typearea)
+                        ->where('departments.dept_group_id',$request->typearea)
                         ->select('jobs.id AS idJob','jobs.name AS nameJob','employees.name AS nameEmployee','employees.id AS idEmployee')
                         ->get();    
                         return response()->json(array($workshifts,$employees));
@@ -529,9 +533,10 @@ class shiftprogrammingController extends Controller
         $employees = DB::table('employees')
                         ->join('jobs','jobs.id','=','employees.job_id')
                         ->join('departments','departments.id','=','jobs.department_id')
+                        ->join('department_group','department_group.id','=','departments.dept_group_id')
                         ->orderBy('employees.job_id')
                         ->where('employees.is_delete','0')
-                        ->where('departments.area_id',$request->typearea)
+                        ->where('departments.dept_group_id',$request->typearea)
                         ->select('jobs.id AS idJob','jobs.name AS nameJob','employees.name AS nameEmployee','employees.id AS idEmployee')
                         ->get();
         $info = DB::table('week')
@@ -567,9 +572,10 @@ class shiftprogrammingController extends Controller
                         ->get();
         $jobs = DB::table('jobs')
                         ->join('departments','departments.id','=','jobs.department_id')
+                        ->join('department_group','department_group.id','=','departments.dept_group_id')
                         ->orderBy('jobs.id')
                         ->where('jobs.is_delete','0')
-                        ->where('departments.area_id',$request->typearea)
+                        ->where('departments.dept_group_id',$request->typearea)
                         ->select('jobs.id AS idJob','jobs.name AS nameJob','departments.id AS idDepartment','departments.name AS nameDepartment')
                         ->get();
         
@@ -581,9 +587,10 @@ class shiftprogrammingController extends Controller
         $employees = DB::table('employees')
                         ->join('jobs','jobs.id','=','employees.job_id')
                         ->join('departments','departments.id','=','jobs.department_id')
+                        ->join('department_group','department_group.id','=','departments.dept_group_id')
                         ->orderBy('employees.job_id')
                         ->where('employees.is_delete','0')
-                        ->where('departments.area_id',$request->typearea)
+                        ->where('departments.dept_group_id',$request->typearea)
                         ->select('jobs.id AS idJob','jobs.name AS nameJob','employees.name AS nameEmployee','employees.id AS idEmployee')
                         ->get();
         $info = DB::table('week')
@@ -619,9 +626,10 @@ class shiftprogrammingController extends Controller
                         ->get();
         $jobs = DB::table('jobs')
                         ->join('departments','departments.id','=','jobs.department_id')
+                        ->join('department_group','department_group.id','=','departments.dept_group_id')
                         ->orderBy('jobs.id')
                         ->where('jobs.is_delete','0')
-                        ->where('departments.area_id',$request->typearea)
+                        ->where('departments.dept_group_id',$request->typearea)
                         ->select('jobs.id AS idJob','jobs.name AS nameJob','departments.id AS idDepartment','departments.name AS nameDepartment')
                         ->get();
         
@@ -634,9 +642,10 @@ class shiftprogrammingController extends Controller
         $employees = DB::table('employees')
                         ->join('jobs','jobs.id','=','employees.job_id')
                         ->join('departments','departments.id','=','jobs.department_id')
+                        ->join('department_group','department_group.id','=','departments.dept_group_id')
                         ->orderBy('employees.job_id')
                         ->where('employees.is_delete','0')
-                        ->where('departments.area_id',$request->typearea)
+                        ->where('departments.dept_group_id',$request->typearea)
                         ->select('jobs.id AS idJob','jobs.name AS nameJob','employees.name AS nameEmployee','employees.id AS idEmployee')
                         ->get();
         $info = DB::table('week')
@@ -672,9 +681,10 @@ class shiftprogrammingController extends Controller
                         ->get();
         $jobs = DB::table('jobs')
                         ->join('departments','departments.id','=','jobs.department_id')
+                        ->join('department_group','department_group.id','=','departments.dept_group_id')
                         ->orderBy('jobs.id')
                         ->where('jobs.is_delete','0')
-                        ->where('departments.area_id',$request->typearea)
+                        ->where('departments.dept_group_id',$request->typearea)
                         ->select('jobs.id AS idJob','jobs.name AS nameJob','departments.id AS idDepartment','departments.name AS nameDepartment')
                         ->get();
         $week = DB::table('week')

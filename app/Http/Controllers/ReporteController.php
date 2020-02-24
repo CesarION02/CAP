@@ -90,34 +90,118 @@ class ReporteController extends Controller
         //
     }
 
-    public function reporteESplanta($type){
-        if($type == 1){
-            $departments = department::where('is_delete','0')->where('area_id','3')->orderBy('id','ASC')->pluck('id','name');
-            return view('report.reportES', compact('departments'))->with('type',$type);
+    /**
+     * Recibe el tipo de reporte y en base a este retorna una colección con los valores posibles
+     *
+     * @param integer $reportType
+     *                  1  Reporte por área
+     *                  2  Reporte por grupo de departamentos
+     *                  3  Reporte por departamentos
+     *                  4  Reporte por empleados
+     * 
+     * @return view('report.reportES')
+     */
+    public function esReport($type = 0){
+        $lAreas = null;
+        $lDepsGroups = null;
+        $lDepts = null;
+        $lEmployees = null;
 
+        switch ($type) {
+            case 1:
+                $lAreas = area::select('id','name')->where('is_delete', false)->get();
+                break;
+            case 2:
+                $lDepsGroups = departmentsGroup::select('id','name')->where('is_delete', false)->get();
+                break;
+            case 3:
+                $lDepts = department::select('id','name')->where('is_delete', false)->get();
+                break;
+            case 4:
+                $lEmployees = employees::select('id', 'name', 'num_employee')->where('is_delete', false)->get();
+                break;
+            
+            default:
+                # code...
+                break;
         }
-        else{
-            $employees = DB::table('employees')
-                        ->join('jobs','jobs.id','=','employees.job_id')
-                        ->join('departments','departments.id','=','jobs.department_id')
-                        ->select('employees.id AS idEmp','employees.name AS nameEmp')
-                        ->where('employees.is_delete','0')
-                        ->where('departments.area_id',3)
-                        ->get();
-            return view('report.reportES', compact('employees'))->with('type',$type);
-        }
+
+        return view('report.reportES')->with('lAreas', $lAreas)
+                                        ->with('lDepsGroups', $lDepsGroups)
+                                        ->with('lDepts', $lDepts)
+                                        ->with('lEmployees', $lEmployees)
+                                        ->with('reportType', $type);
 
     }
 
-    public function generarReporteES(Request $request){
-        $register = DB::table('registers')
-                    ->join('employees','employees.id','=','registers.employee_id')
-                    ->select('employees.name AS name','date AS fecha','time AS tiempo','type_id AS tipo')
-                    ->where('employees_id',$request->empleado)
-                    ->whereBetween('date',[$request->fechaini, $request->fechafin])
-                    ->get();
-        
-        $departments = department::where('is_delete','0')->where('area_id','3')->orderBy('id','ASC')->pluck('id','name');
+    public function reporteESView(Request $request){
+        $reportType = $request->reportType;
+        $values = $request->vals;
+        $startDate = $request->start_date;
+        $endDate = $request->end_date;
+
+        DB::enableQueryLog();
+
+        $register = DB::table('registers AS r')
+                    ->join('employees AS e', 'e.id', '=', 'r.employee_id');
+
+        switch ($reportType) {
+            case 1:
+                $register = $register->join('jobs AS j', 'j.id', '=', 'e.job_id')
+                                    ->join('departments AS d', 'd.id', '=', 'j.department_id')
+                                    ->join('areas AS a', 'a.id', '=', 'd.area_id')
+                                    ->whereIn('a.id', $values)
+                                    ->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id','a.name AS areaname')
+                                    ->groupBy('e.name','date','type_id','e.num_employee','a.name')
+                                    ->orderBy('date')
+                                    ->orderBy('e.name')
+                                    ->orderBy('time')
+                                    ->orderBy('a.id');
+                break;
+            case 2:
+                $register = $register->join('jobs AS j', 'j.id', '=', 'e.job_id')
+                                    ->join('departments AS d', 'd.id', '=', 'j.department_id')
+                                    ->join('department_group AS dg', 'dg.id', '=', 'd.dept_group_id')
+                                    ->whereIn('dg.id', $values)
+                                    ->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id','dg.name AS groupname')
+                                    ->groupBy('date','type_id','e.name','e.num_employee')
+                                    ->orderBy('date')
+                                    ->orderBy('e.name')
+                                    ->orderBy('time')
+                                    ->orderBy('dg.id');
+                break;
+            case 3:
+                $register = $register->join('jobs AS j', 'j.id', '=', 'e.job_id')
+                                    ->join('departments AS d', 'd.id', '=', 'j.department_id')
+                                    ->whereIn('d.id', $values)
+                                    ->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id','d.name AS depname')
+                                    ->groupBy('date','type_id','e.name','e.num_employee')
+                                    ->orderBy('date')
+                                    ->orderBy('e.name')
+                                    ->orderBy('time')
+                                    ->orderBy('d.id');;
+                break;
+            case 4:
+                $register = $register->whereIn('e.id', $values)
+                                    ->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id')
+                                    ->groupBy('date','type_id','e.name','e.num_employee')
+                                    ->orderBy('date')
+                                    ->orderBy('e.name')
+                                    ->orderBy('time');
+                break;
+            
+            default:
+                # code...
+                break;
+        }
+
+        $register = $register->whereBetween('r.date', [$startDate, $endDate])
+                             ->get();
+
+        return view('report.reporteESView')
+                        ->with('reportType', $reportType)
+                        ->with('lRegistries', $register);
+    
 
     }
 
