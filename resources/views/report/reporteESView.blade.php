@@ -58,7 +58,7 @@ Reporte Entradas/Salidas
                                             <td>--</td>
                                             <td>--</td>
                                         @endif
-                                        @if($i != count($lRegistries))
+                                        @if(($i+1) < count($lRegistries))
                                             @if($lRegistries[$i]->num_employee == $lRegistries[$i+1]->num_employee && $lRegistries[$i+1]->type_id == 2)
                                                 <?php $i++; ?>
                                                 <td>{{$lRegistries[$i]->date}}</td>
