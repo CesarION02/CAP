@@ -153,8 +153,8 @@ class ReporteController extends Controller
                                     ->whereIn('a.id', $values)
                                     ->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id','a.name AS areaname')
                                     ->groupBy('e.name','date','type_id','e.num_employee','a.name')
-                                    ->orderBy('date')
                                     ->orderBy('e.name')
+                                    ->orderBy('date')
                                     ->orderBy('time')
                                     ->orderBy('a.id');
                 break;
@@ -165,8 +165,8 @@ class ReporteController extends Controller
                                     ->whereIn('dg.id', $values)
                                     ->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id','dg.name AS groupname')
                                     ->groupBy('date','type_id','e.name','e.num_employee')
-                                    ->orderBy('date')
                                     ->orderBy('e.name')
+                                    ->orderBy('date')
                                     ->orderBy('time')
                                     ->orderBy('dg.id');
                 break;
@@ -176,8 +176,8 @@ class ReporteController extends Controller
                                     ->whereIn('d.id', $values)
                                     ->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id','d.name AS depname')
                                     ->groupBy('date','type_id','e.name','e.num_employee')
-                                    ->orderBy('date')
                                     ->orderBy('e.name')
+                                    ->orderBy('date')
                                     ->orderBy('time')
                                     ->orderBy('d.id');;
                 break;
