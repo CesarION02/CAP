@@ -105,6 +105,13 @@ Route::get('assign/{id}/edit', 'assignController@edit')->name('editar_asignacion
 Route::put('assign/{id}', 'assignController@update')->name('actualizar_asignacion');
 Route::delete('assign/{id}', 'assignController@destroy')->name('eliminar_asignacion');
 
+// 
+Route::get('assignone', 'assignController@indexOneDay')->name('asignar_uno');
+Route::post('assignone', 'assignController@storeOne')->name('guardar_uno');
+Route::put('assignone/{id}', 'assignController@updateOne')->name('actualizar_uno');
+Route::delete('assignone/{id}', 'assignController@deleteOne')->name('eliminar_uno');
+Route::get('assignonedata', 'assignController@getData')->name('get_data');
+
 /* RUTAS AREAS */
 Route::get('area', 'areaController@index')->name('area');
 Route::get('area/create', 'areaController@create')->name('crear_area');
