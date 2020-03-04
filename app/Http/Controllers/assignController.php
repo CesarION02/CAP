@@ -392,7 +392,8 @@ class assignController extends Controller
                 break;
         }
 
-        $lSchedules = $this->getData();
+        // $lSchedules = $this->getData();
+        $lSchedules = $resp;
 
         return json_encode($lSchedules);
     }
@@ -426,7 +427,8 @@ class assignController extends Controller
         $oAssing->updated_by = 1;
         $oAssing->save();
 
-        $lSchedules = $this->getData();
+        // $lSchedules = $this->getData();
+        $lSchedules = $oAssing;
 
         return json_encode($lSchedules);
     }
@@ -446,6 +448,9 @@ class assignController extends Controller
                                         'sa.id'
                                     )
                             ->where('sa.is_delete', false)
+                            ->where('schedule_template_id', 1)
+                            ->where('group_assign_id', 1)
+                            ->where('group_schedules_id', 1)
                             ->orderBy('start_date', 'ASC')
                             ->orderBy('order_gs', 'ASC')
                             ->get();

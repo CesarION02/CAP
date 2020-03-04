@@ -7,7 +7,8 @@ var app = new Vue({
         iEmployee: null,
         oToChange: null,
         iAssignament: null,
-        iAction: 1 // 1: nuevo, 2: editar
+        iAction: 1, // 1: nuevo, 2: editar
+        vueGui: oGui
     },
     methods: {
         /**
@@ -299,16 +300,23 @@ var app = new Vue({
         },
 
         reloadResources(lList) {
-            this.vueServerData.lSchedules = lList;
-            if (this.vueServerData.lSchedules != undefined && this.vueServerData.lSchedules.length > 0) {
-                let auxArray = new Array();
-        
-                for (const assign of this.vueServerData.lSchedules) {
-                    auxArray[assign.start_date + ""] = assign;
+            if (Array.isArray(lList)) {
+                this.vueServerData.lSchedules = lList;
+                if (this.vueServerData.lSchedules != undefined && this.vueServerData.lSchedules.length > 0) {
+                    let auxArray = new Array();
+            
+                    for (const assign of this.vueServerData.lSchedules) {
+                        auxArray[assign.start_date + ""] = assign;
+                    }
+            
+                    this.vueDateAssigns = auxArray;
+    
                 }
-        
-                this.vueDateAssigns = auxArray;
             }
+            else {
+                location.reload();
+            }    
+
         }
     },
 

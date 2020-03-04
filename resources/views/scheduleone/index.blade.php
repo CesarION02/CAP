@@ -23,11 +23,12 @@ Guardias Sabatinas
                     </button>
                 </div>
             </div>
-            <div class="box-body">
-                <table id="schedules_table" class="display" style="width:100%">
+            <div class="box-body" id="the_box">
+                <table id="assigns_id" class="display" style="width:100%">
                     <thead>
                         <tr>
                             <th>Fecha</th>
+                            <th>Num</th>
                             <th>Empleado</th>
                             <th>Acciones</th>
                         </tr>
@@ -35,6 +36,7 @@ Guardias Sabatinas
                     <tbody>
                         <tr v-for="schedule in vueServerData.lSchedules">
                             <td>@{{ schedule.start_date }}</td>
+                            <td>@{{ vueGui.pad(schedule.num_employee) }}</td>
                             <td>@{{ schedule.name }}</td>
                             <td>
                                 <button v-on:click="onShowEditModal(schedule)" 
@@ -88,8 +90,8 @@ Guardias Sabatinas
         $(".chosen-select").chosen({width: "98%"});
     </script>
     <script>
-        $(document).ready(function() {
-                let table = $('#schedules_table').DataTable({
+        function reloadTable() {
+                let table = $('#assigns_id').DataTable({
                     "language": {
                         "sProcessing":     "Procesando...",
                         "sLengthMenu":     "Mostrar _MENU_ registros",
@@ -129,6 +131,8 @@ Guardias Sabatinas
                 // setInterval( function () {
                 //     table.ajax.reload();
                 // }, 60000 );
-            });
+            }
+
+            reloadTable();
     </script>
 @endsection
