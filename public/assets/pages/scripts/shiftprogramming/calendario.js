@@ -36,10 +36,10 @@ function calendario() {
     } else {
         datestart = fechaini.split('-');
         datend = fechafin.split('-');
-        var iniyear = datestart[0] - 1;
+        var iniyear = datestart[0];
         var inimonth = datestart[1] - 1;
         var iniday = datestart[2];
-        var finyear = datend[0] - 1;
+        var finyear = datend[0];
         var finmonth = datend[1] - 1;
         var finday = datend[2];
         var inicio = new Date(iniyear, inimonth, iniday).getTime();
