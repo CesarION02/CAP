@@ -127,6 +127,13 @@ Route::post('department', 'departmentController@store')->name('guardar_departame
 Route::get('department/{id}/edit', 'departmentController@edit')->name('editar_departamento');
 Route::put('department/{id}', 'departmentController@update')->name('actualizar_departamento');
 Route::delete('department/{id}', 'departmentController@destroy')->name('eliminar_departamento');
+Route::put('upddepartments', 'departmentController@updateDepts')->name('actualizar_departamentos');
+
+/* RUTAS DEPARTAMENTOS */
+Route::get('deptsgroup', 'DeptsGroupController@index')->name('depts_grp');
+Route::post('deptsgroup', 'DeptsGroupController@store')->name('guardar_grupodepts');
+Route::delete('deptsgroup/{id}', 'DeptsGroupController@delete')->name('eliminar_grupodepts');
+Route::put('deptsgroup/{id}/{name}', 'DeptsGroupController@edit')->name('actualizar_grupodepts');
 
 /* RUTAS PUESTOS */
 Route::get('job', 'jobController@index')->name('puesto');
