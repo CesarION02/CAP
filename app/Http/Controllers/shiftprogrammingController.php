@@ -354,7 +354,8 @@ class shiftprogrammingController extends Controller
             $avance+= 6 ;
             PDF::SetXY($ejeX,$avance);
             if($departments[$x]->status == 2){
-                PDF::Cell(60,6,'Cerrado',1,false,'C',0,'',1,false,'M','M'); 
+                PDF::Cell(60,6,'Cerrado',1,false,'C',0,'',1,false,'M','M');
+                $renglones = 3; 
             }else{
                 $workshifts = DB::table('group_workshifts_lines')
                                 ->join('workshifts','workshifts.id','=','group_workshifts_lines.workshifts_id')
@@ -400,6 +401,8 @@ class shiftprogrammingController extends Controller
                     PDF::SetXY($ejeXAux,$auxAvance);
                     $renglones++;
                     $contEmpleados=0;
+                    $contadorRenglones=0;
+                    $auxContRen = 0;
                     for( $j = 0 ; $numTurno > $j ; $j++){
                         if($j!=0){
                         $auxAvance = $auxAvance - ($contEmpleados*6);}
@@ -412,12 +415,16 @@ class shiftprogrammingController extends Controller
                                 $renglones++;
                                 $auxAvance+=6;
                                 $contEmpleados++;
+                                $contadorRenglones++;
                             }
                         }
+                        if($contadorRenglones > $auxContRen ){$auxContRen = $contadorRenglones;}
+                        $contadorRenglones=0;
                         $ejeXAux+=$tamañoCol;
                         
                     }
-
+                    $auxAvance = $auxAvance - ($contEmpleados*6);
+                    $auxAvance = $auxAvance+($auxContRen*6);
                 }   
             }
             $ejeX= $ejeX+68;
@@ -452,7 +459,7 @@ class shiftprogrammingController extends Controller
             $formateoCalendario = $formateo[2].'-'.$formateo[1].'-'.$formateo[0];
             $nombreMes = $meses[date('n', strtotime($formateoCalendario))];
             $formateoCalImp = $formateo[2].'-'.$nombreMes;
-            PDF::Cell($tamañoDia,6,$formateoCalImp,1,false,'C',0,'',0,false,'M','M');
+            PDF::Cell($tamañoDia,5,$formateoCalImp,1,false,'C',0,'',0,false,'M','M');
             $auxX = $auxX + $tamañoDia;
             PDF::setXY($auxX,$ejeY);
             $date = date("Y-m-d",strtotime($date."+1 days"));
@@ -506,9 +513,9 @@ class shiftprogrammingController extends Controller
                     PDF::SetFont('helvetica','',9);
                     PDF::setXY($auxX,$ejeY);
                     if($diasEmpleados[$numEmpleado]->rest > 0){
-                        PDF::Cell($tamañoDia,6,'Descanso',1,false,'C',0,'',1,false,'M','M');
+                        PDF::Cell($tamañoDia,5,'Descanso',1,false,'C',0,'',1,false,'M','M');
                     }else{
-                        PDF::Cell($tamañoDia,6,$diasEmpleados[$numEmpleado]->nameEmployee,1,false,'C',0,'',1,false,'M','M');
+                        PDF::Cell($tamañoDia,5,$diasEmpleados[$numEmpleado]->nameEmployee,1,false,'C',0,'',1,false,'M','M');
                     }
                     $numEmpleado++;
                     $auxX = $auxX+$tamañoDia;
@@ -517,7 +524,7 @@ class shiftprogrammingController extends Controller
 
             $auxX = 10;
             
-            $ejeY = $ejeY + 6;
+            $ejeY = $ejeY + 5;
             
         }
         

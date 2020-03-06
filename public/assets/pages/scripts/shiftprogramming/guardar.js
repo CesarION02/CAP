@@ -94,7 +94,7 @@ function guardar() {
 
     cont = 0;
     $('.sel').each(function() {
-        if (Empleado[cont] = $(this).val() != 0) {
+        if ($(this).val() != 0) {
             Empleado[cont] = $(this).val();
             nombreEmpleado[cont] = this.name;
             auxiliar = nombreEmpleado[cont].split(',');
