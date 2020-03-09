@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 use App\Models\assign_schedule;
 use App\Models\schedule_template;
 use App\Models\schedule_day;
 use App\Models\department;
 use App\Models\employees;
 use App\Models\group_assign;
+use App\SUtils\SDateTimeUtils;
 use DateTime;
 use DB;
 
@@ -263,5 +265,217 @@ class assignController extends Controller
         } else {
             abort(404);
         }
+    }
+
+
+    public function indexOneDay(Request $request)
+    {
+        $startDate = $request->start_date;
+        $endDate = $request->end_date;
+
+        if ($startDate == null) {
+            $now = Carbon::now();
+            $month = $now->format('m');
+            $year = $now->format('Y');
+            $startDate = SDateTimeUtils::getFirstDayOfMonth($month, $year, 'Y-m-d');
+            $endDate = SDateTimeUtils::getLastDayOfMonth($month, $year, 'Y-m-d');
+        }
+
+        $lSchedules = $this->getData($startDate, $endDate);
+
+        $lEmployees = employees::where('is_delete', false)
+                                ->select('id', 'num_employee', 'name')
+                                ->orderBy('name', 'ASC')
+                                ->orderBy('num_employee', 'ASC')
+                                ->get();
+
+        $iTemplateId = 1;
+        $iGrpSchId = 1;
+
+        return view('scheduleone.index')->with('lSchedules', $lSchedules)
+                                        ->with('lEmployees', $lEmployees)
+                                        ->with('startDate', $startDate)
+                                        ->with('endDate', $endDate)
+                                        ->with('iTemplateId', $iTemplateId)
+                                        ->with('iGrpSchId', $iGrpSchId);
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function storeOne(Request $request)
+    {
+        /**
+         * -1: cancelar
+         * 0: insertar guardia
+         * 1: remplazar guardia
+         * 2: desplazar guardias
+         */
+        $iAction = $request->i_action;
+
+        $resp = null;
+        switch ($iAction) {
+            case 2: 
+                $toReplace = json_decode($request->to_change);
+                $oAssign = json_decode($request->ass_objs);
+                $lAssigns = assign_schedule::where('schedule_template_id', 1)
+                                ->where('group_assign_id', 1)
+                                ->where('group_schedules_id', 1)
+                                ->where('is_delete', false)
+                                ->where('start_date', '>=', $toReplace->start_date)
+                                ->orderBy('start_date', 'ASC')
+                                ->orderBy('employee_id', 'DESC')
+                                ->get();
+
+                for ($i = 0; $i < sizeof($lAssigns); $i++) {
+                    $oNew = null;
+                    if ($i == (sizeof($lAssigns) - 1)) {
+                        $oPrevious = $lAssigns[$i];
+
+                        $newDate = date('Y-m-d', strtotime($oPrevious->start_date. ' + 7 days'));
+
+                        $oNew = new assign_schedule();
+
+                        $oNew->employee_id = $oPrevious->employee_id;
+                        $oNew->group_assign_id = 1;
+                        $oNew->schedule_template_id = 1;
+                        $oNew->group_schedules_id = 1;
+                        $oNew->start_date = $newDate;
+                        $oNew->end_date = $newDate;
+                        $oNew->is_delete = false;
+                        $oNew->order_gs = 0;
+                        $oNew->created_by = 1;
+                        $oNew->updated_by = 1;
+
+                        $oNew->save();
+                    }
+
+                    if ($i == 0) {
+                        $oNewAss = clone $lAssigns[$i];
+
+                        $oNewAss->employee_id = $oAssign->employee_id;
+                        $oNewAss->start_date = $oAssign->start_date;
+                        $oNewAss->end_date = $oAssign->end_date;
+
+                        $oNewAss->save();
+                    }
+
+                    if ($i > 0 && $i < (sizeof($lAssigns))) {
+                        $oPrevious = $lAssigns[$i - 1];
+                        $oNew = clone $lAssigns[$i];
+
+                        $oNew->employee_id = $oPrevious->employee_id;
+                        // $oNew->start_date = $oPrevious->start_date;
+                        // $oNew->end_date = $oPrevious->end_date;
+
+                        $oNew->save();
+                    }
+                }
+
+                break;
+
+            case 1:
+                $toReplace = json_decode($request->to_change);
+                $oToReplace = assign_schedule::find($toReplace->id);
+                $oToReplace->is_delete = true;
+                $oToReplace->updated_by = 1;
+                $oToReplace->save();
+
+            case 0:
+                $oAssign = json_decode($request->ass_objs);
+
+                $obj = new assign_schedule();
+
+                $obj->employee_id = $oAssign->employee_id;
+                $obj->group_assign_id = 1;
+                $obj->schedule_template_id = 1;
+                $obj->start_date = $oAssign->start_date;
+                $obj->end_date = $oAssign->start_date;
+                $obj->group_schedules_id = 1;
+                $obj->order_gs = 0;
+                $obj->is_delete = false;
+                $obj->created_by = 1;
+                $obj->updated_by = 1;
+
+                $resp = $obj->save();
+                break;
+            
+            default:
+                # code...
+                break;
+        }
+
+        // $lSchedules = $this->getData();
+        $lSchedules = $resp;
+
+        return json_encode($lSchedules);
+    }
+
+    public function updateOne(Request $request, $id)
+    {
+        $oAssing = assign_schedule::find($id);
+
+        if ($oAssing == null) {
+            return;
+        }
+
+        $oAssing->employee_id = $request->emply_id;
+        $oAssing->updated_by = 1;
+        $oAssing->save();
+
+        $lSchedules = $this->getData();
+
+        return json_encode($lSchedules);
+    }
+
+    public function deleteOne(Request $request, $id)
+    {
+        $oAssing = assign_schedule::find($id);
+
+        if ($oAssing == null) {
+            return;
+        }
+
+        $oAssing->is_delete = true;
+        $oAssing->updated_by = 1;
+        $oAssing->save();
+
+        // $lSchedules = $this->getData();
+        $lSchedules = $oAssing;
+
+        return json_encode($lSchedules);
+    }
+
+    
+    public function getData($startDate = null, $endDate = null)
+    {
+        $data = DB::table('schedule_assign AS sa')
+                            ->join('employees AS e', 'e.id', '=', 'sa.employee_id')
+                            ->join('group_schedule AS gs', 'gs.id', '=', 'sa.group_schedules_id')
+                            ->select('e.name', 
+                                        'e.num_employee', 
+                                        'sa.start_date', 
+                                        'sa.end_date', 
+                                        'sa.group_schedules_id', 
+                                        'sa.order_gs',
+                                        'sa.employee_id',
+                                        'sa.id'
+                                    );
+        if ($startDate != null && $endDate != null) {
+            $data = $data->whereBetween('sa.start_date', [$startDate, $endDate]);
+        }
+
+        $data = $data->where('sa.is_delete', false)
+                            ->where('schedule_template_id', 1)
+                            ->where('group_assign_id', 1)
+                            ->where('group_schedules_id', 1)
+                            ->orderBy('start_date', 'ASC')
+                            ->orderBy('order_gs', 'ASC')
+                            ->get();
+
+        return $data;
     }
 }
