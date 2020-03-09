@@ -1,9 +1,10 @@
 @extends("theme.$theme.layout")
 @section('styles1')
     <link rel="stylesheet" href="{{asset("assets/css/chosen.min.css")}}">
+    <link rel="stylesheet" href="{{asset("daterangepicker/daterangepicker.css")}}">
 @endsection
 @section('title')
-Guardias Sabatinas
+    Guardias Sabatinas
 @endsection
 
 
@@ -15,12 +16,38 @@ Guardias Sabatinas
             <div class="box-header with-border">
                 <h3 class="box-title">Guardias Sabatinas</h3>
                 <div class="box-tools pull-right">
-                    <button type="button" class="btn btn-info" v-on:click="refresh()">
-                        <i class="glyphicon glyphicon-refresh"></i>
-                    </button>
-                    <button type="button" class="btn btn-success" v-on:click="onShowModal()">
-                        <i class="fa fa-fw fa-plus-circle"></i> Nueva guardia
-                    </button>
+                    <div class="row">
+                        <div class="col-md-3 col-md-offset-9">
+                            <button type="button" class="btn btn-info" v-on:click="refresh()">
+                                <i class="glyphicon glyphicon-refresh"></i>
+                            </button>
+                            <button type="button" class="btn btn-success" v-on:click="onShowModal()">
+                                <i class="fa fa-fw fa-plus-circle"></i> Nueva guardia
+                            </button>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                        <form action="{{ route('asignar_uno') }}">
+                            <input type="hidden" name="start_date" v-model="sStartDate">
+                            <input type="hidden" name="end_date" v-model="sEndDate">
+                            <div class="col-md-5 col-md-offset-7">
+                                <div class="input-group">
+                                    <div id="reportrange" 
+                                        v-on:change="onShowModal()"
+                                        style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
+                                        <i class="fa fa-calendar"></i>&nbsp;
+                                        <span></span> <i class="fa fa-caret-down"></i>
+                                    </div>
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default" type="submit">
+                                            <i class="glyphicon glyphicon-search"></i>
+                                        </button>
+                                    </span>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
             <div class="box-body" id="the_box">
@@ -58,7 +85,6 @@ Guardias Sabatinas
 </div>
 @endsection
 
-
 @section("scripts")
     <script src="{{ asset("assets/js/chosen.jquery.min.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/moment/moment.js") }}" type="text/javascript"></script>
@@ -73,9 +99,13 @@ Guardias Sabatinas
 	<script src="{{ asset('dt/buttons.html5.min.js') }}"></script>
 	<script src="{{ asset('dt/buttons.print.min.js') }}"></script>
     <script src="{{ asset("assets/pages/scripts/SGui.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("daterangepicker/daterangepicker.js") }}" type="text/javascript"></script>
     <script>
             function ServerData () {
                 this.lSchedules = <?php echo json_encode($lSchedules) ?>;
+                this.startDate = <?php echo json_encode($startDate) ?>;
+                this.endDate = <?php echo json_encode($endDate) ?>;
+
                 this.lEmployees = <?php echo json_encode($lEmployees) ?>;
                 this.iTemplateId = <?php echo json_encode($iTemplateId) ?>;
                 this.iGrpSchId = <?php echo json_encode($iGrpSchId) ?>;
@@ -86,6 +116,37 @@ Guardias Sabatinas
     </script>
     <script src="{{ asset("assets/pages/scripts/assign/SAssignament.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/pages/scripts/assign/VueAssignOne.js") }}" type="text/javascript"></script>
+    <script type="text/javascript">
+        $(function() {
+
+            var start = moment(oServerData.startDate);
+            var end = moment(oServerData.endDate);
+
+            function cb(start, end) {
+                $('#reportrange span').html(start.format('D MMMM YYYY') + ' - ' + end.format('D MMMM YYYY'));
+            }
+
+            $('#reportrange').daterangepicker({
+                startDate: start,
+                endDate: end,
+                ranges: {
+                    'Hoy': [moment(), moment()],
+                    'Ayer': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                    'Últimos 7 días': [moment().subtract(6, 'days'), moment()],
+                    'Últimos 30 días': [moment().subtract(29, 'days'), moment()],
+                    'Este mes': [moment().startOf('month'), moment().endOf('month')],
+                    'Último mes': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+                    'A fin de año': [moment(), moment().endOf('year')]
+                }
+            }, cb);
+
+            cb(start, end);
+        });
+
+        $('#reportrange').on('apply.daterangepicker', function(ev, picker) {
+            app.setDates(picker.startDate.format('YYYY-MM-DD'), picker.endDate.format('YYYY-MM-DD'));
+        });
+    </script>
     <script>
         $(".chosen-select").chosen({width: "98%"});
     </script>

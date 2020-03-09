@@ -8,9 +8,15 @@ var app = new Vue({
         oToChange: null,
         iAssignament: null,
         iAction: 1, // 1: nuevo, 2: editar
-        vueGui: oGui
+        vueGui: oGui,
+        sStartDate: oServerData.startDate,
+        sEndDate: oServerData.endDate
     },
     methods: {
+        setDates(startDate, endDate) {
+            this.sStartDate = startDate;
+            this.sEndDate = endDate;
+        },
         /**
          * Muestra el modal cuando un registro nuevo será creado
          * pone como valor por default el sábado siguiente a la fecha actual

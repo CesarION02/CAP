@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 use App\Models\assign_schedule;
 use App\Models\schedule_template;
 use App\Models\schedule_day;
 use App\Models\department;
 use App\Models\employees;
 use App\Models\group_assign;
+use App\SUtils\SDateTimeUtils;
 use DateTime;
 use DB;
 
@@ -265,9 +267,21 @@ class assignController extends Controller
         }
     }
 
-    public function indexOneDay(int $var = null)
+
+    public function indexOneDay(Request $request)
     {
-        $lSchedules = $this->getData();
+        $startDate = $request->start_date;
+        $endDate = $request->end_date;
+
+        if ($startDate == null) {
+            $now = Carbon::now();
+            $month = $now->format('m');
+            $year = $now->format('Y');
+            $startDate = SDateTimeUtils::getFirstDayOfMonth($month, $year, 'Y-m-d');
+            $endDate = SDateTimeUtils::getLastDayOfMonth($month, $year, 'Y-m-d');
+        }
+
+        $lSchedules = $this->getData($startDate, $endDate);
 
         $lEmployees = employees::where('is_delete', false)
                                 ->select('id', 'num_employee', 'name')
@@ -280,6 +294,8 @@ class assignController extends Controller
 
         return view('scheduleone.index')->with('lSchedules', $lSchedules)
                                         ->with('lEmployees', $lEmployees)
+                                        ->with('startDate', $startDate)
+                                        ->with('endDate', $endDate)
                                         ->with('iTemplateId', $iTemplateId)
                                         ->with('iGrpSchId', $iGrpSchId);
     }
@@ -433,9 +449,10 @@ class assignController extends Controller
         return json_encode($lSchedules);
     }
 
-    public function getData()
+    
+    public function getData($startDate = null, $endDate = null)
     {
-        return DB::table('schedule_assign AS sa')
+        $data = DB::table('schedule_assign AS sa')
                             ->join('employees AS e', 'e.id', '=', 'sa.employee_id')
                             ->join('group_schedule AS gs', 'gs.id', '=', 'sa.group_schedules_id')
                             ->select('e.name', 
@@ -446,13 +463,19 @@ class assignController extends Controller
                                         'sa.order_gs',
                                         'sa.employee_id',
                                         'sa.id'
-                                    )
-                            ->where('sa.is_delete', false)
+                                    );
+        if ($startDate != null && $endDate != null) {
+            $data = $data->whereBetween('sa.start_date', [$startDate, $endDate]);
+        }
+
+        $data = $data->where('sa.is_delete', false)
                             ->where('schedule_template_id', 1)
                             ->where('group_assign_id', 1)
                             ->where('group_schedules_id', 1)
                             ->orderBy('start_date', 'ASC')
                             ->orderBy('order_gs', 'ASC')
                             ->get();
+
+        return $data;
     }
 }
