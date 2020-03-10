@@ -72,6 +72,12 @@ Route::get('user/{id}/edit', 'userController@edit')->name('editar_usuario');
 Route::put('user/{id}', 'userController@update')->name('actualizar_usuario');
 Route::delete('user/{id}', 'userController@destroy')->name('eliminar_usuario');
 
+/* RUTAS DE EMPRESAS */
+Route::get('company', 'companyController@index')->name('company');
+Route::post('company', 'companyController@store')->name('save_company');
+Route::put('company/{id}', 'companyController@update')->name('update_company');
+Route::delete('company/{id}', 'companyController@destroy')->name('delete_company');
+
 /* RUTAS DE EMPLEADOS */
 Route::get('employee', 'employeeController@index')->name('empleado');
 Route::get('employee/create', 'employeeController@create')->name('crear_empleado');
