@@ -53,7 +53,7 @@ class holidayController extends Controller
 
         $hAux = new holidayAux();
 
-        $hAux->text_description = "";
+        $hAux->text_description = $req->text_description;
         $hAux->dt_date = $req->dt_date;
         $hAux->holiday_id = (! $req->holiday_id > 0) ? null : $req->holiday_id;
         $hAux->is_delete = false;

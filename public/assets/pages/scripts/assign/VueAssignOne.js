@@ -345,6 +345,7 @@ var app = new Vue({
 
             oHolidayAux.dt_date = this.dtDate;
             oHolidayAux.holiday_id = this.iHoliday;
+            oHolidayAux.text_description = this.sDescription;
 
             let route = './holidaysaux';
 
