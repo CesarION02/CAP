@@ -15,7 +15,13 @@ class SGui {
   }
 
   pad(num, size) {
-    var s = num + "";
+
+    if (num.length == 0) {
+      return "";
+    }
+
+    let s = num + "";
+
     while (s.length < size) s = "0" + s;
     return s;
   }

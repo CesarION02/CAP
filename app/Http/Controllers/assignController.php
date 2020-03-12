@@ -10,6 +10,8 @@ use App\Models\schedule_day;
 use App\Models\department;
 use App\Models\employees;
 use App\Models\group_assign;
+use App\Models\holidayAux;
+use App\Models\holiday;
 use App\SUtils\SDateTimeUtils;
 use DateTime;
 use DB;
@@ -292,8 +294,19 @@ class assignController extends Controller
         $iTemplateId = env('TMPLTE_SATURDAYS', 0);
         $iGrpSchId = env('GRP_SCHDLS_SATUDY', 0);
 
+        $holidays = holiday::select('id',
+                                'name',
+                                'fecha',
+                                'year',
+                                'is_delete')
+                            ->where('is_delete', false)
+                            ->get();
+
+        $holidays[] = new holiday();
+
         return view('scheduleone.index')->with('lSchedules', $lSchedules)
                                         ->with('lEmployees', $lEmployees)
+                                        ->with('holidays', $holidays)
                                         ->with('startDate', $startDate)
                                         ->with('endDate', $endDate)
                                         ->with('iTemplateId', $iTemplateId)
@@ -473,6 +486,28 @@ class assignController extends Controller
                             ->orderBy('start_date', 'ASC')
                             ->orderBy('order_gs', 'ASC')
                             ->get();
+
+        $holAuxs = DB::table('holidays_aux')
+                        ->selectRaw('"FESTIVO" AS name,
+                            "" AS num_employee,
+                            text_description,
+                            dt_date AS start_date,
+                            dt_date AS end_date,
+                            "0" AS employee_id,
+                            id AS h_id,
+                            holiday_id,
+                            0 AS id')
+                        ->where('is_delete', false);
+
+        if ($startDate != null && $endDate != null) {
+            $holAuxs = $holAuxs->whereBetween('dt_date', [$startDate, $endDate]);
+        }
+
+        $holAuxs = $holAuxs->get();
+
+        foreach ($holAuxs as $ha) {
+            $data[] = $ha;
+        }
 
         return $data;
     }

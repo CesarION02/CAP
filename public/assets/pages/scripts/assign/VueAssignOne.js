@@ -4,6 +4,10 @@ var app = new Vue({
         vueServerData: oServerData,
         vueDateAssigns: [],
         dtDate: (new Date()).toISOString().split('T')[0],
+        bHoliday: false,
+        iHolidayAux: 0,
+        iHoliday: 0,
+        sDescription: "",
         iEmployee: null,
         oToChange: null,
         iAssignament: null,
@@ -23,11 +27,16 @@ var app = new Vue({
          */
         onShowModal() {
             this.iEmployee = null;
+            
             const today = moment().isoWeekday();
             
             if (today < 6) {
                 this.dtDate = (moment().isoWeekday(6)).toISOString().split('T')[0];
             }
+
+            this.bHoliday = false;
+            this.iHolidayAux = 0;
+            this.iHoliday = 0;
 
             $("#sel_emp").val(0).trigger("chosen:updated");
             $("#st_date").attr('readonly', false);
@@ -44,14 +53,29 @@ var app = new Vue({
          * @param {Assignament} schedule 
          */
         onShowEditModal(schedule) {
-            this.iEmployee = schedule.employee_id;
-            this.dtDate = schedule.start_date;
-            this.iAssignament = schedule.id;
-            
-            $("#sel_emp").val(this.iEmployee).trigger("chosen:updated");
-            $("#st_date").attr('readonly', true);
-
             this.iAction = 2;
+
+            if (schedule.id > 0) {
+                this.iEmployee = schedule.employee_id;
+                this.dtDate = schedule.start_date;
+                this.iAssignament = schedule.id;
+                this.bHoliday = false;
+                this.iHoliday = 0;
+                this.iHolidayAux = 0;
+                
+                $("#sel_emp").val(this.iEmployee).trigger("chosen:updated");
+            }
+            else {
+                this.bHoliday = true;
+                this.iHoliday = schedule.holiday_id;
+                this.sDescription = schedule.text_description;
+
+                $("#sel_hol").val(this.iHoliday).trigger("chosen:updated");
+                this.iHolidayAux = schedule.h_id;
+            }
+            
+            $("#is_holiday").attr('disabled', true);
+            $("#st_date").attr('readonly', true);
 
             $("#modalScheduleOne").modal();
         },
@@ -63,15 +87,27 @@ var app = new Vue({
         processAssignament() {
             switch (this.iAction) {
                 case 1:
-                    this.newAssignament();
+                    if (! this.bHoliday) {
+                        this.newAssignament();
+                    }
+                    else {
+                        this.newHolidayAux();
+                    }
+
                     break;
                 case 2:
-                    this.editAssignament();
+                    if (! this.bHoliday) {
+                        this.editAssignament();
+                    }
+                    else {
+                        this.editHolidayAux();
+                    }
                     break;
             
                 default:
                     break;
             }
+            
         },
 
         /**
@@ -234,7 +270,7 @@ var app = new Vue({
                 if (willDelete) {
                     oGui.showLoading(3000);
 
-                    this.deleteAssignament(oAssi.id);
+                    this.deleteAssignament(oAssi);
                 }
             });
         },
@@ -242,10 +278,17 @@ var app = new Vue({
         /**
          * Realiza la petición al servidor para 
          * 
-         * @param {integer} idAssignament 
+         * @param {SAssignament} oAssignament 
          */
-        deleteAssignament(idAssignament) {
-            let route = './assignone/' + idAssignament;
+        deleteAssignament(oAssignament) {
+            let route = '';
+
+            if (oAssignament.id > 0) {
+                route = './assignone/' + oAssignament.id;
+            }
+            else {
+                route = './holidaysaux/' + oAssignament.h_id;
+            }
 
             axios
             .delete(route)
@@ -286,6 +329,60 @@ var app = new Vue({
             this.iEmployee = $('#sel_emp')[0].value;
 
             return this.iEmployee > 0;
+        },
+
+        newHolidayAux() {
+            this.iHoliday = $('#sel_hol')[0].value;
+
+            if (! this.validateDay()) {
+                oGui.showError("Debe seleccionar solo días sábados.");
+                return;
+            }
+
+            oGui.showLoading(3000);
+
+            let oHolidayAux = new SHolidayAux();
+
+            oHolidayAux.dt_date = this.dtDate;
+            oHolidayAux.holiday_id = this.iHoliday;
+
+            let route = './holidaysaux';
+
+            axios.post(route, {
+                hol_aux: JSON.stringify(oHolidayAux),
+            })
+            .then(res => {
+                console.log(res);
+
+                this.reloadResources(res.data);
+
+                oGui.showOk();
+            })
+            .catch(function(error) {
+                console.log(error);
+            });
+        },
+
+        editHolidayAux() {
+            oGui.showLoading(3000);
+
+            let route = './holidaysaux/' + this.iHolidayAux;
+
+            axios.put(route, {
+                holiday_id: this.iHoliday,
+                text_description: this.sDescription,
+            })
+            .then(res => {
+                console.log(res);
+
+                this.reloadResources(res.data);
+
+                $("#modalScheduleOne").modal("hide");
+                oGui.showOk();
+            })
+            .catch(function(error) {
+                console.log(error);
+            });
         },
 
         refresh() {

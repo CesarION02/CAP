@@ -173,6 +173,11 @@ Route::get('holidays/{id}/edit', 'holidayController@edit')->name('editar_festivo
 Route::put('holidays/{id}', 'holidayController@update')->name('actualizar_festivo');
 Route::delete('holidays/{id}', 'holidayController@destroy')->name('eliminar_festivo');
 
+/* RUTAS DIAS FESTIVOS AUXILIARES (Guardias sabatinas)*/
+Route::post('holidaysaux', 'holidayController@storeAux')->name('festivo_aux');
+Route::delete('holidaysaux/{id}', 'holidayController@destroyAux')->name('eliminar_festivo_aux');
+Route::put('holidaysaux/{id}', 'holidayController@updateAux')->name('actualizar_festivo_aux');
+
 /* RUTAS TIPOS INCIDENTES */
 Route::get('type_incidents', 'typeincidentController@index')->name('tipo_incidentes');
 Route::get('type_incidents/create', 'typeincidentController@create')->name('crear_tipoincidente');
