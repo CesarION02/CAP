@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\employees;
 use App\Models\job;
 use App\Models\way_register;
+use App\Models\benefitsPolice;
 
 class employeeController extends Controller
 {
@@ -34,7 +35,11 @@ class employeeController extends Controller
     {
         $way = way_register::orderBy('id','ASC')->pluck('id','name');
         $job = job::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
-        return view('employee.create')->with('way',$way)->with('job',$job);
+        $benPols = benefitsPolice::orderBy('name','ASC')->pluck('id','name');
+        
+        return view('employee.create')->with('way',$way)
+                                        ->with('job',$job)
+                                        ->with('benPols',$benPols);
     }
 
     /**
@@ -70,8 +75,13 @@ class employeeController extends Controller
     {
         $way = way_register::orderBy('id','ASC')->pluck('id','name');
         $job = job::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
+        $benPols = benefitsPolice::orderBy('name','ASC')->pluck('id','name');
         $data = employees::findOrFail($id);
-        return view('employee.edit', compact('data'))->with('way',$way)->with('job',$job);
+
+        return view('employee.edit', compact('data'))
+                                        ->with('way',$way)
+                                        ->with('job',$job)
+                                        ->with('benPols',$benPols);
     }
 
     /**
