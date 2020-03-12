@@ -8,7 +8,25 @@ class employees extends Model
 {
     protected $table = 'employees';
     protected $primaryKey = 'id';
-    protected $fillable = ['name','num_employee','nip','way_register_id','job_id'];
+    protected $fillable = [
+                            'name',
+                            'names',
+                            'first_name',
+                            'short_name',
+                            'num_employee',
+                            'admission_date date',
+                            'leave_date date',
+                            'is_overtime',
+                            'company_id',
+                            'nip',
+                            'way_register_id',
+                            'way_pay_id',
+                            'ben_pol_id',
+                            'job_id',
+                            'external_id',
+                            'is_active',
+                            'is_delete',
+                            ];
     public $timestamps = false;
 
     public function job(){

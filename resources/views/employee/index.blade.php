@@ -30,6 +30,7 @@ Empleados
                     <thead>
                         <tr>
                             <th>Nombre empleado</th>
+                            <th>Nombre corto</th>
                             <th>Número empleado</th>
                             <th>Nip</th>
                             <th>Manera de checar</th>
@@ -41,10 +42,11 @@ Empleados
                         @foreach ($datas as $data)
                         <tr>
                             <td>{{$data->name}}</td>
+                            <td>{{$data->short_name}}</td>
                             <td>{{$data->num_employee}}</td>
                             <td>{{$data->nip}}</td>
-                            <td>{{$data->way_register->name}}</td>
-                            <td>{{$data->job->name}}</td>
+                            <td>{{$data->way_register == null ? "" : $data->way_register->name}}</td>
+                            <td>{{$data->job == null ? "" : $data->job->name}}</td>
                             <td>
                                 <a href="{{route('editar_empleado', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Editar este registro">
                                     <i class="fa fa-fw fa-pencil"></i>
