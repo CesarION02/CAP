@@ -26,9 +26,9 @@ Reporte Entradas/Salidas
                                     <th>#</th>
                                     <th>Empleado</th>
                                     <th>Fecha entrada</th>
-                                    <th>Hora</th>
+                                    <th>Hora entrada</th>
                                     <th>Fecha salida</th>
-                                    <th>Hora</th>
+                                    <th>Hora salida</th>
                                     @switch($reportType)
                                             @case(1)
                                                 <th>Area</th>

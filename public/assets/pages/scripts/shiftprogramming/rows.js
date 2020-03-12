@@ -28,6 +28,7 @@ function agregarFila(tabla, job) {
 
 
             document.getElementById(cadena).insertRow(row).innerHTML = listaTabla;
+            selectCheck();
         },
         error: function() {
             console.log('falle');

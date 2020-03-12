@@ -34,4 +34,8 @@ class assign_schedule extends Model
         return $this->belongsTo('App\Models\group_assign','group_assing_id');
     }
 
+    public function group_schedule(){
+        return $this->belongsTo('App\Models\groupSchedule','group_schedule_id');
+    }
+
 }

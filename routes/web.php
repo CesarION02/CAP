@@ -98,12 +98,19 @@ Route::put('schedule/{id}', 'scheduleController@update')->name('actualizar_plant
 Route::delete('schedule/{id}', 'scheduleController@destroy')->name('eliminar_plantilla');
 
 /* RUTAS DE ASIGNACION HORARIOS */
+Route::get('assign/programming/schedule_template','assignController@schedule_template')->name('agregar');
+Route::get('assign/viewProgramming/{id}','assignController@viewProgramming')->name('index_programacion');
+Route::get('assign/showProgramming/{id}/{dgroup}','assignController@editProgramming')->name('editar_programacion');
 Route::get('assign', 'assignController@index')->name('asignacion');
 Route::get('assign/create/{id}', 'assignController@create')->name('crear_asignacion');
+Route::get('assign/programming/{id}', 'assignController@programming')->name('programar');
 Route::post('assign', 'assignController@store')->name('guardar_asignacion');
+Route::post('assign/guardar', 'assignController@guardar')->name('guardar');
 Route::get('assign/{id}/edit', 'assignController@edit')->name('editar_asignacion');
+Route::put('assign/actualizar/{id}', 'assignController@actualizar')->name('actulizacion');
 Route::put('assign/{id}', 'assignController@update')->name('actualizar_asignacion');
 Route::delete('assign/{id}', 'assignController@destroy')->name('eliminar_asignacion');
+Route::delete('assign/programming/{id}', 'assignController@eliminar')->name('eliminar');
 
 /* RUTAS AREAS */
 Route::get('area', 'areaController@index')->name('area');

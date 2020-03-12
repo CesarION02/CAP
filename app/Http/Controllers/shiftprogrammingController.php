@@ -137,7 +137,7 @@ class shiftprogrammingController extends Controller
                         ->join('jobs','jobs.id','=','employees.job_id')
                         ->join('departments','departments.id','=','jobs.department_id')
                         ->join('department_group','department_group.id','=','departments.dept_group_id')
-                        ->orderBy('employees.job_id')
+                        ->orderBy('employees.name')
                         ->where('employees.is_delete','0')
                         ->where('departments.dept_group_id',$request->typearea)
                         ->select('jobs.id AS idJob','jobs.name AS nameJob','employees.name AS nameEmployee','employees.id AS idEmployee')
@@ -170,7 +170,7 @@ class shiftprogrammingController extends Controller
                         ->join('jobs','jobs.id','=','employees.job_id')
                         ->join('departments','departments.id','=','jobs.department_id')
                         ->join('department_group','department_group.id','=','departments.dept_group_id')
-                        ->orderBy('employees.job_id')
+                        ->orderBy('employees.name')
                         ->where('employees.is_delete','0')
                         ->where('departments.dept_group_id',$request->typearea)
                         ->select('jobs.id AS idJob','jobs.name AS nameJob','employees.name AS nameEmployee','employees.id AS idEmployee')
@@ -505,9 +505,9 @@ class shiftprogrammingController extends Controller
             while(count($diasEmpleados) > $numEmpleado ){
                 $auxX = 10;
                 $ejeY= $ejeY + 5;
-                if($ejeY > 250){
-                    PDF::AddPage();
-                    $ejeY = 30;
+                if($ejeY > 180){
+                    PDF::AddPage('L');
+                    $ejeY = 10;
                 } 
                 for($x = 0 ; $diff->days >= $x ; $x++){
                     PDF::SetFont('helvetica','',9);
@@ -525,6 +525,11 @@ class shiftprogrammingController extends Controller
             $auxX = 10;
             
             $ejeY = $ejeY + 5;
+            if($ejeY > 180){
+                $ejeY = 10;
+                PDF::AddPage('L');
+                PDF::setXY(10,$ejeY);    
+            }
             
         }
         

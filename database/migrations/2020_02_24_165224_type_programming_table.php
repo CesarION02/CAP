@@ -16,9 +16,17 @@ class TypeProgrammingTable extends Migration
         Schema::create('type_programming', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
+            $table->integer('is_delete')->default(0);
         });
-    }
+    
 
+        DB::table('type_programming')->insert([
+            ['id' => '1','name' => 'Rotación','is_delete' => '0'],
+            ['id' => '2','name' => 'Rotación solo sabado','is_delete' => '0'],
+            ['id' => '3','name' => 'Mixto','is_delete' => '0'],
+            ['id' => '4','name' => 'Fijos','is_delete' => '0'], 
+        ]);
+    }
     /**
      * Reverse the migrations.
      *

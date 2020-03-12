@@ -276,21 +276,37 @@ class ReporteController extends Controller
                 $register = $register->join('jobs AS j', 'j.id', '=', 'e.job_id')
                                     ->join('departments AS d', 'd.id', '=', 'j.department_id')
                                     ->join('areas AS a', 'a.id', '=', 'd.area_id')
-                                    ->whereIn('a.id', $values);
+                                    ->whereIn('a.id', $values)
+                                    ->groupBy('e.name','date','type_id','e.num_employee','a.name')
+                                    ->orderBy('date')
+                                    ->orderBy('e.name')
+                                    ->orderBy('time');
                 break;
             case 2:
                 $register = $register->join('jobs AS j', 'j.id', '=', 'e.job_id')
                                     ->join('departments AS d', 'd.id', '=', 'j.department_id')
                                     ->join('department_group AS dg', 'dg.id', '=', 'd.dept_group_id')
-                                    ->whereIn('dg.id', $values);
+                                    ->whereIn('dg.id', $values)
+                                    ->groupBy('e.name','date','type_id','e.num_employee','a.name')
+                                    ->orderBy('date')
+                                    ->orderBy('e.name')
+                                    ->orderBy('time');
                 break;
             case 3:
                 $register = $register->join('jobs AS j', 'j.id', '=', 'e.job_id')
                                     ->join('departments AS d', 'd.id', '=', 'j.department_id')
-                                    ->whereIn('d.id', $values);
+                                    ->whereIn('d.id', $values)
+                                    ->groupBy('e.name','date','type_id','e.num_employee','a.name')
+                                    ->orderBy('date')
+                                    ->orderBy('e.name')
+                                    ->orderBy('time');
                 break;
             case 4:
-                $register = $register->whereIn('e.id', $values);
+                $register = $register->whereIn('e.id', $values)
+                                    ->groupBy('e.name','date','type_id','e.num_employee','a.name')
+                                    ->orderBy('date')
+                                    ->orderBy('e.name')
+                                    ->orderBy('time');
                 break;
             
             default:

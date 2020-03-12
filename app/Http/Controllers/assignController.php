@@ -9,6 +9,7 @@ use App\Models\schedule_day;
 use App\Models\department;
 use App\Models\employees;
 use App\Models\group_assign;
+use App\Models\groupSchedule;
 use DateTime;
 use DB;
 
@@ -264,4 +265,174 @@ class assignController extends Controller
             abort(404);
         }
     }
+
+    public function eliminar(Request $request,$id)
+    {
+        if ($request->ajax()) {
+            $datas = assign_schedule::find($id);
+            $auxiliar = $datas->group_schedules_id;
+            if($auxiliar != null){
+                $empleados = DB::table('schedule_assign')
+                        ->where('group_schedules_id',$auxiliar)
+                        ->select('schedule_assign.id AS id')
+                        ->get();
+                for($i = 0 ; count($empleados) > $i ; $i++){
+                    $datas = assign_schedule::find($empleados[$i]->id);
+                    $datas->is_delete = 1;
+                    $datas->save();    
+                }
+            }else{
+                $datas->is_delete = 1;
+                $datas->save();
+            }
+            return response()->json(['mensaje' => 'ok']);
+        } else {
+            abort(404);
+        }   
+    }
+
+    public function programming($id){
+        $employee = DB::table('employees')
+                ->join('jobs','jobs.id','=','employees.job_id')
+                ->join('departments','departments.id','=','jobs.department_id')
+                ->join('department_group','department_group.id','=','departments.dept_group_id')
+                ->where('departments.dept_group_id',$id)
+                ->select('employees.id AS id','employees.name AS name', 'department_group.name AS nameGroup')
+                ->get();
+        $schedule_template = schedule_template::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
+
+        return view('assign.programming')->with('employees',$employee)->with('schedule_template',$schedule_template)->with('idGroup',$id);   
+    }
+
+    public function schedule_template(){
+        $schedule_template = DB::table('schedule_template')
+                ->where('is_delete','0')
+                ->select('id AS id','name AS name')
+                ->get();
+        return response()->json($schedule_template);
+    }
+
+    public function guardar(Request $request){
+        $start = null;
+        $end = null;
+        $orden = null;
+        $group_num = null;
+
+        if($request->start_date != ''){
+            $start = $request->start_date;
+            $end = $request->end_date;
+        }
+        
+        if($request->contador > 1){
+            $group = new groupSchedule();
+            $group->name = $request->nameGroup;
+            $group->delete = false;
+            $group->created_by = 1;
+            $group->updated_by = 1;
+            $group->save();
+            $group_num = $group->id;
+        }
+        for($i = 1 ; $request->contador >= $i ; $i++){
+            
+            $asignacion = new assign_schedule();
+            $asignacion->employee_id = $request->empleado;
+            $cadena = 'horario'.$i;
+            $orden = 'orden'.$i;
+            $asignacion->schedule_template_id = $request->$cadena;
+            $asignacion->start_date = $start;
+            $asignacion->end_date = $end;
+            $asignacion->order_gs = $request->$orden;
+            $asignacion->group_schedules_id = $group_num;
+            $asignacion->created_by = 1;
+            $asignacion->updated_by = 1;
+            $asignacion->save();
+        } 
+        $url =  'assign/viewProgramming/'.$request->idGroup;
+        
+        return redirect($url)->with('mensaje','Asignación fue creada con exito');
+    }
+
+    public function editProgramming ($id,$dgroup){
+        $grupo = assign_schedule::find($id);
+        $auxiliar = $datas->group_schedules_id;
+        if($auxiliar != null){
+            $assigns = DB::table('schedule_assign')
+                ->join('employees','employees.id','=','schedule_assign.employee_id')
+                ->join('schedule_template','schedule_template.id','=','schedule_assign.schedule_template_id')
+                ->join('schedule_day','schedule_day.schedule_template_id','=','schedule_template.id')
+                ->where('schedule_assign.group_schedules_id',$id)
+                ->select('employees.id AS id','employees.name AS name','schedule_assign.start_date AS startDate','schedule_assign.end_date AS endDate','schedule_day.day_name AS dayName','schedule_day.entry AS entry','schedule_day.departure AS departure','schedule_template.name AS templateName','schedule_assign.order_gs AS orden','schedule_assign.id AS idAssign')
+                ->orderBy('employees.id')
+                ->orderBy('schedule_assign.group_schedules_id')
+                ->get();
+        }else{
+            $assigns = DB::table('schedule_assign')
+                ->join('employees','employees.id','=','schedule_assign.employee_id')
+                ->join('schedule_template','schedule_template.id','=','schedule_assign.schedule_template_id')
+                ->join('schedule_day','schedule_day.schedule_template_id','=','schedule_template.id')
+                ->where('schedule_assign.id',$id)
+                ->select('employees.id AS id','employees.name AS name','schedule_assign.start_date AS startDate','schedule_assign.end_date AS endDate','schedule_day.day_name AS dayName','schedule_day.entry AS entry','schedule_day.departure AS departure','schedule_template.name AS templateName','schedule_assign.order_gs AS orden','schedule_assign.id AS idAssign')
+                ->orderBy('employees.id')
+                ->orderBy('schedule_assign.group_schedules_id')
+                ->get(); 
+        }
+        
+
+        return view('assign.editprogramming')->with('assigns',$assigns)->with('dgroup',$dgroup);       
+
+    }
+
+    public function actualizar (Request $request,$id){
+        $assigns = DB::table('schedule_assign')
+                ->where('id',$id)
+                ->select('id AS id','group_schedules_id AS group')
+                ->get();
+        $aux = 0;
+        if($assigns[0]->group == NULL){
+            $datas = assign_schedule::find($id);
+            $datas->start_date = $request->start_date;
+            $datas->end_date = $request->end_date;
+            $datas->order_gs = $request->orden1;
+            $datas->save();
+
+            $data = assign_schedule::find($id);
+            $datas->start_date = $request->end_date;
+             
+        }else{
+            $asignaciones = DB::table('schedule_assign')
+                    ->where('group_schedules_id',$assigns[0]->group)
+                    ->select('id AS id')
+                    ->get();
+            for($i = 0 ; count($asignaciones) > $i ; $i++){
+                $aux++;
+                $orden = 'orden'.$aux;
+                $datas = assign_schedule::find($asignaciones[$i]->id);
+                $datas->start_date = $request->start_date;
+                $datas->end_date = $request->end_date;
+                $datas->order_gs = $request->$orden;
+                $datas->save();
+            }
+            
+        }  
+        $url =  'assign/viewProgramming/'.$request->idGroup;
+        return redirect($url)->with('mensaje','Asignación fue actualizada con exito');
+    }
+
+    public function viewProgramming ($id){
+        $assigns = DB::table('schedule_assign')
+                ->join('employees','employees.id','=','schedule_assign.employee_id')
+                ->join('schedule_template','schedule_template.id','=','schedule_assign.schedule_template_id')
+                ->join('jobs','jobs.id','=','employees.job_id')
+                ->join('departments','departments.id','=','jobs.department_id')
+                ->where('departments.dept_group_id',$id)
+                ->where('schedule_assign.is_delete',0)
+                ->select('employees.id AS id','employees.name AS name','schedule_assign.start_date AS startDate','schedule_assign.end_date AS endDate','schedule_assign.id AS idAssign')
+                ->orderBy('employees.id')
+                ->orderBy('schedule_assign.group_schedules_id')
+                ->groupBy('schedule_assign.group_schedules_id')
+                ->get();   
+        
+        return view('assign.showprogramming')->with('assigns',$assigns)->with('dgroup',$id);
+    }
+
 }
