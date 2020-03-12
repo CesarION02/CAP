@@ -100,4 +100,27 @@ class departmentController extends Controller
             abort(404);
         }
     }
+
+    /**
+     * Undocumented function
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function updateDepts(Request $request)
+    {
+        $lDepartments = json_decode($request->departments);
+        // $deptIds = array();
+        foreach ($lDepartments as $dept) {
+            department::where('id', $dept->id)
+                        ->update(['dept_group_id' => $dept->dept_group_id]);
+            // $deptIds[] = $dept->id;
+        }
+
+        $lResp = department::where('is_delete', false)
+                    ->select('id', 'name', 'dept_group_id')
+                    ->get();
+
+        return json_encode($lResp);
+    }
 }

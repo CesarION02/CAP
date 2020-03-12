@@ -72,6 +72,12 @@ Route::get('user/{id}/edit', 'userController@edit')->name('editar_usuario');
 Route::put('user/{id}', 'userController@update')->name('actualizar_usuario');
 Route::delete('user/{id}', 'userController@destroy')->name('eliminar_usuario');
 
+/* RUTAS DE EMPRESAS */
+Route::get('company', 'companyController@index')->name('company');
+Route::post('company', 'companyController@store')->name('save_company');
+Route::put('company/{id}', 'companyController@update')->name('update_company');
+Route::delete('company/{id}', 'companyController@destroy')->name('delete_company');
+
 /* RUTAS DE EMPLEADOS */
 Route::get('employee', 'employeeController@index')->name('empleado');
 Route::get('employee/create', 'employeeController@create')->name('crear_empleado');
@@ -112,6 +118,13 @@ Route::put('assign/{id}', 'assignController@update')->name('actualizar_asignacio
 Route::delete('assign/{id}', 'assignController@destroy')->name('eliminar_asignacion');
 Route::delete('assign/programming/{id}', 'assignController@eliminar')->name('eliminar');
 
+// 
+Route::get('assignone', 'assignController@indexOneDay')->name('asignar_uno');
+Route::post('assignone', 'assignController@storeOne')->name('guardar_uno');
+Route::put('assignone/{id}', 'assignController@updateOne')->name('actualizar_uno');
+Route::delete('assignone/{id}', 'assignController@deleteOne')->name('eliminar_uno');
+Route::get('assignonedata', 'assignController@getData')->name('get_data');
+
 /* RUTAS AREAS */
 Route::get('area', 'areaController@index')->name('area');
 Route::get('area/create', 'areaController@create')->name('crear_area');
@@ -127,6 +140,13 @@ Route::post('department', 'departmentController@store')->name('guardar_departame
 Route::get('department/{id}/edit', 'departmentController@edit')->name('editar_departamento');
 Route::put('department/{id}', 'departmentController@update')->name('actualizar_departamento');
 Route::delete('department/{id}', 'departmentController@destroy')->name('eliminar_departamento');
+Route::put('upddepartments', 'departmentController@updateDepts')->name('actualizar_departamentos');
+
+/* RUTAS DEPARTAMENTOS */
+Route::get('deptsgroup', 'DeptsGroupController@index')->name('depts_grp');
+Route::post('deptsgroup', 'DeptsGroupController@store')->name('guardar_grupodepts');
+Route::delete('deptsgroup/{id}', 'DeptsGroupController@delete')->name('eliminar_grupodepts');
+Route::put('deptsgroup/{id}/{name}', 'DeptsGroupController@edit')->name('actualizar_grupodepts');
 
 /* RUTAS PUESTOS */
 Route::get('job', 'jobController@index')->name('puesto');
