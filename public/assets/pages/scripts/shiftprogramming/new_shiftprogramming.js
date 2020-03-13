@@ -14,12 +14,22 @@ function new_shiftprogramming() {
             listaEmpleados += '<table class="customers"><tr><th>' + data[0][0].nameJob + '</th></tr>';
             for (var i = 0; data[0].length > i; i++) {
                 if (idJob == data[0][i].idJob) {
-                    listaEmpleados += '<tr><td>' + data[0][i].nameEmployee + '</td></tr>';
+                    if (data[0][i].shortName != '') {
+                        listaEmpleados += '<tr><td>' + data[0][i].shortName + '</td></tr>';
+                    } else {
+                        listaEmpleados += '<tr><td>' + data[0][i].nameEmployee + '</td></tr>';
+                    }
+
                 } else {
                     listaEmpleados += '</table>';
                     idJob = data[0][i].idJob;
                     listaEmpleados += '<table class="customers"><tr><th>' + data[0][i].nameJob + '</th></tr>';
-                    listaEmpleados += '<tr><td>' + data[0][i].nameEmployee + '</td></tr>';
+                    if (data[0][i].shortName != '') {
+                        listaEmpleados += '<tr><td>' + data[0][i].shortName + '</td></tr>';
+                    } else {
+                        listaEmpleados += '<tr><td>' + data[0][i].nameEmployee + '</td></tr>';
+                    }
+
                 }
 
             }
@@ -65,7 +75,12 @@ function crear_select_empleados(departamento, turno, renglon, job, data) {
     var selectEmpleados = '<select style="width: 80%" class="sel" name="sel' + ',d' + departamento + ',t' + turno + ',r' + renglon + ',p' + job + '" id="select' + 'd' + departamento + 't' + turno + 'r' + renglon + 'p' + job + '"><option value="0">Seleccione empleado</option>';
 
     for (var j = 0; data.length > j; j++) {
-        selectEmpleados += '<option value="' + data[j].idEmployee + '" >' + data[j].nameEmployee + '</option>';
+        if (data[j].shortName != '') {
+            selectEmpleados += '<option value="' + data[j].idEmployee + '" >' + data[j].shortName + '</option>';
+        } else {
+            selectEmpleados += '<option value="' + data[j].idEmployee + '" >' + data[j].nameEmployee + '</option>';
+        }
+
     }
     selectEmpleados += '</select>';
     return selectEmpleados;

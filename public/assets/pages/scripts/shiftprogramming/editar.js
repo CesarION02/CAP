@@ -129,9 +129,18 @@ function crear_empleados(departamento, turno, renglon, job, data, empleado) {
 
     for (var j = 0; data.length > j; j++) {
         if (empleado == data[j].idEmployee) {
-            selectEmpleados += '<option selected=selected value="' + data[j].idEmployee + '" >' + data[j].nameEmployee + '</option>';
+            if (data[j].shortName != '') {
+                selectEmpleados += '<option selected=selected value="' + data[j].idEmployee + '" >' + data[j].shortName + '</option>';
+            } else {
+                selectEmpleados += '<option selected=selected value="' + data[j].idEmployee + '" >' + data[j].nameEmployee + '</option>';
+            }
+
         } else {
-            selectEmpleados += '<option value="' + data[j].idEmployee + '" >' + data[j].nameEmployee + '</option>';
+            if (data[j].shortName != '') {
+                selectEmpleados += '<option value="' + data[j].idEmployee + '" >' + data[j].shortName + '</option>';
+            } else {
+                selectEmpleados += '<option value="' + data[j].idEmployee + '" >' + data[j].nameEmployee + '</option>';
+            }
         }
 
     }

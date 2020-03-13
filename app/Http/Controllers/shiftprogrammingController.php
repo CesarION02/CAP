@@ -122,7 +122,7 @@ class shiftprogrammingController extends Controller
                         ->orderBy('employees.job_id')
                         ->where('employees.is_delete','0')
                         ->where('departments.dept_group_id',$request->typearea)
-                        ->select('jobs.id AS idJob','jobs.name AS nameJob','employees.name AS nameEmployee','employees.id AS idEmployee')
+                        ->select('jobs.id AS idJob','jobs.name AS nameJob','employees.name AS nameEmployee','employees.short_name AS shortName','employees.id AS idEmployee')
                         ->get();
         $group_workshift = DB::table('group_workshifts')
                         ->where('group_workshifts.is_delete','0')
@@ -140,7 +140,7 @@ class shiftprogrammingController extends Controller
                         ->orderBy('employees.name')
                         ->where('employees.is_delete','0')
                         ->where('departments.dept_group_id',$request->typearea)
-                        ->select('jobs.id AS idJob','jobs.name AS nameJob','employees.name AS nameEmployee','employees.id AS idEmployee')
+                        ->select('jobs.id AS idJob','jobs.name AS nameJob','employees.name AS nameEmployee','employees.short_name AS shortName','employees.id AS idEmployee')
                         ->get();
         $workshifts = DB::table('group_workshifts_lines')
                         ->join('workshifts','workshifts.id','=','group_workshifts_lines.workshifts_id')
@@ -173,7 +173,7 @@ class shiftprogrammingController extends Controller
                         ->orderBy('employees.name')
                         ->where('employees.is_delete','0')
                         ->where('departments.dept_group_id',$request->typearea)
-                        ->select('jobs.id AS idJob','jobs.name AS nameJob','employees.name AS nameEmployee','employees.id AS idEmployee')
+                        ->select('jobs.id AS idJob','jobs.name AS nameJob','employees.name AS nameEmployee','employees.short_name AS shortName','employees.id AS idEmployee')
                         ->get();    
                         return response()->json(array($workshifts,$employees));
     }
@@ -382,7 +382,7 @@ class shiftprogrammingController extends Controller
                                 ->join('day_workshifts_employee','day_workshifts.id','=','day_workshifts_employee.day_id')
                                 ->join('employees','day_workshifts_employee.employee_id','=','employees.id')
                                 ->where('week_id','=',$week->id)
-                                ->select('day_workshifts_employee.job_id AS idJob','employees.name AS nameEmployee','day_workshifts.workshift_id AS id')
+                                ->select('day_workshifts_employee.job_id AS idJob','employees.name AS nameEmployee','employees.short_name AS shortName','day_workshifts.workshift_id AS id')
                                 ->groupBy('employee_id','day_workshifts_employee.job_id','employees.name','day_workshifts.workshift_id')
                                 ->get();
                 $renglones = 2;
@@ -411,7 +411,12 @@ class shiftprogrammingController extends Controller
                             if($job[$z]->idJob == $empleados[$i]->idJob && $workshifts[$j]->idWork == $empleados[$i]->id){
                                 PDF::SetXY($ejeXAux,$auxAvance);
                                 PDF::SetFont('helvetica','',8);
-                                PDF::Cell($tamañoCol,6,$empleados[$i]->nameEmployee,1,false,'C',0,'',1,false,'M','M');    
+                                if($empleados[$i] != ''){
+                                    PDF::Cell($tamañoCol,6,$empleados[$i]->short_name,1,false,'C',0,'',1,false,'M','M');
+                                }else{
+                                    PDF::Cell($tamañoCol,6,$empleados[$i]->nameEmployee,1,false,'C',0,'',1,false,'M','M');   
+                                }
+                                    
                                 $renglones++;
                                 $auxAvance+=6;
                                 $contEmpleados++;
@@ -498,7 +503,7 @@ class shiftprogrammingController extends Controller
             ->join('employees','day_workshifts_employee.employee_id','=','employees.id')
             ->where('week_id','=',$week->id)
             ->where('day_workshifts.workshift_id','=',$workshifts[$j]->idWork)
-            ->select('day_workshifts_employee.job_id AS idJob','day_workshifts_employee.is_rest AS rest','employees.name AS nameEmployee','day_workshifts.workshift_id AS id')
+            ->select('day_workshifts_employee.job_id AS idJob','day_workshifts_employee.is_rest AS rest','employees.name AS nameEmployee','employees.short_name AS shortName','day_workshifts.workshift_id AS id')
             ->orderBy('employee_id')
             ->get();
             $numEmpleado = 0;
@@ -515,7 +520,12 @@ class shiftprogrammingController extends Controller
                     if($diasEmpleados[$numEmpleado]->rest > 0){
                         PDF::Cell($tamañoDia,5,'Descanso',1,false,'C',0,'',1,false,'M','M');
                     }else{
-                        PDF::Cell($tamañoDia,5,$diasEmpleados[$numEmpleado]->nameEmployee,1,false,'C',0,'',1,false,'M','M');
+                        if($diasEmpleados[$numEmpleado]->shortName != ''){
+                            PDF::Cell($tamañoDia,5,$diasEmpleados[$numEmpleado]->shortName,1,false,'C',0,'',1,false,'M','M');
+                        }else{
+                            PDF::Cell($tamañoDia,5,$diasEmpleados[$numEmpleado]->nameEmployee,1,false,'C',0,'',1,false,'M','M');
+                        }
+                        
                     }
                     $numEmpleado++;
                     $auxX = $auxX+$tamañoDia;
@@ -549,7 +559,7 @@ class shiftprogrammingController extends Controller
                         ->orderBy('employees.job_id')
                         ->where('employees.is_delete','0')
                         ->where('departments.dept_group_id',$request->typearea)
-                        ->select('jobs.id AS idJob','jobs.name AS nameJob','employees.name AS nameEmployee','employees.id AS idEmployee')
+                        ->select('jobs.id AS idJob','jobs.name AS nameJob','employees.name AS nameEmployee','employees.short_name AS shortName','employees.id AS idEmployee')
                         ->get();
         $info = DB::table('week')
                         ->join('week_department','week.id','=','week_department.week_id')
@@ -603,7 +613,7 @@ class shiftprogrammingController extends Controller
                         ->orderBy('employees.job_id')
                         ->where('employees.is_delete','0')
                         ->where('departments.dept_group_id',$request->typearea)
-                        ->select('jobs.id AS idJob','jobs.name AS nameJob','employees.name AS nameEmployee','employees.id AS idEmployee')
+                        ->select('jobs.id AS idJob','jobs.name AS nameJob','employees.name AS nameEmployee','employees.short_name AS shortName','employees.id AS idEmployee')
                         ->get();
         $info = DB::table('week')
                         ->join('week_department','week.id','=','week_department.week_id')
@@ -658,7 +668,7 @@ class shiftprogrammingController extends Controller
                         ->orderBy('employees.job_id')
                         ->where('employees.is_delete','0')
                         ->where('departments.dept_group_id',$request->typearea)
-                        ->select('jobs.id AS idJob','jobs.name AS nameJob','employees.name AS nameEmployee','employees.id AS idEmployee')
+                        ->select('jobs.id AS idJob','jobs.name AS nameJob','employees.name AS nameEmployee','employees.short_name AS shortName','employees.id AS idEmployee')
                         ->get();
         $info = DB::table('week')
                         ->join('week_department','week.id','=','week_department.week_id')
