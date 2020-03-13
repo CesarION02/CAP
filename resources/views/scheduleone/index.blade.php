@@ -63,8 +63,12 @@
                     <tbody>
                         <tr v-for="schedule in vueServerData.lSchedules">
                             <td>@{{ schedule.start_date }}</td>
-                            <td>@{{ vueGui.pad(schedule.num_employee) }}</td>
-                            <td>@{{ schedule.name }}</td>
+                            <td>@{{ vueGui.pad(schedule.num_employee, 6) }}</td>
+                            <td>@{{ schedule.name }}
+                                    <i v-show="schedule.text_description != undefined" 
+                                    class="glyphicon glyphicon-info-sign" 
+                                    :title="schedule.text_description"></i>
+                            </td>
                             <td>
                                 <button v-on:click="onShowEditModal(schedule)" 
                                         class="btn-accion-tabla tooltipsC" title="Editar este registro">
@@ -107,6 +111,7 @@
                 this.endDate = <?php echo json_encode($endDate) ?>;
 
                 this.lEmployees = <?php echo json_encode($lEmployees) ?>;
+                this.holidays = <?php echo json_encode($holidays) ?>;
                 this.iTemplateId = <?php echo json_encode($iTemplateId) ?>;
                 this.iGrpSchId = <?php echo json_encode($iGrpSchId) ?>;
             }
@@ -115,6 +120,7 @@
             var oGui = new SGui();
     </script>
     <script src="{{ asset("assets/pages/scripts/assign/SAssignament.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/pages/scripts/assign/SHolidayAux.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/pages/scripts/assign/VueAssignOne.js") }}" type="text/javascript"></script>
     <script type="text/javascript">
         $(function() {
