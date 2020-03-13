@@ -37,7 +37,13 @@ class holidayController extends Controller
      */
     public function store(Request $request)
     {
-        holiday::create($request->all());
+        $holiday = new holiday($request->all());
+
+        $holiday->created_by = 1;
+        $holiday->updated_by = 1;
+
+        $holiday->save();
+
         return redirect('holidays')->with('mensaje', 'Día Festivo creado con exito');
     }
 
