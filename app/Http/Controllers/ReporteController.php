@@ -8,9 +8,14 @@ use App\Models\employees;
 use App\Models\register;
 use App\Models\area;
 use App\Models\departmentsGroup;
+use App\SUtils\SDelayReportUtils;
+use App\SUtils\SRegistryRow;
+use App\SUtils\SDateComparison;
 use DateTime;
 use DB;
 use PDF;
+
+use Carbon\Carbon;
 
 class ReporteController extends Controller
 {
@@ -321,5 +326,34 @@ class ReporteController extends Controller
         return view('report.reportRegsView')
                         ->with('reportType', $reportType)
                         ->with('lRegistries', $register);
+    }
+
+    public function genDelayReport()
+    {
+        return view('report.reportDelays');
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function delaysReport(Request $request)
+    {
+        $sStartDate = $request->start_date;
+        $sEndDate = $request->end_date;
+
+        /**
+         * 1: quincena
+         * 2: semana
+         * 3: todos
+         */
+        $payWay = $request->pay_way;
+
+        $lRows = SDelayReportUtils::processReport($sStartDate, $sEndDate, $payWay);
+
+        return view('report.reportDelaysView')
+                    ->with('lRows', $lRows);
     }
 }
