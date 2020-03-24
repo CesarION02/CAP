@@ -265,7 +265,7 @@ class SDelayReportUtils {
             //si el grupo de horarios es nullo significa que solo tiene asignado un horario
             // por lo que la comparación se hace directa con el día
             if ($lAassigns[0]->group_schedules_id == null) {
-                SDelayReportUtils::compareTemplate($lAassigns[0]->schedule_template_id, $registry);
+                return SDelayReportUtils::compareTemplate($lAassigns[0]->schedule_template_id, $registry);
             }
             else {
                 /**
