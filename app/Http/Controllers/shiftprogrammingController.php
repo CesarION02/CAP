@@ -145,7 +145,7 @@ class shiftprogrammingController extends Controller
         $workshifts = DB::table('group_workshifts_lines')
                         ->join('workshifts','workshifts.id','=','group_workshifts_lines.workshifts_id')
                         ->where('group_workshifts_id',$request->turno)
-                        ->orderBy('workshifts.order')
+                        ->orderBy('workshifts.order_view')
                         ->select('workshifts.id AS idWork','workshifts.name AS nameWork')
                         ->get();
         $departments = DB::table('jobs')
@@ -163,7 +163,7 @@ class shiftprogrammingController extends Controller
         $workshifts = DB::table('group_workshifts_lines')
                         ->join('workshifts','workshifts.id','=','group_workshifts_lines.workshifts_id')
                         ->where('group_workshifts_id',$request->turno)
-                        ->orderBy('workshifts.order')
+                        ->orderBy('workshifts.order_view')
                         ->select('workshifts.id AS idWork')
                         ->get();
         $employees = DB::table('employees')
@@ -181,7 +181,7 @@ class shiftprogrammingController extends Controller
     public function turnos(Request $request){
         $workshifts = DB::table('group_workshifts_lines')
                         ->join('workshifts','workshifts.id','=','group_workshifts_lines.workshifts_id')
-                        ->orderBy('workshifts.order')
+                        ->orderBy('workshifts.order_view')
                         ->select('workshifts.id AS idWork', 'workshifts.name AS nameWork','workshifts.entry AS entry', 'workshifts.departure AS departure')
                         ->get(); 
                         return response()->json($workshifts);
@@ -411,8 +411,8 @@ class shiftprogrammingController extends Controller
                             if($job[$z]->idJob == $empleados[$i]->idJob && $workshifts[$j]->idWork == $empleados[$i]->id){
                                 PDF::SetXY($ejeXAux,$auxAvance);
                                 PDF::SetFont('helvetica','',8);
-                                if($empleados[$i] != ''){
-                                    PDF::Cell($tamañoCol,6,$empleados[$i]->short_name,1,false,'C',0,'',1,false,'M','M');
+                                if($empleados[$i]->shortName != ''){
+                                    PDF::Cell($tamañoCol,6,$empleados[$i]->shortName,1,false,'C',0,'',1,false,'M','M');
                                 }else{
                                     PDF::Cell($tamañoCol,6,$empleados[$i]->nameEmployee,1,false,'C',0,'',1,false,'M','M');   
                                 }
@@ -486,61 +486,68 @@ class shiftprogrammingController extends Controller
                                 
         $workshifts = $workshifts->where('is_delete','=','0')
                                 ->orderBy('group_workshifts_id')
-                                ->orderBy('workshifts.order')
+                                ->orderBy('workshifts.order_view')
                                 ->groupBy('workshifts.id','workshifts.name','workshifts.entry','workshifts.departure')
                                 ->select('workshifts.id AS idWork', 'workshifts.name AS nameWork', 'workshifts.entry AS entry','workshifts.departure AS departure')
                                 ->get();
+
         for($j = 0 ; count($workshifts) > $j ; $j++ ){
             PDF::setXY($auxX,$ejeY);
             PDF::SetFont('helvetica','B',9);
             PDF::Cell(260,5,$workshifts[$j]->nameWork.' de '.$workshifts[$j]->entry.' a '.$workshifts[$j]->departure,1,false,'C',0,'',0,false,'M','M');
-            $diasEmpleados = DB::table('week')
-            ->join('week_department','week.id','=','week_department.week_id')
-            ->join('departments','week_department.department_id','=','departments.id')
-            ->join('week_department_day','week_department.id','=','week_department_day.week_department_id')
-            ->join('day_workshifts','week_department_day.id','=','day_workshifts.day_id')
-            ->join('day_workshifts_employee','day_workshifts.id','=','day_workshifts_employee.day_id')
-            ->join('employees','day_workshifts_employee.employee_id','=','employees.id')
-            ->where('week_id','=',$week->id)
-            ->where('day_workshifts.workshift_id','=',$workshifts[$j]->idWork)
-            ->select('day_workshifts_employee.job_id AS idJob','day_workshifts_employee.is_rest AS rest','employees.name AS nameEmployee','employees.short_name AS shortName','day_workshifts.workshift_id AS id')
-            ->orderBy('employee_id')
-            ->get();
-            $numEmpleado = 0;
-            while(count($diasEmpleados) > $numEmpleado ){
-                $auxX = 10;
-                $ejeY= $ejeY + 5;
-                if($ejeY > 180){
-                    PDF::AddPage('L');
-                    $ejeY = 10;
-                } 
-                for($x = 0 ; $diff->days >= $x ; $x++){
-                    PDF::SetFont('helvetica','',9);
-                    PDF::setXY($auxX,$ejeY);
-                    if($diasEmpleados[$numEmpleado]->rest > 0){
-                        PDF::Cell($tamañoDia,5,'Descanso',1,false,'C',0,'',1,false,'M','M');
-                    }else{
-                        if($diasEmpleados[$numEmpleado]->shortName != ''){
-                            PDF::Cell($tamañoDia,5,$diasEmpleados[$numEmpleado]->shortName,1,false,'C',0,'',1,false,'M','M');
-                        }else{
-                            PDF::Cell($tamañoDia,5,$diasEmpleados[$numEmpleado]->nameEmployee,1,false,'C',0,'',1,false,'M','M');
+            
+            for($z = 0 ; count($departments) > $z ; $z++){
+                $diasEmpleados = DB::table('week')
+                    ->join('week_department','week.id','=','week_department.week_id')
+                    ->join('departments','week_department.department_id','=','departments.id')
+                    ->join('week_department_day','week_department.id','=','week_department_day.week_department_id')
+                    ->join('day_workshifts','week_department_day.id','=','day_workshifts.day_id')
+                    ->join('day_workshifts_employee','day_workshifts.id','=','day_workshifts_employee.day_id')
+                    ->join('employees','day_workshifts_employee.employee_id','=','employees.id')
+                    ->where('week_id','=',$week->id)
+                    ->where('day_workshifts.workshift_id','=',$workshifts[$j]->idWork)
+                    ->where('departments.id','=',$departments[$z]->idDepartment)
+                    ->select('day_workshifts_employee.job_id AS idJob','day_workshifts_employee.is_rest AS rest','employees.name AS nameEmployee','employees.short_name AS shortName','day_workshifts.workshift_id AS id')
+                    ->orderBy('employee_id')
+                    ->get();
+                $numEmpleado = 0;
+                if(count($diasEmpleados) != 0){
+                    $ejeY= $ejeY + 5;
+                    PDF::setXY(10,$ejeY);
+                    PDF::SetFont('helvetica','B',9);
+                    PDF::Cell(260,5,$departments[$z]->nameDepartment,1,false,'C',0,'',0,false,'M','M');
+                    while(count($diasEmpleados) > $numEmpleado ){
+                        $ejeY= $ejeY + 5;
+                        for($x = 0 ; $diff->days >= $x ; $x++){
+                            PDF::SetFont('helvetica','',9);
+                             
+                            PDF::setXY($auxX,$ejeY);
+                            if($diasEmpleados[$numEmpleado]->rest > 0){
+                                PDF::Cell($tamañoDia,5,'Descanso',1,false,'C',0,'',1,false,'M','M');
+                            }else{
+                                if($diasEmpleados[$numEmpleado]->shortName != ''){
+                                    PDF::Cell($tamañoDia,5,$diasEmpleados[$numEmpleado]->shortName,1,false,'C',0,'',1,false,'M','M');
+                                }else{
+                                    PDF::Cell($tamañoDia,5,$diasEmpleados[$numEmpleado]->nameEmployee,1,false,'C',0,'',1,false,'M','M');
+                                }
+                            }
+                            $numEmpleado++;
+                            $auxX = $auxX+$tamañoDia;
+                            
                         }
                         
+                        $auxX = 10;
                     }
-                    $numEmpleado++;
-                    $auxX = $auxX+$tamañoDia;
-                }
-            }
 
-            $auxX = 10;
-            
-            $ejeY = $ejeY + 5;
-            if($ejeY > 180){
-                $ejeY = 10;
-                PDF::AddPage('L');
-                PDF::setXY(10,$ejeY);    
+                    if($ejeY > 180){
+                        $ejeY = 10;
+                        PDF::AddPage('L');
+                        PDF::setXY(10,$ejeY);    
+                    }
+                }
+                  
             }
-            
+            $ejeY= $ejeY + 5; 
         }
         
         PDF::Output(storage_path('app/public/').$nombrePdf.'.pdf', 'F');

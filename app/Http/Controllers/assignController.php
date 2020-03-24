@@ -15,6 +15,8 @@ use App\Models\holiday;
 use App\SUtils\SDateTimeUtils;
 use DateTime;
 use DB;
+use DatePeriod;
+use DateInterval;
 
 class assignController extends Controller
 {
@@ -600,7 +602,7 @@ class assignController extends Controller
 
     public function editProgramming ($id,$dgroup){
         $grupo = assign_schedule::find($id);
-        $auxiliar = $datas->group_schedules_id;
+        $auxiliar = $grupo->group_schedules_id;
         if($auxiliar != null){
             $assigns = DB::table('schedule_assign')
                 ->join('employees','employees.id','=','schedule_assign.employee_id')
@@ -680,6 +682,264 @@ class assignController extends Controller
         
         return view('assign.showprogramming')->with('assigns',$assigns)->with('dgroup',$id);
     }
+
+    public function viewSpecificDate ($id) {
+        $employees = DB::table('schedule_assign')
+                ->join('employees','employees.id','=','schedule_assign.employee_id')
+                ->join('jobs','jobs.id','=','employees.job_id')
+                ->join('departments','departments.id','=','jobs.department_id')
+                ->where('departments.dept_group_id',$id)
+                ->select('employees.id AS id','employees.name AS name')
+                ->groupBy('employees.id')
+                ->get();
+        return view('assign.specificDate')->with('employees',$employees);
+    }
+
+    public function mostrarFecha (Request $request) {
+        $semana = $request->semana;
+        $año = explode('-',$semana);
+        $weeks = explode('W',$semana);
+        $year = $año[0];
+        $week = $weeks[1];
+        $calendario = 0;
+        //inicia determinacion de fechas
+        // Se crea objeto DateTime del 1/enero del año ingresado
+        $fecha = DateTime::createFromFormat('Y-m-d', $year . '-1-2');
+        $w = $fecha->format('W'); // Número de la semana
+        // Se agrega semanas hasta igualar
+        while ($week > $w) {
+            $fecha->add(DateInterval::createfromdatestring('+1 week'));
+            $w = $fecha->format('W');
+        }
+        // Ahora $fecha pertenece a la semana buscada
+        // Se debe obtener el primer y el último día
+
+        // Si $fecha no es el primer día de la semana, se restan días
+        if ($fecha->format('N') > 1) {
+            $format = '-' . ($fecha->format('N') - 1) . ' day';
+            $fecha->add(DateInterval::createfromdatestring($format));
+        }
+        // Ahora $fecha es el primer día de esa semana
+
+        // Se clona la fecha en $fecha2 y se le agrega 6 días
+        $fecha2 = clone($fecha);
+        $fecha2->add(DateInterval::createfromdatestring('+6 day'));
+
+        // Devuelve un array con ambas fechas
+        $fechas =  [$fecha, $fecha2];
+//termina determinacion de fechas
+        $grupo = '';
+        $comparacion = 0;
+        $diferencia = 52;
+        $id = 0;
+        if(count($request->empleado) == 1){
+            $assign = DB::table('schedule_assign')
+                    ->join('employees','employees.id','=','schedule_assign.employee_id')
+                    ->where('employees.id',$request->empleado[0])
+                    ->where('schedule_assign.is_delete',0)
+                    ->select('schedule_assign.start_date AS Start','schedule_assign.end_date AS End','group_schedules_id AS Grupo','schedule_assign.id AS Id')
+                    ->get();
+            for($x = 0 ; count($assign) > $x ; $x++){
+                $dia   = substr($assign[$x]->Start,8,2);
+                $mes = substr($assign[$x]->Start,5,2);
+                $anio = substr($assign[$x]->Start,0,4); 
+                $numeroSemana = date("W",mktime(0,0,0,$mes,$dia,$anio));
+                if ($numeroSemana == $week){
+                    $id = $assign[$x]->Id;
+                    $diferencia = 0;
+                    $grupo = $assign[$x]->Grupo;
+                }else{
+                    if($numeroSemana < $week){
+                        $comparacion =  $week - $numeroSemana;
+                        if($comparacion < $diferencia){
+                            $diferencia = $comparacion;
+                            $id = $assign[$x]->Id;
+                            $grupo = $assign[$x]->Grupo;
+                        }
+                    }
+                }
+            }
+            if($grupo != null){
+                $assign = DB::table('schedule_assign')
+                    ->join('employees','employees.id','=','schedule_assign.employee_id')
+                    ->where('schedule_assign.group_schedules_id',$grupo)
+                    ->where('schedule_assign.is_delete',0)
+                    ->select('schedule_assign.start_date AS Start','schedule_assign.end_date AS End','group_schedules_id AS Grupo','schedule_assign.id AS Id')
+                    ->get();
+            }else{
+                $assign = DB::table('schedule_assign')
+                    ->join('employees','employees.id','=','schedule_assign.employee_id')
+                    ->where('schedule_assign.id',$id)
+                    ->where('schedule_assign.is_delete',0)
+                    ->select('schedule_assign.start_date AS Start','schedule_assign.end_date AS End','group_schedules_id AS Grupo','schedule_assign.id AS Id')
+                    ->get();
+            }
+                
+        
+            if(count($assign) == 1) {
+                $fechaIni = strtotime($assign[0]->Start);
+                $fechaFin = strtotime($assign[0]->End);
+                $fechaAux1=date_format($fechas[0], 'd-m-Y');
+                $fechaAux2=date_format($fechas[1], 'd-m-Y');
+                $fechaComparacion = strtotime($fechaAux1);
+                $fechaComparacion2 = strtotime($fechaAux2);
+                if(!$fechaFin){
+                    if($fechaIni<$fechaComparacion){
+                        $calendario = DB::table('schedule_assign')
+                            ->join('employees','employees.id','=','schedule_assign.employee_id')
+                            ->join('schedule_template','schedule_template.id','=','schedule_assign.schedule_template_id')
+                            ->join('schedule_day','schedule_day.schedule_template_id','=','schedule_template.id')
+                            ->where('employees.id',$request->empleado[0])
+                            ->where('schedule_assign.is_delete',0)
+                            ->select('schedule_day.day_name AS Dia','schedule_day.day_num AS Numero','schedule_day.entry AS Entrada','schedule_day.departure AS Salida','employees.id AS Id','employees.name AS Nombre')
+                            ->get();    
+                    }
+                }
+                else{
+                }
+            }else{
+                $fechaIni = strtotime($assign[0]->Start);
+                $fechaFin = strtotime($assign[0]->End);
+                $fechaAux1=date_format($fechas[0], 'd-m-Y');
+                $fechaAux2=date_format($fechas[1], 'd-m-Y');
+                $fechaComparacion = strtotime($fechaAux1);
+                $fechaComparacion2 = strtotime($fechaAux2);
+                if(!$fechaFin){
+                    if($fechaIni<$fechaComparacion){
+                        $numeroHorarios = count($assign);
+                        $horario = 1;
+                        $dia   = substr($assign[0]->Start,8,2);
+                        $mes = substr($assign[0]->Start,5,2);
+                        $anio = substr($assign[0]->Start,0,4); 
+                        $numeroSemana = date("W",mktime(0,0,0,$mes,$dia,$anio));
+                        for($numeroSemana ; $week > $numeroSemana ; $numeroSemana++){
+                            $horario ++;
+                            if($horario > $numeroHorarios){
+                                $horario = 1;
+                            }
+                        }
+                        $calendario = DB::table('schedule_assign')
+                            ->join('employees','employees.id','=','schedule_assign.employee_id')
+                            ->join('schedule_template','schedule_template.id','=','schedule_assign.schedule_template_id')
+                            ->join('schedule_day','schedule_day.schedule_template_id','=','schedule_template.id')
+                            ->where('employees.id',$request->empleado[0])
+                            ->where('schedule_assign.order_gs',$horario)
+                            ->where('schedule_assign.is_delete',0)
+                            ->select('schedule_day.day_name AS Dia','schedule_day.day_num AS Numero','schedule_day.entry AS Entrada','schedule_day.departure AS Salida','employees.id AS Id','employees.name AS Nombre')
+                            ->get(); 
+
+                    }
+                }
+            
+            }
+        }else{
+            $ids = [];
+            $grupos = [];
+            for ($y = 0; count($request->empleado) > $y ; $y++){
+
+            $assign = DB::table('schedule_assign')
+                    ->join('employees','employees.id','=','schedule_assign.employee_id')
+                    ->where('employees.id',$request->empleado[$y])
+                    ->where('schedule_assign.is_delete',0)
+                    ->select('schedule_assign.start_date AS Start','schedule_assign.end_date AS End','group_schedules_id AS Grupo','schedule_assign.id AS Id')
+                    ->get();
+            for($x = 0 ; count($assign) > $x ; $x++){
+                $dia   = substr($assign[$x]->Start,8,2);
+                $mes = substr($assign[$x]->Start,5,2);
+                $anio = substr($assign[$x]->Start,0,4); 
+                $numeroSemana = date("W",mktime(0,0,0,$mes,$dia,$anio));
+                if ($numeroSemana == $week){
+                    $id = $assign[$x]->Id;
+                    $diferencia = 0;
+                    $grupo = $assign[$x]->Grupo;
+                }else{
+                    if($numeroSemana < $week){
+                        $comparacion =  $week - $numeroSemana;
+                        if($comparacion < $diferencia){
+                            $diferencia = $comparacion;
+                            $id = $assign[$x]->Id;
+                            $grupo = $assign[$x]->Grupo;
+                        }
+                    }
+                }
+            }
+            $diferencia = 52;
+            $comparacion = 0;
+            if($grupo != null){
+              $ids[$y] = $id;
+              $grupos[$y] = $grupo;
+            }else{
+              $ids[$y] = $id;
+              $grupos[$y] = 0;  
+            }
+                
+        
+            if($grupos[$y] > 0) {
+                $assign = DB::table('schedule_assign')
+                    ->join('employees','employees.id','=','schedule_assign.employee_id')
+                    ->where('schedule_assign.group_schedules_id',$grupos[$y])
+                    ->where('schedule_assign.is_delete',0)
+                    ->select('schedule_assign.start_date AS Start','schedule_assign.end_date AS End','group_schedules_id AS Grupo','schedule_assign.id AS Id')
+                    ->get(); 
+                $fechaIni = strtotime($assign[0]->Start);
+                $fechaFin = strtotime($assign[0]->End);
+                $fechaAux1=date_format($fechas[0], 'd-m-Y');
+                $fechaAux2=date_format($fechas[1], 'd-m-Y');
+                $fechaComparacion = strtotime($fechaAux1);
+                $fechaComparacion2 = strtotime($fechaAux2);
+                if(!$fechaFin){
+                    if($fechaIni<$fechaComparacion){
+                        $numeroHorarios = count($assign);
+                        $horario = 1;
+                        $dia   = substr($assign[0]->Start,8,2);
+                        $mes = substr($assign[0]->Start,5,2);
+                        $anio = substr($assign[0]->Start,0,4); 
+                        $numeroSemana = date("W",mktime(0,0,0,$mes,$dia,$anio));
+                        for($numeroSemana ; $week > $numeroSemana ; $numeroSemana++){
+                            $horario ++;
+                            if($horario > $numeroHorarios){
+                                $horario = 1;
+                            }
+                        }
+                    }
+                }
+                $horarios[$y] = $horario;
+            
+            }
+            else{
+                $horarios[$y] = 0;
+            }   
+        }
+        $calendario = DB::table('schedule_assign')
+        ->join('employees','employees.id','=','schedule_assign.employee_id')
+        ->join('schedule_template','schedule_template.id','=','schedule_assign.schedule_template_id')
+        ->join('schedule_day','schedule_day.schedule_template_id','=','schedule_template.id')
+        ->where('schedule_assign.is_delete',0);
+        for($z = 0 ; count($ids) > $z ; $z++){
+            if($grupos[$z] == 0){
+                $calendario = $calendario->orwhere('schedule_assign.id',$ids[$z]);
+            }else{
+                $calendario = $calendario->where('schedule_assign.group_schedules_id',$grupos[$z])
+                       ->where('schedule_assign.order_gs',$horarios[$z]);
+            }
+        }
+        $calendario = $calendario->select('schedule_day.day_name AS Dia','schedule_day.day_num AS Numero','schedule_day.entry AS Entrada','schedule_day.departure AS Salida','employees.id AS Id','employees.name AS Nombre')
+        ->orderBy('employees.id')
+        ->orderBy('day_num')
+        ->get();
+
+        }
+        $Empleado = $request->empleado;
+        $diff = $fechas[0]->diff($fechas[1]);
+        $diff = $diff->days;
+        return view('assign.viewCalendar')->with('calendario',$calendario)->with('empleado',$Empleado)->with('inicio',$fechaAux1)->with('fin',$fechaAux2)->with('diff',$diff);
+    }
+
+    function get_dates($year = 0, $week = 0)
+{
+       
+}
+
 
 }
 

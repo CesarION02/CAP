@@ -7,6 +7,7 @@ use App\Models\employees;
 use App\Models\job;
 use App\Models\way_register;
 use App\Models\benefitsPolice;
+use DB;
 
 class employeeController extends Controller
 {
@@ -114,5 +115,32 @@ class employeeController extends Controller
         } else {
             abort(404);
         }
+    }
+
+    public function supervisorsView($id = 1){
+
+        $employees = DB::table('employees')
+                        ->join('jobs','jobs.id','=','employees.job_id')
+                        ->join('departments','departments.id','=','jobs.department_id')
+                        ->join('department_group','department_group.id','=','departments.dept_group_id')
+                        ->orderBy('employees.job_id')
+                        ->where('employees.is_delete','0')
+                        ->where('departments.dept_group_id',$id)
+                        ->orderBy('employees.name')
+                        ->select('employees.name AS nameEmployee','employees.num_employee AS numEmployee','employees.short_name AS shortName','employees.id AS idEmployee')
+                        ->get();
+        return view('employee.supervisorsView', compact('employees'));
+    }
+
+    public function editShortname ($id) {
+        $data = employees::findOrFail($id);
+        return view('employee.editShortname')->with('data',$data);    
+    }
+
+    public function updateShortname (Request $request, $id){
+        $employee = employees::findOrFail($id);
+        $employee->short_name = $request->short_name;
+        $employee->update();
+        return redirect('employee/supervisorsView')->with('mensaje', 'Empleado actualizado con exito');    
     }
 }

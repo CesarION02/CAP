@@ -79,6 +79,9 @@ Route::put('company/{id}', 'companyController@update')->name('update_company');
 Route::delete('company/{id}', 'companyController@destroy')->name('delete_company');
 
 /* RUTAS DE EMPLEADOS */
+Route::get('employee/supervisorsView', 'employeeController@supervisorsView')->name('supervisores');
+Route::get('employee/{id}/editShortname', 'employeeController@editShortname')->name('editar_nombrecorto');
+Route::put('employee/supervisorsView/{id}', 'employeeController@updateShortname')->name('actualizar_nombrecorto');
 Route::get('employee', 'employeeController@index')->name('empleado');
 Route::get('employee/create', 'employeeController@create')->name('crear_empleado');
 Route::post('employee', 'employeeController@store')->name('guardar_empleado');
@@ -107,6 +110,8 @@ Route::delete('schedule/{id}', 'scheduleController@destroy')->name('eliminar_pla
 Route::get('assign/programming/schedule_template','assignController@schedule_template')->name('agregar');
 Route::get('assign/viewProgramming/{id}','assignController@viewProgramming')->name('index_programacion');
 Route::get('assign/showProgramming/{id}/{dgroup}','assignController@editProgramming')->name('editar_programacion');
+Route::get('assign/specificDate/{id}','assignController@viewSpecificDate')->name('fecha_especifica');
+Route::post('assign/mostrarFecha', 'assignController@mostrarFecha')->name('mostrar_fecha');
 Route::get('assign', 'assignController@index')->name('asignacion');
 Route::get('assign/create/{id}', 'assignController@create')->name('crear_asignacion');
 Route::get('assign/programming/{id}', 'assignController@programming')->name('programar');
