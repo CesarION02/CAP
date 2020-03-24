@@ -5,11 +5,11 @@
 @endsection
 
 @section('title')
-Reporte Retardos
+    Reporte Retardos
 @endsection
 
 @section('content')
-<div class="row">
+<div class="row" id="reportDelayAppGen">
     <div class="col-lg-12">
         @include('includes.form-error')
         @include('includes.mensaje')
@@ -44,8 +44,8 @@ Reporte Retardos
                                 <span></span> <i class="fa fa-caret-down"></i>
                             </div>
                         </div>
-                        <input value="2020-02-18" type="hidden" name="start_date">
-                        <input value="2020-02-27" type="hidden" name="end_date">
+                        <input :value="startDate" type="hidden" name="start_date">
+                        <input :value="endDate" type="hidden" name="end_date">
                     </div>
                 </div>
                 <div class="box-footer">
@@ -62,8 +62,11 @@ Reporte Retardos
 
 @section("scripts")
     <script src="{{ asset("assets/js/chosen.jquery.min.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/js/vue.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/moment/moment.js") }}" type="text/javascript"></script>
     <script src="{{ asset("daterangepicker/daterangepicker.js") }}" type="text/javascript"></script>
+    
+    <script src="{{asset("assets/pages/scripts/report/SDelayReportGen.js")}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(function() {
@@ -73,6 +76,7 @@ Reporte Retardos
         
             function cb(start, end) {
                 $('#reportrange span').html(start.format('D MMMM YYYY') + ' - ' + end.format('D MMMM YYYY'));
+                app.setDates(start.format('YYYY-MM-DD'), end.format('YYYY-MM-DD'));
             }
         
             $('#reportrange').daterangepicker({
@@ -90,6 +94,10 @@ Reporte Retardos
         
             cb(start, end);
         
+        });
+
+        $('#reportrange').on('apply.daterangepicker', function(ev, picker) {
+            app.setDates(picker.startDate.format('YYYY-MM-DD'), picker.endDate.format('YYYY-MM-DD'));
         });
     </script>
 @endsection
