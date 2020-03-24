@@ -25,9 +25,9 @@ Reporte de retardos
                                 <tr>
                                     <th>#</th>
                                     <th>Empleado</th>
-                                    <th>Fecha entrada</th>
+                                    {{-- <th>Fecha entrada</th> --}}
                                     <th>Hora entrada</th>
-                                    <th>Fecha salida</th>
+                                    {{-- <th>Fecha salida</th> --}}
                                     <th>Hora salida</th>
                                     <th>Retardo (min)</th>
                                     <th>Comentarios</th>
@@ -37,9 +37,9 @@ Reporte de retardos
                                 <tr v-for="row in oData.lRows">
                                     <td>@{{ vueGui.pad(row.numEmployee, 6) }}</td>
                                     <td>@{{ row.employee }}</td>
-                                    <td>@{{ row.inDate }}</td>
+                                    {{-- <td>@{{ row.inDate }}</td> --}}
                                     <td>@{{ row.inDateTime }}</td>
-                                    <td>@{{ row.outDate }}</td>
+                                    {{-- <td>@{{ row.outDate }}</td> --}}
                                     <td>@{{ row.outDateTime }}</td>
                                     <td>@{{ row.delayMins }}</td>
                                     <td>@{{ row.comments }}</td>

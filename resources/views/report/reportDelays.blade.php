@@ -68,8 +68,8 @@ Reporte Retardos
     <script type="text/javascript">
         $(function() {
         
-            var start = moment('2020-02-18');
-            var end = moment('2020-02-27');
+            var start = moment().subtract(6, 'days');
+            var end = moment();
         
             function cb(start, end) {
                 $('#reportrange span').html(start.format('D MMMM YYYY') + ' - ' + end.format('D MMMM YYYY'));
@@ -79,12 +79,12 @@ Reporte Retardos
                 startDate: start,
                 endDate: end,
                 ranges: {
-                   'Today': [moment(), moment()],
-                   'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-                   'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-                   'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-                   'This Month': [moment().startOf('month'), moment().endOf('month')],
-                   'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                   'Hoy': [moment(), moment()],
+                   'Ayer': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                   'Últimos 7 días': [moment().subtract(6, 'days'), moment()],
+                   'últimos 30 días': [moment().subtract(29, 'days'), moment()],
+                   'Este mes': [moment().startOf('month'), moment().endOf('month')],
+                   'Último mes': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
                 }
             }, cb);
         
