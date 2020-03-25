@@ -5,7 +5,7 @@
 @endsection
 
 @section('title')
-    Reporte Retardos
+    {{ $sTitle }}
 @endsection
 
 @section('content')
@@ -15,11 +15,11 @@
         @include('includes.mensaje')
         <div class="box box-danger">
             <div class="box-header with-border">
-                <h3 class="box-title">Reporte de retardos</h3>
+                <h3 class="box-title">{{ $sTitle }}</h3>
                 <div class="box-tools pull-right">
                 </div>
             </div>
-            <form action="{{ route('reporteRetardos') }}">
+            <form action="{{ route(''.$sRoute.'') }}">
                 <div class="box-body" id="reportApp">
                     <div class="row">
                         <div class="col-md-2">
@@ -86,9 +86,9 @@
                    'Hoy': [moment(), moment()],
                    'Ayer': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
                    'Últimos 7 días': [moment().subtract(6, 'days'), moment()],
-                   'últimos 30 días': [moment().subtract(29, 'days'), moment()],
+                   'Últimos 15 días': [moment().subtract(14, 'days'), moment()],
                    'Este mes': [moment().startOf('month'), moment().endOf('month')],
-                   'Último mes': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                   'Mes pasado': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
                 }
             }, cb);
         

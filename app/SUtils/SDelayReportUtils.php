@@ -14,7 +14,18 @@ class SDelayReportUtils {
      * var_dump(Carbon::SATURDAY);   // int(6)
      */
 
-    public static function processReport($sStartDate, $sEndDate, $payWay)
+     /**
+      * Realiza el proceso de empatar checadas vs horarios programados y regresa una
+      * lista de SRegistryRow con los datos correspondientes
+      *
+      * @param string $sStartDate
+      * @param string $sEndDate
+      * @param int $payWay [ 1: QUINCENA, 2: SEMANA, 0: TODOS]
+      * @param int $tReport [\SCons::REP_DELAY, \SCons::REP_HR_EX]
+
+      * @return [SRegistryRow] (array)
+      */
+    public static function processReport($sStartDate, $sEndDate, $payWay, $tReport)
     {
         $registries = SDelayReportUtils::getRegistries($sStartDate, $sEndDate, $payWay);
         $lWorkshifts = SDelayReportUtils::getWorkshifts($sStartDate, $sEndDate, $payWay);
@@ -35,7 +46,12 @@ class SDelayReportUtils {
                 $lAssigns = SDelayReportUtils::hasAnAssing($idEmployee, $idDepartment, $sStartDate, $sEndDate);
             }
 
-            $theRow = SDelayReportUtils::manageRow($newRow, $isNew, $idEmployee, $registry, $lAssigns, $lWorkshifts);
+            if ($tReport == \SCons::REP_DELAY) {
+                $theRow = SDelayReportUtils::manageRow($newRow, $isNew, $idEmployee, $registry, $lAssigns, $lWorkshifts);
+            }
+            else {
+                $theRow = SDelayReportUtils::manageRowHrExt($newRow, $isNew, $idEmployee, $registry, $lAssigns, $lWorkshifts);
+            }
             $isNew = $theRow[0];
             $newRow = $theRow[1];
             $again = $theRow[2];
@@ -45,7 +61,12 @@ class SDelayReportUtils {
             }
 
             if ($again) {
-                $theRow = SDelayReportUtils::manageRow($newRow, $isNew, $idEmployee, $registry, $lAssigns, $lWorkshifts);
+                if ($tReport == \SCons::REP_DELAY) {
+                    $theRow = SDelayReportUtils::manageRow($newRow, $isNew, $idEmployee, $registry, $lAssigns, $lWorkshifts);
+                }
+                else {
+                    $theRow = SDelayReportUtils::manageRowHrExt($newRow, $isNew, $idEmployee, $registry, $lAssigns, $lWorkshifts);
+                }
                 $isNew = $theRow[0];
                 $newRow = $theRow[1];
 
@@ -64,6 +85,20 @@ class SDelayReportUtils {
         return $lRows;
     }
 
+    /**
+     * Procesa el renglón de checada y busca si tiene un horario asignado, esta función es usada para 
+     * el reporte de retardos, ya que consulta sobre el registro de entrada
+     *
+     * @param SRegistryRow $newRow
+     * @param boolean $isNew
+     * @param int $idEmployee
+     * @param query_result $registry
+     * @param query_assigns $lAssigns
+     * 
+     * @return array $response[0] = boolean que determina si el renglón está listo para ser agregado
+     *               $response[1] = SRegistryRow que puede ser procesado de nuevo o estar completo
+     *               $response[2] = boolean que determina si el renglón será reprocesado, esto cuando falta un registro de entrada o salida
+     */
     private static function manageRow($newRow, $isNew, $idEmployee, $registry, $lAssigns, $qWorkshifts)
     {
         $lWorkshifts = clone $qWorkshifts;
@@ -77,12 +112,12 @@ class SDelayReportUtils {
             $newRow->employee = $registry->name;
         }
 
-        if ($registry->type_id == 1) {
+        if ($registry->type_id == \SCons::REG_IN) {
             if ($hasAssign) {
-                $result = SDelayReportUtils::processRegistry($lAssigns, $registry);
+                $result = SDelayReportUtils::processRegistry($lAssigns, $registry, \SCons::REP_DELAY);
             }
             else {
-                $result = SDelayReportUtils::checkSchedule($lWorkshifts, $idEmployee, $registry);
+                $result = SDelayReportUtils::checkSchedule($lWorkshifts, $idEmployee, $registry, \SCons::REP_DELAY);
             }
 
             // no tiene horario para el día actual
@@ -145,6 +180,111 @@ class SDelayReportUtils {
         return $response;
     }
 
+    /**
+     * Procesa el renglón de checada y busca si tiene un horario asignado, esta función es usada para 
+     * el reporte de horas extras, ya que consulta sobre el registro de salida
+     *
+     * @param SRegistryRow $newRow
+     * @param boolean $isNew
+     * @param int $idEmployee
+     * @param query_result $registry
+     * @param query_assigns $lAssigns
+     * @param query $qWorkshifts
+     * 
+     * @return array $response[0] = boolean que determina si el renglón está listo para ser agregado
+     *               $response[1] = SRegistryRow que puede ser procesado de nuevo o estar completo
+     *               $response[2] = boolean que determina si el renglón será reprocesado, esto cuando falta un registro de entrada o salida
+     */
+    public static function manageRowHrExt($newRow, $isNew, $idEmployee, $registry, $lAssigns, $qWorkshifts)
+    {
+        $lWorkshifts = clone $qWorkshifts;
+        $hasAssign = $lAssigns != null;
+        $again = false;
+
+        if ($isNew) {
+            $newRow = new SRegistryRow();
+            $newRow->idEmployee = $idEmployee;
+            $newRow->numEmployee = $registry->num_employee;
+            $newRow->employee = $registry->name;
+        }
+
+        if ($registry->type_id == \SCons::REG_OUT) {
+            if ($hasAssign) {
+                $result = SDelayReportUtils::processRegistry($lAssigns, $registry, \SCons::REP_HR_EX);
+            }
+            else {
+                $result = SDelayReportUtils::checkSchedule($lWorkshifts, $idEmployee, $registry, \SCons::REP_HR_EX);
+            }
+
+            // no tiene horario para el día actual
+            if ($result == null) {
+                if ($isNew) {
+                    $isNew = false;
+                    $again = true;
+                    $newRow->comments = $newRow->comments."Falta entrada".",";
+                }
+                else {
+                    $isNew = true;
+                    $newRow->outDate = $registry->date;
+                    $newRow->outDateTime = $registry->date.' '.$registry->time;
+                    $newRow->comments = $newRow->comments."Sin horario".",";
+                }
+            }
+            else {
+                if ($newRow->inDate != null) {
+                    if ($newRow->outDate == null) {
+                        $newRow->outDate = $result->variableDateTime->toDateString();
+                        $newRow->outDateTime = $result->variableDateTime->toDateTimeString();
+                        $newRow->outDateTimeSch = $result->pinnedDateTime->toDateTimeString();
+                        $newRow->delayMins = $result->delayMins;
+                        $newRow->extraHours = SDelayReportUtils::convertToHoursMins($result->delayMins);
+    
+                        $isNew = true;
+                    }
+                }
+                else {
+                    //falta entrada
+                    $isNew = false;
+                    $again = true;
+                    $newRow->comments = $newRow->comments."Falta entrada".",";
+                }
+            }
+
+        }
+        else {
+            if ($newRow->outDate == null) {
+                if ($newRow->inDate == null) {
+                    $newRow->inDate = $registry->date;
+                    $newRow->inDateTime = $registry->date.' '.$registry->time;
+
+                    $isNew = false;
+                }
+                else {
+                    // falta salida
+                    $newRow->comments = $newRow->comments."Falta salida".",";
+                    $again = true;
+                    $isNew = true;
+                }
+            }
+        }
+
+        $response = array();
+        $response[] = $isNew;
+        $response[] = $newRow;
+        $response[] = $again;
+
+        return $response;
+    }
+
+    /**
+     * Obtiene las checadas dado un rango de fechas y filtra por tipo de pago
+     *
+     * @param string $startDate [YYYY-MM-DD]
+     * @param string $endDate [YYYY-MM-DD]
+     * @param int $payWay [ 1: QUINCENA, 2: SEMANA, 0: TODOS]
+     * 
+     * @return array ('r.*', 'd.id AS dept_id', 'e.num_employee', 'e.name')
+     */
     public static function getRegistries($startDate, $endDate, $payWay)
     {
         // \DB::enableQueryLog();
@@ -182,6 +322,16 @@ class SDelayReportUtils {
         return $registries;
     }
 
+    /**
+     * Obtiene los horarios programados para los empleados que cumplan con el rango de fechas
+     * y el tipo de pago
+     *
+     * @param string $startDate [YYYY-MM-DD]
+     * @param string $endDate [YYYY-MM-DD]
+     * @param int $payWay [ 1: QUINCENA, 2: SEMANA, 0: TODOS]
+     * 
+     * @return query ('wdd.date', 'w.name', 'w.entry', 'w.departure')
+     */
     public static function getWorkshifts($startDate, $endDate, $payWay)
     {
         $lWorkshifts = \DB::table('week_department_day AS wdd')
@@ -208,6 +358,19 @@ class SDelayReportUtils {
         return $lWorkshifts;
     }
     
+    /**
+     * Consulta en la tabla de schedule_assign si el empleado tiene asignados horarios por empleado
+     * y por departamento que cumplan con el rango de fechas recibido, que empiecen antes de la fecha inicial
+     * y terminen después de esta, que estén ambas fechas dentro del rango, fechas indefinidas, o que empiecen antes 
+     * o después de la fecha final y terminen dentro del rango o no terminen
+     *
+     * @param int $idEmployee
+     * @param int $idDepartment departamento del empleado (busca por este medio solo si no encuentra referencias al empleado)
+     * @param string $startDate [YYYY-MM-DD]
+     * @param string $endDate [YYYY-MM-DD]
+     * 
+     * @return array  schedule_assign.*
+     */
     public static function hasAnAssing($idEmployee, $idDepartment, $startDate, $endDate)
     {
         // \DB::enableQueryLog();
@@ -255,7 +418,17 @@ class SDelayReportUtils {
         return $assings;
     }
 
-    public static function processRegistry($lAassigns, $registry)
+    /**
+     * Determina cuál es el horario que correspone al registro de checada y lo compara contra la hora
+     * regresa null cuando no hay un horario que corresponda al registro
+     *
+     * @param array $lAassigns
+     * @param query_registry $registry
+     * @param int $tReport [\SCons::REP_DELAY, \SCons::REP_HR_EX]
+     * 
+     * @return SDateComparison object
+     */
+    public static function processRegistry($lAassigns, $registry, $tReport)
     {
         /**
          * si la fecha de inicio de la asignación es nula, significa que dicha
@@ -265,7 +438,7 @@ class SDelayReportUtils {
             //si el grupo de horarios es nullo significa que solo tiene asignado un horario
             // por lo que la comparación se hace directa con el día
             if ($lAassigns[0]->group_schedules_id == null) {
-                return SDelayReportUtils::compareTemplate($lAassigns[0]->schedule_template_id, $registry);
+                return SDelayReportUtils::compareTemplate($lAassigns[0]->schedule_template_id, $registry, $tReport);
             }
             else {
                 /**
@@ -288,10 +461,10 @@ class SDelayReportUtils {
                 //recorrido de los horarios que el empleado tiene asignados
                 //cuando no tiene fecha de inicio y existen asigandos más de un template
                 foreach ($assignsTemplates as $ass_template) {
-                    $comparisons[] = SDelayReportUtils::compareTemplate($ass_template->schedule_template_id, $registry);
+                    $comparisons[] = SDelayReportUtils::compareTemplate($ass_template->schedule_template_id, $registry, $tReport);
                 }
 
-                // ordenar las asignaciones en base a los minutos de retardo
+                // ordenar las asignaciones en base al tiempo de retardo
                 usort($comparisons, function($a, $b)
                 {
                     return (abs($a->delayMins) - abs($b->delayMins));
@@ -305,7 +478,7 @@ class SDelayReportUtils {
                 if ($assign->start_date <= $registry->date && // funciona la comparación?
                     (($assign->end_date != null &&  $assign->end_date >= $registry->date) ||
                     $assign->end_date == null)) { 
-                        $result = SDelayReportUtils::compareTemplate($assign->schedule_template_id, $registry);
+                        $result = SDelayReportUtils::compareTemplate($assign->schedule_template_id, $registry, $tReport);
 
                         return $result;
                 }
@@ -316,17 +489,15 @@ class SDelayReportUtils {
     }
 
     /**
-     * Undocumented function
+     * Compara el registro recibido contra el template asociado al id recibido
      *
-     * @param [type] $templateId
-     * @param [type] $registry
+     * @param int $templateId
+     * @param query_registry $registry
+     * @param int $tReport [\SCons::REP_DELAY, \SCons::REP_HR_EX]
      * 
-     * @return SDateComparison comparison object
-     *   variableDateTime
-     *   pinnedDateTime
-     *   delayMins
+     * @return SDateComparison object
      */
-    public static function compareTemplate($templateId, $registry)
+    public static function compareTemplate($templateId, $registry, $tReport)
     {
         $oDate = Carbon::parse($registry->date.' '.$registry->time);
         // Carbon::setWeekStartsAt(Carbon::FRIDAY);
@@ -343,11 +514,14 @@ class SDelayReportUtils {
 
         $oScheduleDay = $templateDay[0];
 
-        return SDelayReportUtils::compareDates($registry->date.' '.$oScheduleDay->entry, $registry->date.' '.$registry->time);
+        $scheduleDate = $registry->date.' '.($tReport == \SCons::REP_DELAY ? $oScheduleDay->entry : $oScheduleDay->departure);
+
+        return SDelayReportUtils::compareDates($scheduleDate, $registry->date.' '.$registry->time);
     }
 
     /**
-     * Undocumented function
+     * Compara las fechas recibidas y retorna el número de minutos de diferencia entre ellas,
+     * cuando $sDateOne > $sDateTwo el valor retornado es negativo
      *
      * @param String $sDateOne puede ser considerada como la fecha de referencia o fija.
      * @param String $sDateTwo fecha variable (checada)
@@ -375,7 +549,39 @@ class SDelayReportUtils {
         return $comparison;
     }
 
-    public static function checkSchedule($lWorkshifts, $idEmployee, $registry)
+    /**
+     * Convierte los minutos en entero a formato 00:00
+     *
+     * @param int $time
+     * @param string $format
+     * 
+     * @return string 00:00
+     */
+    public static function convertToHoursMins($time, $format = '%02d:%02d') 
+    {
+        if ($time < 1) {
+            return "00:00";
+        }
+
+        $hours = floor($time / 60);
+        $minutes = ($time % 60);
+
+        return sprintf($format, $hours, $minutes);
+    }
+
+    /**
+     * filtra el empleado y la fecha del registro de la query de horarios para determinar
+     * si dicho empleado tiene un horario asignado, retorna null si no hay horario asignado.
+     *
+     * @param query $lWorkshifts
+     * @param int $idEmployee
+     * @param query_registry $registry
+     * @param int $tReport [\SCons::REP_DELAY, \SCons::REP_HR_EX]
+     *              Si el parámetro es \SCons::REP_DELAY compara contra fecha de entrada, si no contra fecha de salida
+     * 
+     * @return SDateComparison 
+     */
+    public static function checkSchedule($lWorkshifts, $idEmployee, $registry, $tReport)
     {
         $lWEmployee = $lWorkshifts->where('e.id', $idEmployee)
                                     ->where('wdd.date', $registry->date);
@@ -386,8 +592,10 @@ class SDelayReportUtils {
         }
 
         $workshift = $lWEmployee[0];
+
+        $workshiftDate = $registry->date.' '.($tReport == \SCons::REP_DELAY ? $workshift->entry : $workshift->departure);
         
-        return SDelayReportUtils::compareDates($workshift->date.' '.$workshift->entry, $registry->date.' '.$registry->time);
+        return SDelayReportUtils::compareDates($workshiftDate, $registry->date.' '.$registry->time);
     }
 }
 

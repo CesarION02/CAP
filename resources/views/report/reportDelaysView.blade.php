@@ -3,7 +3,7 @@
     <link rel="stylesheet" href="{{ asset("dt/datatables.css") }}">
 @endsection
 @section('title')
-Reporte de retardos
+{{ $sTitle }}
 @endsection
 
 @section('content')
@@ -13,7 +13,7 @@ Reporte de retardos
         @include('includes.mensaje')
         <div class="box box-danger">
             <div class="box-header with-border">
-                <h3 class="box-title">Reporte de retardos</h3>
+                <h3 class="box-title">{{ $sTitle }}</h3>
                 <div class="box-tools pull-right">
                 </div>
             </div>
@@ -26,11 +26,13 @@ Reporte de retardos
                                     <th>#</th>
                                     <th>Empleado</th>
                                     {{-- <th>Fecha entrada</th> --}}
-                                    <th>Hora entrada</th>
+                                    <th>Hora_entrada</th>
                                     {{-- <th>Fecha salida</th> --}}
-                                    <th>Hora salida</th>
-                                    <th>Retardo (min)</th>
-                                    <th>Comentarios</th>
+                                    <th v-if="oData.tReport == oData.REP_HR_EX">Hora_progr.</th>
+                                    <th>Hora_salida</th>
+                                    <th v-if="oData.tReport == oData.REP_DELAY">Retardo (min)</th>
+                                    <th v-else>Horas Extra</th>
+                                    <th>Comen.</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -40,8 +42,10 @@ Reporte de retardos
                                     {{-- <td>@{{ row.inDate }}</td> --}}
                                     <td>@{{ row.inDateTime }}</td>
                                     {{-- <td>@{{ row.outDate }}</td> --}}
+                                    <td v-if="oData.tReport == oData.REP_HR_EX">@{{ row.outDateTimeSch }}</td>
                                     <td>@{{ row.outDateTime }}</td>
-                                    <td>@{{ row.delayMins }}</td>
+                                    <td v-if="oData.tReport == oData.REP_DELAY">@{{ row.delayMins }}</td>
+                                    <td v-else>@{{ row.extraHours }}</td>
                                     <td>@{{ row.comments }}</td>
                                 </tr>
                             </tbody>
@@ -70,6 +74,9 @@ Reporte de retardos
     <script>
         function GlobalData () {
             this.lRows = <?php echo json_encode($lRows) ?>;
+            this.tReport = <?php echo json_encode($tReport) ?>;
+            this.REP_HR_EX = <?php echo json_encode(\SCons::REP_HR_EX) ?>;
+            this.REP_DELAY = <?php echo json_encode(\SCons::REP_DELAY) ?>;
         }
         
         var oData = new GlobalData();
