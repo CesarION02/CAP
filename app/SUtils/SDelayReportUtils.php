@@ -340,6 +340,9 @@ class SDelayReportUtils {
                             ->join('workshifts AS w', 'dw.workshift_id', '=', 'w.id')
                             ->join('employees AS e', 'dwe.employee_id', '=', 'e.id')
                             ->select('wdd.date', 'w.name', 'w.entry', 'w.departure')
+                            ->where('dwe.is_delete', false)
+                            ->where('w.is_delete', false)
+                            ->where('e.is_delete', false)
                             ->whereBetween('wdd.date', [$startDate, $endDate]);
 
         switch ($payWay) {
@@ -584,7 +587,9 @@ class SDelayReportUtils {
     public static function checkSchedule($lWorkshifts, $idEmployee, $registry, $tReport)
     {
         $lWEmployee = $lWorkshifts->where('e.id', $idEmployee)
-                                    ->where('wdd.date', $registry->date);
+                                    ->where('wdd.date', $registry->date)
+                                    ->orderBy('wdd.created_at', 'DESC');
+
         $lWEmployee = $lWEmployee->get();
 
         if (sizeof($lWEmployee) == 0) {
