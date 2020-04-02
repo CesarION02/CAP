@@ -20,7 +20,7 @@
             <div class="box-body" id="reportDelayApp">
                 <div class="row">
                     <div class="col-md-12">
-                        <table id="delays_table" class="display table table-condensed" style="width:100%">
+                        <table id="delays_table" class="table table-condensed" style="width:100%">
                             <thead>
                                 <tr>
                                     <th>#</th>
@@ -28,12 +28,12 @@
                                     {{-- <th>Fecha entrada</th> --}}
                                     <th>Hora_entrada</th>
                                     {{-- <th>Fecha salida</th> --}}
-                                    <th v-if="oData.tReport == oData.REP_HR_EX">Hora_progr.</th>
                                     <th>Hora_salida</th>
                                     {{-- <th v-if="oData.tReport == oData.REP_DELAY">Retardo (min)</th>
                                     <th v-else>Horas Extra</th> --}}
                                     <th>Retardo (min)</th>
                                     <th>Horas Extra</th>
+                                    <th v-if="oData.tReport == oData.REP_HR_EX">Hr_progr_Sal</th>
                                     <th>Comen.</th>
                                 </tr>
                             </thead>
@@ -44,12 +44,12 @@
                                     {{-- <td>@{{ row.inDate }}</td> --}}
                                     <td>@{{ row.inDateTime }}</td>
                                     {{-- <td>@{{ row.outDate }}</td> --}}
-                                    <td v-if="oData.tReport == oData.REP_HR_EX">@{{ row.outDateTimeSch }}</td>
                                     <td>@{{ row.outDateTime }}</td>
                                     {{-- <td v-if="oData.tReport == oData.REP_DELAY">@{{ row.delayMins }}</td>
                                     <td v-else>@{{ row.extraHours }}</td> --}}
-                                    <td>@{{ row.delayMins }}</td>
+                                    <td>@{{ row.delayMins < 0 ? 0 : row.delayMins }}</td>
                                     <td>@{{ row.extraHours }}</td>
+                                    <td v-if="oData.tReport == oData.REP_HR_EX">@{{ row.outDateTimeSch }}</td>
                                     <td>@{{ row.comments }}</td>
                                 </tr>
                             </tbody>
@@ -82,8 +82,9 @@
             this.REP_HR_EX = <?php echo json_encode(\SCons::REP_HR_EX) ?>;
             this.REP_DELAY = <?php echo json_encode(\SCons::REP_DELAY) ?>;
 
-            this.minsCol = this.tReport == this.REP_DELAY ? 4 : 5;
-            this.hiddenCol = 5;
+            // this.minsCol = this.tReport == this.REP_DELAY ? 4 : 4;
+            this.minsCol = 4;
+            this.hiddenCol = this.tReport == this.REP_DELAY ? 5 : 4;
         }
         
         var oData = new GlobalData();
