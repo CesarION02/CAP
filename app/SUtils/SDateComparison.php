@@ -1,5 +1,8 @@
 <?php namespace App\SUtils;
 
+/**
+ * Estructura utilizada para la comparación de fechas
+ */
 class SDateComparison {
     function __construct() {
         $this->variableDateTime = null;

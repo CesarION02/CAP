@@ -5,21 +5,21 @@
 @endsection
 
 @section('title')
-Reporte Retardos
+    {{ $sTitle }}
 @endsection
 
 @section('content')
-<div class="row">
+<div class="row" id="reportDelayAppGen">
     <div class="col-lg-12">
         @include('includes.form-error')
         @include('includes.mensaje')
         <div class="box box-danger">
             <div class="box-header with-border">
-                <h3 class="box-title">Reporte de retardos</h3>
+                <h3 class="box-title">{{ $sTitle }}</h3>
                 <div class="box-tools pull-right">
                 </div>
             </div>
-            <form action="{{ route('reporteRetardos') }}">
+            <form action="{{ route(''.$sRoute.'') }}">
                 <div class="box-body" id="reportApp">
                     <div class="row">
                         <div class="col-md-2">
@@ -44,8 +44,8 @@ Reporte Retardos
                                 <span></span> <i class="fa fa-caret-down"></i>
                             </div>
                         </div>
-                        <input value="2020-02-18" type="hidden" name="start_date">
-                        <input value="2020-02-27" type="hidden" name="end_date">
+                        <input :value="startDate" type="hidden" name="start_date">
+                        <input :value="endDate" type="hidden" name="end_date">
                     </div>
                 </div>
                 <div class="box-footer">
@@ -62,34 +62,42 @@ Reporte Retardos
 
 @section("scripts")
     <script src="{{ asset("assets/js/chosen.jquery.min.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/js/vue.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/moment/moment.js") }}" type="text/javascript"></script>
     <script src="{{ asset("daterangepicker/daterangepicker.js") }}" type="text/javascript"></script>
+    
+    <script src="{{asset("assets/pages/scripts/report/SDelayReportGen.js")}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(function() {
         
-            var start = moment('2020-02-18');
-            var end = moment('2020-02-27');
+            var start = moment().subtract(6, 'days');
+            var end = moment();
         
             function cb(start, end) {
                 $('#reportrange span').html(start.format('D MMMM YYYY') + ' - ' + end.format('D MMMM YYYY'));
+                app.setDates(start.format('YYYY-MM-DD'), end.format('YYYY-MM-DD'));
             }
         
             $('#reportrange').daterangepicker({
                 startDate: start,
                 endDate: end,
                 ranges: {
-                   'Today': [moment(), moment()],
-                   'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-                   'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-                   'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-                   'This Month': [moment().startOf('month'), moment().endOf('month')],
-                   'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                   'Hoy': [moment(), moment()],
+                   'Ayer': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                   'Últimos 7 días': [moment().subtract(6, 'days'), moment()],
+                   'Últimos 15 días': [moment().subtract(14, 'days'), moment()],
+                   'Este mes': [moment().startOf('month'), moment().endOf('month')],
+                   'Mes pasado': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
                 }
             }, cb);
         
             cb(start, end);
         
+        });
+
+        $('#reportrange').on('apply.daterangepicker', function(ev, picker) {
+            app.setDates(picker.startDate.format('YYYY-MM-DD'), picker.endDate.format('YYYY-MM-DD'));
         });
     </script>
 @endsection

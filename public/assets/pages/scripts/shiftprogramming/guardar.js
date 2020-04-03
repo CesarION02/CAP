@@ -114,7 +114,7 @@ function guardar() {
             document.getElementById("weekFlag").value = data[0];
             document.getElementById("departFlag").value = 1;
             if (data[1] != 0) {
-                var pdf = '<a target="_blank" href=http://localhost/csv/checador/storage/app/public/' + data[1] + '>IMPRIMIR PDF';
+                var pdf = '<a target="_blank" href="../../././storage/app/public/' + data[1] + '">IMPRIMIR PDF';
                 $('#pdf').append(pdf);
                 document.getElementById("pdfFlag").value = data[0];
             }

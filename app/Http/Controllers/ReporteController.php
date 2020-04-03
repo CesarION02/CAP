@@ -330,7 +330,18 @@ class ReporteController extends Controller
 
     public function genDelayReport()
     {
-        return view('report.reportDelays');
+        return view('report.reportsGen')
+                    ->with('tReport', \SCons::REP_DELAY)
+                    ->with('sTitle', 'Reporte de Retardos')
+                    ->with('sRoute', 'reporteRetardos');
+    }
+
+    public function genHrExReport()
+    {
+        return view('report.reportsGen')
+                    ->with('tReport', \SCons::REP_HR_EX)
+                    ->with('sTitle', 'Reporte de Horas Extra')
+                    ->with('sRoute', 'reporteHrsExtras');
     }
 
     /**
@@ -351,9 +362,36 @@ class ReporteController extends Controller
          */
         $payWay = $request->pay_way;
 
-        $lRows = SDelayReportUtils::processReport($sStartDate, $sEndDate, $payWay);
+        $lRows = SDelayReportUtils::processReport($sStartDate, $sEndDate, $payWay, \SCons::REP_DELAY);
 
         return view('report.reportDelaysView')
+                    ->with('tReport', \SCons::REP_DELAY)
+                    ->with('sTitle', 'Reporte de Retardos')
+                    ->with('lRows', $lRows);
+    }
+    /**
+     * Undocumented function
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function hrExtReport(Request $request)
+    {
+        $sStartDate = $request->start_date;
+        $sEndDate = $request->end_date;
+
+        /**
+         * 1: quincena
+         * 2: semana
+         * 3: todos
+         */
+        $payWay = $request->pay_way;
+
+        $lRows = SDelayReportUtils::processReport($sStartDate, $sEndDate, $payWay, \SCons::REP_HR_EX);
+
+        return view('report.reportDelaysView')
+                    ->with('tReport', \SCons::REP_HR_EX)
+                    ->with('sTitle', 'Reporte de Horas Extra')
                     ->with('lRows', $lRows);
     }
 }

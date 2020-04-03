@@ -65,6 +65,8 @@ Route::get('report/generarReporteRegs/{type}','ReporteController@registriesRepor
 Route::get('report/reporteRegistros','ReporteController@reporteRegistrosView')->name('generarreporteRegistros');
 Route::get('report/reporteRetardos','ReporteController@genDelayReport')->name('generarreporteRetardos');
 Route::get('report/viewReporteRetardos','ReporteController@delaysReport')->name('reporteRetardos');
+Route::get('report/reporteHrExtras','ReporteController@genHrExReport')->name('generarreporteHrExtras');
+Route::get('report/viewReporteHrExtras','ReporteController@hrExtReport')->name('reporteHrsExtras');
 
 /* RUTAS DE USUARIO */
 Route::get('user', 'userController@index')->name('usuario');
