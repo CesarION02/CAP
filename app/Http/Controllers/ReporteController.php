@@ -5,17 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\department;
 use App\Models\employees;
-use App\Models\register;
 use App\Models\area;
 use App\Models\departmentsGroup;
 use App\SUtils\SDelayReportUtils;
-use App\SUtils\SRegistryRow;
-use App\SUtils\SDateComparison;
-use DateTime;
+use App\SUtils\SGenUtils;
 use DB;
-use PDF;
-
-use Carbon\Carbon;
 
 class ReporteController extends Controller
 {
@@ -361,8 +355,12 @@ class ReporteController extends Controller
          * 3: todos
          */
         $payWay = $request->pay_way;
+        $filterType = $request->i_filter;
+        $ids = $request->elems;
 
-        $lRows = SDelayReportUtils::processReport($sStartDate, $sEndDate, $payWay, \SCons::REP_DELAY);
+        $lEmployees = SGenUtils::toEmployeeIds($filterType, $ids);
+
+        $lRows = SDelayReportUtils::processReport($sStartDate, $sEndDate, $payWay, \SCons::REP_DELAY, $lEmployees);
 
         return view('report.reportDelaysView')
                     ->with('tReport', \SCons::REP_DELAY)
@@ -387,7 +385,12 @@ class ReporteController extends Controller
          */
         $payWay = $request->pay_way;
 
-        $lRows = SDelayReportUtils::processReport($sStartDate, $sEndDate, $payWay, \SCons::REP_HR_EX);
+        $filterType = $request->i_filter;
+        $ids = $request->elems;
+
+        $lEmployees = SGenUtils::toEmployeeIds($filterType, $ids);
+
+        $lRows = SDelayReportUtils::processReport($sStartDate, $sEndDate, $payWay, \SCons::REP_HR_EX, $lEmployees);
 
         return view('report.reportDelaysView')
                     ->with('tReport', \SCons::REP_HR_EX)

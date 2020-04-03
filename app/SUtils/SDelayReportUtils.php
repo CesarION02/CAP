@@ -22,13 +22,14 @@ class SDelayReportUtils {
       * @param string $sEndDate
       * @param int $payWay [ 1: QUINCENA, 2: SEMANA, 0: TODOS]
       * @param int $tReport [\SCons::REP_DELAY, \SCons::REP_HR_EX]
+      * @param array $lEmployees arreglo de ids de empleados
 
       * @return [SRegistryRow] (array)
       */
-    public static function processReport($sStartDate, $sEndDate, $payWay, $tReport)
+    public static function processReport($sStartDate, $sEndDate, $payWay, $tReport, $lEmployees)
     {
-        $registries = SDelayReportUtils::getRegistries($sStartDate, $sEndDate, $payWay);
-        $lWorkshifts = SDelayReportUtils::getWorkshifts($sStartDate, $sEndDate, $payWay);
+        $registries = SDelayReportUtils::getRegistries($sStartDate, $sEndDate, $payWay, $lEmployees);
+        $lWorkshifts = SDelayReportUtils::getWorkshifts($sStartDate, $sEndDate, $payWay, $lEmployees);
 
         $lRows = array();
         $idEmployee = 0;
@@ -125,7 +126,7 @@ class SDelayReportUtils {
                 if ($isNew) {
                     $isNew = false;
                     $newRow->inDate = $registry->date;
-                    $newRow->inDateTime = $registry->date.' '.$registry->time;
+                    $newRow->inDateTime = $registry->date.'   '.$registry->time;
                     $newRow->comments = $newRow->comments."Sin horario".",";
                 }
                 else {
@@ -138,7 +139,8 @@ class SDelayReportUtils {
                 if ($newRow->inDate == null) {
                     if ($newRow->outDate == null) {
                         $newRow->inDate = $result->variableDateTime->toDateString();
-                        $newRow->inDateTime = $result->variableDateTime->toDateTimeString();
+                        $newRow->inDateTime = $result->variableDateTime->format('Y-m-d   H:i:s');
+                        // $newRow->inDateTime = $result->variableDateTime->toDateTimeString();
                         $newRow->delayMins = $result->delayMins;
     
                         $isNew = false;
@@ -157,14 +159,14 @@ class SDelayReportUtils {
             if ($newRow->outDate == null) {
                 if ($newRow->inDate != null) {
                     $newRow->outDate = $registry->date;
-                    $newRow->outDateTime = $registry->date.' '.$registry->time;
+                    $newRow->outDateTime = $registry->date.'   '.$registry->time;
 
                     $isNew = true;
                 }
                 else {
                     // falta entrada
                     $newRow->outDate = $registry->date;
-                    $newRow->outDateTime = $registry->date.' '.$registry->time;
+                    $newRow->outDateTime = $registry->date.'   '.$registry->time;
                     $newRow->comments = $newRow->comments."Falta entrada".",";
 
                     $isNew = true;
@@ -226,7 +228,7 @@ class SDelayReportUtils {
                 else {
                     $isNew = true;
                     $newRow->outDate = $registry->date;
-                    $newRow->outDateTime = $registry->date.' '.$registry->time;
+                    $newRow->outDateTime = $registry->date.'   '.$registry->time;
                     $newRow->comments = $newRow->comments."Sin horario".",";
                 }
             }
@@ -234,8 +236,9 @@ class SDelayReportUtils {
                 if ($newRow->inDate != null) {
                     if ($newRow->outDate == null) {
                         $newRow->outDate = $result->variableDateTime->toDateString();
-                        $newRow->outDateTime = $result->variableDateTime->toDateTimeString();
-                        $newRow->outDateTimeSch = $result->pinnedDateTime->toDateTimeString();
+                        $newRow->outDateTime = $result->variableDateTime->format('Y-m-d   H:i:s');
+                        $newRow->outDateTimeSch = $result->pinnedDateTime->format('Y-m-d   H:i:s');
+                        // $newRow->outDateTimeSch = $result->pinnedDateTime->toDateTimeString();
                         $newRow->delayMins = $result->delayMins;
                         $newRow->extraHours = SDelayReportUtils::convertToHoursMins($result->delayMins);
     
@@ -244,8 +247,14 @@ class SDelayReportUtils {
                 }
                 else {
                     //falta entrada
-                    $isNew = false;
-                    $again = true;
+                    $newRow->outDate = $result->variableDateTime->toDateString();
+                    $newRow->outDateTime = $result->variableDateTime->format('Y-m-d   H:i:s');
+                    $newRow->outDateTimeSch = $result->pinnedDateTime->format('Y-m-d   H:i:s');
+                    $newRow->delayMins = $result->delayMins;
+                    $newRow->extraHours = SDelayReportUtils::convertToHoursMins($result->delayMins);
+
+                    $isNew = true;
+                    $again = false;
                     $newRow->comments = $newRow->comments."Falta entrada".",";
                 }
             }
@@ -255,7 +264,7 @@ class SDelayReportUtils {
             if ($newRow->outDate == null) {
                 if ($newRow->inDate == null) {
                     $newRow->inDate = $registry->date;
-                    $newRow->inDateTime = $registry->date.' '.$registry->time;
+                    $newRow->inDateTime = $registry->date.'   '.$registry->time;
 
                     $isNew = false;
                 }
@@ -282,10 +291,11 @@ class SDelayReportUtils {
      * @param string $startDate [YYYY-MM-DD]
      * @param string $endDate [YYYY-MM-DD]
      * @param int $payWay [ 1: QUINCENA, 2: SEMANA, 0: TODOS]
+     * @param array $lEmployees arreglo de ids de empleados
      * 
      * @return array ('r.*', 'd.id AS dept_id', 'e.num_employee', 'e.name')
      */
-    public static function getRegistries($startDate, $endDate, $payWay)
+    public static function getRegistries($startDate, $endDate, $payWay, $lEmployees)
     {
         // \DB::enableQueryLog();
 
@@ -300,7 +310,11 @@ class SDelayReportUtils {
                                 ->orderBy('employee_id', 'ASC')
                                 ->orderBy('date', 'ASC')
                                 ->orderBy('type_id', 'ASC');
-                                // ->where('employee_id', '79');
+                                // ->where('employee_id', '87');
+
+        if (sizeof($lEmployees) > 0) {
+            $registries = $registries->whereIn('e.id', $lEmployees);
+        }
 
         switch ($payWay) {
             case 1:
@@ -329,10 +343,11 @@ class SDelayReportUtils {
      * @param string $startDate [YYYY-MM-DD]
      * @param string $endDate [YYYY-MM-DD]
      * @param int $payWay [ 1: QUINCENA, 2: SEMANA, 0: TODOS]
+     * @param array $lEmployees arreglo de ids de empleados
      * 
      * @return query ('wdd.date', 'w.name', 'w.entry', 'w.departure')
      */
-    public static function getWorkshifts($startDate, $endDate, $payWay)
+    public static function getWorkshifts($startDate, $endDate, $payWay, $lEmployees)
     {
         $lWorkshifts = \DB::table('week_department_day AS wdd')
                             ->join('day_workshifts AS dw', 'wdd.id', '=', 'dw.day_id')
@@ -344,6 +359,10 @@ class SDelayReportUtils {
                             ->where('w.is_delete', false)
                             ->where('e.is_delete', false)
                             ->whereBetween('wdd.date', [$startDate, $endDate]);
+
+        if (sizeof($lEmployees) > 0) {
+            $lWorkshifts = $lWorkshifts->whereIn('dwe.employee_id', $lEmployees);
+        }
 
         switch ($payWay) {
             case 1:
