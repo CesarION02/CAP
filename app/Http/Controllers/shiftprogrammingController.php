@@ -128,7 +128,43 @@ class shiftprogrammingController extends Controller
                         ->where('group_workshifts.is_delete','0')
                         ->select('group_workshifts.id AS idShift','group_workshifts.name AS nameShift')
                         ->get();
-        return response()->json(array($employees,$departments,$group_workshift));
+        $startDate = $request->ini;
+        $endDate = $request->fin;
+        $vacaciones = DB::table('incidents')
+                        ->join('employees','employees.id','=','incidents.employee_id')
+                        ->join('jobs','jobs.id','=','employees.job_id')
+                        ->join('departments','departments.id','=','jobs.department_id')
+                        ->join('department_group','department_group.id','=','departments.dept_group_id')
+                        ->orderBy('employees.job_id')
+                        ->where('employees.is_delete','0')
+                        ->where('departments.dept_group_id',$request->typearea)
+                        ->where('incidents.type_incidents_id',3)
+                        ->where(function ($query) use ($startDate, $endDate) {
+                                $query->where('start_date', '<=', $endDate)
+                                        ->where(function ($query) use ($startDate) {
+                                            $query->where('end_date', '>=', $startDate)
+                                                ->orWhereNull('end_date');
+                                        })
+                                        ->orWhereNull('start_date');
+                        })
+                        ->whereBetween('start_date', [$request->ini, $request->fin])
+                        ->orwhereBetween('end_date', [$request->ini, $request->fin])
+                        ->select('employees.name AS name')
+                        ->get();
+        $incapacidades = DB::table('incidents')
+                        ->join('employees','employees.id','=','incidents.employee_id')
+                        ->join('jobs','jobs.id','=','employees.job_id')
+                        ->join('departments','departments.id','=','jobs.department_id')
+                        ->join('department_group','department_group.id','=','departments.dept_group_id')
+                        ->orderBy('employees.job_id')
+                        ->where('employees.is_delete','0')
+                        ->where('departments.dept_group_id',$request->typearea)
+                        ->where('incidents.type_incidents_id',2)
+                        ->whereBetween('start_date', [$request->ini, $request->fin])
+                        ->orwhereBetween('end_date', [$request->ini, $request->fin])
+                        ->select('employees.name AS name')
+                        ->get();
+        return response()->json(array($employees,$departments,$group_workshift,$vacaciones,$incapacidades));
 
     }
 
@@ -513,11 +549,21 @@ class shiftprogrammingController extends Controller
                 $numEmpleado = 0;
                 if(count($diasEmpleados) != 0){
                     $ejeY= $ejeY + 5;
+                    if($ejeY > 180){
+                        $ejeY = 10;
+                        PDF::AddPage('L');
+                        PDF::setXY(10,$ejeY);    
+                    }
                     PDF::setXY(10,$ejeY);
                     PDF::SetFont('helvetica','B',9);
                     PDF::Cell(260,5,$departments[$z]->nameDepartment,1,false,'C',0,'',0,false,'M','M');
                     while(count($diasEmpleados) > $numEmpleado ){
                         $ejeY= $ejeY + 5;
+                        if($ejeY > 180){
+                            $ejeY = 10;
+                            PDF::AddPage('L');
+                            PDF::setXY(10,$ejeY);    
+                        }
                         for($x = 0 ; $diff->days >= $x ; $x++){
                             PDF::SetFont('helvetica','',9);
                              

@@ -13,6 +13,7 @@ use App\Models\group_assign;
 use App\Models\holidayAux;
 use App\Models\holiday;
 use App\SUtils\SDateTimeUtils;
+use App\Models\groupSchedule;
 use DateTime;
 use DB;
 use DatePeriod;
@@ -236,7 +237,9 @@ class assignController extends Controller
             $assign->created_by = 1;
             $assign->updated_by = 1;
             $assign->save();       
-        }   
+        } 
+        
+        return redirect('assign')->with('mensaje','Asignación fue actualizada con exito');  
     }
 
     /**
@@ -608,7 +611,7 @@ class assignController extends Controller
                 ->join('employees','employees.id','=','schedule_assign.employee_id')
                 ->join('schedule_template','schedule_template.id','=','schedule_assign.schedule_template_id')
                 ->join('schedule_day','schedule_day.schedule_template_id','=','schedule_template.id')
-                ->where('schedule_assign.group_schedules_id',$id)
+                ->where('schedule_assign.group_schedules_id',$auxiliar)
                 ->select('employees.id AS id','employees.name AS name','schedule_assign.start_date AS startDate','schedule_assign.end_date AS endDate','schedule_day.day_name AS dayName','schedule_day.entry AS entry','schedule_day.departure AS departure','schedule_template.name AS templateName','schedule_assign.order_gs AS orden','schedule_assign.id AS idAssign')
                 ->orderBy('employees.id')
                 ->orderBy('schedule_assign.group_schedules_id')
@@ -677,7 +680,7 @@ class assignController extends Controller
                 ->select('employees.id AS id','employees.name AS name','schedule_assign.start_date AS startDate','schedule_assign.end_date AS endDate','schedule_assign.id AS idAssign')
                 ->orderBy('employees.id')
                 ->orderBy('schedule_assign.group_schedules_id')
-                ->groupBy('schedule_assign.group_schedules_id')
+                ->groupBy('schedule_assign.group_schedules_id','employees.id')
                 ->get();   
         
         return view('assign.showprogramming')->with('assigns',$assigns)->with('dgroup',$id);
@@ -701,7 +704,8 @@ class assignController extends Controller
         $weeks = explode('W',$semana);
         $year = $año[0];
         $week = $weeks[1];
-        $calendario = 0;
+        $calendario = null;
+        $info = 0;
         //inicia determinacion de fechas
         // Se crea objeto DateTime del 1/enero del año ingresado
         $fecha = DateTime::createFromFormat('Y-m-d', $year . '-1-2');
@@ -767,12 +771,14 @@ class assignController extends Controller
                     ->select('schedule_assign.start_date AS Start','schedule_assign.end_date AS End','group_schedules_id AS Grupo','schedule_assign.id AS Id')
                     ->get();
             }else{
-                $assign = DB::table('schedule_assign')
-                    ->join('employees','employees.id','=','schedule_assign.employee_id')
-                    ->where('schedule_assign.id',$id)
-                    ->where('schedule_assign.is_delete',0)
-                    ->select('schedule_assign.start_date AS Start','schedule_assign.end_date AS End','group_schedules_id AS Grupo','schedule_assign.id AS Id')
-                    ->get();
+                if( $id != 0 ){
+                    $assign = DB::table('schedule_assign')
+                        ->join('employees','employees.id','=','schedule_assign.employee_id')
+                        ->where('schedule_assign.id',$id)
+                        ->where('schedule_assign.is_delete',0)
+                        ->select('schedule_assign.start_date AS Start','schedule_assign.end_date AS End','group_schedules_id AS Grupo','schedule_assign.id AS Id')
+                        ->get();
+                }
             }
                 
         
@@ -783,8 +789,8 @@ class assignController extends Controller
                 $fechaAux2=date_format($fechas[1], 'd-m-Y');
                 $fechaComparacion = strtotime($fechaAux1);
                 $fechaComparacion2 = strtotime($fechaAux2);
-                if(!$fechaFin){
-                    if($fechaIni<$fechaComparacion){
+                if(!$fechaFin || $fechaFin <= $fechaComparacion2){
+                    if($fechaIni<=$fechaComparacion){
                         $calendario = DB::table('schedule_assign')
                             ->join('employees','employees.id','=','schedule_assign.employee_id')
                             ->join('schedule_template','schedule_template.id','=','schedule_assign.schedule_template_id')
@@ -792,7 +798,8 @@ class assignController extends Controller
                             ->where('employees.id',$request->empleado[0])
                             ->where('schedule_assign.is_delete',0)
                             ->select('schedule_day.day_name AS Dia','schedule_day.day_num AS Numero','schedule_day.entry AS Entrada','schedule_day.departure AS Salida','employees.id AS Id','employees.name AS Nombre')
-                            ->get();    
+                            ->get();
+                        $info = 1;    
                     }
                 }
                 else{
@@ -804,8 +811,8 @@ class assignController extends Controller
                 $fechaAux2=date_format($fechas[1], 'd-m-Y');
                 $fechaComparacion = strtotime($fechaAux1);
                 $fechaComparacion2 = strtotime($fechaAux2);
-                if(!$fechaFin){
-                    if($fechaIni<$fechaComparacion){
+                if(!$fechaFin || $fechaFin <= $fechaComparacion2){
+                    if($fechaIni<=$fechaComparacion){
                         $numeroHorarios = count($assign);
                         $horario = 1;
                         $dia   = substr($assign[0]->Start,8,2);
@@ -827,7 +834,7 @@ class assignController extends Controller
                             ->where('schedule_assign.is_delete',0)
                             ->select('schedule_day.day_name AS Dia','schedule_day.day_num AS Numero','schedule_day.entry AS Entrada','schedule_day.departure AS Salida','employees.id AS Id','employees.name AS Nombre')
                             ->get(); 
-
+                        $info = 1;
                     }
                 }
             
@@ -887,8 +894,8 @@ class assignController extends Controller
                 $fechaAux2=date_format($fechas[1], 'd-m-Y');
                 $fechaComparacion = strtotime($fechaAux1);
                 $fechaComparacion2 = strtotime($fechaAux2);
-                if(!$fechaFin){
-                    if($fechaIni<$fechaComparacion){
+                if(!$fechaFin || $fechaFin <= $fechaComparacion2 ){
+                    if($fechaIni<=$fechaComparacion){
                         $numeroHorarios = count($assign);
                         $horario = 1;
                         $dia   = substr($assign[0]->Start,8,2);
@@ -908,13 +915,18 @@ class assignController extends Controller
             }
             else{
                 $horarios[$y] = 0;
+                $fechaIni = strtotime($assign[0]->Start);
+                $fechaFin = strtotime($assign[0]->End);
+                $fechaAux1=date_format($fechas[0], 'd-m-Y');
+                $fechaAux2=date_format($fechas[1], 'd-m-Y');
+                $fechaComparacion = strtotime($fechaAux1);
+                $fechaComparacion2 = strtotime($fechaAux2);
             }   
         }
         $calendario = DB::table('schedule_assign')
         ->join('employees','employees.id','=','schedule_assign.employee_id')
         ->join('schedule_template','schedule_template.id','=','schedule_assign.schedule_template_id')
-        ->join('schedule_day','schedule_day.schedule_template_id','=','schedule_template.id')
-        ->where('schedule_assign.is_delete',0);
+        ->join('schedule_day','schedule_day.schedule_template_id','=','schedule_template.id');
         for($z = 0 ; count($ids) > $z ; $z++){
             if($grupos[$z] == 0){
                 $calendario = $calendario->orwhere('schedule_assign.id',$ids[$z]);
@@ -924,15 +936,18 @@ class assignController extends Controller
             }
         }
         $calendario = $calendario->select('schedule_day.day_name AS Dia','schedule_day.day_num AS Numero','schedule_day.entry AS Entrada','schedule_day.departure AS Salida','employees.id AS Id','employees.name AS Nombre')
+        ->where('schedule_assign.is_delete',0)
         ->orderBy('employees.id')
         ->orderBy('day_num')
         ->get();
+
+        $info = 1;
 
         }
         $Empleado = $request->empleado;
         $diff = $fechas[0]->diff($fechas[1]);
         $diff = $diff->days;
-        return view('assign.viewCalendar')->with('calendario',$calendario)->with('empleado',$Empleado)->with('inicio',$fechaAux1)->with('fin',$fechaAux2)->with('diff',$diff);
+        return view('assign.viewCalendar')->with('calendario',$calendario)->with('empleado',$Empleado)->with('inicio',$fechaAux1)->with('fin',$fechaAux2)->with('diff',$diff)->with('info',$info);
     }
 
     function get_dates($year = 0, $week = 0)

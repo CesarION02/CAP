@@ -80,14 +80,15 @@ Turno
                     <tbody>
                         
                             
-                            @if ($calendario == 0)
+                            @if ($info == 0)
                                 <th colspan="8">No hay registros para esas fechas</th>
                             @else
-                                @for($i = 0 ; count($calendario) > $i ; $i=$i+7)
+                                @for($i = 0 ; count($calendario) > $i ; $i)
                                 <tr>
                                     <th>{{$calendario[$i]->Nombre}}</th>
                                     @for($j = 0 ; 7 > $j ; $j++)       
-                                        <td>{{$calendario[$i]->Entrada.' - '.$calendario[$i]->Salida}}</td>    
+                                        <td>{{$calendario[$i]->Entrada.' - '.$calendario[$i]->Salida}}</td>
+                                        <?php $i++;?>    
                                     @endfor
                                 </tr>    
                                 @endfor
