@@ -33,8 +33,8 @@
                                     <th v-else>Horas Extra</th> --}}
                                     <th>Retardo (min)</th>
                                     <th>Horas Extra</th>
-                                    <th v-if="oData.tReport == oData.REP_HR_EX">Hr_progr_Sal</th>
-                                    <th>Comen.</th>
+                                    {{-- <th v-if="oData.tReport == oData.REP_HR_EX">Hr_progr_Sal</th> --}}
+                                    <th>Observaciones</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -49,7 +49,7 @@
                                     <td v-else>@{{ row.extraHours }}</td> --}}
                                     <td>@{{ row.delayMins < 0 ? null : row.delayMins }}</td>
                                     <td>@{{ row.extraHours }}</td>
-                                    <td v-if="oData.tReport == oData.REP_HR_EX">@{{ row.outDateTimeSch }}</td>
+                                    {{-- <td v-if="oData.tReport == oData.REP_HR_EX">@{{ row.outDateTimeSch }}</td> --}}
                                     <td>@{{ row.comments }}</td>
                                 </tr>
                             </tbody>
@@ -85,6 +85,7 @@
             // this.minsCol = this.tReport == this.REP_DELAY ? 4 : 4;
             this.minsCol = 4;
             this.hiddenCol = this.tReport == this.REP_DELAY ? 5 : 4;
+            this.toExport = this.tReport == this.REP_DELAY ? [0, 1, 2, 3, 4, 6] : [0, 1, 2, 3, 5, 6];
         }
         
         var oData = new GlobalData();
@@ -186,7 +187,31 @@
                     [ 'Mostrar 10', 'Mostrar 25', 'Mostrar 50', 'Mostrar 100', 'Mostrar todo' ]
                 ],
                 "buttons": [
-                        'pageLength', 'copy', 'csv', 'excel', 'print'
+                        'pageLength',
+                        {
+                            extend: 'excel',
+                            exportOptions: {
+                                columns: oData.toExport
+                            }
+                        },
+                        {
+                            extend: 'copy',
+                            exportOptions: {
+                                columns: oData.toExport
+                            }
+                        },
+                        {
+                            extend: 'csv',
+                            exportOptions: {
+                                columns: oData.toExport
+                            }
+                        },
+                        {
+                            extend: 'print',
+                            exportOptions: {
+                                columns: oData.toExport
+                            }
+                        }
                     ]
             });
         });
