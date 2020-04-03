@@ -14,4 +14,8 @@ class area extends Model
     public function department(){
         return $this->hasMany('App\Models\department');
     }
+
+    public function holiday(){
+        return $this->hasMany('App\Models\holidayassign');
+    }
 }
