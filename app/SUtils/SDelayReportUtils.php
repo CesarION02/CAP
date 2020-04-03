@@ -126,7 +126,7 @@ class SDelayReportUtils {
                 if ($isNew) {
                     $isNew = false;
                     $newRow->inDate = $registry->date;
-                    $newRow->inDateTime = $registry->date.' '.$registry->time;
+                    $newRow->inDateTime = $registry->date.'   '.$registry->time;
                     $newRow->comments = $newRow->comments."Sin horario".",";
                 }
                 else {
@@ -139,7 +139,8 @@ class SDelayReportUtils {
                 if ($newRow->inDate == null) {
                     if ($newRow->outDate == null) {
                         $newRow->inDate = $result->variableDateTime->toDateString();
-                        $newRow->inDateTime = $result->variableDateTime->toDateTimeString();
+                        $newRow->inDateTime = $result->variableDateTime->format('Y-m-d   H:i:s');
+                        // $newRow->inDateTime = $result->variableDateTime->toDateTimeString();
                         $newRow->delayMins = $result->delayMins;
     
                         $isNew = false;
@@ -158,14 +159,14 @@ class SDelayReportUtils {
             if ($newRow->outDate == null) {
                 if ($newRow->inDate != null) {
                     $newRow->outDate = $registry->date;
-                    $newRow->outDateTime = $registry->date.' '.$registry->time;
+                    $newRow->outDateTime = $registry->date.'   '.$registry->time;
 
                     $isNew = true;
                 }
                 else {
                     // falta entrada
                     $newRow->outDate = $registry->date;
-                    $newRow->outDateTime = $registry->date.' '.$registry->time;
+                    $newRow->outDateTime = $registry->date.'   '.$registry->time;
                     $newRow->comments = $newRow->comments."Falta entrada".",";
 
                     $isNew = true;
@@ -227,7 +228,7 @@ class SDelayReportUtils {
                 else {
                     $isNew = true;
                     $newRow->outDate = $registry->date;
-                    $newRow->outDateTime = $registry->date.' '.$registry->time;
+                    $newRow->outDateTime = $registry->date.'   '.$registry->time;
                     $newRow->comments = $newRow->comments."Sin horario".",";
                 }
             }
@@ -235,8 +236,9 @@ class SDelayReportUtils {
                 if ($newRow->inDate != null) {
                     if ($newRow->outDate == null) {
                         $newRow->outDate = $result->variableDateTime->toDateString();
-                        $newRow->outDateTime = $result->variableDateTime->toDateTimeString();
-                        $newRow->outDateTimeSch = $result->pinnedDateTime->toDateTimeString();
+                        $newRow->outDateTime = $result->variableDateTime->format('Y-m-d   H:i:s');
+                        $newRow->outDateTimeSch = $result->pinnedDateTime->format('Y-m-d   H:i:s');
+                        // $newRow->outDateTimeSch = $result->pinnedDateTime->toDateTimeString();
                         $newRow->delayMins = $result->delayMins;
                         $newRow->extraHours = SDelayReportUtils::convertToHoursMins($result->delayMins);
     
@@ -246,8 +248,8 @@ class SDelayReportUtils {
                 else {
                     //falta entrada
                     $newRow->outDate = $result->variableDateTime->toDateString();
-                    $newRow->outDateTime = $result->variableDateTime->toDateTimeString();
-                    $newRow->outDateTimeSch = $result->pinnedDateTime->toDateTimeString();
+                    $newRow->outDateTime = $result->variableDateTime->format('Y-m-d   H:i:s');
+                    $newRow->outDateTimeSch = $result->pinnedDateTime->format('Y-m-d   H:i:s');
                     $newRow->delayMins = $result->delayMins;
                     $newRow->extraHours = SDelayReportUtils::convertToHoursMins($result->delayMins);
 
@@ -262,7 +264,7 @@ class SDelayReportUtils {
             if ($newRow->outDate == null) {
                 if ($newRow->inDate == null) {
                     $newRow->inDate = $registry->date;
-                    $newRow->inDateTime = $registry->date.' '.$registry->time;
+                    $newRow->inDateTime = $registry->date.'   '.$registry->time;
 
                     $isNew = false;
                 }
