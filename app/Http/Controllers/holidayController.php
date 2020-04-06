@@ -160,4 +160,46 @@ class holidayController extends Controller
 
         return $id;
     }
+
+    public function saveHolidaysFromJSON($lSiieHolidays)
+    {
+        $lCapHolidays = holiday::select('id', 'external_key')
+                                    ->pluck('id', 'external_key');
+
+        foreach ($lSiieHolidays as $jHoliday) {
+            try {
+                $id = $lCapHolidays[$jHoliday->year.'_'.$jHoliday->id_holiday];
+                $this->updHoliday($jHoliday, $id);
+            }
+            catch (\Throwable $th) {
+                $this->insertHoliday($jHoliday);
+            }
+        }
+    }
+    
+    private function updHoliday($jHoliday, $id)
+    {
+        holiday::where('id', $id)
+                    ->update(
+                            [
+                            'name' => $jHoliday->name,
+                            'fecha' => $jHoliday->dt_date,
+                            'year' => $jHoliday->year,
+                            'is_delete' => $jHoliday->is_deleted,
+                            ]
+                        );
+    }
+    
+    private function insertHoliday($jHoliday)
+    {
+        $holiday = new holiday();
+
+        $holiday->name = $jHoliday->name;
+        $holiday->year = $jHoliday->year;
+        $holiday->fecha = $jHoliday->dt_date;
+        $holiday->external_key = ($jHoliday->year.'_'.$jHoliday->id_holiday);
+        $holiday->is_delete = $jHoliday->is_deleted;
+
+        $holiday->save();
+    }
 }

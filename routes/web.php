@@ -82,6 +82,9 @@ Route::post('company', 'companyController@store')->name('save_company');
 Route::put('company/{id}', 'companyController@update')->name('update_company');
 Route::delete('company/{id}', 'companyController@destroy')->name('delete_company');
 
+/* RUTAS DE SINCRONIZACIÓN */
+Route::get('/syncronize', 'SyncController@toSyncronize')->name('syncErp');
+
 /* RUTAS DE EMPLEADOS */
 Route::get('employee/supervisorsView', 'employeeController@supervisorsView')->name('supervisores');
 Route::get('employee/{id}/editShortname', 'employeeController@editShortname')->name('editar_nombrecorto');
