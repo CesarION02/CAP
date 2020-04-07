@@ -34,6 +34,7 @@
                                     <th>Retardo (min)</th>
                                     <th>Horas Extra</th>
                                     {{-- <th v-if="oData.tReport == oData.REP_HR_EX">Hr_progr_Sal</th> --}}
+                                    <th v-if="oData.tReport == oData.REP_HR_EX">Otros</th>
                                     <th>Observaciones</th>
                                 </tr>
                             </thead>
@@ -50,6 +51,7 @@
                                     <td>@{{ row.delayMins < 0 ? null : row.delayMins }}</td>
                                     <td>@{{ row.extraHours }}</td>
                                     {{-- <td v-if="oData.tReport == oData.REP_HR_EX">@{{ row.outDateTimeSch }}</td> --}}
+                                    <td v-if="oData.tReport == oData.REP_HR_EX">@{{ row.others }}</td>
                                     <td>@{{ row.comments }}</td>
                                 </tr>
                             </tbody>
@@ -85,7 +87,7 @@
             // this.minsCol = this.tReport == this.REP_DELAY ? 4 : 4;
             this.minsCol = 4;
             this.hiddenCol = this.tReport == this.REP_DELAY ? 5 : 4;
-            this.toExport = this.tReport == this.REP_DELAY ? [0, 1, 2, 3, 4, 6] : [0, 1, 2, 3, 5, 6];
+            this.toExport = this.tReport == this.REP_DELAY ? [0, 1, 2, 3, 4, 6] : [0, 1, 2, 3, 5, 6, 7];
         }
         
         var oData = new GlobalData();

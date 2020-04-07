@@ -16,6 +16,8 @@ class SRegistryRow {
         $this->outDateTimeSch = null;
         $this->delayMins = null;
         $this->extraHours = "00:00";
+        $this->isSunday = 0;
+        $this->others = "";
         $this->comments = "";
     }
 }

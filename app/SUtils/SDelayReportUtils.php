@@ -277,6 +277,20 @@ class SDelayReportUtils {
             }
         }
 
+        if ($isNew) {
+            if (SDelayReportUtils::isSunday($newRow)) {
+                $newRow->isSunday = true;
+                $newRow->others = 'DOMINGO, '.$newRow->others;
+            }
+            
+            $lWorks = clone $qWorkshifts;
+            $event = SDelayReportUtils::checkEvents($lWorks, $idEmployee, $newRow->inDate);
+
+            if ($event != null) {
+                $newRow->others = $event->td_name.', '.$newRow->others;
+            }
+        }
+
         $response = array();
         $response[] = $isNew;
         $response[] = $newRow;
@@ -353,8 +367,9 @@ class SDelayReportUtils {
                             ->join('day_workshifts AS dw', 'wdd.id', '=', 'dw.day_id')
                             ->join('day_workshifts_employee AS dwe', 'dw.id', '=', 'dwe.day_id')
                             ->join('workshifts AS w', 'dw.workshift_id', '=', 'w.id')
+                            ->join('type_day AS td', 'dwe.type_day_id', '=', 'td.id')
                             ->join('employees AS e', 'dwe.employee_id', '=', 'e.id')
-                            ->select('wdd.date', 'w.name', 'w.entry', 'w.departure')
+                            ->select('wdd.date', 'w.name', 'w.entry', 'w.departure', 'td.name AS td_name', 'td.short_name', 'dwe.type_day_id')
                             ->where('dwe.is_delete', false)
                             ->where('w.is_delete', false)
                             ->where('e.is_delete', false)
@@ -620,6 +635,51 @@ class SDelayReportUtils {
         $workshiftDate = $registry->date.' '.($tReport == \SCons::REP_DELAY ? $workshift->entry : $workshift->departure);
         
         return SDelayReportUtils::compareDates($workshiftDate, $registry->date.' '.$registry->time);
+    }
+
+    public static function checkEvents($lWorkshifts, $idEmployee, $date)
+    {
+        $lWEmployee = $lWorkshifts->where('e.id', $idEmployee)
+                                    ->where('wdd.date', $date)
+                                    ->where('dwe.type_day_id', '>', 1)
+                                    ->orderBy('wdd.created_at', 'DESC');
+
+        $lWEmployee = $lWEmployee->get();
+
+        if (sizeof($lWEmployee) == 0) {
+            return null;
+        }
+
+        $workshift = $lWEmployee[0];
+
+        return $workshift;
+    }
+
+    /**
+     * Regresa verdadero si el día a analizar es domingo
+     *
+     * @param SRegistryRow $oRow
+     * 
+     * @return boolean
+     */
+    private static function isSunday($oRow)
+    {
+        if ($oRow->inDate != null) {
+            if (SDateTimeUtils::dayOfWeek($oRow->inDate) == Carbon::SUNDAY) {
+                return true;
+            }
+            else {
+                if ($oRow->inDate == $oRow->outDate) {
+                    return false;
+                }
+            }
+        }
+
+        if ($oRow->outDate != null) {
+            return SDateTimeUtils::dayOfWeek($oRow->outDate) == Carbon::SUNDAY;
+        }
+        
+        return false;
     }
 }
 
