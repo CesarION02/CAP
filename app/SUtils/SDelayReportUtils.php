@@ -515,13 +515,51 @@ class SDelayReportUtils {
                 if ($assign->start_date <= $registry->date && // funciona la comparación?
                     (($assign->end_date != null &&  $assign->end_date >= $registry->date) ||
                     $assign->end_date == null)) {
-                        $result = SDelayReportUtils::compareTemplate($assign->schedule_template_id, $registry, $tReport);
-
-                        return $result;
+                        if ($assign->group_schedules_id == null) {
+                            return SDelayReportUtils::compareTemplate($assign->schedule_template_id, $registry, $tReport);
+                        }
+                        else {
+                            $res = SDelayReportUtils::getScheduleAssignGrouped($assign->group_schedules_id, $registry->date);
+                            if ($res == null) {
+                                continue;
+                            }
+                            else {
+                                return SDelayReportUtils::compareTemplate($res, $registry, $tReport);
+                            }
+                        }
                 }
             }
 
             return null;
+        }
+    }
+
+    private static function getScheduleAssignGrouped($group, $dateToCompare)
+    {
+        $oDtCompare = Carbon::parse($dateToCompare);
+        $schedules = \DB::table('schedule_assign AS sa')
+                            ->where('group_schedules_id', $group)
+                            ->where('is_delete', false)
+                            ->orderBy('order_gs', 'ASC')
+                            ->get();
+        
+        $count = sizeof($schedules);
+        $firstDate = Carbon::parse($schedules[0]->start_date);
+        $secondDate = (clone $firstDate)->addDays(6);
+
+        $search = true;
+        while ($search) {
+            for ($i = 0; $i < $count; $i++) {
+                if ($oDtCompare->between($firstDate, $secondDate)) {
+                    return $schedules[$i]->schedule_template_id;
+                }
+                $firstDate = (clone $firstDate)->addDays(7);
+                $secondDate = (clone $firstDate)->addDays(6);
+            }
+
+            if ($oDtCompare->isAfter($secondDate)) {
+                return null;
+            }
         }
     }
 
