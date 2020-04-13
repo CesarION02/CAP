@@ -323,8 +323,8 @@ class SDelayReportUtils {
                                 ->select('r.*', 'd.id AS dept_id', 'e.num_employee', 'e.name')
                                 ->orderBy('employee_id', 'ASC')
                                 ->orderBy('date', 'ASC')
-                                ->orderBy('type_id', 'ASC');
-                                // ->where('employee_id', '87');
+                                ->orderBy('time', 'ASC');
+                                // ->where('employee_id', '44');
 
         if (sizeof($lEmployees) > 0) {
             $registries = $registries->whereIn('e.id', $lEmployees);
@@ -514,7 +514,7 @@ class SDelayReportUtils {
             foreach ($lAassigns as $assign) {
                 if ($assign->start_date <= $registry->date && // funciona la comparación?
                     (($assign->end_date != null &&  $assign->end_date >= $registry->date) ||
-                    $assign->end_date == null)) { 
+                    $assign->end_date == null)) {
                         $result = SDelayReportUtils::compareTemplate($assign->schedule_template_id, $registry, $tReport);
 
                         return $result;
