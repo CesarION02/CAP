@@ -11,14 +11,14 @@ function new_shiftprogramming() {
 
         success: function(data) {
             if (data[3].length > 0) {
-                listaEmpleados += '<table class="customers"><tr><th>VACACIONES</th></tr>';
+                listaEmpleados += '<table class="customers2"><tr><th>VACACIONES</th></tr>';
                 for (var i = 0; data[3].length > i; i++) {
                     listaEmpleados += '<tr><td>' + data[3][i].name + '</td></tr>';
                     listaEmpleados += '</table>';
                 }
             }
             if (data[4].length > 0) {
-                listaEmpleados += '<table class="customers"><tr><th>INCAPACIDAD</th></tr>';
+                listaEmpleados += '<table class="customers2"><tr><th>INCAPACIDAD</th></tr>';
                 for (var i = 0; data[4].length > i; i++) {
                     listaEmpleados += '<tr><td>' + data[4][i].name + '</td></tr>';
                     listaEmpleados += '</table>';

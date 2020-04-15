@@ -72,9 +72,15 @@ function guardar() {
             if (comparacion == auxiliar2[1]) {
                 contX++;
                 if (document.getElementById(cadenatabla).innerHTML == 'Descanso') {
-                    arrCalendarioDias[contY - 1][contX] = 1;
+                    arrCalendarioDias[contY - 1][contX] = 5;
+                } else if (document.getElementById(cadenatabla).innerHTML == 'VACACIONES') {
+                    arrCalendarioDias[contY - 1][contX] = 2;
+                } else if (document.getElementById(cadenatabla).innerHTML == 'INCAPACIDAD') {
+                    arrCalendarioDias[contY - 1][contX] = 3;
+                } else if (document.getElementById(cadenatabla).innerHTML == 'DIA FESTIVO') {
+                    arrCalendarioDias[contY - 1][contX] = 4;
                 } else {
-                    arrCalendarioDias[contY - 1][contX] = 0;
+                    arrCalendarioDias[contY - 1][contX] = 1;
                 }
             } else {
                 comparacion = auxiliar2[1];
@@ -83,9 +89,15 @@ function guardar() {
                 arrCalendarioDias[contY - 1] = new Array(dias);
 
                 if (document.getElementById(cadenatabla).innerHTML == 'Descanso') {
-                    arrCalendarioDias[contY - 1][contX] = 1;
+                    arrCalendarioDias[contY - 1][contX] = 5;
+                } else if (document.getElementById(cadenatabla).innerHTML == 'VACACIONES') {
+                    arrCalendarioDias[contY - 1][contX] = 2;
+                } else if (document.getElementById(cadenatabla).innerHTML == 'INCAPACIDAD') {
+                    arrCalendarioDias[contY - 1][contX] = 3;
+                } else if (document.getElementById(cadenatabla).innerHTML == 'DIA FESTIVO') {
+                    arrCalendarioDias[contY - 1][contX] = 4;
                 } else {
-                    arrCalendarioDias[contY - 1][contX] = 0;
+                    arrCalendarioDias[contY - 1][contX] = 1;
                 }
 
             }

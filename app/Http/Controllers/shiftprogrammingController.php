@@ -140,15 +140,9 @@ class shiftprogrammingController extends Controller
                         ->where('departments.dept_group_id',$request->typearea)
                         ->where('incidents.type_incidents_id',3)
                         ->where(function ($query) use ($startDate, $endDate) {
-                                $query->where('start_date', '<=', $endDate)
-                                        ->where(function ($query) use ($startDate) {
-                                            $query->where('end_date', '>=', $startDate)
-                                                ->orWhereNull('end_date');
-                                        })
-                                        ->orWhereNull('start_date');
+                                return $query->whereBetween('start_date', [$startDate, $endDate])
+                                    ->orwhereBetween('end_date', [$startDate, $endDate]);
                         })
-                        ->whereBetween('start_date', [$request->ini, $request->fin])
-                        ->orwhereBetween('end_date', [$request->ini, $request->fin])
                         ->select('employees.name AS name')
                         ->get();
         $incapacidades = DB::table('incidents')
@@ -160,8 +154,10 @@ class shiftprogrammingController extends Controller
                         ->where('employees.is_delete','0')
                         ->where('departments.dept_group_id',$request->typearea)
                         ->where('incidents.type_incidents_id',2)
-                        ->whereBetween('start_date', [$request->ini, $request->fin])
-                        ->orwhereBetween('end_date', [$request->ini, $request->fin])
+                        ->where(function ($query) use ($startDate, $endDate) {
+                            $query->whereBetween('start_date', [$startDate, $endDate])
+                                ->orwhereBetween('end_date', [$startDate, $endDate]);
+                        })
                         ->select('employees.name AS name')
                         ->get();
         return response()->json(array($employees,$departments,$group_workshift,$vacaciones,$incapacidades));
@@ -219,8 +215,76 @@ class shiftprogrammingController extends Controller
                         ->join('workshifts','workshifts.id','=','group_workshifts_lines.workshifts_id')
                         ->orderBy('workshifts.order_view')
                         ->select('workshifts.id AS idWork', 'workshifts.name AS nameWork','workshifts.entry AS entry', 'workshifts.departure AS departure')
-                        ->get(); 
-                        return response()->json($workshifts);
+                        ->get();
+        $startDate = $request->ini;
+        $endDate = $request->fin;
+        $vacaciones = DB::table('incidents')
+                        ->join('employees','employees.id','=','incidents.employee_id')
+                        ->join('jobs','jobs.id','=','employees.job_id')
+                        ->join('incidents_day','incidents_day.incidents_id','=','incidents.id')
+                        ->join('departments','departments.id','=','jobs.department_id')
+                        ->join('department_group','department_group.id','=','departments.dept_group_id')
+                        ->orderBy('employees.job_id')
+                        ->where('employees.is_delete','0')
+                        ->where('departments.dept_group_id',$request->typearea)
+                        ->where('incidents.type_incidents_id',3)
+                        ->where(function ($query) use ($startDate, $endDate) {
+                                return $query->whereBetween('start_date', [$startDate, $endDate])
+                                ->orwhereBetween('end_date', [$startDate, $endDate]);
+                        })
+                        ->select('employees.id AS idEmp','incidents_day.date as Date')
+                        ->get();
+        $incapacidades = DB::table('incidents')
+                        ->join('employees','employees.id','=','incidents.employee_id')
+                        ->join('jobs','jobs.id','=','employees.job_id')
+                        ->join('incidents_day','incidents_day.incidents_id','=','incidents.id')
+                        ->join('departments','departments.id','=','jobs.department_id')
+                        ->join('department_group','department_group.id','=','departments.dept_group_id')
+                        ->orderBy('employees.job_id')
+                        ->where('employees.is_delete','0')
+                        ->where('departments.dept_group_id',$request->typearea)
+                        ->where('incidents.type_incidents_id',2)
+                        ->where(function ($query) use ($startDate, $endDate) {
+                                return $query->whereBetween('start_date', [$startDate, $endDate])
+                                ->orwhereBetween('end_date', [$startDate, $endDate]);
+                        })
+                        ->select('employees.id AS idEmp','incidents_day.date as Date')
+                        ->get();
+        $festivosDept = DB::table('holiday_assign')
+                        ->join('departments','departments.id','=','holiday_assign.department_id')
+                        ->join('department_group','department_group.id','=','departments.dept_group_id')
+                        ->where('departments.dept_group_id',$request->typearea)
+                        ->where('departments.is_delete','0')
+                        ->whereBetween('date', [$startDate, $endDate])
+                        ->orderBy('holiday_assign.department_id')
+                        ->select('departments.id AS idDept','holiday_assign.date as Date','departments.name AS name')
+                        ->get();
+        $festivosArea = DB::table('holiday_assign')
+                        ->join('areas','areas.id','=','holiday_assign.area_id')
+                        ->join('departments','departments.area_id','=','areas.id')
+                        ->join('department_group','department_group.id','=','departments.dept_group_id')
+                        ->where('departments.dept_group_id',$request->typearea)
+                        ->where('areas.is_delete','0')
+                        ->whereBetween('date', [$startDate, $endDate])
+                        ->orderBy('holiday_assign.area_id')
+                        ->groupBy('holiday_assign.area_id','date')
+                        ->select('areas.id AS idArea','holiday_assign.date as Date','areas.name AS name')
+                        ->get();
+        $festivosEmployee = DB::table('holiday_assign')
+                        ->join('employees', 'employees.id','=','holiday_assign.employee_id')
+                        ->join('jobs','jobs.id','=','employees.job_id')
+                        ->join('departments','departments.id','=','jobs.department_id')
+                        ->join('department_group','department_group.id','=','departments.dept_group_id')
+                        ->where('departments.dept_group_id',$request->typearea)
+                        ->where('employees.is_delete','0')
+                        ->whereBetween('date', [$startDate, $endDate])
+                        ->orderBy('holiday_assign.employee_id')
+                        ->select('employees.id AS idEmp','holiday_assign.date as Date','employees.name AS name')
+                        ->get();
+
+
+        return response()->json(array($workshifts,$vacaciones,$incapacidades,$festivosArea,$festivosDept,$festivosEmployee));
+         
     }
 
     public function uploadimage(Request $request){
@@ -305,7 +369,8 @@ class shiftprogrammingController extends Controller
                                             $day_workshifts_employee->employee_id = $request->Empleado[$y];
                                             $day_workshifts_employee->day_id = $day_workshifts->id;
                                             $day_workshifts_employee->job_id = $request->arrJob[$y];   
-                                            $day_workshifts_employee->is_rest = $request->arrCalendarioDias[$contEmpl][$j];
+                                            $day_workshifts_employee->is_rest = 0;
+                                            $day_workshifts_employee->type_day_id = $request->arrCalendarioDias[$contEmpl][$j];
                                             $day_workshifts_employee->is_delete = 0; 
                                             $day_workshifts_employee->save(); 
                                         }
@@ -543,7 +608,7 @@ class shiftprogrammingController extends Controller
                     ->where('week_id','=',$week->id)
                     ->where('day_workshifts.workshift_id','=',$workshifts[$j]->idWork)
                     ->where('departments.id','=',$departments[$z]->idDepartment)
-                    ->select('day_workshifts_employee.job_id AS idJob','day_workshifts_employee.is_rest AS rest','employees.name AS nameEmployee','employees.short_name AS shortName','day_workshifts.workshift_id AS id')
+                    ->select('day_workshifts_employee.job_id AS idJob','day_workshifts_employee.type_day_id AS tipo','employees.name AS nameEmployee','employees.short_name AS shortName','day_workshifts.workshift_id AS id')
                     ->orderBy('employee_id')
                     ->get();
                 $numEmpleado = 0;
@@ -568,14 +633,30 @@ class shiftprogrammingController extends Controller
                             PDF::SetFont('helvetica','',9);
                              
                             PDF::setXY($auxX,$ejeY);
-                            if($diasEmpleados[$numEmpleado]->rest > 0){
-                                PDF::Cell($tamañoDia,5,'Descanso',1,false,'C',0,'',1,false,'M','M');
-                            }else{
-                                if($diasEmpleados[$numEmpleado]->shortName != ''){
-                                    PDF::Cell($tamañoDia,5,$diasEmpleados[$numEmpleado]->shortName,1,false,'C',0,'',1,false,'M','M');
-                                }else{
-                                    PDF::Cell($tamañoDia,5,$diasEmpleados[$numEmpleado]->nameEmployee,1,false,'C',0,'',1,false,'M','M');
-                                }
+                            switch ($diasEmpleados[$numEmpleado]->tipo){
+                                case 1 : 
+                                    if($diasEmpleados[$numEmpleado]->shortName != ''){
+                                        PDF::Cell($tamañoDia,5,$diasEmpleados[$numEmpleado]->shortName,1,false,'C',0,'',1,false,'M','M');
+                                    }else{
+                                        PDF::Cell($tamañoDia,5,$diasEmpleados[$numEmpleado]->nameEmployee,1,false,'C',0,'',1,false,'M','M');
+                                    }
+                                break;
+
+                                case 2 :
+                                    PDF::Cell($tamañoDia,5,'Incapacidad',1,false,'C',0,'',1,false,'M','M');
+                                break;
+
+                                case 3 :
+                                    PDF::Cell($tamañoDia,5,'Vacaciones',1,false,'C',0,'',1,false,'M','M');
+                                break;
+
+                                case 4 :
+                                    PDF::Cell($tamañoDia,5,'Días Festivos',1,false,'C',0,'',1,false,'M','M');
+                                break;
+
+                                case 5 :
+                                    PDF::Cell($tamañoDia,5,'Descanso',1,false,'C',0,'',1,false,'M','M');
+                                break;
                             }
                             $numEmpleado++;
                             $auxX = $auxX+$tamañoDia;

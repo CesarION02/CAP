@@ -614,7 +614,7 @@ class assignController extends Controller
                 ->where('schedule_assign.group_schedules_id',$auxiliar)
                 ->select('employees.id AS id','employees.name AS name','schedule_assign.start_date AS startDate','schedule_assign.end_date AS endDate','schedule_day.day_name AS dayName','schedule_day.entry AS entry','schedule_day.departure AS departure','schedule_template.name AS templateName','schedule_assign.order_gs AS orden','schedule_assign.id AS idAssign')
                 ->orderBy('employees.id')
-                ->orderBy('schedule_assign.group_schedules_id')
+                ->orderBy('schedule_assign.order_gs')
                 ->get();
         }else{
             $assigns = DB::table('schedule_assign')
@@ -624,7 +624,7 @@ class assignController extends Controller
                 ->where('schedule_assign.id',$id)
                 ->select('employees.id AS id','employees.name AS name','schedule_assign.start_date AS startDate','schedule_assign.end_date AS endDate','schedule_day.day_name AS dayName','schedule_day.entry AS entry','schedule_day.departure AS departure','schedule_template.name AS templateName','schedule_assign.order_gs AS orden','schedule_assign.id AS idAssign')
                 ->orderBy('employees.id')
-                ->orderBy('schedule_assign.group_schedules_id')
+                ->orderBy('schedule_assign.order_gs')
                 ->get(); 
         }
         

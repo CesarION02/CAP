@@ -53,3 +53,31 @@
 .customers1 tr:hover {
     background-color: #ddd;
 }
+
+.customers2 th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: center;
+    background-color: #a01b1b;
+    color: white;
+}
+
+.customers2 {
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 70%;
+}
+
+.customers1 td,
+.customers th {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.customers1 tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.customers1 tr:hover {
+    background-color: #ddd;
+}
