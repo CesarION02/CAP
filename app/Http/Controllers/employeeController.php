@@ -7,10 +7,13 @@ use App\Models\employees;
 use App\Models\job;
 use App\Models\way_register;
 use App\Models\benefitsPolice;
+use App\Models\company;
 use DB;
 
 class employeeController extends Controller
 {
+    private $companies;
+
     /**
      * Display a listing of the resource.
      *
@@ -142,5 +145,87 @@ class employeeController extends Controller
         $employee->short_name = $request->short_name;
         $employee->update();
         return redirect('employee/supervisorsView')->with('mensaje', 'Empleado actualizado con exito');    
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param [type] $lEmployees
+     * @return void
+     */
+    public function saveEmployeesFromJSON($lEmployees)
+    {
+        $lCapEmployees = employees::select('id', 'external_id')
+                                    ->pluck('id', 'external_id');
+
+        $this->companies = company::select('id', 'external_id')
+                                ->pluck('id', 'external_id');
+
+        foreach ($lEmployees as $jEmployee) {
+            try {
+                $id = $lCapEmployees[$jEmployee->id_employee];
+                $this->updEmployee($jEmployee, $id);
+            }
+            catch (\Throwable $th) {
+                $this->insertEmployee($jEmployee);
+            }
+        }
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param [type] $jEmployee
+     * @param [type] $id
+     * @return void
+     */
+    private function updEmployee($jEmployee, $id)
+    {
+        employees::where('id', $id)
+                    ->update(
+                            [
+                            'num_employee' => $jEmployee->num_employee,
+                            'name' => $jEmployee->firstname." ".$jEmployee->lastname,
+                            'names' => $jEmployee->firstname,
+                            'first_name' => $jEmployee->lastname,
+                            'admission_date' => $jEmployee->admission_date,
+                            'leave_date' => $jEmployee->leave_date,
+                            'is_overtime' => $jEmployee->extra_time,
+                            'company_id' => $this->companies[$jEmployee->company_id],
+                            'way_pay_id' => $jEmployee->way_pay == 1 ? 2 : 1,
+                            'is_active' => $jEmployee->is_active,
+                            'is_delete' => $jEmployee->is_deleted,
+                            ]
+                        );
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param [type] $jEmployee
+     * @return void
+     */
+    private function insertEmployee($jEmployee)
+    {
+        $emp = new employees();
+
+        $emp->num_employee = $jEmployee->num_employee;
+        $emp->name = $jEmployee->firstname." ".$jEmployee->lastname;
+        $emp->names = $jEmployee->firstname;
+        $emp->first_name = $jEmployee->lastname;
+        $emp->admission_date = $jEmployee->admission_date;
+        $emp->leave_date = $jEmployee->leave_date;
+        $emp->nip = 0;
+        $emp->is_overtime = $jEmployee->extra_time;
+        $emp->way_register_id = 1; // pendiente
+        $emp->ben_pol_id = 1; // estricto
+        $emp->job_id = 1; // ???
+        $emp->external_id = $jEmployee->id_employee;
+        $emp->company_id = $this->companies[$jEmployee->company_id];
+        $emp->way_pay_id = $jEmployee->way_pay == 1 ? 2 : 1;
+        $emp->is_active = $jEmployee->is_active;
+        $emp->is_delete = $jEmployee->is_deleted;
+
+        $emp->save();
     }
 }

@@ -22,13 +22,14 @@ class SDelayReportUtils {
       * @param string $sEndDate
       * @param int $payWay [ 1: QUINCENA, 2: SEMANA, 0: TODOS]
       * @param int $tReport [\SCons::REP_DELAY, \SCons::REP_HR_EX]
+      * @param array $lEmployees arreglo de ids de empleados
 
       * @return [SRegistryRow] (array)
       */
-    public static function processReport($sStartDate, $sEndDate, $payWay, $tReport)
+    public static function processReport($sStartDate, $sEndDate, $payWay, $tReport, $lEmployees)
     {
-        $registries = SDelayReportUtils::getRegistries($sStartDate, $sEndDate, $payWay);
-        $lWorkshifts = SDelayReportUtils::getWorkshifts($sStartDate, $sEndDate, $payWay);
+        $registries = SDelayReportUtils::getRegistries($sStartDate, $sEndDate, $payWay, $lEmployees, true);
+        $lWorkshifts = SDelayReportUtils::getWorkshifts($sStartDate, $sEndDate, $payWay, $lEmployees);
 
         $lRows = array();
         $idEmployee = 0;
@@ -125,7 +126,7 @@ class SDelayReportUtils {
                 if ($isNew) {
                     $isNew = false;
                     $newRow->inDate = $registry->date;
-                    $newRow->inDateTime = $registry->date.' '.$registry->time;
+                    $newRow->inDateTime = $registry->date.'   '.$registry->time;
                     $newRow->comments = $newRow->comments."Sin horario".",";
                 }
                 else {
@@ -138,7 +139,8 @@ class SDelayReportUtils {
                 if ($newRow->inDate == null) {
                     if ($newRow->outDate == null) {
                         $newRow->inDate = $result->variableDateTime->toDateString();
-                        $newRow->inDateTime = $result->variableDateTime->toDateTimeString();
+                        $newRow->inDateTime = $result->variableDateTime->format('Y-m-d   H:i:s');
+                        // $newRow->inDateTime = $result->variableDateTime->toDateTimeString();
                         $newRow->delayMins = $result->delayMins;
     
                         $isNew = false;
@@ -157,14 +159,14 @@ class SDelayReportUtils {
             if ($newRow->outDate == null) {
                 if ($newRow->inDate != null) {
                     $newRow->outDate = $registry->date;
-                    $newRow->outDateTime = $registry->date.' '.$registry->time;
+                    $newRow->outDateTime = $registry->date.'   '.$registry->time;
 
                     $isNew = true;
                 }
                 else {
                     // falta entrada
                     $newRow->outDate = $registry->date;
-                    $newRow->outDateTime = $registry->date.' '.$registry->time;
+                    $newRow->outDateTime = $registry->date.'   '.$registry->time;
                     $newRow->comments = $newRow->comments."Falta entrada".",";
 
                     $isNew = true;
@@ -226,7 +228,7 @@ class SDelayReportUtils {
                 else {
                     $isNew = true;
                     $newRow->outDate = $registry->date;
-                    $newRow->outDateTime = $registry->date.' '.$registry->time;
+                    $newRow->outDateTime = $registry->date.'   '.$registry->time;
                     $newRow->comments = $newRow->comments."Sin horario".",";
                 }
             }
@@ -234,8 +236,9 @@ class SDelayReportUtils {
                 if ($newRow->inDate != null) {
                     if ($newRow->outDate == null) {
                         $newRow->outDate = $result->variableDateTime->toDateString();
-                        $newRow->outDateTime = $result->variableDateTime->toDateTimeString();
-                        $newRow->outDateTimeSch = $result->pinnedDateTime->toDateTimeString();
+                        $newRow->outDateTime = $result->variableDateTime->format('Y-m-d   H:i:s');
+                        $newRow->outDateTimeSch = $result->pinnedDateTime->format('Y-m-d   H:i:s');
+                        // $newRow->outDateTimeSch = $result->pinnedDateTime->toDateTimeString();
                         $newRow->delayMins = $result->delayMins;
                         $newRow->extraHours = SDelayReportUtils::convertToHoursMins($result->delayMins);
     
@@ -244,8 +247,14 @@ class SDelayReportUtils {
                 }
                 else {
                     //falta entrada
-                    $isNew = false;
-                    $again = true;
+                    $newRow->outDate = $result->variableDateTime->toDateString();
+                    $newRow->outDateTime = $result->variableDateTime->format('Y-m-d   H:i:s');
+                    $newRow->outDateTimeSch = $result->pinnedDateTime->format('Y-m-d   H:i:s');
+                    $newRow->delayMins = $result->delayMins;
+                    $newRow->extraHours = SDelayReportUtils::convertToHoursMins($result->delayMins);
+
+                    $isNew = true;
+                    $again = false;
                     $newRow->comments = $newRow->comments."Falta entrada".",";
                 }
             }
@@ -255,7 +264,7 @@ class SDelayReportUtils {
             if ($newRow->outDate == null) {
                 if ($newRow->inDate == null) {
                     $newRow->inDate = $registry->date;
-                    $newRow->inDateTime = $registry->date.' '.$registry->time;
+                    $newRow->inDateTime = $registry->date.'   '.$registry->time;
 
                     $isNew = false;
                 }
@@ -265,6 +274,20 @@ class SDelayReportUtils {
                     $again = true;
                     $isNew = true;
                 }
+            }
+        }
+
+        if ($isNew) {
+            if (SDelayReportUtils::isSunday($newRow)) {
+                $newRow->isSunday = true;
+                $newRow->others = 'DOMINGO, '.$newRow->others;
+            }
+            
+            $lWorks = clone $qWorkshifts;
+            $event = SDelayReportUtils::checkEvents($lWorks, $idEmployee, $newRow->inDate);
+
+            if ($event != null) {
+                $newRow->others = $event->td_name.', '.$newRow->others;
             }
         }
 
@@ -282,10 +305,12 @@ class SDelayReportUtils {
      * @param string $startDate [YYYY-MM-DD]
      * @param string $endDate [YYYY-MM-DD]
      * @param int $payWay [ 1: QUINCENA, 2: SEMANA, 0: TODOS]
+     * @param array $lEmployees arreglo de ids de empleados
+     * @param boolean $isArray si este parámetro es TRUE devuelve un arreglo, s es FALSE devuelve una query (sin get())
      * 
      * @return array ('r.*', 'd.id AS dept_id', 'e.num_employee', 'e.name')
      */
-    public static function getRegistries($startDate, $endDate, $payWay)
+    public static function getRegistries($startDate, $endDate, $payWay, $lEmployees, $isArray)
     {
         // \DB::enableQueryLog();
 
@@ -295,12 +320,16 @@ class SDelayReportUtils {
                                 ->join('employees AS e', 'e.id', '=', 'r.employee_id')
                                 ->leftJoin('jobs AS j', 'j.id', '=', 'e.job_id')
                                 ->leftJoin('departments AS d', 'd.id', '=', 'j.department_id')
-                                ->whereBetween('date', [$startDate, $endDate])
+                                ->whereBetween('r.date', [$startDate, $endDate])
                                 ->select('r.*', 'd.id AS dept_id', 'e.num_employee', 'e.name')
                                 ->orderBy('employee_id', 'ASC')
                                 ->orderBy('date', 'ASC')
-                                ->orderBy('type_id', 'ASC');
-                                // ->where('employee_id', '79');
+                                ->orderBy('time', 'ASC');
+                                // ->where('employee_id', '44');
+
+        if (sizeof($lEmployees) > 0) {
+            $registries = $registries->whereIn('e.id', $lEmployees);
+        }
 
         switch ($payWay) {
             case 1:
@@ -315,7 +344,9 @@ class SDelayReportUtils {
                 break;
         }
 
-        $registries = $registries->get();
+        if ($isArray) {
+            $registries = $registries->get();
+        }
 
         // dd(\DB::getQueryLog());
 
@@ -329,21 +360,27 @@ class SDelayReportUtils {
      * @param string $startDate [YYYY-MM-DD]
      * @param string $endDate [YYYY-MM-DD]
      * @param int $payWay [ 1: QUINCENA, 2: SEMANA, 0: TODOS]
+     * @param array $lEmployees arreglo de ids de empleados
      * 
      * @return query ('wdd.date', 'w.name', 'w.entry', 'w.departure')
      */
-    public static function getWorkshifts($startDate, $endDate, $payWay)
+    public static function getWorkshifts($startDate, $endDate, $payWay, $lEmployees)
     {
         $lWorkshifts = \DB::table('week_department_day AS wdd')
                             ->join('day_workshifts AS dw', 'wdd.id', '=', 'dw.day_id')
                             ->join('day_workshifts_employee AS dwe', 'dw.id', '=', 'dwe.day_id')
                             ->join('workshifts AS w', 'dw.workshift_id', '=', 'w.id')
+                            ->join('type_day AS td', 'dwe.type_day_id', '=', 'td.id')
                             ->join('employees AS e', 'dwe.employee_id', '=', 'e.id')
-                            ->select('wdd.date', 'w.name', 'w.entry', 'w.departure')
+                            ->select('wdd.date', 'w.name', 'w.entry', 'w.departure', 'td.name AS td_name', 'td.short_name', 'dwe.type_day_id')
                             ->where('dwe.is_delete', false)
                             ->where('w.is_delete', false)
                             ->where('e.is_delete', false)
                             ->whereBetween('wdd.date', [$startDate, $endDate]);
+
+        if (sizeof($lEmployees) > 0) {
+            $lWorkshifts = $lWorkshifts->whereIn('dwe.employee_id', $lEmployees);
+        }
 
         switch ($payWay) {
             case 1:
@@ -480,14 +517,52 @@ class SDelayReportUtils {
             foreach ($lAassigns as $assign) {
                 if ($assign->start_date <= $registry->date && // funciona la comparación?
                     (($assign->end_date != null &&  $assign->end_date >= $registry->date) ||
-                    $assign->end_date == null)) { 
-                        $result = SDelayReportUtils::compareTemplate($assign->schedule_template_id, $registry, $tReport);
-
-                        return $result;
+                    $assign->end_date == null)) {
+                        if ($assign->group_schedules_id == null) {
+                            return SDelayReportUtils::compareTemplate($assign->schedule_template_id, $registry, $tReport);
+                        }
+                        else {
+                            $res = SDelayReportUtils::getScheduleAssignGrouped($assign->group_schedules_id, $registry->date);
+                            if ($res == null) {
+                                continue;
+                            }
+                            else {
+                                return SDelayReportUtils::compareTemplate($res, $registry, $tReport);
+                            }
+                        }
                 }
             }
 
             return null;
+        }
+    }
+
+    private static function getScheduleAssignGrouped($group, $dateToCompare)
+    {
+        $oDtCompare = Carbon::parse($dateToCompare);
+        $schedules = \DB::table('schedule_assign AS sa')
+                            ->where('group_schedules_id', $group)
+                            ->where('is_delete', false)
+                            ->orderBy('order_gs', 'ASC')
+                            ->get();
+        
+        $count = sizeof($schedules);
+        $firstDate = Carbon::parse($schedules[0]->start_date);
+        $secondDate = (clone $firstDate)->addDays(6);
+
+        $search = true;
+        while ($search) {
+            for ($i = 0; $i < $count; $i++) {
+                if ($oDtCompare->between($firstDate, $secondDate)) {
+                    return $schedules[$i]->schedule_template_id;
+                }
+                $firstDate = (clone $firstDate)->addDays(7);
+                $secondDate = (clone $firstDate)->addDays(6);
+            }
+
+            if ($oDtCompare->isAfter($secondDate)) {
+                return null;
+            }
         }
     }
 
@@ -519,7 +594,9 @@ class SDelayReportUtils {
 
         $scheduleDate = $registry->date.' '.($tReport == \SCons::REP_DELAY ? $oScheduleDay->entry : $oScheduleDay->departure);
 
-        return SDelayReportUtils::compareDates($scheduleDate, $registry->date.' '.$registry->time);
+        $comparison = SDelayReportUtils::compareDates($scheduleDate, $registry->date.' '.$registry->time);
+        $comparison->auxScheduleDay = $oScheduleDay;
+        return $comparison;
     }
 
     /**
@@ -579,15 +656,39 @@ class SDelayReportUtils {
      * @param query $lWorkshifts
      * @param int $idEmployee
      * @param query_registry $registry
-     * @param int $tReport [\SCons::REP_DELAY, \SCons::REP_HR_EX]
+     * @param int $mType [\SCons::REP_DELAY, \SCons::REP_HR_EX, null]
      *              Si el parámetro es \SCons::REP_DELAY compara contra fecha de entrada, si no contra fecha de salida
      * 
      * @return SDateComparison 
      */
-    public static function checkSchedule($lWorkshifts, $idEmployee, $registry, $tReport)
+    public static function checkSchedule($lWorkshifts, $idEmployee, $registry, $mType)
     {
         $lWEmployee = $lWorkshifts->where('e.id', $idEmployee)
                                     ->where('wdd.date', $registry->date)
+                                    ->orderBy('wdd.created_at', 'DESC');
+                                    
+        $lWEmployee = $lWEmployee->get();
+        
+        if (sizeof($lWEmployee) == 0) {
+            return null;
+        }
+        
+        if ($mType == null) {
+            return $lWEmployee;
+        }
+
+        $workshift = $lWEmployee[0];
+
+        $workshiftDate = $registry->date.' '.($mType == \SCons::REP_DELAY ? $workshift->entry : $workshift->departure);
+        
+        return SDelayReportUtils::compareDates($workshiftDate, $registry->date.' '.$registry->time);
+    }
+
+    public static function checkEvents($lWorkshifts, $idEmployee, $date)
+    {
+        $lWEmployee = $lWorkshifts->where('e.id', $idEmployee)
+                                    ->where('wdd.date', $date)
+                                    ->where('dwe.type_day_id', '>', 1)
                                     ->orderBy('wdd.created_at', 'DESC');
 
         $lWEmployee = $lWEmployee->get();
@@ -598,9 +699,34 @@ class SDelayReportUtils {
 
         $workshift = $lWEmployee[0];
 
-        $workshiftDate = $registry->date.' '.($tReport == \SCons::REP_DELAY ? $workshift->entry : $workshift->departure);
+        return $workshift;
+    }
+
+    /**
+     * Regresa verdadero si el día a analizar es domingo
+     *
+     * @param SRegistryRow $oRow
+     * 
+     * @return boolean
+     */
+    private static function isSunday($oRow)
+    {
+        if ($oRow->inDate != null) {
+            if (SDateTimeUtils::dayOfWeek($oRow->inDate) == Carbon::SUNDAY) {
+                return true;
+            }
+            else {
+                if ($oRow->inDate == $oRow->outDate) {
+                    return false;
+                }
+            }
+        }
+
+        if ($oRow->outDate != null) {
+            return SDateTimeUtils::dayOfWeek($oRow->outDate) == Carbon::SUNDAY;
+        }
         
-        return SDelayReportUtils::compareDates($workshiftDate, $registry->date.' '.$registry->time);
+        return false;
     }
 }
 

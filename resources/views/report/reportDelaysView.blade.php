@@ -20,7 +20,7 @@
             <div class="box-body" id="reportDelayApp">
                 <div class="row">
                     <div class="col-md-12">
-                        <table id="delays_table" class="display" style="width:100%">
+                        <table id="delays_table" class="table table-condensed" style="width:100%">
                             <thead>
                                 <tr>
                                     <th>#</th>
@@ -28,24 +28,30 @@
                                     {{-- <th>Fecha entrada</th> --}}
                                     <th>Hora_entrada</th>
                                     {{-- <th>Fecha salida</th> --}}
-                                    <th v-if="oData.tReport == oData.REP_HR_EX">Hora_progr.</th>
                                     <th>Hora_salida</th>
-                                    <th v-if="oData.tReport == oData.REP_DELAY">Retardo (min)</th>
-                                    <th v-else>Horas Extra</th>
-                                    <th>Comen.</th>
+                                    {{-- <th v-if="oData.tReport == oData.REP_DELAY">Retardo (min)</th>
+                                    <th v-else>Horas Extra</th> --}}
+                                    <th>Retardo (min)</th>
+                                    <th>Horas Extra</th>
+                                    {{-- <th v-if="oData.tReport == oData.REP_HR_EX">Hr_progr_Sal</th> --}}
+                                    <th v-if="oData.tReport == oData.REP_HR_EX">Otros</th>
+                                    <th>Observaciones</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="row in oData.lRows">
+                                <tr v-for="row in oData.lRows" :class="getCssClass(row.delayMins, oData.tReport)">
                                     <td>@{{ vueGui.pad(row.numEmployee, 6) }}</td>
                                     <td>@{{ row.employee }}</td>
                                     {{-- <td>@{{ row.inDate }}</td> --}}
                                     <td>@{{ row.inDateTime }}</td>
                                     {{-- <td>@{{ row.outDate }}</td> --}}
-                                    <td v-if="oData.tReport == oData.REP_HR_EX">@{{ row.outDateTimeSch }}</td>
                                     <td>@{{ row.outDateTime }}</td>
-                                    <td v-if="oData.tReport == oData.REP_DELAY">@{{ row.delayMins }}</td>
-                                    <td v-else>@{{ row.extraHours }}</td>
+                                    {{-- <td v-if="oData.tReport == oData.REP_DELAY">@{{ row.delayMins }}</td>
+                                    <td v-else>@{{ row.extraHours }}</td> --}}
+                                    <td>@{{ row.delayMins < 0 ? null : row.delayMins }}</td>
+                                    <td>@{{ row.extraHours }}</td>
+                                    {{-- <td v-if="oData.tReport == oData.REP_HR_EX">@{{ row.outDateTimeSch }}</td> --}}
+                                    <td v-if="oData.tReport == oData.REP_HR_EX">@{{ row.others }}</td>
                                     <td>@{{ row.comments }}</td>
                                 </tr>
                             </tbody>
@@ -77,10 +83,34 @@
             this.tReport = <?php echo json_encode($tReport) ?>;
             this.REP_HR_EX = <?php echo json_encode(\SCons::REP_HR_EX) ?>;
             this.REP_DELAY = <?php echo json_encode(\SCons::REP_DELAY) ?>;
+
+            // this.minsCol = this.tReport == this.REP_DELAY ? 4 : 4;
+            this.minsCol = 4;
+            this.hiddenCol = this.tReport == this.REP_DELAY ? 5 : 4;
+            this.toExport = this.tReport == this.REP_DELAY ? [0, 1, 2, 3, 4, 6] : [0, 1, 2, 3, 5, 6, 7];
         }
         
         var oData = new GlobalData();
         var oGui = new SGui();
+
+        /**
+         * Convierte los minutos en entero a formato 00:00
+         *
+         * @param int time
+         * 
+         * @return string 00:00
+         */
+        function convertToHoursMins(time) 
+        {
+            if (time < 1) {
+                return "00:00";
+            }
+
+            let hours = Math.floor(time / 60);          
+            let minutes = time % 60;
+
+            return "" + hours + ":" + minutes;
+        }
     </script>
 
     <script src="{{asset("assets/pages/scripts/report/delayReport.js")}}" type="text/javascript"></script>
@@ -112,6 +142,45 @@
                         "sSortDescending": ": Activar para ordenar la columna de manera descendente"
                     }
                 },
+                order: [[0, 'asc']],
+                "columnDefs": [
+                    {
+                        "targets": [ oData.hiddenCol ],
+                        "visible": false
+                    }
+                ],
+                rowGroup: {
+                    startRender: null,
+                    endRender: function ( rows, group ) {
+                        var mins = rows
+                                    .data()
+                                    .pluck(oData.minsCol)
+                                    .reduce( function (a, b) {
+                                        a = parseInt(a, 10);
+                                        if(isNaN(a)){ a = 0; }                   
+
+                                        b = parseInt(b, 10);
+                                        if(isNaN(b)){ b = 0; }
+
+                                        a = a < 0 ? 0 : a;
+                                        b = b < 0 ? 0 : b;
+
+                                        return a + b;
+                                    }, 0);
+                        
+                        let value_to_return = '';
+
+                        if (oData.tReport == oData.REP_DELAY) {
+                            value_to_return = group +' (Retardo total = ' + mins + ' mins)';
+                        }
+                        else {
+                            value_to_return = group +' (Horas Extras Totales = ' + convertToHoursMins(mins) + ')';
+                        }
+                        
+                        return value_to_return;
+                    },
+                    dataSrc: 0
+                },
                 "colReorder": true,
                 "scrollX": true,
                 "dom": 'Bfrtip',
@@ -120,7 +189,31 @@
                     [ 'Mostrar 10', 'Mostrar 25', 'Mostrar 50', 'Mostrar 100', 'Mostrar todo' ]
                 ],
                 "buttons": [
-                        'pageLength', 'copy', 'csv', 'excel', 'print'
+                        'pageLength',
+                        {
+                            extend: 'excel',
+                            exportOptions: {
+                                columns: oData.toExport
+                            }
+                        },
+                        {
+                            extend: 'copy',
+                            exportOptions: {
+                                columns: oData.toExport
+                            }
+                        },
+                        {
+                            extend: 'csv',
+                            exportOptions: {
+                                columns: oData.toExport
+                            }
+                        },
+                        {
+                            extend: 'print',
+                            exportOptions: {
+                                columns: oData.toExport
+                            }
+                        }
                     ]
             });
         });

@@ -9,6 +9,8 @@ class SDateComparison {
         $this->pinnedDateTime = null;
 
         $this->delayMins = 0;
+
+        $this->auxScheduleDay = null;
     }
 }
 
