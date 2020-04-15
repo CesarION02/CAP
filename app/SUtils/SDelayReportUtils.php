@@ -28,7 +28,7 @@ class SDelayReportUtils {
       */
     public static function processReport($sStartDate, $sEndDate, $payWay, $tReport, $lEmployees)
     {
-        $registries = SDelayReportUtils::getRegistries($sStartDate, $sEndDate, $payWay, $lEmployees);
+        $registries = SDelayReportUtils::getRegistries($sStartDate, $sEndDate, $payWay, $lEmployees, true);
         $lWorkshifts = SDelayReportUtils::getWorkshifts($sStartDate, $sEndDate, $payWay, $lEmployees);
 
         $lRows = array();
@@ -306,10 +306,11 @@ class SDelayReportUtils {
      * @param string $endDate [YYYY-MM-DD]
      * @param int $payWay [ 1: QUINCENA, 2: SEMANA, 0: TODOS]
      * @param array $lEmployees arreglo de ids de empleados
+     * @param boolean $isArray si este parámetro es TRUE devuelve un arreglo, s es FALSE devuelve una query (sin get())
      * 
      * @return array ('r.*', 'd.id AS dept_id', 'e.num_employee', 'e.name')
      */
-    public static function getRegistries($startDate, $endDate, $payWay, $lEmployees)
+    public static function getRegistries($startDate, $endDate, $payWay, $lEmployees, $isArray)
     {
         // \DB::enableQueryLog();
 
@@ -319,7 +320,7 @@ class SDelayReportUtils {
                                 ->join('employees AS e', 'e.id', '=', 'r.employee_id')
                                 ->leftJoin('jobs AS j', 'j.id', '=', 'e.job_id')
                                 ->leftJoin('departments AS d', 'd.id', '=', 'j.department_id')
-                                ->whereBetween('date', [$startDate, $endDate])
+                                ->whereBetween('r.date', [$startDate, $endDate])
                                 ->select('r.*', 'd.id AS dept_id', 'e.num_employee', 'e.name')
                                 ->orderBy('employee_id', 'ASC')
                                 ->orderBy('date', 'ASC')
@@ -343,7 +344,9 @@ class SDelayReportUtils {
                 break;
         }
 
-        $registries = $registries->get();
+        if ($isArray) {
+            $registries = $registries->get();
+        }
 
         // dd(\DB::getQueryLog());
 
@@ -591,7 +594,9 @@ class SDelayReportUtils {
 
         $scheduleDate = $registry->date.' '.($tReport == \SCons::REP_DELAY ? $oScheduleDay->entry : $oScheduleDay->departure);
 
-        return SDelayReportUtils::compareDates($scheduleDate, $registry->date.' '.$registry->time);
+        $comparison = SDelayReportUtils::compareDates($scheduleDate, $registry->date.' '.$registry->time);
+        $comparison->auxScheduleDay = $oScheduleDay;
+        return $comparison;
     }
 
     /**
@@ -651,26 +656,30 @@ class SDelayReportUtils {
      * @param query $lWorkshifts
      * @param int $idEmployee
      * @param query_registry $registry
-     * @param int $tReport [\SCons::REP_DELAY, \SCons::REP_HR_EX]
+     * @param int $mType [\SCons::REP_DELAY, \SCons::REP_HR_EX, null]
      *              Si el parámetro es \SCons::REP_DELAY compara contra fecha de entrada, si no contra fecha de salida
      * 
      * @return SDateComparison 
      */
-    public static function checkSchedule($lWorkshifts, $idEmployee, $registry, $tReport)
+    public static function checkSchedule($lWorkshifts, $idEmployee, $registry, $mType)
     {
         $lWEmployee = $lWorkshifts->where('e.id', $idEmployee)
                                     ->where('wdd.date', $registry->date)
                                     ->orderBy('wdd.created_at', 'DESC');
-
+                                    
         $lWEmployee = $lWEmployee->get();
-
+        
         if (sizeof($lWEmployee) == 0) {
             return null;
+        }
+        
+        if ($mType == null) {
+            return $lWEmployee;
         }
 
         $workshift = $lWEmployee[0];
 
-        $workshiftDate = $registry->date.' '.($tReport == \SCons::REP_DELAY ? $workshift->entry : $workshift->departure);
+        $workshiftDate = $registry->date.' '.($mType == \SCons::REP_DELAY ? $workshift->entry : $workshift->departure);
         
         return SDelayReportUtils::compareDates($workshiftDate, $registry->date.' '.$registry->time);
     }
