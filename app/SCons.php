@@ -10,6 +10,10 @@ class SCons {
 
    const PAY_W_Q = 1;
    const PAY_W_S = 2;
+
+   const ALL_DATA = "1";
+   const LIMITED_DATA = "2";
+   const OTHER_DATA = "3";
 }
 
 ?>
