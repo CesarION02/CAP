@@ -579,7 +579,7 @@ class SDelayReportUtils {
     {
         $oDate = Carbon::parse($registry->date.' '.$registry->time);
         // Carbon::setWeekStartsAt(Carbon::FRIDAY);
-        $day = ($oDate->toObject()->dayOfWeek + 1); // los días en Carbon inician en 0, así que hay que sumar uno
+        $day = ($oDate->toObject()->dayOfWeek == 0 ? 7 : $oDate->toObject()->dayOfWeek); // los días en Carbon inician en 0, así que hay que sumar uno
         
         /**
          * Se consulta el horario que corresponde al día de la 
