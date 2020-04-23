@@ -162,7 +162,7 @@ class SInfoWithPolicy{
                                     }
                                 }
                                 $j++;
-                                if($j > count($lRows)){
+                                if($j >= count($lRows)){
                                     $auxIni = Carbon::parse($sEndDate);
                                     $auxIni->addDay(); 
                                 }
@@ -173,7 +173,7 @@ class SInfoWithPolicy{
                                     $auxIni->addDay();
                                 }else{
                                     $j++;
-                                    if($j > count($lRows)){
+                                    if($j >= count($lRows)){
                                         $auxIni = Carbon::parse($sEndDate);
                                         $auxIni->addDay(); 
                                     }
@@ -206,7 +206,9 @@ class SInfoWithPolicy{
             default:
                 break;
         }
-        SInfoWithPolicy::selectInfo($lRows,$typeInfo);
+        return SInfoWithPolicy::selectInfo($lRows,$typeInfo);
+
+
       }
       //const ALL_DATA = "1";
       //const LIMITED_DATA = "2";
@@ -220,7 +222,7 @@ class SInfoWithPolicy{
                 }
                 break;
             case 2:
-                for( $j = 0 ; count($lRows) > $j ; $j ){
+                for( $j = 0 ; count($lRows) > $j ; $j++ ){
                     $mediaHora = $lRows[$j]->extraDoubleMins % 60;
                     $horas = intdiv($lRows[$j]->extraDoubleMins,60);
                     if( $mediaHora != 0){
@@ -228,19 +230,21 @@ class SInfoWithPolicy{
                     }
                     $lRows[$j]->extraDoble = SDelayReportUtils::convertToHoursMins($lRows[$j]->extraDoubleMins);
                     if($lRows[$j]->extraTripleMins != 0){
-                        $salidaMaquillada = Carbon::parse($lRow[$j]->outDateTimeSch);
+                        $salidaMaquillada = Carbon::parse($lRows[$j]->outDateTimeSch);
                         $salidaMaquillada->addHours($horas);
-                        $lRow[$j]->outDateTime = $salidaMaquillada;
+                        $lRows[$j]->outDateTime = $salidaMaquillada->toDateTimeString();
                     }
                     $lRows[$j]->extraTripleMins = 0;
                 }
                 break;
             case 3:
-                for( $j = 0 ; count($lRows) > $j ; $j ){
+                for( $j = 0 ; count($lRows) > $j ; $j++ ){
                     $mediaHora =  $lRows[$j]->extraDoubleMins % 60;
                     if( $mediaHora != 0){
                         $lRows[$j]->extraDoubleMins = 30;
                         $lRows[$j]->extraDoble = SDelayReportUtils::convertToHoursMins($lRows[$j]->extraDoubleMins);
+                    }else{
+                        $lRows[$j]->extraDoubleMins = 0;   
                     }
                     $lRows[$j]->extraTriple = SDelayReportUtils::convertToHoursMins($lRows[$j]->extraTripleMins);   
                 }
