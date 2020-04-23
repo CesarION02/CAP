@@ -19,6 +19,10 @@ class SRegistryRow {
         $this->isSunday = 0;
         $this->others = "";
         $this->comments = "";
+        $this->extraDouble = "00:00";
+        $this->extraDoubleMins = 0;
+        $this->extraTriple = "00:00";
+        $this->extraTripleMins = 0;
     }
 }
 
