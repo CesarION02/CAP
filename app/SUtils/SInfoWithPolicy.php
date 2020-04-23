@@ -83,8 +83,8 @@ class SInfoWithPolicy{
                                 $contadorRenglones++;
                             // si tiene más de una hora de tiempo extra
                                 if( $lRows[$j]->delayMins > 60 ){
-                                    $horasCompletas = 60 / $lRows[$j]->delayMins;
-                                    $horasMedias = 60 % $lRows[$j]->delayMins;
+                                    $horasCompletas = intdiv($lRows[$j]->delayMins,60);
+                                    $horasMedias = $lRows[$j]->delayMins % 60;
                                     $auxHorasCompletas = 0;
                                     $auxHorasMedias = 0;
                                     if( $horasMedias >= $initialLimitHour && $finalLimitHour >= $horasMedias ){
@@ -222,11 +222,16 @@ class SInfoWithPolicy{
             case 2:
                 for( $j = 0 ; count($lRows) > $j ; $j ){
                     $mediaHora = $lRows[$j]->extraDoubleMins % 60;
+                    $horas = intdiv($lRows[$j]->extraDoubleMins,60);
                     if( $mediaHora != 0){
                         $lRows[$j]->extraDoubleMins = $lRows[$j]->extraDoubleMins - 30;
                     }
                     $lRows[$j]->extraDoble = SDelayReportUtils::convertToHoursMins($lRows[$j]->extraDoubleMins);
-                    
+                    if($lRows[$j]->extraTripleMins != 0){
+                        $salidaMaquillada = Carbon::parse($lRow[$j]->outDateTimeSch);
+                        $salidaMaquillada->addHours($horas);
+                        $lRow[$j]->outDateTime = $salidaMaquillada;
+                    }
                     $lRows[$j]->extraTripleMins = 0;
                 }
                 break;
