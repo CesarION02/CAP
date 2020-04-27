@@ -6,8 +6,10 @@ use Illuminate\Http\Request;
 use App\Models\department;
 use App\Models\employees;
 use App\Models\area;
+use App\Models\way_pay;
 use App\Models\departmentsGroup;
 use App\SUtils\SDelayReportUtils;
+use App\SUtils\SInfoWithPolicy;
 use App\SUtils\SGenUtils;
 use DB;
 
@@ -396,5 +398,141 @@ class ReporteController extends Controller
                     ->with('tReport', \SCons::REP_HR_EX)
                     ->with('sTitle', 'Reporte de Horas Extra')
                     ->with('lRows', $lRows);
+    }
+
+    public function hrReport(Request $request)
+    {
+        $sStartDate = $request->start_date;
+        $sEndDate = $request->end_date;
+        $lEmployees = [];
+        /**
+         * 1: quincena
+         * 2: semana
+         * 3: todos
+         */
+        $payWay = $request->way_pay;
+        $id = $request->vals;
+        switch($request->reportType){
+            case 1:
+                
+                $employees = DB::table('employees')
+                        ->join('jobs','jobs.id','=','employees.job_id')
+                        ->join('departments','departments.id','=','jobs.department_id')
+                        ->join('department_group','department_group.id','=','departments.dept_group_id')
+                        ->join('areas','areas.id','=','departments.area_id')
+                        ->orderBy('employees.job_id')
+                        ->where('employees.is_delete','0')
+                        ->where('employees.way_pay_id',$payWay);
+                for($i = 0 ; count($id) > $i ; $i++ ){
+                   if($i != 0){
+                        $employees = $employees->OrWhere('areas.id',$id[$i]);
+                   }else{
+                        $employees = $employees->where('areas.id',$id[$i]);
+                   }
+                }
+                $employees = $employees->select('employees.id')->get();
+                for($i = 0 ; count($employees) > $i ; $i++){
+                    $lEmployees[$i] = $employees[$i]->id; 
+                }
+            break;
+            case 2:
+                $employees = DB::table('employees')
+                        ->join('jobs','jobs.id','=','employees.job_id')
+                        ->join('departments','departments.id','=','jobs.department_id')
+                        ->join('department_group','department_group.id','=','departments.dept_group_id')
+                        ->orderBy('employees.job_id')
+                        ->where('employees.is_delete','0')
+                        ->where('employees.way_pay_id',$payWay);
+                for($i = 0 ; count($id) > $i ; $i++ ){
+                   if($i != 0){
+                        $employees = $employees->OrWhere('departments.dept_group_id',$id[$i]);
+                   }else{
+                        $employees = $employees->where('departments.dept_group_id',$id[$i]);
+                   }
+                }
+                $employees = $employees->select('employees.id')->get();
+                for($i = 0 ; count($employees) > $i ; $i++){
+                    $lEmployees[$i] = $employees[$i]->id; 
+                }
+            break;
+            case 3:
+                $employees = DB::table('employees')
+                        ->join('jobs','jobs.id','=','employees.job_id')
+                        ->join('departments','departments.id','=','jobs.department_id')
+                        ->orderBy('employees.job_id')
+                        ->where('employees.is_delete','0')
+                        ->where('employees.way_pay_id',$payWay);
+                for($i = 0 ; count($id) > $i ; $i++ ){
+                   if($i != 0){
+                        $employees = $employees->OrWhere('departments.id',$id[$i]);
+                   }else{
+                        $employees = $employees->where('departments.id',$id[$i]);
+                   }
+                }
+                $employees = $employees->select('employees.id AS id')->get();
+                for($i = 0 ; count($employees) > $i ; $i++){
+                    $lEmployees[$i] = $employees[$i]->id; 
+                }
+            break;
+            case 4:
+                $lEmployees = $request->vals;
+            break;
+        }
+        //$lEmployees[0] = 32; 
+        $lRows = SInfoWithPolicy::processInfo($sStartDate, $sEndDate, $payWay, $lEmployees,2);
+
+        return view('report.reportView')
+                    ->with('sTitle', 'Reporte de Checadas')
+                    ->with('lRows', $lRows);
+    } 
+
+    public function prueba(){
+        $start = '2020-03-28';
+        $end = '2020-04-11';
+        $way = 1;    
+        $employees[0] = 32;
+        //$employees[0] = 24;
+
+        $prueba = SInfoWithPolicy::processInfo($start,$end,$way,$employees,2);
+    }
+
+    public function datosReporteSecretaria($reportType){
+        $lAreas = null;
+        $lDepsGroups = null;
+        $lDepts = null;
+        $lEmployees = null;
+
+        switch ($reportType) {
+            case 1:
+                $lAreas = area::select('id','name')->where('is_delete', false)->get();
+                break;
+            case 2:
+                $lDepsGroups = departmentsGroup::select('id','name')->where('is_delete', false)->get();
+                break;
+            case 3:
+                $lDepts = department::select('id','name')->where('is_delete', false)->get();
+                break;
+            case 4:
+                $lEmployees = employees::select('id', 'name', 'num_employee')
+                                        ->where('is_delete', false)
+                                        ->orderBy('name', 'ASC')
+                                        ->get();
+                break;
+            
+            default:
+                # code...
+                break;
+        }
+        //$lWayPay = way_pay::select('id','name')->where('is_delete',false)->get();
+        return view('report.datosReportView')->with('lAreas', $lAreas)
+                                            ->with('lDepsGroups', $lDepsGroups)
+                                            ->with('lDepts', $lDepts)
+                                            ->with('lEmployees', $lEmployees)
+                                            //->with('lWay',$lWayPay)
+                                            ->with('reportType', $reportType);
+    }
+
+    public function generarReporteSecretaria(Request $request){
+
     }
 }
