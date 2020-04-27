@@ -63,7 +63,13 @@ class SInfoWithPolicy{
                     for( $j = 0 ; count($lRows) > $j ; $j ){
                         if($auxFin < $dateE){
                             $auxFin->addDays($groupDay);
-                        }else{$j++;}
+                        }else{$j++;
+                            if($j >= count($lRows)){
+                                $auxIni = Carbon::parse($sEndDate);
+                                $auxIni->addDay(); 
+                            }
+                        }
+                        if($cambioEmpleado)
                         while( $auxFin >= $auxIni ){
                             if($lRows[$j]->inDate != null){
                                 $auxComparacion = Carbon::parse($lRows[$j]->inDate);
@@ -89,7 +95,7 @@ class SInfoWithPolicy{
                                     $auxHorasMedias = 0;
                                     if( $horasMedias >= $initialLimitHour && $finalLimitHour >= $horasMedias ){
                                         $auxHorasCompletas = 1; 
-                                    }else if( $horasMedias >= $initialLimitHalf && $finalLimitHalf >= $horasMedias ){
+                                    }else if( $horasMedias >= $initialLimitHalf && $finalLimitHour <= $horasMedias ){
                                         $auxHorasMedias = 1;
                                     }
                                     if( $HalfPendient == 1 && $auxHorasMedias == 1){
@@ -134,7 +140,7 @@ class SInfoWithPolicy{
                                             $lRows[$j]->extraTripleMins = 60; 
                                         }
                                     //si supera los limites para ser media hora
-                                    }else if($lRows[$j]->delayMins >= $initialLimitHalf && $finalLimitHalf >= $lRows[$j]->delayMins){
+                                    }else if($lRows[$j]->delayMins >= $initialLimitHalf && $initialLimitHour <= $lRows[$j]->delayMins){
                                         //se viene arrastrando una media hora
                                         if( $HalfPendient == 1 ){
                                             //si la suma de horas esta por debajo del limite
@@ -164,13 +170,14 @@ class SInfoWithPolicy{
                                 $j++;
                                 if($j >= count($lRows)){
                                     $auxIni = Carbon::parse($sEndDate);
-                                    $auxIni->addDay(); 
+                                    $auxIni->addDays(10); 
                                 }
                                 $auxIni->addDay();
                             }else if($auxIni > $auxComparacion){
                                 if($cambioEmpleado == 1){
                                     $auxIni = Carbon::parse($sEndDate);
-                                    $auxIni->addDay();
+                                    $auxIni->addDays(10);
+                                    
                                 }else{
                                     $j++;
                                     if($j >= count($lRows)){
@@ -194,8 +201,9 @@ class SInfoWithPolicy{
                             }   
                         }
                         if($cambioEmpleado == 1){
-                            $auxIni = Carbon::parse($sStartDate);;
-                            $auxFin = Carbon::parse($sStartDate);;
+                            $auxIni = Carbon::parse($sStartDate);
+                            $auxFin = Carbon::parse($sStartDate);
+                            $cambioEmpleado = 0;
                         }
                         $sumaHoras = 0;
                         $HalfPendient = 0;
