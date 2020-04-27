@@ -55,7 +55,7 @@ class SDateTimeUtils {
         }
 
         // Carbon::setWeekStartsAt(Carbon::FRIDAY);
-        $day = ($oDate->toObject()->dayOfWeek); // los días en Carbon inician en 0, así que hay que sumar uno
+        $day = ($oDate->toObject()->dayOfWeek);
 
         return $day;
     }

@@ -8,6 +8,8 @@ class SCons {
    const REG_IN = 1;
    const REG_OUT = 2;
 
+   const WEEK_START_DAY = 1; //LUNES
+
    const PAY_W_Q = 1;
    const PAY_W_S = 2;
 

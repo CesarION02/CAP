@@ -199,7 +199,6 @@ class SDelayReportUtils {
      */
     public static function manageRowHrExt($newRow, $isNew, $idEmployee, $registry, $lAssigns, $qWorkshifts)
     {
-        $lWorkshifts = clone $qWorkshifts;
         $hasAssign = $lAssigns != null;
         $again = false;
 
@@ -215,7 +214,7 @@ class SDelayReportUtils {
                 $result = SDelayReportUtils::processRegistry($lAssigns, $registry, \SCons::REP_HR_EX);
             }
             else {
-                $result = SDelayReportUtils::checkSchedule($lWorkshifts, $idEmployee, $registry, \SCons::REP_HR_EX);
+                $result = SDelayReportUtils::checkSchedule(clone $qWorkshifts, $idEmployee, $registry, \SCons::REP_HR_EX);
             }
 
             // no tiene horario para el día actual
@@ -223,13 +222,28 @@ class SDelayReportUtils {
                 if ($isNew) {
                     $isNew = false;
                     $again = true;
-                    $newRow->comments = $newRow->comments."Falta entrada".",";
+                    $newRow->comments = $newRow->comments."Falta entrada,";
                 }
                 else {
+                    $otherResult = SDelayReportUtils::getNearSchedule($registry->date, $registry->time, $idEmployee,clone $qWorkshifts);
                     $isNew = true;
-                    $newRow->outDate = $registry->date;
-                    $newRow->outDateTime = $registry->date.'   '.$registry->time;
-                    $newRow->comments = $newRow->comments."Sin horario".",";
+
+                    if ($otherResult != null) {
+                        $newRow->outDate = $otherResult->variableDateTime->toDateString();
+                        $newRow->outDateTime = $otherResult->variableDateTime->format('Y-m-d   H:i:s');
+                        $newRow->outDateTimeSch = $otherResult->pinnedDateTime->format('Y-m-d   H:i:s');
+                        // $newRow->outDateTimeSch = $result->pinnedDateTime->toDateTimeString();
+                        $newRow->delayMins = $otherResult->delayMins;
+                        $newRow->extraHours = SDelayReportUtils::convertToHoursMins($otherResult->delayMins);
+
+                        $newRow->isDayOff = true;
+                        $newRow->others = $newRow->others."Descanso trabajado,";
+                    }
+                    else {
+                        $newRow->outDate = $registry->date;
+                        $newRow->outDateTime = $registry->date.'   '.$registry->time;
+                        $newRow->comments = $newRow->comments."Sin horario".",";
+                    }
                 }
             }
             else {
@@ -588,7 +602,12 @@ class SDelayReportUtils {
         $templateDay = \DB::table('schedule_day AS sd')
                             ->where('schedule_template_id', $templateId)
                             ->where('day_num', $day)
+                            ->where('is_active', true)
                             ->get();
+        
+        if ($templateDay == null || sizeof($templateDay) == 0) {
+            return null;
+        }
 
         $oScheduleDay = $templateDay[0];
 
@@ -700,6 +719,83 @@ class SDelayReportUtils {
         $workshift = $lWEmployee[0];
 
         return $workshift;
+    }
+
+    /**
+     * Busca un horario asignado al empleado para la fecha seleccionada, tanto en assigns como en 
+     * workshifts
+     *
+     * @param String $startDate
+     * @param String $endDate
+     * @param int $idEmployee
+     * @param [type] $registry
+     * @param query $lWorkshifts
+     * @param int $iRep [\SCons::REP_DELAY, \SCons::REP_HR_EX]
+     * @return void
+     */
+    public static function getSchedule($startDate, $endDate, $idEmployee, $registry, $lWorkshifts, $iRep) {
+        // checar horarios *******************************************************************
+        $lAssigns = SDelayReportUtils::hasAnAssing($idEmployee, 0, $startDate, $endDate);
+
+        if ($lAssigns != null) {
+            $result = SDelayReportUtils::processRegistry($lAssigns, $registry, $iRep);
+
+            if ($result != null) {
+                if ($result->auxScheduleDay->is_active) {
+                    // $day->prog_entry = $result->auxScheduleDay->entry;
+                    // $day->prog_leave = $result->auxScheduleDay->departure;
+                    
+                    //  $day->is_absence = true;
+                    return $result;
+                }
+            }
+        }
+
+        /**
+         * busca el horario en base a las tablas de workshift
+        */
+        $result = SDelayReportUtils::checkSchedule($lWorkshifts, $idEmployee, $registry, $iRep);
+        
+        return $result;
+    }
+
+    /**
+     * Busca un horario a partir del día después del día de corte de semana
+     *
+     * @param String $date
+     * @param String $time
+     * @param int $idEmployee
+     * @param query $lWorkshifts
+     * @return void
+     */
+    public static function getNearSchedule($date, $time, $idEmployee, $lWorkshifts)
+    {
+        $oDate = Carbon::parse($date);
+        $iDay = SDateTimeUtils::dayOfWeek($oDate);
+        if ($iDay == \SCons::WEEK_START_DAY) {
+            $oDate->addDays(1);
+        }
+        else {
+            $oDate->subDays($iDay - 2);
+        }
+
+        while (SDateTimeUtils::dayOfWeek($oDate) != \SCons::WEEK_START_DAY) {
+            $registry = (object) [
+                'date' => $oDate->toDateString(),
+                'time' => $time
+            ];
+            
+            $res = SDelayReportUtils::getSchedule($oDate->toDateString(), $oDate->toDateString(), $idEmployee, $registry, clone $lWorkshifts, \SCons::REP_HR_EX);
+            
+            if ($res == null) {
+                $oDate->addDays(1);
+            }
+            else {
+                return $res;
+            }
+        }
+
+        return null;
     }
 
     /**
