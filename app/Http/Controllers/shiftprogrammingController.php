@@ -138,7 +138,7 @@ class shiftprogrammingController extends Controller
                         ->orderBy('employees.job_id')
                         ->where('employees.is_delete','0')
                         ->where('departments.dept_group_id',$request->typearea)
-                        ->where('incidents.type_incidents_id',3)
+                        ->where('incidents.cls_inc_id',3)
                         ->where(function ($query) use ($startDate, $endDate) {
                                 return $query->whereBetween('start_date', [$startDate, $endDate])
                                     ->orwhereBetween('end_date', [$startDate, $endDate]);
@@ -153,7 +153,7 @@ class shiftprogrammingController extends Controller
                         ->orderBy('employees.job_id')
                         ->where('employees.is_delete','0')
                         ->where('departments.dept_group_id',$request->typearea)
-                        ->where('incidents.type_incidents_id',2)
+                        ->where('incidents.cls_inc_id',2)
                         ->where(function ($query) use ($startDate, $endDate) {
                             $query->whereBetween('start_date', [$startDate, $endDate])
                                 ->orwhereBetween('end_date', [$startDate, $endDate]);
@@ -227,7 +227,7 @@ class shiftprogrammingController extends Controller
                         ->orderBy('employees.job_id')
                         ->where('employees.is_delete','0')
                         ->where('departments.dept_group_id',$request->typearea)
-                        ->where('incidents.type_incidents_id',3)
+                        ->where('incidents.cls_inc_id',3)
                         ->where(function ($query) use ($startDate, $endDate) {
                                 return $query->whereBetween('start_date', [$startDate, $endDate])
                                 ->orwhereBetween('end_date', [$startDate, $endDate]);
@@ -243,7 +243,7 @@ class shiftprogrammingController extends Controller
                         ->orderBy('employees.job_id')
                         ->where('employees.is_delete','0')
                         ->where('departments.dept_group_id',$request->typearea)
-                        ->where('incidents.type_incidents_id',2)
+                        ->where('incidents.cls_inc_id',2)
                         ->where(function ($query) use ($startDate, $endDate) {
                                 return $query->whereBetween('start_date', [$startDate, $endDate])
                                 ->orwhereBetween('end_date', [$startDate, $endDate]);

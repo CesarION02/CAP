@@ -59,6 +59,9 @@ Route::get('shiftprogramming/{id}', 'shiftprogrammingController@index')->name('p
 });
 
 /* RUTAS DE REPORTES */
+Route::get('report/datosReporte/{type}', 'ReporteController@datosReporteSecretaria')->name('reporte_secretaria');
+Route::get('report/hrReport', 'ReporteController@hrReport')->name('reporte_secretaria');
+Route::get('report/prueba','ReporteController@prueba')->name('prueba');
 Route::get('report/reportES/{type}', 'ReporteController@esReport')->name('reporteES');
 Route::get('report/generarReporteES','ReporteController@reporteESView')->name('generarreporteES');
 Route::get('report/generarReporteRegs/{type}','ReporteController@registriesReport')->name('generarreporteRegs');
@@ -137,7 +140,7 @@ Route::put('assignone/{id}', 'assignController@updateOne')->name('actualizar_uno
 Route::delete('assignone/{id}', 'assignController@deleteOne')->name('eliminar_uno');
 Route::get('assignonedata', 'assignController@getData')->name('get_data');
 
-/* RUTAS DE ASIGNACION HORARIOS */
+/* RUTAS DE ASIGNACION HOLIDAYS */
 Route::get('holidayassign', 'holidayassignController@index')->name('asignacion_festivo');
 Route::get('holidayassign/create/{id}', 'holidayassignController@create')->name('crear_asignacion_festivo');
 Route::post('holidayassign', 'holidayassignController@store')->name('guardar_asignacion_festivo');
