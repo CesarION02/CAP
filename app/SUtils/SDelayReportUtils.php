@@ -229,14 +229,14 @@ class SDelayReportUtils {
                     $isNew = true;
 
                     if ($otherResult != null) {
-                        $newRow->outDate = $otherResult->variableDateTime->toDateString();
-                        $newRow->outDateTime = $otherResult->variableDateTime->format('Y-m-d   H:i:s');
-                        $newRow->outDateTimeSch = $otherResult->pinnedDateTime->format('Y-m-d   H:i:s');
+                        $newRow->outDate = $otherResult->oAuxDate->toDateString();
+                        $newRow->outDateTime = $otherResult->oAuxDate->format('Y-m-d   H:i:s');
+                        $newRow->outDateTimeSch = $otherResult->oAuxDate->format('Y-m-d   H:i:s');
                         // $newRow->outDateTimeSch = $result->pinnedDateTime->toDateTimeString();
                         $newRow->delayMins = $otherResult->delayMins;
                         $newRow->extraHours = SDelayReportUtils::convertToHoursMins($otherResult->delayMins);
 
-                        $newRow->isDayOff = true;
+                        $newRow->isDayOff = 1;
                         $newRow->others = $newRow->others."Descanso trabajado,";
                     }
                     else {
@@ -791,6 +791,7 @@ class SDelayReportUtils {
                 $oDate->addDays(1);
             }
             else {
+                $res->oAuxDate = Carbon::parse($date.' '.$time);
                 return $res;
             }
         }
