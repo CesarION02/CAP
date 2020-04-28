@@ -69,7 +69,6 @@ class SInfoWithPolicy{
                                 $auxIni->addDay(); 
                             }
                         }
-                        if($cambioEmpleado)
                         while( $auxFin >= $auxIni ){
                             if($lRows[$j]->inDate != null){
                                 $auxComparacion = Carbon::parse($lRows[$j]->inDate);
