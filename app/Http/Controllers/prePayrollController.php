@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Validator;
 use Carbon\Carbon;
 use App\SUtils\SDelayReportUtils;
+use App\SUtils\SDateTimeUtils;
+use App\SUtils\SInfoWithPolicy;
 use App\Models\employees;
 use App\Models\incident;
 use App\SPayroll\SPrePayroll;
@@ -26,15 +28,15 @@ class prePayrollController extends Controller
      *	rows: [
      *			{
      *			employee_id: integer,
+     *          double_overtime: decimal,
+     *          triple_overtime: decimal,
      *			days: [
      *				{
      *				dt_date: date,
-     *				entry: time,
-     *				leave: time,
-     *				prog_entry: time,
-     *				prog-leave: time,
-     *				abs_id: integer,
-     *				type_abs_id: integer,
+     *              is_absence: boolean,
+     *              is_sunday: boolean,
+     *              is_day_off: boolean,
+     *              events: []
      *				holiday_id: integer
      *				}
      *				]
@@ -47,10 +49,12 @@ class prePayrollController extends Controller
         $validator = Validator::make($request->all(), [
             'start_date' => 'required',
             'end_date' => 'required',
-            'employees' => 'required'
+            'employees' => 'required',
+            'pay_type' => 'required',
+            'data_type' => 'required'
         ]);
 
-        if (!$validator->passes()) {
+        if (! $validator->passes()) {
             // return response()->json(['success'=>'Added new records.']);
             return response()->json(['error' => $validator->errors()->all()]);
         }
@@ -58,12 +62,14 @@ class prePayrollController extends Controller
         $startDate = $request->start_date;
         $endDate = $request->end_date;
         $aEmployeeIds = $request->employees;
+        $payType = $request->pay_type == "1" ? \SCons::PAY_W_S : \SCons::PAY_W_Q;
+        $dataType = $request->data_type;
 
         if (is_string($aEmployeeIds)) {
             $aEmployeeIds = explode(",", $aEmployeeIds);
         }
 
-        $oPrepayroll = $this->makePrepayroll($startDate, $endDate, $aEmployeeIds);
+        $oPrepayroll = $this->makePrepayroll($startDate, $endDate, $aEmployeeIds, $payType, $dataType);
 
         return json_encode($oPrepayroll, JSON_PRETTY_PRINT);
     }
@@ -77,7 +83,7 @@ class prePayrollController extends Controller
      * 
      * @return SPrePayroll object
      */
-    private function makePrepayroll($startDate, $endDate, $aEmployeeIds)
+    private function makePrepayroll($startDate, $endDate, $aEmployeeIds, $payType, $dataType)
     {
         $aDates = [];
         $oStartDate = Carbon::parse($startDate);
@@ -111,6 +117,11 @@ class prePayrollController extends Controller
          */
         $lWorkshifts = SDelayReportUtils::getWorkshifts($startDate, $endDate, 0, $lCapEmployees);
 
+        /**
+         * Obtiene el reporte de horas extra, que contiene también domingos y festivos.
+         */
+        $lExtras = SInfoWithPolicy::processInfo($startDate, $endDate, $payType, $lCapEmployees, $dataType);
+
         $prePayroll = new SPrePayroll();
         $prePayroll->start_date = $startDate;
         $prePayroll->end_date = $endDate;
@@ -121,19 +132,56 @@ class prePayrollController extends Controller
             $row->employee_id = $extId;
             $row->days = [];
 
+            $lCExtrasEmp = clone collect($lExtras);
+            $lGrouped = $lCExtrasEmp->groupBy('idEmployee')->map(function ($row) {
+                                                $registry = (object) [
+                                                    'minsExtraDouble' => $row->sum('extraDoubleMins'),
+                                                    'minsExtraTriple' => $row->sum('extraTripleMins'),
+                                                ];
+        
+                                        return $registry;
+                                    });
+                                    
+            if (sizeof($lGrouped) > 0) {
+                switch ($dataType) {
+                    case \SCons::LIMITED_DATA:
+                        $row->double_overtime = $lGrouped{$idEmployee}->minsExtraDouble / 60;
+                        break;
+                    case \SCons::OTHER_DATA:
+                        $row->triple_overtime = $lGrouped{$idEmployee}->minsExtraTriple / 60;
+                        break;
+    
+                    case \SCons::ALL_DATA:
+                        # code...
+                        break;
+                    
+                    default:
+                        # code...
+                        break;
+                }
+            }
+
+            $lCExtrasEmp = clone collect($lExtras);
+
             foreach ($aDates as $sDate) {
                 $day = new SPrePayrollDay();
                 $day->dt_date = $sDate;
 
-                $day->absences = [];
+                $registry = (object) [
+                    'date' => $sDate,
+                    'time' => '12:00:00'
+                ];
+
                 $lChecks = clone $qChecks; // podría mejorarse a recorrer los días en lugar de hacer query por día
                 $lChecks = $lChecks->where('e.id', $idEmployee)
                                     ->where('r.date', $sDate)
                                     ->get();
                 
+                // si no tiene checadas:                                    
                 if (sizeof($lChecks) == 0) {
                     // checar incidencias ********************************************************
                     $lAbsences = $this->searchAbsence($idEmployee, $sDate);
+                    
                     if (sizeof($lAbsences) > 0) {
                         foreach ($lAbsences as $absence) {
                             $key = explode("_", $absence->external_key);
@@ -143,55 +191,44 @@ class prePayrollController extends Controller
                             $abs['id_abs'] = $key[1];
                             $abs['nts'] = $absence->nts;
 
-                            $day->absences[] = $abs;
+                            $day->events[] = $abs;
+                        }
+
+                        continue;
+                    }
+                    else {
+                        /**
+                         * Si no tiene checadas y no tiene incidencias se revisa que no sea un día inactivo para el empleado
+                         * Si es un día activo se le pone falta
+                         */
+                        $result = SDelayReportUtils::getSchedule($startDate, $endDate, $idEmployee, $registry, clone $lWorkshifts, \SCons::REP_DELAY);
+
+                        if ($result != null) {
+                            $day->is_absence = true;
                         }
                     }
                 }
                 else {
                     // verificar checadas **************************************************************
-                    foreach ($lChecks as $check) {
-                        if ($check->type_id == \SCons::REG_IN) {
-                            $day->entry = $check->time;
-                        } else {
-                            $day->leave = $check->time;
-                        }
-                    }
+                    // foreach ($lChecks as $check) {
+                    //     if ($check->type_id == \SCons::REG_IN) {
+                    //         $day->entry[] = $check->time;
+                    //     }
+                    //     else {
+                    //         $day->leave[] = $check->time;
+                    //     }
+                    // }
+                    
+                    //si tiene checada y es domingo se agrega domingo trabajado (PRIMA DOMINICAL)
+                    $day->is_sunday = SDateTimeUtils::dayOfWeek($sDate) == Carbon::SUNDAY;
                 }
 
-                // checar horarios *******************************************************************
-                $lAssigns = SDelayReportUtils::hasAnAssing($idEmployee, 0, $startDate, $endDate);
-                $registry = (object)[
-                    'date' => $sDate,
-                    'time' => '12:00:00'
-                ];
+                // Verifica en base al reporte de horas extra si el día corresponde a un día de descanso trabajado
+                $nDaysOff = $lCExtrasEmp->where('idEmployee', $idEmployee)
+                                            ->where('outDate', $sDate)
+                                            ->sum('isDayOff');
 
-                $bCheckWorkshifts = true;;
-                if ($lAssigns != null) {
-                    /**
-                     * busca el horario correspondiente en base a la hora de entrada
-                     */
-                    $result = SDelayReportUtils::processRegistry($lAssigns, $registry, \SCons::REP_DELAY);
-
-                    if ($result != null) {
-                        $day->prog_entry = $result->auxScheduleDay->entry;
-                        $day->prog_leave = $result->auxScheduleDay->departure;
-
-                        $bCheckWorkshifts = false;
-                    }
-                }
-
-                if ($bCheckWorkshifts) {
-                    $lworks = clone $lWorkshifts;
-
-                    /**
-                     * busca el horario en base a las tablas de workshift
-                     */
-                    $result = SDelayReportUtils::checkSchedule($lworks, $idEmployee, $registry, null);
-                    if ($result != null) {
-                        $day->prog_entry = $result->entry;
-                        $day->prog_leave = $result->departure;
-                    }
-                }
+                $day->n_days_off = $nDaysOff;
 
                 $row->days[] = $day;
             }
