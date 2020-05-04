@@ -121,6 +121,7 @@ class shiftprogrammingController extends Controller
                         ->join('department_group','department_group.id','=','departments.dept_group_id')
                         ->orderBy('employees.job_id')
                         ->where('employees.is_delete','0')
+                        ->where('employees.is_active', '1')
                         ->where('departments.dept_group_id',$request->typearea)
                         ->select('jobs.id AS idJob','jobs.name AS nameJob','employees.name AS nameEmployee','employees.short_name AS shortName','employees.id AS idEmployee')
                         ->get();
@@ -171,6 +172,7 @@ class shiftprogrammingController extends Controller
                         ->join('department_group','department_group.id','=','departments.dept_group_id')
                         ->orderBy('employees.name')
                         ->where('employees.is_delete','0')
+                        ->where('employees.is_active', '1')
                         ->where('departments.dept_group_id',$request->typearea)
                         ->select('jobs.id AS idJob','jobs.name AS nameJob','employees.name AS nameEmployee','employees.short_name AS shortName','employees.id AS idEmployee')
                         ->get();
@@ -204,6 +206,7 @@ class shiftprogrammingController extends Controller
                         ->join('department_group','department_group.id','=','departments.dept_group_id')
                         ->orderBy('employees.name')
                         ->where('employees.is_delete','0')
+                        ->where('employees.is_active', '1')
                         ->where('departments.dept_group_id',$request->typearea)
                         ->select('jobs.id AS idJob','jobs.name AS nameJob','employees.name AS nameEmployee','employees.short_name AS shortName','employees.id AS idEmployee')
                         ->get();    
@@ -692,6 +695,7 @@ class shiftprogrammingController extends Controller
                         ->join('department_group','department_group.id','=','departments.dept_group_id')
                         ->orderBy('employees.job_id')
                         ->where('employees.is_delete','0')
+                        ->where('employees.is_active', '1')
                         ->where('departments.dept_group_id',$request->typearea)
                         ->select('jobs.id AS idJob','jobs.name AS nameJob','employees.name AS nameEmployee','employees.short_name AS shortName','employees.id AS idEmployee')
                         ->get();
@@ -746,6 +750,7 @@ class shiftprogrammingController extends Controller
                         ->join('department_group','department_group.id','=','departments.dept_group_id')
                         ->orderBy('employees.job_id')
                         ->where('employees.is_delete','0')
+                        ->where('employees.is_active', '1')
                         ->where('departments.dept_group_id',$request->typearea)
                         ->select('jobs.id AS idJob','jobs.name AS nameJob','employees.name AS nameEmployee','employees.short_name AS shortName','employees.id AS idEmployee')
                         ->get();
@@ -801,6 +806,7 @@ class shiftprogrammingController extends Controller
                         ->join('department_group','department_group.id','=','departments.dept_group_id')
                         ->orderBy('employees.job_id')
                         ->where('employees.is_delete','0')
+                        ->where('employees.is_active', '1')
                         ->where('departments.dept_group_id',$request->typearea)
                         ->select('jobs.id AS idJob','jobs.name AS nameJob','employees.name AS nameEmployee','employees.short_name AS shortName','employees.id AS idEmployee')
                         ->get();
