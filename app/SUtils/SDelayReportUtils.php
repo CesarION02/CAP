@@ -41,6 +41,12 @@ class SDelayReportUtils {
 
         foreach ($registries as $registry) {
             if ($registry->employee_id != $idEmployee) {
+                if (! $isNew) {
+                    $lRows[] = $newRow;
+                    $isNew = true;
+                    $newRow = null;
+                }
+
                 $idEmployee = $registry->employee_id;
                 $idDepartment = $registry->dept_id;
 
@@ -225,7 +231,7 @@ class SDelayReportUtils {
                     $newRow->comments = $newRow->comments."Falta entrada,";
                 }
                 else {
-                    $otherResult = SDelayReportUtils::getNearSchedule($registry->date, $registry->time, $idEmployee,clone $qWorkshifts);
+                    $otherResult = SDelayReportUtils::getNearSchedule($registry->date, $registry->time, $idEmployee, clone $qWorkshifts);
                     $isNew = true;
 
                     if ($otherResult != null) {
@@ -233,11 +239,13 @@ class SDelayReportUtils {
                         $newRow->outDateTime = $otherResult->oAuxDate->format('Y-m-d   H:i:s');
                         $newRow->outDateTimeSch = $otherResult->oAuxDate->format('Y-m-d   H:i:s');
                         // $newRow->outDateTimeSch = $result->pinnedDateTime->toDateTimeString();
-                        $newRow->delayMins = $otherResult->delayMins;
-                        $newRow->extraHours = SDelayReportUtils::convertToHoursMins($otherResult->delayMins);
+                        $extraMins = SDelayReportUtils::getExtraTime($result);
+                        $mins = ($result->delayMins < 0 ? 0 : $result->delayMins) + $extraMins;
+                        $newRow->delayMins = $mins;
+                        $newRow->extraHours = SDelayReportUtils::convertToHoursMins($mins);
 
                         $newRow->isDayOff = 1;
-                        $newRow->others = $newRow->others."Descanso trabajado,";
+                        // $newRow->others = $newRow->others."DESCANSO,";
                     }
                     else {
                         $newRow->outDate = $registry->date;
@@ -253,8 +261,10 @@ class SDelayReportUtils {
                         $newRow->outDateTime = $result->variableDateTime->format('Y-m-d   H:i:s');
                         $newRow->outDateTimeSch = $result->pinnedDateTime->format('Y-m-d   H:i:s');
                         // $newRow->outDateTimeSch = $result->pinnedDateTime->toDateTimeString();
-                        $newRow->delayMins = $result->delayMins;
-                        $newRow->extraHours = SDelayReportUtils::convertToHoursMins($result->delayMins);
+                        $extraMins = SDelayReportUtils::getExtraTime($result);
+                        $mins = ($result->delayMins < 0 ? 0 : $result->delayMins) + $extraMins;
+                        $newRow->delayMins = $mins;
+                        $newRow->extraHours = SDelayReportUtils::convertToHoursMins($mins);
     
                         $isNew = true;
                     }
@@ -264,8 +274,10 @@ class SDelayReportUtils {
                     $newRow->outDate = $result->variableDateTime->toDateString();
                     $newRow->outDateTime = $result->variableDateTime->format('Y-m-d   H:i:s');
                     $newRow->outDateTimeSch = $result->pinnedDateTime->format('Y-m-d   H:i:s');
-                    $newRow->delayMins = $result->delayMins;
-                    $newRow->extraHours = SDelayReportUtils::convertToHoursMins($result->delayMins);
+                    $extraMins = SDelayReportUtils::getExtraTime($result);
+                    $mins = ($result->delayMins < 0 ? 0 : $result->delayMins) + $extraMins;
+                    $newRow->delayMins = $mins;
+                    $newRow->extraHours = SDelayReportUtils::convertToHoursMins($mins);
 
                     $isNew = true;
                     $again = false;
@@ -293,8 +305,8 @@ class SDelayReportUtils {
 
         if ($isNew) {
             if (SDelayReportUtils::isSunday($newRow)) {
-                $newRow->isSunday = true;
-                $newRow->others = 'DOMINGO, '.$newRow->others;
+                $newRow->isSunday = 1;
+                // $newRow->others = 'PRIMA DOMINICAL, '.$newRow->others;
             }
             
             $lWorks = clone $qWorkshifts;
@@ -311,6 +323,19 @@ class SDelayReportUtils {
         $response[] = $again;
 
         return $response;
+    }
+
+    private static function getExtraTime($oComparison) {
+        if ($oComparison->auxScheduleDay != null) {
+            return $oComparison->auxScheduleDay->overtimepershift * 60;
+        }
+        else {
+            if ($oComparison->auxWorkshift != null) {
+                return $oComparison->auxWorkshift->overtimepershift * 60;
+            }
+            
+            return 0;
+        }
     }
 
     /**
@@ -386,7 +411,14 @@ class SDelayReportUtils {
                             ->join('workshifts AS w', 'dw.workshift_id', '=', 'w.id')
                             ->join('type_day AS td', 'dwe.type_day_id', '=', 'td.id')
                             ->join('employees AS e', 'dwe.employee_id', '=', 'e.id')
-                            ->select('wdd.date', 'w.name', 'w.entry', 'w.departure', 'td.name AS td_name', 'td.short_name', 'dwe.type_day_id')
+                            ->select('wdd.date', 
+                                        'w.name', 
+                                        'w.entry', 
+                                        'w.overtimepershift',
+                                        'w.departure', 
+                                        'td.name AS td_name', 
+                                        'td.short_name', 
+                                        'dwe.type_day_id')
                             ->where('dwe.is_delete', false)
                             ->where('w.is_delete', false)
                             ->where('e.is_delete', false)
@@ -600,6 +632,15 @@ class SDelayReportUtils {
          * semana de la fecha de checada
          */
         $templateDay = \DB::table('schedule_day AS sd')
+                            ->join('schedule_template AS st', 'sd.schedule_template_id', '=', 'st.id')
+                            ->select('sd.id',
+                                    'sd.day_name',
+                                    'sd.day_num',
+                                    'sd.entry',
+                                    'sd.departure',
+                                    'sd.is_active',
+                                    'sd.schedule_template_id',
+                                    'st.overtimepershift')
                             ->where('schedule_template_id', $templateId)
                             ->where('day_num', $day)
                             ->where('is_active', true)
@@ -699,8 +740,11 @@ class SDelayReportUtils {
         $workshift = $lWEmployee[0];
 
         $workshiftDate = $registry->date.' '.($mType == \SCons::REP_DELAY ? $workshift->entry : $workshift->departure);
+
+        $comparison = SDelayReportUtils::compareDates($workshiftDate, $registry->date.' '.$registry->time);
+        $comparison->auxWorkshift = $workshift;
         
-        return SDelayReportUtils::compareDates($workshiftDate, $registry->date.' '.$registry->time);
+        return $comparison;
     }
 
     public static function checkEvents($lWorkshifts, $idEmployee, $date)
@@ -808,16 +852,16 @@ class SDelayReportUtils {
      */
     private static function isSunday($oRow)
     {
-        if ($oRow->inDate != null) {
-            if (SDateTimeUtils::dayOfWeek($oRow->inDate) == Carbon::SUNDAY) {
-                return true;
-            }
-            else {
-                if ($oRow->inDate == $oRow->outDate) {
-                    return false;
-                }
-            }
-        }
+        // if ($oRow->inDate != null) {
+        //     if (SDateTimeUtils::dayOfWeek($oRow->inDate) == Carbon::SUNDAY) {
+        //         return true;
+        //     }
+        //     else {
+        //         if ($oRow->inDate == $oRow->outDate) {
+        //             return false;
+        //         }
+        //     }
+        // }
 
         if ($oRow->outDate != null) {
             return SDateTimeUtils::dayOfWeek($oRow->outDate) == Carbon::SUNDAY;

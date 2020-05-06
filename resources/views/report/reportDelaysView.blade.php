@@ -1,9 +1,14 @@
-@extends("theme.$theme.layout")
+@extends("theme.$theme.layoutcustom")
 @section('styles1')
     <link rel="stylesheet" href="{{ asset("dt/datatables.css") }}">
+    <style>
+        tr {
+            font-size: 80%
+        }
+    </style>
 @endsection
 @section('title')
-{{ $sTitle }}
+    {{ $sTitle }}
 @endsection
 
 @section('content')
@@ -34,6 +39,8 @@
                                     <th>Retardo (min)</th>
                                     <th>Horas Extra</th>
                                     {{-- <th v-if="oData.tReport == oData.REP_HR_EX">Hr_progr_Sal</th> --}}
+                                    <th v-if="oData.tReport == oData.REP_HR_EX">Pr. Dom.</th>
+                                    <th v-if="oData.tReport == oData.REP_HR_EX">Descanso</th>
                                     <th v-if="oData.tReport == oData.REP_HR_EX">Otros</th>
                                     <th>Observaciones</th>
                                 </tr>
@@ -51,6 +58,8 @@
                                     <td>@{{ row.delayMins < 0 ? null : row.delayMins }}</td>
                                     <td>@{{ row.extraHours }}</td>
                                     {{-- <td v-if="oData.tReport == oData.REP_HR_EX">@{{ row.outDateTimeSch }}</td> --}}
+                                    <td v-if="oData.tReport == oData.REP_HR_EX">@{{ row.isSunday > 0 ? row.isSunday : "" }}</td>
+                                    <td v-if="oData.tReport == oData.REP_HR_EX">@{{ row.isDayOff > 0 ? row.isDayOff : "" }}</td>
                                     <td v-if="oData.tReport == oData.REP_HR_EX">@{{ row.others }}</td>
                                     <td>@{{ row.comments }}</td>
                                 </tr>
@@ -86,8 +95,10 @@
 
             // this.minsCol = this.tReport == this.REP_DELAY ? 4 : 4;
             this.minsCol = 4;
+            this.sunCol = 6;
+            this.dayoffCol = 7;
             this.hiddenCol = this.tReport == this.REP_DELAY ? 5 : 4;
-            this.toExport = this.tReport == this.REP_DELAY ? [0, 1, 2, 3, 4, 6] : [0, 1, 2, 3, 5, 6, 7];
+            this.toExport = this.tReport == this.REP_DELAY ? [0, 1, 2, 3, 4, 6] : [0, 1, 2, 3, 5, 6, 7, 8, 9];
         }
         
         var oData = new GlobalData();
@@ -152,7 +163,9 @@
                 rowGroup: {
                     startRender: null,
                     endRender: function ( rows, group ) {
-                        var mins = rows
+                        let suns = 0;
+                        let daysoff = 0;
+                        let mins = rows
                                     .data()
                                     .pluck(oData.minsCol)
                                     .reduce( function (a, b) {
@@ -167,6 +180,39 @@
 
                                         return a + b;
                                     }, 0);
+                        if (oData.tReport == oData.REP_HR_EX) {
+                            suns = rows
+                                        .data()
+                                        .pluck(oData.sunCol)
+                                        .reduce( function (a, b) {
+                                            a = parseInt(a, 10);
+                                            if(isNaN(a)){ a = 0; }                   
+
+                                            b = parseInt(b, 10);
+                                            if(isNaN(b)){ b = 0; }
+
+                                            a = a < 0 ? 0 : a;
+                                            b = b < 0 ? 0 : b;
+
+                                            return a + b;
+                                        }, 0);
+
+                            daysoff = rows
+                                        .data()
+                                        .pluck(oData.dayoffCol)
+                                        .reduce( function (a, b) {
+                                            a = parseInt(a, 10);
+                                            if(isNaN(a)){ a = 0; }                   
+
+                                            b = parseInt(b, 10);
+                                            if(isNaN(b)){ b = 0; }
+
+                                            a = a < 0 ? 0 : a;
+                                            b = b < 0 ? 0 : b;
+
+                                            return a + b;
+                                        }, 0);
+                        }
                         
                         let value_to_return = '';
 
@@ -174,7 +220,8 @@
                             value_to_return = group +' (Retardo total = ' + mins + ' mins)';
                         }
                         else {
-                            value_to_return = group +' (Horas Extras Totales = ' + convertToHoursMins(mins) + ')';
+                            value_to_return = group +' (Horas Extras Totales = ' + convertToHoursMins(mins) + 
+                                              ", Primas dom = " + suns + ", Descansos = " + daysoff +  ')';
                         }
                         
                         return value_to_return;
