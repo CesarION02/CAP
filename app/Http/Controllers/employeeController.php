@@ -128,6 +128,7 @@ class employeeController extends Controller
                         ->join('department_group','department_group.id','=','departments.dept_group_id')
                         ->orderBy('employees.job_id')
                         ->where('employees.is_delete','0')
+                        ->where('employees.is_active','1')
                         ->where('departments.dept_group_id',$id)
                         ->orderBy('employees.name')
                         ->select('employees.name AS nameEmployee','employees.num_employee AS numEmployee','employees.short_name AS shortName','employees.id AS idEmployee')

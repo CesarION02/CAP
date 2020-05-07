@@ -29,6 +29,17 @@
             </div>
     </div>
     <div class="form-group">
+        <label for="cut_id" class="col-lg-3 control-label requerido">Recortar Reporte secretaria:</label>
+        <div class="col-lg-8">
+            <select id="cut_id" name="cut_id" class="form-control">
+                @foreach($datas as $data => $index)
+                <option value="{{ $index }}" {{old('cut_id') == $index ? 'selected' : '' }} > {{$data}}</option>
+                @endforeach
+            </select>
+    
+        </div>
+    </div>
+    <div class="form-group">
             <label for="order" class="col-lg-3 control-label requerido">Orden(en caso de que roten):</label>
             <div class="col-lg-8">
                 <input type="number" name="order" id="order" class="form-control" value="{{old('order', $data->order ?? '')}}" required>

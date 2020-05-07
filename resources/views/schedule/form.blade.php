@@ -6,6 +6,24 @@
         
 </div>
 <div class="form-group">
+    <label for="overtimepershift" class="col-lg-3 control-label">Tiempo extra:</label>
+    <div class="col-lg-6">
+        <input type="number" step="0.5" name="overtimepershift" id="overtimepershift" class="form-control" required value=<?php if(isset($datas)){ echo $datas[0]->overtimepershift;}else{echo " ";} ?> >
+    </div>
+    
+</div>
+<div class="form-group">
+    <label for="cut_id" class="col-lg-3 control-label requerido">Recortar Reporte secretaria:</label>
+    <div class="col-lg-6">
+        <select id="cut_id" name="cut_id" class="form-control">
+            @foreach($cuts as $cut => $index)
+            <option value="{{ $index }}" {{old('cut_id') == $index ? 'selected' : '' }} > {{$cut}}</option>
+            @endforeach
+        </select>
+
+    </div>
+</div>
+<div class="form-group">
         <label for="lunes" class="col-lg-2 control-label">Lunes:</label>
         <div class="col-md-2">
             <input type="time" name="lunesE" id="lunesE" class="form-control" value=<?php if(isset($datas)){ echo $datas[0]->entry;}else{echo " ";}?> >
@@ -81,7 +99,7 @@
 <div class="form-group">
         <label for="sabado" class="col-lg-2 control-label">Sabado:</label>
         <div class="col-md-2">
-            <input type="time" name="sabadoE" id="sabadoE" class="form-control" value=<?php if(isset($datas)){ echo $datas[5]->departure;}else{echo " ";}?> >
+            <input type="time" name="sabadoE" id="sabadoE" class="form-control" value=<?php if(isset($datas)){ echo $datas[5]->entry;}else{echo " ";}?> >
         </div>
         <div class="col-md-2">
             <input type="time" name="sabadoS" id="sabadoS" class="form-control" value=<?php if(isset($datas)){ echo $datas[5]->departure;}else{echo " ";}?> >

@@ -38,6 +38,15 @@ Route::group(['prefix' => 'admin', 'namespace' => 'admin', 'middleware' => ['aut
     /*RUTAS MENU_ROL*/
     Route::get('menu-rol', 'menurolController@index')->name('menu_rol');
     Route::post('menu-rol', 'menurolController@store')->name('guardar_menu_rol');
+    
+    /*RUTAS ROL_USUARIO*/
+    Route::get('rol-user', 'roluserController@index')->name('rol_user');
+    Route::get('rol-user/create', 'roluserController@create')->name('crear_rol_user');
+    Route::post('rol-user', 'roluserController@store')->name('guardar_rol_user');
+    Route::get('rol-user/{id}/edit', 'roluserController@edit')->name('editar_rol_user');
+    Route::put('rol-user/{id}', 'roluserController@update')->name('actualizar_rol_user');
+    Route::delete('rol-user/{id}', 'roluserController@destroy')->name('eliminar_rol_user');
+    
 
 });
 
@@ -72,12 +81,15 @@ Route::get('report/reporteHrExtras','ReporteController@genHrExReport')->name('ge
 Route::get('report/viewReporteHrExtras','ReporteController@hrExtReport')->name('reporteHrsExtras');
 
 /* RUTAS DE USUARIO */
+Route::get('user/change', 'userController@change')->name('cambio_usuario');
+Route::put('user/{id}/cambio', 'userController@updatePassword')->name('actualizar_contraseña');
 Route::get('user', 'userController@index')->name('usuario');
 Route::get('user/create', 'userController@create')->name('crear_usuario');
 Route::post('user', 'userController@store')->name('guardar_usuario');
 Route::get('user/{id}/edit', 'userController@edit')->name('editar_usuario');
 Route::put('user/{id}', 'userController@update')->name('actualizar_usuario');
 Route::delete('user/{id}', 'userController@destroy')->name('eliminar_usuario');
+
 
 /* RUTAS DE EMPRESAS */
 Route::get('company', 'companyController@index')->name('company');

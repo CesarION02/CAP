@@ -29,7 +29,7 @@
 </div>
 <div class="form-group">
     <label for="horario" class="col-lg-3 control-label">Plantilla:</label>
-    <div class="col-lg-2">
+    <div class="col-lg-3">
         <select name="horario1" id="horario1">
             @foreach($schedule_template as $schedule_template => $index)
                 @if(isset($datas))

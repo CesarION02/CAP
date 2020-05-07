@@ -6,6 +6,7 @@ use App\Models\schedule_template;
 use App\Models\schedule_day;
 use DateTime;
 use DB;
+use App\Models\cut;
 
 use Illuminate\Http\Request;
 
@@ -35,7 +36,8 @@ class scheduleController extends Controller
      */
     public function create()
     {
-        return view('schedule.create');
+        $cuts = cut::where('is_delete','0')->orderBy('id')->pluck('id','name');
+        return view('schedule.create', compact('cuts'));
     }
 
     /**
@@ -48,6 +50,8 @@ class scheduleController extends Controller
     {
         $plantilla = new schedule_template();
         $plantilla->name = $request->name;
+        $plantilla->overtimepershift = $request->overtimepershift;
+        $plantilla->cut_id = $request->cut_id;
         $plantilla->created_by = 1;
         $plantilla->updated_by = 1;
         $plantilla->save();
@@ -180,15 +184,16 @@ class scheduleController extends Controller
      */
     public function edit($id)
     {
+        $cuts = cut::where('is_delete','0')->orderBy('id')->pluck('id','name');
         $datas = DB::table('schedule_day')
                     ->join('schedule_template','schedule_template.id','=','schedule_day.schedule_template_id')
                     ->orderBy('schedule_template.id')
                     ->orderBy('schedule_day.day_num')
                     ->where('schedule_template.is_delete','0')
                     ->where('schedule_day.schedule_template_id',$id)
-                    ->select('schedule_day.day_num AS idSchedule','schedule_template.name AS nameTem','schedule_day.entry AS entry','schedule_day.departure AS departure','schedule_day.is_active AS active','schedule_template.name AS Name','schedule_day.schedule_template_id AS idTemplate')
+                    ->select('schedule_day.day_num AS idSchedule','schedule_template.name AS nameTem','schedule_template.overtimepershift AS overtimepershift','schedule_day.entry AS entry','schedule_day.departure AS departure','schedule_day.is_active AS active','schedule_template.name AS Name','schedule_day.schedule_template_id AS idTemplate')
                     ->get();
-        return view('schedule.edit', compact('datas'));
+        return view('schedule.edit', compact('datas'))->with('cuts',$cuts);
     }
 
     /**
@@ -202,6 +207,8 @@ class scheduleController extends Controller
     {
         $schedule = schedule_template::find($id);
         $schedule->name = $request->name;
+        $schedule->overtimepershift = $request->overtimepershift;
+        $schedule->cut_id = $request->cut_id;
         $schedule->updated_by = 1;
         $schedule->save();
         $schedule_day = schedule_day::where('schedule_template_id',$id)

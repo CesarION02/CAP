@@ -8,7 +8,7 @@ class workshift extends Model
 {
     protected $table = 'workshifts';
     protected $primaryKey = 'id';
-    protected $fillable = ['name','entry','departure','order','work_time','overtimepershift'];
+    protected $fillable = ['name','entry','departure','order','work_time','overtimepershift','cut_id'];
 
     public function day_workshifts(){
         return $this->hasMany('App\Models\day_workshifts');

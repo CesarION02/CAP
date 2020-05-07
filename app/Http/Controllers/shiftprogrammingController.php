@@ -138,6 +138,7 @@ class shiftprogrammingController extends Controller
                         ->join('department_group','department_group.id','=','departments.dept_group_id')
                         ->orderBy('employees.job_id')
                         ->where('employees.is_delete','0')
+                        ->where('employees.is_active','0')
                         ->where('departments.dept_group_id',$request->typearea)
                         ->where('incidents.cls_inc_id',3)
                         ->where(function ($query) use ($startDate, $endDate) {
@@ -153,6 +154,7 @@ class shiftprogrammingController extends Controller
                         ->join('department_group','department_group.id','=','departments.dept_group_id')
                         ->orderBy('employees.job_id')
                         ->where('employees.is_delete','0')
+                        ->where('employees.is_active','0')
                         ->where('departments.dept_group_id',$request->typearea)
                         ->where('incidents.cls_inc_id',2)
                         ->where(function ($query) use ($startDate, $endDate) {
@@ -229,6 +231,7 @@ class shiftprogrammingController extends Controller
                         ->join('department_group','department_group.id','=','departments.dept_group_id')
                         ->orderBy('employees.job_id')
                         ->where('employees.is_delete','0')
+                        ->where('employees.is_active','0')
                         ->where('departments.dept_group_id',$request->typearea)
                         ->where('incidents.cls_inc_id',3)
                         ->where(function ($query) use ($startDate, $endDate) {
@@ -244,6 +247,7 @@ class shiftprogrammingController extends Controller
                         ->join('departments','departments.id','=','jobs.department_id')
                         ->join('department_group','department_group.id','=','departments.dept_group_id')
                         ->orderBy('employees.job_id')
+                        ->where('employees.is_active','0')
                         ->where('employees.is_delete','0')
                         ->where('departments.dept_group_id',$request->typearea)
                         ->where('incidents.cls_inc_id',2)

@@ -1,13 +1,16 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\admin;
 
 use Illuminate\Http\Request;
-use App\Models\workshift;
-use App\Models\cut;
+use App\Http\Controllers\Controller;
 
+use DB;
+use App\user;
+use App\Models\admin\rol;
+use App\Models\admin\roluser;
 
-class workshiftController extends Controller
+class rolUserController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,8 +19,14 @@ class workshiftController extends Controller
      */
     public function index()
     {
-        $datas = workshift::where('is_delete','0')->orderBy('id')->get();
-        return view('workshift.index', compact('datas'));
+        $datas = DB::table('users')
+                        ->join('user_rol','user_rol.user_id','=','users.id')
+                        ->join('rol','rol.id','=','user_rol.rol_id')
+                        ->where('state',1)
+                        ->select('rol.name AS nameRol','users.name AS nameUser','user_rol.id AS id')
+                        ->get();
+
+        return view('admin.roluser.index', compact('datas'));
     }
 
     /**
@@ -27,9 +36,10 @@ class workshiftController extends Controller
      */
     public function create()
     {
-        $datas = cut::where('is_delete','0')->orderBy('id')->pluck('id','name');
-
-        return view('workshift.create', compact('datas'));
+        $users = User::where('is_delete',0)->pluck('id','name');
+        $rols = rol::orderBy('id')->pluck('id','name');
+        
+        return view('admin.roluser.create')->with('users',$users)->with('rols',$rols);
     }
 
     /**
@@ -40,8 +50,13 @@ class workshiftController extends Controller
      */
     public function store(Request $request)
     {
-        workshift::create($request->all());
-        return redirect('workshift')->with('mensaje', 'Incidente creado con exito');
+        $roluser = new roluser();
+        $roluser->user_id = $request->usuario_id;
+        $roluser->rol_id = $request->rol_id;
+        $roluser->state = 1;
+        $roluser->save();
+
+        return redirect('admin/rol-user')->with('mensaje','Rol usuario fue creado con exito');
     }
 
     /**
@@ -63,9 +78,7 @@ class workshiftController extends Controller
      */
     public function edit($id)
     {
-        $datas = cut::where('is_delete','0')->orderBy('id')->pluck('id','name');
-        $data = workshift::findOrFail($id);
-        return view('workshift.edit', compact('data'))->with('datas',$datas);
+        //
     }
 
     /**
@@ -77,8 +90,7 @@ class workshiftController extends Controller
      */
     public function update(Request $request, $id)
     {
-        workshift::findOrFail($id)->update($request->all());
-        return redirect('workshift')->with('mensaje', 'Turno actualizado con exito');
+        //
     }
 
     /**
@@ -90,13 +102,13 @@ class workshiftController extends Controller
     public function destroy(Request $request,$id)
     {
         if ($request->ajax()) {
-            $workshift = workshift::find($id);
-            $workshift->fill($request->all());
-            $workshift->is_delete = 1;
-            $workshift->save();
+            $roluser = roluser::find($id);
+            $roluser->fill($request->all());
+            $roluser->state = 0;
+            $roluser->save();
             return response()->json(['mensaje' => 'ok']);
         } else {
             abort(404);
-        }        
+        }
     }
 }

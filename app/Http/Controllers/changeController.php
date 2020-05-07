@@ -3,11 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\workshift;
-use App\Models\cut;
 
+use App\User;
 
-class workshiftController extends Controller
+class changeController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,8 +15,7 @@ class workshiftController extends Controller
      */
     public function index()
     {
-        $datas = workshift::where('is_delete','0')->orderBy('id')->get();
-        return view('workshift.index', compact('datas'));
+        //
     }
 
     /**
@@ -27,9 +25,7 @@ class workshiftController extends Controller
      */
     public function create()
     {
-        $datas = cut::where('is_delete','0')->orderBy('id')->pluck('id','name');
-
-        return view('workshift.create', compact('datas'));
+        //
     }
 
     /**
@@ -40,8 +36,7 @@ class workshiftController extends Controller
      */
     public function store(Request $request)
     {
-        workshift::create($request->all());
-        return redirect('workshift')->with('mensaje', 'Incidente creado con exito');
+        //
     }
 
     /**
@@ -63,9 +58,7 @@ class workshiftController extends Controller
      */
     public function edit($id)
     {
-        $datas = cut::where('is_delete','0')->orderBy('id')->pluck('id','name');
-        $data = workshift::findOrFail($id);
-        return view('workshift.edit', compact('data'))->with('datas',$datas);
+        //
     }
 
     /**
@@ -77,8 +70,7 @@ class workshiftController extends Controller
      */
     public function update(Request $request, $id)
     {
-        workshift::findOrFail($id)->update($request->all());
-        return redirect('workshift')->with('mensaje', 'Turno actualizado con exito');
+        //
     }
 
     /**
@@ -87,16 +79,14 @@ class workshiftController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Request $request,$id)
+    public function destroy($id)
     {
-        if ($request->ajax()) {
-            $workshift = workshift::find($id);
-            $workshift->fill($request->all());
-            $workshift->is_delete = 1;
-            $workshift->save();
-            return response()->json(['mensaje' => 'ok']);
-        } else {
-            abort(404);
-        }        
+        //
+    }
+
+    public function change(){
+        $id = session()->get('id');
+        $data = User::findOrFail($id);
+        return view('user.changePassword', compact('data'));   
     }
 }
