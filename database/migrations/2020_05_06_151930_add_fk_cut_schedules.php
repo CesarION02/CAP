@@ -27,7 +27,7 @@ class AddFkCutSchedules extends Migration
      */
     public function down()
     {
-        Schema::table('workshifts', function($table)
+        Schema::table('schedule_template', function($table)
         {
             $table->dropForeign(['cut_id']);
 
