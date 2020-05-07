@@ -11,6 +11,7 @@ class SDateComparison {
         $this->delayMins = 0;
 
         $this->auxScheduleDay = null;
+        $this->auxWorkshift = null;
     }
 }
 

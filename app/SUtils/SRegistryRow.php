@@ -18,6 +18,7 @@ class SRegistryRow {
         $this->extraHours = "00:00";
         $this->isSunday = 0;
         $this->isDayOff = 0;
+        $this->isHoliday = 0;
         $this->others = "";
         $this->comments = "";
         $this->extraDouble = "00:00";
