@@ -14,11 +14,13 @@ class SyncController extends Controller
         $config = \App\SUtils\SConfiguration::getConfigurations();
 
         $this->syncronizeWithERP($config->lastSyncDateTime);
+
+        return redirect('/')->with('mensaje', 'Sincronizado');
     }
 
     public function syncronizeWithERP($lastSyncDate = "")
     {
-        //$jsonString = file_get_contents(base_path('response_from_siie.json'));
+        // $jsonString = file_get_contents(base_path('response_from_siie.json'));
         $client = new Client([
             'base_uri' => 'localhost:8080',
             'timeout' => 10.0,
@@ -29,6 +31,9 @@ class SyncController extends Controller
         $data = json_decode($jsonString);
 
         // dd($data);
+        $deptRhCont = new DeptsRhController();
+        $deptRhCont->saveRhDeptsFromJSON($data->departments);
+       
         $empCont = new employeeController();
         $empCont->saveEmployeesFromJSON($data->employees);
 

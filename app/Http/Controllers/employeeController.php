@@ -8,11 +8,13 @@ use App\Models\job;
 use App\Models\way_register;
 use App\Models\benefitsPolice;
 use App\Models\company;
+use App\Models\DepartmentRH;
 use DB;
 
 class employeeController extends Controller
 {
     private $companies;
+    private $rhdepartments;
 
     /**
      * Display a listing of the resource.
@@ -160,6 +162,8 @@ class employeeController extends Controller
 
         $this->companies = company::select('id', 'external_id')
                                 ->pluck('id', 'external_id');
+        $this->rhdepartments = DepartmentRH::select('id', 'external_id')
+                                ->pluck('id', 'external_id');
 
         foreach ($lEmployees as $jEmployee) {
             try {
@@ -192,6 +196,7 @@ class employeeController extends Controller
                             'leave_date' => $jEmployee->leave_date,
                             'is_overtime' => $jEmployee->extra_time,
                             'company_id' => $this->companies[$jEmployee->company_id],
+                            'dept_rh_id' => $this->rhdepartments[$jEmployee->dept_rh_id],
                             'way_pay_id' => $jEmployee->way_pay == 1 ? 2 : 1,
                             'is_active' => $jEmployee->is_active,
                             'is_delete' => $jEmployee->is_deleted,
@@ -222,6 +227,7 @@ class employeeController extends Controller
         $emp->job_id = 1; // ???
         $emp->external_id = $jEmployee->id_employee;
         $emp->company_id = $this->companies[$jEmployee->company_id];
+        $emp->dept_rh_id = $this->rhdepartments[$jEmployee->dept_rh_id];
         $emp->way_pay_id = $jEmployee->way_pay == 1 ? 2 : 1;
         $emp->is_active = $jEmployee->is_active;
         $emp->is_delete = $jEmployee->is_deleted;

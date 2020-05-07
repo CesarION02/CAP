@@ -199,6 +199,8 @@ class holidayController extends Controller
         $holiday->fecha = $jHoliday->dt_date;
         $holiday->external_key = ($jHoliday->year.'_'.$jHoliday->id_holiday);
         $holiday->is_delete = $jHoliday->is_deleted;
+        $holiday->created_by = 1;
+        $holiday->updated_by = 1;
 
         $holiday->save();
     }

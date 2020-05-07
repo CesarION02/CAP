@@ -1,5 +1,288 @@
 {
   "last_sync_date" : "2010-01-01 00:00:00",
+  "departments" : [ {
+    "id_department" : 1,
+    "dept_code" : "",
+    "dept_name" : "(NO APLICA)",
+    "is_deleted" : false,
+    "is_system" : true
+  }, {
+    "id_department" : 2,
+    "dept_code" : "1",
+    "dept_name" : "VENTAS",
+    "is_deleted" : true,
+    "is_system" : false
+  }, {
+    "id_department" : 3,
+    "dept_code" : "2",
+    "dept_name" : "ADMINISTRACION",
+    "is_deleted" : true,
+    "is_system" : false
+  }, {
+    "id_department" : 4,
+    "dept_code" : "3",
+    "dept_name" : "EXTRACCION",
+    "is_deleted" : true,
+    "is_system" : false
+  }, {
+    "id_department" : 5,
+    "dept_code" : "4",
+    "dept_name" : "PRODUCCION",
+    "is_deleted" : true,
+    "is_system" : false
+  }, {
+    "id_department" : 6,
+    "dept_code" : "5",
+    "dept_name" : "EMPLEADOS MEXICO, D.F.",
+    "is_deleted" : true,
+    "is_system" : false
+  }, {
+    "id_department" : 7,
+    "dept_code" : "6",
+    "dept_name" : "EMPLEADOS GUADALAJARA, JAL.",
+    "is_deleted" : true,
+    "is_system" : false
+  }, {
+    "id_department" : 8,
+    "dept_code" : "7",
+    "dept_name" : "FUNCIONARIOS",
+    "is_deleted" : false,
+    "is_system" : false
+  }, {
+    "id_department" : 9,
+    "dept_code" : "10",
+    "dept_name" : "OBREROS EXTRACTORA",
+    "is_deleted" : true,
+    "is_system" : false
+  }, {
+    "id_department" : 10,
+    "dept_code" : "20",
+    "dept_name" : "OBREROS EVENTUALES EXTRACTORA",
+    "is_deleted" : true,
+    "is_system" : false
+  }, {
+    "id_department" : 11,
+    "dept_code" : "30",
+    "dept_name" : "OBREROS REFINACION",
+    "is_deleted" : true,
+    "is_system" : false
+  }, {
+    "id_department" : 12,
+    "dept_code" : "40",
+    "dept_name" : "OBREROS EVENTUALES REFINACION",
+    "is_deleted" : true,
+    "is_system" : false
+  }, {
+    "id_department" : 13,
+    "dept_code" : "41",
+    "dept_name" : "SEGURIDAD",
+    "is_deleted" : true,
+    "is_system" : false
+  }, {
+    "id_department" : 14,
+    "dept_code" : "1 A",
+    "dept_name" : "EXTRACCION Y PRODUCCION OFICINA",
+    "is_deleted" : false,
+    "is_system" : false
+  }, {
+    "id_department" : 15,
+    "dept_code" : "2",
+    "dept_name" : "VENTAS",
+    "is_deleted" : true,
+    "is_system" : false
+  }, {
+    "id_department" : 16,
+    "dept_code" : "3",
+    "dept_name" : "ADMINISTRACION Y OFICINAS",
+    "is_deleted" : false,
+    "is_system" : false
+  }, {
+    "id_department" : 17,
+    "dept_code" : "4",
+    "dept_name" : "SEGURIDAD",
+    "is_deleted" : false,
+    "is_system" : false
+  }, {
+    "id_department" : 18,
+    "dept_code" : "11",
+    "dept_name" : "PREPARACION",
+    "is_deleted" : true,
+    "is_system" : false
+  }, {
+    "id_department" : 19,
+    "dept_code" : "12",
+    "dept_name" : "EXTRACCION",
+    "is_deleted" : true,
+    "is_system" : false
+  }, {
+    "id_department" : 20,
+    "dept_code" : "13",
+    "dept_name" : "MOLINO",
+    "is_deleted" : true,
+    "is_system" : false
+  }, {
+    "id_department" : 21,
+    "dept_code" : "14",
+    "dept_name" : "MANTENIMIENTO",
+    "is_deleted" : true,
+    "is_system" : false
+  }, {
+    "id_department" : 22,
+    "dept_code" : "15",
+    "dept_name" : "MANIOBRAS",
+    "is_deleted" : true,
+    "is_system" : false
+  }, {
+    "id_department" : 23,
+    "dept_code" : "16",
+    "dept_name" : "INGENIERIA",
+    "is_deleted" : true,
+    "is_system" : false
+  }, {
+    "id_department" : 24,
+    "dept_code" : "2",
+    "dept_name" : "AUDITORIA INTERNA",
+    "is_deleted" : false,
+    "is_system" : false
+  }, {
+    "id_department" : 25,
+    "dept_code" : "8",
+    "dept_name" : "EVENTUALES EXTRACCION",
+    "is_deleted" : false,
+    "is_system" : false
+  }, {
+    "id_department" : 26,
+    "dept_code" : "9",
+    "dept_name" : "ADMINISTRACION AUX",
+    "is_deleted" : false,
+    "is_system" : false
+  }, {
+    "id_department" : 27,
+    "dept_code" : "10",
+    "dept_name" : "AGUACATE ARIO",
+    "is_deleted" : false,
+    "is_system" : false
+  }, {
+    "id_department" : 28,
+    "dept_code" : "11",
+    "dept_name" : "EVENTUALES EXT Y PROD AGUACATE",
+    "is_deleted" : false,
+    "is_system" : false
+  }, {
+    "id_department" : 29,
+    "dept_code" : "28",
+    "dept_name" : "HARINAS",
+    "is_deleted" : false,
+    "is_system" : false
+  }, {
+    "id_department" : 30,
+    "dept_code" : "29",
+    "dept_name" : "DESARROLLO",
+    "is_deleted" : false,
+    "is_system" : false
+  }, {
+    "id_department" : 31,
+    "dept_code" : "30",
+    "dept_name" : "OFICINA DF",
+    "is_deleted" : false,
+    "is_system" : false
+  }, {
+    "id_department" : 32,
+    "dept_code" : "12",
+    "dept_name" : "AGUACATE URUAPAN",
+    "is_deleted" : false,
+    "is_system" : false
+  }, {
+    "id_department" : 33,
+    "dept_code" : "13",
+    "dept_name" : "INTENDENCIA",
+    "is_deleted" : false,
+    "is_system" : false
+  }, {
+    "id_department" : 34,
+    "dept_code" : "14",
+    "dept_name" : "CORPORATIVO",
+    "is_deleted" : false,
+    "is_system" : false
+  }, {
+    "id_department" : 35,
+    "dept_code" : "15",
+    "dept_name" : "CHOFERES",
+    "is_deleted" : false,
+    "is_system" : false
+  }, {
+    "id_department" : 36,
+    "dept_code" : "16",
+    "dept_name" : "CORPORATIVO CONTRALORIA",
+    "is_deleted" : false,
+    "is_system" : false
+  }, {
+    "id_department" : 37,
+    "dept_code" : "17",
+    "dept_name" : "CORPORATIVO AUDITORIA",
+    "is_deleted" : false,
+    "is_system" : false
+  }, {
+    "id_department" : 38,
+    "dept_code" : "18",
+    "dept_name" : "CORPORATIVO TESORERIA",
+    "is_deleted" : false,
+    "is_system" : false
+  }, {
+    "id_department" : 39,
+    "dept_code" : "19",
+    "dept_name" : "CORPORATIVO RIESGO",
+    "is_deleted" : false,
+    "is_system" : false
+  }, {
+    "id_department" : 40,
+    "dept_code" : "20",
+    "dept_name" : "CORPORATIVO MERCADOTECNIA",
+    "is_deleted" : false,
+    "is_system" : false
+  }, {
+    "id_department" : 41,
+    "dept_code" : "21",
+    "dept_name" : "EXTRACCION Y PRODUCCION SEMILLA",
+    "is_deleted" : false,
+    "is_system" : false
+  }, {
+    "id_department" : 42,
+    "dept_code" : "22",
+    "dept_name" : "EXTRACCION Y PRODUCCION AGUACATE MORELIA",
+    "is_deleted" : false,
+    "is_system" : false
+  }, {
+    "id_department" : 43,
+    "dept_code" : "23",
+    "dept_name" : "EXTRACCION Y PRODUCCION SECADOR",
+    "is_deleted" : false,
+    "is_system" : false
+  }, {
+    "id_department" : 44,
+    "dept_code" : "24",
+    "dept_name" : "EXTRACCION Y PRODUCCION REFINERIA",
+    "is_deleted" : false,
+    "is_system" : false
+  }, {
+    "id_department" : 45,
+    "dept_code" : "8 A",
+    "dept_name" : "EVENTUALES EXTRACCION OFIC.",
+    "is_deleted" : true,
+    "is_system" : false
+  }, {
+    "id_department" : 46,
+    "dept_code" : "8",
+    "dept_name" : "EVENTUALES EXTRACCION",
+    "is_deleted" : false,
+    "is_system" : false
+  }, {
+    "id_department" : 47,
+    "dept_code" : "1",
+    "dept_name" : "EXTRACCION Y PRODUCCION",
+    "is_deleted" : false,
+    "is_system" : false
+  } ],
   "employees" : [ {
     "id_employee" : 163,
     "num_employee" : 914,
@@ -10,6 +293,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 30,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -19,9 +303,10 @@
     "firstname" : "SERGIO ABRAHAM",
     "admission_date" : "2013-01-01",
     "leave_date" : null,
-    "company_id" : 1211,
+    "company_id" : 1603,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 30,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -34,6 +319,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 8,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -46,6 +332,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -55,9 +342,10 @@
     "firstname" : "EDGAR",
     "admission_date" : "2018-06-04",
     "leave_date" : "2017-07-15",
-    "company_id" : 1211,
+    "company_id" : 2852,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 42,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -70,6 +358,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -82,6 +371,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -94,6 +384,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -106,6 +397,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -118,6 +410,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -130,6 +423,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -142,6 +436,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -154,6 +449,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 42,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -166,6 +462,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -178,6 +475,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 42,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -190,6 +488,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -202,6 +501,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -211,9 +511,10 @@
     "firstname" : "GERARDO",
     "admission_date" : "2012-05-01",
     "leave_date" : "2010-10-31",
-    "company_id" : 1211,
+    "company_id" : 2852,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 42,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -226,6 +527,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 17,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -238,6 +540,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 35,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -250,6 +553,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 35,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -262,6 +566,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 31,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -274,6 +579,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 29,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -286,6 +592,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -298,6 +605,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 37,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -310,6 +618,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 35,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -322,6 +631,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 26,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -334,6 +644,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 38,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -346,6 +657,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -358,6 +670,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -370,6 +683,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -382,6 +696,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 37,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -394,6 +709,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 27,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -406,6 +722,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -418,6 +735,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -430,6 +748,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -442,6 +761,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 35,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -454,6 +774,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -466,6 +787,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 35,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -478,6 +800,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 35,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -490,6 +813,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -502,6 +826,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -514,6 +839,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -526,6 +852,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -538,6 +865,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -550,6 +878,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -562,6 +891,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 1,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -574,6 +904,7 @@
     "company_id" : 2852,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -586,6 +917,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 30,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -598,6 +930,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -610,6 +943,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -622,6 +956,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -634,6 +969,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 35,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -646,6 +982,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -658,6 +995,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -670,6 +1008,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 35,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -682,6 +1021,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -694,6 +1034,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 17,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -706,6 +1047,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 29,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -718,6 +1060,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 1,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -730,6 +1073,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 1,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -742,6 +1086,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 35,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -754,6 +1099,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 37,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -766,6 +1112,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 29,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -778,6 +1125,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 30,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -790,6 +1138,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -802,6 +1151,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -814,6 +1164,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -826,6 +1177,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -838,6 +1190,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -850,6 +1203,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -862,6 +1216,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -874,6 +1229,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 27,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -886,6 +1242,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -898,6 +1255,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -910,6 +1268,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 25,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -922,6 +1281,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -934,6 +1294,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 1,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -946,6 +1307,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -958,6 +1320,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -970,6 +1333,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -982,6 +1346,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -994,6 +1359,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1006,6 +1372,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1018,6 +1385,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 42,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -1030,6 +1398,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1042,6 +1411,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -1054,6 +1424,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1066,6 +1437,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1078,6 +1450,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1090,6 +1463,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 33,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1102,6 +1476,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1114,6 +1489,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1126,6 +1502,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1138,6 +1515,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1150,6 +1528,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1162,6 +1541,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -1174,6 +1554,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1186,6 +1567,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1198,6 +1580,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1210,6 +1593,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1222,6 +1606,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1234,6 +1619,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1246,6 +1632,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1258,6 +1645,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1270,6 +1658,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1282,6 +1671,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1294,6 +1684,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1306,6 +1697,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1318,6 +1710,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1330,6 +1723,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1342,6 +1736,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1354,6 +1749,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1366,6 +1762,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1378,6 +1775,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1390,6 +1788,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1402,6 +1801,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1414,6 +1814,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1426,6 +1827,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1438,6 +1840,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 17,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1450,6 +1853,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 17,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1462,6 +1866,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1474,6 +1879,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 17,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1486,6 +1892,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1498,6 +1905,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1510,6 +1918,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1522,6 +1931,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 24,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1534,6 +1944,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 17,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1546,6 +1957,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 17,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1558,6 +1970,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1570,6 +1983,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1582,6 +1996,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1594,6 +2009,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1606,6 +2022,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1618,6 +2035,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1630,6 +2048,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1642,6 +2061,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1654,6 +2074,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1666,6 +2087,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1678,6 +2100,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 26,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1690,6 +2113,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1702,6 +2126,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 25,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1714,6 +2139,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 25,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1726,6 +2152,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1738,6 +2165,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1750,6 +2178,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1762,6 +2191,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1774,6 +2204,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1786,6 +2217,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 25,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1798,6 +2230,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 25,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1810,6 +2243,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1822,6 +2256,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1834,6 +2269,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1846,6 +2282,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 25,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1858,6 +2295,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 25,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1870,6 +2308,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 25,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1882,6 +2321,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 25,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1894,6 +2334,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 25,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1906,6 +2347,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 25,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1918,6 +2360,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 25,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1930,6 +2373,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 17,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1942,6 +2386,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1954,6 +2399,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1966,6 +2412,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 17,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1978,6 +2425,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 26,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -1990,6 +2438,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 25,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2002,6 +2451,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 25,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2014,6 +2464,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 17,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2026,6 +2477,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2038,6 +2490,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2050,6 +2503,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 24,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2062,6 +2516,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 24,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2074,6 +2529,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2086,6 +2542,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2098,6 +2555,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 28,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2110,6 +2568,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 17,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2122,6 +2581,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2134,6 +2594,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2146,6 +2607,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 29,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2158,6 +2620,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 29,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2170,6 +2633,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 29,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2182,6 +2646,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2194,6 +2659,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 29,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2206,6 +2672,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2218,6 +2685,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2230,6 +2698,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 17,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2242,6 +2711,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -2254,6 +2724,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 39,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2266,6 +2737,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 35,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2278,6 +2750,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -2290,6 +2763,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 37,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -2302,6 +2776,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -2314,6 +2789,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2326,6 +2802,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2338,6 +2815,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2350,6 +2828,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 30,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2362,6 +2841,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -2374,6 +2854,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2386,6 +2867,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2398,6 +2880,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2410,6 +2893,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2422,6 +2906,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2434,6 +2919,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2446,6 +2932,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2458,6 +2945,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2470,6 +2958,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2482,6 +2971,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -2494,6 +2984,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 30,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2506,6 +2997,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 30,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2518,6 +3010,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2530,6 +3023,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2542,6 +3036,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2554,6 +3049,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2566,6 +3062,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2578,6 +3075,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2590,6 +3088,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 37,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2602,6 +3101,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 43,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -2614,6 +3114,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -2626,6 +3127,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2638,6 +3140,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 42,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -2650,6 +3153,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2662,6 +3166,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 40,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2674,6 +3179,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2686,6 +3192,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2698,6 +3205,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 38,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2710,6 +3218,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 42,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -2722,6 +3231,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2734,6 +3244,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2746,6 +3257,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 30,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -2758,6 +3270,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2770,6 +3283,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 35,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2782,6 +3296,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2794,6 +3309,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 30,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2806,6 +3322,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2818,6 +3335,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -2830,6 +3348,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2842,6 +3361,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2854,6 +3374,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2866,6 +3387,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2878,6 +3400,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 37,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2890,6 +3413,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2902,6 +3426,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -2914,6 +3439,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -2926,6 +3452,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2938,6 +3465,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2950,6 +3478,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2962,6 +3491,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2974,6 +3504,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2986,6 +3517,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -2998,6 +3530,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3010,6 +3543,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3022,6 +3556,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 30,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3034,6 +3569,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 40,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3046,6 +3582,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3058,6 +3595,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3070,6 +3608,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3082,6 +3621,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3094,6 +3634,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 30,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3106,6 +3647,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 30,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -3118,6 +3660,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 30,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -3130,6 +3673,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3142,6 +3686,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3154,6 +3699,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 35,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -3166,6 +3712,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3178,6 +3725,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3190,6 +3738,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3202,6 +3751,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3214,6 +3764,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3226,6 +3777,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3238,6 +3790,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -3250,6 +3803,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3259,9 +3813,10 @@
     "firstname" : "JOSE ALVARO",
     "admission_date" : "2018-03-06",
     "leave_date" : "2018-03-09",
-    "company_id" : 2852,
+    "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 1,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3274,6 +3829,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3286,6 +3842,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3298,6 +3855,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3310,6 +3868,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3322,6 +3881,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 30,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3334,6 +3894,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3346,6 +3907,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3358,6 +3920,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3370,6 +3933,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3382,6 +3946,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3394,6 +3959,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3406,6 +3972,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3418,6 +3985,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3430,6 +3998,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3442,6 +4011,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 37,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -3454,6 +4024,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3466,6 +4037,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3478,6 +4050,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3490,6 +4063,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3502,6 +4076,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3514,6 +4089,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3526,6 +4102,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3538,6 +4115,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -3550,6 +4128,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3562,6 +4141,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3574,6 +4154,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 30,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3586,6 +4167,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -3598,6 +4180,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 38,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -3610,6 +4193,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 39,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -3622,6 +4206,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3634,6 +4219,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3646,6 +4232,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3658,6 +4245,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3670,6 +4258,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -3682,6 +4271,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3694,6 +4284,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -3706,6 +4297,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -3718,6 +4310,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 42,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -3730,6 +4323,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3742,6 +4336,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3754,6 +4349,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3766,6 +4362,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3778,6 +4375,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3790,6 +4388,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -3802,6 +4401,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3814,6 +4414,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3826,6 +4427,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -3838,6 +4440,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -3850,6 +4453,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3862,6 +4466,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -3874,6 +4479,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3886,6 +4492,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3898,6 +4505,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3910,6 +4518,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3922,6 +4531,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3934,6 +4544,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3946,6 +4557,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3958,6 +4570,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3970,6 +4583,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 37,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -3982,6 +4596,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -3994,6 +4609,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4006,6 +4622,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4018,6 +4635,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4030,6 +4648,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4042,6 +4661,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -4054,6 +4674,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4063,9 +4684,10 @@
     "firstname" : "GREGORIO",
     "admission_date" : "2020-01-01",
     "leave_date" : "2020-01-06",
-    "company_id" : 2852,
+    "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 1,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4078,6 +4700,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4090,6 +4713,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4102,6 +4726,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4114,6 +4739,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4126,6 +4752,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 43,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4138,6 +4765,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4150,6 +4778,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -4162,6 +4791,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4174,6 +4804,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4186,6 +4817,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4198,6 +4830,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4210,6 +4843,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4222,6 +4856,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4234,6 +4869,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4246,6 +4882,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4258,6 +4895,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4270,6 +4908,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4282,6 +4921,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -4294,6 +4934,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4306,6 +4947,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4318,6 +4960,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4330,6 +4973,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4342,6 +4986,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4354,6 +4999,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 35,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -4366,6 +5012,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 35,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -4378,6 +5025,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 37,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4390,6 +5038,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4402,6 +5051,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4414,6 +5064,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4426,6 +5077,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4438,6 +5090,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -4450,6 +5103,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -4462,6 +5116,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -4474,6 +5129,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -4486,6 +5142,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4498,6 +5155,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -4510,6 +5168,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -4522,6 +5181,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4534,6 +5194,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -4546,6 +5207,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -4558,6 +5220,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -4570,6 +5233,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 27,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4582,6 +5246,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 27,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -4594,6 +5259,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 27,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4606,6 +5272,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 27,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4618,6 +5285,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 38,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4630,6 +5298,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4642,6 +5311,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 27,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -4654,6 +5324,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 27,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -4666,6 +5337,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 27,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -4678,6 +5350,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4690,6 +5363,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4702,6 +5376,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4714,6 +5389,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4726,6 +5402,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4738,6 +5415,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4750,6 +5428,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4762,6 +5441,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4774,6 +5454,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4786,6 +5467,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 43,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4798,6 +5480,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4810,6 +5493,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4822,6 +5506,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 30,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4834,6 +5519,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4846,6 +5532,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4858,6 +5545,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 27,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4870,6 +5558,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -4882,6 +5571,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 43,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4894,6 +5584,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4906,6 +5597,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4918,6 +5610,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4930,6 +5623,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4942,6 +5636,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4954,6 +5649,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -4966,6 +5662,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4978,6 +5675,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -4990,6 +5688,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 37,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5002,6 +5701,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 37,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5014,6 +5714,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5026,6 +5727,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5038,6 +5740,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5050,6 +5753,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 42,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5062,6 +5766,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5074,6 +5779,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5086,6 +5792,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5098,6 +5805,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5110,6 +5818,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 42,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -5122,6 +5831,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5134,6 +5844,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5146,6 +5857,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5158,6 +5870,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5170,6 +5883,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 2,
+    "dept_rh_id" : 42,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -5182,6 +5896,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5194,6 +5909,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5206,6 +5922,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5218,6 +5935,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5230,6 +5948,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -5242,6 +5961,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5254,6 +5974,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5266,6 +5987,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5278,6 +6000,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5290,6 +6013,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5302,6 +6026,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 35,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -5314,6 +6039,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -5326,6 +6052,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5338,6 +6065,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5350,6 +6078,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -5362,6 +6091,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5374,6 +6104,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5386,6 +6117,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5398,6 +6130,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5410,6 +6143,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -5422,6 +6156,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5434,6 +6169,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 42,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -5446,6 +6182,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5458,6 +6195,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5470,6 +6208,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5482,6 +6221,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5494,6 +6234,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5506,6 +6247,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5518,6 +6260,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5530,6 +6273,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -5542,6 +6286,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5554,6 +6299,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5566,6 +6312,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5578,6 +6325,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 43,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5590,6 +6338,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -5602,6 +6351,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 43,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -5614,6 +6364,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -5626,6 +6377,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5638,6 +6390,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -5650,6 +6403,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -5662,6 +6416,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5674,6 +6429,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5686,6 +6442,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -5698,6 +6455,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -5710,6 +6468,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5722,6 +6481,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 14,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -5734,6 +6494,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5746,6 +6507,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 37,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -5758,6 +6520,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5770,6 +6533,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5782,6 +6546,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -5794,6 +6559,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5806,6 +6572,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5818,6 +6585,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5830,6 +6598,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5842,6 +6611,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -5854,6 +6624,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5866,6 +6637,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5878,6 +6650,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5890,6 +6663,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -5902,6 +6676,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -5914,6 +6689,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5926,6 +6702,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5938,6 +6715,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5950,6 +6728,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5962,6 +6741,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -5974,6 +6754,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -5986,6 +6767,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -5998,6 +6780,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -6010,6 +6793,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6022,6 +6806,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6034,6 +6819,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6046,6 +6832,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -6058,6 +6845,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -6070,6 +6858,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6082,6 +6871,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6094,6 +6884,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6106,6 +6897,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6118,6 +6910,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6130,6 +6923,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6142,6 +6936,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6154,6 +6949,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 27,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -6166,6 +6962,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6178,6 +6975,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6190,6 +6988,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6202,6 +7001,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6210,11 +7010,12 @@
     "lastname" : "CHAVEZ SANCHEZ",
     "firstname" : "ALFREDO",
     "admission_date" : "2019-11-07",
-    "leave_date" : "2020-02-26",
+    "leave_date" : null,
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
-    "is_active" : false,
+    "dept_rh_id" : 47,
+    "is_active" : true,
     "is_deleted" : false
   }, {
     "id_employee" : 4271,
@@ -6226,6 +7027,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -6238,6 +7040,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -6250,6 +7053,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6262,6 +7066,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6274,6 +7079,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6286,6 +7092,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6298,6 +7105,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6310,6 +7118,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6322,6 +7131,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 27,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6334,6 +7144,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 27,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6346,6 +7157,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 27,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6358,6 +7170,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6370,6 +7183,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -6382,6 +7196,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6394,6 +7209,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6406,6 +7222,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6418,6 +7235,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -6426,11 +7244,12 @@
     "lastname" : "CALDERON CARREON",
     "firstname" : "LEONARDO",
     "admission_date" : "2019-12-16",
-    "leave_date" : "2020-03-15",
+    "leave_date" : null,
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
-    "is_active" : false,
+    "dept_rh_id" : 32,
+    "is_active" : true,
     "is_deleted" : false
   }, {
     "id_employee" : 4317,
@@ -6442,6 +7261,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -6454,6 +7274,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -6466,6 +7287,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6478,6 +7300,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6490,6 +7313,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -6502,6 +7326,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -6514,6 +7339,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -6526,6 +7352,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6534,11 +7361,12 @@
     "lastname" : "DAVILA CRUZ",
     "firstname" : "JOSE DOMINGO",
     "admission_date" : "2020-01-15",
-    "leave_date" : "2020-03-18",
+    "leave_date" : null,
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
-    "is_active" : false,
+    "dept_rh_id" : 47,
+    "is_active" : true,
     "is_deleted" : false
   }, {
     "id_employee" : 4340,
@@ -6550,6 +7378,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6562,6 +7391,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6574,6 +7404,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6586,6 +7417,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6598,6 +7430,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6610,6 +7443,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -6622,6 +7456,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -6634,6 +7469,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 30,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6646,6 +7482,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 42,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6658,6 +7495,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6670,6 +7508,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6682,6 +7521,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6694,6 +7534,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6706,6 +7547,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6718,6 +7560,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6730,6 +7573,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -6742,6 +7586,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6754,6 +7599,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6766,6 +7612,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6778,6 +7625,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 16,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6790,6 +7638,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6802,6 +7651,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6814,6 +7664,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6826,6 +7677,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6838,6 +7690,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : false,
     "is_deleted" : false
   }, {
@@ -6850,6 +7703,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 32,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6862,6 +7716,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6870,11 +7725,12 @@
     "lastname" : "GUERRA MIRANDA",
     "firstname" : "MANUEL",
     "admission_date" : "2020-02-17",
-    "leave_date" : "2020-03-17",
+    "leave_date" : null,
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
-    "is_active" : false,
+    "dept_rh_id" : 47,
+    "is_active" : true,
     "is_deleted" : false
   }, {
     "id_employee" : 4391,
@@ -6886,6 +7742,7 @@
     "company_id" : 1211,
     "extra_time" : false,
     "way_pay" : 2,
+    "dept_rh_id" : 37,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6898,6 +7755,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6910,6 +7768,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6922,6 +7781,7 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
+    "dept_rh_id" : 47,
     "is_active" : true,
     "is_deleted" : false
   }, {
@@ -6934,58 +7794,18 @@
     "company_id" : 1211,
     "extra_time" : true,
     "way_pay" : 1,
-    "is_active" : true,
-    "is_deleted" : false
-  }, {
-    "id_employee" : 4415,
-    "num_employee" : 1338,
-    "lastname" : "GONZALEZ GIL",
-    "firstname" : "URIEL MANTOVANI",
-    "admission_date" : "2020-03-23",
-    "leave_date" : null,
-    "company_id" : 1211,
-    "extra_time" : true,
-    "way_pay" : 1,
-    "is_active" : true,
-    "is_deleted" : false
-  }, {
-    "id_employee" : 4418,
-    "num_employee" : 1339,
-    "lastname" : "ARREGUIN ZUÑIGA",
-    "firstname" : "JOSE ANTONIO",
-    "admission_date" : "2020-03-25",
-    "leave_date" : null,
-    "company_id" : 1211,
-    "extra_time" : true,
-    "way_pay" : 1,
-    "is_active" : true,
-    "is_deleted" : false
-  }, {
-    "id_employee" : 4424,
-    "num_employee" : 1340,
-    "lastname" : "LEMUS QUINCOSA",
-    "firstname" : "MARCO ANTONIO",
-    "admission_date" : "2020-04-01",
-    "leave_date" : null,
-    "company_id" : 1211,
-    "extra_time" : false,
-    "way_pay" : 2,
-    "is_active" : true,
-    "is_deleted" : false
-  }, {
-    "id_employee" : 4425,
-    "num_employee" : 1341,
-    "lastname" : "RIVERA VARGAS",
-    "firstname" : "JOSE ALBERTO",
-    "admission_date" : "2020-04-01",
-    "leave_date" : null,
-    "company_id" : 1211,
-    "extra_time" : false,
-    "way_pay" : 2,
+    "dept_rh_id" : 47,
     "is_active" : true,
     "is_deleted" : false
   } ],
-  "holidays" : [ ],
+  "holidays" : [ {
+    "year" : 2020,
+    "id_holiday" : 1,
+    "code" : "1",
+    "name" : "PRUEBA",
+    "dt_date" : "2020-01-01",
+    "is_deleted" : false
+  } ],
   "fdys" : [ {
     "year" : 2007,
     "dt_date" : "2007-01-01",
@@ -7532,51 +8352,6 @@
     "eff_days" : 4,
     "ben_year" : 2017,
     "ben_ann" : 22,
-    "notes" : "",
-    "fk_class_abs" : 3,
-    "fk_type_abs" : 1,
-    "is_closed" : false,
-    "is_deleted" : false
-  }, {
-    "id_emp" : 1904,
-    "id_abs" : 116,
-    "num" : "1",
-    "dt_date" : "2020-03-28",
-    "dt_start" : "2020-03-24",
-    "dt_end" : "2020-03-24",
-    "eff_days" : 1,
-    "ben_year" : 2018,
-    "ben_ann" : 23,
-    "notes" : "",
-    "fk_class_abs" : 3,
-    "fk_type_abs" : 1,
-    "is_closed" : false,
-    "is_deleted" : false
-  }, {
-    "id_emp" : 1904,
-    "id_abs" : 117,
-    "num" : "5",
-    "dt_date" : "2020-03-28",
-    "dt_start" : "2020-03-17",
-    "dt_end" : "2020-03-21",
-    "eff_days" : 5,
-    "ben_year" : 2018,
-    "ben_ann" : 23,
-    "notes" : "",
-    "fk_class_abs" : 3,
-    "fk_type_abs" : 1,
-    "is_closed" : false,
-    "is_deleted" : false
-  }, {
-    "id_emp" : 1904,
-    "id_abs" : 118,
-    "num" : "1",
-    "dt_date" : "2020-03-30",
-    "dt_start" : "2020-03-26",
-    "dt_end" : "2020-03-26",
-    "eff_days" : 1,
-    "ben_year" : 2018,
-    "ben_ann" : 23,
     "notes" : "",
     "fk_class_abs" : 3,
     "fk_type_abs" : 1,
@@ -9218,21 +9993,6 @@
     "is_closed" : false,
     "is_deleted" : false
   }, {
-    "id_emp" : 2563,
-    "id_abs" : 20,
-    "num" : "1",
-    "dt_date" : "2020-03-18",
-    "dt_start" : "2020-02-21",
-    "dt_end" : "2020-02-21",
-    "eff_days" : 1,
-    "ben_year" : 2011,
-    "ben_ann" : 13,
-    "notes" : "",
-    "fk_class_abs" : 3,
-    "fk_type_abs" : 1,
-    "is_closed" : false,
-    "is_deleted" : false
-  }, {
     "id_emp" : 2579,
     "id_abs" : 76,
     "num" : "12,170419",
@@ -10268,21 +11028,6 @@
     "is_closed" : false,
     "is_deleted" : false
   }, {
-    "id_emp" : 2943,
-    "id_abs" : 59,
-    "num" : "06.03",
-    "dt_date" : "2020-03-18",
-    "dt_start" : "2020-03-06",
-    "dt_end" : "2020-03-06",
-    "eff_days" : 1,
-    "ben_year" : 2017,
-    "ben_ann" : 4,
-    "notes" : "",
-    "fk_class_abs" : 3,
-    "fk_type_abs" : 1,
-    "is_closed" : false,
-    "is_deleted" : false
-  }, {
     "id_emp" : 2973,
     "id_abs" : 25,
     "num" : "05A09FEB",
@@ -10533,21 +11278,6 @@
     "ben_year" : 2017,
     "ben_ann" : 3,
     "notes" : "24 DIC",
-    "fk_class_abs" : 3,
-    "fk_type_abs" : 1,
-    "is_closed" : false,
-    "is_deleted" : false
-  }, {
-    "id_emp" : 3181,
-    "id_abs" : 49,
-    "num" : "1",
-    "dt_date" : "2020-03-18",
-    "dt_start" : "2020-03-04",
-    "dt_end" : "2020-03-04",
-    "eff_days" : 1,
-    "ben_year" : 2017,
-    "ben_ann" : 3,
-    "notes" : "",
     "fk_class_abs" : 3,
     "fk_type_abs" : 1,
     "is_closed" : false,
@@ -11243,21 +11973,6 @@
     "is_closed" : false,
     "is_deleted" : false
   }, {
-    "id_emp" : 3298,
-    "id_abs" : 25,
-    "num" : "1",
-    "dt_date" : "2020-03-26",
-    "dt_start" : "2020-03-19",
-    "dt_end" : "2020-03-19",
-    "eff_days" : 1,
-    "ben_year" : 2018,
-    "ben_ann" : 3,
-    "notes" : "",
-    "fk_class_abs" : 3,
-    "fk_type_abs" : 1,
-    "is_closed" : false,
-    "is_deleted" : false
-  }, {
     "id_emp" : 3300,
     "id_abs" : 6,
     "num" : "09012019",
@@ -11723,6 +12438,276 @@
     "is_closed" : false,
     "is_deleted" : false
   }, {
+    "id_emp" : 3338,
+    "id_abs" : 21,
+    "num" : "",
+    "dt_date" : "2020-04-28",
+    "dt_start" : "2020-03-30",
+    "dt_end" : "2020-03-30",
+    "eff_days" : 1,
+    "ben_year" : 0,
+    "ben_ann" : 0,
+    "notes" : "FALTA REPORTADA POR CHECADOR",
+    "fk_class_abs" : 1,
+    "fk_type_abs" : 1,
+    "is_closed" : false,
+    "is_deleted" : false
+  }, {
+    "id_emp" : 3338,
+    "id_abs" : 22,
+    "num" : "",
+    "dt_date" : "2020-04-28",
+    "dt_start" : "2020-03-31",
+    "dt_end" : "2020-03-31",
+    "eff_days" : 1,
+    "ben_year" : 0,
+    "ben_ann" : 0,
+    "notes" : "FALTA REPORTADA POR CHECADOR",
+    "fk_class_abs" : 1,
+    "fk_type_abs" : 1,
+    "is_closed" : false,
+    "is_deleted" : false
+  }, {
+    "id_emp" : 3338,
+    "id_abs" : 23,
+    "num" : "",
+    "dt_date" : "2020-04-28",
+    "dt_start" : "2020-04-06",
+    "dt_end" : "2020-04-06",
+    "eff_days" : 1,
+    "ben_year" : 0,
+    "ben_ann" : 0,
+    "notes" : "FALTA REPORTADA POR CHECADOR",
+    "fk_class_abs" : 1,
+    "fk_type_abs" : 1,
+    "is_closed" : false,
+    "is_deleted" : false
+  }, {
+    "id_emp" : 3338,
+    "id_abs" : 24,
+    "num" : "",
+    "dt_date" : "2020-04-28",
+    "dt_start" : "2020-04-08",
+    "dt_end" : "2020-04-08",
+    "eff_days" : 1,
+    "ben_year" : 0,
+    "ben_ann" : 0,
+    "notes" : "FALTA REPORTADA POR CHECADOR",
+    "fk_class_abs" : 1,
+    "fk_type_abs" : 1,
+    "is_closed" : false,
+    "is_deleted" : false
+  }, {
+    "id_emp" : 3338,
+    "id_abs" : 25,
+    "num" : "",
+    "dt_date" : "2020-04-28",
+    "dt_start" : "2020-04-09",
+    "dt_end" : "2020-04-09",
+    "eff_days" : 1,
+    "ben_year" : 0,
+    "ben_ann" : 0,
+    "notes" : "FALTA REPORTADA POR CHECADOR",
+    "fk_class_abs" : 1,
+    "fk_type_abs" : 1,
+    "is_closed" : false,
+    "is_deleted" : false
+  }, {
+    "id_emp" : 3338,
+    "id_abs" : 26,
+    "num" : "",
+    "dt_date" : "2020-04-28",
+    "dt_start" : "2020-04-10",
+    "dt_end" : "2020-04-10",
+    "eff_days" : 1,
+    "ben_year" : 0,
+    "ben_ann" : 0,
+    "notes" : "FALTA REPORTADA POR CHECADOR",
+    "fk_class_abs" : 1,
+    "fk_type_abs" : 1,
+    "is_closed" : false,
+    "is_deleted" : false
+  }, {
+    "id_emp" : 3338,
+    "id_abs" : 27,
+    "num" : "",
+    "dt_date" : "2020-04-29",
+    "dt_start" : "2020-03-30",
+    "dt_end" : "2020-03-30",
+    "eff_days" : 1,
+    "ben_year" : 0,
+    "ben_ann" : 0,
+    "notes" : "FALTA REPORTADA POR CHECADOR",
+    "fk_class_abs" : 1,
+    "fk_type_abs" : 1,
+    "is_closed" : false,
+    "is_deleted" : false
+  }, {
+    "id_emp" : 3338,
+    "id_abs" : 28,
+    "num" : "",
+    "dt_date" : "2020-04-29",
+    "dt_start" : "2020-03-31",
+    "dt_end" : "2020-03-31",
+    "eff_days" : 1,
+    "ben_year" : 0,
+    "ben_ann" : 0,
+    "notes" : "FALTA REPORTADA POR CHECADOR",
+    "fk_class_abs" : 1,
+    "fk_type_abs" : 1,
+    "is_closed" : false,
+    "is_deleted" : false
+  }, {
+    "id_emp" : 3338,
+    "id_abs" : 29,
+    "num" : "",
+    "dt_date" : "2020-04-29",
+    "dt_start" : "2020-04-06",
+    "dt_end" : "2020-04-06",
+    "eff_days" : 1,
+    "ben_year" : 0,
+    "ben_ann" : 0,
+    "notes" : "FALTA REPORTADA POR CHECADOR",
+    "fk_class_abs" : 1,
+    "fk_type_abs" : 1,
+    "is_closed" : false,
+    "is_deleted" : false
+  }, {
+    "id_emp" : 3338,
+    "id_abs" : 30,
+    "num" : "",
+    "dt_date" : "2020-04-29",
+    "dt_start" : "2020-04-08",
+    "dt_end" : "2020-04-08",
+    "eff_days" : 1,
+    "ben_year" : 0,
+    "ben_ann" : 0,
+    "notes" : "FALTA REPORTADA POR CHECADOR",
+    "fk_class_abs" : 1,
+    "fk_type_abs" : 1,
+    "is_closed" : false,
+    "is_deleted" : false
+  }, {
+    "id_emp" : 3338,
+    "id_abs" : 31,
+    "num" : "",
+    "dt_date" : "2020-04-29",
+    "dt_start" : "2020-04-09",
+    "dt_end" : "2020-04-09",
+    "eff_days" : 1,
+    "ben_year" : 0,
+    "ben_ann" : 0,
+    "notes" : "FALTA REPORTADA POR CHECADOR",
+    "fk_class_abs" : 1,
+    "fk_type_abs" : 1,
+    "is_closed" : false,
+    "is_deleted" : false
+  }, {
+    "id_emp" : 3338,
+    "id_abs" : 32,
+    "num" : "",
+    "dt_date" : "2020-04-29",
+    "dt_start" : "2020-04-10",
+    "dt_end" : "2020-04-10",
+    "eff_days" : 1,
+    "ben_year" : 0,
+    "ben_ann" : 0,
+    "notes" : "FALTA REPORTADA POR CHECADOR",
+    "fk_class_abs" : 1,
+    "fk_type_abs" : 1,
+    "is_closed" : false,
+    "is_deleted" : false
+  }, {
+    "id_emp" : 3338,
+    "id_abs" : 33,
+    "num" : "",
+    "dt_date" : "2020-04-29",
+    "dt_start" : "2020-03-30",
+    "dt_end" : "2020-03-30",
+    "eff_days" : 1,
+    "ben_year" : 0,
+    "ben_ann" : 0,
+    "notes" : "FALTA REPORTADA POR CHECADOR",
+    "fk_class_abs" : 1,
+    "fk_type_abs" : 1,
+    "is_closed" : false,
+    "is_deleted" : false
+  }, {
+    "id_emp" : 3338,
+    "id_abs" : 34,
+    "num" : "",
+    "dt_date" : "2020-04-29",
+    "dt_start" : "2020-03-31",
+    "dt_end" : "2020-03-31",
+    "eff_days" : 1,
+    "ben_year" : 0,
+    "ben_ann" : 0,
+    "notes" : "FALTA REPORTADA POR CHECADOR",
+    "fk_class_abs" : 1,
+    "fk_type_abs" : 1,
+    "is_closed" : false,
+    "is_deleted" : false
+  }, {
+    "id_emp" : 3338,
+    "id_abs" : 35,
+    "num" : "",
+    "dt_date" : "2020-04-29",
+    "dt_start" : "2020-04-06",
+    "dt_end" : "2020-04-06",
+    "eff_days" : 1,
+    "ben_year" : 0,
+    "ben_ann" : 0,
+    "notes" : "FALTA REPORTADA POR CHECADOR",
+    "fk_class_abs" : 1,
+    "fk_type_abs" : 1,
+    "is_closed" : false,
+    "is_deleted" : false
+  }, {
+    "id_emp" : 3338,
+    "id_abs" : 36,
+    "num" : "",
+    "dt_date" : "2020-04-29",
+    "dt_start" : "2020-04-08",
+    "dt_end" : "2020-04-08",
+    "eff_days" : 1,
+    "ben_year" : 0,
+    "ben_ann" : 0,
+    "notes" : "FALTA REPORTADA POR CHECADOR",
+    "fk_class_abs" : 1,
+    "fk_type_abs" : 1,
+    "is_closed" : false,
+    "is_deleted" : false
+  }, {
+    "id_emp" : 3338,
+    "id_abs" : 37,
+    "num" : "",
+    "dt_date" : "2020-04-29",
+    "dt_start" : "2020-04-09",
+    "dt_end" : "2020-04-09",
+    "eff_days" : 1,
+    "ben_year" : 0,
+    "ben_ann" : 0,
+    "notes" : "FALTA REPORTADA POR CHECADOR",
+    "fk_class_abs" : 1,
+    "fk_type_abs" : 1,
+    "is_closed" : false,
+    "is_deleted" : false
+  }, {
+    "id_emp" : 3338,
+    "id_abs" : 38,
+    "num" : "",
+    "dt_date" : "2020-04-29",
+    "dt_start" : "2020-04-10",
+    "dt_end" : "2020-04-10",
+    "eff_days" : 1,
+    "ben_year" : 0,
+    "ben_ann" : 0,
+    "notes" : "FALTA REPORTADA POR CHECADOR",
+    "fk_class_abs" : 1,
+    "fk_type_abs" : 1,
+    "is_closed" : false,
+    "is_deleted" : false
+  }, {
     "id_emp" : 3388,
     "id_abs" : 5,
     "num" : "190119",
@@ -12014,36 +12999,6 @@
     "dt_date" : "2020-01-29",
     "dt_start" : "2020-01-25",
     "dt_end" : "2020-01-25",
-    "eff_days" : 1,
-    "ben_year" : 0,
-    "ben_ann" : 0,
-    "notes" : "",
-    "fk_class_abs" : 1,
-    "fk_type_abs" : 1,
-    "is_closed" : false,
-    "is_deleted" : false
-  }, {
-    "id_emp" : 3426,
-    "id_abs" : 27,
-    "num" : "18-03",
-    "dt_date" : "2020-03-18",
-    "dt_start" : "2020-03-09",
-    "dt_end" : "2020-03-09",
-    "eff_days" : 1,
-    "ben_year" : 2018,
-    "ben_ann" : 3,
-    "notes" : "",
-    "fk_class_abs" : 3,
-    "fk_type_abs" : 1,
-    "is_closed" : false,
-    "is_deleted" : false
-  }, {
-    "id_emp" : 3426,
-    "id_abs" : 28,
-    "num" : "1",
-    "dt_date" : "2020-04-03",
-    "dt_start" : "2020-03-30",
-    "dt_end" : "2020-03-30",
     "eff_days" : 1,
     "ben_year" : 0,
     "ben_ann" : 0,
@@ -13090,11 +14045,11 @@
   }, {
     "id_emp" : 3637,
     "id_abs" : 17,
-    "num" : "2",
+    "num" : "0903202020",
     "dt_date" : "2020-03-13",
     "dt_start" : "2020-03-09",
     "dt_end" : "2020-03-11",
-    "eff_days" : 2,
+    "eff_days" : 3,
     "ben_year" : 2018,
     "ben_ann" : 2,
     "notes" : "",
@@ -13105,11 +14060,11 @@
   }, {
     "id_emp" : 3637,
     "id_abs" : 18,
-    "num" : "5",
+    "num" : "09032020",
     "dt_date" : "2020-03-13",
     "dt_start" : "2020-03-13",
     "dt_end" : "2020-03-19",
-    "eff_days" : 5,
+    "eff_days" : 7,
     "ben_year" : 2019,
     "ben_ann" : 3,
     "notes" : "",
@@ -13669,21 +14624,6 @@
     "ben_ann" : 0,
     "notes" : "FALTO SIN AVISO",
     "fk_class_abs" : 1,
-    "fk_type_abs" : 1,
-    "is_closed" : false,
-    "is_deleted" : false
-  }, {
-    "id_emp" : 3662,
-    "id_abs" : 24,
-    "num" : "1",
-    "dt_date" : "2020-03-28",
-    "dt_start" : "2020-03-17",
-    "dt_end" : "2020-03-17",
-    "eff_days" : 1,
-    "ben_year" : 2018,
-    "ben_ann" : 2,
-    "notes" : "",
-    "fk_class_abs" : 3,
     "fk_type_abs" : 1,
     "is_closed" : false,
     "is_deleted" : false
@@ -15698,21 +16638,6 @@
     "is_closed" : false,
     "is_deleted" : false
   }, {
-    "id_emp" : 4019,
-    "id_abs" : 1,
-    "num" : "1",
-    "dt_date" : "2020-03-29",
-    "dt_start" : "2020-03-21",
-    "dt_end" : "2020-03-21",
-    "eff_days" : 1,
-    "ben_year" : 2018,
-    "ben_ann" : 1,
-    "notes" : "",
-    "fk_class_abs" : 3,
-    "fk_type_abs" : 1,
-    "is_closed" : false,
-    "is_deleted" : false
-  }, {
     "id_emp" : 4042,
     "id_abs" : 1,
     "num" : "02012019",
@@ -16283,21 +17208,6 @@
     "is_closed" : false,
     "is_deleted" : false
   }, {
-    "id_emp" : 4074,
-    "id_abs" : 4,
-    "num" : "2",
-    "dt_date" : "2020-03-18",
-    "dt_start" : "2020-03-09",
-    "dt_end" : "2020-03-10",
-    "eff_days" : 2,
-    "ben_year" : 2019,
-    "ben_ann" : 1,
-    "notes" : "",
-    "fk_class_abs" : 3,
-    "fk_type_abs" : 1,
-    "is_closed" : false,
-    "is_deleted" : false
-  }, {
     "id_emp" : 4084,
     "id_abs" : 1,
     "num" : "20022019",
@@ -16534,21 +17444,6 @@
     "ben_ann" : 1,
     "notes" : "24 DIC",
     "fk_class_abs" : 3,
-    "fk_type_abs" : 1,
-    "is_closed" : false,
-    "is_deleted" : false
-  }, {
-    "id_emp" : 4099,
-    "id_abs" : 5,
-    "num" : "1",
-    "dt_date" : "2020-03-28",
-    "dt_start" : "2020-03-20",
-    "dt_end" : "2020-03-20",
-    "eff_days" : 1,
-    "ben_year" : 0,
-    "ben_ann" : 0,
-    "notes" : "",
-    "fk_class_abs" : 1,
     "fk_type_abs" : 1,
     "is_closed" : false,
     "is_deleted" : false
@@ -16896,7 +17791,7 @@
     "fk_class_abs" : 2,
     "fk_type_abs" : 2,
     "is_closed" : false,
-    "is_deleted" : true
+    "is_deleted" : false
   }, {
     "id_emp" : 4160,
     "id_abs" : 7,
@@ -17234,21 +18129,6 @@
     "dt_date" : "2020-03-12",
     "dt_start" : "2020-03-03",
     "dt_end" : "2020-03-03",
-    "eff_days" : 1,
-    "ben_year" : 0,
-    "ben_ann" : 0,
-    "notes" : "",
-    "fk_class_abs" : 1,
-    "fk_type_abs" : 1,
-    "is_closed" : false,
-    "is_deleted" : false
-  }, {
-    "id_emp" : 4189,
-    "id_abs" : 11,
-    "num" : "1",
-    "dt_date" : "2020-04-03",
-    "dt_start" : "2020-03-30",
-    "dt_end" : "2020-03-30",
     "eff_days" : 1,
     "ben_year" : 0,
     "ben_ann" : 0,
@@ -17603,42 +18483,12 @@
     "is_closed" : false,
     "is_deleted" : false
   }, {
-    "id_emp" : 4294,
-    "id_abs" : 3,
-    "num" : "12.03",
-    "dt_date" : "2020-03-18",
-    "dt_start" : "2020-03-12",
-    "dt_end" : "2020-03-12",
-    "eff_days" : 1,
-    "ben_year" : 0,
-    "ben_ann" : 0,
-    "notes" : "",
-    "fk_class_abs" : 1,
-    "fk_type_abs" : 1,
-    "is_closed" : false,
-    "is_deleted" : false
-  }, {
     "id_emp" : 4301,
     "id_abs" : 1,
     "num" : "22.02.2020",
     "dt_date" : "2020-02-27",
     "dt_start" : "2020-02-22",
     "dt_end" : "2020-02-22",
-    "eff_days" : 1,
-    "ben_year" : 0,
-    "ben_ann" : 0,
-    "notes" : "",
-    "fk_class_abs" : 1,
-    "fk_type_abs" : 1,
-    "is_closed" : false,
-    "is_deleted" : false
-  }, {
-    "id_emp" : 4301,
-    "id_abs" : 2,
-    "num" : "1",
-    "dt_date" : "2020-03-25",
-    "dt_start" : "2020-03-21",
-    "dt_end" : "2020-03-21",
     "eff_days" : 1,
     "ben_year" : 0,
     "ben_ann" : 0,
@@ -17753,21 +18603,6 @@
     "is_closed" : false,
     "is_deleted" : false
   }, {
-    "id_emp" : 4324,
-    "id_abs" : 2,
-    "num" : "1",
-    "dt_date" : "2020-04-03",
-    "dt_start" : "2020-03-29",
-    "dt_end" : "2020-03-29",
-    "eff_days" : 1,
-    "ben_year" : 0,
-    "ben_ann" : 0,
-    "notes" : "",
-    "fk_class_abs" : 1,
-    "fk_type_abs" : 1,
-    "is_closed" : false,
-    "is_deleted" : false
-  }, {
     "id_emp" : 4325,
     "id_abs" : 1,
     "num" : "17022020",
@@ -17780,21 +18615,6 @@
     "notes" : "FALTA INJUSTIFICDA 17.02.2020",
     "fk_class_abs" : 1,
     "fk_type_abs" : 1,
-    "is_closed" : false,
-    "is_deleted" : false
-  }, {
-    "id_emp" : 4325,
-    "id_abs" : 2,
-    "num" : "6",
-    "dt_date" : "2020-03-25",
-    "dt_start" : "2020-03-17",
-    "dt_end" : "2020-03-22",
-    "eff_days" : 6,
-    "ben_year" : 0,
-    "ben_ann" : 0,
-    "notes" : "",
-    "fk_class_abs" : 2,
-    "fk_type_abs" : 2,
     "is_closed" : false,
     "is_deleted" : false
   }, {
@@ -17873,21 +18693,6 @@
     "is_closed" : false,
     "is_deleted" : false
   }, {
-    "id_emp" : 4336,
-    "id_abs" : 4,
-    "num" : "15.03",
-    "dt_date" : "2020-03-18",
-    "dt_start" : "2020-03-15",
-    "dt_end" : "2020-03-15",
-    "eff_days" : 1,
-    "ben_year" : 0,
-    "ben_ann" : 0,
-    "notes" : "",
-    "fk_class_abs" : 1,
-    "fk_type_abs" : 1,
-    "is_closed" : false,
-    "is_deleted" : false
-  }, {
     "id_emp" : 4348,
     "id_abs" : 1,
     "num" : "18022020",
@@ -17898,51 +18703,6 @@
     "ben_year" : 0,
     "ben_ann" : 0,
     "notes" : "FALTA INJUSTIFICADA 18.02.2020",
-    "fk_class_abs" : 1,
-    "fk_type_abs" : 1,
-    "is_closed" : false,
-    "is_deleted" : false
-  }, {
-    "id_emp" : 4355,
-    "id_abs" : 1,
-    "num" : "1",
-    "dt_date" : "2020-03-25",
-    "dt_start" : "2020-03-21",
-    "dt_end" : "2020-03-21",
-    "eff_days" : 1,
-    "ben_year" : 0,
-    "ben_ann" : 0,
-    "notes" : "",
-    "fk_class_abs" : 2,
-    "fk_type_abs" : 2,
-    "is_closed" : false,
-    "is_deleted" : false
-  }, {
-    "id_emp" : 4368,
-    "id_abs" : 1,
-    "num" : "15.03",
-    "dt_date" : "2020-03-18",
-    "dt_start" : "2020-03-15",
-    "dt_end" : "2020-03-15",
-    "eff_days" : 1,
-    "ben_year" : 0,
-    "ben_ann" : 0,
-    "notes" : "",
-    "fk_class_abs" : 1,
-    "fk_type_abs" : 1,
-    "is_closed" : false,
-    "is_deleted" : false
-  }, {
-    "id_emp" : 4368,
-    "id_abs" : 2,
-    "num" : "1",
-    "dt_date" : "2020-04-03",
-    "dt_start" : "2020-03-29",
-    "dt_end" : "2020-03-29",
-    "eff_days" : 1,
-    "ben_year" : 0,
-    "ben_ann" : 0,
-    "notes" : "",
     "fk_class_abs" : 1,
     "fk_type_abs" : 1,
     "is_closed" : false,
@@ -17963,72 +18723,12 @@
     "is_closed" : false,
     "is_deleted" : false
   }, {
-    "id_emp" : 4379,
-    "id_abs" : 2,
-    "num" : "1",
-    "dt_date" : "2020-03-25",
-    "dt_start" : "2020-03-18",
-    "dt_end" : "2020-03-18",
-    "eff_days" : 1,
-    "ben_year" : 0,
-    "ben_ann" : 0,
-    "notes" : "",
-    "fk_class_abs" : 1,
-    "fk_type_abs" : 1,
-    "is_closed" : false,
-    "is_deleted" : false
-  }, {
-    "id_emp" : 4379,
-    "id_abs" : 3,
-    "num" : "1",
-    "dt_date" : "2020-03-25",
-    "dt_start" : "2020-03-21",
-    "dt_end" : "2020-03-21",
-    "eff_days" : 1,
-    "ben_year" : 0,
-    "ben_ann" : 0,
-    "notes" : "",
-    "fk_class_abs" : 1,
-    "fk_type_abs" : 1,
-    "is_closed" : false,
-    "is_deleted" : false
-  }, {
     "id_emp" : 2672,
     "id_abs" : 1,
     "num" : "02032020",
     "dt_date" : "2020-03-13",
     "dt_start" : "2020-03-02",
     "dt_end" : "2020-03-02",
-    "eff_days" : 1,
-    "ben_year" : 2017,
-    "ben_ann" : 5,
-    "notes" : "",
-    "fk_class_abs" : 3,
-    "fk_type_abs" : 1,
-    "is_closed" : false,
-    "is_deleted" : false
-  }, {
-    "id_emp" : 2672,
-    "id_abs" : 2,
-    "num" : "09032020",
-    "dt_date" : "2020-03-25",
-    "dt_start" : "2020-03-09",
-    "dt_end" : "2020-03-13",
-    "eff_days" : 5,
-    "ben_year" : 2018,
-    "ben_ann" : 6,
-    "notes" : "",
-    "fk_class_abs" : 3,
-    "fk_type_abs" : 1,
-    "is_closed" : false,
-    "is_deleted" : false
-  }, {
-    "id_emp" : 2672,
-    "id_abs" : 3,
-    "num" : "09032020",
-    "dt_date" : "2020-03-25",
-    "dt_start" : "2020-03-17",
-    "dt_end" : "2020-03-17",
     "eff_days" : 1,
     "ben_year" : 2017,
     "ben_ann" : 5,
