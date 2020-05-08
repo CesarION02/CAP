@@ -239,8 +239,12 @@ class SDelayReportUtils {
                         $newRow->outDateTime = $otherResult->oAuxDate->format('Y-m-d   H:i:s');
                         $newRow->outDateTimeSch = $otherResult->oAuxDate->format('Y-m-d   H:i:s');
                         // $newRow->outDateTimeSch = $result->pinnedDateTime->toDateTimeString();
-                        $extraMins = SDelayReportUtils::getExtraTime($result);
-                        $mins = ($result->delayMins < 0 ? 0 : $result->delayMins) + $extraMins;
+                        $newRow->overDefaultMins = SDelayReportUtils::getExtraTime($result);
+                        $newRow->overScheduleMins = SDelayReportUtils::getExtraTimeBySchedule($result);
+                        $newRow->overWorkedMins = $registry->is_overtime ? $result->delayMins : 0;
+                        $mins = ($newRow->overWorkedMins < 0 ? 0 : $newRow->overWorkedMins) 
+                                    + $newRow->overDefaultMins 
+                                    + $newRow->overScheduleMins;
                         $newRow->delayMins = $mins;
                         $newRow->extraHours = SDelayReportUtils::convertToHoursMins($mins);
 
@@ -261,8 +265,12 @@ class SDelayReportUtils {
                         $newRow->outDateTime = $result->variableDateTime->format('Y-m-d   H:i:s');
                         $newRow->outDateTimeSch = $result->pinnedDateTime->format('Y-m-d   H:i:s');
                         // $newRow->outDateTimeSch = $result->pinnedDateTime->toDateTimeString();
-                        $extraMins = SDelayReportUtils::getExtraTime($result);
-                        $mins = ($result->delayMins < 0 ? 0 : $result->delayMins) + $extraMins;
+                        $newRow->overDefaultMins = SDelayReportUtils::getExtraTime($result);
+                        $newRow->overScheduleMins = SDelayReportUtils::getExtraTimeBySchedule($result);
+                        $newRow->overWorkedMins = $registry->is_overtime ? $result->delayMins : 0;
+                        $mins = ($newRow->overWorkedMins < 0 ? 0 : $newRow->overWorkedMins) 
+                                    + $newRow->overDefaultMins 
+                                    + $newRow->overScheduleMins;
                         $newRow->delayMins = $mins;
                         $newRow->extraHours = SDelayReportUtils::convertToHoursMins($mins);
     
@@ -274,8 +282,12 @@ class SDelayReportUtils {
                     $newRow->outDate = $result->variableDateTime->toDateString();
                     $newRow->outDateTime = $result->variableDateTime->format('Y-m-d   H:i:s');
                     $newRow->outDateTimeSch = $result->pinnedDateTime->format('Y-m-d   H:i:s');
-                    $extraMins = SDelayReportUtils::getExtraTime($result);
-                    $mins = ($result->delayMins < 0 ? 0 : $result->delayMins) + $extraMins;
+                    $newRow->overDefaultMins = SDelayReportUtils::getExtraTime($result);
+                    $newRow->overScheduleMins = SDelayReportUtils::getExtraTimeBySchedule($result);
+                    $newRow->overWorkedMins = $registry->is_overtime ? $result->delayMins : 0;
+                    $mins = ($newRow->overWorkedMins < 0 ? 0 : $newRow->overWorkedMins) 
+                                + $newRow->overDefaultMins 
+                                + $newRow->overScheduleMins;
                     $newRow->delayMins = $mins;
                     $newRow->extraHours = SDelayReportUtils::convertToHoursMins($mins);
 
@@ -338,6 +350,36 @@ class SDelayReportUtils {
         }
     }
 
+    private static function getExtraTimeBySchedule($oComparison) {
+        $mins = 0;
+        $oAux = null;
+        if ($oComparison->auxScheduleDay != null) {
+            $oAux = $oComparison->auxScheduleDay;
+        }
+        else {
+            if ($oComparison->auxWorkshift != null) {
+                $oAux = $oComparison->auxWorkshift;
+            }
+            else {
+                return 0;
+            }
+        }
+        
+        $sDate = $oComparison->pinnedDateTime->toDateString();
+        $date1 = $sDate.' '.$oAux->entry;
+        $date2 = $sDate.' '.$oAux->departure;
+        $comp = SDelayReportUtils::compareDates($date1, $date2);
+
+        $mins = abs($comp->delayMins);
+        $scheduleTop = 8 * 60; // 8 horas
+
+        if ($mins > $scheduleTop) {
+            return ($mins - $scheduleTop);
+        }
+
+        return 0;
+    }
+
     /**
      * Obtiene las checadas dado un rango de fechas y filtra por tipo de pago
      *
@@ -360,7 +402,7 @@ class SDelayReportUtils {
                                 ->leftJoin('jobs AS j', 'j.id', '=', 'e.job_id')
                                 ->leftJoin('departments AS d', 'd.id', '=', 'j.department_id')
                                 ->whereBetween('r.date', [$startDate, $endDate])
-                                ->select('r.*', 'd.id AS dept_id', 'e.num_employee', 'e.name')
+                                ->select('r.*', 'd.id AS dept_id', 'e.num_employee', 'e.name', 'e.is_overtime')
                                 ->orderBy('employee_id', 'ASC')
                                 ->orderBy('date', 'ASC')
                                 ->orderBy('time', 'ASC');
