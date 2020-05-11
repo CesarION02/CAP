@@ -24,6 +24,13 @@
             </div>
             <div class="box-body" id="reportDelayApp">
                 <div class="row">
+                    <div class="col-md-offset-10 col-md-2">
+                        <div id="wrapper">
+                            <button class="btn btn-info" id="button-a">Crear Excel</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
                     <div class="col-md-12">
                         <table id="delays_table" class="table table-condensed" style="width:100%">
                             <thead>
@@ -85,6 +92,8 @@
 	<script src="{{ asset('dt/buttons.html5.min.js') }}"></script>
     <script src="{{ asset('dt/buttons.print.min.js') }}"></script>
     <script src="{{ asset("assets/pages/scripts/SGui.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("js/excel/xlsx.full.min.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("js/excel/FileSaver.min.js") }}" type="text/javascript"></script>
     
     <script>
         function GlobalData () {
@@ -117,8 +126,14 @@
                 return "00:00";
             }
 
-            let hours = Math.floor(time / 60);          
+            let hours = Math.floor(time / 60);
+            if (hours < 10) {
+                hours = "0" + hours;
+            }
             let minutes = time % 60;
+            if (minutes < 10) {
+                minutes = "0" + minutes;
+            }
 
             return "" + hours + ":" + minutes;
         }
@@ -127,8 +142,7 @@
     <script src="{{asset("assets/pages/scripts/report/delayReport.js")}}" type="text/javascript"></script>
 
     <script>
-        $(document).ready(function() {
-            $('#delays_table').DataTable({
+        var oTable = $('#delays_table').DataTable({
                 "language": {
                     "sProcessing":     "Procesando...",
                     "sLengthMenu":     "Mostrar _MENU_ registros",
@@ -221,7 +235,7 @@
                         }
                         else {
                             value_to_return = group +' (Horas Extras Totales = ' + convertToHoursMins(mins) + 
-                                              ", Primas dom = " + suns + ", Descansos = " + daysoff +  ')';
+                                                ", Primas dom = " + suns + ", Descansos = " + daysoff +  ')';
                         }
                         
                         return value_to_return;
@@ -263,6 +277,8 @@
                         }
                     ]
             });
-        });
     </script>
+
+    <script src="{{asset("assets/pages/scripts/report/SReportRow.js")}}" type="text/javascript"></script>
+    <script src="{{asset("assets/pages/scripts/report/SExportExcel.js")}}" type="text/javascript"></script>
 @endsection
