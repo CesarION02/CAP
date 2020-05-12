@@ -21,6 +21,7 @@ Reporte Entradas/Salidas
                 <input type="hidden" id="reportType" name="reportType" value={{ $reportType }}>
                 <div class="box-body" id="reportApp">
                     <div class="row">
+                        <input type="hidden" name="tipodato" id="tipodato" value={{$tipoDatos}}>
                         <div class="col-md-5 col-md-offset-1">
                             <label for="start_date">Fecha inicio:</label>
                             <input type="date" name="start_date" id="start_date" :value="startDate">

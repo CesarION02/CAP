@@ -28,6 +28,10 @@ class SRegistryRow {
         $this->extraDoubleMins = 0;
         $this->extraTriple = "00:00";
         $this->extraTripleMins = 0;
+        $this->extraDoubleNoficial = "00:00";
+        $this->extraDoubleMinsNoficial = 0;
+        $this->extraTripleNoficial = "00:00";
+        $this->extraTripleMinsNoficial = 0;
     }
 }
 

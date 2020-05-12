@@ -31,8 +31,9 @@
                                     <th>Hora_salida</th>
                                     {{-- <th v-if="oData.tReport == oData.REP_DELAY">Retardo (min)</th>
                                     <th v-else>Horas Extra</th> --}}
-                                    <th>Horas Extra</th>
+                                    <th>Horas Extra Dobles</th>
                                     {{-- <th v-if="oData.tReport == oData.REP_HR_EX">Hr_progr_Sal</th> --}}
+                                    <th>Horas Extra Triples</th>
                                     <th>Observaciones</th>
                                 </tr>
                             </thead>
@@ -46,7 +47,8 @@
                                     <td>@{{ row.outDateTime }}</td>
                                     {{-- <td v-if="oData.tReport == oData.REP_DELAY">@{{ row.delayMins }}</td>
                                     <td v-else>@{{ row.extraHours }}</td> --}}
-                                    <td>@{{ row.extraDoble }}</td>
+                                    <td>@{{ row.extraDouble }}</td>
+                                    <td>@{{ row.extraTriple }}</td>
                                     {{-- <td v-if="oData.tReport == oData.REP_HR_EX">@{{ row.outDateTimeSch }}</td> --}}
                                     <td>@{{ row.comments }}</td>
                                 </tr>

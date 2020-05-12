@@ -7,6 +7,7 @@ use App\Models\department;
 use App\Models\employees;
 use App\Models\area;
 use App\Models\way_pay;
+use App\Models\DepartmentRH;
 use App\Models\departmentsGroup;
 use App\SUtils\SDelayReportUtils;
 use App\SUtils\SInfoWithPolicy;
@@ -410,6 +411,7 @@ class ReporteController extends Controller
          * 2: semana
          * 3: todos
          */
+        $tipoDatos = $request->tipodato;
         $payWay = $request->way_pay;
         $id = $request->vals;
         switch($request->reportType){
@@ -457,16 +459,14 @@ class ReporteController extends Controller
             break;
             case 3:
                 $employees = DB::table('employees')
-                        ->join('jobs','jobs.id','=','employees.job_id')
-                        ->join('departments','departments.id','=','jobs.department_id')
-                        ->orderBy('employees.job_id')
+                        ->join('dept_rh','dept_rh.id','=','employees.dept_rh_id')
                         ->where('employees.is_delete','0')
                         ->where('employees.way_pay_id',$payWay);
                 for($i = 0 ; count($id) > $i ; $i++ ){
                    if($i != 0){
-                        $employees = $employees->OrWhere('departments.id',$id[$i]);
+                        $employees = $employees->OrWhere('dept_rh.id',$id[$i]);
                    }else{
-                        $employees = $employees->where('departments.id',$id[$i]);
+                        $employees = $employees->where('dept_rh.id',$id[$i]);
                    }
                 }
                 $employees = $employees->select('employees.id AS id')->get();
@@ -479,7 +479,7 @@ class ReporteController extends Controller
             break;
         }
         //$lEmployees[0] = 32; 
-        $lRows = SInfoWithPolicy::processInfo($sStartDate, $sEndDate, $payWay, $lEmployees,2);
+        $lRows = SInfoWithPolicy::processInfo($sStartDate, $sEndDate, $payWay, $lEmployees,$tipoDatos);
 
         return view('report.reportView')
                     ->with('sTitle', 'Reporte de Checadas')
@@ -487,16 +487,16 @@ class ReporteController extends Controller
     } 
 
     public function prueba(){
-        $start = '2020-03-28';
-        $end = '2020-04-11';
-        $way = 1;    
-        $employees[0] = 32;
+        $start = '2020-03-23';
+        $end = '2020-03-29';
+        $way = 2;    
+        $employees[0] = 57;
         //$employees[0] = 24;
 
         $prueba = SInfoWithPolicy::processInfo($start,$end,$way,$employees,2);
     }
 
-    public function datosReporteSecretaria($reportType){
+    public function datosReporteSecretaria($reportType,$tipoDatos){
         $lAreas = null;
         $lDepsGroups = null;
         $lDepts = null;
@@ -510,7 +510,7 @@ class ReporteController extends Controller
                 $lDepsGroups = departmentsGroup::select('id','name')->where('is_delete', false)->get();
                 break;
             case 3:
-                $lDepts = department::select('id','name')->where('is_delete', false)->get();
+                $lDepts = DepartmentRH::select('id','name')->where('is_delete', false)->get();
                 break;
             case 4:
                 $lEmployees = employees::select('id', 'name', 'num_employee')
@@ -529,7 +529,8 @@ class ReporteController extends Controller
                                             ->with('lDepts', $lDepts)
                                             ->with('lEmployees', $lEmployees)
                                             //->with('lWay',$lWayPay)
-                                            ->with('reportType', $reportType);
+                                            ->with('reportType', $reportType)
+                                            ->with('tipoDatos', $tipoDatos);
     }
 
     public function generarReporteSecretaria(Request $request){
