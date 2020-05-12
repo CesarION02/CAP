@@ -257,7 +257,10 @@ class SDelayReportUtils {
                 }
                 else {
                     //falta entrada
-                   $newRow = SDelayReportUtils::setMinsToRow($newRow, $registry, $result);
+                    $newRow->outDate = $result->variableDateTime->toDateString();
+                    $newRow->outDateTime = $result->variableDateTime->format('Y-m-d   H:i:s');
+                    $newRow->outDateTimeSch = $result->pinnedDateTime->format('Y-m-d   H:i:s');
+                    $newRow->cutId = SDelayReportUtils::getCutId($result);
 
                     $isNew = true;
                     $again = false;

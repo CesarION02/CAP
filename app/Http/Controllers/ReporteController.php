@@ -337,7 +337,7 @@ class ReporteController extends Controller
     {
         return view('report.reportsGen')
                     ->with('tReport', \SCons::REP_HR_EX)
-                    ->with('sTitle', 'Reporte de Horas Extra')
+                    ->with('sTitle', 'Reporte de Percepciones Varias')
                     ->with('sRoute', 'reporteHrsExtras');
     }
 
@@ -397,7 +397,7 @@ class ReporteController extends Controller
 
         return view('report.reportDelaysView')
                     ->with('tReport', \SCons::REP_HR_EX)
-                    ->with('sTitle', 'Reporte de Horas Extra')
+                    ->with('sTitle', 'Reporte de Percepciones Varias')
                     ->with('lRows', $lRows);
     }
 
