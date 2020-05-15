@@ -225,7 +225,7 @@ function calendario() {
 }
 
 function diasemana(dia) {
-    var dias = ["lunes", "martes", "miercoles", "jueves", "viernes", "sabado", "domingo"];
+    var dias = ["domingo", "lunes", "martes", "miercoles", "jueves", "viernes", "sabado"];
     var respuesta = dias[dia];
     return respuesta;
 }

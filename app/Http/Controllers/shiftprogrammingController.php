@@ -112,6 +112,7 @@ class shiftprogrammingController extends Controller
                         ->orderBy('departments.id')
                         ->orderBy('jobs.id')
                         ->where('jobs.is_delete','0')
+                        ->where('departments.is_delete','0')
                         ->where('departments.dept_group_id',$request->typearea)
                         ->select('jobs.id AS idJob','jobs.name AS nameJob','departments.id AS idDepartment','departments.name AS nameDepartment')
                         ->get();
