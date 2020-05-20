@@ -180,7 +180,7 @@ class prePayrollController extends Controller
                 // si no tiene checadas:                                    
                 if (sizeof($lChecks) == 0) {
                     // checar incidencias ********************************************************
-                    $lAbsences = $this->searchAbsence($idEmployee, $sDate);
+                    $lAbsences = prePayrollController::searchAbsence($idEmployee, $sDate);
                     
                     if (sizeof($lAbsences) > 0) {
                         foreach ($lAbsences as $absence) {
@@ -248,7 +248,7 @@ class prePayrollController extends Controller
      * 
      * @return incident array
      */
-    private function searchAbsence($idEmployee, $sDate)
+    public static function searchAbsence($idEmployee, $sDate)
     {
         $lAbsences = incident::where('employee_id', $idEmployee)
             ->whereRaw("'" . $sDate . "' BETWEEN start_date AND end_date")
