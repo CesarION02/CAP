@@ -163,9 +163,9 @@ class prePayrollController extends Controller
                 }
             }
 
-            $lCExtrasEmp = clone collect($lExtras);
-
             foreach ($aDates as $sDate) {
+                $lCExtrasDay = clone collect($lExtras);
+
                 $day = new SPrePayrollDay();
                 $day->dt_date = $sDate;
 
@@ -226,7 +226,7 @@ class prePayrollController extends Controller
                 }
 
                 // Verifica en base al reporte de horas extra si el día corresponde a un día de descanso trabajado
-                $nDaysOff = $lCExtrasEmp->where('idEmployee', $idEmployee)
+                $nDaysOff = $lCExtrasDay->where('idEmployee', $idEmployee)
                                             ->where('outDate', $sDate)
                                             ->sum('isDayOff');
 
