@@ -305,7 +305,7 @@ class ReporteController extends Controller
                 break;
             case 4:
                 $register = $register->whereIn('e.id', $values)
-                                    ->groupBy('e.name','date','type_id','e.num_employee','a.name')
+                                    ->groupBy('e.name','date','type_id','e.num_employee')
                                     ->orderBy('date')
                                     ->orderBy('e.name')
                                     ->orderBy('time');

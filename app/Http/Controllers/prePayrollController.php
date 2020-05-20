@@ -146,8 +146,10 @@ class prePayrollController extends Controller
                 switch ($dataType) {
                     case \SCons::LIMITED_DATA:
                         $row->double_overtime = $lGrouped{$idEmployee}->minsExtraDouble / 60;
+                        $row->triple_overtime = $lGrouped{$idEmployee}->minsExtraTriple / 60;
                         break;
                     case \SCons::OTHER_DATA:
+                        $row->double_overtime = $lGrouped{$idEmployee}->minsExtraDouble / 60;
                         $row->triple_overtime = $lGrouped{$idEmployee}->minsExtraTriple / 60;
                         break;
     
