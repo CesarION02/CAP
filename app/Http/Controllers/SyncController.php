@@ -22,7 +22,7 @@ class SyncController extends Controller
     {
         // $jsonString = file_get_contents(base_path('response_from_siie.json'));
         $client = new Client([
-            'base_uri' => 'localhost:8080',
+            'base_uri' => 'localhost:9000',
             'timeout' => 10.0,
         ]);
 

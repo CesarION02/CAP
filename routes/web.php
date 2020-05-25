@@ -101,6 +101,12 @@ Route::delete('company/{id}', 'companyController@destroy')->name('delete_company
 Route::get('/syncronize', 'SyncController@toSyncronize')->name('syncErp');
 
 /* RUTAS DE EMPLEADOS */
+Route::delete('employee/fingerprint/{id}', 'employeeController@desactivar')->name('desactivar');
+Route::delete('employee/fingerprint/disable/{id}', 'employeeController@activar')->name('activar');
+Route::get('employee/fingerprint', 'employeeController@fingerprints')->name('huellas');
+Route::get('employee/fingerprint/disable', 'employeeController@fingerprintsDisable')->name('huellasActivar');
+Route::get('employee/{id}/editFinger','employeeController@fingerprintEdit')->name('editarhuella');
+Route::put('employee/fingerprint/{id}', 'employeeController@Editfingerprint')->name('edicionhuella');
 Route::get('employee/supervisorsView', 'employeeController@supervisorsView')->name('supervisores');
 Route::get('employee/{id}/editShortname', 'employeeController@editShortname')->name('editar_nombrecorto');
 Route::put('employee/supervisorsView/{id}', 'employeeController@updateShortname')->name('actualizar_nombrecorto');
