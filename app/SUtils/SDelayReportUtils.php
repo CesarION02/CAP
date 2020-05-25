@@ -369,7 +369,7 @@ class SDelayReportUtils {
 
         //Obtención de minutos de salida prematura
         $dateAux = clone $result->pinnedDateTime;
-        $dateAux->addMinutes($config->toleranceMinutes);
+        $dateAux->subMinutes($config->toleranceMinutes);
         $earlyComp = SDelayReportUtils::compareDates($result->variableDateTime->toDateTimeString(), $dateAux->toDateTimeString());
         $oRow->diffMins = $earlyComp->delayMins;
         // $newRow->outDateTimeSch = $result->pinnedDateTime->toDateTimeString();
