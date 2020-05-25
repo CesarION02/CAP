@@ -575,7 +575,7 @@ class SDelayReportUtils {
                                 ->orderBy('employee_id', 'ASC')
                                 ->orderBy('date', 'ASC')
                                 ->orderBy('time', 'ASC');
-                                // ->where('employee_id', '68');
+                                // ->where('employee_id', '121');
 
         if (sizeof($lEmployees) > 0) {
             $registries = $registries->whereIn('e.id', $lEmployees);
@@ -900,6 +900,7 @@ class SDelayReportUtils {
                                     'sd.is_active',
                                     'sd.schedule_template_id',
                                     'st.cut_id',
+                                    'st.is_night',
                                     'st.overtimepershift')
                             ->where('schedule_template_id', $templateId)
                             ->where('day_num', $day)
