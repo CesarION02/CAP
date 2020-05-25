@@ -178,7 +178,7 @@ class SInfoWithPolicy{
                                             $lRows[$j]->extraTripleMinsNoficial = 60; 
                                         }
                                     //si supera los limites para ser media hora
-                                    }else if( $minutosExtra >= $initialLimitHalf && $initialLimitHour <= $minutosExtra ){
+                                    }else if( $minutosExtra >= $initialLimitHalf && $initialLimitHour >= $minutosExtra ){
                                         //se viene arrastrando una media hora
                                         if( $HalfPendient == 1 ){
                                             //si la suma de horas esta por debajo del limite

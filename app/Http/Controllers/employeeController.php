@@ -225,7 +225,7 @@ class employeeController extends Controller
         $emp->is_overtime = $jEmployee->extra_time;
         $emp->way_register_id = 1; // pendiente
         $emp->ben_pol_id = 1; // estricto
-        $emp->job_id = 1; // ???
+        $emp->job_id = 25; // ???
         $emp->external_id = $jEmployee->id_employee;
         $emp->company_id = $this->companies[$jEmployee->company_id];
         $emp->dept_rh_id = $this->rhdepartments[$jEmployee->dept_rh_id];
@@ -234,5 +234,71 @@ class employeeController extends Controller
         $emp->is_delete = $jEmployee->is_deleted;
 
         $emp->save();
+    }
+
+    public function fingerprints(){
+        $employees = DB::table('employees')
+                        ->leftjoin('fingerprints','employees.id','=','fingerprints.employee_id')
+                        ->join('way_register','way_register.id','=','employees.way_register_id')
+                        ->groupBy('employees.id')
+                        ->orderBy('employees.name')
+                        ->where('employees.is_delete','0')
+                        ->where('employees.is_active', '1')
+                        ->select('employees.id AS idEmployee','employees.name AS nameEmployee','way_register.name AS way','fingerprints.id AS fingerprint','employees.num_employee AS num')
+                        ->get(); 
+        
+        return view('employee.fingerprints')->with('employees',$employees); 
+    }
+    public function fingerprintsDisable(){
+        $employees = DB::table('employees')
+                        ->leftjoin('fingerprints','employees.id','=','fingerprints.employee_id')
+                        ->join('way_register','way_register.id','=','employees.way_register_id')
+                        ->groupBy('employees.id')
+                        ->orderBy('employees.name')
+                        ->where('employees.is_delete','2')
+                        ->where('employees.is_active', '1')
+                        ->select('employees.id AS idEmployee','employees.name AS nameEmployee','way_register.name AS way','fingerprints.id AS fingerprint','employees.num_employee AS num')
+                        ->get(); 
+        
+        return view('employee.fingerprintDisable')->with('employees',$employees); 
+    }
+
+    public function fingerprintEdit($id){
+        $way = way_register::orderBy('id','ASC')->pluck('id','name');
+        $data = employees::findOrFail($id);
+
+        return view('employee.fingerprintedit', compact('data'))
+                                        ->with('way',$way);   
+    }
+
+    public function Editfingerprint(Request $request, $id){
+
+        $actualizar = employees::findOrFail($id);
+        $actualizar->way_register_id = $request->way_register_id;
+        $actualizar->save();
+        return redirect('employee')->with('mensaje', 'Empleado actualizado con exito');
+    }
+
+    public function desactivar(Request $request,$id){
+        if ($request->ajax()) {
+            $employee = employees::find($id);
+            $employee->fill($request->all());
+            $employee->is_delete = 2;
+            $employee->save();
+            return response()->json(['mensaje' => 'ok']);
+        } else {
+            abort(404);
+        }    
+    }
+    public function activar(Request $request,$id){
+        if ($request->ajax()) {
+            $employee = employees::find($id);
+            $employee->fill($request->all());
+            $employee->is_delete = 0;
+            $employee->save();
+            return response()->json(['mensaje' => 'ok']);
+        } else {
+            abort(404);
+        }    
     }
 }
