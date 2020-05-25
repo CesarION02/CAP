@@ -57,11 +57,12 @@ class SDelayReportUtils {
                 $theRow = SDelayReportUtils::manageRow($newRow, $isNew, $idEmployee, $registry, $lAssigns, $lWorkshifts);
             }
             else {
-                $theRow = SDelayReportUtils::manageRowHrExt($newRow, $isNew, $idEmployee, $registry, $lAssigns, $lWorkshifts);
+                $theRow = SDelayReportUtils::manageRowHrExt($newRow, $isNew, $idEmployee, $registry, $lAssigns, $lWorkshifts, $sStartDate, $sEndDate);
             }
             $isNew = $theRow[0];
             $newRow = $theRow[1];
             $again = $theRow[2];
+            $fRegistry = $theRow[3];
 
             if ($isNew) {
                 $lRows[] = $newRow;
@@ -72,7 +73,12 @@ class SDelayReportUtils {
                     $theRow = SDelayReportUtils::manageRow($newRow, $isNew, $idEmployee, $registry, $lAssigns, $lWorkshifts);
                 }
                 else {
-                    $theRow = SDelayReportUtils::manageRowHrExt($newRow, $isNew, $idEmployee, $registry, $lAssigns, $lWorkshifts);
+                    if ($fRegistry != null) {
+                        $theRow = SDelayReportUtils::manageRowHrExt($newRow, $isNew, $idEmployee, $fRegistry, $lAssigns, $lWorkshifts, $sStartDate, $sEndDate);
+                    }
+                    else {
+                        $theRow = SDelayReportUtils::manageRowHrExt($newRow, $isNew, $idEmployee, $registry, $lAssigns, $lWorkshifts, $sStartDate, $sEndDate);
+                    }
                 }
                 $isNew = $theRow[0];
                 $newRow = $theRow[1];
@@ -184,6 +190,7 @@ class SDelayReportUtils {
         $response[] = $isNew;
         $response[] = $newRow;
         $response[] = $again;
+        $response[] = null;
 
         return $response;
     }
@@ -203,10 +210,11 @@ class SDelayReportUtils {
      *               $response[1] = SRegistryRow que puede ser procesado de nuevo o estar completo
      *               $response[2] = boolean que determina si el renglón será reprocesado, esto cuando falta un registro de entrada o salida
      */
-    public static function manageRowHrExt($newRow, $isNew, $idEmployee, $registry, $lAssigns, $qWorkshifts)
+    public static function manageRowHrExt($newRow, $isNew, $idEmployee, $registry, $lAssigns, $qWorkshifts, $sStartDate, $sEndDate)
     {
         $hasAssign = $lAssigns != null;
         $again = false;
+        $oFoundRegistry = null;
 
         if ($isNew) {
             $newRow = new SRegistryRow();
@@ -257,14 +265,33 @@ class SDelayReportUtils {
                 }
                 else {
                     //falta entrada
-                    $newRow->outDate = $result->variableDateTime->toDateString();
-                    $newRow->outDateTime = $result->variableDateTime->format('Y-m-d   H:i:s');
-                    $newRow->outDateTimeSch = $result->pinnedDateTime->format('Y-m-d   H:i:s');
-                    $newRow->cutId = SDelayReportUtils::getCutId($result);
+                    $bFound = false;
+                    if ($result->pinnedDateTime->toDateString() == $sStartDate) {
+                        // buscar entrada un día antes
+                        $oDateAux = clone $result->pinnedDateTime;
+                        $oDateAux->subDay();
+                        $oFoundRegistryI = SDelayReportUtils::getRegistry($oDateAux->toDateString(), $idEmployee, \SCons::REG_IN);
+                        if ($oFoundRegistryI != null) {
+                            $newRow->sInDate = $oFoundRegistryI->date.' '.$oFoundRegistryI->time;
+                            $newRow->inDate = $oFoundRegistryI->date;
+                            $newRow->inDateTime = $oFoundRegistryI->date.'   '.$oFoundRegistryI->time;
+    
+                            $isNew = false;
+                            $again = true;
+                            $bFound = true;
+                        }
+                    }
 
-                    $isNew = true;
-                    $again = false;
-                    $newRow->comments = $newRow->comments."Falta entrada".",";
+                    if (! $bFound) {
+                        $newRow->outDate = $result->variableDateTime->toDateString();
+                        $newRow->outDateTime = $result->variableDateTime->format('Y-m-d   H:i:s');
+                        $newRow->outDateTimeSch = $result->pinnedDateTime->format('Y-m-d   H:i:s');
+                        $newRow->cutId = SDelayReportUtils::getCutId($result);
+
+                        $isNew = true;
+                        $again = false;
+                        $newRow->comments = $newRow->comments."Falta entrada".",";
+                    }
                 }
             }
 
@@ -272,6 +299,7 @@ class SDelayReportUtils {
         else {
             if ($newRow->outDate == null) {
                 if ($newRow->inDate == null) {
+                    $newRow->sInDate = $registry->date.' '.$registry->time;
                     $newRow->inDate = $registry->date;
                     $newRow->inDateTime = $registry->date.'   '.$registry->time;
 
@@ -279,9 +307,24 @@ class SDelayReportUtils {
                 }
                 else {
                     // falta salida
-                    $newRow->comments = $newRow->comments."Falta salida".",";
-                    $again = true;
-                    $isNew = true;
+                    $bFound = false;
+                    if ($registry->date == $sEndDate) {
+                        // buscar entrada un día antes
+                        $oDateAux = Carbon::parse($registry->date);
+                        $oDateAux->addDay();
+                        $oFoundRegistry = SDelayReportUtils::getRegistry($oDateAux->toDateString(), $idEmployee, \SCons::REG_OUT);
+                        if ($oFoundRegistry != null) {
+                            $isNew = false;
+                            $bFound = true;
+                            $again = true;
+                        }
+                    }
+
+                    if (! $bFound) {
+                        $newRow->comments = $newRow->comments."Falta salida".",";
+                        $again = true;
+                        $isNew = true;
+                    }
                 }
             }
         }
@@ -304,28 +347,126 @@ class SDelayReportUtils {
         $response[] = $isNew;
         $response[] = $newRow;
         $response[] = $again;
+        $response[] = $oFoundRegistry;
 
         return $response;
     }
 
+    /**
+     * Determina las horas extras correspondientes
+     *
+     * @param SRegistryRow $oRow
+     * @param query_result $registry
+     * @param query_result $result
+     * 
+     * @return SRegistryRow $oRow
+     */
     private static function setMinsToRow($oRow = null, $registry = null, $result = null) {
         $oRow->outDate = $result->variableDateTime->toDateString();
         $oRow->outDateTime = $result->variableDateTime->format('Y-m-d   H:i:s');
         $oRow->outDateTimeSch = $result->pinnedDateTime->format('Y-m-d   H:i:s');
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+
+        //Obtención de minutos de salida prematura
+        $dateAux = clone $result->pinnedDateTime;
+        $dateAux->addMinutes($config->toleranceMinutes);
+        $earlyComp = SDelayReportUtils::compareDates($result->variableDateTime->toDateTimeString(), $dateAux->toDateTimeString());
+        $oRow->diffMins = $earlyComp->delayMins;
         // $newRow->outDateTimeSch = $result->pinnedDateTime->toDateTimeString();
-        $oRow->overDefaultMins = SDelayReportUtils::getExtraTime($result);
-        $oRow->overScheduleMins = SDelayReportUtils::getExtraTimeBySchedule($result);
-        $oRow->overWorkedMins = $registry->is_overtime ? $result->delayMins : 0;
-        $mins = ($oRow->overWorkedMins < 0 ? 0 : $oRow->overWorkedMins) 
-                    + $oRow->overDefaultMins 
-                    + $oRow->overScheduleMins;
-        $oRow->delayMins = $mins;
-        $oRow->extraHours = SDelayReportUtils::convertToHoursMins($mins);
+
+        //comparar hora entrada vs hora programada
+        $sInDate = $oRow->sInDate;
+        $sInSchedule = SDelayReportUtils::getScheduleIn($result);
+
+        $comparison = SDelayReportUtils::compareDates($sInSchedule, $sInDate);
+        //Determinar a partir de qué hora se toman horas extra
+        $oDateExtra = null;
+        if ($comparison->delayMins > 0) {
+            $oDate = clone $result->pinnedDateTime;
+            $oDateExtra = $oDate->addMinutes($comparison->delayMins);
+        }
+        else {
+            $oDateExtra = $result->pinnedDateTime;
+        }
+
+        //duración de jornada con horas programadas
+        $comparisonSched = SDelayReportUtils::compareDates($sInSchedule, $result->pinnedDateTime->toDateTimeString());
+        // duración de jornada con horas de checadas
+        $comparisonCheck = SDelayReportUtils::compareDates($sInDate, $result->variableDateTime->toDateTimeString());
         $oRow->cutId = SDelayReportUtils::getCutId($result);
+
+        // Si cumple con las horas de trabajo requeridas (tomando en cuenta minutos de tolerancia)
+        if ($comparisonCheck->delayMins >= ($comparisonSched->delayMins - $config->toleranceMinutes)) { // holgura
+            // Se compara la nueva hora de salida de referencia cotra la hora de salida de la checada
+            $resultN = SDelayReportUtils::compareDates($oDateExtra->toDateTimeString(), $result->variableDateTime->toDateTimeString());
+
+            // se obtienen horas extras de la base de datos
+            $oRow->overDefaultMins = SDelayReportUtils::getExtraTime($result);
+            // se obtiene tiempo extra por turno mayor de 8 horas
+            $oRow->overScheduleMins = SDelayReportUtils::getExtraTimeBySchedule($result);
+            $oRow->overWorkedMins = $registry->is_overtime ? $resultN->delayMins : 0;
+            $mins = ($oRow->overWorkedMins < 0 ? 0 : $oRow->overWorkedMins) 
+                        + $oRow->overDefaultMins 
+                        + $oRow->overScheduleMins;
+            $oRow->delayMins = $mins;
+            $oRow->extraHours = SDelayReportUtils::convertToHoursMins($mins);
+        }
+        else {
+            $oRow->overDefaultMins = 0;
+            $oRow->overScheduleMins = 0;
+            $oRow->overWorkedMins = 0;
+            $mins = 0;
+            $oRow->delayMins = $mins;
+            $oRow->extraHours = SDelayReportUtils::convertToHoursMins($mins);
+        }
 
         return $oRow;
     }
 
+    /**
+     * Determina la hora de entrada programada en base al objeto recibido
+     *
+     * @param SDateComparison $oComparison
+     * @return String "yyyy-MM-dd hh:mm:ss"
+     */
+    private static function getScheduleIn($oComparison) {
+        $night = false;
+        $sDate = "";
+        if ($oComparison->auxScheduleDay != null) {
+            $oAux = $oComparison->auxScheduleDay;
+            $night = $oAux->is_night;
+        }
+        else {
+            if ($oComparison->auxWorkshift != null) {
+                $oAux = $oComparison->auxWorkshift;
+                if ($oAux->name == "Noche") {
+                    $night = true;
+                }
+            }
+            else {
+                return 0;
+            }
+        }
+
+        $time = $oAux->entry;
+        if ($night) {
+            $oAuxDate = clone $oComparison->pinnedDateTime;
+            $sDate = $oAuxDate->subDay()->toDateString();
+        }
+        else {
+            $sDate = $oComparison->pinnedDateTime->toDateString();
+        }
+
+        return $sDate." ".$time;
+    }
+
+    /**
+     * Devuelve el tiempo extra procedente de la base de datos,
+     * correspondiente al tiempo que le corresponde por default
+     *
+     * @param SDateComparison $oComparison
+     * @return int Minutos extra correspondientes
+     */
     private static function getExtraTime($oComparison) {
         if ($oComparison->auxScheduleDay != null) {
             return $oComparison->auxScheduleDay->overtimepershift * 60;
@@ -339,15 +480,27 @@ class SDelayReportUtils {
         }
     }
 
+    /**
+     * Devuelve los minutos extra que le corresponden al empleado su tiene un
+     * turno de más de 8 horas
+     *
+     * @param SDateComparison $oComparison
+     * 
+     * @return int Minutos extra correspondientes
+     */
     private static function getExtraTimeBySchedule($oComparison) {
         $mins = 0;
         $oAux = null;
+        $night = false;
         if ($oComparison->auxScheduleDay != null) {
             $oAux = $oComparison->auxScheduleDay;
         }
         else {
             if ($oComparison->auxWorkshift != null) {
                 $oAux = $oComparison->auxWorkshift;
+                if ($oAux->name == "Noche") {
+                    $night = true;
+                }
             }
             else {
                 return 0;
@@ -356,6 +509,9 @@ class SDelayReportUtils {
         
         $sDate = $oComparison->pinnedDateTime->toDateString();
         $date1 = $sDate.' '.$oAux->entry;
+        if ($night) {
+            $sDate = $oComparison->pinnedDateTime->addDay()->toDateString();
+        }
         $date2 = $sDate.' '.$oAux->departure;
         $comp = SDelayReportUtils::compareDates($date1, $date2);
         
@@ -363,12 +519,23 @@ class SDelayReportUtils {
         $scheduleTop = 8 * 60; // 8 horas
         
         if ($mins > $scheduleTop) {
-            return ($mins - $scheduleTop);
+            $extraMins = $mins - $scheduleTop;
+            if ($extraMins > 240) {
+                return 240;
+            }
+
+            return $extraMins;
         }
         
         return 0;
     }
     
+    /**
+     * Obtiene la bandera de si se recorta entrada o salida
+     *
+     * @param SDateComparison $oComparison
+     * @return int cut_id
+     */
     private static function getCutId($oComparison) {
         if ($oComparison->auxScheduleDay != null) {
             return $oComparison->auxScheduleDay->cut_id;
@@ -408,7 +575,7 @@ class SDelayReportUtils {
                                 ->orderBy('employee_id', 'ASC')
                                 ->orderBy('date', 'ASC')
                                 ->orderBy('time', 'ASC');
-                                // ->where('employee_id', '44');
+                                // ->where('employee_id', '68');
 
         if (sizeof($lEmployees) > 0) {
             $registries = $registries->whereIn('e.id', $lEmployees);
@@ -434,6 +601,53 @@ class SDelayReportUtils {
         // dd(\DB::getQueryLog());
 
         return $registries;
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param [type] $sDate
+     * @param [type] $iEmployee
+     * @param int \SCons::REG_OUT \SCons::REG_IN
+     * @return void
+     */
+    private static function getRegistry($sDate, $iEmployee, $iType)
+    {
+        $registry = \DB::table('registers AS r')
+                                ->join('employees AS e', 'e.id', '=', 'r.employee_id')
+                                ->where('r.date', $sDate)
+                                ->where('e.id', $iEmployee)
+                                ->select('r.*', 'e.num_employee', 'e.name', 'e.is_overtime');
+
+        if ($iType == \SCons::REG_IN) {
+            $registry = $registry->orderBy('date', 'DESC')
+                                ->orderBy('time', 'DESC');
+        }
+        else {
+            $registry = $registry->orderBy('date', 'ASC')
+                                ->orderBy('time', 'ASC');
+        }
+
+        $registry = $registry->get();
+
+        foreach ($registry as $reg) {
+            if ($iType == \SCons::REG_IN) {
+                if ($reg->type_id == \SCons::REG_OUT) {
+                    return null;
+                }
+                
+                return $reg;
+            }
+            else {
+                if ($reg->type_id = \SCons::REG_IN) {
+                    return null;
+                }
+
+                return $reg;
+            }
+        }
+
+        return null;
     }
 
     /**

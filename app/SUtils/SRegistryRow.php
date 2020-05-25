@@ -9,11 +9,13 @@ class SRegistryRow {
         $this->idEmployee = 0;
         $this->numEmployee = 0;
         $this->employee = 0;
+        $this->sInDate = null;
         $this->inDate = null;
         $this->inDateTime = null;
         $this->outDate = null;
         $this->outDateTime = null;
         $this->outDateTimeSch = null;
+        $this->diffMins = null;
         $this->delayMins = null;
         $this->overDefaultMins = null;
         $this->overScheduleMins = null;
