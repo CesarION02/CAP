@@ -15,6 +15,8 @@ class SRegistryRow {
         $this->outDate = null;
         $this->outDateTime = null;
         $this->outDateTimeSch = null;
+        $this->entryDelayMinutes = null;
+        $this->prematureOut = null;
         $this->diffMins = null;
         $this->delayMins = null;
         $this->overDefaultMins = null;
@@ -24,6 +26,7 @@ class SRegistryRow {
         $this->isSunday = 0;
         $this->isDayOff = 0;
         $this->isHoliday = 0;
+        $this->isCheckSchedule = false;
         $this->others = "";
         $this->comments = "";
         $this->extraDouble = "00:00";

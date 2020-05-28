@@ -1,6 +1,7 @@
 @extends("theme.$theme.layoutcustom")
 @section('styles1')
     <link rel="stylesheet" href="{{ asset("dt/datatables.css") }}">
+    <link rel="stylesheet" href="{{ asset("assets/css/reportD.css") }}">
     <style>
         tr {
             font-size: 80%
@@ -46,6 +47,8 @@
                                     <th>Retardo (min)</th>
                                     <th>Horas Extra</th>
                                     {{-- <th v-if="oData.tReport == oData.REP_HR_EX">Hr_progr_Sal</th> --}}
+                                    <th v-if="oData.tReport == oData.REP_HR_EX">Retardo (min)</th>
+                                    <th v-if="oData.tReport == oData.REP_HR_EX">Sal. Premat. (min)</th>
                                     <th v-if="oData.tReport == oData.REP_HR_EX">Pr. Dom.</th>
                                     <th v-if="oData.tReport == oData.REP_HR_EX">Descanso</th>
                                     <th v-if="oData.tReport == oData.REP_HR_EX">Otros</th>
@@ -53,7 +56,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="row in oData.lRows" :class="getCssClass(row.delayMins, oData.tReport)">
+                                <tr v-for="row in oData.lRows" :class="getCssClass(row, oData.tReport)">
                                     <td>@{{ vueGui.pad(row.numEmployee, 6) }}</td>
                                     <td>@{{ row.employee }}</td>
                                     {{-- <td>@{{ row.inDate }}</td> --}}
@@ -65,6 +68,8 @@
                                     <td>@{{ row.delayMins < 0 ? null : row.delayMins }}</td>
                                     <td>@{{ row.extraHours }}</td>
                                     {{-- <td v-if="oData.tReport == oData.REP_HR_EX">@{{ row.outDateTimeSch }}</td> --}}
+                                    <td v-if="oData.tReport == oData.REP_HR_EX">@{{ row.entryDelayMinutes }}</td>
+                                    <td v-if="oData.tReport == oData.REP_HR_EX">@{{ row.prematureOut }}</td>
                                     <td v-if="oData.tReport == oData.REP_HR_EX">@{{ row.isSunday > 0 ? row.isSunday : "" }}</td>
                                     <td v-if="oData.tReport == oData.REP_HR_EX">@{{ row.isDayOff > 0 ? row.isDayOff : "" }}</td>
                                     <td v-if="oData.tReport == oData.REP_HR_EX">@{{ row.others }}</td>
@@ -104,10 +109,10 @@
 
             // this.minsCol = this.tReport == this.REP_DELAY ? 4 : 4;
             this.minsCol = 4;
-            this.sunCol = 6;
-            this.dayoffCol = 7;
+            this.sunCol = 9;
+            this.dayoffCol = 9;
             this.hiddenCol = this.tReport == this.REP_DELAY ? 5 : 4;
-            this.toExport = this.tReport == this.REP_DELAY ? [0, 1, 2, 3, 4, 6] : [0, 1, 2, 3, 5, 6, 7, 8, 9];
+            this.toExport = this.tReport == this.REP_DELAY ? [0, 1, 2, 3, 4, 6] : [0, 1, 2, 3, 5, 6, 7, 8, 9, 10, 11];
         }
         
         var oData = new GlobalData();
