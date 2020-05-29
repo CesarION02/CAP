@@ -77,8 +77,8 @@ Route::get('report/generarReporteRegs/{type}','ReporteController@registriesRepor
 Route::get('report/reporteRegistros','ReporteController@reporteRegistrosView')->name('generarreporteRegistros');
 Route::get('report/reporteRetardos','ReporteController@genDelayReport')->name('generarreporteRetardos');
 Route::get('report/viewReporteRetardos','ReporteController@delaysReport')->name('reporteRetardos');
-Route::get('report/reporteHrExtras','ReporteController@genHrExReport')->name('generarreporteHrExtras');
-Route::get('report/viewReporteHrExtras','ReporteController@hrExtReport')->name('reporteHrsExtras');
+Route::get('report/percepcionesvariables','ReporteController@genHrExReport')->name('generarreportepervariables');
+Route::get('report/viewpercepvariables','ReporteController@hrExtReport')->name('reportepercepvariables');
 
 /* RUTAS DE USUARIO */
 Route::get('user/change', 'userController@change')->name('cambio_usuario');

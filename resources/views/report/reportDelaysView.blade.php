@@ -4,7 +4,7 @@
     <link rel="stylesheet" href="{{ asset("assets/css/reportD.css") }}">
     <style>
         tr {
-            font-size: 80%
+            font-size: 70%;
         }
     </style>
 @endsection
@@ -27,7 +27,7 @@
                 <div class="row">
                     <div class="col-md-offset-10 col-md-2">
                         <div id="wrapper">
-                            <button class="btn btn-info" id="button-a">Crear Excel</button>
+                            <button class="btn btn-info" id="button-a">Crear excel</button>
                         </div>
                     </div>
                 </div>
@@ -39,13 +39,13 @@
                                     <th>#</th>
                                     <th>Empleado</th>
                                     {{-- <th>Fecha entrada</th> --}}
-                                    <th>Hora_entrada</th>
+                                    <th>Fecha/hora entrada</th>
                                     {{-- <th>Fecha salida</th> --}}
-                                    <th>Hora_salida</th>
+                                    <th>Fecha/hora salida</th>
                                     {{-- <th v-if="oData.tReport == oData.REP_DELAY">Retardo (min)</th>
                                     <th v-else>Horas Extra</th> --}}
                                     <th>Retardo (min)</th>
-                                    <th>Horas Extra</th>
+                                    <th>Horas extra</th>
                                     {{-- <th v-if="oData.tReport == oData.REP_HR_EX">Hr_progr_Sal</th> --}}
                                     <th v-if="oData.tReport == oData.REP_HR_EX">Retardo (min)</th>
                                     <th v-if="oData.tReport == oData.REP_HR_EX">Sal. Premat. (min)</th>
@@ -86,6 +86,13 @@
 @endsection
 
 @section("scripts")
+    <script src="{{ asset("assets/pages/scripts/SGui.js") }}" type="text/javascript"></script>
+
+    <script>
+        var oGui = new SGui();
+        oGui.showLoading(5000);
+    </script>
+
     <script src="{{ asset("assets/js/chosen.jquery.min.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/vue.js") }}" type="text/javascript"></script>
     <script src="{{ asset("dt/datatables.js") }}" type="text/javascript"></script>
@@ -96,12 +103,12 @@
 	<script src="{{ asset('dt/vfs_fonts.js') }}"></script>
 	<script src="{{ asset('dt/buttons.html5.min.js') }}"></script>
     <script src="{{ asset('dt/buttons.print.min.js') }}"></script>
-    <script src="{{ asset("assets/pages/scripts/SGui.js") }}" type="text/javascript"></script>
     <script src="{{ asset("js/excel/xlsx.full.min.js") }}" type="text/javascript"></script>
     <script src="{{ asset("js/excel/FileSaver.min.js") }}" type="text/javascript"></script>
     
     <script>
         function GlobalData () {
+
             this.lRows = <?php echo json_encode($lRows) ?>;
             this.tReport = <?php echo json_encode($tReport) ?>;
             this.REP_HR_EX = <?php echo json_encode(\SCons::REP_HR_EX) ?>;
@@ -116,7 +123,6 @@
         }
         
         var oData = new GlobalData();
-        var oGui = new SGui();
 
         /**
          * Convierte los minutos en entero a formato 00:00
@@ -257,12 +263,6 @@
                 "buttons": [
                         'pageLength',
                         {
-                            extend: 'excel',
-                            exportOptions: {
-                                columns: oData.toExport
-                            }
-                        },
-                        {
                             extend: 'copy',
                             exportOptions: {
                                 columns: oData.toExport
@@ -270,6 +270,12 @@
                         },
                         {
                             extend: 'csv',
+                            exportOptions: {
+                                columns: oData.toExport
+                            }
+                        },
+                        {
+                            extend: 'excel',
                             exportOptions: {
                                 columns: oData.toExport
                             }

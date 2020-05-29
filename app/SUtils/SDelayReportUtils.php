@@ -140,12 +140,12 @@ class SDelayReportUtils {
                     $isNew = false;
                     $newRow->inDate = $registry->date;
                     $newRow->inDateTime = $registry->date.'   '.$registry->time;
-                    $newRow->comments = $newRow->comments."Sin horario".",";
+                    $newRow->comments = $newRow->comments."Sin horario".". ";
                 }
                 else {
                     $isNew = true;
                     $again = true;
-                    $newRow->comments = $newRow->comments."Falta salida".",";
+                    $newRow->comments = $newRow->comments."Falta salida".". ";
                 }
             }
             else {
@@ -158,7 +158,7 @@ class SDelayReportUtils {
 
                         //Comparar si la checada de entrada está antes que su hora programada
                         if ($result->delayMins <= (-1 * $config->maxGapMinutes)) {
-                            $newRow->comments = $newRow->comments."REVISAR HORARIO,";
+                            $newRow->comments = $newRow->comments."REVISAR HORARIO. ";
                             $newRow->isCheckSchedule = true;
                         }
     
@@ -169,7 +169,7 @@ class SDelayReportUtils {
                     //falta salida
                     $isNew = true;
                     $again = true;
-                    $newRow->comments = $newRow->comments."Falta salida".",";
+                    $newRow->comments = $newRow->comments."Falta salida".". ";
                 }
             }
 
@@ -186,7 +186,7 @@ class SDelayReportUtils {
                     // falta entrada
                     $newRow->outDate = $registry->date;
                     $newRow->outDateTime = $registry->date.'   '.$registry->time;
-                    $newRow->comments = $newRow->comments."Falta entrada".",";
+                    $newRow->comments = $newRow->comments."Falta entrada".". ";
 
                     $isNew = true;
                 }
@@ -244,7 +244,7 @@ class SDelayReportUtils {
                 if ($isNew) {
                     $isNew = false;
                     $again = true;
-                    $newRow->comments = $newRow->comments."Falta entrada,";
+                    $newRow->comments = $newRow->comments."Falta entrada. ";
                 }
                 else {
                     $otherResult = SDelayReportUtils::getNearSchedule($registry->date, $registry->time, $idEmployee, clone $qWorkshifts);
@@ -259,7 +259,7 @@ class SDelayReportUtils {
                     else {
                         $newRow->outDate = $registry->date;
                         $newRow->outDateTime = $registry->date.'   '.$registry->time;
-                        $newRow->comments = $newRow->comments."Sin horario".",";
+                        $newRow->comments = $newRow->comments."Sin horario".". ";
                     }
                 }
             }
@@ -298,7 +298,7 @@ class SDelayReportUtils {
 
                         $isNew = true;
                         $again = false;
-                        $newRow->comments = $newRow->comments."Falta entrada".",";
+                        $newRow->comments = $newRow->comments."Falta entrada".". ";
                     }
                 }
             }
@@ -344,12 +344,12 @@ class SDelayReportUtils {
 
                             //Comparar si la checada de entrada está antes que su hora programada
                             if ($result->delayMins <= (-1 * $config->maxGapMinutes)) {
-                                $newRow->comments = $newRow->comments."REVISAR HORARIO,";
+                                $newRow->comments = $newRow->comments."REVISAR HORARIO. ";
                                 $newRow->isCheckSchedule = true;
                             }
                         }
 
-                        $newRow->comments = $newRow->comments."Falta salida".",";
+                        $newRow->comments = $newRow->comments."Falta salida".". ";
                         $again = true;
                         $isNew = true;
                     }
@@ -428,7 +428,7 @@ class SDelayReportUtils {
             $oDateExtra = $result->pinnedDateTime;
             //Comparar si la checada de entrada está antes que su hora programada
             if ($comparison->delayMins <= (-1 * $config->maxGapMinutes)) {
-                $oRow->comments = $oRow->comments."REVISAR HORARIO,";
+                $oRow->comments = $oRow->comments."REVISAR HORARIO. ";
                 $oRow->isCheckSchedule = true;
             }
         }

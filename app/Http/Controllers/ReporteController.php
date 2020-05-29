@@ -335,10 +335,13 @@ class ReporteController extends Controller
 
     public function genHrExReport()
     {
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+
         return view('report.reportsGen')
                     ->with('tReport', \SCons::REP_HR_EX)
                     ->with('sTitle', 'Reporte de Percepciones Variables')
-                    ->with('sRoute', 'reporteHrsExtras');
+                    ->with('sRoute', 'reportepercepvariables')
+                    ->with('startOfWeek', $config->startOfWeek);
     }
 
     /**
