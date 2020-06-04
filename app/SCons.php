@@ -16,6 +16,10 @@ class SCons {
    const ALL_DATA = "1";
    const LIMITED_DATA = "2";
    const OTHER_DATA = "3";
+
+   const BEN_POL_STRICT = 1;
+   const BEN_POL_FREE = 2;
+   const BEN_POL_EVENT = 3;
 }
 
 ?>

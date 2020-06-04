@@ -117,6 +117,8 @@ Route::get('employee/{id}/edit', 'employeeController@edit')->name('editar_emplea
 Route::put('employee/{id}', 'employeeController@update')->name('actualizar_empleado');
 Route::delete('employee/{id}', 'employeeController@destroy')->name('eliminar_empleado');
 
+Route::get('employeebens', 'employeeController@index')->name('employeebens');
+
 /* RUTAS DE GRUPOS TURNOS */
 Route::get('group', 'groupController@index')->name('grupo');
 Route::get('group/{id}/mostrar', 'groupController@mostrar')->name('ver_grupo');

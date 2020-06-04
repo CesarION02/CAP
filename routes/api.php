@@ -23,3 +23,9 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::get('prepayroll', [
     'uses' => 'prePayrollController@getPrePayroll'
 ]);
+/*
+* Faltas y retardos
+**/
+Route::get('absdelays', [
+    'uses' => 'externalSrcsController@getAbsDelays'
+]);

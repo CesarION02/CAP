@@ -301,4 +301,18 @@ class employeeController extends Controller
             abort(404);
         }    
     }
+
+    public function indexBenefits(Request $request)
+    {
+        $lEmployees = DB::table('employees e')
+                            ->join('benefit_policies bp', 'e.ben_pol_id','=','bp.id')
+                            ->where('e.is_delete', false)
+                            ->where('e.is_active', true)
+                            ->select(['name', 'id', 'num_employee', 'ben_pol_id', 'bp.name AS bp_name'])
+                            ->get();
+
+        return view('employee.employeebenefits')
+                    ->with('lEmployees', $lEmployees)
+                    ->with('sTitle', "Política de beneficios");
+    }
 }
