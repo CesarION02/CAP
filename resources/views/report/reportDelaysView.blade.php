@@ -25,7 +25,11 @@
             </div>
             <div class="box-body" id="reportDelayApp">
                 <div class="row">
-                    <div class="col-md-offset-10 col-md-2">
+                    <div class="col-md-10">
+                        <p>Periodo: <b>{{ $sStartDate }}</b> - <b>{{ $sEndDate }}</b>. P. pago: <b>{{ $sPayWay }}</b>.</p>
+                    </div>
+                </col-md-10>
+                    <div class="col-md-2">
                         <div id="wrapper">
                             <button class="btn btn-info" id="button-a">Crear excel</button>
                         </div>

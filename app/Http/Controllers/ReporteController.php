@@ -327,10 +327,13 @@ class ReporteController extends Controller
 
     public function genDelayReport()
     {
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+        
         return view('report.reportsGen')
                     ->with('tReport', \SCons::REP_DELAY)
                     ->with('sTitle', 'Reporte de Retardos')
-                    ->with('sRoute', 'reporteRetardos');
+                    ->with('sRoute', 'reporteRetardos')
+                    ->with('startOfWeek', $config->startOfWeek);
     }
 
     public function genHrExReport()
@@ -368,8 +371,24 @@ class ReporteController extends Controller
 
         $lRows = SDelayReportUtils::processReport($sStartDate, $sEndDate, $payWay, \SCons::REP_DELAY, $lEmployees);
 
+        $sPayWay = "";
+        switch ($payWay) {
+            case \SCons::PAY_W_Q :
+                $sPayWay = "Quincena";
+                break;
+            case \SCons::PAY_W_S :
+                $sPayWay = "Semana";
+                break;
+            default:
+                $sPayWay = "Todos";
+                break;
+        }
+
         return view('report.reportDelaysView')
                     ->with('tReport', \SCons::REP_DELAY)
+                    ->with('sStartDate', $sStartDate)
+                    ->with('sEndDate', $sEndDate)
+                    ->with('sPayWay', $sPayWay)
                     ->with('sTitle', 'Reporte de Retardos')
                     ->with('lRows', $lRows);
     }
@@ -398,8 +417,24 @@ class ReporteController extends Controller
 
         $lRows = SDelayReportUtils::processReport($sStartDate, $sEndDate, $payWay, \SCons::REP_HR_EX, $lEmployees);
 
+        $sPayWay = "";
+        switch ($payWay) {
+            case \SCons::PAY_W_Q :
+                $sPayWay = "Quincena";
+                break;
+            case \SCons::PAY_W_S :
+                $sPayWay = "Semana";
+                break;
+            default:
+                $sPayWay = "Todos";
+                break;
+        }
+
         return view('report.reportDelaysView')
                     ->with('tReport', \SCons::REP_HR_EX)
+                    ->with('sStartDate', $sStartDate)
+                    ->with('sEndDate', $sEndDate)
+                    ->with('sPayWay', $sPayWay)
                     ->with('sTitle', 'Reporte de Percepciones Variables')
                     ->with('lRows', $lRows);
     }
