@@ -5,475 +5,12 @@ use Carbon\Carbon;
 class SDelayReportUtils {
 
     /**
-     * var_dump(Carbon::SUNDAY);     // int(0)
-     * var_dump(Carbon::MONDAY);     // int(1)
-     * var_dump(Carbon::TUESDAY);    // int(2)
-     * var_dump(Carbon::WEDNESDAY);  // int(3)
-     * var_dump(Carbon::THURSDAY);   // int(4)
-     * var_dump(Carbon::FRIDAY);     // int(5)
-     * var_dump(Carbon::SATURDAY);   // int(6)
-     */
-
-     /**
-      * Realiza el proceso de empatar checadas vs horarios programados y regresa una
-      * lista de SRegistryRow con los datos correspondientes
-      *
-      * @param string $sStartDate
-      * @param string $sEndDate
-      * @param int $payWay [ 1: QUINCENA, 2: SEMANA, 0: TODOS]
-      * @param int $tReport [\SCons::REP_DELAY, \SCons::REP_HR_EX]
-      * @param array $lEmployees arreglo de ids de empleados
-
-      * @return [SRegistryRow] (array)
-      */
-    public static function processReport($sStartDate, $sEndDate, $payWay, $tReport, $lEmployees)
-    {
-        $registries = SDelayReportUtils::getRegistries($sStartDate, $sEndDate, $payWay, $lEmployees, true);
-        $lWorkshifts = SDelayReportUtils::getWorkshifts($sStartDate, $sEndDate, $payWay, $lEmployees);
-
-        $lRows = array();
-        $idEmployee = 0;
-        $idDepartment = 0;
-        $isNew = true;
-        $newRow = null;
-        $count = 0;
-        $rows = sizeof($registries);
-
-        foreach ($registries as $registry) {
-            if ($registry->employee_id != $idEmployee) {
-                if (! $isNew) {
-                    $lRows[] = $newRow;
-                    $isNew = true;
-                    $newRow = null;
-                }
-
-                $idEmployee = $registry->employee_id;
-                $idDepartment = $registry->dept_id;
-
-                $lAssigns = SDelayReportUtils::hasAnAssing($idEmployee, $idDepartment, $sStartDate, $sEndDate);
-            }
-
-            if ($tReport == \SCons::REP_DELAY) {
-                $theRow = SDelayReportUtils::manageRow($newRow, $isNew, $idEmployee, $registry, $lAssigns, $lWorkshifts);
-            }
-            else {
-                $theRow = SDelayReportUtils::manageRowHrExt($newRow, $isNew, $idEmployee, $registry, $lAssigns, $lWorkshifts, $sStartDate, $sEndDate);
-            }
-            $isNew = $theRow[0];
-            $newRow = $theRow[1];
-            $again = $theRow[2];
-            $fRegistry = $theRow[3];
-
-            if ($isNew) {
-                $lRows[] = $newRow;
-            }
-
-            if ($again) {
-                if ($tReport == \SCons::REP_DELAY) {
-                    $theRow = SDelayReportUtils::manageRow($newRow, $isNew, $idEmployee, $registry, $lAssigns, $lWorkshifts);
-                }
-                else {
-                    if ($fRegistry != null) {
-                        $theRow = SDelayReportUtils::manageRowHrExt($newRow, $isNew, $idEmployee, $fRegistry, $lAssigns, $lWorkshifts, $sStartDate, $sEndDate);
-                    }
-                    else {
-                        $theRow = SDelayReportUtils::manageRowHrExt($newRow, $isNew, $idEmployee, $registry, $lAssigns, $lWorkshifts, $sStartDate, $sEndDate);
-                    }
-                }
-                $isNew = $theRow[0];
-                $newRow = $theRow[1];
-
-                if ($isNew) {
-                    $lRows[] = $newRow;
-                }
-            }
-
-            if (! $isNew && $count == ($rows -1)) {
-                $lRows[] = $newRow;
-            }
-
-            $count++;
-        }
-
-        return $lRows;
-    }
-
-    /**
-     * Procesa el renglón de checada y busca si tiene un horario asignado, esta función es usada para 
-     * el reporte de retardos, ya que consulta sobre el registro de entrada
-     *
-     * @param SRegistryRow $newRow
-     * @param boolean $isNew
-     * @param int $idEmployee
-     * @param query_result $registry
-     * @param query_assigns $lAssigns
-     * 
-     * @return array $response[0] = boolean que determina si el renglón está listo para ser agregado
-     *               $response[1] = SRegistryRow que puede ser procesado de nuevo o estar completo
-     *               $response[2] = boolean que determina si el renglón será reprocesado, esto cuando falta un registro de entrada o salida
-     */
-    private static function manageRow($newRow, $isNew, $idEmployee, $registry, $lAssigns, $qWorkshifts)
-    {
-        $lWorkshifts = clone $qWorkshifts;
-        $hasAssign = $lAssigns != null;
-        $again = false;
-        $config = \App\SUtils\SConfiguration::getConfigurations();
-
-        if ($isNew) {
-            $newRow = new SRegistryRow();
-            $newRow->idEmployee = $idEmployee;
-            $newRow->numEmployee = $registry->num_employee;
-            $newRow->employee = $registry->name;
-        }
-
-        if ($registry->type_id == \SCons::REG_IN) {
-            if ($hasAssign) {
-                $result = SDelayReportUtils::processRegistry($lAssigns, $registry, \SCons::REP_DELAY);
-            }
-            else {
-                $result = SDelayReportUtils::checkSchedule($lWorkshifts, $idEmployee, $registry, \SCons::REP_DELAY);
-            }
-
-            // no tiene horario para el día actual
-            if ($result == null) {
-                if ($isNew) {
-                    $isNew = false;
-                    $newRow->inDate = $registry->date;
-                    $newRow->inDateTime = $registry->date.'   '.$registry->time;
-                    $newRow->comments = $newRow->comments."Sin horario".". ";
-                }
-                else {
-                    $isNew = true;
-                    $again = true;
-                    $newRow->comments = $newRow->comments."Falta salida".". ";
-                }
-            }
-            else {
-                if ($newRow->inDate == null) {
-                    if ($newRow->outDate == null) {
-                        $newRow->inDate = $result->variableDateTime->toDateString();
-                        $newRow->inDateTime = $result->variableDateTime->format('Y-m-d   H:i:s');
-                        // $newRow->inDateTime = $result->variableDateTime->toDateTimeString();
-                        $newRow->delayMins = $result->delayMins;
-
-                        //Comparar si la checada de entrada está antes que su hora programada
-                        if ($result->delayMins <= (-1 * $config->maxGapMinutes)) {
-                            $newRow->comments = $newRow->comments."REVISAR HORARIO. ";
-                            $newRow->isCheckSchedule = true;
-                        }
-    
-                        $isNew = false;
-                    }
-                }
-                else {
-                    //falta salida
-                    $isNew = true;
-                    $again = true;
-                    $newRow->comments = $newRow->comments."Falta salida".". ";
-                }
-            }
-
-        }
-        else {
-            if ($newRow->outDate == null) {
-                if ($newRow->inDate != null) {
-                    $newRow->outDate = $registry->date;
-                    $newRow->outDateTime = $registry->date.'   '.$registry->time;
-
-                    $isNew = true;
-                }
-                else {
-                    // falta entrada
-                    $newRow->outDate = $registry->date;
-                    $newRow->outDateTime = $registry->date.'   '.$registry->time;
-                    $newRow->comments = $newRow->comments."Falta entrada".". ";
-
-                    $isNew = true;
-                }
-            }
-        }
-
-        $response = array();
-        $response[] = $isNew;
-        $response[] = $newRow;
-        $response[] = $again;
-        $response[] = null;
-
-        return $response;
-    }
-
-    /**
-     * Procesa el renglón de checada y busca si tiene un horario asignado, esta función es usada para 
-     * el reporte de horas extras, ya que consulta sobre el registro de salida
-     *
-     * @param SRegistryRow $newRow
-     * @param boolean $isNew
-     * @param int $idEmployee
-     * @param query_result $registry
-     * @param query_assigns $lAssigns
-     * @param query $qWorkshifts
-     * 
-     * @return array $response[0] = boolean que determina si el renglón está listo para ser agregado
-     *               $response[1] = SRegistryRow que puede ser procesado de nuevo o estar completo
-     *               $response[2] = boolean que determina si el renglón será reprocesado, esto cuando falta un registro de entrada o salida
-     */
-    public static function manageRowHrExt($newRow, $isNew, $idEmployee, $registry, $lAssigns, $qWorkshifts, $sStartDate, $sEndDate)
-    {
-        $config = \App\SUtils\SConfiguration::getConfigurations();
-        $hasAssign = $lAssigns != null;
-        $again = false;
-        $oFoundRegistry = null;
-
-        if ($isNew) {
-            $newRow = new SRegistryRow();
-            $newRow->idEmployee = $idEmployee;
-            $newRow->numEmployee = $registry->num_employee;
-            $newRow->employee = $registry->name;
-        }
-
-        if ($registry->type_id == \SCons::REG_OUT) {
-            if ($hasAssign) {
-                $result = SDelayReportUtils::processRegistry($lAssigns, $registry, \SCons::REP_HR_EX);
-            }
-            else {
-                $result = SDelayReportUtils::checkSchedule(clone $qWorkshifts, $idEmployee, $registry, \SCons::REP_HR_EX);
-            }
-
-            // no tiene horario para el día actual
-            if ($result == null) {
-                if ($isNew) {
-                    $isNew = false;
-                    $again = true;
-                    $newRow->comments = $newRow->comments."Falta entrada. ";
-                }
-                else {
-                    $otherResult = SDelayReportUtils::getNearSchedule($registry->date, $registry->time, $idEmployee, clone $qWorkshifts);
-                    $isNew = true;
-
-                    if ($otherResult != null) {
-                        $newRow = SDelayReportUtils::setMinsToRow($newRow, $registry, $otherResult);
-
-                        $newRow->isDayOff = 1;
-                        // $newRow->others = $newRow->others."DESCANSO,";
-                    }
-                    else {
-                        $newRow->outDate = $registry->date;
-                        $newRow->outDateTime = $registry->date.'   '.$registry->time;
-                        $newRow->comments = $newRow->comments."Sin horario".". ";
-                    }
-                }
-            }
-            else {
-                if ($newRow->inDate != null) {
-                    if ($newRow->outDate == null) {
-                        $newRow = SDelayReportUtils::setMinsToRow($newRow, $registry, $result);
-    
-                        $isNew = true;
-                    }
-                }
-                else {
-                    //falta entrada
-                    $bFound = false;
-                    if ($result->pinnedDateTime->toDateString() == $sStartDate) {
-                        // buscar entrada un día antes
-                        $oDateAux = clone $result->pinnedDateTime;
-                        $oDateAux->subDay();
-                        $oFoundRegistryI = SDelayReportUtils::getRegistry($oDateAux->toDateString(), $idEmployee, \SCons::REG_IN);
-                        if ($oFoundRegistryI != null) {
-                            $newRow->sInDate = $oFoundRegistryI->date.' '.$oFoundRegistryI->time;
-                            $newRow->inDate = $oFoundRegistryI->date;
-                            $newRow->inDateTime = $oFoundRegistryI->date.'   '.$oFoundRegistryI->time;
-    
-                            $isNew = false;
-                            $again = true;
-                            $bFound = true;
-                        }
-                    }
-
-                    if (! $bFound) {
-                        $newRow->outDate = $result->variableDateTime->toDateString();
-                        $newRow->outDateTime = $result->variableDateTime->format('Y-m-d   H:i:s');
-                        $newRow->outDateTimeSch = $result->pinnedDateTime->format('Y-m-d   H:i:s');
-                        $newRow->cutId = SDelayReportUtils::getCutId($result);
-
-                        $isNew = true;
-                        $again = false;
-                        $newRow->comments = $newRow->comments."Falta entrada".". ";
-                    }
-                }
-            }
-
-        }
-        else {
-            if ($newRow->outDate == null) {
-                if ($newRow->inDate == null) {
-                    $newRow->sInDate = $registry->date.' '.$registry->time;
-                    $newRow->inDate = $registry->date;
-                    $newRow->inDateTime = $registry->date.'   '.$registry->time;
-
-                    $isNew = false;
-                }
-                else {
-                    // falta salida
-                    $bFound = false;
-                    if ($registry->date == $sEndDate) {
-                        // buscar salida un día después
-                        $oDateAux = Carbon::parse($registry->date);
-                        $oDateAux->addDay();
-                        $oFoundRegistry = SDelayReportUtils::getRegistry($oDateAux->toDateString(), $idEmployee, \SCons::REG_OUT);
-                        if ($oFoundRegistry != null) {
-                            $isNew = false;
-                            $bFound = true;
-                            $again = true;
-                        }
-                    }
-
-                    if (! $bFound) {
-                        if ($hasAssign) {
-                            $result = SDelayReportUtils::processRegistry($lAssigns, $registry, \SCons::REP_DELAY);
-                        }
-                        else {
-                            $result = SDelayReportUtils::checkSchedule(clone $qWorkshifts, $idEmployee, $registry, \SCons::REP_DELAY);
-                        }
-
-                        if ($result != null) {
-                            $newRow->inDate = $result->variableDateTime->toDateString();
-                            $newRow->inDateTime = $result->variableDateTime->format('Y-m-d   H:i:s');
-                            // $newRow->inDateTime = $result->variableDateTime->toDateTimeString();
-                            $newRow->entryDelayMinutes = $result->delayMins > 0 ? $result->delayMins : null;
-
-                            //Comparar si la checada de entrada está antes que su hora programada
-                            if ($result->delayMins <= (-1 * $config->maxGapMinutes)) {
-                                $newRow->comments = $newRow->comments."REVISAR HORARIO. ";
-                                $newRow->isCheckSchedule = true;
-                            }
-                        }
-
-                        $newRow->comments = $newRow->comments."Falta salida".". ";
-                        $again = true;
-                        $isNew = true;
-                    }
-                }
-            }
-        }
-
-        if ($isNew) {
-            if (SDelayReportUtils::isSunday($newRow)) {
-                $newRow->isSunday = 1;
-                // $newRow->others = 'PRIMA DOMINICAL, '.$newRow->others;
-            }
-            
-            $lWorks = clone $qWorkshifts;
-            $event = SDelayReportUtils::checkEvents($lWorks, $idEmployee, $newRow->inDate);
-
-            if ($event != null) {
-                if ($newRow->outDate != null && $event->type_day_id == 5) { // si el evento es DESCANSO
-                    $newRow->isDayOff = 1;
-                }
-
-                $newRow->others = $event->td_name.', '.$newRow->others;
-            }
-        }
-
-        $response = array();
-        $response[] = $isNew;
-        $response[] = $newRow;
-        $response[] = $again;
-        $response[] = $oFoundRegistry;
-
-        return $response;
-    }
-
-    /**
-     * Determina las horas extras correspondientes
-     *
-     * @param SRegistryRow $oRow
-     * @param query_result $registry
-     * @param query_result $result
-     * 
-     * @return SRegistryRow $oRow
-     */
-    private static function setMinsToRow($oRow = null, $registry = null, $result = null) {
-        $oRow->outDate = $result->variableDateTime->toDateString();
-        $oRow->outDateTime = $result->variableDateTime->format('Y-m-d   H:i:s');
-        $oRow->outDateTimeSch = $result->pinnedDateTime->format('Y-m-d   H:i:s');
-        $config = \App\SUtils\SConfiguration::getConfigurations();
-
-        //Obtención de minutos de salida prematura
-        $dateAux = clone $result->pinnedDateTime;
-        $dateAux->subMinutes($config->toleranceMinutes);
-        $earlyComp = SDelayReportUtils::compareDates($result->variableDateTime->toDateTimeString(), $dateAux->toDateTimeString());
-        $oRow->diffMins = $earlyComp->delayMins;
-        if ($result->delayMins < 0) {
-            $oRow->prematureOut = $result->delayMins * -1;
-        }
-        else {
-            $oRow->prematureOut = 0;
-        }
-        // $newRow->outDateTimeSch = $result->pinnedDateTime->toDateTimeString();
-
-        //comparar hora entrada vs hora programada
-        $sInDate = $oRow->sInDate;
-        $sInSchedule = SDelayReportUtils::getScheduleIn($result);
-
-        $comparison = SDelayReportUtils::compareDates($sInSchedule, $sInDate);
-        //Determinar a partir de qué hora se toman horas extra
-        $oDateExtra = null;
-        if ($comparison->delayMins > 0) {
-            $oDate = clone $result->pinnedDateTime;
-            $oDateExtra = $oDate->addMinutes($comparison->delayMins);
-            $oRow->entryDelayMinutes = $comparison->delayMins > 0 ? $comparison->delayMins : 0; // minutos de retardo entrada
-        }
-        else {
-            $oDateExtra = $result->pinnedDateTime;
-            //Comparar si la checada de entrada está antes que su hora programada
-            if ($comparison->delayMins <= (-1 * $config->maxGapMinutes)) {
-                $oRow->comments = $oRow->comments."REVISAR HORARIO. ";
-                $oRow->isCheckSchedule = true;
-            }
-        }
-
-        //duración de jornada con horas programadas
-        $comparisonSched = SDelayReportUtils::compareDates($sInSchedule, $result->pinnedDateTime->toDateTimeString());
-        // duración de jornada con horas de checadas
-        $comparisonCheck = SDelayReportUtils::compareDates($sInDate, $result->variableDateTime->toDateTimeString());
-        $oRow->cutId = SDelayReportUtils::getCutId($result);
-
-        // Si cumple con las horas de trabajo requeridas (tomando en cuenta minutos de tolerancia)
-        if ($comparisonCheck->delayMins >= ($comparisonSched->delayMins - $config->toleranceMinutes) || $comparisonCheck->delayMins > 480) { // holgura o mayor de 8 horas
-            // Se compara la nueva hora de salida de referencia contra la hora de salida de la checada
-            $resultN = SDelayReportUtils::compareDates($oDateExtra->toDateTimeString(), $result->variableDateTime->toDateTimeString());
-
-            // se obtienen horas extras de la base de datos
-            $oRow->overDefaultMins = SDelayReportUtils::getExtraTime($result);
-            // se obtiene tiempo extra por turno mayor de 8 horas
-            $oRow->overScheduleMins = SDelayReportUtils::getExtraTimeBySchedule($result);
-            $oRow->overWorkedMins = $registry->is_overtime ? $resultN->delayMins : 0;
-            $mins = ($oRow->overWorkedMins < 0 ? 0 : $oRow->overWorkedMins) 
-                        + $oRow->overDefaultMins 
-                        + $oRow->overScheduleMins;
-            $oRow->delayMins = $mins;
-            $oRow->extraHours = SDelayReportUtils::convertToHoursMins($mins);
-        }
-        else {
-            $oRow->overDefaultMins = 0;
-            $oRow->overScheduleMins = 0;
-            $oRow->overWorkedMins = 0;
-            $mins = 0;
-            $oRow->delayMins = $mins;
-            $oRow->extraHours = SDelayReportUtils::convertToHoursMins($mins);
-        }
-
-        return $oRow;
-    }
-
-    /**
      * Determina la hora de entrada programada en base al objeto recibido
      *
      * @param SDateComparison $oComparison
      * @return String "yyyy-MM-dd hh:mm:ss"
      */
-    private static function getScheduleIn($oComparison) {
+    public static function getScheduleIn($oComparison) {
         $night = false;
         $sDate = "";
         if ($oComparison->auxScheduleDay != null) {
@@ -511,7 +48,7 @@ class SDelayReportUtils {
      * @param SDateComparison $oComparison
      * @return int Minutos extra correspondientes
      */
-    private static function getExtraTime($oComparison) {
+    public static function getExtraTime($oComparison) {
         if ($oComparison->auxScheduleDay != null) {
             return $oComparison->auxScheduleDay->overtimepershift * 60;
         }
@@ -532,7 +69,7 @@ class SDelayReportUtils {
      * 
      * @return int Minutos extra correspondientes
      */
-    private static function getExtraTimeBySchedule($oComparison) {
+    public static function getExtraTimeBySchedule($oComparison) {
         $mins = 0;
         $oAux = null;
         $night = false;
@@ -559,7 +96,7 @@ class SDelayReportUtils {
         $date2 = $sDate.' '.$oAux->departure;
         $comp = SDelayReportUtils::compareDates($date1, $date2);
         
-        $mins = abs($comp->delayMins);
+        $mins = abs($comp->diffMinutes);
         $scheduleTop = 8 * 60; // 8 horas
         
         if ($mins > $scheduleTop) {
@@ -580,7 +117,7 @@ class SDelayReportUtils {
      * @param SDateComparison $oComparison
      * @return int cut_id
      */
-    private static function getCutId($oComparison) {
+    public static function getCutId($oComparison) {
         if ($oComparison->auxScheduleDay != null) {
             return $oComparison->auxScheduleDay->cut_id;
         }
@@ -626,11 +163,11 @@ class SDelayReportUtils {
         }
 
         switch ($payWay) {
-            case 1:
-                $registries = $registries->where('e.way_pay_id', 1);
+            case \SCons::PAY_W_Q:
+                $registries = $registries->where('e.way_pay_id', \SCons::PAY_W_Q);
                 break;
-            case 2:
-                $registries = $registries->where('e.way_pay_id', 2);
+            case \SCons::PAY_W_S:
+                $registries = $registries->where('e.way_pay_id', \SCons::PAY_W_S);
                 break;
             
             default:
@@ -655,7 +192,7 @@ class SDelayReportUtils {
      * @param int \SCons::REG_OUT \SCons::REG_IN
      * @return void
      */
-    private static function getRegistry($sDate, $iEmployee, $iType)
+    public static function getRegistry($sDate, $iEmployee, $iType)
     {
         $registry = \DB::table('registers AS r')
                                 ->join('employees AS e', 'e.id', '=', 'r.employee_id')
@@ -732,11 +269,11 @@ class SDelayReportUtils {
         }
 
         switch ($payWay) {
-            case 1:
-                $lWorkshifts = $lWorkshifts->where('e.way_pay_id', 1);
+            case \SCons::PAY_W_Q:
+                $lWorkshifts = $lWorkshifts->where('e.way_pay_id', \SCons::PAY_W_Q);
                 break;
-            case 2:
-                $lWorkshifts = $lWorkshifts->where('e.way_pay_id', 2);
+            case \SCons::PAY_W_S:
+                $lWorkshifts = $lWorkshifts->where('e.way_pay_id', \SCons::PAY_W_S);
                 break;
             
             default:
@@ -856,7 +393,7 @@ class SDelayReportUtils {
                 // ordenar las asignaciones en base al tiempo de retardo
                 usort($comparisons, function($a, $b)
                 {
-                    return (abs($a->delayMins) - abs($b->delayMins));
+                    return (abs($a->diffMinutes) - abs($b->diffMinutes));
                 });
 
                 return $comparisons[0];
@@ -989,7 +526,7 @@ class SDelayReportUtils {
             $mins *= -1;
         }
 
-        $comparison->delayMins = $mins;
+        $comparison->diffMinutes = $mins;
 
         return $comparison;
     }
@@ -1071,7 +608,8 @@ class SDelayReportUtils {
             return null;
         }
 
-        $workshift = $lWEmployee[0];
+        //$workshift = $lWEmployee[0];
+        $workshift = $lWEmployee;
 
         return $workshift;
     }

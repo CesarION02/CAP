@@ -69,7 +69,7 @@
                                     <td>@{{ row.outDateTime }}</td>
                                     {{-- <td v-if="oData.tReport == oData.REP_DELAY">@{{ row.delayMins }}</td>
                                     <td v-else>@{{ row.extraHours }}</td> --}}
-                                    <td>@{{ row.delayMins < 0 ? null : row.delayMins }}</td>
+                                    <td>@{{ row.overMinsTotal < 0 ? null : row.overMinsTotal }}</td>
                                     <td>@{{ row.extraHours }}</td>
                                     {{-- <td v-if="oData.tReport == oData.REP_HR_EX">@{{ row.outDateTimeSch }}</td> --}}
                                     <td v-if="oData.tReport == oData.REP_HR_EX">@{{ row.entryDelayMinutes }}</td>

@@ -8,7 +8,7 @@ class SDateComparison {
         $this->variableDateTime = null;
         $this->pinnedDateTime = null;
 
-        $this->delayMins = 0;
+        $this->diffMinutes = 0;
 
         $this->auxScheduleDay = null;
         $this->auxWorkshift = null;

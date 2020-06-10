@@ -20,6 +20,13 @@ class SCons {
    const BEN_POL_STRICT = 1;
    const BEN_POL_FREE = 2;
    const BEN_POL_EVENT = 3;
+
+   const T_DAY_NORMAL = 1;
+   const T_DAY_INHABILITY = 2;
+   const T_DAY_VACATION = 3;
+   const T_DAY_HOLIDAY = 4;
+   const T_DAY_DAY_OFF = 5;
+   
 }
 
 ?>

@@ -12,6 +12,7 @@ use App\Models\departmentsGroup;
 use App\SUtils\SDelayReportUtils;
 use App\SUtils\SInfoWithPolicy;
 use App\SUtils\SGenUtils;
+use App\SData\SDataProcess;
 use DB;
 
 class ReporteController extends Controller
@@ -367,7 +368,7 @@ class ReporteController extends Controller
         $filterType = $request->i_filter;
         $ids = $request->elems;
 
-        $lEmployees = SGenUtils::toEmployeeIds($filterType, $ids);
+        $lEmployees = SGenUtils::toEmployeeIds($payWay, $filterType, $ids);
 
         $lRows = SDelayReportUtils::processReport($sStartDate, $sEndDate, $payWay, \SCons::REP_DELAY, $lEmployees);
 
@@ -413,9 +414,9 @@ class ReporteController extends Controller
         $filterType = $request->i_filter;
         $ids = $request->elems;
 
-        $lEmployees = SGenUtils::toEmployeeIds($filterType, $ids);
+        $lEmployees = SGenUtils::toEmployeeIds($payWay, $filterType, $ids);
 
-        $lRows = SDelayReportUtils::processReport($sStartDate, $sEndDate, $payWay, \SCons::REP_HR_EX, $lEmployees);
+        $lRows = SDataProcess::process($sStartDate, $sEndDate, $payWay, $lEmployees);
 
         $sPayWay = "";
         switch ($payWay) {
