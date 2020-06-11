@@ -74,6 +74,8 @@ function new_shiftprogramming() {
             $("#listanueva").empty("");
             $("#turnonuevo").empty("");
             $("#guardar").empty("")
+            $('#calendario').empty("");
+            $('#botonCale').attr('disabled', false)
                 //$("#Antigua").empty(" ");
             $("#listanueva").append(listaEmpleados);
             $("#turnonuevo").append(listaDepartamentos);

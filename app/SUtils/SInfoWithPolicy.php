@@ -1,6 +1,11 @@
 <?php namespace App\SUtils;
 use DataTime;
 use Carbon\Carbon;
+use DB;
+use App\SUtils\SDateTimeUtils;
+use App\SUtils\SRegistryRow;
+use App\SData\SDataProcess;
+use App\SUtils\SDateUtils;
 
 class SInfoWithPolicy{
 /**
@@ -53,6 +58,7 @@ class SInfoWithPolicy{
                 $finalLimitHalf = 30;
                 $initialLimitHour = 50;
                 $finalLimitHour = 60;
+
                 if($payWay == 1 ){
                     $groupDay = 14;
                     $limitHours = $hrsBiweekly;
@@ -89,21 +95,23 @@ class SInfoWithPolicy{
                                 $contadorRenglones++;
                                 $horaEntrada = Carbon::parse($lRows[$j]->inDateTime);
                                 $horaSalida = Carbon::parse($lRows[$j]->outDateTime);
-                                $diferenciaHoras = $horaEntrada->diffInMinutes($horaSalida);
-                                $diferenciaHoras = $diferenciaHoras - $lRows[$j]->overScheduleMins;
-                                $banderaHoras = 0; 
-                                if($diferenciaHoras < 480 && $lRows[$j]->overScheduleMins > 0){ $banderaHoras = 1;}
-                                $extraProg = $lRows[$j]->overDefaultMins - $lRows[$j]->overScheduleMins;
-                                $minutosExtra = $extraProg + $lRows[$j]->overWorkedMins;
-                            // si tiene más de una hora de tiempo extra
-                                if( $minutosExtra > 60 ){
+                                
+                                //$diferenciaHoras = $horaEntrada->diffInMinutes($horaSalida);
+                                //$diferenciaHoras = $diferenciaHoras - $lRows[$j]->overScheduleMins;
+                                //$banderaHoras = 0; 
+                                //if($diferenciaHoras < 480 && $lRows[$j]->overScheduleMins > 0){ $banderaHoras = 1;}
+                                //$extraProg = $lRows[$j]->overDefaultMins - $lRows[$j]->overScheduleMins;
+                                $minutosExtra = $lRows[$j]->overDefaultMins + $lRows[$j]->overWorkedMins;
+                                
+                                // si tiene más de una hora de tiempo extra
+                                if( $minutosExtra >= 60 ){
                                     $horasCompletas = intdiv($minutosExtra,60);
                                     $horasMedias = $minutosExtra % 60;
                                     $auxHorasCompletas = 0;
                                     $auxHorasMedias = 0;
                                     if( $horasMedias >= $initialLimitHour && $finalLimitHour >= $horasMedias ){
                                         $auxHorasCompletas = 1; 
-                                    }else if( $horasMedias >= $initialLimitHalf && $finalLimitHour <= $horasMedias ){
+                                    }else if( $horasMedias >= $initialLimitHalf && $initialLimitHour <= $horasMedias ){
                                         $auxHorasMedias = 1;
                                     }
                                     if( $HalfPendient == 1 && $auxHorasMedias == 1){
@@ -118,25 +126,19 @@ class SInfoWithPolicy{
                                         if($sumaHorasAuxiliar > $limitHours){
                                             $horasFueraLimite = $sumaHorasAuxiliar - $limitHours;
                                             $horasDentroLimite = $horasCompletas + $auxHorasCompletas - $horasFueraLimite;
-                                            $sumaHoras = 9;
+                                            $sumaHoras = $limitHours;
                                             $lRows[$j]->extraDoubleMins = $horasDentroLimite*60;
                                             $lRows[$j]->extraTripleMins = 0;
-                                            if($banderaHoras == 1){
-                                                $lRows[$j]->extraDoubleMinsNoficial = 0; 
-                                            }else{
-                                                $lRows[$j]->extraDoubleMinsNoficial = $lRows[$j]->overScheduleMins;
-                                            }
+                                            
+                                            $lRows[$j]->extraDoubleMinsNoficial = SInfoWithPolicy::normalizacion($initialLimitHalf,$initialLimitHour,$finalLimitHour,$lRows[$j]->overScheduleMins);
+                                            
                                             $lRows[$j]->extraTripleMinsNoficial = $horasFueraLimite*60;
                                         //si no se pasa continua normal
                                         }else{
                                             $sumaHoras = $sumaHorasAuxiliar;
                                             $lRows[$j]->extraDoubleMins = ($horasCompletas + $auxHorasCompletas) * 60;
                                             $lRows[$j]->extraTripleMins = 0;
-                                            if($banderaHoras == 1){
-                                                $lRows[$j]->extraDoubleMinsNoficial = 0; 
-                                            }else{
-                                                $lRows[$j]->extraDoubleMinsNoficial = $lRows[$j]->overScheduleMins;
-                                            }
+                                            $lRows[$j]->extraDoubleMinsNoficial = SInfoWithPolicy::normalizacion($initialLimitHalf,$initialLimitHour,$finalLimitHour,$lRows[$j]->overScheduleMins);
                                             $lRows[$j]->extraTripleMinsNoficial = 0;
                                         }    
                                     //si la suma de horas paso el limite
@@ -144,11 +146,7 @@ class SInfoWithPolicy{
                                         $horasCompletas = ($horasCompletas + $auxHorasCompletas)*60;
                                         $lRows[$j]->extraDoubleMins = 0;
                                         $lRows[$j]->extraTripleMins = 0;
-                                        if($banderaHoras == 1){
-                                            $lRows[$j]->extraDoubleMinsNoficial = 0; 
-                                        }else{
-                                            $lRows[$j]->extraDoubleMinsNoficial = $lRows[$j]->overScheduleMins;
-                                        }
+                                        $lRows[$j]->extraDoubleMinsNoficial = SInfoWithPolicy::normalizacion($initialLimitHalf,$initialLimitHour,$finalLimitHour,$lRows[$j]->overScheduleMins);
                                         $lRows[$j]->extraTripleMinsNoficial = $horasCompletas;     
                                     }  
                                 //si tiene menos de una hora de tiempo extra
@@ -159,22 +157,14 @@ class SInfoWithPolicy{
                                         if($sumaHoras < $limitHours){
                                             $lRows[$j]->extraDoubleMins = 60;
                                             $lRows[$j]->extraTripleMins = 0;
-                                            if($banderaHoras == 1){
-                                                $lRows[$j]->extraDoubleMinsNoficial = 0; 
-                                            }else{
-                                                $lRows[$j]->extraDoubleMinsNoficial = $lRows[$j]->overScheduleMins;
-                                            }
+                                            $lRows[$j]->extraDoubleMinsNoficial = SInfoWithPolicy::normalizacion($initialLimitHalf,$initialLimitHour,$finalLimitHour,$lRows[$j]->overScheduleMins);
                                             $lRows[$j]->extraTripleMinsNoficial = 0;
                                             $sumaHoras = $sumaHoras + 1;
                                         //si la suma de horas paso el limite
                                         }else{
                                             $lRows[$j]->extraDoubleMins = 0;
                                             $lRows[$j]->extraTripleMins = 0;
-                                            if($banderaHoras == 1){
-                                                $lRows[$j]->extraDoubleMinsNoficial = 0; 
-                                            }else{
-                                                $lRows[$j]->extraDoubleMinsNoficial = $lRows[$j]->overScheduleMins;
-                                            }
+                                            $lRows[$j]->extraDoubleMinsNoficial = SInfoWithPolicy::normalizacion($initialLimitHalf,$initialLimitHour,$finalLimitHour,$lRows[$j]->overScheduleMins);
                                             $lRows[$j]->extraTripleMinsNoficial = 60; 
                                         }
                                     //si supera los limites para ser media hora
@@ -185,11 +175,7 @@ class SInfoWithPolicy{
                                             if( $sumaHoras < $limitHours ){
                                                 $lRows[$j]->extraDoubleMins = 60;
                                                 $lRows[$j]->extraTripleMins = 0;
-                                                if($banderaHoras == 1){
-                                                    $lRows[$j]->extraDoubleMinsNoficial = 0; 
-                                                }else{
-                                                    $lRows[$j]->extraDoubleMinsNoficial = $lRows[$j]->overScheduleMins;
-                                                }
+                                                $lRows[$j]->extraDoubleMinsNoficial = SInfoWithPolicy::normalizacion($initialLimitHalf,$initialLimitHour,$finalLimitHour,$lRows[$j]->overScheduleMins);
                                                 $lRows[$j]->extraTripleMinsNoficial = 0; 
                                                 $sumaHoras = $sumaHoras + 1;  
                                                 $HalfPendient = 0; 
@@ -197,11 +183,7 @@ class SInfoWithPolicy{
                                             }else{
                                                 $lRows[$j]->extraDoubleMins = 0;
                                                 $lRows[$j]->extraTripleMins = 0;
-                                                if($banderaHoras == 1){
-                                                    $lRows[$j]->extraDoubleMinsNoficial = 0; 
-                                                }else{
-                                                    $lRows[$j]->extraDoubleMinsNoficial = $lRows[$j]->overScheduleMins;
-                                                }
+                                                $lRows[$j]->extraDoubleMinsNoficial = SInfoWithPolicy::normalizacion($initialLimitHalf,$initialLimitHour,$finalLimitHour,$lRows[$j]->overScheduleMins);
                                                 $lRows[$j]->extraTripleMinsNoficial = 60; 
                                                 $HalfPendient = 0;
                                             }
@@ -210,22 +192,14 @@ class SInfoWithPolicy{
                                             $HalfPendient = 1;
                                             $lRows[$j]->extraDoubleMins = 0;
                                             $lRows[$j]->extraTripleMins = 0;
-                                            if($banderaHoras == 1){
-                                                $lRows[$j]->extraDoubleMinsNoficial = 0; 
-                                            }else{
-                                                $lRows[$j]->extraDoubleMinsNoficial = $lRows[$j]->overScheduleMins;
-                                            }
+                                            $lRows[$j]->extraDoubleMinsNoficial = SInfoWithPolicy::normalizacion($initialLimitHalf,$initialLimitHour,$finalLimitHour,$lRows[$j]->overScheduleMins);
                                             $lRows[$j]->extraTripleMinsNoficial = 0;
                                         }
                                     //no alcanza los limites para ser hora o media hora extra
                                     }else{
                                         $lRows[$j]->extraDoubleMins = 0;
                                         $lRows[$j]->extraTripleMins = 0;
-                                        if($banderaHoras == 1){
-                                            $lRows[$j]->extraDoubleMinsNoficial = 0; 
-                                        }else{
-                                            $lRows[$j]->extraDoubleMinsNoficial = $lRows[$j]->overScheduleMins;
-                                        }
+                                        $lRows[$j]->extraDoubleMinsNoficial = SInfoWithPolicy::normalizacion($initialLimitHalf,$initialLimitHour,$finalLimitHour,$lRows[$j]->overScheduleMins);
                                         $lRows[$j]->extraTripleMinsNoficial = 0;
                                     }
                                 }
@@ -400,6 +374,297 @@ class SInfoWithPolicy{
         return $minutos;
       }
 
+      public static function normalizacion($inilihalf,$inilihour,$finlihour,$minutes){
+        if($minutes > 60){  
+            $completas = intdiv($minutes,60);
+            $minutos =  $minutes % 60;
+        }else{
+            $completas = 0;
+            $minutos = $minutes;
+        }
+
+        if($minutos > $inilihalf && $minutos < $inilihour){
+            $minutes = ($completas*60) + 30;
+        }elseif($minutos > $inilihour && $minutos < $finlihour){
+            $minutes = ($completas*60) + 60;
+        }else{
+            $minutes = $completas*60;
+        }
+            
+        return $minutes;
+      }
+      
+      /**
+      * Estandarización de los datos 
+      *
+      * @param string $sStartDate
+      * @param string $sEndDate
+      * @param int $payWay [ 1: QUINCENA, 2: SEMANA, 0: TODOS]
+      * @param int $type
+      * @param int $key
+      * @param int $employees
+
+      * @return [SRegistryRow] (array)
+      */
+      public static function standardization($sStartDate,$sEndDate,$payWay,$type,$key,$employees){
+        $lEmployees = SGenUtils::toEmployeeIds(0, 0, null, $employees);
+        $lRows = SDataProcess::process($sStartDate, $sEndDate, $payWay, $lEmployees);
+
+        $dateS = Carbon::parse($sStartDate);
+        $dateE = Carbon::parse($sEndDate);
+        $auxIni = Carbon::parse($sStartDate);
+        $auxFin = Carbon::parse($sStartDate);
+
+        $diferencia = $dateE->diffInDays($dateS);
+
+        $contadorRenglones = 0;
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+       // Número de días que se incluirán
+       // $diff = $dateS->diff($dateE);
+
+        switch($config->policy){
+            case 1:
+                $hrsBiweekly = 18;
+                $hrsWeekly = 9;
+                $horasCompletas = 0;
+                $horasMedias = 0;
+                $sumaHoras = 0;
+                $limitHours = 0;
+                $HalfPendient = 0;    //0-> no se tienen medias horas pendientes 1-> se tiene media hora pendiente
+                //constantes
+                $compEmpleado = 0;
+                $cambioEmpleado = 0;
+                $initialLimitHalf = 20;
+                $finalLimitHalf = 30;
+                $initialLimitHour = 50;
+                $finalLimitHour = 60;
+
+                if($payWay == 1 ){
+                    $limitHours = $hrsBiweekly;
+                }else if($payWay == 2){
+                    $limitHours = $hrsWeekly;
+                }
+
+                for( $j = 0 ; count($lRows) > $j ; $j ){
+                    for ( $i = 0 ; $diferencia+1 > $i ; $i++ ){
+                        $minutosExtra = $lRows[$j]->overDefaultMins + $lRows[$j]->overWorkedMins;
+                                
+                        // si tiene más de una hora de tiempo extra
+                        if( $minutosExtra >= 60 ){
+                            $horasCompletas = intdiv($minutosExtra,60);
+                            $horasMedias = $minutosExtra % 60;
+                            $auxHorasCompletas = 0;
+                            $auxHorasMedias = 0;
+                            if( $horasMedias >= $initialLimitHour && $finalLimitHour >= $horasMedias ){
+                                $auxHorasCompletas = 1; 
+                            }else if( $horasMedias >= $initialLimitHalf && $initialLimitHour <= $horasMedias ){
+                                $auxHorasMedias = 1;
+                            }
+                            if( $HalfPendient == 1 && $auxHorasMedias == 1){
+                                $auxHorasCompletas = $auxHorasCompletas + 1 ;
+                            }else if( $HalfPendient == 0 && $auxHorasMedias == 1){
+                                $HalfPendient = 1;
+                            }
+                            //si la suma de horas no paso el limite
+                            if($sumaHoras < $limitHours){
+                                $sumaHorasAuxiliar = $sumaHoras + $horasCompletas + $auxHorasCompletas;
+                                
+                                //checar si se pasa al sumar las horas del dia
+                                if($sumaHorasAuxiliar > $limitHours){
+                                    $horasFueraLimite = $sumaHorasAuxiliar - $limitHours;
+                                    $horasDentroLimite = $horasCompletas + $auxHorasCompletas - $horasFueraLimite;
+                                    $sumaHoras = $limitHours;
+                                    $lRows[$j]->extraDoubleMins = $horasDentroLimite*60;
+                                    $lRows[$j]->extraTripleMins = 0;
+                                            
+                                    $lRows[$j]->extraDoubleMinsNoficial = SInfoWithPolicy::normalizacion($initialLimitHalf,$initialLimitHour,$finalLimitHour,$lRows[$j]->overScheduleMins);
+                                            
+                                    $lRows[$j]->extraTripleMinsNoficial = $horasFueraLimite*60;
+                                //si no se pasa continua normal
+                                }else{
+                                    $sumaHoras = $sumaHorasAuxiliar;
+                                    $lRows[$j]->extraDoubleMins = ($horasCompletas + $auxHorasCompletas) * 60;
+                                    $lRows[$j]->extraTripleMins = 0;
+                                    $lRows[$j]->extraDoubleMinsNoficial = SInfoWithPolicy::normalizacion($initialLimitHalf,$initialLimitHour,$finalLimitHour,$lRows[$j]->overScheduleMins);
+                                    $lRows[$j]->extraTripleMinsNoficial = 0;
+                                }    
+                                //si la suma de horas paso el limite
+                            }else{
+                                $horasCompletas = ($horasCompletas + $auxHorasCompletas)*60;
+                                $lRows[$j]->extraDoubleMins = 0;
+                                $lRows[$j]->extraTripleMins = 0;
+                                $lRows[$j]->extraDoubleMinsNoficial = SInfoWithPolicy::normalizacion($initialLimitHalf,$initialLimitHour,$finalLimitHour,$lRows[$j]->overScheduleMins);
+                                $lRows[$j]->extraTripleMinsNoficial = $horasCompletas;     
+                            }  
+                            //si tiene menos de una hora de tiempo extra
+                        }else{
+                            // si supera los limites para ser una hora
+                            if( $minutosExtra >= $initialLimitHour && $finalLimitHour >= $minutosExtra){
+                                //si la suma de horas aun no pasa el limite
+                                if($sumaHoras < $limitHours){
+                                    $lRows[$j]->extraDoubleMins = 60;
+                                    $lRows[$j]->extraTripleMins = 0;
+                                    $lRows[$j]->extraDoubleMinsNoficial = SInfoWithPolicy::normalizacion($initialLimitHalf,$initialLimitHour,$finalLimitHour,$lRows[$j]->overScheduleMins);
+                                    $lRows[$j]->extraTripleMinsNoficial = 0;
+                                    $sumaHoras = $sumaHoras + 1;
+                                //si la suma de horas paso el limite
+                                }else{
+                                    $lRows[$j]->extraDoubleMins = 0;
+                                    $lRows[$j]->extraTripleMins = 0;
+                                    $lRows[$j]->extraDoubleMinsNoficial = SInfoWithPolicy::normalizacion($initialLimitHalf,$initialLimitHour,$finalLimitHour,$lRows[$j]->overScheduleMins);
+                                    $lRows[$j]->extraTripleMinsNoficial = 60; 
+                                }
+                                //si supera los limites para ser media hora
+                            }else if( $minutosExtra >= $initialLimitHalf && $initialLimitHour >= $minutosExtra ){
+                                //se viene arrastrando una media hora
+                                if( $HalfPendient == 1 ){
+                                    //si la suma de horas esta por debajo del limite
+                                    if( $sumaHoras < $limitHours ){
+                                        $lRows[$j]->extraDoubleMins = 60;
+                                        $lRows[$j]->extraTripleMins = 0;
+                                        $lRows[$j]->extraDoubleMinsNoficial = SInfoWithPolicy::normalizacion($initialLimitHalf,$initialLimitHour,$finalLimitHour,$lRows[$j]->overScheduleMins);
+                                        $lRows[$j]->extraTripleMinsNoficial = 0; 
+                                        $sumaHoras = $sumaHoras + 1;  
+                                        $HalfPendient = 0; 
+                                    //si la suma de horas es mayor al limite
+                                    }else{
+                                        $lRows[$j]->extraDoubleMins = 0;
+                                        $lRows[$j]->extraTripleMins = 0;
+                                        $lRows[$j]->extraDoubleMinsNoficial = SInfoWithPolicy::normalizacion($initialLimitHalf,$initialLimitHour,$finalLimitHour,$lRows[$j]->overScheduleMins);
+                                        $lRows[$j]->extraTripleMinsNoficial = 60; 
+                                        $HalfPendient = 0;
+                                    }
+                                    //Si no se tenia media hora
+                                }else{
+                                    $HalfPendient = 1;
+                                    $lRows[$j]->extraDoubleMins = 0;
+                                    $lRows[$j]->extraTripleMins = 0;
+                                    $lRows[$j]->extraDoubleMinsNoficial = SInfoWithPolicy::normalizacion($initialLimitHalf,$initialLimitHour,$finalLimitHour,$lRows[$j]->overScheduleMins);
+                                    $lRows[$j]->extraTripleMinsNoficial = 0;
+                                }
+                                //no alcanza los limites para ser hora o media hora extra
+                            }else{
+                                $lRows[$j]->extraDoubleMins = 0;
+                                $lRows[$j]->extraTripleMins = 0;
+                                $lRows[$j]->extraDoubleMinsNoficial = SInfoWithPolicy::normalizacion($initialLimitHalf,$initialLimitHour,$finalLimitHour,$lRows[$j]->overScheduleMins);
+                                $lRows[$j]->extraTripleMinsNoficial = 0;
+                            }
+                        }
+                        $j++;        
+                    }
+                    //si es el ultimo dia del grupo y se tiene una media hora sobrante 
+                    if($auxIni > $auxFin && $HalfPendient == 1){
+                    //si la suma de horas es menor al limite -> media hora Double
+                        if($limitHours > $sumaHoras){
+                            $lRows[$j-1]->extraDoubleMinsNoficial = $lRows[$j-1]->extraDoubleMinsNoficial + 30;
+                        //si la suma de horas es mayor al limite -> media hora triple
+                        }else{
+                            $lRows[$j-1]->extraTripleMinsNoficial = $lRows[$j-1]->extraTripleMinsNoficial + 30;
+                        }
+                    }
+                      
+                    $sumaHoras = 0;
+                    $HalfPendient = 0;
+                    $horasCompletas = 0;
+                    $horasMedias = 0;
+                }
+            break;
+            default:
+            break;
+        }
+        $lRows = SInfoWithPolicy::handlingHours($lRows);
+        return $lRows;
+      }
+
+      public static function handlingHours($lRows){
+        for( $j = 0 ; count($lRows) > $j ; $j++ ){
+            $mediaHora = $lRows[$j]->extraDoubleMinsNoficial % 60;
+            $horasD = intdiv($lRows[$j]->extraDoubleMinsNoficial,60);
+            $horasT = intdiv($lRows[$j]->extraTripleMinsNoficial,60);
+            if($lRows[$j]->extraDoubleMinsNoficial > 30){
+                if($lRows[$j]->cutId == 2){
+                    $Maquillada = Carbon::parse($lRows[$j]->inDateTime);
+                    $minutos = $Maquillada->format('i');
+                    $minutos = trim($minutos, "0");
+                    $horas = $Maquillada->format('h');
+                    $horas = trim($horas, "0");
+                    $minutosA = SInfoWithPolicy::cutMinutes($horas,$minutos);
+                    if($minutosA >= 0){
+                        $Maquillada->addMinutes($minutosA);
+                    }else{
+                        $Maquillada->subMinutes($minutosA);   
+                    }
+                    $Maquillada->addHours($horasD);
+                    $lRows[$j]->inDateTimeNoficial = $Maquillada->toDateTimeString();
+                    if($lRows[$j]->extraTripleMinsNoficial != 0){
+                        $salidaMaquillada = Carbon::parse($lRows[$j]->outDateTimeSch);
+                        $salidaOriginal = Carbon::parse($lRows[$j]->outDateTime);
+                        $minutos = $salidaOriginal->format('i');
+                        $minutos = trim($minutos, "0");
+                        $horas = $salidaOriginal->format('h');
+                        $horas = trim($horas, "0");
+                        $minutosA = SInfoWithPolicy::cutMinutes($horas,$minutos);
+                        if($minutosA >= 0){
+                            $salidaMaquillada->addMinutes($minutosA);
+                        }else{
+                            $salidaMaquillada->subMinutes($minutosA);   
+                        }
+                        
+                        
+                        $lRows[$j]->outDateTimeNoficial = $salidaMaquillada->toDateTimeString();
+                    }   
+
+                }else{
+                    $Maquillada = Carbon::parse($lRows[$j]->outDateTimeSch);
+                    $salidaOriginal = Carbon::parse($lRows[$j]->outDateTime);
+                    $minutos = $salidaOriginal->format('i');
+                    $minutos = trim($minutos, "0");
+                    $horas = $salidaOriginal->format('h');
+                    $horas = trim($horas, "0");
+                    $minutosA = SInfoWithPolicy::cutMinutes($horas,$minutos);
+                    if($minutosA >= 0){
+                        $Maquillada->addMinutes($minutosA);
+                    }else{
+                        $Maquillada->subMinutes($minutosA);   
+                    }
+                    $Maquillada->subHours($horasD);
+
+                    $lRows[$j]->outDateTimeNoficial = $Maquillada->toDateTimeString();
+                    
+                }
+
+            }else{
+                if($lRows[$j]->extraTripleMinsNoficial != 0){
+                    $salidaMaquillada = Carbon::parse($lRows[$j]->outDateTimeSch);
+                    $salidaOriginal = Carbon::parse($lRows[$j]->outDateTime);
+                    $minutos = $salidaOriginal->format('i');
+                    $minutos = trim($minutos, "0");
+                    $horas = $salidaOriginal->format('h');
+                    $horas = trim($horas, "0");
+
+                    $minutosA = SInfoWithPolicy::cutMinutes($horas,$minutos);
+                    if($minutosA >= 0){
+                        $salidaMaquillada->addMinutes($minutosA);
+                    }else{
+                        $salidaMaquillada->subMinutes($minutosA);   
+                    }
+                    
+                    
+                    $lRows[$j]->outDateTimeNoficial = $salidaMaquillada->toDateTimeString();
+                }   
+            }
+            
+            $lRows[$j]->extraDouble = SDelayReportUtils::convertToHoursMins($lRows[$j]->extraDoubleMins);
+            $lRows[$j]->extraTripleMins = 0;
+        }
+        return $lRows;  
+      }
+
+      public static function restDay($lRows){
+        for( $j = 0 ; count($lRows) > $j ; $j++ ){
+
+        }    
+      }
 
       public static function initArr(){
         // cero horas y todos sus minutos
