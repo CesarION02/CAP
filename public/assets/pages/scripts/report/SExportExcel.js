@@ -1,9 +1,9 @@
 function makeDocument() {
     let wb = XLSX.utils.book_new();
     wb.Props = {
-            Title: "SheetJS Tutorial",
-            Subject: "Test",
-            Author: "Red Stapler",
+            Title: "Reporte CAP",
+            Subject: "Report",
+            Author: "CAP",
             CreatedDate: new Date(2017,12,19)
     };
 
@@ -30,25 +30,31 @@ function makeDocument() {
 
     let numEmploye = tableData[0][0];
     let hrs = 0;
+    let delayMins = 0;
+    let premMins = 0;
     let sundays = 0;
     let daysOff = 0;
     tableData.each(function (rowValue, index) {
         let value = [...rowValue];
 
         if (value[0] != numEmploye) {
-            let row = oRowObj.createRowBottom(oData.tReport, numEmploye, hrs, sundays, daysOff);
+            let row = oRowObj.createRowBottom(oData.tReport, numEmploye, hrs, delayMins, premMins, sundays, daysOff);
 
             ws_data.push(row);
             numEmploye = value[0];
             hrs = 0;
+            delayMins = 0;
+            premMins = 0;
             sundays = 0;
             daysOff = 0;
         }
 
         if (oData.tReport == oData.REP_HR_EX) {
             hrs += (value[4] == "") ? 0 : parseInt(value[4], 10);
-            sundays += (value[6] == "") ? 0 : parseInt(value[6], 10);
-            daysOff += (value[7] == "") ? 0 : parseInt(value[7], 10);
+            delayMins += (value[6] == "") ? 0 : parseInt(value[6], 10);
+            premMins += (value[7] == "") ? 0 : parseInt(value[7], 10);
+            sundays += (value[8] == "") ? 0 : parseInt(value[8], 10);
+            daysOff += (value[9] == "") ? 0 : parseInt(value[9], 10);
         }
         else {
             hrs += (value[4] == "") ? 0 : parseInt(value[4], 10);
@@ -64,7 +70,7 @@ function makeDocument() {
         ws_data.push(value);
     });
 
-    let row = oRowObj.createRowBottom(oData.tReport, numEmploye, hrs, sundays, daysOff);
+    let row = oRowObj.createRowBottom(oData.tReport, numEmploye, hrs, delayMins, premMins, sundays, daysOff);
 
     ws_data.push(row);
 

@@ -120,7 +120,8 @@
 
             // this.minsCol = this.tReport == this.REP_DELAY ? 4 : 4;
             this.minsCol = 4;
-            this.sunCol = 9;
+            this.minsDelayCol = this.tReport == this.REP_DELAY ? 4 : 6;
+            this.sunCol = 8;
             this.dayoffCol = 9;
             this.hiddenCol = this.tReport == this.REP_DELAY ? 5 : 4;
             this.toExport = this.tReport == this.REP_DELAY ? [0, 1, 2, 3, 4, 6] : [0, 1, 2, 3, 5, 6, 7, 8, 9, 10, 11];
@@ -194,6 +195,7 @@
                     endRender: function ( rows, group ) {
                         let suns = 0;
                         let daysoff = 0;
+                        let minsDelay;
                         let mins = rows
                                     .data()
                                     .pluck(oData.minsCol)
@@ -210,6 +212,21 @@
                                         return a + b;
                                     }, 0);
                         if (oData.tReport == oData.REP_HR_EX) {
+                            minsDelay = rows
+                                    .data()
+                                    .pluck(oData.minsDelayCol)
+                                    .reduce( function (a, b) {
+                                        a = parseInt(a, 10);
+                                        if(isNaN(a)){ a = 0; }                   
+
+                                        b = parseInt(b, 10);
+                                        if(isNaN(b)){ b = 0; }
+
+                                        a = a < 0 ? 0 : a;
+                                        b = b < 0 ? 0 : b;
+
+                                        return a + b;
+                                    }, 0);
                             suns = rows
                                         .data()
                                         .pluck(oData.sunCol)
@@ -250,7 +267,7 @@
                         }
                         else {
                             value_to_return = group +' (Horas Extras Totales = ' + convertToHoursMins(mins) + 
-                                                ", Primas dom = " + suns + ", Descansos = " + daysoff +  ')';
+                                                ", Retardo total = " + minsDelay + " mins, Primas dom = " + suns + ", Descansos = " + daysoff +  ')';
                         }
                         
                         return value_to_return;

@@ -391,8 +391,45 @@ class SDataProcess {
             $oRow->overDefaultMins = SDelayReportUtils::getExtraTime($result);
             // minutos por turnos de más de 8 horas
             $oRow->overScheduleMins = SDelayReportUtils::getExtraTimeBySchedule($result);
+
+            $oRow = SDataProcess::checkTypeDay($result, $oRow);
         }
 
+        return $oRow;
+    }
+
+    public static function checkTypeDay($result, $oRow)
+    {
+        if ($result->auxWorkshift != null) {
+            $oRow->isTypeDayChecked = true;
+
+            if ($result->auxWorkshift->type_day_id == \SCons::T_DAY_NORMAL) {
+                return $oRow;
+            }
+
+            switch ($result->auxWorkshift->type_day_id) {
+                case \SCons::T_DAY_INHABILITY:
+                    $oRow->dayInhability++;
+                    break;
+
+                case \SCons::T_DAY_VACATION:
+                    $oRow->dayVacations++;
+                    break;
+
+                case \SCons::T_DAY_HOLIDAY:
+                    $oRow->isHoliday++;
+                    break;
+
+                case \SCons::T_DAY_DAY_OFF:
+                    $oRow->isDayOff++;
+                    break;
+
+                default:
+                    # code...
+                    break;
+            }
+        }
+        
         return $oRow;
     }
 
@@ -415,6 +452,10 @@ class SDataProcess {
                 }
             }
 
+            if ($oRow->isTypeDayChecked) {
+                continue;
+            }
+
             $lWorks = clone $qWorkshifts;
             $events = SDelayReportUtils::checkEvents($lWorks, $oRow->idEmployee, $oRow->inDate);
 
@@ -429,19 +470,19 @@ class SDataProcess {
 
                 switch ($event->type_day_id) {
                     case \SCons::T_DAY_INHABILITY:
-                        $oRow->dayInhability = 1;
+                        $oRow->dayInhability++;
                         break;
 
                     case \SCons::T_DAY_VACATION:
-                        $oRow->dayVacations = 1;
+                        $oRow->dayVacations++;
                         break;
 
                     case \SCons::T_DAY_HOLIDAY:
-                        $oRow->isHoliday = 1;
+                        $oRow->isHoliday++;
                         break;
 
                     case \SCons::T_DAY_DAY_OFF:
-                        $oRow->isDayOff = 1;
+                        $oRow->isDayOff++;
                         break;
 
                     default:
