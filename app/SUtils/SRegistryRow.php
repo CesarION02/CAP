@@ -23,6 +23,7 @@ class SRegistryRow {
         $this->overScheduleMins = null;
         $this->overWorkedMins = null;
         $this->overMinsTotal = null;
+        $this->cutId = null;
         $this->extraHours = "00:00";
         $this->isSunday = 0;
         $this->isDayOff = 0;
@@ -33,6 +34,7 @@ class SRegistryRow {
         $this->hasChecks = true;
         $this->hasSchedule = true;
         $this->isCheckSchedule = false;
+        $this->isTypeDayChecked = false;
         $this->hasAbsence = false;
         $this->others = "";
         $this->comments = "";

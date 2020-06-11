@@ -1,5 +1,5 @@
 class SReportRow {
-    createRowBottom(tReport, numEmploye, hrs, sundays, daysOff) {
+    createRowBottom(tReport, numEmploye, hrs, delayMins, premMins, sundays, daysOff) {
         let row = [];
         if (tReport == oData.REP_HR_EX) {
             row[0] = numEmploye;
@@ -7,10 +7,12 @@ class SReportRow {
             row[2] = "";
             row[3] = "TOTAL =";
             row[4] = convertToHoursMins(hrs);
-            row[5] = sundays;
-            row[6] = daysOff;
-            row[7] = "";
-            row[8] = "";
+            row[5] = delayMins;
+            row[6] = premMins;
+            row[7] = sundays;
+            row[8] = daysOff;
+            row[9] = "";
+            row[10] = "";
         }
         else {        
             row[0] = numEmploye;

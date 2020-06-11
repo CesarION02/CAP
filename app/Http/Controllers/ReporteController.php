@@ -343,7 +343,7 @@ class ReporteController extends Controller
 
         return view('report.reportsGen')
                     ->with('tReport', \SCons::REP_HR_EX)
-                    ->with('sTitle', 'Reporte de Percepciones Variables')
+                    ->with('sTitle', 'Reporte de Retardos y Percepciones Variables')
                     ->with('sRoute', 'reportepercepvariables')
                     ->with('startOfWeek', $config->startOfWeek);
     }
@@ -436,7 +436,7 @@ class ReporteController extends Controller
                     ->with('sStartDate', $sStartDate)
                     ->with('sEndDate', $sEndDate)
                     ->with('sPayWay', $sPayWay)
-                    ->with('sTitle', 'Reporte de Percepciones Variables')
+                    ->with('sTitle', 'Reporte de Retardos y Percepciones Variables')
                     ->with('lRows', $lRows);
     }
 
