@@ -501,6 +501,13 @@ class SDataProcess {
     {
         foreach ($lData as $oRow) {
             if (! $oRow->hasChecks) {
+                $oRow->overWorkedMins = 0;
+                $oRow->overDefaultMins = 0;
+                $oRow->overScheduleMins = 0;
+
+                $oRow->overMinsTotal = 0;
+                $oRow->extraHours = SDelayReportUtils::convertToHoursMins($oRow->overMinsTotal);
+
                 continue;
             }
 
