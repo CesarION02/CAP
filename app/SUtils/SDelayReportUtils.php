@@ -69,7 +69,7 @@ class SDelayReportUtils {
      * 
      * @return int Minutos extra correspondientes
      */
-    public static function getExtraTimeBySchedule($oComparison) {
+    public static function getExtraTimeByScheduleC($oComparison) {
         $mins = 0;
         $oAux = null;
         $night = false;
@@ -103,6 +103,56 @@ class SDelayReportUtils {
             $extraMins = $mins - $scheduleTop;
             if ($extraMins > 240) {
                 return 240;
+            }
+
+            return $extraMins;
+        }
+        
+        return 0;
+    }
+
+    /**
+     * Devuelve los minutos extra que le corresponden al empleado su tiene un
+     * turno de más de 8 horas
+     *
+     * @param SDateComparison $oComparison
+     * 
+     * @return int Minutos extra correspondientes
+     */
+    public static function getExtraTimeBySchedule($oComparison, $inDateTime, $inDateTimeSch, $outDateTime, $outDateTimeSch) {
+        if ($inDateTime == null || $inDateTimeSch == null || $outDateTime == null || $outDateTimeSch == null) {
+            return 0;
+        }
+
+        $mins = 0;
+        $oAux = null;
+        if ($oComparison->auxScheduleDay != null) {
+            $oAux = $oComparison->auxScheduleDay;
+        }
+        else {
+            if ($oComparison->auxWorkshift != null) {
+                $oAux = $oComparison->auxWorkshift;
+            }
+            else {
+                return 0;
+            }
+        }
+
+        $maxOverTime = $oAux->agreed_extra;
+
+        if ($maxOverTime <= 0) {
+            return 0;
+        }
+
+        $comp = SDelayReportUtils::compareDates($inDateTime, $outDateTime);
+        
+        $mins = abs($comp->diffMinutes);
+        $scheduleTop = 8 * 60; // 8 horas
+        
+        if ($mins > $scheduleTop) {
+            $extraMins = $mins - $scheduleTop;
+            if ($extraMins > $maxOverTime) {
+                return $maxOverTime;
             }
 
             return $extraMins;
@@ -256,6 +306,7 @@ class SDelayReportUtils {
                                         'w.overtimepershift',
                                         'w.departure', 
                                         'w.cut_id',
+                                        'w.agreed_extra',
                                         'td.name AS td_name', 
                                         'td.short_name', 
                                         'dwe.type_day_id')
@@ -481,6 +532,7 @@ class SDelayReportUtils {
                                     'sd.is_active',
                                     'sd.schedule_template_id',
                                     'st.cut_id',
+                                    'st.agreed_extra',
                                     'st.is_night',
                                     'st.overtimepershift')
                             ->where('schedule_template_id', $templateId)

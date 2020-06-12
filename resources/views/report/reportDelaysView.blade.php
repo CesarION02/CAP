@@ -40,23 +40,23 @@
                         <table id="delays_table" class="table table-condensed" style="width:100%">
                             <thead>
                                 <tr>
-                                    <th>#</th>
+                                    <th>Num Empleado</th>
                                     <th>Empleado</th>
                                     {{-- <th>Fecha entrada</th> --}}
-                                    <th>Fecha/hora entrada</th>
+                                    <th>Fecha-hora entrada</th>
                                     {{-- <th>Fecha salida</th> --}}
-                                    <th>Fecha/hora salida</th>
+                                    <th>Fecha-hora salida</th>
                                     {{-- <th v-if="oData.tReport == oData.REP_DELAY">Retardo (min)</th>
                                     <th v-else>Horas Extra</th> --}}
-                                    <th>Retardo (min)</th>
-                                    <th>Horas extra</th>
+                                    <th>Tiempo retardo (min)</th>
+                                    <th>Tiempo extra (hr)</th>
                                     {{-- <th v-if="oData.tReport == oData.REP_HR_EX">Hr_progr_Sal</th> --}}
-                                    <th v-if="oData.tReport == oData.REP_HR_EX">Retardo (min)</th>
-                                    <th v-if="oData.tReport == oData.REP_HR_EX">Sal. Premat. (min)</th>
-                                    <th v-if="oData.tReport == oData.REP_HR_EX">Pr. Dom.</th>
+                                    <th v-if="oData.tReport == oData.REP_HR_EX">Tiempo retardo (min)</th>
+                                    <th v-if="oData.tReport == oData.REP_HR_EX">Salida anticipada (min)</th>
+                                    <th v-if="oData.tReport == oData.REP_HR_EX">Prima Dominical</th>
                                     <th v-if="oData.tReport == oData.REP_HR_EX">Descanso</th>
-                                    <th v-if="oData.tReport == oData.REP_HR_EX">Otros</th>
-                                    <th>Observaciones</th>
+                                    <th v-if="oData.tReport == oData.REP_HR_EX">Observaciones</th>
+                                    <th>Incidentes</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -266,8 +266,8 @@
                             value_to_return = group +' (Retardo total = ' + mins + ' mins)';
                         }
                         else {
-                            value_to_return = group +' (Horas Extras Totales = ' + convertToHoursMins(mins) + 
-                                                ", Retardo total = " + minsDelay + " mins, Primas dom = " + suns + ", Descansos = " + daysoff +  ')';
+                            value_to_return = "TOTAL " + group +': tiempo extra: ' + convertToHoursMins(mins) + 
+                                                "; tiempo retardo: " + minsDelay + " min, primas dominicales: " + suns + ", descansos: " + daysoff +  '';
                         }
                         
                         return value_to_return;
@@ -281,6 +281,7 @@
                     [ 10, 25, 50, 100, -1 ],
                     [ 'Mostrar 10', 'Mostrar 25', 'Mostrar 50', 'Mostrar 100', 'Mostrar todo' ]
                 ],
+                "iDisplayLength": -1,
                 "buttons": [
                         'pageLength',
                         {
