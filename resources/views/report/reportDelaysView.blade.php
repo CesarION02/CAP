@@ -43,9 +43,9 @@
                                     <th>Num Empleado</th>
                                     <th>Empleado</th>
                                     {{-- <th>Fecha entrada</th> --}}
-                                    <th>Fecha-hora entrada</th>
+                                    <th>Fechahora entrada</th>
                                     {{-- <th>Fecha salida</th> --}}
-                                    <th>Fecha-hora salida</th>
+                                    <th>Fechahora salida</th>
                                     {{-- <th v-if="oData.tReport == oData.REP_DELAY">Retardo (min)</th>
                                     <th v-else>Horas Extra</th> --}}
                                     <th>Tiempo retardo (min)</th>

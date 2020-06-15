@@ -270,7 +270,7 @@ class SDelayReportUtils {
                 return $reg;
             }
             else {
-                if ($reg->type_id = \SCons::REG_IN) {
+                if ($reg->type_id == \SCons::REG_IN) {
                     return null;
                 }
 
@@ -312,8 +312,8 @@ class SDelayReportUtils {
                                         'dwe.type_day_id')
                             ->where('dwe.is_delete', false)
                             ->where('w.is_delete', false)
-                            ->where('e.is_delete', false)
-                            ->whereBetween('wdd.date', [$startDate, $endDate]);
+                            ->where('e.is_delete', false);
+                            // ->whereBetween('wdd.date', [$startDate, $endDate]);
 
         if (sizeof($lEmployees) > 0) {
             $lWorkshifts = $lWorkshifts->whereIn('dwe.employee_id', $lEmployees);
@@ -718,10 +718,7 @@ class SDelayReportUtils {
         $oDate = Carbon::parse($date);
         $iDay = SDateTimeUtils::dayOfWeek($oDate);
         if ($iDay == \SCons::WEEK_START_DAY) {
-            $oDate->addDays(1);
-        }
-        else {
-            $oDate->subDays($iDay - 2);
+            $oDate->subDays(1);
         }
 
         while (SDateTimeUtils::dayOfWeek($oDate) != \SCons::WEEK_START_DAY) {
@@ -730,10 +727,11 @@ class SDelayReportUtils {
                 'time' => $time
             ];
             
-            $res = SDelayReportUtils::getSchedule($oDate->toDateString(), $oDate->toDateString(), $idEmployee, $registry, clone $lWorkshifts, \SCons::REP_HR_EX);
+            $res = SDelayReportUtils::checkSchedule(clone $lWorkshifts, $idEmployee, $registry, \SCons::REP_HR_EX);
+            // $res = SDelayReportUtils::getSchedule($oDate->toDateString(), $oDate->toDateString(), $idEmployee, $registry, clone $lWorkshifts, \SCons::REP_HR_EX);
             
             if ($res == null) {
-                $oDate->addDays(1);
+                $oDate->subDays(1);
             }
             else {
                 $res->oAuxDate = Carbon::parse($date.' '.$time);

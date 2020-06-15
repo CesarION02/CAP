@@ -133,7 +133,7 @@ class SDataProcess {
                         $registry = (object) [
                             'date' => $sDate,
                             'time' => '12:00:00',
-                            'type_id' => 2,
+                            'type_id' => 1,
                             'to_close' => true
                         ];
 
@@ -171,10 +171,8 @@ class SDataProcess {
                         $otherRow->comments = $otherRow->comments."Sin checadas. ";
                     }
 
-                    if ($result != null) {
-                        $otherRow->inDateTime = $sDate.' 00:00:00';
-                        $otherRow->outDateTime = $sDate.' 00:00:00';
-                    }
+                    $otherRow->inDateTime = $sDate;
+                    $otherRow->outDateTime = $sDate;
 
                     $lRows[] = $otherRow;
                 }
@@ -191,9 +189,30 @@ class SDataProcess {
 
                     $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, $lAssigns, clone $lWorkshifts, $sStartDate, $sEndDate);
                     $newRow = $theRow[1];
+                    $again = $theRow[2];
+                    $fRegistry = $theRow[3];
+    
+                    if ($isNew) {
+                        $lRows[] = $newRow;
+                    }
+
+                    if ($again) {
+                        if ($fRegistry != null) {
+                            $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $fRegistry, $lAssigns, clone $lWorkshifts, $sStartDate, $sEndDate);
+                        }
+                        else {
+                            $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, $lAssigns, clone $lWorkshifts, $sStartDate, $sEndDate);
+                        }
+
+                        $isNew = $theRow[0];
+                        $newRow = $theRow[1];
+        
+                        if ($isNew) {
+                            $lRows[] = $newRow;
+                        }
+                    }
                 }
 
-                $lRows[] = $newRow;
                 $isNew = true;
                 $newRow = null;
             }
@@ -251,7 +270,25 @@ class SDataProcess {
                     $isNew = true;
 
                     if ($otherResult != null) {
-                        $newRow = SDataProcess::setDates($result, $newRow);
+                        $oAux = null;
+                        if ($otherResult->oAuxDate != null) {
+                            $otherResult->variableDateTime = $otherResult->oAuxDate;
+
+                            if ($otherResult->auxWorkshift != null) {
+                                $oAux = $otherResult->auxWorkshift;
+                            }
+                            else {
+                                if ($otherResult->auxScheduleDay != null) {
+                                    $oAux = $otherResult->auxScheduleDay;
+                                }
+                            }
+
+                            if ($oAux != null) {
+                                $otherResult->pinnedDateTime = Carbon::parse($otherResult->oAuxDate->toDateString()." ".$oAux->departure);
+                            }
+                        }
+
+                        $newRow = SDataProcess::setDates($otherResult, $newRow);
                     }
                     else {
                         $newRow->outDate = $registry->date;
@@ -283,6 +320,7 @@ class SDataProcess {
                         $oDateAux = clone $result->pinnedDateTime;
                         $oDateAux->subDay();
                         $oFoundRegistryI = SDelayReportUtils::getRegistry($oDateAux->toDateString(), $idEmployee, \SCons::REG_IN);
+
                         if ($oFoundRegistryI != null) {
                             $newRow->sInDate = $oFoundRegistryI->date.' '.$oFoundRegistryI->time;
                             $newRow->inDate = $oFoundRegistryI->date;
@@ -325,6 +363,7 @@ class SDataProcess {
                         $oDateAux = Carbon::parse($registry->date);
                         $oDateAux->addDay();
                         $oFoundRegistry = SDelayReportUtils::getRegistry($oDateAux->toDateString(), $idEmployee, \SCons::REG_OUT);
+                        
                         if ($oFoundRegistry != null) {
                             $isNew = false;
                             $bFound = true;
