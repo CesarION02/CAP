@@ -162,14 +162,14 @@ class SDataProcess {
                     $otherRow = SDataProcess::setDates($result, $otherRow, $sDate);
 
                     $otherRow->hasChecks = false;
-                    if (! $otherRow->hasSchedule) {
-                        $comments = $otherRow->comments;
-                        $newComments = str_replace("Sin horario.", "", $comments);
-                        $otherRow->comments = $newComments."No laboral. ";
-                    }
-                    else {
+                    // if (! $otherRow->hasSchedule) {
+                    //     $comments = $otherRow->comments;
+                    //     $newComments = str_replace("Sin horario.", "", $comments);
+                    //     $otherRow->comments = $newComments."No laboral. ";
+                    // }
+                    // else {
                         $otherRow->comments = $otherRow->comments."Sin checadas. ";
-                    }
+                    // }
 
                     $otherRow->inDateTime = $sDate;
                     $otherRow->outDateTime = $sDate;
@@ -192,6 +192,13 @@ class SDataProcess {
                     $again = $theRow[2];
                     $fRegistry = $theRow[3];
     
+                    if (isset($theRow[501]) && $theRow[501]) {
+                        $newRow = null;
+                        $isNew = true;
+                        $again = false;
+
+                        continue;
+                    }
                     if ($isNew) {
                         $lRows[] = $newRow;
                     }
@@ -249,6 +256,7 @@ class SDataProcess {
         $hasAssign = $newRow->hasAssign;
         $again = false;
         $oFoundRegistry = null;
+        $isOut = false;
 
         if ($registry->type_id == \SCons::REG_OUT) {
             if ($hasAssign) {
@@ -365,6 +373,22 @@ class SDataProcess {
                         $oFoundRegistry = SDelayReportUtils::getRegistry($oDateAux->toDateString(), $idEmployee, \SCons::REG_OUT);
                         
                         if ($oFoundRegistry != null) {
+                            if ($oFoundRegistry->date == $oDateAux->toDateString()) {
+                                $config = \App\SUtils\SConfiguration::getConfigurations();
+
+                                $registryAux = (object) [
+                                    'type_id' => \SCons::REG_OUT,
+                                    'time' => $oFoundRegistry->time,
+                                    'date' => $oFoundRegistry->date,
+                                    'employee_id' => $idEmployee
+                                ];
+
+                                $sched = SDelayReportUtils::getSchedule($oDateAux->toDateString(), $oDateAux->toDateString(), $idEmployee, $registryAux, clone $qWorkshifts, \SCons::REP_HR_EX);
+                                if ($sched != null && abs($sched->diffMinutes) <= $config->maxGapMinutes) {
+                                    $isOut = true;
+                                }
+                            }
+
                             $isNew = false;
                             $bFound = true;
                             $again = true;
@@ -420,6 +444,10 @@ class SDataProcess {
         $response[] = $newRow;
         $response[] = $again;
         $response[] = $oFoundRegistry;
+
+        if ($isOut) {
+            $response[501] = true;
+        }
 
         return $response;
     }
