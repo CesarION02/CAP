@@ -537,7 +537,7 @@ class SDelayReportUtils {
                                     'st.overtimepershift')
                             ->where('schedule_template_id', $templateId)
                             ->where('day_num', $day)
-                            ->where('is_active', true)
+                            // ->where('is_active', true)
                             ->get();
         
         if ($templateDay == null || sizeof($templateDay) == 0) {
@@ -686,13 +686,13 @@ class SDelayReportUtils {
             $result = SDelayReportUtils::processRegistry($lAssigns, $registry, $iRep);
 
             if ($result != null) {
-                if ($result->auxScheduleDay->is_active) {
+                // if ($result->auxScheduleDay->is_active) {
                     // $day->prog_entry = $result->auxScheduleDay->entry;
                     // $day->prog_leave = $result->auxScheduleDay->departure;
                     
                     //  $day->is_absence = true;
                     return $result;
-                }
+                // }
             }
         }
 
@@ -727,7 +727,7 @@ class SDelayReportUtils {
                 'time' => $time
             ];
             
-            $res = SDelayReportUtils::checkSchedule(clone $lWorkshifts, $idEmployee, $registry, \SCons::REP_HR_EX);
+            $res = SDelayReportUtils::getSchedule($date, $date, $idEmployee, $registry, clone $lWorkshifts, \SCons::REP_HR_EX);
             // $res = SDelayReportUtils::getSchedule($oDate->toDateString(), $oDate->toDateString(), $idEmployee, $registry, clone $lWorkshifts, \SCons::REP_HR_EX);
             
             if ($res == null) {

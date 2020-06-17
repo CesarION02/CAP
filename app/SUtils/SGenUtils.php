@@ -19,7 +19,7 @@ class SGenUtils {
                             ->select('e.id', 'd.id AS dept_id', 'e.num_employee', 
                                         'e.name', 'e.is_overtime', 'e.ben_pol_id', 'external_id')
                             ->where('d.is_delete', false)
-                            // ->where('e.id', 119)
+                            // ->where('e.id', 67)
                             ->where('e.is_active', true);
                             
         if (sizeof($aEmployees) > 0) {

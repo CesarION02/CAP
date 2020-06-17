@@ -26,6 +26,11 @@ class SCons {
    const T_DAY_VACATION = 3;
    const T_DAY_HOLIDAY = 4;
    const T_DAY_DAY_OFF = 5;
+
+   const FROM_ASSIGN = 2;
+   const FROM_WORKSH = 3;
+
+   const INACTIVE_DAY = 15;
    
 }
 
