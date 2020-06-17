@@ -526,15 +526,17 @@ class ReporteController extends Controller
     } 
 
     public function prueba(){
-        $start = '2020-05-11';
-        $end = '2020-05-17';
-        $way = 1;    
+        $start = '2020-05-01';
+        $end = '2020-05-15';
+        $way = 2;
+        $year = '2020';    
         $employees[0] = 67;
         $key[0] = 2;
 
         //$employees[0] = 24;
 
-        $prueba = SInfoWithPolicy::standardization($start,$end,$way,2,$key,$employees);
+        //$prueba = SInfoWithPolicy::standardization($start,$end,$way,2,$key,$employees);
+        $prueba = SInfoWithPolicy::preProcessInfo($start,$year,$end,$way);
     }
 
     public function datosReporteSecretaria($reportType,$tipoDatos){

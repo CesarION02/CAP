@@ -6,6 +6,8 @@ use App\SUtils\SDateTimeUtils;
 use App\SUtils\SRegistryRow;
 use App\SData\SDataProcess;
 use App\SUtils\SDateUtils;
+use App\Models\processed_data;
+use App\Models\period_processed;
 
 class SInfoWithPolicy{
 /**
@@ -406,7 +408,7 @@ class SInfoWithPolicy{
 
       * @return [SRegistryRow] (array)
       */
-      public static function standardization($sStartDate,$sEndDate,$payWay,$type,$key,$employees){
+      public static function standardization($sStartDate,$sEndDate,$payWay,$employees){
         $lEmployees = SGenUtils::toEmployeeIds(0, 0, null, $employees);
         $lRows = SDataProcess::process($sStartDate, $sEndDate, $payWay, $lEmployees);
 
@@ -415,7 +417,7 @@ class SInfoWithPolicy{
         $auxIni = Carbon::parse($sStartDate);
         $auxFin = Carbon::parse($sStartDate);
 
-        $diferencia = $dateE->diffInDays($dateS);
+        $diferencia = ($dateE->diffInDays($dateS))+1;
 
         $contadorRenglones = 0;
         $config = \App\SUtils\SConfiguration::getConfigurations();
@@ -445,8 +447,7 @@ class SInfoWithPolicy{
                     $limitHours = $hrsWeekly;
                 }
 
-                for( $j = 0 ; count($lRows) > $j ; $j ){
-                    for ( $i = 0 ; $diferencia+1 > $i ; $i++ ){
+                for( $j = 0 ; count($lRows) > $j ; $j++ ){
                         $minutosExtra = $lRows[$j]->overDefaultMins + $lRows[$j]->overWorkedMins;
                                 
                         // si tiene más de una hora de tiempo extra
@@ -549,9 +550,8 @@ class SInfoWithPolicy{
                                 $lRows[$j]->extraDoubleMinsNoficial = SInfoWithPolicy::normalizacion($initialLimitHalf,$initialLimitHour,$finalLimitHour,$lRows[$j]->overScheduleMins);
                                 $lRows[$j]->extraTripleMinsNoficial = 0;
                             }
-                        }
-                        $j++;        
-                    }
+                        }        
+                    
                     //si es el ultimo dia del grupo y se tiene una media hora sobrante 
                     if($auxIni > $auxFin && $HalfPendient == 1){
                     //si la suma de horas es menor al limite -> media hora Double
@@ -572,11 +572,11 @@ class SInfoWithPolicy{
             default:
             break;
         }
-        $lRows = SInfoWithPolicy::handlingHours($lRows);
+        
         return $lRows;
       }
 
-      public static function handlingHours($lRows){
+      public static function handlingHours($lRows,$diferencia){
         for( $j = 0 ; count($lRows) > $j ; $j++ ){
             $mediaHora = $lRows[$j]->extraDoubleMinsNoficial % 60;
             $horasD = intdiv($lRows[$j]->extraDoubleMinsNoficial,60);
@@ -585,7 +585,7 @@ class SInfoWithPolicy{
                 if($lRows[$j]->cutId == 2){
                     $Maquillada = Carbon::parse($lRows[$j]->inDateTime);
                     $minutos = $Maquillada->format('i');
-                    $minutos = trim($minutos, "0");
+                    if($minutos == "00"){$minutos = "0";}else{$minutos = trim($minutos, "0");}
                     $horas = $Maquillada->format('h');
                     $horas = trim($horas, "0");
                     $minutosA = SInfoWithPolicy::cutMinutes($horas,$minutos);
@@ -600,7 +600,7 @@ class SInfoWithPolicy{
                         $salidaMaquillada = Carbon::parse($lRows[$j]->outDateTimeSch);
                         $salidaOriginal = Carbon::parse($lRows[$j]->outDateTime);
                         $minutos = $salidaOriginal->format('i');
-                        $minutos = trim($minutos, "0");
+                        if($minutos == "00"){$minutos = "0";}else{$minutos = trim($minutos, "0");}
                         $horas = $salidaOriginal->format('h');
                         $horas = trim($horas, "0");
                         $minutosA = SInfoWithPolicy::cutMinutes($horas,$minutos);
@@ -618,7 +618,8 @@ class SInfoWithPolicy{
                     $Maquillada = Carbon::parse($lRows[$j]->outDateTimeSch);
                     $salidaOriginal = Carbon::parse($lRows[$j]->outDateTime);
                     $minutos = $salidaOriginal->format('i');
-                    $minutos = trim($minutos, "0");
+                    if($minutos == "00"){$minutos = "0";}else{$minutos = trim($minutos, "0");}
+                    
                     $horas = $salidaOriginal->format('h');
                     $horas = trim($horas, "0");
                     $minutosA = SInfoWithPolicy::cutMinutes($horas,$minutos);
@@ -638,7 +639,7 @@ class SInfoWithPolicy{
                     $salidaMaquillada = Carbon::parse($lRows[$j]->outDateTimeSch);
                     $salidaOriginal = Carbon::parse($lRows[$j]->outDateTime);
                     $minutos = $salidaOriginal->format('i');
-                    $minutos = trim($minutos, "0");
+                    if($minutos == "00"){$minutos = "0";}else{$minutos = trim($minutos, "0");}
                     $horas = $salidaOriginal->format('h');
                     $horas = trim($horas, "0");
 
@@ -660,12 +661,442 @@ class SInfoWithPolicy{
         return $lRows;  
       }
 
-      public static function restDay($lRows){
-        for( $j = 0 ; count($lRows) > $j ; $j++ ){
+      public static function restDay($lRows,$diferencia){
+        $semanaNoCompleta = false;
+        $horaExtraMenor = 0;
+        $extraMenorPosicion = 0;
+        $posicionRango = 0;
+        $auxCorrectos = 0;
+        $contadorAusencia = 0;
+        $contadorSinextra = 0;
+        if($diferencia != 7){ return $lRows;}
+        if(count($lRows) < 7){ return $lRows;};
+        for($i = 0 ; $diferencia > $i ; $i++){
+            if( $lRows[$i]->hasChecks == false && $lRows[$i]->hasSchedule == false ){
+                $semanaNoCompleta = true;
+            }elseif( $lRows[$i]->hasChecks == false && $lRows[$i]->hasSchedule == true ){
+                $aAbsence[$contadorAusencia] = $i;
+                $contadorAusencia++;
+            }elseif( $lRows[$i]->hasChecks == true ){
+                if( $lRows[$i]->extraDoubleMins == 0 && $lRows[$i]->extraDoubleMinsNoficial == 0 && $lRows[$i]->extraTripleMins == 0 && $lRows[$i]->extraTripleMinsNoficial == 0 && $lRows[$i]->isSunday == 0){
+                    $aWithoutExtra[$contadorSinextra] = $i;
+                    $contadorSinextra++;
+                }else{
+                    $extraTotales = $lRows[$i]->extraDoubleMins + $lRows[$i]->extraDoubleMinsNoficial + $lRows[$i]->extraTripleMins + $lRows[$i]->extraTripleMinsNoficial;
+                    if( ( $horaExtraMenor > $extraTotales || $horaExtraMenor == 0 ) && $lRows[$i]->isSunday == 0 ){
+                        $horaExtraMenor = $extraTotales;
+                        $extraMenorPosicion = $i;
+                    }
+                }
+                $diasCorrectos[$auxCorrectos] = $i;
+                $auxCorrectos++;
+            }
+        
 
+        }
+
+        if($semanaNoCompleta != true){
+            if(isset($aAbsence)){
+                $lRows[$aAbsence[0]]->isDayOff = 1;
+                $lRows[$aAbsence[0]]->hasAbsence = false;
+            }else{
+                    if(isset($aWithoutExtra)){
+                        $lRows[$aWithoutExtra[0]]->isDayOff = 1;
+                    }else{
+                        $lRows[$extraMenorPosicion]->isDayOff = 1; 
+                        if( $diasCorrectos[0] == $extraMenorPosicion ){
+                            $diaSumar = 1;
+                        }else{
+                            $diaSumar = 0;
+                        }
+                        
+                        $lRows[ $diaSumar ]->extraDoubleMins = $lRows[ $diaSumar ]->extraDoubleMins + $lRows[$extraMenorPosicion ]->extraDoubleMins;
+                        $lRows[ $diaSumar ]->extraTripleMins = $lRows[ $diaSumar ]->extraTripleMins + $lRows[$extraMenorPosicion ]->extraTripleMins;
+                        $lRows[ $diaSumar ]->extraDoubleMinsNoficial = $lRows[ $diaSumar ]->extraDoubleMinsNoficial + $lRows[$extraMenorPosicion ]->extraDoubleMinsNoficial;
+                        $lRows[ $diaSumar ]->extraTripleMinsNoficial = $lRows[ $diaSumar ]->extraTripleMinsNoficial + $lRows[$extraMenorPosicion ]->extraTripleMinsNoficial;
+                        
+                        if($lRows[$extraMenorPosicion ]->extraDoubleMins > 0){
+                            if( $lRows[ $diaSumar ]->outDateTimeNoficial != null ){
+                                $salidaMaquillada = Carbon::parse($lRows[ $diaSumar ]->outDateTimeNoficial);
+                                $horas = intdiv($lRows[$extraMenorPosicion ]->extraDoubleMins,60);
+                                $minutos = $lRows[$extraMenorPosicion ]->extraDoubleMins % 60;
+
+                                $salidaMaquillada->addMinutes($minutos);
+                                $salidaMaquillada->addHours($horas);
+
+                                $lRows[ $diaSumar ]->outDateTimeNoficial = $salidaMaquillada->toDateTimeString();
+                                   
+                            }else{
+                                $salidaMaquillada = Carbon::parse($lRows[ $diaSumar ]->outDateTime );
+                                $horas = intdiv($lRows[$extraMenorPosicion ]->extraDoubleMins,60);
+                                $minutos = $lRows[$extraMenorPosicion ]->extraDoubleMins % 60;
+
+                                $salidaMaquillada->addMinutes($minutos);
+                                $salidaMaquillada->addHours($horas);
+
+                                $lRows[$diaSumar]->outDateTimeNoficial = $salidaMaquillada->toDateTimeString();
+                            }
+                             
+                        }
+                        $lRows[$extraMenorPosicion ]->extraDoubleMins = 0;
+                        $lRows[$extraMenorPosicion ]->extraTripleMins = 0;
+                        $lRows[$extraMenorPosicion ]->extraDoubleMinsNoficial = 0;
+                        $lRows[$extraMenorPosicion ]->extraTripleMinsNoficial = 0;
+                    }
+            }
+                
+        }
+        return $lRows;
+    }
+
+      public static function restDayBi($lRows,$inicio,$fin,$semana,$year,$employee,$contador){
+        $final = DB::table('week_cut')
+            ->where('num','=',$semana)
+            ->where('year','=',$year)
+            ->select('ini AS inicio', 'fin AS final')
+            ->get();
+        $primeraFecha = Carbon::parse($lRows[ $contador ]->inDate);
+        $chequeoPrimera = Carbon::parse($inicio);
+        if($primeraFecha < $chequeoPrimera){ $primeraFecha->addDay();}
+        $inicioSemana = Carbon::parse($final[0]->inicio);
+        $noCompleto = 0;
+        $diferencia = 0;
+        if ( $primeraFecha > $inicioSemana ){
+            $diferencia = ($primeraFecha->diffInDays($inicioSemana));
+            for( $i = 0 ; $diferencia > $i ; $i++ ){
+                $fechas[$i] = $inicioSemana->toDateString();
+                $inicioSemana->addDay();
+            }
+            $diasTrabajados = DB::table('processed_data')
+                    ->whereIn('inDate',$fechas)
+                    ->where('employee_id',$employee)
+                    ->select('haschecks AS checada')
+                    ->get();
+            for( $i = 0 ; count($diasTrabajados) > $i ; $i++ ){
+                if($diasTrabajados[$i]->checada == 0){
+                    $noCompleto = 1;
+                }
+            } 
+            if ( $noCompleto == 1 ){
+                $contador = 7 - $diferencia;
+                return $contador;
+            }else{
+                $semanaNoCompleta = false;
+                $horaExtraMenor = 0;
+                $extraMenorPosicion = 0;
+                $posicionRango = 0;
+                $auxCorrectos = 0;
+                $contadorAusencia = 0;
+                $contadorSinextra = 0;
+                $i = $contador;
+                $diferencia = 6 - $diferencia; 
+                for($i ; $diferencia > $i ; $i++){
+                    if(($lRows[$i]->hasChecks == false) ){
+                        $semanaNoCompleta = true;
+                    }else{
+                        $diasCorrectos[$auxCorrectos] = $i;
+                        $auxCorrectos++; 
+                    }
+                    
+                    if($lRows[$i]->hasAbsence == true ){
+                        $aAbsence[$contadorAusencia] = $i;
+                        $contadorAusencia++;
+                    }elseif( $lRows[$i]->extraDoubleMins == 0 && $lRows[$i]->extraDoubleMinsNoficial == 0 && $lRows[$i]->extraTripleMins == 0 && $lRows[$i]->extraTripleMinsNoficial == 0 && $lRows[$i]->isSunday == 0){
+                        $aWithoutExtra[$contadorSinextra] = $i;
+                        $contadorSinextra++;
+                    }else{
+                        $extraTotales = $lRows[$i]->extraDoubleMins + $lRows[$i]->extraDoubleMinsNoficial + $lRows[$i]->extraTripleMins + $lRows[$i]->extraTripleMinsNoficial;
+                        if( ( $horaExtraMenor > $extraTotales || $horaExtraMenor == 0 ) && $lRows[$i]->isSunday == 0 ){
+                            $horaExtraMenor = $extraTotales;
+                            $extraMenorPosicion = $i;
+                        }
+                    }
+
+                }
+                $contador = $i - 1;
+                if($semanaNoCompleta != true){
+                    if(isset($aAbsence)){
+                        $lRows[$aAbsence[0]]->isDayOff = 1;
+                        $lRows[$aAbsence[0]]->hasAbsence = false;
+                    }else{
+                        if(isset($aWithoutExtra)){
+                            $lRows[$aWithoutExtra[0]]->isDayOff = 1;
+                        }else{
+                            $lRows[$extraMenorPosicion]->isDayOff = 1; 
+                            $lRows[ $diasCorrectos[0]]->extraDoubleMins = $lRows[ $diasCorrectos[0] ]->extraDoubleMins + $lRows[$extraMenorPosicion ]->extraDoubleMins;
+                            $lRows[ $diasCorrectos[0] ]->extraTripleMins = $lRows[ $diasCorrectos[0] ]->extraTripleMins + $lRows[$extraMenorPosicion ]->extraTripleMins;
+                            $lRows[ $diasCorrectos[0] ]->extraDoubleMinsNoficial = $lRows[ $diasCorrectos[0] ]->extraDoubleMinsNoficial + $lRows[$extraMenorPosicion ]->extraDoubleMinsNoficial;
+                            $lRows[ $diasCorrectos[0] ]->extraTripleMinsNoficial = $lRows[ $diasCorrectos[0] ]->extraTripleMinsNoficial + $lRows[$extraMenorPosicion ]->extraTripleMinsNoficial;
+                            if($lRows[$extraMenorPosicion ]->extraDoubleMins > 0){
+                                if( $lRows[ $diasCorrectos[0] ]->outDateTimeNoficial != null ){
+                                    $salidaMaquillada = Carbon::parse($lRows[ $extraMenorPosicion + 1 ]->outDateTimeNoficial);
+                                    $minutos = intdiv($lRows[$extraMenorPosicion ]->extraDoubleMins,60);
+                                    $horas = $lRows[$extraMenorPosicion ]->extraDoubleMins % 60;
+
+                                    $salidaMaquillada->addMinutes($minutos);
+                                    $salidaMaquillada->addHours($horas);
+
+                                    $lRows[ $diasCorrectos[0] ]->outDateTimeNoficial = $salidaMaquillada->toDateTimeString();
+                                   
+                                }else{
+                                    $salidaMaquillada = Carbon::parse($lRows[ $diasCorrectos[0] ]->outDateTime );
+                                    $minutos = intdiv($lRows[$extraMenorPosicion ]->extraDoubleMins,60);
+                                    $horas = $lRows[$extraMenorPosicion ]->extraDoubleMins % 60;
+
+                                    $salidaMaquillada->addMinutes($minutos);
+                                    $salidaMaquillada->addHours($horas);
+
+                                    $lRows[$diasCorrectos[0]]->outDateTimeNoficial = $salidaMaquillada->toDateTimeString();
+                                } 
+                            }
+                        }
+                }
+                
+            }    
+            }       
+
+            return $contador;
+        }else if ($primeraFecha < $inicioSemana){
+                $semanaNoCompleta = false;
+                $horaExtraMenor = 0;
+                $extraMenorPosicion = 0;
+                $posicionRango = 0;
+                $auxCorrectos = 0;
+                $contadorAusencia = 0;
+                $contadorSinextra = 0;
+                $i = $contador;
+                $diferencia = 6 + $contador;
+                if ( $diferencia < count($lRows) ){
+                for($i ; $diferencia > $i ; $i++){
+                    if(($lRows[$i]->hasChecks == false) ){
+                        $semanaNoCompleta = true;
+                    }else{
+                        $diasCorrectos[$auxCorrectos] = $i;
+                        $auxCorrectos++; 
+                    }
+                    
+                    if($lRows[$i]->hasAbsence == true ){
+                        $aAbsence[$contadorAusencia] = $i;
+                        $contadorAusencia++;
+                    }elseif( $lRows[$i]->extraDoubleMins == 0 && $lRows[$i]->extraDoubleMinsNoficial == 0 && $lRows[$i]->extraTripleMins == 0 && $lRows[$i]->extraTripleMinsNoficial == 0 && $lRows[$i]->isSunday == 0){
+                        $aWithoutExtra[$contadorSinextra] = $i;
+                        $contadorSinextra++;
+                    }else{
+                        $extraTotales = $lRows[$i]->extraDoubleMins + $lRows[$i]->extraDoubleMinsNoficial + $lRows[$i]->extraTripleMins + $lRows[$i]->extraTripleMinsNoficial;
+                        if( ( $horaExtraMenor > $extraTotales || $horaExtraMenor == 0 ) && $lRows[$i]->isSunday == 0 ){
+                            $horaExtraMenor = $extraTotales;
+                            $extraMenorPosicion = $i;
+                        }
+                    }
+
+                }
+                $contador = $i - 1;
+                if($semanaNoCompleta != true){
+                    if(isset($aAbsence)){
+                        $lRows[$aAbsence[0]]->isDayOff = 1;
+                        $lRows[$aAbsence[0]]->hasAbsence = false;
+                    }else{
+                        if(isset($aWithoutExtra)){
+                            $lRows[$aWithoutExtra[0]]->isDayOff = 1;
+                        }else{
+                            $lRows[$extraMenorPosicion]->isDayOff = 1; 
+                            $lRows[ $diasCorrectos[0]]->extraDoubleMins = $lRows[ $diasCorrectos[0] ]->extraDoubleMins + $lRows[$extraMenorPosicion ]->extraDoubleMins;
+                            $lRows[ $diasCorrectos[0] ]->extraTripleMins = $lRows[ $diasCorrectos[0] ]->extraTripleMins + $lRows[$extraMenorPosicion ]->extraTripleMins;
+                            $lRows[ $diasCorrectos[0] ]->extraDoubleMinsNoficial = $lRows[ $diasCorrectos[0] ]->extraDoubleMinsNoficial + $lRows[$extraMenorPosicion ]->extraDoubleMinsNoficial;
+                            $lRows[ $diasCorrectos[0] ]->extraTripleMinsNoficial = $lRows[ $diasCorrectos[0] ]->extraTripleMinsNoficial + $lRows[$extraMenorPosicion ]->extraTripleMinsNoficial;
+                            if($lRows[$extraMenorPosicion ]->extraDoubleMins > 0){
+                                if( $lRows[ $diasCorrectos[0] ]->outDateTimeNoficial != null ){
+                                    $salidaMaquillada = Carbon::parse($lRows[ $extraMenorPosicion + 1 ]->outDateTimeNoficial);
+                                    $minutos = intdiv($lRows[$extraMenorPosicion ]->extraDoubleMins,60);
+                                    $horas = $lRows[$extraMenorPosicion ]->extraDoubleMins % 60;
+
+                                    $salidaMaquillada->addMinutes($minutos);
+                                    $salidaMaquillada->addHours($horas);
+
+                                    $lRows[ $diasCorrectos[0] ]->outDateTimeNoficial = $salidaMaquillada->toDateTimeString();
+                                   
+                                }else{
+                                    $salidaMaquillada = Carbon::parse($lRows[ $diasCorrectos[0] ]->outDateTime );
+                                    $minutos = intdiv($lRows[$extraMenorPosicion ]->extraDoubleMins,60);
+                                    $horas = $lRows[$extraMenorPosicion ]->extraDoubleMins % 60;
+
+                                    $salidaMaquillada->addMinutes($minutos);
+                                    $salidaMaquillada->addHours($horas);
+
+                                    $lRows[$diasCorrectos[0]]->outDateTimeNoficial = $salidaMaquillada->toDateTimeString();
+                                } 
+                            }
+                        }
+                }
+                
+            }
+            return $contador;
+            }else{return $contador = 0; }
+               
         }    
+    } 
+      
+      public static function preProcessInfo($iIni = '', $iYear = 0, $iFin = '',$sTypePay = 0){
+        //primero del rango completo se sacan las semanas o quincenas que a
+        $semanas = SDateUtils::getNumWeek($iIni,$iYear,$iFin,$sTypePay);
+        $pendientesProcesar = SDateUtils::isProcessed($semanas,$iYear,$sTypePay);
+
+        switch($sTypePay){
+            case 2:
+                $empleados = DB::table('employees')
+                                ->where('is_active','=',1)
+                                ->where('way_pay_id','=',2)
+                                ->select('id AS id')
+                                ->get();
+                $num_empleados = count($empleados);
+                $semanas = DB::table('week_cut')
+                                ->whereIn('num',$semanas)
+                                ->where('year',$iYear)
+                                ->select('ini AS inicio','fin AS final','id AS id')
+                                ->get();
+                $num_semanas = count($semanas);
+
+                for ( $i = 0 ; $num_semanas > $i ; $i++ ){
+                    $cerrado = 1;
+                    for( $j = 0 ; $num_empleados > $j ; $j++ ){
+                        $inicio = Carbon::parse($semanas[$i]->inicio);
+                        $fin = Carbon::parse($semanas[$i]->final);
+                        $diferencia = ($inicio->diffInDays($fin))+1;
+                        $empl[0] = $empleados[$j]->id;
+                        $lRows = SInfoWithPolicy::standardization($semanas[$i]->inicio,$semanas[$i]->final,$sTypePay,$empl);
+                        $lRows = SInfoWithPolicy::handlingHours($lRows,$diferencia);
+                        $lRows = SInfoWithPolicy::restDay($lRows,$diferencia);
+
+                        $diasIngresados = SInfoWithPolicy::guardarProcesamiento($empleados[$j]->id,$lRows);
+                        if( $diasIngresados < 7 ){
+                            $cerrado = 0;
+                        }
+                    }
+
+                        SInfoWithPolicy::closePeriod( $semanas[$i]->id, $sTypePay,$cerrado);
+                        
+                }
+            break;
+            case 1:
+                $contador = 0;
+                $empleados = DB::table('employees')
+                                ->where('is_active','=',1)
+                                ->where('way_pay_id','=',1)
+                                ->select('id AS id')
+                                ->get();
+                $num_empleados = count($empleados);
+                $quincenas = DB::table('hrs_prepay_cut')
+                                ->whereIn('id',$semanas)
+                                ->select('dt_cut AS cut', 'num AS num', 'year AS year','id AS id')
+                                ->get();
+                $num_semanas = count($quincenas);
+                for( $j = 0 ; count($quincenas) > $j ; $j++ ){                
+                    if($quincenas[$j]->num > 1){
+                        $inicioAux = DB::table('hrs_prepay_cut')
+                        ->where('year', $quincenas[$j]->year)
+                        ->where('num', ($quincenas[$j]->num)-1)
+                        ->select('dt_cut AS cut')
+                        ->get(); 
+        
+                        $inicio = Carbon::parse($inicioAux[0]->cut);
+                        $inicio->addDay();
+                        $quincenasInicio[$j] = $inicio->format('Y-m-d');
+                    }else{
+                        $inicioAux = DB::table('hrs_prepay-cut')
+                        ->where('year',($quincenas[$j]->year)-1)
+                        ->orderBy('num','DESC')
+                        ->select('dt_cut AS cut')
+                        ->get();
+                        
+                        $inicio = Carbon::parse($inicioAux[0]->cut);
+                        $inicio->addDay();
+                        $quincenasInicio[$j] = $inicio->format('Y-m-d');
+                    } 
+                }
+                for ( $i = 0 ; $num_semanas > $i ; $i++ ){
+                    for( $j = 0 ; $num_empleados > $j ; $j++ ){
+                        $inicio = Carbon::parse($quincenasInicio[$i]);
+                        $fin = Carbon::parse($quincenas[$i]->cut);
+                        $diferencia = ($inicio->diffInDays($fin))+1;
+                        $empl[0] = 67;//$empleados[$j]->id;
+                        $lRows = SInfoWithPolicy::standardization($quincenasInicio[$i],$quincenas[$i]->cut,$sTypePay,$empl);
+                        $lRows = SInfoWithPolicy::handlingHours($lRows,$diferencia);
+                        //$lRows = SInfoWithPolicy::restDay($lRows,$diferencia);
+                        $semanas = SDateUtils::separateBiweekly($quincenas[$i]->id);
+                        for ( $x = 0 ; count($semanas) > $x ; $x++ ){
+                            $contador = SInfoWithPolicy::restDayBi($lRows,$quincenasInicio[$i],$quincenas[$i]->cut,$semanas[$x],$iYear,$empleados[$j],$contador);
+                        }
+                        $contador = 0;
+                        $diasIngresados = SInfoWithPolicy::guardarProcesamiento($empleados[$j]->id,$lRows);
+                    }
+                    
+                    if( $diasIngresados == 7 ){
+                        SInfoWithPolicy::closePeriod( $semanas[$i]->id, $sTypePay);
+                    }
+                }
+            break;
+        }
+         
       }
 
+      public static function guardarProcesamiento($employee,$lRows){
+        for( $i = 0 ; count($lRows) > $i ; $i++ ){
+            $processed = new processed_data();
+
+            $processed->employee_id = $lRows[$i]->idEmployee;
+            $processed->inDate = $lRows[$i]->inDate;
+            $processed->inDateTime = $lRows[$i]->inDateTime;
+            $processed->inDateTimeNoficial = $lRows[$i]->inDateTimeNoficial;
+            $processed->outDate = $lRows[$i]->outDate;
+            $processed->outDateTime = $lRows[$i]->outDateTime;
+            $processed->outDateTimeNoficial = $lRows[$i]->outDateTimeNoficial;
+            $processed->diffMins = $lRows[$i]->diffMins;
+            $processed->delayMins = $lRows[$i]->delayMins;
+            $processed->overDefaultMins = $lRows[$i]->overDefaultMins;
+            $processed->overScheduleMins = $lRows[$i]->overScheduleMins;
+            $processed->overWorkedMins = $lRows[$i]->overWorkedMins;
+            $processed->extraHours = $lRows[$i]->extraHours;
+            $processed->is_sunday = $lRows[$i]->isSunday;
+            $processed->is_dayoff = $lRows[$i]->isDayOff;
+            $processed->is_holiday = $lRows[$i]->isHoliday;
+            $processed->others = $lRows[$i]->others;
+            $processed->comments = $lRows[$i]->comments;
+            $processed->extraDobleMins = $lRows[$i]->extraDoubleMins;
+            $processed->extraTripleMins = $lRows[$i]->extraTripleMins;
+            $processed->extraDobleMinsNoficial = $lRows[$i]->extraDoubleMinsNoficial;
+            $processed->extraTripleMinsNoficial = $lRows[$i]->extraTripleMinsNoficial;
+            $processed->indatetimesch = $lRows[$i]->inDateTimeSch;
+            $processed->outdatetimesch = $lRows[$i]->outDateTimeSch;
+            $processed->prematureout = $lRows[$i]->prematureOut;
+            $processed->overminstotal = $lRows[$i]->overMinsTotal;
+            $processed->dayinhability = $lRows[$i]->dayInhability;
+            $processed->dayvacation = $lRows[$i]->dayVacations;
+            $processed->haschecks = $lRows[$i]->hasChecks;
+            $processed->ischecksschedule = $lRows[$i]->isCheckSchedule;
+            $processed->istypedaychecked = $lRows[$i]->isTypeDayChecked;
+            $processed->hasabsence = $lRows[$i]->hasAbsence;
+
+            $processed->save();
+            
+        }
+        return $i;
+      }
+
+      public static function closePeriod ($num_period,$type,$cerrado){
+        if( $type == 2 ){
+            $period_processed = new period_processed();
+            $period_processed->num_week = $num_period;
+            $period_processed->is_week = 1;
+            $period_processed->is_close = $cerrado;
+            $period_processed->save();
+        }else if( $type == 1 ){
+            $period_processed = new period_processed();
+            $period_processed->num_biweekly = $num_period;
+            $period_processed->is_biweekly = 1;
+            $period_processed->is_close = $cerrado;
+            $period_processed->save();
+        }
+      }
       public static function initArr(){
         // cero horas y todos sus minutos
         $arrmin[0][0]=3;
