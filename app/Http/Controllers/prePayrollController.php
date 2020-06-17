@@ -252,10 +252,12 @@ class prePayrollController extends Controller
      */
     public static function searchAbsence($idEmployee, $sDate)
     {
-        $lAbsences = incident::where('employee_id', $idEmployee)
+        $lAbsences = \DB::table('incidents AS i')
+            ->join('type_incidents AS ti', 'i.type_incidents_id', '=', 'ti.id')
+            ->where('employee_id', $idEmployee)
             ->whereRaw("'" . $sDate . "' BETWEEN start_date AND end_date")
-            ->select('external_key', 'nts')
-            ->orderBy('id', 'ASC')
+            ->select('i.external_key', 'i.nts', 'ti.name AS type_name')
+            ->orderBy('i.id', 'ASC')
             ->get();
 
         return $lAbsences;

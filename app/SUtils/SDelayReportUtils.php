@@ -69,7 +69,7 @@ class SDelayReportUtils {
      * 
      * @return int Minutos extra correspondientes
      */
-    public static function getExtraTimeBySchedule($oComparison) {
+    public static function getExtraTimeByScheduleC($oComparison) {
         $mins = 0;
         $oAux = null;
         $night = false;
@@ -103,6 +103,56 @@ class SDelayReportUtils {
             $extraMins = $mins - $scheduleTop;
             if ($extraMins > 240) {
                 return 240;
+            }
+
+            return $extraMins;
+        }
+        
+        return 0;
+    }
+
+    /**
+     * Devuelve los minutos extra que le corresponden al empleado su tiene un
+     * turno de más de 8 horas
+     *
+     * @param SDateComparison $oComparison
+     * 
+     * @return int Minutos extra correspondientes
+     */
+    public static function getExtraTimeBySchedule($oComparison, $inDateTime, $inDateTimeSch, $outDateTime, $outDateTimeSch) {
+        if ($inDateTime == null || $inDateTimeSch == null || $outDateTime == null || $outDateTimeSch == null) {
+            return 0;
+        }
+
+        $mins = 0;
+        $oAux = null;
+        if ($oComparison->auxScheduleDay != null) {
+            $oAux = $oComparison->auxScheduleDay;
+        }
+        else {
+            if ($oComparison->auxWorkshift != null) {
+                $oAux = $oComparison->auxWorkshift;
+            }
+            else {
+                return 0;
+            }
+        }
+
+        $maxOverTime = $oAux->agreed_extra;
+
+        if ($maxOverTime <= 0) {
+            return 0;
+        }
+
+        $comp = SDelayReportUtils::compareDates($inDateTime, $outDateTime);
+        
+        $mins = abs($comp->diffMinutes);
+        $scheduleTop = 8 * 60; // 8 horas
+        
+        if ($mins > $scheduleTop) {
+            $extraMins = $mins - $scheduleTop;
+            if ($extraMins > $maxOverTime) {
+                return $maxOverTime;
             }
 
             return $extraMins;
@@ -220,7 +270,7 @@ class SDelayReportUtils {
                 return $reg;
             }
             else {
-                if ($reg->type_id = \SCons::REG_IN) {
+                if ($reg->type_id == \SCons::REG_IN) {
                     return null;
                 }
 
@@ -256,13 +306,14 @@ class SDelayReportUtils {
                                         'w.overtimepershift',
                                         'w.departure', 
                                         'w.cut_id',
+                                        'w.agreed_extra',
                                         'td.name AS td_name', 
                                         'td.short_name', 
                                         'dwe.type_day_id')
                             ->where('dwe.is_delete', false)
                             ->where('w.is_delete', false)
-                            ->where('e.is_delete', false)
-                            ->whereBetween('wdd.date', [$startDate, $endDate]);
+                            ->where('e.is_delete', false);
+                            // ->whereBetween('wdd.date', [$startDate, $endDate]);
 
         if (sizeof($lEmployees) > 0) {
             $lWorkshifts = $lWorkshifts->whereIn('dwe.employee_id', $lEmployees);
@@ -481,6 +532,7 @@ class SDelayReportUtils {
                                     'sd.is_active',
                                     'sd.schedule_template_id',
                                     'st.cut_id',
+                                    'st.agreed_extra',
                                     'st.is_night',
                                     'st.overtimepershift')
                             ->where('schedule_template_id', $templateId)
@@ -666,10 +718,7 @@ class SDelayReportUtils {
         $oDate = Carbon::parse($date);
         $iDay = SDateTimeUtils::dayOfWeek($oDate);
         if ($iDay == \SCons::WEEK_START_DAY) {
-            $oDate->addDays(1);
-        }
-        else {
-            $oDate->subDays($iDay - 2);
+            $oDate->subDays(1);
         }
 
         while (SDateTimeUtils::dayOfWeek($oDate) != \SCons::WEEK_START_DAY) {
@@ -678,10 +727,11 @@ class SDelayReportUtils {
                 'time' => $time
             ];
             
-            $res = SDelayReportUtils::getSchedule($oDate->toDateString(), $oDate->toDateString(), $idEmployee, $registry, clone $lWorkshifts, \SCons::REP_HR_EX);
+            $res = SDelayReportUtils::checkSchedule(clone $lWorkshifts, $idEmployee, $registry, \SCons::REP_HR_EX);
+            // $res = SDelayReportUtils::getSchedule($oDate->toDateString(), $oDate->toDateString(), $idEmployee, $registry, clone $lWorkshifts, \SCons::REP_HR_EX);
             
             if ($res == null) {
-                $oDate->addDays(1);
+                $oDate->subDays(1);
             }
             else {
                 $res->oAuxDate = Carbon::parse($date.' '.$time);

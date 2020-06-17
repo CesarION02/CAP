@@ -6,13 +6,13 @@ var app = new Vue({
     },
     methods: {
       getCssClass(oRow, report) {
-        if (oRow.delayMins > 0) {
-          if (report == this.oData.REP_DELAY) {
-            return 'danger';
-          }
-        }
         if (oRow.isCheckSchedule) {
           return 'check';
+        }
+        if (report != this.oData.REP_DELAY) {
+          if (oRow.entryDelayMinutes > 0) {
+            return 'danger';
+          }
         }
       }
     },

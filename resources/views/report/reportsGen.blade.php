@@ -131,11 +131,11 @@
                 ranges: {
                    'Hoy': [moment(), moment()],
                    'Ayer': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-                   'Esta semana': [startWeek, endWeek],
+                   'Semana actual': [startWeek, endWeek],
                    'Semana pasada': [startLastWeek, endLastWeek],
-                   'Esta quincena': [startThisFortnight, endThisFortnight],
+                   'Quincena actual': [startThisFortnight, endThisFortnight],
                    'Quincena pasada': [startLastFortnight, endLastFortnight],
-                   'Este mes': [moment().startOf('month'), moment().endOf('month')],
+                   'Mes actual': [moment().startOf('month'), moment().endOf('month')],
                    'Mes pasado': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
                 }
             }, cb);
