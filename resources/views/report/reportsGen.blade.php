@@ -19,23 +19,50 @@
                 <div class="box-tools pull-right">
                 </div>
             </div>
-            <form action="{{ route(''.$sRoute.'') }}">
+            <form action="{{ route(''.$sRoute.'') }}" id="theForm">
                 <div class="box-body" id="reportApp">
                     <div class="row">
-                        <div class="col-md-2">
-                            Periodicidad de pago*:
+                        <div class="col-md-3">
+                            Filtrar por:
                         </div>
-                        <div class="col-md-4 col-md-offset-1">
-                            <select name="pay_way" id="pay_way" class="form-control">
-                                <option value="2">Semana</option>
-                                <option value="1">Quincena</option>
-                                <option value="0">Todos</option>
-                            </select>
+                        <div class="col-md-2 col-md-offset-1">
+                            <label><input v-model="picked" type="radio" name="optradio" value="period">Periodic. pago</label>
+                        </div>
+                        <div class="col-md-2">
+                            <label><input v-model="picked" type="radio" name="optradio" value="employee">Empleado</label>
                         </div>
                     </div>
                     <br>
+                    <div v-if="picked == 'period'">
+                        <div class="row">
+                            <div class="col-md-3">
+                                Periodicidad de pago*:
+                            </div>
+                            <div class="col-md-4 col-md-offset-1">
+                                <select name="pay_way" id="pay_way" class="form-control" v-model="iPayWay">
+                                    <option value="2">Semana</option>
+                                    <option value="1">Quincena</option>
+                                    <option value="0">Todos</option>
+                                </select>
+                            </div>
+                        </div>
+                        <br>
+                    </div>
+                    <div v-if="picked == 'employee'">
+                        <div class="row">
+                            <div class="col-md-3">
+                                Empleado*:
+                            </div>
+                            <div class="col-md-7 col-md-offset-1">
+                                <select v-model='idEmployee' name="emp_id" form="theForm" id="emp_id" class="form-control" placeholder="Selecciona empleado...">
+                                    <option v-for="employee in lEmps" :value="employee.id">@{{ employee.name }}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <br>
+                    </div>
                     <div class="row">
-                        <div class="col-md-2">
+                        <div class="col-md-3">
                             Filtrar*:
                         </div>
                         <div class="col-md-7 col-md-offset-1">
@@ -44,7 +71,7 @@
                     </div>
                     <br>
                     <div class="row">
-                        <div class="col-md-2">
+                        <div class="col-md-3">
                             Período*:
                         </div>
                         <div class="col-md-6 col-md-offset-1">
@@ -55,6 +82,7 @@
                         </div>
                         <input :value="startDate" type="hidden" name="start_date">
                         <input :value="endDate" type="hidden" name="end_date">
+                        {{-- <input :value="idEmployee" type="hidden" name="employee_id"> --}}
                     </div>
                 </div>
                 <div class="box-footer">
@@ -77,6 +105,7 @@
             function GlobalData () {
                 this.aData = <?php echo json_encode(\App\SUtils\SGuiUtils::getAreasAndDepts()) ?>;
                 this.startOfWeek = <?php echo json_encode($startOfWeek) ?>;
+                this.lEmployees = <?php echo json_encode($lEmployees) ?>;
                 this.lAreas = this.aData[0];
                 this.lDepts = this.aData[1];
             }

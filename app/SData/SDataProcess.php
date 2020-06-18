@@ -95,7 +95,7 @@ class SDataProcess {
                                         ->where('employee_id', $idEmployee);
 
                 //filtrar checadas repetidas
-                $registries = SDataProcess::filterDoubleCheks($registries);
+                $registries = SDataProcess::manageCheks($registries, $sDate);
 
                 if (sizeof($registries) > 0) {
                     foreach ($registries as $registry) {
@@ -635,23 +635,29 @@ class SDataProcess {
                 $oRow->overScheduleMins = 0;
             }
             
-            // suma de minutos extra totales.
-            $oRow->overMinsTotal = $oRow->overWorkedMins + $oRow->overDefaultMins + $oRow->overScheduleMins;
-            $oRow->extraHours = SDelayReportUtils::convertToHoursMins($oRow->overMinsTotal);
-
             $cIn = SDataProcess::isCheckSchedule($oRow->inDateTime, $oRow->inDateTimeSch);
             if ($cIn) {
                 $oRow->comments = $oRow->comments."Entrada atípica. ";
-                $oRow->isCheckSchedule = true;
+                $oRow->isAtypicalIn = true;
             }
             $cOut = SDataProcess::isCheckSchedule($oRow->outDateTime, $oRow->outDateTimeSch);
             if ($cOut) {
                 $oRow->comments = $oRow->comments."Salida atípica. ";
-                $oRow->isCheckSchedule = true;
+                $oRow->isAtypicalOut = true;
             }
             if ($cIn || $cOut) {
                 $oRow->comments = $oRow->comments."Revisar horario. ";
+                $oRow->isCheckSchedule = true;
             }
+
+            if ($oRow->isAtypicalOut && $oRow->isAtypicalIn) {
+                $oRow->overDefaultMins = 0;
+            }
+
+            // suma de minutos extra totales.
+            $oRow->overMinsTotal = $oRow->overWorkedMins + $oRow->overDefaultMins + $oRow->overScheduleMins;
+            $oRow->extraHours = SDelayReportUtils::convertToHoursMins($oRow->overMinsTotal);
+
         }
 
         return $lData;
@@ -853,6 +859,68 @@ class SDataProcess {
         }
 
         return $lNewChecks;
+    }
+
+    public static function manageCheks($lCheks, $sDate)
+    {
+        if (sizeof($lCheks) == 0) {
+            return $lCheks;
+        }
+
+        $lNewChecks = array();
+
+        $registry = (object) [
+            'date' => $sDate,
+            'time' => '12:00:00',
+            'type_id' => 1
+        ];
+
+        $lWorkshifts = SDelayReportUtils::getWorkshifts($sDate, $sDate, 0, []);
+        foreach($lCheks as $auxCheck) break;
+        $result = SDelayReportUtils::getSchedule($sDate, $sDate, $auxCheck->employee_id, $registry, clone $lWorkshifts, \SCons::REP_HR_EX);
+
+        if ($result == null) {
+            return SDataProcess::filterDoubleCheks($lCheks);
+        }
+
+        $inTime = "";
+        $outTime = "";
+        if ($result->auxWorkshift != null) {
+            $inTime = $result->auxWorkshift->entry;
+            $outTime = $result->auxWorkshift->departure;
+        }
+        else {
+            $inTime = $result->auxScheduleDay->entry;
+            $outTime = $result->auxScheduleDay->departure;
+        }
+
+        $inDateTime = $sDate.' '.$inTime;
+        $outDateTime = $sDate.' '.$outTime;
+        $originalChecks = clone $lCheks;
+        foreach ($lCheks as $check) {
+            $checkDateTime = $check->date.' '.$check->time;
+
+            $comparisonIn = SDelayReportUtils::compareDates($inDateTime, $checkDateTime);
+            $comparisonOut = SDelayReportUtils::compareDates($outDateTime, $checkDateTime);
+
+            if (abs($comparisonIn->diffMinutes) > 60 && abs($comparisonOut->diffMinutes) > 60) {
+                $lNewChecks = $originalChecks;
+                break;
+            }
+
+            if (abs($comparisonIn->diffMinutes) <= 60) {
+                $check->type_id = \SCons::REG_IN;
+            }
+            else {
+                if (abs($comparisonOut->diffMinutes) <= 60) {
+                    $check->type_id = \SCons::REG_OUT;
+                }
+            }
+
+            $lNewChecks[] = $check;
+        }
+
+        return SDataProcess::filterDoubleCheks($lNewChecks);
     }
 }
 

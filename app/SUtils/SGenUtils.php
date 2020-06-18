@@ -16,7 +16,7 @@ class SGenUtils {
         $employees = \DB::table('employees AS e')
                             ->leftJoin('jobs AS j', 'j.id', '=', 'e.job_id')
                             ->leftJoin('departments AS d', 'd.id', '=', 'j.department_id')
-                            ->select('e.id', 'd.id AS dept_id', 'e.num_employee', 
+                            ->select('e.id', 'd.id AS dept_id', 'e.num_employee', 'e.way_pay_id',
                                         'e.name', 'e.is_overtime', 'e.ben_pol_id', 'external_id')
                             ->where('d.is_delete', false)
                             // ->where('e.id', 67)
@@ -54,7 +54,7 @@ class SGenUtils {
                 break;
         }
 
-        $employees = $employees->get();
+        $employees = $employees->orderBy('e.name', 'ASC')->get();
 
         return $employees;
     }
