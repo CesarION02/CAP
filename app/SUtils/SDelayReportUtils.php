@@ -138,9 +138,9 @@ class SDelayReportUtils {
             }
         }
 
-        $maxOverTime = $oAux->agreed_extra;
+        $maxOverMinsTime = $oAux->agreed_extra * 60;
 
-        if ($maxOverTime <= 0) {
+        if ($maxOverMinsTime <= 0) {
             return 0;
         }
 
@@ -151,8 +151,8 @@ class SDelayReportUtils {
         
         if ($mins > $scheduleTop) {
             $extraMins = $mins - $scheduleTop;
-            if ($extraMins > $maxOverTime) {
-                return $maxOverTime;
+            if ($extraMins > $maxOverMinsTime) {
+                return $maxOverMinsTime;
             }
 
             return $extraMins;
