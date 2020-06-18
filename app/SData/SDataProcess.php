@@ -95,7 +95,7 @@ class SDataProcess {
                                         ->where('employee_id', $idEmployee);
 
                 //filtrar checadas repetidas
-                $registries = SDataProcess::filterDoubleCheks($registries);
+                $registries = SDataProcess::manageCheks($registries, $sDate);
 
                 if (sizeof($registries) > 0) {
                     foreach ($registries as $registry) {
@@ -151,8 +151,8 @@ class SDataProcess {
                                     'date' => $sDate,
                                     'time' => '12:00:00'
                                 ];
-
-                    $result = SDelayReportUtils::checkSchedule(clone $lWorkshifts, $idEmployee, $registry, \SCons::REP_HR_EX);
+                                
+                    $result = SDelayReportUtils::getSchedule($sDate, $sDate, $idEmployee, $registry, clone $lWorkshifts, \SCons::REP_HR_EX);
 
                     $otherRow = new SRegistryRow();
                     $otherRow->idEmployee = $idEmployee;
@@ -162,13 +162,16 @@ class SDataProcess {
                     $otherRow = SDataProcess::setDates($result, $otherRow, $sDate);
 
                     $otherRow->hasChecks = false;
+                    if ($otherRow->workable) {
+                        $otherRow->comments = $otherRow->comments."Sin checadas. ";
+                    }
                     // if (! $otherRow->hasSchedule) {
                     //     $comments = $otherRow->comments;
                     //     $newComments = str_replace("Sin horario.", "", $comments);
                     //     $otherRow->comments = $newComments."No laboral. ";
                     // }
                     // else {
-                        $otherRow->comments = $otherRow->comments."Sin checadas. ";
+                        // $otherRow->comments = $otherRow->comments."Sin checadas. ";
                     // }
 
                     $otherRow->inDateTime = $sDate;
@@ -466,6 +469,17 @@ class SDataProcess {
             $oRow->hasSchedule = false;
         }
         else {
+            $oRow->scheduleFrom = SDataProcess::getOrigin($result);
+
+            if ($oRow->scheduleFrom == \SCons::FROM_ASSIGN && ! $result->auxScheduleDay->is_active) {
+                $oRow->outDate = $result->variableDateTime->toDateString();
+                $oRow->outDateTime = $result->variableDateTime->toDateTimeString();
+                $oRow->comments = $oRow->comments."No laborable. ";
+                $oRow->workable = false;
+
+                return $oRow;
+            }
+
             $oRow->outDate = $result->variableDateTime->toDateString();
             $oRow->outDateTime = $result->variableDateTime->toDateTimeString();
             $oRow->outDateTimeSch = $result->pinnedDateTime->toDateTimeString();
@@ -487,6 +501,15 @@ class SDataProcess {
         return $oRow;
     }
 
+    public static function getOrigin($result)
+    {
+        if ($result->auxWorkshift != null) {
+            return \SCons::FROM_WORKSH;
+        }
+        
+        return \SCons::FROM_ASSIGN;
+    }
+
     public static function checkTypeDay($result, $oRow)
     {
         if ($result->auxWorkshift != null) {
@@ -501,7 +524,12 @@ class SDataProcess {
     public static function addEventsDaysOffAndHolidays($lData53, $qWorkshifts)
     {
         foreach ($lData53 as $oRow) {
-            $lAbsences = prePayrollController::searchAbsence($oRow->idEmployee, $oRow->inDate);
+            if (! $oRow->workable) {
+                continue;
+            }
+            $sDt = Carbon::parse($oRow->inDateTimeSch);
+
+            $lAbsences = prePayrollController::searchAbsence($oRow->idEmployee, $sDt->toDateString());
                     
             if (sizeof($lAbsences) > 0) {
                 foreach ($lAbsences as $absence) {
@@ -523,7 +551,7 @@ class SDataProcess {
             }
 
             $lWorks = clone $qWorkshifts;
-            $events = SDelayReportUtils::checkEvents($lWorks, $oRow->idEmployee, $oRow->inDate);
+            $events = SDelayReportUtils::checkEvents($lWorks, $oRow->idEmployee, $sDt->toDateString());
 
             if ($events == null) {
                 continue;
@@ -580,7 +608,7 @@ class SDataProcess {
     public static function addDelaysAndOverTime($lData, $aEmployeeOverTime)
     {
         foreach ($lData as $oRow) {
-            if (! $oRow->hasChecks) {
+            if (! $oRow->hasChecks || ! $oRow->workable) {
                 $oRow->overWorkedMins = 0;
                 $oRow->overDefaultMins = 0;
                 $oRow->overScheduleMins = 0;
@@ -607,14 +635,29 @@ class SDataProcess {
                 $oRow->overScheduleMins = 0;
             }
             
+            $cIn = SDataProcess::isCheckSchedule($oRow->inDateTime, $oRow->inDateTimeSch);
+            if ($cIn) {
+                $oRow->comments = $oRow->comments."Entrada atípica. ";
+                $oRow->isAtypicalIn = true;
+            }
+            $cOut = SDataProcess::isCheckSchedule($oRow->outDateTime, $oRow->outDateTimeSch);
+            if ($cOut) {
+                $oRow->comments = $oRow->comments."Salida atípica. ";
+                $oRow->isAtypicalOut = true;
+            }
+            if ($cIn || $cOut) {
+                $oRow->comments = $oRow->comments."Revisar horario. ";
+                $oRow->isCheckSchedule = true;
+            }
+
+            if ($oRow->isAtypicalOut && $oRow->isAtypicalIn) {
+                $oRow->overDefaultMins = 0;
+            }
+
             // suma de minutos extra totales.
             $oRow->overMinsTotal = $oRow->overWorkedMins + $oRow->overDefaultMins + $oRow->overScheduleMins;
             $oRow->extraHours = SDelayReportUtils::convertToHoursMins($oRow->overMinsTotal);
 
-            if (SDataProcess::isCheckSchedule($oRow->inDateTime, $oRow->inDateTimeSch, $oRow->outDateTime, $oRow->outDateTimeSch)) {
-                $oRow->comments = $oRow->comments."Revisar horario. ";
-                $oRow->isCheckSchedule = true;
-            }
         }
 
         return $lData;
@@ -691,26 +734,17 @@ class SDataProcess {
                 || $comparisonCheck->diffMinutes >= (480 - $config->toleranceMinutes);
     }
 
-    public static function isCheckSchedule($inDateTime, $inDateTimeSch, $outDateTime, $outDateTimeSch)
+    public static function isCheckSchedule($sDateTime, $sDateTimeSch)
     {
-        if ($inDateTime == null || $inDateTimeSch == null) {
+        if ($sDateTime == null || $sDateTimeSch == null) {
             return false;
         }
 
-        $comparisonIn = SDelayReportUtils::compareDates($inDateTime, $inDateTimeSch);
         $config = \App\SUtils\SConfiguration::getConfigurations();
 
-        if (abs($comparisonIn->diffMinutes) > $config->maxGapMinutes) {
-            return true;
-        }
-
-        if ($outDateTime == null || $outDateTimeSch == null) {
-            return false;
-        }
-
-        $comparisonOut = SDelayReportUtils::compareDates($outDateTime, $outDateTimeSch);
+        $comparison = SDelayReportUtils::compareDates($sDateTime, $sDateTimeSch);
         
-        return abs($comparisonOut->diffMinutes) > $config->maxGapMinutes;
+        return abs($comparison->diffMinutes) > $config->maxGapMinutes;
     }
 
     public static function addAbsences($lData, $aEmployeeBen)
@@ -729,7 +763,7 @@ class SDataProcess {
                         if (! $oRow->hasChecks) {
                             if (sizeof($oRow->events) == 0 && ! $oRow->isDayOff 
                                     && $oRow->isHoliday == 0 && $oRow->dayInhability == 0
-                                    && $oRow->dayVacations == 0) {
+                                    && $oRow->dayVacations == 0 && $oRow->workable) {
                                         $hasAbs = true;
                             }
                         }
@@ -753,7 +787,7 @@ class SDataProcess {
     public static function addSundayPay($lData)
     {
         foreach ($lData as $oRow) {
-            if (! $oRow->hasChecks) {
+            if (! $oRow->hasChecks || ! $oRow->workable) {
                 continue;
             }
 
@@ -825,6 +859,68 @@ class SDataProcess {
         }
 
         return $lNewChecks;
+    }
+
+    public static function manageCheks($lCheks, $sDate)
+    {
+        if (sizeof($lCheks) == 0) {
+            return $lCheks;
+        }
+
+        $lNewChecks = array();
+
+        $registry = (object) [
+            'date' => $sDate,
+            'time' => '12:00:00',
+            'type_id' => 1
+        ];
+
+        $lWorkshifts = SDelayReportUtils::getWorkshifts($sDate, $sDate, 0, []);
+        foreach($lCheks as $auxCheck) break;
+        $result = SDelayReportUtils::getSchedule($sDate, $sDate, $auxCheck->employee_id, $registry, clone $lWorkshifts, \SCons::REP_HR_EX);
+
+        if ($result == null) {
+            return SDataProcess::filterDoubleCheks($lCheks);
+        }
+
+        $inTime = "";
+        $outTime = "";
+        if ($result->auxWorkshift != null) {
+            $inTime = $result->auxWorkshift->entry;
+            $outTime = $result->auxWorkshift->departure;
+        }
+        else {
+            $inTime = $result->auxScheduleDay->entry;
+            $outTime = $result->auxScheduleDay->departure;
+        }
+
+        $inDateTime = $sDate.' '.$inTime;
+        $outDateTime = $sDate.' '.$outTime;
+        $originalChecks = clone $lCheks;
+        foreach ($lCheks as $check) {
+            $checkDateTime = $check->date.' '.$check->time;
+
+            $comparisonIn = SDelayReportUtils::compareDates($inDateTime, $checkDateTime);
+            $comparisonOut = SDelayReportUtils::compareDates($outDateTime, $checkDateTime);
+
+            if (abs($comparisonIn->diffMinutes) > 60 && abs($comparisonOut->diffMinutes) > 60) {
+                $lNewChecks = $originalChecks;
+                break;
+            }
+
+            if (abs($comparisonIn->diffMinutes) <= 60) {
+                $check->type_id = \SCons::REG_IN;
+            }
+            else {
+                if (abs($comparisonOut->diffMinutes) <= 60) {
+                    $check->type_id = \SCons::REG_OUT;
+                }
+            }
+
+            $lNewChecks[] = $check;
+        }
+
+        return SDataProcess::filterDoubleCheks($lNewChecks);
     }
 }
 
