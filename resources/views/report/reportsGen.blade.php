@@ -26,20 +26,20 @@
                             Filtrar por:
                         </div>
                         <div class="col-md-2 col-md-offset-1">
-                            <label><input v-model="picked" type="radio" name="optradio" value="period">Periodic. pago</label>
+                            <label><input v-model="picked" v-on:change="onFilterTypeChange()" type="radio" name="optradio" value="period">Periodic. pago</label>
                         </div>
                         <div class="col-md-2">
-                            <label><input v-model="picked" type="radio" name="optradio" value="employee">Empleado</label>
+                            <label><input v-model="picked" v-on:change="onFilterTypeChange()" type="radio" name="optradio" value="employee">Empleado</label>
                         </div>
                     </div>
                     <br>
-                    <div v-if="picked == 'period'">
+                    <div>
                         <div class="row">
                             <div class="col-md-3">
                                 Periodicidad de pago*:
                             </div>
                             <div class="col-md-4 col-md-offset-1">
-                                <select name="pay_way" id="pay_way" class="form-control" v-model="iPayWay">
+                                <select :disabled="picked == 'employee'" name="pay_way" id="pay_way" class="form-control" v-model="iPayWay">
                                     <option value="2">Semana</option>
                                     <option value="1">Quincena</option>
                                     <option value="0">Todos</option>
@@ -48,13 +48,13 @@
                         </div>
                         <br>
                     </div>
-                    <div v-if="picked == 'employee'">
+                    <div>
                         <div class="row">
                             <div class="col-md-3">
                                 Empleado*:
                             </div>
                             <div class="col-md-7 col-md-offset-1">
-                                <select v-model='idEmployee' name="emp_id" form="theForm" id="emp_id" class="form-control" placeholder="Selecciona empleado...">
+                                <select :disabled="picked == 'period'" v-model='idEmployee' name="emp_id" form="theForm" id="emp_id" class="form-control" placeholder="Selecciona empleado...">
                                     <option v-for="employee in lEmps" :value="employee.id">@{{ employee.name }}</option>
                                 </select>
                             </div>
@@ -82,7 +82,6 @@
                         </div>
                         <input :value="startDate" type="hidden" name="start_date">
                         <input :value="endDate" type="hidden" name="end_date">
-                        {{-- <input :value="idEmployee" type="hidden" name="employee_id"> --}}
                     </div>
                 </div>
                 <div class="box-footer">
