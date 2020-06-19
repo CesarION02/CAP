@@ -408,9 +408,14 @@ class ReporteController extends Controller
         $sEndDate = $request->end_date;
         $iEmployee = $request->emp_id;
 
-        if ($iEmployee > 0) {
-            $lEmployees = SGenUtils::toEmployeeIds(0, 0, 0, [$iEmployee]);
-            $payWay = $lEmployees[0]->way_pay_id;
+        if ($request->optradio == "employee") {
+            if ($iEmployee > 0) {
+                $lEmployees = SGenUtils::toEmployeeIds(0, 0, 0, [$iEmployee]);
+                $payWay = $lEmployees[0]->way_pay_id;
+            }
+            else {
+                return \Redirect::back()->withErrors(['Error', 'Debe seleccionar empleado']);
+            }
         }
         else {
             /**
@@ -418,7 +423,7 @@ class ReporteController extends Controller
              * 2: semana
              * 3: todos
              */
-            $payWay = $request->pay_way;
+            $payWay = $request->pay_way == null ? \SCons::PAY_W_S : $request->pay_way;
 
             $filterType = $request->i_filter;
             $ids = $request->elems;
