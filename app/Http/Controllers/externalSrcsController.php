@@ -92,7 +92,7 @@ class externalSrcsController extends Controller
                         $lColRep = $lColRep->where('idEmployee', $oEmployee->id);
                         $lColRep = $lColRep->filter(function ($item) {
                                             // replace stristr with your choice of matching function
-                                            return (stristr($item->comments, 'Falta entrada') || stristr($item->comments, 'Falta salida'))
+                                            return (stristr($item->comments, 'Sin entrada') || stristr($item->comments, 'Sin salida'))
                                                     && (! stristr($item->comments, 'Sin horario'));
                                         });
 

@@ -342,10 +342,13 @@ class ReporteController extends Controller
     {
         $config = \App\SUtils\SConfiguration::getConfigurations();
 
+        $lEmployees = SGenUtils::toEmployeeIds(0, 0, []);
+
         return view('report.reportsGen')
                     ->with('tReport', \SCons::REP_HR_EX)
                     ->with('sTitle', 'Reporte de Retardos y Percepciones Variables')
                     ->with('sRoute', 'reportepercepvariables')
+                    ->with('lEmployees', $lEmployees)
                     ->with('startOfWeek', $config->startOfWeek);
     }
 
@@ -404,18 +407,29 @@ class ReporteController extends Controller
     {
         $sStartDate = $request->start_date;
         $sEndDate = $request->end_date;
+        $iEmployee = $request->emp_id;
 
-        /**
-         * 1: quincena
-         * 2: semana
-         * 3: todos
-         */
-        $payWay = $request->pay_way;
+        if ($request->optradio == "employee") {
+            if ($iEmployee > 0) {
+                $lEmployees = SGenUtils::toEmployeeIds(0, 0, 0, [$iEmployee]);
+                $payWay = $lEmployees[0]->way_pay_id;
+            }
+            else {
+                return \Redirect::back()->withErrors(['Error', 'Debe seleccionar empleado']);
+            }
+        }
+        else {
+            /**
+             * 1: quincena
+             * 2: semana
+             * 3: todos
+             */
+            $payWay = $request->pay_way == null ? \SCons::PAY_W_S : $request->pay_way;
 
-        $filterType = $request->i_filter;
-        $ids = $request->elems;
-
-        $lEmployees = SGenUtils::toEmployeeIds($payWay, $filterType, $ids);
+            $filterType = $request->i_filter;
+            $ids = $request->elems;
+            $lEmployees = SGenUtils::toEmployeeIds($payWay, $filterType, $ids);
+        }
 
         $lRows = SDataProcess::process($sStartDate, $sEndDate, $payWay, $lEmployees);
 
