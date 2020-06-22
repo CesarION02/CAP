@@ -17,41 +17,89 @@
                 <div class="box-tools pull-right">
                 </div>
             </div>
-            <div class="box-body" id="reportDelayApp">
+            <div class="box-body" >
                 <div class="row">
                     <div class="col-md-12">
                         <table id="delays_table" class="table table-condensed" style="width:100%">
                             <thead>
                                 <tr>
-                                    <th>#</th>
+                                    <th></th>
                                     <th>Empleado</th>
                                     {{-- <th>Fecha entrada</th> --}}
-                                    <th>Hora_entrada</th>
-                                    {{-- <th>Fecha salida</th> --}}
-                                    <th>Hora_salida</th>
+                                    <th>Fecha entrada</th></th>
+                                    <th>Hora entrada</th>
+                                    <th>Fecha salida</th>
+                                    <th>Hora salida</th>
                                     {{-- <th v-if="oData.tReport == oData.REP_DELAY">Retardo (min)</th>
                                     <th v-else>Horas Extra</th> --}}
                                     <th>Horas Extra Dobles</th>
                                     {{-- <th v-if="oData.tReport == oData.REP_HR_EX">Hr_progr_Sal</th> --}}
                                     <th>Horas Extra Triples</th>
-                                    <th>Observaciones</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="row in oData.lRows" :class="getCssClass(row.delayMins, oData.tReport)">
-                                    <td>@{{ vueGui.pad(row.numEmployee, 6) }}</td>
-                                    <td>@{{ row.employee }}</td>
+                                @for($i = 0 ; count($lRows) > $i ; $i++)
+                                <tr>
+                                    <td>{{ $lRows[$i]->num_employee  }}</td>
+                                    <td>{{ $lRows[$i]->name }}</td>
                                     {{-- <td>@{{ row.inDate }}</td> --}}
-                                    <td>@{{ row.inDateTime }}</td>
-                                    {{-- <td>@{{ row.outDate }}</td> --}}
-                                    <td>@{{ row.outDateTime }}</td>
+                                    <td>{{ $lRows[$i]->inDate }}</td>
+                                    @if($lRows[$i]->haschecks == 1)
+                                        @if($tipo != 2)
+                                            <td>{{ $lRows[$i]->inDateTime }}</td>
+                                        @else
+                                            @if($lRows[$i]->inDateTimeNoficial == null)
+                                                <td>{{ $lRows[$i]->inDateTime }}</td>   
+                                            @else
+                                                <td>{{ $lRows[$i]->inDateTimeNoficial }}</td>
+                                            @endif
+                                        @endif
+                                    
+                                        <td>{{ $lRows[$i]->outDate }}</td>
+                                    
+                                        @if($tipo != 2)
+                                            <td>{{ $lRows[$i]->outDateTime }}</td>
+                                        @else
+                                            @if($lRows[$i]->outDateTimeNoficial == null)
+                                                <td>{{ $lRows[$i]->outDateTime }}</td>   
+                                            @else
+                                                <td>{{ $lRows[$i]->outDateTimeNoficial }}</td>
+                                            @endif
+                                        @endif
                                     {{-- <td v-if="oData.tReport == oData.REP_DELAY">@{{ row.delayMins }}</td>
                                     <td v-else>@{{ row.extraHours }}</td> --}}
-                                    <td>@{{ row.extraDouble }}</td>
-                                    <td>@{{ row.extraTriple }}</td>
+                                        @if($tipo == 1)
+                                            <td align="center">{{ $lRows[$i]->extraDobleMins + $lRows[$i]->extraDobleMinsNoficial }}</td>
+                                            <td align="center">{{ $lRows[$i]->extraTripleMins + $lRows[$i]->extraTripleMinsNoficial }}</td>
+                                        @elseif($tipo == 2)
+                                            <td align="center">{{ $lRows[$i]->extraDobleMins }}</td>
+                                            <td align="center">{{ $lRows[$i]->extraTripleMins }}</td>
+                                        @else
+                                            <td align="center">{{ $lRows[$i]->extraDobleMinsNoficial }}</td>
+                                            <td align="center">{{ $lRows[$i]->extraTripleMinsNoficial }}</td>
+                                        @endif
+                                    @elseif($lRows[$i]->hasabsence)
+                                        <td>{{ 'Falta'}}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    @elseif($lRows[$i]->is_dayoff)
+                                        <td>{{ 'Descanso'}}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    @elseif($lRows[$i]->is_holiday)
+                                        <td>{{ 'Día festivo'}}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    @endif
                                     {{-- <td v-if="oData.tReport == oData.REP_HR_EX">@{{ row.outDateTimeSch }}</td> --}}
-                                    <td>@{{ row.comments }}</td>
                                 </tr>
+                                @endfor
                             </tbody>
                         </table>
                     </div>
@@ -63,8 +111,7 @@
 @endsection
 
 @section("scripts")
-    <script src="{{ asset("assets/js/chosen.jquery.min.js") }}" type="text/javascript"></script>
-    <script src="{{ asset("assets/js/vue.js") }}" type="text/javascript"></script>
+
     <script src="{{ asset("dt/datatables.js") }}" type="text/javascript"></script>
     <script src="{{ asset('dt/dataTables.buttons.min.js') }}"></script>
 	<script src="{{ asset('dt/buttons.flash.min.js') }}"></script>
@@ -73,41 +120,10 @@
 	<script src="{{ asset('dt/vfs_fonts.js') }}"></script>
 	<script src="{{ asset('dt/buttons.html5.min.js') }}"></script>
     <script src="{{ asset('dt/buttons.print.min.js') }}"></script>
-    <script src="{{ asset("assets/pages/scripts/SGui.js") }}" type="text/javascript"></script>
-    
-    <script>
-        function GlobalData () {
-            this.lRows = <?php echo json_encode($lRows) ?>;
-            this.REP_HR_EX = <?php echo json_encode(\SCons::REP_HR_EX) ?>;
-            this.REP_DELAY = <?php echo json_encode(\SCons::REP_DELAY) ?>;
 
-            // this.minsCol = this.tReport == this.REP_DELAY ? 4 : 4;
-        }
         
-        var oData = new GlobalData();
-        var oGui = new SGui();
 
-        /**
-         * Convierte los minutos en entero a formato 00:00
-         *
-         * @param int time
-         * 
-         * @return string 00:00
-         */
-        function convertToHoursMins(time) 
-        {
-            if (time < 1) {
-                return "00:00";
-            }
 
-            let hours = Math.floor(time / 60);          
-            let minutes = time % 60;
-
-            return "" + hours + ":" + minutes;
-        }
-    </script>
-
-    <script src="{{asset("assets/pages/scripts/report/delayReport.js")}}" type="text/javascript"></script>
 
     <script>
         $(document).ready(function() {
@@ -136,13 +152,7 @@
                         "sSortDescending": ": Activar para ordenar la columna de manera descendente"
                     }
                 },
-                order: [[0, 'asc']],
-                "columnDefs": [
-                    {
-                        "targets": [ oData.hiddenCol ],
-                        "visible": false
-                    }
-                ],
+                
                 
                 "colReorder": true,
                 "scrollX": true,
@@ -155,27 +165,19 @@
                         'pageLength',
                         {
                             extend: 'excel',
-                            exportOptions: {
-                                columns: oData.toExport
-                            }
+                            
                         },
                         {
                             extend: 'copy',
-                            exportOptions: {
-                                columns: oData.toExport
-                            }
+                            
                         },
                         {
                             extend: 'csv',
-                            exportOptions: {
-                                columns: oData.toExport
-                            }
+                            
                         },
                         {
                             extend: 'print',
-                            exportOptions: {
-                                columns: oData.toExport
-                            }
+                            
                         }
                     ]
             });

@@ -14,6 +14,7 @@ use App\SUtils\SInfoWithPolicy;
 use App\SUtils\SGenUtils;
 use App\SData\SDataProcess;
 use DB;
+use Carbon\Carbon;
 
 class ReporteController extends Controller
 {
@@ -450,9 +451,11 @@ class ReporteController extends Controller
          * 2: semana
          * 3: todos
          */
+        $year = '2020';
         $tipoDatos = $request->tipodato;
         $payWay = $request->way_pay;
         $id = $request->vals;
+        $prueba = SInfoWithPolicy::preProcessInfo($sStartDate,$year,$sEndDate,$payWay);
         switch($request->reportType){
             case 1:
                 
@@ -514,27 +517,36 @@ class ReporteController extends Controller
                 }
             break;
             case 4:
-                $lEmployees = $request->vals;
+                $lEmployees = $id; 
             break;
+            
         }
         //$lEmployees[0] = 32; 
-        $lRows = SInfoWithPolicy::processInfo($sStartDate, $sEndDate, $payWay, $lEmployees,$tipoDatos);
-
+        $lRows = DB::table('processed_data')
+                        ->join('employees','employees.id','=','processed_data.employee_id')
+                        ->whereIn('employees.id',$lEmployees)
+                        ->where(function($query) use ($sStartDate,$sEndDate) {
+                            $query->whereBetween('inDate',[$sStartDate,$sEndDate])
+                            ->OrwhereBetween('outDate',[$sStartDate,$sEndDate]);
+                        })
+                        ->get();
+        $lEmployees = $id;
         return view('report.reportView')
                     ->with('sTitle', 'Reporte de Checadas')
-                    ->with('lRows', $lRows);
+                    ->with('lRows', $lRows)
+                    ->with('tipo', $tipoDatos);
     } 
 
     public function prueba(){
         $start = '2020-05-01';
         $end = '2020-05-15';
-        $way = 2;
+        $way = 1;
         $year = '2020';    
         $employees[0] = 67;
-        $key[0] = 2;
+        
 
         //$employees[0] = 24;
-
+        $key[0] = 2;
         //$prueba = SInfoWithPolicy::standardization($start,$end,$way,2,$key,$employees);
         $prueba = SInfoWithPolicy::preProcessInfo($start,$year,$end,$way);
     }

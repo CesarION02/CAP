@@ -1,19 +1,19 @@
 var app = new Vue({
     el: '#reportDelayApp',
     data: {
-      oData: oData,
-      vueGui: oGui
+        oData: oData,
+        vueGui: oGui
     },
     methods: {
-      getCssClass(oRow, report) {
-        if (oRow.isCheckSchedule) {
-          return 'check';
+        getCssClass(oRow, report) {
+            if (oRow.ischeckschedule) {
+                return 'check';
+            }
+            if (report != this.oData.REP_DELAY) {
+                if (oRow.entryDelayMinutes > 0) {
+                    return 'danger';
+                }
+            }
         }
-        if (report != this.oData.REP_DELAY) {
-          if (oRow.entryDelayMinutes > 0) {
-            return 'danger';
-          }
-        }
-      }
     },
-  })
+})
