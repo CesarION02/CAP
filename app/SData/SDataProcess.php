@@ -634,13 +634,14 @@ class SDataProcess {
                 $oRow->overDefaultMins = 0;
                 $oRow->overScheduleMins = 0;
             }
-            
-            $cIn = SDataProcess::isCheckSchedule($oRow->inDateTime, $oRow->inDateTimeSch);
+            $mayBeOverTime = false;
+            $cIn = SDataProcess::isCheckSchedule($oRow->inDateTime, $oRow->inDateTimeSch, $mayBeOverTime);
             if ($cIn) {
                 $oRow->comments = $oRow->comments."Entrada atípica. ";
                 $oRow->isAtypicalIn = true;
             }
-            $cOut = SDataProcess::isCheckSchedule($oRow->outDateTime, $oRow->outDateTimeSch);
+            $mayBeOverTime = true;
+            $cOut = SDataProcess::isCheckSchedule($oRow->outDateTime, $oRow->outDateTimeSch, $mayBeOverTime);
             if ($cOut) {
                 $oRow->comments = $oRow->comments."Salida atípica. ";
                 $oRow->isAtypicalOut = true;
@@ -734,7 +735,7 @@ class SDataProcess {
                 || $comparisonCheck->diffMinutes >= (480 - $config->toleranceMinutes);
     }
 
-    public static function isCheckSchedule($sDateTime, $sDateTimeSch)
+    public static function isCheckSchedule($sDateTime, $sDateTimeSch, $isOut)
     {
         if ($sDateTime == null || $sDateTimeSch == null) {
             return false;
@@ -743,6 +744,10 @@ class SDataProcess {
         $config = \App\SUtils\SConfiguration::getConfigurations();
 
         $comparison = SDelayReportUtils::compareDates($sDateTime, $sDateTimeSch);
+
+        if ($isOut) {
+            return $comparison->diffMinutes > 0 && $comparison->diffMinutes > $config->maxGapMinutes;
+        }
         
         return abs($comparison->diffMinutes) > $config->maxGapMinutes;
     }
