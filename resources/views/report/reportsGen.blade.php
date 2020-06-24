@@ -25,10 +25,10 @@
                         <div class="col-md-3">
                             Filtrar por:
                         </div>
-                        <div class="col-md-2 col-md-offset-1">
-                            <label><input v-model="picked" v-on:change="onFilterTypeChange()" type="radio" name="optradio" value="period">Periodic. pago</label>
+                        <div class="col-md-3 col-md-offset-1">
+                            <label><input v-model="picked" v-on:change="onFilterTypeChange()" type="radio" name="optradio" value="period">Periodicidad de pago</label>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-3">
                             <label><input v-model="picked" v-on:change="onFilterTypeChange()" type="radio" name="optradio" value="employee">Empleado</label>
                         </div>
                     </div>
@@ -85,7 +85,9 @@
                     </div>
                 </div>
                 <div class="box-footer">
-                    <div class="col-lg-8"></div>
+                    <div class="col-lg-4 col-lg-offset-4">
+                        <p style="color:red">Nota: Este proceso podría demorar algunos minutos</p>
+                    </div>
                     <div class="col-lg-2">
                         <button class="btn btn-warning" id="generar" name="generar" type="submit">Generar</button>
                     </div>
