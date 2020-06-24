@@ -448,7 +448,7 @@ class SInfoWithPolicy{
                 }
 
                 for( $j = 0 ; count($lRows) > $j ; $j++ ){
-                        if($lRows[$j]->isTypeDayChecked == 0){
+                        if($lRows[$j]->isCheckSchedule == 0){
                             $minutosExtra = $lRows[$j]->overDefaultMins + $lRows[$j]->overWorkedMins;
                         }else{
                             $minutosExtra = $lRows[$j]->overWorkedMins;
