@@ -707,11 +707,14 @@ class SInfoWithPolicy{
         if($diferencia != 7){ return $lRows;}
         if(count($lRows) < 7){ return $lRows;};
         for($i = 0 ; $diferencia > $i ; $i++){
-            if( $lRows[$i]->hasChecks == false && $lRows[$i]->hasSchedule == false ){
-                $semanaNoCompleta = true;
-            }elseif( $lRows[$i]->hasChecks == false && $lRows[$i]->hasSchedule == true ){
-                $aAbsence[$contadorAusencia] = $i;
-                $contadorAusencia++;
+            if( $lRows[$i]->hasChecks == false ){
+                if( $lRows[$i]->hasAbsence == true ){
+                    $aAbsence[$contadorAusencia] = $i;
+                    $contadorAusencia++;
+                }else{
+                    $semanaNoCompleta = true;
+                }
+                
             }elseif( $lRows[$i]->hasChecks == true ){
                 if( $lRows[$i]->extraDoubleMins == 0 && $lRows[$i]->extraTripleMins == 0 && $lRows[$i]->isSunday == 0){
                     $aWithoutExtra[$contadorSinextra] = $i;
@@ -825,11 +828,14 @@ class SInfoWithPolicy{
                 $diferencia = 7 - $diferencia;
                 if($diferencia != 1){ 
                 for($i ; $diferencia > $i ; $i++){
-                    if( $lRows[$i]->hasChecks == false && $lRows[$i]->hasSchedule == false ){
-                        $semanaNoCompleta = true;
-                    }elseif( $lRows[$i]->hasChecks == false && $lRows[$i]->hasSchedule == true ){
-                        $aAbsence[$contadorAusencia] = $i;
-                        $contadorAusencia++;
+                    if( $lRows[$i]->hasChecks == false ){
+                        if( $lRows[$i]->hasAbsence == true ){
+                            $aAbsence[$contadorAusencia] = $i;
+                            $contadorAusencia++;
+                        }else{
+                            $semanaNoCompleta = true;
+                        }
+                        
                     }elseif( $lRows[$i]->hasChecks == true ){
                         if( $lRows[$i]->extraDoubleMins == 0 && $lRows[$i]->extraTripleMins == 0  && $lRows[$i]->isSunday == 0){
                             $aWithoutExtra[$contadorSinextra] = $i;
@@ -944,11 +950,14 @@ class SInfoWithPolicy{
                 $diferencia = 7 + $contador[0];
                 if ( $diferencia < count($lRows) ){
                     for($i ; $diferencia > $i ; $i++){
-                        if( $lRows[$i]->hasChecks == false && $lRows[$i]->hasSchedule == false ){
-                            $semanaNoCompleta = true;
-                        }elseif( $lRows[$i]->hasChecks == false && $lRows[$i]->hasSchedule == true ){
-                            $aAbsence[$contadorAusencia] = $i;
-                            $contadorAusencia++;
+                        if( $lRows[$i]->hasChecks == false ){
+                            if( $lRows[$i]->hasAbsence == true ){
+                                $aAbsence[$contadorAusencia] = $i;
+                                $contadorAusencia++;
+                            }else{
+                                $semanaNoCompleta = true;
+                            }
+                            
                         }elseif( $lRows[$i]->hasChecks == true ){
                             if( $lRows[$i]->extraDoubleMins == 0 && $lRows[$i]->extraTripleMins == 0 && $lRows[$i]->isSunday == 0){
                                 $aWithoutExtra[$contadorSinextra] = $i;
@@ -1038,6 +1047,7 @@ class SInfoWithPolicy{
                 $empleados = DB::table('employees')
                                 ->where('is_active','=',1)
                                 ->where('way_pay_id','=',2)
+                                ->where('id',57)
                                 ->select('id AS id')
                                 ->get();
                 $num_empleados = count($empleados);
@@ -1074,7 +1084,7 @@ class SInfoWithPolicy{
                 $empleados = DB::table('employees')
                                 ->where('is_active','=',1)
                                 ->where('way_pay_id','=',1)
-                                ->where('id',67)
+                                //->where('id',67)
                                 ->select('id AS id')
                                 ->get();
                 $num_empleados = count($empleados);
