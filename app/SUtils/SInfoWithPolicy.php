@@ -789,7 +789,15 @@ class SInfoWithPolicy{
             ->where('year','=',$year)
             ->select('ini AS inicio', 'fin AS final')
             ->get();
-        $primeraFecha = Carbon::parse($lRows[ $contador[0] ]->inDate);
+        if($lRows[$contador[0]]->inDate != null){
+            $primeraFecha = Carbon::parse($lRows[ $contador[0] ]->inDate);
+        }else if($lRows[ $contador[0] ]->inDateTime != null){
+            $primeraFecha = Carbon::parse($lRows[ $contador[0] ]->inDateTime);    
+        }else if($lRows[ $contador[0] ]->outDate != null){
+            $primeraFecha = Carbon::parse($lRows[ $contador[0] ]->outDate);
+        }else{
+            $primeraFecha = Carbon::parse($lRows[ $contador[0] ]->outDateTime);
+        }
         $chequeoPrimera = Carbon::parse($inicio);
         if($primeraFecha < $chequeoPrimera){ $primeraFecha->addDay();}
         $inicioSemana = Carbon::parse($final[0]->inicio);
@@ -806,10 +814,14 @@ class SInfoWithPolicy{
                     ->where('employee_id',$employee)
                     ->select('haschecks AS checada','hasschedule AS programado')
                     ->get();
-            for( $i = 0 ; count($diasTrabajados) > $i ; $i++ ){
-                if( $diasTrabajados[$i]->checada == 0 && $diasTrabajados[$i]->programado == 0 ){
-                    $noCompleto = 1;
+            if(count($diasTrabajados) != 0 ){
+                for( $i = 0 ; count($diasTrabajados) > $i ; $i++ ){
+                    if( $diasTrabajados[$i]->checada == 0 && $diasTrabajados[$i]->programado == 0 ){
+                        $noCompleto = 1;
+                    }
                 }
+            }else{
+                $noCompleto = 1;
             } 
             if ( $noCompleto == 1 ){
                 $contador[0] = 7 - $diferencia;
@@ -1047,7 +1059,7 @@ class SInfoWithPolicy{
                 $empleados = DB::table('employees')
                                 ->where('is_active','=',1)
                                 ->where('way_pay_id','=',2)
-                                ->where('id',57)
+                                //->where('id',57)
                                 ->select('id AS id')
                                 ->get();
                 $num_empleados = count($empleados);
@@ -1084,7 +1096,7 @@ class SInfoWithPolicy{
                 $empleados = DB::table('employees')
                                 ->where('is_active','=',1)
                                 ->where('way_pay_id','=',1)
-                                //->where('id',67)
+                                //->where('id',60)
                                 ->select('id AS id')
                                 ->get();
                 $num_empleados = count($empleados);
@@ -1123,6 +1135,7 @@ class SInfoWithPolicy{
                         $diferencia = ($inicio->diffInDays($fin))+1;
                         $empl[0] = $empleados[$j]->id;
                         $lRows = SInfoWithPolicy::standardization($quincenasInicio[$i],$quincenas[$i]->cut,$sTypePay,$empl);
+                        if(count($lRows) != 0){
                         $lRows = SInfoWithPolicy::handlingHours($lRows,$diferencia);
                         //$lRows = SInfoWithPolicy::restDay($lRows,$diferencia);
                         $semanas = SDateUtils::separateBiweekly($quincenas[$i]->id);
@@ -1133,6 +1146,7 @@ class SInfoWithPolicy{
                         $contador[1] = 0;
                         $contador[2] = 0;
                         SInfoWithPolicy::guardarProcesamiento($empleados[$j]->id,$lRows,$quincenas[$i]->id,$iYear,1);
+                        }
                     }
 
                     SInfoWithPolicy::closePeriod( $quincenas[$i]->id, $sTypePay);    
