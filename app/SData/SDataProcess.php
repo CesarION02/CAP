@@ -619,6 +619,10 @@ class SDataProcess {
                 continue;
             }
 
+            if (! $oRow->hasSchedule) {
+                $oRow = SDataProcess::determineSchedule($oRow);
+            }
+
             // minutos de retardo
             $oRow->entryDelayMinutes = SDataProcess::getDelayMins($oRow->inDateTime, $oRow->inDateTimeSch);
             // minutos de salida anticipada
@@ -750,6 +754,57 @@ class SDataProcess {
         }
         
         return abs($comparison->diffMinutes) > $config->maxGapMinutes;
+    }
+
+    /**
+     * Determina por las checadas de entrada y salida si el horario pertenece a alguno
+     * de los que otorgan tiempo extra y los asigna al empleado junto con sus horas extra
+     *
+     * @param App\SUtils\SRegistryRow $oRow
+     * 
+     * @return App\SUtils\SRegistryRow
+     */
+    public static function determineSchedule($oRow)
+    {
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+
+        $inDate = Carbon::parse($oRow->inDateTime)->toDateString();
+        $outDate = Carbon::parse($oRow->outDateTime)->toDateString();
+        $comparisonIn = SDelayReportUtils::compareDates($oRow->inDateTime, $inDate.' 14:30:00');
+        $comparisonOut = SDelayReportUtils::compareDates($oRow->outDateTime, $outDate.' 22:30:00');
+
+        $oRow->isOnSchedule = true;
+        
+        if (abs($comparisonIn->diffMinutes) <= $config->maxGapMinutes && abs($comparisonOut->diffMinutes) <= $config->maxGapMinutes) {
+            $oRow->inDateTimeSch = $inDate.' 14:30:00';
+            $oRow->outDateTimeSch = $outDate.' 22:30:00';
+            $oRow->overDefaultMins = 30;
+            return $oRow;
+        }
+
+        $comparisonIn = SDelayReportUtils::compareDates($oRow->inDateTime, $inDate.' 18:30:00');
+        $comparisonOut = SDelayReportUtils::compareDates($oRow->outDateTime, $outDate.' 06:30:00');
+        
+        if (abs($comparisonIn->diffMinutes) <= $config->maxGapMinutes && abs($comparisonOut->diffMinutes) <= $config->maxGapMinutes) {
+            $oRow->inDateTimeSch = $inDate.' 18:30:00';
+            $oRow->outDateTimeSch = $outDate.' 06:30:00';
+            $oRow->overDefaultMins = 240;
+            return $oRow;
+        }
+
+        $comparisonIn = SDelayReportUtils::compareDates($oRow->inDateTime, $inDate.' 22:30:00');
+        $comparisonOut = SDelayReportUtils::compareDates($oRow->outDateTime, $outDate.' 06:30:00');
+        
+        if (abs($comparisonIn->diffMinutes) <= $config->maxGapMinutes && abs($comparisonOut->diffMinutes) <= $config->maxGapMinutes) {
+            $oRow->inDateTimeSch = $inDate.' 22:30:00';
+            $oRow->outDateTimeSch = $outDate.' 06:30:00';
+            $oRow->overDefaultMins = 60;
+            return $oRow;
+        }
+
+        $oRow->isOnSchedule = false;
+
+        return $oRow;
     }
 
     public static function addAbsences($lData, $aEmployeeBen)

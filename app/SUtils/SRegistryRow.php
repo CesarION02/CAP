@@ -44,6 +44,7 @@ class SRegistryRow {
         $this->hasAssign = false;
         $this->hasChecks = true;
         $this->hasSchedule = true;
+        $this->isOnSchedule = true;
         $this->scheduleFrom = 0;
         $this->workable = true;
         $this->isAtypicalIn = false;

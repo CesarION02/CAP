@@ -189,6 +189,10 @@
                     {
                         "targets": [ oData.hiddenCol ],
                         "visible": false
+                    },
+                    {
+                        targets: [ 0 ],
+                        orderData: [ 0, 2, 3 ]
                     }
                 ],
                 rowGroup: {
