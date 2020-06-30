@@ -6,7 +6,7 @@ var app = new Vue({
     },
     methods: {
         getCssClass(oRow, report) {
-            if (oRow.ischeckschedule) {
+            if (oRow.isCheckSchedule) {
                 return 'check';
             }
             if (report != this.oData.REP_DELAY) {
