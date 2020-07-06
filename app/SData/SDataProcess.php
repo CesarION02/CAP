@@ -957,7 +957,8 @@ class SDataProcess {
         $inDateTime = $sDate.' '.$inTime;
         $outDateTime = $sDate.' '.$outTime;
         $originalChecks = clone $lCheks;
-        foreach ($lCheks as $check) {
+        foreach ($lCheks as $oCheck) {
+            $check = clone $oCheck;
             $checkDateTime = $check->date.' '.$check->time;
 
             $comparisonIn = SDelayReportUtils::compareDates($inDateTime, $checkDateTime);
