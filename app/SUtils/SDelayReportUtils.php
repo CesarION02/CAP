@@ -124,6 +124,13 @@ class SDelayReportUtils {
             return 0;
         }
 
+        $scheduleTop = 8 * 60; // 8 horas
+        $compSch = SDelayReportUtils::compareDates($inDateTimeSch, $outDateTimeSch);
+
+        if ($compSch->diffMinutes <= $scheduleTop) {
+            return 0;
+        }
+
         $mins = 0;
         $oAux = null;
         if ($oComparison->auxScheduleDay != null) {
@@ -147,7 +154,6 @@ class SDelayReportUtils {
         $comp = SDelayReportUtils::compareDates($inDateTime, $outDateTime);
         
         $mins = abs($comp->diffMinutes);
-        $scheduleTop = 8 * 60; // 8 horas
         
         if ($mins > $scheduleTop) {
             $extraMins = $mins - $scheduleTop;

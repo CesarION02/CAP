@@ -274,6 +274,8 @@ class SDataProcess {
                 if ($isNew) {
                     $isNew = false;
                     $again = true;
+                    $newRow->inDate = $registry->date;
+                    $newRow->inDateTime = $registry->date;
                     $newRow->comments = $newRow->comments."Sin entrada. ";
                 }
                 else {
@@ -315,8 +317,8 @@ class SDataProcess {
                         $newRow = SDataProcess::setDates($result, $newRow);
 
                         if (isset($registry->to_close) && $registry->to_close) {
-                            $newRow->outDate = null;
-                            $newRow->outDateTime = null;
+                            $newRow->outDate = $newRow->inDate;
+                            $newRow->outDateTime = $newRow->inDate;
                             $newRow->comments = $newRow->comments."Sin salida. ";
                         }
     
@@ -351,6 +353,8 @@ class SDataProcess {
 
                         $isNew = true;
                         $again = false;
+                        $newRow->inDate = $registry->date;
+                        $newRow->inDateTime = $registry->date;
                         $newRow->comments = $newRow->comments."Sin entrada".". ";
                     }
                 }
@@ -434,6 +438,8 @@ class SDataProcess {
                             }
                         }
 
+                        $newRow->outDate = $newRow->inDate;
+                        $newRow->outDateTime = $newRow->inDate;
                         $newRow->comments = $newRow->comments."Sin salida".". ";
                         $again = true;
                         $isNew = true;
@@ -455,6 +461,16 @@ class SDataProcess {
         return $response;
     }
 
+    /**
+     * Asigna los datos correspondientes a las fechas de entrada, salida,
+     * horas extras, no laborable y sin horario.
+     *
+     * @param App\SUtils\SDateComparison $result
+     * @param Object $oRow
+     * @param string $sDate
+     * 
+     * @return Object $oRow
+     */
     private static function setDates($result, $oRow, $sDate = null)
     {
         if ($result == null) {
@@ -501,15 +517,34 @@ class SDataProcess {
         return $oRow;
     }
 
+    /**
+     * Retorna un valor dependiendo de donde fue obtenido el horario,
+     * si desde los horarios asignados o los programados
+     *
+     * @param App\SUtils\SDateComparison $result
+     * 
+     * @return int \SCons::FROM_WORKSH o \SCons::FROM_ASSIGN
+     */
     public static function getOrigin($result)
     {
         if ($result->auxWorkshift != null) {
             return \SCons::FROM_WORKSH;
         }
+        if ($result->auxScheduleDay != null) {
+            return \SCons::FROM_ASSIGN;
+        }
         
-        return \SCons::FROM_ASSIGN;
+        return 0;
     }
 
+    /**
+     * Asigna al renglón en base al tipo de día si es un día festivo, descanso, etc.
+     *
+     * @param App\SUtils\SDateComparison $result
+     * @param Object $oRow
+     * 
+     * @return Object $oRow
+     */
     public static function checkTypeDay($result, $oRow)
     {
         if ($result->auxWorkshift != null) {
@@ -521,13 +556,26 @@ class SDataProcess {
         return $oRow;
     }
 
+    /**
+     * Agrega eventos, descansos y festivos al renglón
+     *
+     * @param array App\SUtils\SRegistryRow $lData53
+     * @param query $qWorkshifts
+     * 
+     * @return array App\SUtils\SRegistryRow
+     */
     public static function addEventsDaysOffAndHolidays($lData53, $qWorkshifts)
     {
         foreach ($lData53 as $oRow) {
             if (! $oRow->workable) {
                 continue;
             }
-            $sDt = Carbon::parse($oRow->inDateTimeSch);
+            if ($oRow->inDateTimeSch == null) {
+                $sDt = Carbon::parse($oRow->inDateTime);
+            }
+            else {
+                $sDt = Carbon::parse($oRow->inDateTimeSch);
+            }
 
             $lAbsences = prePayrollController::searchAbsence($oRow->idEmployee, $sDt->toDateString());
                     
@@ -567,6 +615,15 @@ class SDataProcess {
         return $lData53_2;
     }
 
+    /**
+     * En base al tipo de día determina si el empleado tiene incapacidad, vacaciones, festivos
+     * o descansos para el día en cuestión
+     *
+     * @param int $typeDay
+     * @param App\SUtils\SRegistryRow $oRow
+     * 
+     * @return App\SUtils\SRegistryRow
+     */
     public static function setTypeDay($typeDay, $oRow)
     {
         if ($typeDay == \SCons::T_DAY_NORMAL) {
@@ -605,6 +662,15 @@ class SDataProcess {
         return $oRow;
     }
 
+    /**
+     * Determina retardos, tiempo extra, salida anticipada y en base a esto
+     * agrega banderas de checar horario
+     *
+     * @param array[App\SUtils\SRegistryRow] $lData
+     * @param array[id_employee => genera horas extra] $aEmployeeOverTime
+     * 
+     * @return array[App\SUtils\SRegistryRow] $lData
+     */
     public static function addDelaysAndOverTime($lData, $aEmployeeOverTime)
     {
         foreach ($lData as $oRow) {
@@ -644,7 +710,7 @@ class SDataProcess {
                 $oRow->comments = $oRow->comments."Entrada atípica. ";
                 $oRow->isAtypicalIn = true;
             }
-            $mayBeOverTime = true;
+            $mayBeOverTime = $aEmployeeOverTime[$oRow->idEmployee];
             $cOut = SDataProcess::isCheckSchedule($oRow->outDateTime, $oRow->outDateTimeSch, $mayBeOverTime);
             if ($cOut) {
                 $oRow->comments = $oRow->comments."Salida atípica. ";
@@ -668,6 +734,14 @@ class SDataProcess {
         return $lData;
     }
 
+    /**
+     * Retorna un entero con los minutos de retardo del empleado
+     *
+     * @param string $inDateTime
+     * @param string $inDateTimeSch
+     * 
+     * @return int minutos de retardo
+     */
     public static function getDelayMins($inDateTime, $inDateTimeSch)
     {
         if ($inDateTime == null || $inDateTimeSch == null) {
@@ -684,6 +758,14 @@ class SDataProcess {
         }
     }
 
+    /**
+     * Retorna minutos de salida anticipada
+     *
+     * @param string $outDateTime
+     * @param string $outDateTimeSch
+     * 
+     * @return int minutos de salida anticipada
+     */
     public static function getPrematureTime($outDateTime, $outDateTimeSch)
     {
         if ($outDateTime == null || $outDateTimeSch == null) {
@@ -700,6 +782,17 @@ class SDataProcess {
         }
     }
 
+    /**
+     * Determina el tiempo extra recorriendo la hora de salida base,
+     * esto sumando los minutos de retardo a la entrada
+     *
+     * @param string $inDateTime
+     * @param string $inDateTimeSch
+     * @param string $outDateTime
+     * @param string $outDateTimeSch
+     * 
+     * @return int tiempo extra (minutos)
+     */
     public static function getOverTime($inDateTime, $inDateTimeSch, $outDateTime, $outDateTimeSch)
     {
         if ($inDateTime == null || $inDateTimeSch == null || $outDateTime == null || $outDateTimeSch == null) {
@@ -724,6 +817,16 @@ class SDataProcess {
         return 0;
     }
 
+    /**
+     * Determina si el trabajador completó su jornada laboral, o si hizo más de 8 horas
+     *
+     * @param string $inDateTime
+     * @param string $inDateTimeSch
+     * @param string $outDateTime
+     * @param string $outDateTimeSch
+     * 
+     * @return boolean
+     */
     public static function journeyCompleted($inDateTime, $inDateTimeSch, $outDateTime, $outDateTimeSch)
     {
         if ($inDateTime == null || $inDateTimeSch == null || $outDateTime == null || $outDateTimeSch == null) {
@@ -739,6 +842,18 @@ class SDataProcess {
                 || $comparisonCheck->diffMinutes >= (480 - $config->toleranceMinutes);
     }
 
+    /**
+     * Compara el horario programado con el horario de la checada para determinar
+     * si se salió del rango y en base a esto checar horario.
+     * El parámetro $isOut es auxiliar para saber si la checada es de salida y no agregar 
+     * la leyenda, ya que puede ser tiempo extra.
+     *
+     * @param string $sDateTime
+     * @param string $sDateTimeSch
+     * @param boolean $isOut
+     * 
+     * @return boolean
+     */
     public static function isCheckSchedule($sDateTime, $sDateTimeSch, $isOut)
     {
         if ($sDateTime == null || $sDateTimeSch == null) {
@@ -788,7 +903,7 @@ class SDataProcess {
         if (abs($comparisonIn->diffMinutes) <= $config->maxGapMinutes && abs($comparisonOut->diffMinutes) <= $config->maxGapMinutes) {
             $oRow->inDateTimeSch = $inDate.' 18:30:00';
             $oRow->outDateTimeSch = $outDate.' 06:30:00';
-            $oRow->overDefaultMins = 240;
+            $oRow->overDefaultMins = 300;
             return $oRow;
         }
 
@@ -802,11 +917,29 @@ class SDataProcess {
             return $oRow;
         }
 
+        $comparisonIn = SDelayReportUtils::compareDates($oRow->inDateTime, $inDate.' 06:30:00');
+        $comparisonOut = SDelayReportUtils::compareDates($oRow->outDateTime, $outDate.' 18:30:00');
+        
+        if (abs($comparisonIn->diffMinutes) <= $config->maxGapMinutes && abs($comparisonOut->diffMinutes) <= $config->maxGapMinutes) {
+            $oRow->inDateTimeSch = $inDate.' 06:30:00';
+            $oRow->outDateTimeSch = $outDate.' 18:30:00';
+            $oRow->overDefaultMins = 240;
+            return $oRow;
+        }
+
         $oRow->isOnSchedule = false;
 
         return $oRow;
     }
 
+    /**
+     * Determina faltas, es decir el empleado tiene asignado un horario y no tiene 
+     * vacaciones, festivos, incidencias, etc
+     *
+     * @param array[App\SUtils\SRegistryRow] $lData
+     * @param array[id_employee, beneficios] $aEmployeeBen
+     * @return void
+     */
     public static function addAbsences($lData, $aEmployeeBen)
     {
         foreach ($lData as $oRow) {
@@ -844,6 +977,13 @@ class SDataProcess {
         return $lData;
     }
 
+    /**
+     * Agrega la prima dominical
+     *
+     * @param array[App\SUtils\SRegistryRow] $lData
+     * 
+     * @return array[App\SUtils\SRegistryRow]
+     */
     public static function addSundayPay($lData)
     {
         foreach ($lData as $oRow) {
@@ -861,6 +1001,14 @@ class SDataProcess {
         return $lData;
     }
 
+    /**
+     * Procesa las checadas de un día en específico y determina si 
+     * el empleado checó más de una vez en el momento
+     *
+     * @param array[SRegistry] $lCheks
+     * 
+     * @return array[SRegistry] con las checadas válidas
+     */
     public static function filterDoubleCheks($lCheks)
     {
         if (sizeof($lCheks) == 0) {
@@ -921,6 +1069,15 @@ class SDataProcess {
         return $lNewChecks;
     }
 
+    /**
+     * En base al horario del empleado determina si la checada
+     * es de entrada o salida y retorna el arreglo con el tipo modificado
+     *
+     * @param array[SRegistry] $lCheks
+     * @param string $sDate
+     * 
+     * @return array[SRegistry]
+     */
     public static function manageCheks($lCheks, $sDate)
     {
         if (sizeof($lCheks) == 0) {
@@ -943,6 +1100,8 @@ class SDataProcess {
             return SDataProcess::filterDoubleCheks($lCheks);
         }
 
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+
         $inTime = "";
         $outTime = "";
         if ($result->auxWorkshift != null) {
@@ -964,16 +1123,17 @@ class SDataProcess {
             $comparisonIn = SDelayReportUtils::compareDates($inDateTime, $checkDateTime);
             $comparisonOut = SDelayReportUtils::compareDates($outDateTime, $checkDateTime);
 
-            if (abs($comparisonIn->diffMinutes) > 60 && abs($comparisonOut->diffMinutes) > 60) {
+            // si ni entrada ni salida coinciden con el horario regresa las checadas originales
+            if (abs($comparisonIn->diffMinutes) > $config->maxGapSchedule && abs($comparisonOut->diffMinutes) > $config->maxGapSchedule) {
                 $lNewChecks = $originalChecks;
                 break;
             }
 
-            if (abs($comparisonIn->diffMinutes) <= 60) {
+            if (abs($comparisonIn->diffMinutes) <= $config->maxGapSchedule) {
                 $check->type_id = \SCons::REG_IN;
             }
             else {
-                if (abs($comparisonOut->diffMinutes) <= 60) {
+                if (abs($comparisonOut->diffMinutes) <= $config->maxGapSchedule) {
                     $check->type_id = \SCons::REG_OUT;
                 }
             }

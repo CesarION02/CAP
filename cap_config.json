@@ -3,5 +3,6 @@
     "startOfWeek": 1,
     "policy": "1",
     "toleranceMinutes": 20,
-    "maxGapMinutes": 60
+    "maxGapMinutes": 60,
+    "maxGapSchedule": 90
 }
