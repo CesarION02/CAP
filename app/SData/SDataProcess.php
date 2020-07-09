@@ -97,6 +97,17 @@ class SDataProcess {
                 //filtrar checadas repetidas
                 $registries = SDataProcess::manageCheks($registries, $sDate);
 
+                $bug = false;
+                if (sizeof($registries) == 1) {
+                    $res = SDataProcess::manageOneCheck($sDate, $idEmployee, $registries, $lWorkshifts);
+                    
+                    if ($res == 2) {
+                        $regTemp = $registries;
+                        $bug = true;
+                        $registries = [];
+                    }
+                }
+                toAbsences:
                 if (sizeof($registries) > 0) {
                     foreach ($registries as $registry) {
                         $qWorkshifts = clone $lWorkshifts;
@@ -178,6 +189,11 @@ class SDataProcess {
                     $otherRow->outDateTime = $sDate;
 
                     $lRows[] = $otherRow;
+
+                    if ($bug) {
+                        $registries = $regTemp;
+                        goto toAbsences;
+                    }
                 }
             }
 
@@ -1142,6 +1158,61 @@ class SDataProcess {
         }
 
         return SDataProcess::filterDoubleCheks($lNewChecks);
+    }
+
+    private static function manageOneCheck($sDate, $idEmployee, $registries, $lWorkshifts)
+    {
+        $oRegistry = $registries[0];
+        $result = SDelayReportUtils::getSchedule($sDate, $sDate, $idEmployee, $oRegistry, clone $lWorkshifts, \SCons::REP_HR_EX);
+
+        if ($result == null) {
+            return 0;
+        }
+
+        $sdate = $registries[0]->date;
+        $entry = "";
+        $dept = "";
+        if ($result->auxWorkshift != null) {
+            $entry = $result->auxWorkshift->entry;
+            $dept = $result->auxWorkshift->departure;
+        }
+        if ($result->auxScheduleDay != null) {
+            $entry = $result->auxScheduleDay->entry;
+            $dept = $result->auxScheduleDay->departure;
+        }
+
+        $comparison = null;
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+        // if ($registries[0]->type_id == \SCons::REG_OUT) {
+        //     $comparison = SDelayReportUtils::compareDates($sdate.' '.$oRegistry->time, $sdate.' 06:30:00');
+
+        //     return (abs($comparison->diffMinutes) <= $config->maxGapMinutes) ? 1 : 0;
+        // }
+        if ($registries[0]->type_id == \SCons::REG_IN) {
+            $comparison = SDelayReportUtils::compareDates($sdate.' '.$oRegistry->time, $sdate.' 22:30:00');
+            
+            if (abs($comparison->diffMinutes) <= $config->maxGapMinutes) {
+                $oDateAux = Carbon::parse($sdate);
+                $oDateAux->subDay();
+                $oFoundRegistry = SDelayReportUtils::getRegistry($oDateAux->toDateString(), $idEmployee, \SCons::REG_IN);
+
+                if ($oFoundRegistry == null) {
+                    return 2;
+                }
+                else {
+                    $comparison = SDelayReportUtils::compareDates($oFoundRegistry->date.' '.$oFoundRegistry->time, $oDateAux->toDateString().' 22:30:00');
+
+                    if (abs($comparison->diffMinutes) <= $config->maxGapMinutes) {
+                        return 0;
+                    }
+                    else {
+                        return 2;
+                    }
+                }
+            }
+        }
+
+        return 0;
     }
 }
 

@@ -156,8 +156,8 @@
             }
         
             $('#reportrange').daterangepicker({
-                startDate: start,
-                endDate: end,
+                startDate: startWeek,
+                endDate: endWeek,
                 ranges: {
                    'Hoy': [moment(), moment()],
                    'Ayer': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
@@ -170,7 +170,7 @@
                 }
             }, cb);
         
-            cb(start, end);
+            cb(startWeek, endWeek);
         
         });
 
