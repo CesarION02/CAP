@@ -121,6 +121,7 @@
 
             // this.minsCol = this.tReport == this.REP_DELAY ? 4 : 4;
             this.minsCol = 4;
+            this.minsBeforeCol = 7;
             this.minsDelayCol = this.tReport == this.REP_DELAY ? 4 : 6;
             this.sunCol = 8;
             this.dayoffCol = 9;
@@ -200,7 +201,8 @@
                     endRender: function ( rows, group ) {
                         let suns = 0;
                         let daysoff = 0;
-                        let minsDelay;
+                        let minsDelay = 0;
+                        let minsBeforeOut = 0;
                         let mins = rows
                                     .data()
                                     .pluck(oData.minsCol)
@@ -220,6 +222,21 @@
                             minsDelay = rows
                                     .data()
                                     .pluck(oData.minsDelayCol)
+                                    .reduce( function (a, b) {
+                                        a = parseInt(a, 10);
+                                        if(isNaN(a)){ a = 0; }                   
+
+                                        b = parseInt(b, 10);
+                                        if(isNaN(b)){ b = 0; }
+
+                                        a = a < 0 ? 0 : a;
+                                        b = b < 0 ? 0 : b;
+
+                                        return a + b;
+                                    }, 0);
+                            minsBeforeOut = rows
+                                    .data()
+                                    .pluck(oData.minsBeforeCol)
                                     .reduce( function (a, b) {
                                         a = parseInt(a, 10);
                                         if(isNaN(a)){ a = 0; }                   
@@ -272,7 +289,10 @@
                         }
                         else {
                             value_to_return = "TOTAL " + group +': tiempo extra: ' + convertToHoursMins(mins) + 
-                                                "; tiempo retardo: " + minsDelay + " min, primas dominicales: " + suns + ", descansos: " + daysoff +  '';
+                                                " / tiempo retardo: " + minsDelay + " min " + 
+                                                " / salida anticipada: " + minsBeforeOut  + " min" + 
+                                                " / primas dominicales: " + suns + 
+                                                " / descansos: " + daysoff;
                         }
                         
                         return value_to_return;
