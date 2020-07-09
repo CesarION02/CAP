@@ -336,6 +336,7 @@ class SDataProcess {
                             $newRow->outDate = $newRow->inDate;
                             $newRow->outDateTime = $newRow->inDate;
                             $newRow->comments = $newRow->comments."Sin salida. ";
+                            $newRow->hasCheckOut = false;
                         }
     
                         $isNew = true;
@@ -457,6 +458,7 @@ class SDataProcess {
                         $newRow->outDate = $newRow->inDate;
                         $newRow->outDateTime = $newRow->inDate;
                         $newRow->comments = $newRow->comments."Sin salida".". ";
+                        $newRow->hasCheckOut = false;
                         $again = true;
                         $isNew = true;
                     }
@@ -707,8 +709,14 @@ class SDataProcess {
 
             // minutos de retardo
             $oRow->entryDelayMinutes = SDataProcess::getDelayMins($oRow->inDateTime, $oRow->inDateTimeSch);
+            if ($oRow->entryDelayMinutes > 0) {
+                $oRow->comments = $oRow->comments."Retardo. ";
+            }
+
             // minutos de salida anticipada
-            $oRow->prematureOut = SDataProcess::getPrematureTime($oRow->outDateTime, $oRow->outDateTimeSch);
+            if ($oRow->hasCheckOut) {
+                $oRow->prematureOut = SDataProcess::getPrematureTime($oRow->outDateTime, $oRow->outDateTimeSch);
+            }
             if (SDataProcess::journeyCompleted($oRow->inDateTime, $oRow->inDateTimeSch, $oRow->outDateTime, $oRow->outDateTimeSch)) {
                 if ($aEmployeeOverTime[$oRow->idEmployee]) {
                     // minutos extra trabajados y filtrados por bandera de "genera horas extra"
@@ -726,11 +734,13 @@ class SDataProcess {
                 $oRow->comments = $oRow->comments."Entrada atípica. ";
                 $oRow->isAtypicalIn = true;
             }
-            $mayBeOverTime = $aEmployeeOverTime[$oRow->idEmployee];
-            $cOut = SDataProcess::isCheckSchedule($oRow->outDateTime, $oRow->outDateTimeSch, $mayBeOverTime);
-            if ($cOut) {
-                $oRow->comments = $oRow->comments."Salida atípica. ";
-                $oRow->isAtypicalOut = true;
+            if ($oRow->hasCheckOut) {
+                $mayBeOverTime = $aEmployeeOverTime[$oRow->idEmployee];
+                $cOut = SDataProcess::isCheckSchedule($oRow->outDateTime, $oRow->outDateTimeSch, $mayBeOverTime);
+                if ($cOut) {
+                    $oRow->comments = $oRow->comments."Salida atípica. ";
+                    $oRow->isAtypicalOut = true;
+                }
             }
             if ($cIn || $cOut) {
                 $oRow->comments = $oRow->comments."Revisar horario. ";
