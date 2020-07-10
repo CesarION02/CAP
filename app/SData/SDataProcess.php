@@ -292,6 +292,7 @@ class SDataProcess {
                     $again = true;
                     $newRow->inDate = $registry->date;
                     $newRow->inDateTime = $registry->date;
+                    $newRow->hasCheckIn = false;
                     $newRow->comments = $newRow->comments."Sin entrada. ";
                 }
                 else {
@@ -347,9 +348,25 @@ class SDataProcess {
                     $bFound = false;
                     if ($result->pinnedDateTime->toDateString() == $sStartDate) {
                         // buscar entrada un día antes
+                        $oFoundRegistryI = null;
                         $oDateAux = clone $result->pinnedDateTime;
                         $oDateAux->subDay();
-                        $oFoundRegistryI = SDelayReportUtils::getRegistry($oDateAux->toDateString(), $idEmployee, \SCons::REG_IN);
+                        $oAux = null;
+                        if ($result->auxWorkshift != null) {
+                            $oAux = $result->auxWorkshift;
+                        }
+                        else {
+                            if ($result->auxScheduleDay != null) {
+                                $oAux = $result->auxScheduleDay;
+                            }
+                        }
+
+                        $entry = "";
+                        if ($oAux != null) {
+                            $entry = $oAux->entry;
+                        }
+                        
+                        $oFoundRegistryI = SDelayReportUtils::getRegistry($oDateAux->toDateString(), $idEmployee, \SCons::REG_IN, $entry);
 
                         if ($oFoundRegistryI != null) {
                             $newRow->sInDate = $oFoundRegistryI->date.' '.$oFoundRegistryI->time;
@@ -372,6 +389,7 @@ class SDataProcess {
                         $again = false;
                         $newRow->inDate = $registry->date;
                         $newRow->inDateTime = $registry->date;
+                        $newRow->hasCheckIn = false;
                         $newRow->comments = $newRow->comments."Sin entrada".". ";
                     }
                 }
@@ -703,7 +721,19 @@ class SDataProcess {
                 continue;
             }
 
-            if (! $oRow->hasSchedule) {
+            $cIn = false;
+            $cOut = false;
+
+            if ($oRow->hasCheckIn) {
+                $mayBeOverTime = false;
+                $cIn = SDataProcess::isCheckSchedule($oRow->inDateTime, $oRow->inDateTimeSch, $mayBeOverTime);
+            }
+            if ($oRow->hasCheckOut) {
+                //$mayBeOverTime = $aEmployeeOverTime[$oRow->idEmployee];
+                $mayBeOverTime = false;
+                $cOut = SDataProcess::isCheckSchedule($oRow->outDateTime, $oRow->outDateTimeSch, $mayBeOverTime);
+            }
+            if (($cIn && $cOut) || ! $oRow->hasSchedule) {
                 $oRow = SDataProcess::determineSchedule($oRow);
             }
 
@@ -728,14 +758,21 @@ class SDataProcess {
                 $oRow->overDefaultMins = 0;
                 $oRow->overScheduleMins = 0;
             }
-            $mayBeOverTime = false;
-            $cIn = SDataProcess::isCheckSchedule($oRow->inDateTime, $oRow->inDateTimeSch, $mayBeOverTime);
-            if ($cIn) {
-                $oRow->comments = $oRow->comments."Entrada atípica. ";
-                $oRow->isAtypicalIn = true;
+
+            $cIn = false;
+            $cOut = false;
+
+            if ($oRow->hasCheckIn) {
+                $mayBeOverTime = false;
+                $cIn = SDataProcess::isCheckSchedule($oRow->inDateTime, $oRow->inDateTimeSch, $mayBeOverTime);
+                if ($cIn) {
+                    $oRow->comments = $oRow->comments."Entrada atípica. ";
+                    $oRow->isAtypicalIn = true;
+                }
             }
             if ($oRow->hasCheckOut) {
-                $mayBeOverTime = $aEmployeeOverTime[$oRow->idEmployee];
+                //$mayBeOverTime = $aEmployeeOverTime[$oRow->idEmployee];
+                $mayBeOverTime = false;
                 $cOut = SDataProcess::isCheckSchedule($oRow->outDateTime, $oRow->outDateTimeSch, $mayBeOverTime);
                 if ($cOut) {
                     $oRow->comments = $oRow->comments."Salida atípica. ";
@@ -1204,7 +1241,7 @@ class SDataProcess {
             if (abs($comparison->diffMinutes) <= $config->maxGapMinutes) {
                 $oDateAux = Carbon::parse($sdate);
                 $oDateAux->subDay();
-                $oFoundRegistry = SDelayReportUtils::getRegistry($oDateAux->toDateString(), $idEmployee, \SCons::REG_IN);
+                $oFoundRegistry = SDelayReportUtils::getRegistry($oDateAux->toDateString(), $idEmployee, \SCons::REG_IN, '22:30:00');
 
                 if ($oFoundRegistry == null) {
                     return 2;

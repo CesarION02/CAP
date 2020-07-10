@@ -248,7 +248,7 @@ class SDelayReportUtils {
      * @param int \SCons::REG_OUT \SCons::REG_IN
      * @return void
      */
-    public static function getRegistry($sDate, $iEmployee, $iType)
+    public static function getRegistry($sDate, $iEmployee, $iType, $time = "")
     {
         $registry = \DB::table('registers AS r')
                                 ->join('employees AS e', 'e.id', '=', 'r.employee_id')
@@ -267,20 +267,32 @@ class SDelayReportUtils {
 
         $registry = $registry->get();
 
-        foreach ($registry as $reg) {
-            if ($iType == \SCons::REG_IN) {
-                if ($reg->type_id == \SCons::REG_OUT) {
-                    return null;
+        if ($time == "") {
+            foreach ($registry as $reg) {
+                if ($iType == \SCons::REG_IN) {
+                    if ($reg->type_id == \SCons::REG_OUT) {
+                        return null;
+                    }
+                    
+                    return $reg;
                 }
-                
-                return $reg;
+                else {
+                    if ($reg->type_id == \SCons::REG_IN) {
+                        return null;
+                    }
+    
+                    return $reg;
+                }
             }
-            else {
-                if ($reg->type_id == \SCons::REG_IN) {
-                    return null;
+        }
+        else {
+            $config = \App\SUtils\SConfiguration::getConfigurations();
+    
+            foreach ($registry as $reg) {
+                $oComparison = SDelayReportUtils::compareDates($reg->date.' '.$reg->time, $sDate.' '.$time);
+                if (abs($oComparison->diffMinutes) <= $config->maxGapMinutes) {
+                    return $reg;
                 }
-
-                return $reg;
             }
         }
 
