@@ -7,9 +7,9 @@ class SPrePayrollDay {
         // $this->leave = [];
         // $this->prog_entry = null;
         // $this->prog_leave = null;
-        $this->is_absence = false;
-        $this->is_sunday = false;
-        $this->n_days_off = false;
+        $this->num_absences = 0;
+        $this->is_sunday = 0;
+        $this->n_days_off = 0;
         $this->holiday_id = 0;
         $this->events = [];
     }

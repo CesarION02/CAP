@@ -10,6 +10,7 @@ use App\SUtils\SDateTimeUtils;
 use App\SUtils\SInfoWithPolicy;
 use App\Models\employees;
 use App\Models\incident;
+use App\Models\cutCalendarQ;
 use App\SPayroll\SPrePayroll;
 use App\SPayroll\SPrePayrollRow;
 use App\SPayroll\SPrePayrollDay;
@@ -33,7 +34,7 @@ class prePayrollController extends Controller
      *			days: [
      *				{
      *				dt_date: date,
-     *              is_absence: boolean,
+     *              num_absences: int,
      *              is_sunday: boolean,
      *              is_day_off: boolean,
      *              events: []
@@ -106,21 +107,18 @@ class prePayrollController extends Controller
 
         $lCapEmployees = employees::whereIn('external_id', $aEmployeeIds)
                                     ->pluck('id');
-
-        /**
-         * Obtiene la query de las checadas
-         */
-        $qChecks = SDelayReportUtils::getRegistries($startDate, $endDate, 0, $lCapEmployees, false);
-        
-        /**
-         * obtiene la query de los horarios
-         */
-        $lWorkshifts = SDelayReportUtils::getWorkshifts($startDate, $endDate, 0, $lCapEmployees);
-
         /**
          * Obtiene el reporte de horas extra, que contiene también domingos y festivos.
          */
-        $lExtras = SInfoWithPolicy::processInfo($startDate, $endDate, $payType, $lCapEmployees, $dataType);
+        $info = SInfoWithPolicy::preProcessInfo($startDate, $oStartDate->year, $endDate, $payType);
+        $lExtras = \DB::table('processed_data')
+                                ->join('employees','employees.id','=','processed_data.employee_id')
+                                ->whereIn('employees.id', $lCapEmployees)
+                                ->where(function($query) use ($startDate, $endDate) {
+                                    $query->whereBetween('inDate',[$startDate, $endDate])
+                                    ->OrwhereBetween('outDate',[$startDate, $endDate]);
+                                })
+                                ->get();
 
         $prePayroll = new SPrePayroll();
         $prePayroll->start_date = $startDate;
@@ -132,11 +130,17 @@ class prePayrollController extends Controller
             $row->employee_id = $extId;
             $row->days = [];
 
+            /**
+             * Determinar horas extras dobles y triples
+             */
             $lCExtrasEmp = clone collect($lExtras);
-            $lGrouped = $lCExtrasEmp->groupBy('idEmployee')->map(function ($row) {
+            $lCExtrasEmp = $lCExtrasEmp->where('employee_id', $idEmployee);
+            $lGrouped = $lCExtrasEmp->groupBy('employee_id')->map(function ($row) {
                                                 $registry = (object) [
-                                                    'minsExtraDouble' => $row->sum('extraDoubleMins'),
+                                                    'minsExtraDouble' => $row->sum('extraDobleMins'),
                                                     'minsExtraTriple' => $row->sum('extraTripleMins'),
+                                                    'minsExtraDoubleNoOficial' => $row->sum('extraDobleMinsNoficial'),
+                                                    'minsExtraTripleNoOficial' => $row->sum('extraTripleMinsNoficial'),
                                                 ];
         
                                         return $registry;
@@ -149,12 +153,15 @@ class prePayrollController extends Controller
                         $row->triple_overtime = $lGrouped{$idEmployee}->minsExtraTriple / 60;
                         break;
                     case \SCons::OTHER_DATA:
-                        $row->double_overtime = $lGrouped{$idEmployee}->minsExtraDouble / 60;
-                        $row->triple_overtime = $lGrouped{$idEmployee}->minsExtraTriple / 60;
+                        $row->double_overtime = $lGrouped{$idEmployee}->minsExtraDoubleNoOficial / 60;
+                        $row->triple_overtime = $lGrouped{$idEmployee}->minsExtraTripleNoOficial / 60;
                         break;
     
                     case \SCons::ALL_DATA:
-                        # code...
+                        $row->double_overtime = ($lGrouped{$idEmployee}->minsExtraDouble + 
+                                                    $lGrouped{$idEmployee}->minsExtraDoubleNoOficial) / 60;
+                        $row->triple_overtime = ($lGrouped{$idEmployee}->minsExtraTriple +
+                                                    $lGrouped{$idEmployee}->minsExtraTripleNoOficial) / 60;
                         break;
                     
                     default:
@@ -165,72 +172,78 @@ class prePayrollController extends Controller
 
             foreach ($aDates as $sDate) {
                 $lCExtrasDay = clone collect($lExtras);
-
+                $lCExtrasDay = $lCExtrasDay->where('outDate', $sDate);
+                $lCExtrasDay = $lCExtrasDay->where('employee_id', $idEmployee);
+                
                 $day = new SPrePayrollDay();
                 $day->dt_date = $sDate;
 
-                $registry = (object) [
-                    'date' => $sDate,
-                    'time' => '12:00:00'
-                ];
-
-                $lChecks = clone $qChecks; // podría mejorarse a recorrer los días en lugar de hacer query por día
-                $lChecks = $lChecks->where('e.id', $idEmployee)
-                                    ->where('r.date', $sDate)
-                                    ->get();
-                
-                // si no tiene checadas:                                    
-                if (sizeof($lChecks) == 0) {
-                    // checar incidencias ********************************************************
+                if ($dataType == \SCons::LIMITED_DATA || $dataType == \SCons::ALL_DATA) {
+                    /**
+                     * Determinar faltas en el periodo
+                     */
+                    $lColl = clone $lCExtrasDay;
+                    $withAbs = $lColl->filter(function ($item) {
+                                    return ($item->hasabsence);
+                                });
+                    $day->num_absences = sizeof($withAbs);
+    
+                    /**
+                     * Determinar primas dominicales
+                     */
+                    $lColl = clone $lCExtrasDay;
+                    $withSunday = $lColl->filter(function ($item) {
+                                    return ($item->is_sunday > 0);
+                                });
+                    $day->is_sunday = sizeof($withSunday);
+    
+                    /**
+                     * Obtener descansos
+                     */
+                    $lColl = clone $lCExtrasDay;
+                    $withDaysOff = $lColl->groupBy('employee_id')->map(function ($row) {
+                                                $registry = (object) [
+                                                    'daysOff' => $row->sum('is_dayoff'),
+                                                ];
+    
+                                                return $registry;
+                                            });
+                    if (sizeof($withDaysOff) > 0) {
+                        $day->n_days_off = $withDaysOff{$idEmployee}->daysOff;
+                    }
+    
+                    /**
+                     * Obtener festivos
+                     */
+                    $lColl = clone $lCExtrasDay;
+                    $withHolidays = $lColl->groupBy('employee_id')->map(function ($row) {
+                                                $registry = (object) [
+                                                    'holidays' => $row->sum('is_holiday'),
+                                                ];
+    
+                                                return $registry;
+                                            });
+                    if (sizeof($withHolidays) > 0) {
+                        $day->holiday_id = $withHolidays{$idEmployee}->holidays;
+                    }
+    
+                    /**
+                     * Obtención de incidencias o eventos
+                     */
                     $lAbsences = prePayrollController::searchAbsence($idEmployee, $sDate);
-                    
                     if (sizeof($lAbsences) > 0) {
                         foreach ($lAbsences as $absence) {
                             $key = explode("_", $absence->external_key);
-
+    
                             $abs = [];
                             $abs['id_emp'] = $key[0];
                             $abs['id_abs'] = $key[1];
                             $abs['nts'] = $absence->nts;
-
+    
                             $day->events[] = $abs;
                         }
-
-                        continue;
-                    }
-                    else {
-                        /**
-                         * Si no tiene checadas y no tiene incidencias se revisa que no sea un día inactivo para el empleado
-                         * Si es un día activo se le pone falta
-                         */
-                        $result = SDelayReportUtils::getSchedule($startDate, $endDate, $idEmployee, $registry, clone $lWorkshifts, \SCons::REP_DELAY);
-
-                        if ($result != null) {
-                            $day->is_absence = true;
-                        }
                     }
                 }
-                else {
-                    // verificar checadas **************************************************************
-                    // foreach ($lChecks as $check) {
-                    //     if ($check->type_id == \SCons::REG_IN) {
-                    //         $day->entry[] = $check->time;
-                    //     }
-                    //     else {
-                    //         $day->leave[] = $check->time;
-                    //     }
-                    // }
-                    
-                    //si tiene checada y es domingo se agrega domingo trabajado (PRIMA DOMINICAL)
-                    $day->is_sunday = SDateTimeUtils::dayOfWeek($sDate) == Carbon::SUNDAY;
-                }
-
-                // Verifica en base al reporte de horas extra si el día corresponde a un día de descanso trabajado
-                $nDaysOff = $lCExtrasDay->where('idEmployee', $idEmployee)
-                                            ->where('outDate', $sDate)
-                                            ->sum('isDayOff');
-
-                $day->n_days_off = $nDaysOff;
 
                 $row->days[] = $day;
             }
@@ -261,5 +274,54 @@ class prePayrollController extends Controller
             ->get();
 
         return $lAbsences;
+    }
+
+    /**
+     * Importación de fechas de corte de quincenas para prenómina
+     */
+
+    public function saveCutCalendarFromJSON($lSiieCutsJ)
+    {
+        $lCapCuts = cutCalendarQ::select('id', 'external_id')
+                                    ->pluck('id', 'external_id');
+
+        $lSiieCutsCol = collect($lSiieCutsJ);
+        $lSiieCuts = $lSiieCutsCol->where('fk_tp_pay', 2); // filtrar para quincenas
+        
+        foreach ($lSiieCuts as $jCut) {
+            try {
+                $id = $lCapCuts[$jCut->id_cal];
+                $this->updCutPrepayQ($jCut, $id);
+            }
+            catch (\Throwable $th) {
+                $this->insertCutPrepayQ($jCut);
+            }
+        }
+    }
+    
+    private function updCutPrepayQ($jCut, $id)
+    {
+        cutCalendarQ::where('id', $id)
+                    ->update(
+                            [
+                            'dt_cut' => $jCut->dt_cut,
+                            'year' => $jCut->year,
+                            'num' => $jCut->num,
+                            'is_delete' => $jCut->is_deleted,
+                            ]
+                        );
+    }
+    
+    private function insertCutPrepayQ($jCut)
+    {
+        $cut = new cutCalendarQ();
+
+        $cut->year = $jCut->year;
+        $cut->num = $jCut->num;
+        $cut->dt_cut = $jCut->dt_cut;
+        $cut->external_id = $jCut->id_cal;
+        $cut->is_delete = $jCut->is_deleted;
+
+        $cut->save();
     }
 }

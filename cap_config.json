@@ -4,6 +4,5 @@
     "policy": "1",
     "toleranceMinutes": 20,
     "maxGapMinutes": 60,
-    "dept_foraneo": 100,
-    "job_foraneo": 25
+    "maxGapSchedule": 90
 }

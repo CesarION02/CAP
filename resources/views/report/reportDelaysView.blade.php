@@ -81,6 +81,7 @@
                                     <td>@{{ row.comments }}</td>
                                 </tr>
                             </tbody>
+                            <button onclick="topFunction()" id="myBtn" title="Ir arriba">Ir arriba</button>
                         </table>
                     </div>
                 </div>
@@ -121,6 +122,7 @@
 
             // this.minsCol = this.tReport == this.REP_DELAY ? 4 : 4;
             this.minsCol = 4;
+            this.minsBeforeCol = 7;
             this.minsDelayCol = this.tReport == this.REP_DELAY ? 4 : 6;
             this.sunCol = 8;
             this.dayoffCol = 9;
@@ -184,6 +186,9 @@
                         "sSortDescending": ": Activar para ordenar la columna de manera descendente"
                     }
                 },
+                fixedHeader: {
+                    header: true
+                },
                 order: [[0, 'asc']],
                 "columnDefs": [
                     {
@@ -200,7 +205,8 @@
                     endRender: function ( rows, group ) {
                         let suns = 0;
                         let daysoff = 0;
-                        let minsDelay;
+                        let minsDelay = 0;
+                        let minsBeforeOut = 0;
                         let mins = rows
                                     .data()
                                     .pluck(oData.minsCol)
@@ -220,6 +226,21 @@
                             minsDelay = rows
                                     .data()
                                     .pluck(oData.minsDelayCol)
+                                    .reduce( function (a, b) {
+                                        a = parseInt(a, 10);
+                                        if(isNaN(a)){ a = 0; }                   
+
+                                        b = parseInt(b, 10);
+                                        if(isNaN(b)){ b = 0; }
+
+                                        a = a < 0 ? 0 : a;
+                                        b = b < 0 ? 0 : b;
+
+                                        return a + b;
+                                    }, 0);
+                            minsBeforeOut = rows
+                                    .data()
+                                    .pluck(oData.minsBeforeCol)
                                     .reduce( function (a, b) {
                                         a = parseInt(a, 10);
                                         if(isNaN(a)){ a = 0; }                   
@@ -272,7 +293,10 @@
                         }
                         else {
                             value_to_return = "TOTAL " + group +': tiempo extra: ' + convertToHoursMins(mins) + 
-                                                "; tiempo retardo: " + minsDelay + " min, primas dominicales: " + suns + ", descansos: " + daysoff +  '';
+                                                " / tiempo retardo: " + minsDelay + " min " + 
+                                                " / salida anticipada: " + minsBeforeOut  + " min" + 
+                                                " / primas dominicales: " + suns + 
+                                                " / descansos: " + daysoff;
                         }
                         
                         return value_to_return;
@@ -315,6 +339,28 @@
                         }
                     ]
             });
+    </script>
+
+    <script>
+        //Get the button:
+        mybutton = document.getElementById("myBtn");
+
+        // When the user scrolls down 20px from the top of the document, show the button
+        window.onscroll = function() {scrollFunction()};
+
+        function scrollFunction() {
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                mybutton.style.display = "block";
+            } else {
+                mybutton.style.display = "none";
+            }
+        }
+
+        // When the user clicks on the button, scroll to the top of the document
+        function topFunction() {
+            document.body.scrollTop = 0; // For Safari
+            document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+        }
     </script>
 
     <script src="{{asset("assets/pages/scripts/report/SReportRow.js")}}" type="text/javascript"></script>

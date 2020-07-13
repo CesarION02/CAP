@@ -46,6 +46,9 @@ class SyncController extends Controller
         $absCont = new incidentController();
         $absCont->saveAbsencesFromJSON($data->absences);
 
+        // $prepayCont = new prePayrollController();
+        // $prepayCont->saveCutCalendarFromJSON($data->cuts);
+
         $newDate = Carbon::now();
         $newDate->subMinutes(30);
 
