@@ -31,6 +31,7 @@ class fdyController extends Controller
                             'dt_date' => $jFdy->dt_date,
                             'year' => $jFdy->year,
                             'is_delete' => $jFdy->is_deleted,
+                            'updated_by' => session()->get('user_id')
                             ]
                         );
     }
@@ -44,6 +45,8 @@ class fdyController extends Controller
         $fdy->dt_date = $jFdy->dt_date;
         $fdy->external_id = $jFdy->year;
         $fdy->is_delete = $jFdy->is_deleted;
+        $RhDept->created_by = session()->get('user_id');
+        $RhDept->updated_by = session()->get('user_id');
 
         $fdy->save();
     }

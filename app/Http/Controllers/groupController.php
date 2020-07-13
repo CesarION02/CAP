@@ -54,12 +54,16 @@ class groupController extends Controller
         $group_workshift = new groupworkshift();
         $group_workshift->name = $request->name;
         $group_workshift->is_delete = 0;
+        $group_workshift->created_by = session()->get('user_id');
+        $group_workshift->updated_by = session()->get('user_id');
         $group_workshift->save();
 
         for($j = 0 ; $numSeleccion > $j ; $j++){
             $group_workshift_line = new groupworkshiftline();
             $group_workshift_line->group_workshifts_id = $group_workshift->id;
             $group_workshift_line->workshifts_id = $arrSeleccion[$j];
+            $group_workshift_line->created_by = session()->get('user_id');
+            $group_workshift_line->updated_by = session()->get('user_id');
             $group_workshift_line->save();    
         }
 
@@ -119,6 +123,7 @@ class groupController extends Controller
             $group_workshift_line = new groupworkshiftline();
             $group_workshift_line->group_workshifts_id = $id;
             $group_workshift_line->workshifts_id = $arrSeleccion[$j];
+            $group_workshift_line->updated_by = session()->get('user_id');
             $group_workshift_line->save();    
         }
 

@@ -21,7 +21,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'id','name', 'email', 'password',
     ];
 
     /**
@@ -51,6 +51,9 @@ class User extends Authenticatable
                 ]
             );
         }
+    }
+    public function group_user(){
+        return $this->hasMany('App\Models\group_dept_user');
     }
     
 }

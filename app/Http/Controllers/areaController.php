@@ -36,7 +36,12 @@ class areaController extends Controller
      */
     public function store(Request $request)
     {
-        area::create($request->all());
+        $area = area::create($request->all());
+        $id = session()->get('user_id');
+        $name = session()->get('name');
+        $area->updated_by = session()->get('user_id');
+        $area->created_by = session()->get('user_id');
+        $area->save();
         return redirect('area')->with('mensaje','Area fue creada con exito');
     }
 
@@ -60,6 +65,7 @@ class areaController extends Controller
     public function edit($id)
     {
         $data = area::findOrFail($id);
+        
         return view('area.edit', compact('data'));
     }
 
@@ -72,8 +78,10 @@ class areaController extends Controller
      */
     public function update(Request $request, $id)
     {
-        typeincident::findOrFail($id)->update($request->all());
-        return redirect('type_incidents')->with('mensaje', 'Area actualizada con exito');
+        $area = area::findOrFail($id);
+        $area->updated_by = session()->get('user_id');
+        $area->update($request->all());
+        return redirect('area')->with('mensaje', 'Area actualizada con exito');
     }
 
     /**
@@ -88,6 +96,7 @@ class areaController extends Controller
             $incident = area::find($id);
             $incident->fill($request->all());
             $incident->is_delete = 1;
+            $incident->updated_by = session()->get('user_id');
             $incident->save();
             return response()->json(['mensaje' => 'ok']);
         } else {

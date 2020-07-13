@@ -448,7 +448,7 @@ class SInfoWithPolicy{
                 }
 
                 for( $j = 0 ; count($lRows) > $j ; $j++ ){
-                        if($lRows[$j]->isCheckSchedule == 0){
+                        if($lRows[$j]->hasSchedule == true){
                             $minutosExtra = $lRows[$j]->overDefaultMins + $lRows[$j]->overWorkedMins;
                         }else{
                             $minutosExtra = $lRows[$j]->overWorkedMins;
@@ -480,7 +480,9 @@ class SInfoWithPolicy{
                                     $sumaHoras = $limitHours;
                                     $lRows[$j]->extraDoubleMins = $horasDentroLimite*60;
                                     $lRows[$j]->extraTripleMins = 0;
-                                    if($lRows[$j]->isCheckSchedule == 0){
+                                    if($lRows[$j]->hasSchedule == true){
+                                        $lRows[$j]->extraDoubleMinsNoficial = SInfoWithPolicy::normalizacion($initialLimitHalf,$initialLimitHour,$finalLimitHour,$lRows[$j]->overScheduleMins);
+                                    }elseif($lRows[$j]->isOnSchedule == true){
                                         $lRows[$j]->extraDoubleMinsNoficial = SInfoWithPolicy::normalizacion($initialLimitHalf,$initialLimitHour,$finalLimitHour,$lRows[$j]->overScheduleMins);
                                     }else{
                                         $lRows[$j]->extraDoubleMinsNoficial = 0;
@@ -493,7 +495,9 @@ class SInfoWithPolicy{
                                     $sumaHoras = $sumaHorasAuxiliar;
                                     $lRows[$j]->extraDoubleMins = ($horasCompletas + $auxHorasCompletas) * 60;
                                     $lRows[$j]->extraTripleMins = 0;
-                                    if($lRows[$j]->isCheckSchedule == 0){
+                                    if($lRows[$j]->hasSchedule == true){
+                                        $lRows[$j]->extraDoubleMinsNoficial = SInfoWithPolicy::normalizacion($initialLimitHalf,$initialLimitHour,$finalLimitHour,$lRows[$j]->overScheduleMins);
+                                    }elseif($lRows[$j]->isOnSchedule == true){
                                         $lRows[$j]->extraDoubleMinsNoficial = SInfoWithPolicy::normalizacion($initialLimitHalf,$initialLimitHour,$finalLimitHour,$lRows[$j]->overScheduleMins);
                                     }else{
                                         $lRows[$j]->extraDoubleMinsNoficial = 0;
@@ -505,7 +509,9 @@ class SInfoWithPolicy{
                                 $horasCompletas = ($horasCompletas + $auxHorasCompletas)*60;
                                 $lRows[$j]->extraDoubleMins = 0;
                                 $lRows[$j]->extraTripleMins = 0;
-                                if($lRows[$j]->isCheckSchedule == 0){
+                                if($lRows[$j]->hasSchedule == true){
+                                    $lRows[$j]->extraDoubleMinsNoficial = SInfoWithPolicy::normalizacion($initialLimitHalf,$initialLimitHour,$finalLimitHour,$lRows[$j]->overScheduleMins);
+                                }elseif($lRows[$j]->isOnSchedule == true){
                                     $lRows[$j]->extraDoubleMinsNoficial = SInfoWithPolicy::normalizacion($initialLimitHalf,$initialLimitHour,$finalLimitHour,$lRows[$j]->overScheduleMins);
                                 }else{
                                     $lRows[$j]->extraDoubleMinsNoficial = 0;
@@ -520,7 +526,9 @@ class SInfoWithPolicy{
                                 if($sumaHoras < $limitHours){
                                     $lRows[$j]->extraDoubleMins = 60;
                                     $lRows[$j]->extraTripleMins = 0;
-                                    if($lRows[$j]->isCheckSchedule == 0){
+                                    if($lRows[$j]->hasSchedule == true){
+                                        $lRows[$j]->extraDoubleMinsNoficial = SInfoWithPolicy::normalizacion($initialLimitHalf,$initialLimitHour,$finalLimitHour,$lRows[$j]->overScheduleMins);
+                                    }elseif($lRows[$j]->isOnSchedule == true){
                                         $lRows[$j]->extraDoubleMinsNoficial = SInfoWithPolicy::normalizacion($initialLimitHalf,$initialLimitHour,$finalLimitHour,$lRows[$j]->overScheduleMins);
                                     }else{
                                         $lRows[$j]->extraDoubleMinsNoficial = 0;
@@ -531,7 +539,9 @@ class SInfoWithPolicy{
                                 }else{
                                     $lRows[$j]->extraDoubleMins = 0;
                                     $lRows[$j]->extraTripleMins = 0;
-                                    if($lRows[$j]->isCheckSchedule == 0){
+                                    if($lRows[$j]->hasSchedule == true){
+                                        $lRows[$j]->extraDoubleMinsNoficial = SInfoWithPolicy::normalizacion($initialLimitHalf,$initialLimitHour,$finalLimitHour,$lRows[$j]->overScheduleMins);
+                                    }elseif($lRows[$j]->isOnSchedule == true){
                                         $lRows[$j]->extraDoubleMinsNoficial = SInfoWithPolicy::normalizacion($initialLimitHalf,$initialLimitHour,$finalLimitHour,$lRows[$j]->overScheduleMins);
                                     }else{
                                         $lRows[$j]->extraDoubleMinsNoficial = 0;
@@ -546,7 +556,9 @@ class SInfoWithPolicy{
                                     if( $sumaHoras < $limitHours ){
                                         $lRows[$j]->extraDoubleMins = 60;
                                         $lRows[$j]->extraTripleMins = 0;
-                                        if($lRows[$j]->isCheckSchedule == 0){
+                                        if($lRows[$j]->hasSchedule == true){
+                                            $lRows[$j]->extraDoubleMinsNoficial = SInfoWithPolicy::normalizacion($initialLimitHalf,$initialLimitHour,$finalLimitHour,$lRows[$j]->overScheduleMins);
+                                        }elseif($lRows[$j]->isOnSchedule == true){
                                             $lRows[$j]->extraDoubleMinsNoficial = SInfoWithPolicy::normalizacion($initialLimitHalf,$initialLimitHour,$finalLimitHour,$lRows[$j]->overScheduleMins);
                                         }else{
                                             $lRows[$j]->extraDoubleMinsNoficial = 0;
@@ -558,7 +570,9 @@ class SInfoWithPolicy{
                                     }else{
                                         $lRows[$j]->extraDoubleMins = 0;
                                         $lRows[$j]->extraTripleMins = 0;
-                                        if($lRows[$j]->isCheckSchedule == 0){
+                                        if($lRows[$j]->hasSchedule == true){
+                                            $lRows[$j]->extraDoubleMinsNoficial = SInfoWithPolicy::normalizacion($initialLimitHalf,$initialLimitHour,$finalLimitHour,$lRows[$j]->overScheduleMins);
+                                        }elseif($lRows[$j]->isOnSchedule == true){
                                             $lRows[$j]->extraDoubleMinsNoficial = SInfoWithPolicy::normalizacion($initialLimitHalf,$initialLimitHour,$finalLimitHour,$lRows[$j]->overScheduleMins);
                                         }else{
                                             $lRows[$j]->extraDoubleMinsNoficial = 0;
@@ -571,7 +585,9 @@ class SInfoWithPolicy{
                                     $HalfPendient = 1;
                                     $lRows[$j]->extraDoubleMins = 0;
                                     $lRows[$j]->extraTripleMins = 0;
-                                    if($lRows[$j]->isCheckSchedule == 0){
+                                    if($lRows[$j]->hasSchedule == true){
+                                        $lRows[$j]->extraDoubleMinsNoficial = SInfoWithPolicy::normalizacion($initialLimitHalf,$initialLimitHour,$finalLimitHour,$lRows[$j]->overScheduleMins);
+                                    }elseif($lRows[$j]->isOnSchedule == true){
                                         $lRows[$j]->extraDoubleMinsNoficial = SInfoWithPolicy::normalizacion($initialLimitHalf,$initialLimitHour,$finalLimitHour,$lRows[$j]->overScheduleMins);
                                     }else{
                                         $lRows[$j]->extraDoubleMinsNoficial = 0;
@@ -582,7 +598,9 @@ class SInfoWithPolicy{
                             }else{
                                 $lRows[$j]->extraDoubleMins = 0;
                                 $lRows[$j]->extraTripleMins = 0;
-                                if($lRows[$j]->isCheckSchedule == 0){
+                                if($lRows[$j]->hasSchedule == true){
+                                    $lRows[$j]->extraDoubleMinsNoficial = SInfoWithPolicy::normalizacion($initialLimitHalf,$initialLimitHour,$finalLimitHour,$lRows[$j]->overScheduleMins);
+                                }elseif($lRows[$j]->isOnSchedule == true){
                                     $lRows[$j]->extraDoubleMinsNoficial = SInfoWithPolicy::normalizacion($initialLimitHalf,$initialLimitHour,$finalLimitHour,$lRows[$j]->overScheduleMins);
                                 }else{
                                     $lRows[$j]->extraDoubleMinsNoficial = 0;
@@ -1203,6 +1221,8 @@ class SInfoWithPolicy{
                 $processed->biweek = $periodo;
             }
             $processed->year = $year;
+            $processed->updated_by = session()->get('user_id');
+            $processed->created_by = session()->get('user_id'); 
             $processed->save();
             
         }
@@ -1215,12 +1235,16 @@ class SInfoWithPolicy{
             $period_processed->num_week = $num_period;
             $period_processed->is_week = 1;
             $period_processed->is_close = 0;
+            $period_processed->created_by = session()->get('user_id');
+            $period_processed->updated_by = session()->get('user_id'); 
             $period_processed->save();
         }else if( $type == 1 ){
             $period_processed = new period_processed();
             $period_processed->num_biweekly = $num_period;
             $period_processed->is_biweekly = 1;
             $period_processed->is_close = 0;
+            $period_processed->created_by = session()->get('user_id');
+            $period_processed->updated_by = session()->get('user_id');
             $period_processed->save();
         }
       }

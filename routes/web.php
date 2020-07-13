@@ -68,17 +68,27 @@ Route::get('shiftprogramming/{id}', 'shiftprogrammingController@index')->name('p
 });
 
 /* RUTAS DE REPORTES */
-Route::get('report/datosReporte/{type}/{datos}', 'ReporteController@datosReporteSecretaria')->name('reporte_secretaria');
-Route::get('report/hrReport', 'ReporteController@hrReport')->name('reporte_secretaria');
+Route::get('report/reporteRevisionDatos', 'ReporteController@reporteRevisionView')->name('reporte_revision');
+Route::get('report/reporteRevision', 'ReporteController@generarReporteRevision')->name('generar_revision');
+Route::get('report/datosreportestps/{type}/{datos}', 'ReporteController@datosReporteSecretaria')->name('reporte_secretaria');
+Route::get('report/reportestps', 'ReporteController@hrReport')->name('reporte_secretaria');
 Route::get('report/prueba','ReporteController@prueba')->name('prueba');
 Route::get('report/reportES/{type}', 'ReporteController@esReport')->name('reporteES');
-Route::get('report/generarReporteES','ReporteController@reporteESView')->name('generarreporteES');
+Route::get('report/reporteES','ReporteController@reporteESView')->name('generarreporteES');
 Route::get('report/generarReporteRegs/{type}','ReporteController@registriesReport')->name('generarreporteRegs');
 Route::get('report/reporteRegistros','ReporteController@reporteRegistrosView')->name('generarreporteRegistros');
 Route::get('report/reporteRetardos','ReporteController@genDelayReport')->name('generarreporteRetardos');
 Route::get('report/viewReporteRetardos','ReporteController@delaysReport')->name('reporteRetardos');
-Route::get('report/percepcionesvariables','ReporteController@genHrExReport')->name('generarreportepervariables');
+Route::get('report/reportepercepcionesvariables','ReporteController@genHrExReport')->name('generarreportepervariables');
 Route::get('report/viewpercepvariables','ReporteController@hrExtReport')->name('reportepercepvariables');
+
+/* RUTAS DE GRUPO DEPARTAMENTO USUARIO */
+Route::get('deptgroupuser', 'deptgroupuserController@index')->name('dgu');
+Route::get('deptgroupuser/create', 'deptgroupuserController@create')->name('crear_dgu');
+Route::post('deptgroupuser', 'deptgroupuserController@store')->name('guardar_dgu');
+Route::get('deptgroupuser/{id}/edit', 'deptgroupuserController@edit')->name('editar_dgu');
+Route::put('deptgroupuser/{id}', 'deptgroupuserController@update')->name('actualizar_dgu');
+Route::delete('deptgroupuser/{id}', 'deptgroupuserController@destroy')->name('eliminar_dgu');
 
 /* RUTAS DE USUARIO */
 Route::get('user/change', 'userController@change')->name('cambio_usuario');
@@ -101,6 +111,12 @@ Route::delete('company/{id}', 'companyController@destroy')->name('delete_company
 Route::get('/syncronize', 'SyncController@toSyncronize')->name('syncErp');
 
 /* RUTAS DE EMPLEADOS */
+Route::get('employees/foraneos', 'employeeController@foraneos')->name('foraneos');
+Route::get('employees/enviarForaneos/{id}', 'employeeController@enviarForaneos')->name('enviar_empleado_foraneo');
+Route::put('employee/outstanding/{id}', 'employeeController@updateoutstanding')->name('actualizar_empleado_faltante');
+Route::get('employee/puesto','employeeController@jobs')->name('puesto');
+Route::get('employee/outstanding', 'employeeController@outstandingemployees')->name('empleados_pendientes');
+Route::get('employee/{id}/editoutstanding', 'employeeController@editoutstanding')->name('editar_empleado_faltante');
 Route::delete('employee/fingerprint/{id}', 'employeeController@desactivar')->name('desactivar');
 Route::delete('employee/fingerprint/disable/{id}', 'employeeController@activar')->name('activar');
 Route::get('employee/fingerprint', 'employeeController@fingerprints')->name('huellas');
@@ -136,11 +152,18 @@ Route::get('schedule/{id}/edit', 'scheduleController@edit')->name('editar_planti
 Route::put('schedule/{id}', 'scheduleController@update')->name('actualizar_plantilla');
 Route::delete('schedule/{id}', 'scheduleController@destroy')->name('eliminar_plantilla');
 
+/* RUTAS DE CREACION SEMANAS */
+Route::get('week/firts','weekController@primerdia')->name('primer_dia');
+Route::get('week', 'weekController@index')->name('semana');
+Route::get('week/create', 'weekController@create')->name('crear_semana');
+Route::post('week', 'weekController@store')->name('guardar_semana');
+Route::delete('week/{id}', 'weekController@destroy')->name('eliminar_semana');
+
 /* RUTAS DE ASIGNACION HORARIOS */
 Route::get('assign/programming/schedule_template','assignController@schedule_template')->name('agregar');
-Route::get('assign/viewProgramming/{id}','assignController@viewProgramming')->name('index_programacion');
-Route::get('assign/showProgramming/{id}/{dgroup}','assignController@editProgramming')->name('editar_programacion');
-Route::get('assign/specificDate/{id}','assignController@viewSpecificDate')->name('fecha_especifica');
+Route::get('assign/viewProgramming','assignController@viewProgramming')->name('index_programacion');
+Route::get('assign/showProgramming/{id}','assignController@editProgramming')->name('editar_programacion');
+Route::get('assign/specificDate/','assignController@viewSpecificDate')->name('fecha_especifica');
 Route::post('assign/mostrarFecha', 'assignController@mostrarFecha')->name('mostrar_fecha');
 Route::get('assign', 'assignController@index')->name('asignacion');
 Route::get('assign/create/{id}', 'assignController@create')->name('crear_asignacion');

@@ -30,6 +30,8 @@ Empleados
                             <th>Número empleado</th>
                             <th>Nombre empleado</th>
                             <th>Nombre corto</th>
+                            <th>Departamento</th>
+                            <th>Puesto</th>
                             <th class="width70"></th>
                         </tr>
                     </thead>
@@ -39,6 +41,8 @@ Empleados
                             <td>{{$employee->numEmployee}}</td>
                             <td>{{$employee->nameEmployee}}</td>
                             <td>{{$employee->shortName}}</td>
+                            <td>{{$employee->nameDepartment}}</td>
+                            <td>{{$employee->nameJob}}</td>
                             <td>
                                 <a href="{{route('editar_nombrecorto', ['id' => $employee->idEmployee])}}" class="btn-accion-tabla tooltipsC" title="Editar este registro">
                                     <i class="fa fa-fw fa-pencil"></i>

@@ -46,4 +46,3 @@
         
     @endfor
 @endfor
-<input type="hidden" name="idGroup" id="idGroup" value="{{$dgroup}}">

@@ -4,7 +4,7 @@
 @endsection
 
 @section("scripts")
-
+<script src="{{asset("assets/pages/scripts/employee/puesto.js")}}" type="text/javascript"></script>
 @endsection
 
 @section('content')

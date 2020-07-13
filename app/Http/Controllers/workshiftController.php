@@ -40,7 +40,10 @@ class workshiftController extends Controller
      */
     public function store(Request $request)
     {
-        workshift::create($request->all());
+        $workshift = workshift::create($request->all());
+        $workshift->updated_by = session()->get('user_id');
+        $workshift->created_by = session()->get('user_id');
+        $workshift->save();
         return redirect('workshift')->with('mensaje', 'Incidente creado con exito');
     }
 
@@ -77,7 +80,9 @@ class workshiftController extends Controller
      */
     public function update(Request $request, $id)
     {
-        workshift::findOrFail($id)->update($request->all());
+        $workshift = workshift::findOrFail($id);
+        $workshift->updated_by = session()->get('user_id');
+        $workshift->update($request->all());
         return redirect('workshift')->with('mensaje', 'Turno actualizado con exito');
     }
 
@@ -93,6 +98,7 @@ class workshiftController extends Controller
             $workshift = workshift::find($id);
             $workshift->fill($request->all());
             $workshift->is_delete = 1;
+            $workshift->updated_by = session()->get('user_id');
             $workshift->save();
             return response()->json(['mensaje' => 'ok']);
         } else {

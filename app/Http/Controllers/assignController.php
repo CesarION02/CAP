@@ -543,11 +543,19 @@ class assignController extends Controller
     }
 
     public function programming($id){
+        $dgu = DB::table('group_dept_user')
+                    ->where('user_id',$id)
+                    ->select('groupdept_id AS id')
+                    ->get();
+        $Adgu = [];
+        for($i=0;count($dgu)>$i;$i++){
+            $Adgu[$i]=$dgu[$i]->id;
+        }
         $employee = DB::table('employees')
                 ->join('jobs','jobs.id','=','employees.job_id')
                 ->join('departments','departments.id','=','jobs.department_id')
                 ->join('department_group','department_group.id','=','departments.dept_group_id')
-                ->where('departments.dept_group_id',$id)
+                ->whereIn('departments.dept_group_id',$Adgu)
                 ->select('employees.id AS id','employees.name AS name', 'department_group.name AS nameGroup')
                 ->get();
         $schedule_template = schedule_template::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
@@ -598,12 +606,12 @@ class assignController extends Controller
             $asignacion->updated_by = 1;
             $asignacion->save();
         } 
-        $url =  'assign/viewProgramming/'.$request->idGroup;
+        $url =  'assign/viewProgramming';
         
         return redirect($url)->with('mensaje','Asignación fue creada con exito');
     }
 
-    public function editProgramming ($id,$dgroup){
+    public function editProgramming ($id){
         $grupo = assign_schedule::find($id);
         $auxiliar = $grupo->group_schedules_id;
         if($auxiliar != null){
@@ -629,7 +637,7 @@ class assignController extends Controller
         }
         
 
-        return view('assign.editprogramming')->with('assigns',$assigns)->with('dgroup',$dgroup);       
+        return view('assign.editprogramming')->with('assigns',$assigns);       
 
     }
 
@@ -665,33 +673,57 @@ class assignController extends Controller
             }
             
         }  
-        $url =  'assign/viewProgramming/'.$request->idGroup;
+        $url =  'assign/viewProgramming';
         return redirect($url)->with('mensaje','Asignación fue actualizada con exito');
     }
 
-    public function viewProgramming ($id){
+    public function viewProgramming (){
+        $numero = session()->get('name');
+        $usuario = DB::table('users')
+                    ->where('name',$numero)
+                    ->get();
+        $dgu = DB::table('group_dept_user')
+                    ->where('user_id',$usuario[0]->id)
+                    ->select('groupdept_id AS id')
+                    ->get();
+        $Adgu = [];
+        for($i=0;count($dgu)>$i;$i++){
+            $Adgu[$i]=$dgu[$i]->id;
+        }
         $assigns = DB::table('schedule_assign')
                 ->join('employees','employees.id','=','schedule_assign.employee_id')
                 ->join('schedule_template','schedule_template.id','=','schedule_assign.schedule_template_id')
                 ->join('jobs','jobs.id','=','employees.job_id')
                 ->join('departments','departments.id','=','jobs.department_id')
-                ->where('departments.dept_group_id',$id)
                 ->where('schedule_assign.is_delete',0)
+                ->whereIn('departments.dept_group_id',$Adgu)
                 ->select('employees.id AS id','employees.name AS name','schedule_assign.start_date AS startDate','schedule_assign.end_date AS endDate','schedule_assign.id AS idAssign')
                 ->orderBy('employees.id')
                 ->orderBy('schedule_assign.group_schedules_id')
                 ->groupBy('schedule_assign.group_schedules_id','employees.id')
                 ->get();   
         
-        return view('assign.showprogramming')->with('assigns',$assigns)->with('dgroup',$id);
+        return view('assign.showprogramming')->with('assigns',$assigns)->with('dgroup',$usuario[0]->id);
     }
 
-    public function viewSpecificDate ($id) {
+    public function viewSpecificDate () {
+        $numero = session()->get('name');
+        $usuario = DB::table('users')
+                    ->where('name',$numero)
+                    ->get();
+        $dgu = DB::table('group_dept_user')
+                    ->where('user_id',$usuario[0]->id)
+                    ->select('groupdept_id AS id')
+                    ->get();
+        $Adgu = [];
+        for($i=0;count($dgu)>$i;$i++){
+            $Adgu[$i]=$dgu[$i]->id;
+        }
         $employees = DB::table('schedule_assign')
                 ->join('employees','employees.id','=','schedule_assign.employee_id')
                 ->join('jobs','jobs.id','=','employees.job_id')
                 ->join('departments','departments.id','=','jobs.department_id')
-                ->where('departments.dept_group_id',$id)
+                ->whereIn('departments.dept_group_id',$Adgu)
                 ->select('employees.id AS id','employees.name AS name')
                 ->groupBy('employees.id')
                 ->get();

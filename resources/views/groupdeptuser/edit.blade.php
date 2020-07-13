@@ -1,10 +1,16 @@
 @extends("theme.$theme.layout")
 @section('title')
-    Empleados
+    Grupo departamentos - usuarios
 @endsection
 
+@section('styles1')
+    <link rel="stylesheet" href="{{asset("assets/css/chosen.min.css")}}">
+@endsection
 @section("scripts")
-    <script src="{{asset("assets/pages/scripts/employee/puesto.js")}}" type="text/javascript"></script>
+    <script src="{{ asset("assets/js/chosen.jquery.min.js") }}" type="text/javascript"></script>
+    <script>
+        $(".chosen-select").chosen();
+    </script>
 @endsection
 
 @section('content')
@@ -14,17 +20,17 @@
         @include('includes.mensaje')
         <div class="box box-danger">
             <div class="box-header with-border">
-                <h3 class="box-title">Editar Empleados</h3>
+                <h3 class="box-title">Grupo departamentos - usuarios</h3>
                 <div class="box-tools pull-right">
-                    <a href="{{route('supervisores')}}" class="btn btn-block btn-info btn-sm">
+                    <a href="{{route('dgu')}}" class="btn btn-block btn-info btn-sm">
                         <i class="fa fa-fw fa-reply-all"></i> Volver al listado
                     </a>
                 </div>
             </div>
-            <form action="{{route('actualizar_nombrecorto', ['id' => $data->id])}}" id="form-general" class="form-horizontal" method="POST" autocomplete="off">
+            <form action="{{route('actualizar_dgu', ['id' => $empleados[0]->id])}}" id="form-general" class="form-horizontal" method="POST" autocomplete="off">
                 @csrf @method("put")
                 <div class="box-body">
-                    @include('employee.formShortname')
+                    @include('groupdeptuser.form')
                 </div>
                 <div class="box-footer">
                     <div class="col-lg-3"></div>

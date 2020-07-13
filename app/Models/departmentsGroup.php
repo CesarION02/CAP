@@ -10,4 +10,8 @@ class departmentsGroup extends Model
     protected $primaryKey = 'id';
     protected $fillable = ['name'];
     public $timestamps = false;
+
+    public function group_user(){
+        return $this->hasMany('App\Models\group_dept_user');
+    }
 }

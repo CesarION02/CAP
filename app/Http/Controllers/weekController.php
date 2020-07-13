@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\department;
-use App\Models\area;
-use App\Models\job;
+use DB;
+use Carbon\Carbon;
+use App\Models\week_cut;
 
-class jobController extends Controller
+class weekController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,11 +16,11 @@ class jobController extends Controller
      */
     public function index()
     {
-        $datas = job::where('is_delete','0')->orderBy('id')->get();
-        $datas->each(function($datas){
-            $datas->department;
-        });
-        return view('job.index', compact('datas'));
+        $week = DB::table('week_cut')
+                    ->groupby('year')
+                    ->select('year AS year')
+                    ->get();
+        return view('week.index')->with('year',$week);
     }
 
     /**
@@ -30,8 +30,7 @@ class jobController extends Controller
      */
     public function create()
     {
-        $department = department::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
-        return view('job.create')->with('departments',$department);;
+        return view('week.create');
     }
 
     /**
@@ -41,12 +40,30 @@ class jobController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {
-        $job = job::create($request->all());
-        $job->updated_by = session()->get('user_id');
-        $job->created_by = session()->get('user_id');
-        $job->save();
-        return redirect('job')->with('mensaje','Puesto fue creado con exito');
+    {   
+        $dia = DB::table('first_day_year')
+                    ->where('year',$request->year)
+                    ->get();
+        $num = 1;
+        $primerDia = Carbon::parse($dia[0]->dt_date);
+        $ultimoDia = Carbon::parse($dia[0]->dt_date);
+        $ultimoDia->addDays(6);
+        for($i = 0 ; 52 > $i ; $i++){
+            $semana = new week_cut();
+            $semana->ini = $primerDia->toDateString();
+            $semana->year = $request->year;
+            $semana->fin = $ultimoDia->toDateString();
+            $semana->num = $num;
+            $semana->updated_by = session()->get('user_id');
+            $semana->created_by = session()->get('user_id');
+            $semana->save();
+            $num++;
+            $primerDia->addDays(7);
+            $ultimoDia->addDays(7);
+        }
+
+        return redirect('week')->with('mensaje', 'Semanas creadas con exito');
+
     }
 
     /**
@@ -68,9 +85,7 @@ class jobController extends Controller
      */
     public function edit($id)
     {
-        $department = department::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
-        $data = job::findOrFail($id);
-        return view('job.edit', compact('data'))->with('departments',$department);
+        //
     }
 
     /**
@@ -82,10 +97,7 @@ class jobController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $job = job::findOrFail($id);
-        $job->updated_by = session()->get('user_id');
-        $job->update($request->all());
-        return redirect('job')->with('mensaje', 'Puesto actualizado con exito');
+        //
     }
 
     /**
@@ -97,14 +109,18 @@ class jobController extends Controller
     public function destroy(Request $request,$id)
     {
         if ($request->ajax()) {
-            $job = job::find($id);
-            $job->fill($request->all());
-            $job->is_delete = 1;
-            $job->updated_by = session()->get('user_id');
-            $job->save();
+            
+            week_cut::where('year',$id)->delete();
             return response()->json(['mensaje' => 'ok']);
         } else {
             abort(404);
         }
+    }
+
+    public function primerdia(Request $request){
+        $dia = DB::table('first_day_year')
+                    ->where('year',$request->year)
+                    ->get();
+        return response()->json($dia);
     }
 }

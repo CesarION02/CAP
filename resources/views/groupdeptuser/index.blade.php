@@ -18,40 +18,34 @@ Empleados
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Empleados</h3>
+                <h3 class="box-title">Grupo departamentos - usuarios</h3>
                 <div class="box-tools pull-right">
-                    <!--<a href="{{route('crear_empleado')}}" class="btn btn-block btn-success btn-sm">
+                    <a href="{{route('crear_dgu')}}" class="btn btn-block btn-success btn-sm">
                         <i class="fa fa-fw fa-plus-circle"></i> Nuevo registro
-                    </a>!-->
+                    </a>
                 </div>
             </div>
             <div class="box-body">
                 <table class="table table-striped table-bordered table-hover" id="myTable">
                     <thead>
                         <tr>
-                            <th>Nombre empleado</th>
-                            <th>Nombre corto</th>
-                            <th>Número empleado</th>
-                            <th>Manera de checar</th>
-                            <th>Departamento</th>
-                            <th>Puesto</th>
+                            <th>Nombre usuario</th>
+                            <th>Grupos de departamentos</th>
                             <th class="width70"></th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($datas as $data)
+                        <?php $i = 0;?>
+                        @foreach ($user as $g)
+
                         <tr>
-                            <td>{{$data->name}}</td>
-                            <td>{{$data->short_name}}</td>
-                            <td>{{$data->num_employee}}</td>
-                            <td>{{$data->way_register == null ? "" : $data->way_register->name}}</td>
-                            <td>{{$data->department == null ? "" : $data->department->name}}</td>
-                            <td>{{$data->job == null ? "" : $data->job->name}}</td>
+                            <td>{{$g->nombreEmpleado}}</td>
+                            <td>{{$departamentos[$i]}}</td>
                             <td>
-                                <a href="{{route('editar_empleado', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Editar este registro">
+                                <a href="{{route('editar_dgu', ['id' => $g->id])}}" class="btn-accion-tabla tooltipsC" title="Editar este registro">
                                     <i class="fa fa-fw fa-pencil"></i>
                                 </a>
-                                <form action="{{route('eliminar_empleado', ['id' => $data->id])}}" class="d-inline form-eliminar" method="POST">
+                                <form action="{{route('eliminar_dgu', ['id' => $g->id])}}" class="d-inline form-eliminar" method="POST">
                                     @csrf @method("delete")
                                     <button type="submit" class="btn-accion-tabla eliminar tooltipsC" title="Eliminar este registro">
                                         <i class="fa fa-fw fa-trash text-danger"></i>
@@ -59,6 +53,7 @@ Empleados
                                 </form>
                             </td>
                         </tr>
+                        <?php $i++;?>
                         @endforeach
 
                     </tbody>

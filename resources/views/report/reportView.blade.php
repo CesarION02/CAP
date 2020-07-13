@@ -78,24 +78,43 @@
                                             <td align="center">{{ $lRows[$i]->extraDobleMinsNoficial }}</td>
                                             <td align="center">{{ $lRows[$i]->extraTripleMinsNoficial }}</td>
                                         @endif
-                                    @elseif($lRows[$i]->hasabsence)
+                                    @elseif($lRows[$i]->hasabsence==1)
                                         <td>{{ 'Falta'}}</td>
                                         <td></td>
                                         <td></td>
                                         <td></td>
                                         <td></td>
-                                    @elseif($lRows[$i]->is_dayoff)
+                                    @elseif($lRows[$i]->is_dayoff==1)
                                         <td>{{ 'Descanso'}}</td>
                                         <td></td>
                                         <td></td>
                                         <td></td>
                                         <td></td>
-                                    @elseif($lRows[$i]->is_holiday)
+                                    @elseif($lRows[$i]->is_holiday==1)
                                         <td>{{ 'Día festivo'}}</td>
                                         <td></td>
                                         <td></td>
                                         <td></td>
                                         <td></td>
+                                    @else
+                                        @for( $j = 0 ; count($incapacidades) > $j ; $j++)
+                                            @if ($lRows[$i]->employee_id == $incapacidades[$j]->idEmp && ($lRows[$i]->inDate == $incapacidades[$j]->Date || $lRows[$i]->outDate == $incapacidades[$j]->Date))
+                                            <td>{{ 'Incapacidad'}}</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            @endif
+                                        @endfor
+                                        @for( $j = 0 ; count($vacaciones) > $j ; $j++)
+                                            @if ($lRows[$i]->employee_id == $vacaciones[$j]->idEmp && ($lRows[$i]->inDate == $vacaciones[$j]->Date || $lRows[$i]->outDate == $vacaciones[$j]->Date))
+                                            <td>{{ 'Vacaciones'}}</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            @endif
+                                        @endfor
                                     @endif
                                     {{-- <td v-if="oData.tReport == oData.REP_HR_EX">@{{ row.outDateTimeSch }}</td> --}}
                                 </tr>

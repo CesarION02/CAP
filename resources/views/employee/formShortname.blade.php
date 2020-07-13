@@ -16,6 +16,36 @@
     <input type="text" name="short_name" id="short_name" class="form-control" value="{{old('short_name', $data->short_name ?? '')}}"/>
     </div>
 </div>
+<div class="form-group">
+    <label for="department_id" class="col-lg-3 control-label requerido">Departamento:</label>
+    <div class="col-lg-8">
+            <select id="department_id" name="department_id" class="departamento form-control">
+                @foreach($departments as $department)
+                    @if(isset($data))
+                            @if($department->idDep == $data->department_id)
+                                    <option value="{{ $department->idDep }}" selected> {{$department->nameDep}}</option>       
+                            @else
+                                    <option value="{{ $department->idDep }}" > {{$department->nameDep}}</option>
+                            @endif
+                    @else
+                            <option value="{{ $department->idDep }}" > {{$department->nameDep}}</option>
+                    @endif
+                @endforeach
+            </select>
+    </div>
+</div>
+<div class="form-group">
+    <label for="job_id" class="col-lg-3 control-label requerido">Puesto:</label>
+    <div class="col-lg-8" id="job" name="job">
+            
+    </div>
+</div>
+<div class="form-group">
+    <label for="job_id" class="col-lg-3 control-label readonly">Puesto Anterior:</label>
+    <div class="col-lg-8" id="jobaux" name="jobaux">
+        <input type="text" name="jobanterior" id="jobanterior" value="{{$data->job->name}}">       
+    </div>
+</div>
 
 
 

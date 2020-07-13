@@ -27,7 +27,6 @@ class employees extends Model
                             'is_active',
                             'is_delete',
                             ];
-    public $timestamps = false;
 
     public function job(){
         return $this->belongsTo('App\Models\job','job_id');
@@ -47,6 +46,9 @@ class employees extends Model
 
     public function assign(){
         return $this->hasMany('App\Models\assing_schedule');
+    }
+    public function department(){
+        return $this->belongsTo('App\Models\department','department_id');
     }
 
 }

@@ -46,6 +46,8 @@ class DeptsGroupController extends Controller
         $newGroup = new departmentsGroup();
         $newGroup->name = $obj->name;
         $newGroup->is_delete = false;
+        $newGroup->updated_by = session()->get('user_id');
+        $newGroup->created_by = session()->get('user_id');
 
         $newGroup->save();
 
@@ -55,7 +57,8 @@ class DeptsGroupController extends Controller
     public function edit($id, $name)
     {
         departmentsGroup::where('id', $id)
-                    ->update(['name' => $name]);
+                    ->update(['name' => $name,
+                                'updated_by' => session()->get('user_id')]);
 
         return $id;
     }
@@ -66,11 +69,13 @@ class DeptsGroupController extends Controller
 
         if ($dg->is_delete) {
             departmentsGroup::where('id', $id)
-                            ->update(['is_delete' => false]);
+                            ->update(['is_delete' => false,
+                            'updated_by' => session()->get('user_id')]);
         }
         else {
             departmentsGroup::where('id', $id)
-                            ->update(['is_delete' => true]);
+                            ->update(['is_delete' => true,
+                            'updated_by' => session()->get('user_id')]);
         }
 
         return $id;

@@ -47,6 +47,8 @@ class userController extends Controller
         $user->email = $request->email;
         $user->password = bcrypt($request->password);
         $user->is_delete = 0;
+        $user->updated_by = session()->get('user_id');
+        $user->created_by = session()->get('user_id');
         $user->save();
 
         return redirect('user')->with('mensaje', 'Usuario creado con exito');
@@ -89,6 +91,7 @@ class userController extends Controller
         $user->email = $request->email;
         $user->password = bcrypt($request->password);
         $user->is_delete = 0;
+        $user->updated_by = session()->get('user_id');
         $user->save();
 
         return redirect('user')->with('mensaje', 'Usuario actualizado con exito');
@@ -106,6 +109,7 @@ class userController extends Controller
             $user = User::find($id);
             $user->fill($request->all());
             $user->is_delete = 1;
+            $user->updated_by = session()->get('user_id');
             $user->save();
             return response()->json(['mensaje' => 'ok']);
         } else {
@@ -122,6 +126,7 @@ class userController extends Controller
     public function updatePassword(Request $request, $id){
         $data = User::find($id);
         $data->password = bcrypt($request->password);
+        $data->updated_by = session()->get('user_id');
         $data->save();
         return redirect('/')->with('mensaje', 'Contraseña actualizado con exito');
     }

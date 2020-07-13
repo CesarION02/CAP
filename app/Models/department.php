@@ -8,7 +8,6 @@ class department extends Model
 {
     protected $table = 'departments';
     protected $fillable = ['name', 'area_id'];
-    public $timestamps = false;
 
     public function area(){
         return $this->belongsTo('App\Models\area','area_id');
@@ -16,6 +15,10 @@ class department extends Model
 
     public function job(){
         return $this->hasMany('App\job');
+    }
+
+    public function employee(){
+        return $this->hasMany('App\Models\employees');
     }
 
     public function week_department(){

@@ -41,7 +41,10 @@ class departmentController extends Controller
      */
     public function store(Request $request)
     {
-        department::create($request->all());
+        $department = department::create($request->all());
+        $department->updated_by = session()->get('user_id');
+        $department->created_by = session()->get('user_id');
+        $department->save();
         return redirect('department')->with('mensaje','Departamento fue creado con exito');
     }
 
@@ -78,7 +81,9 @@ class departmentController extends Controller
      */
     public function update(Request $request, $id)
     {
-        department::findOrFail($id)->update($request->all());
+        $department = department::findOrFail($id);
+        $department->updated_by = session()->get('user_id');
+        $department->update($request->all());
         return redirect('department')->with('mensaje', 'Departamento actualizado con exito');
     }
 
@@ -94,6 +99,7 @@ class departmentController extends Controller
             $department = department::find($id);
             $department->fill($request->all());
             $department->is_delete = 1;
+            $department->updated_by = session()->get('user_id');
             $department->save();
             return response()->json(['mensaje' => 'ok']);
         } else {

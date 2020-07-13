@@ -31,6 +31,7 @@ class DeptsRhController extends Controller
                             'name' => $jRhDept->dept_name,
                             'code' => $jRhDept->dept_code,
                             'is_delete' => $jRhDept->is_deleted,
+                            'updated_by' => session()->get('user_id')
                             ]
                         );
     }
@@ -43,6 +44,8 @@ class DeptsRhController extends Controller
         $RhDept->code = $jRhDept->dept_code;
         $RhDept->external_id = ($jRhDept->id_department);
         $RhDept->is_delete = $jRhDept->is_deleted;
+        $RhDept->created_by = session()->get('user_id');
+        $RhDept->updated_by = session()->get('user_id');
 
         $RhDept->save();
     }

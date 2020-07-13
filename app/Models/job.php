@@ -8,7 +8,6 @@ class job extends Model
 {
     protected $table = 'jobs';
     protected $fillable = ['name','department_id'];
-    public $timestamps = false;
     
     public function department(){
         return $this->belongsTo('App\Models\department');
