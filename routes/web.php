@@ -223,8 +223,8 @@ Route::put('job/{id}', 'jobController@update')->name('actualizar_puesto');
 Route::delete('job/{id}', 'jobController@destroy')->name('eliminar_puesto');
 
 /* RUTAS CAPTURA INCIDENTES */
-Route::get('incidents', 'incidentController@index')->name('incidentes');
-Route::get('incidents/create', 'incidentController@create')->name('crear_incidente');
+Route::get('incidents/{type?}', 'incidentController@index')->name('incidentes');
+Route::get('incidents/create/{type?}', 'incidentController@create')->name('crear_incidente');
 Route::post('incidents', 'incidentController@store')->name('guardar_incidente');
 Route::get('incidents/{id}/edit', 'incidentController@edit')->name('editar_incidente');
 Route::put('incidents/{id}', 'incidentController@update')->name('actualizar_incidente');
