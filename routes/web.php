@@ -70,6 +70,8 @@ Route::get('shiftprogramming/{id}', 'shiftprogrammingController@index')->name('p
 /* RUTAS DE REPORTES */
 Route::get('report/reporteRevisionDatos', 'ReporteController@reporteRevisionView')->name('reporte_revision');
 Route::get('report/reporteRevision', 'ReporteController@generarReporteRevision')->name('generar_revision');
+Route::get('report/reporteCheckDatos', 'ReporteController@reporteCheckView')->name('reporte_chequeo');
+Route::get('report/reporteCheck', 'ReporteController@generarReporteCheck')->name('generar_chequeo');
 Route::get('report/datosreportestps/{type}/{datos}', 'ReporteController@datosReporteSecretaria')->name('reporte_secretaria');
 Route::get('report/reportestps', 'ReporteController@hrReport')->name('reporte_secretaria');
 Route::get('report/prueba','ReporteController@prueba')->name('prueba');
