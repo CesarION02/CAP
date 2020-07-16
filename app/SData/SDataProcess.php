@@ -1217,17 +1217,6 @@ class SDataProcess {
         }
 
         $sdate = $registries[0]->date;
-        $entry = "";
-        $dept = "";
-        if ($result->auxWorkshift != null) {
-            $entry = $result->auxWorkshift->entry;
-            $dept = $result->auxWorkshift->departure;
-        }
-        if ($result->auxScheduleDay != null) {
-            $entry = $result->auxScheduleDay->entry;
-            $dept = $result->auxScheduleDay->departure;
-        }
-
         $comparison = null;
         $config = \App\SUtils\SConfiguration::getConfigurations();
         // if ($registries[0]->type_id == \SCons::REG_OUT) {

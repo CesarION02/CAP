@@ -14,7 +14,7 @@ Incidentes
             <div class="box-header with-border">
                 <h3 class="box-title">Incidentes</h3>
                 <div class="box-tools pull-right">
-                    <a href="{{route('crear_incidente')}}" class="btn btn-block btn-success btn-sm">
+                    <a href="{{ route('crear_incidente', $incidentType) }}" class="btn btn-block btn-success btn-sm">
                         <i class="fa fa-fw fa-plus-circle"></i> Nuevo registro
                     </a>
                 </div>

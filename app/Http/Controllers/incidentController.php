@@ -18,14 +18,21 @@ class incidentController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index($incidentType = 0)
     {
-        $datas = incident::where('is_delete','0')->orderBy('id')->get();
+        $datas = incident::where('is_delete','0')->orderBy('id');
+        if ($incidentType > 0) {
+            $datas = $datas->where('type_incidents_id', $incidentType);
+        }
+
+        $datas = $datas->get();
+
         $datas->each(function($datas){
             $datas->typeincident;
             $datas->employee;
         });
-        return view('incident.index', compact('datas'));
+
+        return view('incident.index', compact('datas'), compact('incidentType'));
     }
 
     /**
@@ -33,11 +40,24 @@ class incidentController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create($incidentType = 0)
     {
-        $incidents = typeincident::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
-        $employees = employees::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
-        return view('incident.create')->with('incidents',$incidents)->with('employees',$employees);
+        $incidents = typeincident::orderBy('id','ASC');
+
+        if ($incidentType > 0) {
+            $incidents = $incidents->where('id', $incidentType);
+        }
+
+        $incidents = $incidents->pluck('id','name');
+
+        $employees = employees::where('is_delete','0')
+                                ->orderBy('id','ASC')
+                                ->pluck('id','name');
+
+        return view('incident.create')
+                        ->with('incidentType', $incidentType)
+                        ->with('incidents', $incidents)
+                        ->with('employees', $employees);
     }
 
     /**
@@ -48,9 +68,20 @@ class incidentController extends Controller
      */
     public function store(Request $request)
     {
-        
-        incident::create($request->all());
-        return redirect('incidents')->with('mensaje', 'Incidente creado con exito');
+        $incident = new incident($request->all());
+        $incident->external_key = "0_0";
+        $incident->cls_inc_id = 1;
+        $incident->created_by = 1;
+        $incident->updated_by = 1;
+
+        $incident->save();
+
+        if ($request->incident_type > 0) {
+            return redirect()->route('incidentes', [$request->incident_type])->with('mensaje', 'Incidente creado con éxito');
+        }
+        else {
+            return redirect('incidents')->with('mensaje', 'Incidente creado con éxito');
+        }
     }
 
     /**

@@ -26,6 +26,7 @@
                 @csrf
                 <div class="box-body">
                     @include('incident.form')
+                    <input id="incident_type" name="incident_type" type="hidden" value="{{ $incidentType }}">
                 </div>
                 <div class="box-footer">
                     <div class="col-lg-3"></div>

@@ -237,9 +237,9 @@ class employeeController extends Controller
                     ->update(
                             [
                             'num_employee' => $jEmployee->num_employee,
-                            'name' => $jEmployee->firstname." ".$jEmployee->lastname,
-                            'names' => $jEmployee->firstname,
-                            'first_name' => $jEmployee->lastname,
+                            'name' => ucwords($jEmployee->firstname." ".$jEmployee->lastname),
+                            'names' => ucwords($jEmployee->firstname),
+                            'first_name' => ucwords($jEmployee->lastname),
                             'admission_date' => $jEmployee->admission_date,
                             'leave_date' => $jEmployee->leave_date,
                             'is_overtime' => $jEmployee->extra_time,
@@ -264,9 +264,9 @@ class employeeController extends Controller
         $emp = new employees();
 
         $emp->num_employee = $jEmployee->num_employee;
-        $emp->name = $jEmployee->firstname." ".$jEmployee->lastname;
-        $emp->names = $jEmployee->firstname;
-        $emp->first_name = $jEmployee->lastname;
+        $emp->name = ucwords($jEmployee->firstname." ".$jEmployee->lastname);
+        $emp->names = ucwords($jEmployee->firstname);
+        $emp->first_name = ucwords($jEmployee->lastname);
         $emp->admission_date = $jEmployee->admission_date;
         $emp->leave_date = $jEmployee->leave_date;
         $emp->nip = 0;
