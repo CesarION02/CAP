@@ -288,12 +288,38 @@ class SDataProcess {
             // no tiene horario para el día actual
             if ($result == null) {
                 if ($isNew) {
+                    $bFound = false;
+                    if ($registry->date == $sStartDate) {
+                        // buscar entrada un día antes
+                        $oFoundRegistryI = null;
+                        $oDateAux = Carbon::parse($registry->date);
+                        $oDateAux->subDay();
+                        $oAux = null;
+                        $entry = "";
+                        if ($oAux != null) {
+                            $entry = $oAux->entry;
+                        }
+                        
+                        $oFoundRegistryI = SDelayReportUtils::getRegistry($oDateAux->toDateString(), $idEmployee, \SCons::REG_IN, $entry);
+
+                        if ($oFoundRegistryI != null) {
+                            $newRow->sInDate = $oFoundRegistryI->date.' '.$oFoundRegistryI->time;
+                            $newRow->inDate = $oFoundRegistryI->date;
+                            $newRow->inDateTime = $oFoundRegistryI->date.' '.$oFoundRegistryI->time;
+                            
+                            $bFound = true;
+                        }
+                    }
+
+                    if (! $bFound) {
+                        $newRow->inDate = $registry->date;
+                        $newRow->inDateTime = $registry->date;
+                        $newRow->hasCheckIn = false;
+                        $newRow->comments = $newRow->comments."Sin entrada. ";
+                    }
+
                     $isNew = false;
                     $again = true;
-                    $newRow->inDate = $registry->date;
-                    $newRow->inDateTime = $registry->date;
-                    $newRow->hasCheckIn = false;
-                    $newRow->comments = $newRow->comments."Sin entrada. ";
                 }
                 else {
                     $otherResult = SDelayReportUtils::getNearSchedule($registry->date, $registry->time, $idEmployee, clone $qWorkshifts);
