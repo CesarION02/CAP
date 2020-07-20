@@ -67,7 +67,18 @@ Route::get('shiftprogramming/newShift','shiftprogrammingController@newShift')->n
 Route::get('shiftprogramming/{id}', 'shiftprogrammingController@index')->name('programacion');
 });
 
+/* RUTAS DE TURNOS ESPECIALES */
+Route::get('specialworkshift', 'specialWorkshiftController@index')->name('turno_especial');
+Route::get('specialworkshift/create', 'specialWorkshiftController@create')->name('crear_turno_especial');
+Route::post('specialworkshift', 'specialWorkshiftController@store')->name('guardar_turno_especial');
+Route::get('specialworkshift/{id}/edit', 'specialWorkshiftController@edit')->name('editar_turno_especial');
+Route::put('specialworkshift/{id}', 'specialWorkshiftController@update')->name('actualizar_turno_especial');
+Route::delete('specialworkshift/{id}', 'specialWorkshiftController@destroy')->name('eliminar_turno_especial');
+
+
 /* RUTAS DE REPORTES */
+Route::get('report/reporteNumRegisterDatos', 'ReporteController@reporteNumRegisterView')->name('reporte_numero_registros');
+Route::get('report/reporteNumRegister', 'ReporteController@generarReporteNumRegister')->name('generar_numero');
 Route::get('report/reporteRevisionDatos', 'ReporteController@reporteRevisionView')->name('reporte_revision');
 Route::get('report/reporteRevision', 'ReporteController@generarReporteRevision')->name('generar_revision');
 Route::get('report/reporteCheckDatos', 'ReporteController@reporteCheckView')->name('reporte_chequeo');
@@ -209,6 +220,11 @@ Route::get('department/{id}/edit', 'departmentController@edit')->name('editar_de
 Route::put('department/{id}', 'departmentController@update')->name('actualizar_departamento');
 Route::delete('department/{id}', 'departmentController@destroy')->name('eliminar_departamento');
 Route::put('upddepartments', 'departmentController@updateDepts')->name('actualizar_departamentos');
+
+/* RUTAS DEPARTAMENTOS RH */
+Route::get('departmentRH', 'DeptsRhController@index')->name('departamento_rh');
+Route::get('departmentRH/{id}/edit', 'DeptsRhController@edit')->name('editar_departamento_rh');
+Route::put('departmentRH/{id}', 'DeptsRhController@update')->name('actualizar_departamento_rh');
 
 /* RUTAS DEPARTAMENTOS */
 Route::get('deptsgroup', 'DeptsGroupController@index')->name('depts_grp');
