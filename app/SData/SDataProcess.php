@@ -42,7 +42,7 @@ class SDataProcess {
         $lDataWithAbs = SDataProcess::addAbsences($lData53_2, $aEmployeeBen);
 
         $aEmployeeOverTime = $lEmployees->pluck('is_overtime', 'id');
-        $lData = SDataProcess::addDelaysAndOverTime($lDataWithAbs, $aEmployeeOverTime);
+        $lData = SDataProcess::addDelaysAndOverTime($lDataWithAbs, $aEmployeeOverTime, $sEndDate);
 
         $lDataWSun = SDataProcess::addSundayPay($lData);
 
@@ -434,7 +434,7 @@ class SDataProcess {
                 else {
                     // Sin salida
                     $bFound = false;
-                    if ($registry->date == $sEndDate) {
+                    if ($newRow->inDate == $sEndDate) {
                         // buscar salida un día después
                         $oDateAux = Carbon::parse($registry->date);
                         $oDateAux->addDay();
@@ -733,7 +733,7 @@ class SDataProcess {
      * 
      * @return array[App\SUtils\SRegistryRow] $lData
      */
-    public static function addDelaysAndOverTime($lData, $aEmployeeOverTime)
+    public static function addDelaysAndOverTime($lData, $aEmployeeOverTime, $sEndDate)
     {
         foreach ($lData as $oRow) {
             if (! $oRow->hasChecks || ! $oRow->workable) {
@@ -760,7 +760,7 @@ class SDataProcess {
                 $cOut = SDataProcess::isCheckSchedule($oRow->outDateTime, $oRow->outDateTimeSch, $mayBeOverTime);
             }
             if (($cIn && $cOut) || ! $oRow->hasSchedule) {
-                $oRow = SDataProcess::determineSchedule($oRow);
+                $oRow = SDataProcess::determineSchedule($oRow, $sEndDate);
             }
 
             // minutos de retardo
@@ -968,7 +968,7 @@ class SDataProcess {
      * 
      * @return App\SUtils\SRegistryRow
      */
-    public static function determineSchedule($oRow)
+    public static function determineSchedule($oRow, $sEndDate)
     {
         $config = \App\SUtils\SConfiguration::getConfigurations();
 
@@ -1002,7 +1002,9 @@ class SDataProcess {
         if (abs($comparisonIn->diffMinutes) <= $config->maxGapMinutes && abs($comparisonOut->diffMinutes) <= $config->maxGapMinutes) {
             $oRow->inDateTimeSch = $inDate.' 22:30:00';
             $oRow->outDateTimeSch = $outDate.' 06:30:00';
-            $oRow->overDefaultMins = 60;
+            if ($oRow->outDateTime <= $sEndDate) {
+                $oRow->overDefaultMins = 60;
+            }
             return $oRow;
         }
 

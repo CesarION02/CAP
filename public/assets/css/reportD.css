@@ -1,6 +1,9 @@
 .check {
         background-color:#f1f972;
     }
+.absence {
+        background-color:#cccc66;
+    }
 
 #myBtn {
     display: none; /* Hidden by default */
