@@ -6,6 +6,9 @@ var app = new Vue({
     },
     methods: {
         getCssClass(oRow, report) {
+            if (oRow.hasAbsence || !oRow.hasCheckOut || !oRow.hasCheckIn) {
+                return 'absence';
+            }
             if (oRow.isCheckSchedule) {
                 return 'check';
             }
