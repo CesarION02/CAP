@@ -12,6 +12,7 @@ class SDateComparison {
 
         $this->auxScheduleDay = null;
         $this->auxWorkshift = null;
+        $this->auxIsSpecialSchedule = false;
     }
 }
 
