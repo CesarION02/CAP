@@ -270,6 +270,7 @@ class prePayrollController extends Controller
             ->where('employee_id', $idEmployee)
             ->whereRaw("'" . $sDate . "' BETWEEN start_date AND end_date")
             ->select('i.external_key', 'i.nts', 'ti.name AS type_name')
+            ->where('i.is_delete', false)
             ->orderBy('i.id', 'ASC')
             ->get();
 

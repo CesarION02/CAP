@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 use App\Models\incident;
+use App\Models\incidentDay;
+use App\SUtils\SDelayReportUtils;
 use App\Models\typeincident;
 use App\Models\employees;
 use App\Http\Requests\ValidacionTypeincident;
@@ -174,11 +177,13 @@ class incidentController extends Controller
         foreach ($lAbsences as $jAbs) {
             try {
                 $id = $lCapAbss[$jAbs->id_emp.'_'.$jAbs->id_abs];
-                $this->updIncident($jAbs, $id);
+                $oIncident = $this->updIncident($jAbs, $id);
             }
             catch (\Throwable $th) {
-                $this->insertIncident($jAbs);
+                $oIncident = $this->insertIncident($jAbs);
             }
+
+            $this->saveDays($oIncident);
         }
     }
 
@@ -207,6 +212,8 @@ class incidentController extends Controller
                                 'is_delete' => $jAbs->is_deleted,
                             ]
                         );
+
+        return incident::find($id);
     }
 
     /**
@@ -235,5 +242,58 @@ class incidentController extends Controller
         $abs->updated_by = 1;
 
         $abs->save();
+
+        return $abs;
+    }
+
+    public function saveDays($oIncident)
+    {
+        incidentDay::where('incidents_id', $oIncident->id)->delete();
+
+        $oStartDate = Carbon::parse($oIncident->start_date.' 00:00:00');
+        $oEndDate = Carbon::parse($oIncident->end_date.' 00:00:00');
+        $oDate = clone $oStartDate;
+
+        $days = [];
+        $dayCounter = 1;
+        while ($oDate->lessThanOrEqualTo($oEndDate) && $dayCounter <= $oIncident->eff_day) {
+            $sDate = $oDate->toDateString();
+
+            switch ($oIncident->cls_inc_id) {
+                case \SCons::CL_VACATIONS:
+                    $qWorkshifts = SDelayReportUtils::getWorkshifts($sDate, $sDate, 0, [$oIncident->employee_id]);
+                    $registryAux = (object) [
+                        'type_id' => \SCons::REG_OUT,
+                        'time' => "12:00:00",
+                        'date' => $sDate,
+                        'employee_id' => $oIncident->employee_id
+                    ];
+
+                    $result = SDelayReportUtils::getSchedule($sDate, $sDate, $oIncident->employee_id, $registryAux, clone $qWorkshifts, \SCons::REP_HR_EX);
+
+                    if ($result == null || ($result->auxScheduleDay != null && !$result->auxScheduleDay->is_active)) {
+                        break;
+                    }
+
+                case \SCons::CL_ABSENCE:
+                case \SCons::CL_INHABILITY:
+                default:
+                    $day = new incidentDay();
+                    $day->incidents_id = $oIncident->id;
+                    $day->date = $sDate;
+                    $day->num_day = $dayCounter;
+                    $day->is_delete = $oIncident->is_delete;
+
+                    $days[] = $day;
+                    $dayCounter++;
+                    break;
+            }
+
+            $oDate->addDay();
+        }
+
+        if (sizeof($days) > 0) {
+            $oIncident->incidentDays()->saveMany($days);
+        }
     }
 }

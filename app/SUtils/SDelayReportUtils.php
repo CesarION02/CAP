@@ -759,14 +759,14 @@ class SDelayReportUtils {
                 'time' => $time
             ];
             
-            $res = SDelayReportUtils::getSchedule($date, $date, $idEmployee, $registry, clone $lWorkshifts, \SCons::REP_HR_EX);
+            $result = SDelayReportUtils::getSchedule($date, $date, $idEmployee, $registry, clone $lWorkshifts, \SCons::REP_HR_EX);
             
-            if ($res == null) {
+            if ($result == null || ($result->auxScheduleDay != null && !$result->auxScheduleDay->is_active)) {
                 $oDate->subDays(1);
             }
             else {
-                $res->oAuxDate = Carbon::parse($date.' '.$time);
-                return $res;
+                $result->oAuxDate = Carbon::parse($date.' '.$time);
+                return $result;
             }
         }
 

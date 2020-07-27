@@ -17,4 +17,9 @@ class incident extends Model
     public function employee(){
         return $this->belongsTo('App\Models\employees');
     }
+
+    public function incidentDays()
+    {
+        return $this->hasMany('App\Models\incidentDay', 'incidents_id', 'id');
+    }
 }

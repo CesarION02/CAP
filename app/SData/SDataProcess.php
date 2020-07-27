@@ -1172,7 +1172,7 @@ class SDataProcess {
         foreach($lCheks as $auxCheck) break;
         $result = SDelayReportUtils::getSchedule($sDate, $sDate, $auxCheck->employee_id, $registry, clone $lWorkshifts, \SCons::REP_HR_EX);
 
-        if ($result == null) {
+        if ($result == null || ($result->auxScheduleDay != null && !$result->auxScheduleDay->is_active)) {
             return SDataProcess::filterDoubleCheks($lCheks);
         }
 
@@ -1225,7 +1225,7 @@ class SDataProcess {
         $oRegistry = $registries[0];
         $result = SDelayReportUtils::getSchedule($sDate, $sDate, $idEmployee, $oRegistry, clone $lWorkshifts, \SCons::REP_HR_EX);
 
-        if ($result == null) {
+        if ($result == null || ($result->auxScheduleDay != null && !$result->auxScheduleDay->is_active)) {
             return 0;
         }
 

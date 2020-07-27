@@ -15,6 +15,7 @@ use App\Models\holiday;
 use App\SUtils\SDateTimeUtils;
 use App\Models\groupSchedule;
 use App\Models\holidayassign;
+use App\SUtils\SEventsUtils;
 use DateTime;
 use DB;
 use DatePeriod;
@@ -66,10 +67,20 @@ class holidayassignController extends Controller
         if($request->date != ''){
             $date = $request->date;
         }
+        else {
+            return back()->withInput()->withErrors(['El campo fecha es obligatorio']);
+        }
+
         switch($request->tipo){
             case 1:
             $empleados = $request->empleado;
             if(count($empleados) == 1){
+                $events = SEventsUtils::getAllEvents($date, $empleados[0], 0, 0, 0);
+
+                if (count($events) > 0) {
+                    return back()->withInput()->withErrors(['Ya hay incidencias o días festivos para esta fecha']);
+                }
+
                 $holiday = new holidayassign();
                 $holiday->employee_id = $empleados[0];
                 $holiday->holiday_id = $request->festivo;
@@ -83,6 +94,12 @@ class holidayassignController extends Controller
                 $grupo->created_by = 1;
                 $grupo->updated_by = 1;
                 $grupo->save();
+
+                $events = SEventsUtils::getAllEvents($date, $empleados, 0, 0, 0);
+
+                if (count($events) > 0) {
+                    return back()->withInput()->withErrors(['Ya hay incidencias o días festivos para esta fecha']);
+                }
     
                 for($y = 0 ; count($empleados) > $y ; $y++){
                     $holiday = new holidayassign();
@@ -98,6 +115,12 @@ class holidayassignController extends Controller
             }
         break;
         case 2:
+            $events = SEventsUtils::getAllEvents($date, null, $request->departamento, 0, 0);
+
+            if (count($events) > 0) {
+                return back()->withInput()->withErrors(['Ya hay incidencias o días festivos para esta fecha para este departamento']);
+            }
+
             $holiday = new holidayassign();
             $holiday->department_id = $request->departamento;
             $holiday->holiday_id = $request->festivo;
@@ -107,6 +130,12 @@ class holidayassignController extends Controller
             $holiday->save();   
         break;
         case 3:
+            $events = SEventsUtils::getAllEvents($date, null, 0, 0, $request->area);
+
+            if (count($events) > 0) {
+                return back()->withInput()->withErrors(['Ya hay incidencias o días festivos para esta fecha para este área']);
+            }
+
             $holiday = new holidayassign();
             $holiday->area_id = $request->area;
             $holiday->holiday_id = $request->festivo;
@@ -189,6 +218,13 @@ class holidayassignController extends Controller
             if($request->group == 0){
                 holidayassign::where('id', $id)->delete();
                 if(count($empleados) == 1){
+
+                    $events = SEventsUtils::getAllEvents($date, $empleados[0], 0, 0, 0);
+
+                    if (count($events) > 0) {
+                        return back()->withInput()->withErrors(['Ya hay incidencias o días festivos para esta fecha']);
+                    }
+
                     $holiday = new holidayassign();
                     $holiday->employee_id = $empleados[0];
                     $holiday->holiday_id = $request->festivo;
@@ -201,6 +237,12 @@ class holidayassignController extends Controller
                     $grupo->created_by = 1;
                     $grupo->updated_by = 1;
                     $grupo->save();
+
+                    $events = SEventsUtils::getAllEvents($date, $empleados, 0, 0, 0);
+
+                    if (count($events) > 0) {
+                        return back()->withInput()->withErrors(['Ya hay incidencias o días festivos para esta fecha']);
+                    }
     
                     for($y = 0 ; count($empleados) > $y ; $y++){
                         $holiday = new holidayassign();
@@ -216,6 +258,12 @@ class holidayassignController extends Controller
             }else{
                 holidayassign::where('group_assign_id', $request->group)->delete();
                 if(count($empleados) == 1){
+                    $events = SEventsUtils::getAllEvents($date, $empleados[0], 0, 0, 0);
+
+                    if (count($events) > 0) {
+                        return back()->withInput()->withErrors(['Ya hay incidencias o días festivos para esta fecha']);
+                    }
+
                     $group_assign = group_assign::find($request->group);
                     $group_assign->is_delete = 1;
                     $group_assign->save();
@@ -227,6 +275,12 @@ class holidayassignController extends Controller
                     $holiday->updated_by = 1;
                     $holiday->save();    
                 }else{
+                    $events = SEventsUtils::getAllEvents($date, $empleados, 0, 0, 0);
+
+                    if (count($events) > 0) {
+                        return back()->withInput()->withErrors(['Ya hay incidencias o días festivos para esta fecha']);
+                    }
+
                     for($y = 0 ; count($empleados) > $y ; $y++){
                         $holiday = new holidayassign();
                         $holiday->employee_id = $empleados[$y];
@@ -241,6 +295,11 @@ class holidayassignController extends Controller
             }
         break;
         case 2:
+            $events = SEventsUtils::getAllEvents($date, null, $request->departamento, 0, 0, $id);
+
+            if (count($events) > 0) {
+                return back()->withInput()->withErrors(['Ya hay incidencias o días festivos para esta fecha']);
+            }
             $holiday = holidayassign::find($id);
             $holiday->department_id = $request->departamento;
             $holiday->holiday_id = $request->festivo;
@@ -250,6 +309,11 @@ class holidayassignController extends Controller
             $holiday->save();       
         break; 
         case 3:
+            $events = SEventsUtils::getAllEvents($date, null, 0, 0, $request->area, $id);
+
+            if (count($events) > 0) {
+                return back()->withInput()->withErrors(['Ya hay incidencias o días festivos para esta fecha']);
+            }
             $holiday = holidayassign::find($id);
             $holiday->area_id = $request->area;
             $holiday->holiday_id = $request->festivo;
