@@ -34,6 +34,7 @@ Programacion de Turnos
         <div class="box">
             <div class="box-header with-border">
                 <h3 class="box-title">Programacion Turnos</h3>
+                @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:programacionturnos"])
             </div>
             <div class="box-body">
                 <div class="tab">
