@@ -4,6 +4,7 @@ use Carbon\Carbon;
 use App\SUtils\SDelayReportUtils;
 use App\SUtils\SDateTimeUtils;
 use App\SUtils\SRegistryRow;
+use App\SUtils\SPrepayrollAdjustUtils;
 use App\Http\Controllers\prePayrollController;
 
 class SDataProcess {
@@ -298,8 +299,19 @@ class SDataProcess {
                     if (! $bFound) {
                         $newRow->inDate = $registry->date;
                         $newRow->inDateTime = $registry->date;
-                        $newRow->hasCheckIn = false;
-                        $newRow->comments = $newRow->comments."Sin entrada. ";
+                        $date = $newRow->inDate;
+                        $time = null;
+                        $adjs = SPrepayrollAdjustUtils::getAdjustForCase($date, $time, 1, \SCons::PP_TYPES['JE'], $newRow->idEmployee);
+                
+                        if (count($adjs) == 0) {
+                            $newRow->hasCheckIn = false;
+                            $newRow->comments = $newRow->comments."Sin entrada. ";
+                        }
+                        else {
+                            foreach ($adjs as $adj) {
+                                $newRow->adjusts[] = $adj;
+                            }
+                        }
                     }
 
                     $isNew = false;
@@ -346,8 +358,19 @@ class SDataProcess {
                         if (isset($registry->to_close) && $registry->to_close) {
                             $newRow->outDate = $newRow->inDate;
                             $newRow->outDateTime = $newRow->inDate;
-                            $newRow->comments = $newRow->comments."Sin salida. ";
-                            $newRow->hasCheckOut = false;
+                            $date = $newRow->outDate;
+                            $time = null;
+                            $adjs = SPrepayrollAdjustUtils::getAdjustForCase($date, $time, 1, \SCons::PP_TYPES['JS'], $newRow->idEmployee);
+                    
+                            if (count($adjs) == 0) {
+                                $newRow->comments = $newRow->comments."Sin salida. ";
+                                $newRow->hasCheckOut = false;
+                            }
+                            else {
+                                foreach ($adjs as $adj) {
+                                    $newRow->adjusts[] = $adj;
+                                }
+                            }
                         }
     
                         $isNew = true;
@@ -399,8 +422,19 @@ class SDataProcess {
                         $again = false;
                         $newRow->inDate = $registry->date;
                         $newRow->inDateTime = $registry->date;
-                        $newRow->hasCheckIn = false;
-                        $newRow->comments = $newRow->comments."Sin entrada".". ";
+                        $date = $newRow->inDate;
+                        $time = null;
+                        $adjs = SPrepayrollAdjustUtils::getAdjustForCase($date, $time, 1, \SCons::PP_TYPES['JE'], $newRow->idEmployee);
+                
+                        if (count($adjs) == 0) {
+                            $newRow->hasCheckIn = false;
+                            $newRow->comments = $newRow->comments."Sin entrada. ";
+                        }
+                        else {
+                            foreach ($adjs as $adj) {
+                                $newRow->adjusts[] = $adj;
+                            }
+                        }
                     }
                 }
             }
@@ -482,8 +516,19 @@ class SDataProcess {
 
                         $newRow->outDate = $newRow->inDate;
                         $newRow->outDateTime = $newRow->inDate;
-                        $newRow->comments = $newRow->comments."Sin salida".". ";
-                        $newRow->hasCheckOut = false;
+                        $date = $newRow->outDate;
+                        $time = null;
+                        $adjs = SPrepayrollAdjustUtils::getAdjustForCase($date, $time, 1, \SCons::PP_TYPES['JS'], $newRow->idEmployee);
+                
+                        if (count($adjs) == 0) {
+                            $newRow->comments = $newRow->comments."Sin salida. ";
+                            $newRow->hasCheckOut = false;
+                        }
+                        else {
+                            foreach ($adjs as $adj) {
+                                $newRow->adjusts[] = $adj;
+                            }
+                        }
                         $again = true;
                         $isNew = true;
                     }
@@ -718,6 +763,7 @@ class SDataProcess {
      */
     public static function addDelaysAndOverTime($lData, $aEmployeeOverTime, $sEndDate)
     {
+        $consumAdjs = [];
         foreach ($lData as $oRow) {
             if (! $oRow->hasChecks || ! $oRow->workable) {
                 $oRow->overWorkedMins = 0;
@@ -749,19 +795,63 @@ class SDataProcess {
             }
 
             // minutos de retardo
-            $oRow->entryDelayMinutes = SDataProcess::getDelayMins($oRow->inDateTime, $oRow->inDateTimeSch);
-            if ($oRow->entryDelayMinutes > 0) {
-                $oRow->comments = $oRow->comments."Retardo. ";
+            $mins = SDataProcess::getDelayMins($oRow->inDateTime, $oRow->inDateTimeSch);
+            if ($mins > 0) {
+                $hasDelay = true;
+
+                // Ajuste de prenómina
+                $date = $oRow->inDate == null ? $oRow->inDateTime : $oRow->inDate;
+                $time = strlen($oRow->inDateTime) > 10 ? substr($oRow->inDateTime, -8) : null;
+                $adjs = SPrepayrollAdjustUtils::getAdjustsOfRow($date, $date, $oRow->idEmployee, \SCons::PP_TYPES['OR']);
+
+                if (count($adjs) > 0) {
+                    foreach ($adjs as $adj) {
+                        if (! in_array($adj->id, $consumAdjs)) {
+                            if ($adj->apply_to == 1) {
+                                if ($adj->dt_date == $date) {
+                                    if ($time == $adj->dt_time) {
+                                        $hasDelay = false;
+                                        $consumAdjs[] = $adj->id;
+                                        $oRow->adjusts[] = $adj;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if ($hasDelay) {
+                    $oRow->entryDelayMinutes = $mins;
+                    $oRow->comments = $oRow->comments."Retardo. ";
+                }
+            }
+            else {
+                $oRow->entryDelayMinutes = 0;
             }
 
             // minutos de salida anticipada
             if ($oRow->hasCheckOut) {
                 $oRow->prematureOut = SDataProcess::getPrematureTime($oRow->outDateTime, $oRow->outDateTimeSch);
             }
+
+            $withDiscount = false;
             if (SDataProcess::journeyCompleted($oRow->inDateTime, $oRow->inDateTimeSch, $oRow->outDateTime, $oRow->outDateTimeSch)) {
                 if ($aEmployeeOverTime[$oRow->idEmployee]) {
                     // minutos extra trabajados y filtrados por bandera de "genera horas extra"
-                    $oRow->overWorkedMins = SDataProcess::getOverTime($oRow->inDateTime, $oRow->inDateTimeSch, $oRow->outDateTime, $oRow->outDateTimeSch);
+                    // Ajuste de prenómina
+                    $date = $oRow->outDate == null ? $oRow->outDateTime : $oRow->outDate;
+                    $time = strlen($oRow->outDateTime) > 10 ? substr($oRow->outDateTime, -8) : null;
+                    $adjs = SPrepayrollAdjustUtils::getAdjustForCase($date, $time, 2, \SCons::PP_TYPES['DHE'], $oRow->idEmployee);
+                    
+                    if (count($adjs) > 0) {
+                        $oRow->overWorkedMins = 0;
+                        foreach ($adjs as $adj) {
+                            $oRow->adjusts[] = $adj;
+                        }
+                    }
+                    else {
+                        $oRow->overWorkedMins = SDataProcess::getOverTime($oRow->inDateTime, $oRow->inDateTimeSch, $oRow->outDateTime, $oRow->outDateTimeSch);
+                    }
                 }
             }
             else {
@@ -770,13 +860,30 @@ class SDataProcess {
                 $oRow->overScheduleMins = 0;
             }
 
+            // Ajuste de prenómina
+            if (! $withDiscount) {
+                $date = $oRow->outDate == null ? $oRow->outDateTime : $oRow->outDate;
+                $time = strlen($oRow->outDateTime) > 10 ? substr($oRow->outDateTime, -8) : null;
+                $adjs = SPrepayrollAdjustUtils::getAdjustForCase($date, $time, 2, \SCons::PP_TYPES['AHE'], $oRow->idEmployee);
+
+                if (count($adjs) > 0) {
+                    $minsExtraByAdj = 0;
+                    foreach ($adjs as $adj) {
+                        $minsExtraByAdj += $adj->minutes;
+                        $oRow->adjusts[] = $adj;
+                    }
+
+                    $oRow->overWorkedMins += $minsExtraByAdj;
+                }
+            }
+
             $cIn = false;
             $cOut = false;
 
             if ($oRow->hasCheckIn) {
                 $mayBeOverTime = false;
                 $cIn = SDataProcess::isCheckSchedule($oRow->inDateTime, $oRow->inDateTimeSch, $mayBeOverTime);
-                if ($cIn) {
+                if ($cIn && !SPrepayrollAdjustUtils::hasTheAdjustType($oRow->adjusts, \SCons::PP_TYPES['JE'])) {
                     $oRow->comments = $oRow->comments."Entrada atípica. ";
                     $oRow->isAtypicalIn = true;
                 }
@@ -785,7 +892,7 @@ class SDataProcess {
                 //$mayBeOverTime = $aEmployeeOverTime[$oRow->idEmployee];
                 $mayBeOverTime = false;
                 $cOut = SDataProcess::isCheckSchedule($oRow->outDateTime, $oRow->outDateTimeSch, $mayBeOverTime);
-                if ($cOut) {
+                if ($cOut && !SPrepayrollAdjustUtils::hasTheAdjustType($oRow->adjusts, \SCons::PP_TYPES['JS'])) {
                     $oRow->comments = $oRow->comments."Salida atípica. ";
                     $oRow->isAtypicalOut = true;
                 }
@@ -1018,6 +1125,7 @@ class SDataProcess {
      */
     public static function addAbsences($lData, $aEmployeeBen)
     {
+        $consumAdjs = [];
         foreach ($lData as $oRow) {
             $hasAbs = false;
             switch ($aEmployeeBen[$oRow->idEmployee]) {
@@ -1045,8 +1153,33 @@ class SDataProcess {
             }
 
             if ($hasAbs) {
-                $oRow->hasAbsence = true;
-                $oRow->comments = $oRow->comments."Falta. ";
+                $withAbs = true;
+                
+                // Ajuste de prenómina
+                $date = $oRow->inDate == null ? $oRow->inDateTime : $oRow->inDate;
+                $time = strlen($oRow->inDateTime) > 10 ? substr($oRow->inDateTime, -8) : null;
+                $adjs = SPrepayrollAdjustUtils::getAdjustsOfRow($date, $date, $oRow->idEmployee, \SCons::PP_TYPES['OF']);
+
+                if (count($adjs) > 0) {
+                    foreach ($adjs as $adj) {
+                        if (! in_array($adj->id, $consumAdjs)) {
+                            if ($adj->apply_to == 1) {
+                                if ($adj->dt_date == $date) {
+                                    if ($time == $adj->dt_time) {
+                                        $withAbs = false;
+                                        $consumAdjs[] = $adj->id;
+                                        $oRow->adjusts[] = $adj;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if ($withAbs) {
+                    $oRow->hasAbsence = true;
+                    $oRow->comments = $oRow->comments."Falta. ";
+                }
             }
         }
 

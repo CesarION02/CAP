@@ -95,6 +95,11 @@ Route::get('report/viewReporteRetardos','ReporteController@delaysReport')->name(
 Route::get('report/reportepercepcionesvariables','ReporteController@genHrExReport')->name('generarreportepervariables');
 Route::get('report/viewpercepvariables','ReporteController@hrExtReport')->name('reportepercepvariables');
 
+/* RUTAS DE AJUSTES DE PRENÓMINA */
+Route::get('prepayrollrowadjusts', 'prepayrollAdjustController@getAdjustsFromRow')->name('ajustes_renglon');
+Route::post('prepayrolladjust', 'prepayrollAdjustController@storeAdjust')->name('guardar_ajuste');
+Route::delete('prepayrolladjust/{id}', 'prepayrollAdjustController@deleteAdjust')->name('eliminar_ajuste');
+
 /* RUTAS DE GRUPO DEPARTAMENTO USUARIO */
 Route::get('deptgroupuser', 'deptgroupuserController@index')->name('dgu');
 Route::get('deptgroupuser/create', 'deptgroupuserController@create')->name('crear_dgu');

@@ -6,7 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\department;
 use App\Models\employees;
 use App\Models\area;
-use App\Models\way_pay;
+use App\Models\prepayrollAdjType;
+use App\Models\prepayrollAdjust;
 use App\Models\DepartmentRH;
 use App\Models\departmentsGroup;
 use App\SUtils\SDelayReportUtils;
@@ -398,8 +399,9 @@ class ReporteController extends Controller
                     ->with('sTitle', 'Reporte de Retardos')
                     ->with('lRows', $lRows);
     }
+
     /**
-     * Undocumented function
+     * Muestra reporte de reatrdos y percepciones variables
      *
      * @param Request $request
      * @return void
@@ -447,12 +449,32 @@ class ReporteController extends Controller
                 break;
         }
 
+        $adjTypes = prepayrollAdjType::get()->toArray();
+
+        $lAdjusts = DB::table('prepayroll_adjusts AS pa')
+                        ->join('prepayroll_adjusts_types AS pat', 'pa.adjust_type_id', '=', 'pat.id')
+                        ->select('pa.employee_id',
+                                    'pa.dt_date',
+                                    'pa.dt_time',
+                                    'pa.minutes',
+                                    'pa.apply_to',
+                                    'pa.adjust_type_id',
+                                    'pat.type_code',
+                                    'pat.type_name',
+                                    'pa.id'
+                                    )
+                        ->whereBetween('dt_date', [$sStartDate, $sEndDate])
+                        ->where('is_delete', false)
+                        ->get();
+
         return view('report.reportDelaysView')
                     ->with('tReport', \SCons::REP_HR_EX)
                     ->with('sStartDate', $sStartDate)
                     ->with('sEndDate', $sEndDate)
                     ->with('sPayWay', $sPayWay)
                     ->with('sTitle', 'Reporte de Retardos y Percepciones Variables')
+                    ->with('adjTypes', $adjTypes)
+                    ->with('lAdjusts', $lAdjusts)
                     ->with('lRows', $lRows);
     }
 

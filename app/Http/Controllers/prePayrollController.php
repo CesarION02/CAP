@@ -5,8 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Validator;
 use Carbon\Carbon;
-use App\SUtils\SDelayReportUtils;
-use App\SUtils\SDateTimeUtils;
 use App\SUtils\SInfoWithPolicy;
 use App\Models\employees;
 use App\Models\incident;
