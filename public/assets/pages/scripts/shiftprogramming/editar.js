@@ -39,7 +39,7 @@ function editShift() {
             var contadorJob = 0;
             var contadorWork = 0;
             for (var i = 0; data[2].length > i; i++) {
-                colspanD = 1;
+                colspanD = 0;
                 for (var j = 0; data[4].length > j; j++) {
                     if (data[2][i].group == data[4][j].idShift) {
                         colspanD++;
@@ -61,11 +61,11 @@ function editShift() {
                     listaDepartamentos += '</select></div>';
                     listaDepartamentos += '<div class="col-md-2" style="margin:10px"><input checked type="checkbox" name="cerrar' + data[2][i].idDepart + '" id="cerrar' + data[2][i].idDepart + '" value="' + data[2][i].idDepart + '" class="check"> Cerrar </div></div>';
                     listaDepartamentos += '<input type="hidden" id="hid' + data[2][i].idDepart + '" value="' + data[2][i].nameDepart + '">'
-                    listaDepartamentos += '<div type="row" id="tabla' + data[2][i].idDepart + '"><table class="customers1"><tr><th COLSPAN="' + colspanD + '">' + data[2][i].nameDepart + '-Cerrado' + '</th></tr></table></div>'
+                    listaDepartamentos += '<div type="row" id="tabla' + data[2][i].idDepart + '"><table class="customers1"><tr><th COLSPAN="' + (colspanD + 1) + '">' + data[2][i].nameDepart + '-Cerrado' + '</th></tr></table></div>'
                 } else {
                     listaDepartamentos += crear_workshifts(data[2][i].idDepart, data, i)
                     listaDepartamentos += '<input type="hidden" id="hid' + data[2][i].idDepart + '" value="' + data[2][i].nameDepart + '">'
-                    listaDepartamentos += '<div type="row" id="tabla' + data[2][i].idDepart + '"><table id="t' + data[2][i].idDepart + '" class="customers"><tr><th COLSPAN="' + colspanD + '">' + data[2][i].nameDepart + '</th></tr>';
+                    listaDepartamentos += '<div type="row" id="tabla' + data[2][i].idDepart + '"><table id="t' + data[2][i].idDepart + '" class="customers"><tr><th COLSPAN="' + (colspanD + 1) + '">' + data[2][i].nameDepart + '</th></tr>';
                     for (var j = 0; data[4].length > j; j++) {
                         if (data[2][i].group == data[4][j].idShift) {
                             listaDepartamentos += '<th>' + data[4][j].nameWork + '</th>'
@@ -78,16 +78,25 @@ function editShift() {
                     for (var z = 0; auxIdJob.length > z; z++) {
                         renglon[contadorEmpleados] = "";
                         listaDepartamentos += '<table class="customers" id="tj' + auxIdJob[z] + '"><tr><th COLSPAN="' + (colspanD) + '">' + auxNameJob[z] + '</th><th><button type="button" class="btn btn-primary" onclick="agregarFila(' + data[2][i].idDepart + ',' + auxIdJob[z] + ')"><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span></button></th></tr><tr>';
+                        var numRenglones = new Array(auxWork.length);
                         for (var x = 0; auxWork.length > x; x++) {
+
 
                             for (var y = 0; data[1].length > y; y++) {
                                 if (data[1][y].idJob == auxIdJob[z] && data[1][y].id == auxWork[x] && data[1][y].idD == data[2][i].idDepart) {
 
                                     renglon[contadorEmpleados] += '<td>' + crear_empleados(data[2][i].idDepart, auxWork[x], contadorEmpleados + 1, auxIdJob[z], data[0], data[1][y].idEmployee) + '</td>'
                                     contadorEmpleados++;
-                                    renglon[contadorEmpleados] = "";
+                                    if (typeof renglon[contadorEmpleados] !== 'undefined') {
+
+                                    } else {
+                                        renglon[contadorEmpleados] = "";
+                                    }
+
+
                                 }
                             }
+                            numRenglones[x] = contadorEmpleados;
                             contadorEmpleados = 0;
 
                         }
@@ -111,6 +120,9 @@ function editShift() {
             tablinks[1].className = tablinks[1].className.replace(" active", "");
             document.getElementById("Nueva").style.display = "block";
             document.getElementById("nuevo").onclick = null;
+            document.getElementById("weekFlag").value = data[6][0].id;
+            document.getElementById("departFlag").value = 1;
+            document.getElementById("pdfFlag").value = data[6][0].id;
             $("#listanueva").empty("");
             $("#turnonuevo").empty("");
             $("#guardar").empty("")

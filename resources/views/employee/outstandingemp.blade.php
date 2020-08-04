@@ -4,7 +4,7 @@ Empleados
 @endsection
 
 @section("scripts")
-<script src="{{asset("assets/pages/scripts/admin/datatable/index.js")}}" type="text/javascript"></script>
+<script src="{{asset("assets/pages/scripts/admin/datatable/indexFaltantes.js")}}" type="text/javascript"></script>
 <script>
         $(document).ready( function () {
         $('#myTable').DataTable();
@@ -38,18 +38,27 @@ Empleados
                         <tr>
                             <td>{{$data->num_employee}}</td>
                             <td>{{$data->name}}</td>
-                            <td>{{$data->job == null ? "" : $data->department->name}}</td>
-                            <td>{{$data->job == null ? "" : $data->job->name}}</td>
+                            <td>{{$data->department_id == null ? "" : $data->department->name}}</td>
+                            <td>{{$data->job_id == null ? "" : $data->job->name}}</td>
                             <td>
+                                <form action="{{route('terminar_configurar', ['id' => $data->id])}}" class="d-inline form-configurar" method="POST">
+                                    @csrf @method("delete")
+                                    <button type="submit" class="btn-accion-tabla tooltipsC" title="Confirmar departamento">
+                                        <i class="fa fa-fw fa-check text-danger"></i>
+                                    </button>
+                                </form>
                                 <a href="{{route('editar_empleado_faltante', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Editar este registro">
                                     <i class="fa fa-fw fa-pencil"></i>
                                 </a>
                                 @if(isset($foraneos))
 
                                 @else
-                                <a href="{{route('enviar_empleado_foraneo', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Enviar a foraneo">
-                                    <i class="fa fa-fw fa-trash text-danger"></i>
-                                </a>
+                                <form action="{{route('enviar_empleado_foraneo', ['id' => $data->id])}}" class="d-inline form-eliminar" method="POST">
+                                    @csrf @method("delete")
+                                    <button type="submit" class="btn-accion-tabla eliminar tooltipsC" title="Enviar a foraneo">
+                                        <i class="fa fa-fw fa-trash text-danger"></i>
+                                    </button>
+                                </form>
                                 @endif
                                 
                             </td>

@@ -76,19 +76,10 @@ Turno
                             @for($i = 0 ; $diff >= $i ; $i++)
 
                                 <th><?php echo date("d-m-Y",strtotime($inicio."+ ".$i." days")); ?></th>
-                                <th><?php echo date("d-m-Y",strtotime($inicio."+ ".$i." days")); ?></th>
+    
                             @endfor
                         </tr>
-                        <tr>
-                            <th></th>
-                            <th></th>
-                            @for($i = 0 ; $diff >= $i ; $i++)
-
-                                <th>Entrada</th>
-                                <th>Salida</th>
-                            @endfor
-                            
-                        </tr>
+                        
                     </thead>
                     <tbody>
                         <?php $i = 0;?> 
@@ -102,16 +93,11 @@ Turno
                             @endif
                             @for($x = 0 ; $diff >= $x ; $x++)
                                 @if($lRows[$i]->entrada == true)
-                                    <td>Si</td>
+                                    <td>Registro</td>
                                 @else
-                                    <td>No</td>
+                                    <td>No registro</td>
                                 @endif
 
-                                @if($lRows[$i]->salida == true)
-                                    <td>Si</td>
-                                @else
-                                    <td>No</td>
-                                @endif
                                 <?php $i++;?>
                             @endfor
                             </tr>
@@ -127,16 +113,11 @@ Turno
                             @endif
                             @for($x = 0 ; $diff >= $x ; $x++)
                                 @if($lRows1[$i]->entrada == true)
-                                    <td>Si</td>
+                                    <td>Registro</td>
                                 @else
-                                    <td>No</td>
+                                    <td>No registrado</td>
                                 @endif
 
-                                @if($lRows1[$i]->salida == true)
-                                    <td>Si</td>
-                                @else
-                                    <td>No</td>
-                                @endif
                                 <?php $i++;?>
                             @endfor
                             </tr>

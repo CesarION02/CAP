@@ -84,8 +84,8 @@ Turno
                             <th></th>
                             @for($i = 0 ; $diff >= $i ; $i++)
 
-                                <th>Entrada</th>
-                                <th>Salida</th>
+                                <th>Entradas</th>
+                                <th>Salidas</th>
                             @endfor
                             
                         </tr>
@@ -101,17 +101,9 @@ Turno
                                 <td>No programado</td>
                             @endif
                             @for($x = 0 ; $diff >= $x ; $x++)
-                                @if($lRows[$i]->entrada == true)
-                                    <td>Si</td>
-                                @else
-                                    <td>No</td>
-                                @endif
-
-                                @if($lRows[$i]->salida == true)
-                                    <td>Si</td>
-                                @else
-                                    <td>No</td>
-                                @endif
+                                
+                                <td>{{$lRows[$i]->num_entrada}}</td>
+                                <td>{{$lRows[$i]->num_salida}}</td>
                                 <?php $i++;?>
                             @endfor
                             </tr>
@@ -126,17 +118,8 @@ Turno
                                 <td>No programado</td>
                             @endif
                             @for($x = 0 ; $diff >= $x ; $x++)
-                                @if($lRows1[$i]->entrada == true)
-                                    <td>Si</td>
-                                @else
-                                    <td>No</td>
-                                @endif
-
-                                @if($lRows1[$i]->salida == true)
-                                    <td>Si</td>
-                                @else
-                                    <td>No</td>
-                                @endif
+                                <td>{{$lRows1[$i]->num_entrada}}</td>
+                                <td>{{$lRows1[$i]->num_salida}}</td>
                                 <?php $i++;?>
                             @endfor
                             </tr>

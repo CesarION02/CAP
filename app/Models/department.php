@@ -13,6 +13,18 @@ class department extends Model
         return $this->belongsTo('App\Models\area','area_id');
     }
 
+    public function rh(){
+        return $this->belongsTo('App\Models\DepartmentRH','rh_department_id');
+    }
+
+    public function default_department(){
+        return $this->hasMany('App\Models\DepartmentRH');
+    }
+
+    public function group(){
+        return $this->belongsTo('App\Models\departmentsGroup','dept_group_id');
+    }
+
     public function job(){
         return $this->hasMany('App\job');
     }

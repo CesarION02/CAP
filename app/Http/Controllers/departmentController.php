@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\department;
 use App\Models\area;
+use App\Models\DepartmentRH;
 
 class departmentController extends Controller
 {
@@ -18,6 +19,7 @@ class departmentController extends Controller
         $datas = department::where('is_delete','0')->orderBy('id')->get();
         $datas->each(function($datas){
             $datas->area;
+            $datas->rh;
         });
         return view('department.index', compact('datas'));
     }
@@ -30,7 +32,8 @@ class departmentController extends Controller
     public function create()
     {
         $area = area::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
-        return view('department.create')->with('areas',$area);
+        $deptrhs = DepartmentRH::where('is_delete',0)->pluck('id','name');
+        return view('department.create')->with('areas',$area)->with('deptrhs',$deptrhs);
     }
 
     /**
@@ -42,6 +45,7 @@ class departmentController extends Controller
     public function store(Request $request)
     {
         $department = department::create($request->all());
+        $department->rh_department_id = $request->rh_department_id;
         $department->updated_by = session()->get('user_id');
         $department->created_by = session()->get('user_id');
         $department->save();
@@ -69,7 +73,8 @@ class departmentController extends Controller
     {
         $area = area::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
         $data = department::findOrFail($id);
-        return view('department.edit', compact('data'))->with('areas',$area);
+        $deptrhs = DepartmentRH::where('is_delete',0)->pluck('id','name');
+        return view('department.edit', compact('data'))->with('areas',$area)->with('deptrhs',$deptrhs);
     }
 
     /**

@@ -65,7 +65,6 @@ Route::get('shiftprogramming/rotRol','shiftprogrammingController@rotRol')->name(
 Route::get('shiftprogramming/editRol','shiftprogrammingController@editRol')->name('editarRol');
 Route::get('shiftprogramming/newShift','shiftprogrammingController@newShift')->name('nueva_planeacion');
 Route::get('shiftprogramming/{id}', 'shiftprogrammingController@index')->name('programacion');
-});
 
 /* RUTAS DE TURNOS ESPECIALES */
 Route::get('specialworkshift', 'specialWorkshiftController@index')->name('turno_especial');
@@ -74,7 +73,6 @@ Route::post('specialworkshift', 'specialWorkshiftController@store')->name('guard
 Route::get('specialworkshift/{id}/edit', 'specialWorkshiftController@edit')->name('editar_turno_especial');
 Route::put('specialworkshift/{id}', 'specialWorkshiftController@update')->name('actualizar_turno_especial');
 Route::delete('specialworkshift/{id}', 'specialWorkshiftController@destroy')->name('eliminar_turno_especial');
-
 
 /* RUTAS DE REPORTES */
 Route::get('report/reporteNumRegisterDatos', 'ReporteController@reporteNumRegisterView')->name('reporte_numero_registros');
@@ -124,8 +122,9 @@ Route::delete('company/{id}', 'companyController@destroy')->name('delete_company
 Route::get('/syncronize', 'SyncController@toSyncronize')->name('syncErp');
 
 /* RUTAS DE EMPLEADOS */
+Route::delete('employees/terminarconfiguracion/{id}', 'employeeController@confirmarConfiguracion')->name('terminar_configurar');
 Route::get('employees/foraneos', 'employeeController@foraneos')->name('foraneos');
-Route::get('employees/enviarForaneos/{id}', 'employeeController@enviarForaneos')->name('enviar_empleado_foraneo');
+Route::delete('employees/enviarForaneos/{id}', 'employeeController@enviarForaneos')->name('enviar_empleado_foraneo');
 Route::put('employee/outstanding/{id}', 'employeeController@updateoutstanding')->name('actualizar_empleado_faltante');
 Route::get('employee/puesto','employeeController@jobs')->name('puesto');
 Route::get('employee/outstanding', 'employeeController@outstandingemployees')->name('empleados_pendientes');
@@ -297,3 +296,9 @@ Route::get('permiso-rol', 'permisorolController@store')->name('guardar_permiso_r
 
 
 Route::get('/home', 'HomeController@index')->name('home');
+
+});
+
+
+
+

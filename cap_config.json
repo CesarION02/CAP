@@ -6,5 +6,6 @@
     "maxGapMinutes": 60,
     "maxGapSchedule": 90,
     "dept_foraneo": 100,
-    "job_foraneo": 25
+    "job_foraneo": 25,
+    "dept_pre": 99
 }
