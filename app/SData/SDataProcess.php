@@ -86,7 +86,6 @@ class SDataProcess {
 
         foreach ($lEmployees as $oEmployee) {
             $idEmployee = $oEmployee->id;
-            $lAssigns = SDelayReportUtils::hasAnAssing($idEmployee, $oEmployee->dept_id, $sStartDate, $sEndDate);
             
             foreach ($aDates as $sDate) {
 
@@ -111,7 +110,7 @@ class SDataProcess {
                 if (sizeof($registries) > 0) {
                     foreach ($registries as $registry) {
                         $qWorkshifts = clone $lWorkshifts;
-                        $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, $lAssigns, clone $qWorkshifts, $sStartDate, $sEndDate);
+                        $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $qWorkshifts, $sStartDate, $sEndDate);
         
                         $isNew = $theRow[0];
                         $newRow = $theRow[1];
@@ -124,10 +123,10 @@ class SDataProcess {
 
                         if ($again) {
                             if ($fRegistry != null) {
-                                $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $fRegistry, $lAssigns, clone $lWorkshifts, $sStartDate, $sEndDate);
+                                $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $fRegistry, clone $lWorkshifts, $sStartDate, $sEndDate);
                             }
                             else {
-                                $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, $lAssigns, clone $lWorkshifts, $sStartDate, $sEndDate);
+                                $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $lWorkshifts, $sStartDate, $sEndDate);
                             }
                             $isNew = $theRow[0];
                             $newRow = $theRow[1];
@@ -148,7 +147,7 @@ class SDataProcess {
                             'to_close' => true
                         ];
 
-                        $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, $lAssigns, clone $lWorkshifts, $sStartDate, $sEndDate);
+                        $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $lWorkshifts, $sStartDate, $sEndDate);
 
                         $isNew = $theRow[0];
                         $newRow = $theRow[1];
@@ -176,14 +175,6 @@ class SDataProcess {
                     if ($otherRow->workable) {
                         $otherRow->comments = $otherRow->comments."Sin checadas. ";
                     }
-                    // if (! $otherRow->hasSchedule) {
-                    //     $comments = $otherRow->comments;
-                    //     $newComments = str_replace("Sin horario.", "", $comments);
-                    //     $otherRow->comments = $newComments."No laboral. ";
-                    // }
-                    // else {
-                        // $otherRow->comments = $otherRow->comments."Sin checadas. ";
-                    // }
 
                     $otherRow->inDateTime = $sDate;
                     $otherRow->outDateTime = $sDate;
@@ -206,7 +197,7 @@ class SDataProcess {
                         'employee_id' => $idEmployee
                     ];
 
-                    $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, $lAssigns, clone $lWorkshifts, $sStartDate, $sEndDate);
+                    $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $lWorkshifts, $sStartDate, $sEndDate);
                     $newRow = $theRow[1];
                     $again = $theRow[2];
                     $fRegistry = $theRow[3];
@@ -224,10 +215,10 @@ class SDataProcess {
 
                     if ($again) {
                         if ($fRegistry != null) {
-                            $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $fRegistry, $lAssigns, clone $lWorkshifts, $sStartDate, $sEndDate);
+                            $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $fRegistry, clone $lWorkshifts, $sStartDate, $sEndDate);
                         }
                         else {
-                            $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, $lAssigns, clone $lWorkshifts, $sStartDate, $sEndDate);
+                            $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $lWorkshifts, $sStartDate, $sEndDate);
                         }
 
                         $isNew = $theRow[0];
@@ -262,7 +253,7 @@ class SDataProcess {
      *               $response[1] = SRegistryRow que puede ser procesado de nuevo o estar completo
      *               $response[2] = boolean que determina si el renglón será reprocesado, esto cuando falta un registro de entrada o salida
      */
-    private static function manageRow($newRow, $isNew, $idEmployee, $registry, $lAssigns, $qWorkshifts, $sStartDate, $sEndDate)
+    private static function manageRow($newRow, $isNew, $idEmployee, $registry, $qWorkshifts, $sStartDate, $sEndDate)
     {
         if ($isNew) {
             $newRow = new SRegistryRow();
@@ -270,20 +261,13 @@ class SDataProcess {
             $newRow->numEmployee = $registry->num_employee;
             $newRow->employee = $registry->name;
         }
-
-        $newRow->hasAssign = $lAssigns != null;
-        $hasAssign = $newRow->hasAssign;
+        
         $again = false;
         $oFoundRegistry = null;
         $isOut = false;
 
         if ($registry->type_id == \SCons::REG_OUT) {
-            if ($hasAssign) {
-                $result = SDelayReportUtils::processRegistry($lAssigns, $registry, \SCons::REP_HR_EX);
-            }
-            else {
-                $result = SDelayReportUtils::checkSchedule(clone $qWorkshifts, $idEmployee, $registry, \SCons::REP_HR_EX);
-            }
+            $result = SDelayReportUtils::getSchedule($sStartDate, $sEndDate, $idEmployee, $registry, clone $qWorkshifts, \SCons::REP_HR_EX);
 
             // no tiene horario para el día actual
             if ($result == null) {
@@ -464,12 +448,7 @@ class SDataProcess {
                     }
 
                     if (! $bFound) {
-                        if ($hasAssign) {
-                            $result = SDelayReportUtils::processRegistry($lAssigns, $registry, \SCons::REP_HR_EX);
-                        }
-                        else {
-                            $result = SDelayReportUtils::checkSchedule(clone $qWorkshifts, $idEmployee, $registry, \SCons::REP_HR_EX);
-                        }
+                        $result = SDelayReportUtils::getSchedule($sStartDate, $sEndDate, $idEmployee, $registry, clone $qWorkshifts, \SCons::REP_HR_EX);
 
                         if ($result != null) {
                             // $newRow->inDate = $result->variableDateTime->toDateString();
@@ -497,6 +476,8 @@ class SDataProcess {
                                 $result->pinnedDateTime->subDay();
                                 $newRow->outDateTimeSch = $result->pinnedDateTime->toDateTimeString();
                             }
+
+                            $newRow->isSpecialSchedule = $result->auxIsSpecialSchedule;
                         }
 
                         $newRow->outDate = $newRow->inDate;
@@ -547,6 +528,8 @@ class SDataProcess {
             $oRow->hasSchedule = false;
         }
         else {
+            $oRow->isSpecialSchedule = $result->auxIsSpecialSchedule;
+
             $oRow->scheduleFrom = SDataProcess::getOrigin($result);
 
             if ($oRow->scheduleFrom == \SCons::FROM_ASSIGN && ! $result->auxScheduleDay->is_active) {
@@ -750,17 +733,19 @@ class SDataProcess {
             $cIn = false;
             $cOut = false;
 
-            if ($oRow->hasCheckIn) {
-                $mayBeOverTime = false;
-                $cIn = SDataProcess::isCheckSchedule($oRow->inDateTime, $oRow->inDateTimeSch, $mayBeOverTime);
-            }
-            if ($oRow->hasCheckOut) {
-                //$mayBeOverTime = $aEmployeeOverTime[$oRow->idEmployee];
-                $mayBeOverTime = false;
-                $cOut = SDataProcess::isCheckSchedule($oRow->outDateTime, $oRow->outDateTimeSch, $mayBeOverTime);
-            }
-            if (($cIn && $cOut) || ! $oRow->hasSchedule) {
-                $oRow = SDataProcess::determineSchedule($oRow, $sEndDate);
+            if (! $oRow->isSpecialSchedule) {
+                if ($oRow->hasCheckIn) {
+                    $mayBeOverTime = false;
+                    $cIn = SDataProcess::isCheckSchedule($oRow->inDateTime, $oRow->inDateTimeSch, $mayBeOverTime);
+                }
+                if ($oRow->hasCheckOut) {
+                    //$mayBeOverTime = $aEmployeeOverTime[$oRow->idEmployee];
+                    $mayBeOverTime = false;
+                    $cOut = SDataProcess::isCheckSchedule($oRow->outDateTime, $oRow->outDateTimeSch, $mayBeOverTime);
+                }
+                if (($cIn && $cOut) || ! $oRow->hasSchedule) {
+                    $oRow = SDataProcess::determineSchedule($oRow, $sEndDate);
+                }
             }
 
             // minutos de retardo
@@ -1187,7 +1172,7 @@ class SDataProcess {
         foreach($lCheks as $auxCheck) break;
         $result = SDelayReportUtils::getSchedule($sDate, $sDate, $auxCheck->employee_id, $registry, clone $lWorkshifts, \SCons::REP_HR_EX);
 
-        if ($result == null) {
+        if ($result == null || ($result->auxScheduleDay != null && !$result->auxScheduleDay->is_active)) {
             return SDataProcess::filterDoubleCheks($lCheks);
         }
 
@@ -1240,7 +1225,7 @@ class SDataProcess {
         $oRegistry = $registries[0];
         $result = SDelayReportUtils::getSchedule($sDate, $sDate, $idEmployee, $oRegistry, clone $lWorkshifts, \SCons::REP_HR_EX);
 
-        if ($result == null) {
+        if ($result == null || ($result->auxScheduleDay != null && !$result->auxScheduleDay->is_active)) {
             return 0;
         }
 

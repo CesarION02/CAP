@@ -632,11 +632,15 @@ class SDelayReportUtils {
      * 
      * @return SDateComparison 
      */
-    public static function checkSchedule($lWorkshifts, $idEmployee, $registry, $mType)
+    public static function checkSchedule($lWorkshifts, $idEmployee, $registry, $mType, $isSpecial = false)
     {
         $lWEmployee = $lWorkshifts->where('e.id', $idEmployee)
                                     ->where('wdd.date', $registry->date)
                                     ->orderBy('wdd.created_at', 'DESC');
+
+        if ($isSpecial) {
+            $lWEmployee = $lWEmployee->whereNull('wdd.week_department_id');
+        }
                                     
         $lWEmployee = $lWEmployee->get();
         
@@ -654,6 +658,8 @@ class SDelayReportUtils {
 
         $comparison = SDelayReportUtils::compareDates($workshiftDate, $registry->date.' '.$registry->time);
         $comparison->auxWorkshift = $workshift;
+
+        $comparison->auxIsSpecialSchedule = $isSpecial;
         
         return $comparison;
     }
@@ -696,6 +702,14 @@ class SDelayReportUtils {
      * @return void
      */
     public static function getSchedule($startDate, $endDate, $idEmployee, $registry, $lWorkshifts, $iRep) {
+        // checar horario especial *******************************************************************
+        $isSpecialWorkshift = true;
+        $result = SDelayReportUtils::checkSchedule(clone $lWorkshifts, $idEmployee, $registry, $iRep, $isSpecialWorkshift);
+
+        if ($result != null) {
+            return $result;
+        }
+
         // checar horarios *******************************************************************
         $lAssigns = SDelayReportUtils::hasAnAssing($idEmployee, 0, $startDate, $endDate);
 
@@ -716,7 +730,8 @@ class SDelayReportUtils {
         /**
          * busca el horario en base a las tablas de workshift
         */
-        $result = SDelayReportUtils::checkSchedule($lWorkshifts, $idEmployee, $registry, $iRep);
+        $isSpecialWorkshift = false;
+        $result = SDelayReportUtils::checkSchedule($lWorkshifts, $idEmployee, $registry, $iRep, $isSpecialWorkshift);
         
         return $result;
     }
@@ -744,15 +759,14 @@ class SDelayReportUtils {
                 'time' => $time
             ];
             
-            $res = SDelayReportUtils::getSchedule($date, $date, $idEmployee, $registry, clone $lWorkshifts, \SCons::REP_HR_EX);
-            // $res = SDelayReportUtils::getSchedule($oDate->toDateString(), $oDate->toDateString(), $idEmployee, $registry, clone $lWorkshifts, \SCons::REP_HR_EX);
+            $result = SDelayReportUtils::getSchedule($date, $date, $idEmployee, $registry, clone $lWorkshifts, \SCons::REP_HR_EX);
             
-            if ($res == null) {
+            if ($result == null || ($result->auxScheduleDay != null && !$result->auxScheduleDay->is_active)) {
                 $oDate->subDays(1);
             }
             else {
-                $res->oAuxDate = Carbon::parse($date.' '.$time);
-                return $res;
+                $result->oAuxDate = Carbon::parse($date.' '.$time);
+                return $result;
             }
         }
 

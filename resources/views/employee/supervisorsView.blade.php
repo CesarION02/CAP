@@ -19,6 +19,7 @@ Empleados
         <div class="box">
             <div class="box-header with-border">
                 <h3 class="box-title">Empleados</h3>
+                @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:nombrecorto"])
                 <div class="box-tools pull-right">
 
                 </div>

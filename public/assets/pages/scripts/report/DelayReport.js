@@ -9,12 +9,12 @@ var app = new Vue({
             if (oRow.hasAbsence || !oRow.hasCheckOut || !oRow.hasCheckIn) {
                 return 'absence';
             }
-            if (oRow.isCheckSchedule) {
+            if (oRow.isCheckSchedule || (oRow.events.length > 0 && oRow.hasChecks)) {
                 return 'check';
             }
             if (report != this.oData.REP_DELAY) {
                 if (oRow.entryDelayMinutes > 0) {
-                    return 'danger';
+                    return 'delays';
                 }
             }
         }
