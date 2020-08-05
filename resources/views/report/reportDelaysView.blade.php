@@ -25,6 +25,7 @@
                 </div>
             </div>
             <div class="box-body" id="reportDelayApp">
+                @include('report.adjustsModal')
                 <div class="row">
                     <div class="col-md-10">
                         <p>Periodo: <b>{{ $sStartDate }}</b> - <b>{{ $sEndDate }}</b>. P. pago: <b>{{ $sPayWay }}</b>.</p>
@@ -47,38 +48,45 @@
                                     <th><span class="nobr">Fecha-hora</span> entrada</th>
                                     {{-- <th>Fecha salida</th> --}}
                                     <th><span class="nobr">Fecha-hora</span> salida</th>
-                                    {{-- <th v-if="oData.tReport == oData.REP_DELAY">Retardo (min)</th>
+                                    {{-- <th v-if="vData.tReport == vData.REP_DELAY">Retardo (min)</th>
                                     <th v-else>Horas Extra</th> --}}
                                     <th>Tiempo retardo (min)</th>
                                     <th>Tiempo extra (hr)</th>
-                                    {{-- <th v-if="oData.tReport == oData.REP_HR_EX">Hr_progr_Sal</th> --}}
-                                    <th v-if="oData.tReport == oData.REP_HR_EX">Tiempo retardo (min)</th>
-                                    <th v-if="oData.tReport == oData.REP_HR_EX">Salida anticipada (min)</th>
-                                    <th v-if="oData.tReport == oData.REP_HR_EX">Prima Dominical</th>
-                                    <th v-if="oData.tReport == oData.REP_HR_EX">Descanso</th>
-                                    <th v-if="oData.tReport == oData.REP_HR_EX">Observaciones</th>
+                                    {{-- <th v-if="vData.tReport == vData.REP_HR_EX">Hr_progr_Sal</th> --}}
+                                    <th v-if="vData.tReport == vData.REP_HR_EX">Tiempo retardo (min)</th>
+                                    <th v-if="vData.tReport == vData.REP_HR_EX">Salida anticipada (min)</th>
+                                    <th v-if="vData.tReport == vData.REP_HR_EX">Prima Dominical</th>
+                                    <th v-if="vData.tReport == vData.REP_HR_EX">Descanso</th>
+                                    <th v-if="vData.tReport == vData.REP_HR_EX">Observaciones</th>
                                     <th>Incidentes</th>
+                                    <th>Ajustes</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="row in oData.lRows" :class="getCssClass(row, oData.tReport)">
+                                <tr v-for="row in vData.lRows" :class="getCssClass(row, vData.tReport)">
                                     <td>@{{ vueGui.pad(row.numEmployee, 6) }}</td>
                                     <td>@{{ row.employee }}</td>
                                     {{-- <td>@{{ row.inDate }}</td> --}}
                                     <td>@{{ row.inDateTime }}</td>
                                     {{-- <td>@{{ row.outDate }}</td> --}}
                                     <td>@{{ row.outDateTime }}</td>
-                                    {{-- <td v-if="oData.tReport == oData.REP_DELAY">@{{ row.delayMins }}</td>
+                                    {{-- <td v-if="vData.tReport == vData.REP_DELAY">@{{ row.delayMins }}</td>
                                     <td v-else>@{{ row.extraHours }}</td> --}}
                                     <td>@{{ row.overMinsTotal < 0 ? null : row.overMinsTotal }}</td>
                                     <td>@{{ row.extraHours }}</td>
-                                    {{-- <td v-if="oData.tReport == oData.REP_HR_EX">@{{ row.outDateTimeSch }}</td> --}}
-                                    <td v-if="oData.tReport == oData.REP_HR_EX">@{{ row.entryDelayMinutes }}</td>
-                                    <td v-if="oData.tReport == oData.REP_HR_EX">@{{ row.prematureOut }}</td>
-                                    <td v-if="oData.tReport == oData.REP_HR_EX">@{{ row.isSunday > 0 ? row.isSunday : "" }}</td>
-                                    <td v-if="oData.tReport == oData.REP_HR_EX">@{{ row.isDayOff > 0 ? row.isDayOff : "" }}</td>
-                                    <td v-if="oData.tReport == oData.REP_HR_EX">@{{ row.others }}</td>
+                                    {{-- <td v-if="vData.tReport == vData.REP_HR_EX">@{{ row.outDateTimeSch }}</td> --}}
+                                    <td v-if="vData.tReport == vData.REP_HR_EX">@{{ row.entryDelayMinutes }}</td>
+                                    <td v-if="vData.tReport == vData.REP_HR_EX">@{{ row.prematureOut }}</td>
+                                    <td v-if="vData.tReport == vData.REP_HR_EX">@{{ row.isSunday > 0 ? row.isSunday : "" }}</td>
+                                    <td v-if="vData.tReport == vData.REP_HR_EX">@{{ row.isDayOff > 0 ? row.isDayOff : "" }}</td>
+                                    <td v-if="vData.tReport == vData.REP_HR_EX">@{{ row.others }}</td>
                                     <td>@{{ row.comments }}</td>
+                                    <td>
+                                        <button class="btn btn-primary btn-xs" v-on:click="showModal(row)">
+                                            <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+                                        </button>
+                                        <p>@{{ getAdjToRow(row) }}</p>
+                                    </td>
                                 </tr>
                             </tbody>
                             <button onclick="topFunction()" id="myBtn" title="Ir arriba">Ir arriba</button>
@@ -100,6 +108,7 @@
     </script>
 
     <script src="{{ asset("assets/js/chosen.jquery.min.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/js/axios.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/vue.js") }}" type="text/javascript"></script>
     <script src="{{ asset("dt/datatables.js") }}" type="text/javascript"></script>
     <script src="{{ asset('dt/dataTables.buttons.min.js') }}"></script>
@@ -116,9 +125,13 @@
         function GlobalData () {
 
             this.lRows = <?php echo json_encode($lRows) ?>;
+            this.lEmpWrkdDays = <?php echo json_encode($lEmpWrkdDays) ?>;
+            this.adjTypes = <?php echo json_encode($adjTypes) ?>;
+            this.lAdjusts = <?php echo json_encode($lAdjusts) ?>;
             this.tReport = <?php echo json_encode($tReport) ?>;
             this.REP_HR_EX = <?php echo json_encode(\SCons::REP_HR_EX) ?>;
             this.REP_DELAY = <?php echo json_encode(\SCons::REP_DELAY) ?>;
+            this.ADJ_CONS = <?php echo json_encode(\SCons::PP_TYPES) ?>;
 
             // this.minsCol = this.tReport == this.REP_DELAY ? 4 : 4;
             this.minsCol = 4;
@@ -158,7 +171,7 @@
         }
     </script>
 
-    <script src="{{asset("assets/pages/scripts/report/delayReport.js")}}" type="text/javascript"></script>
+    <script src="{{asset("assets/pages/scripts/report/DelayReport.js")}}" type="text/javascript"></script>
 
     <script>
         var oTable = $('#delays_table').DataTable({
@@ -296,7 +309,7 @@
                                                 " / tiempo retardo: " + minsDelay + " min " + 
                                                 " / salida anticipada: " + minsBeforeOut  + " min" + 
                                                 " / primas dominicales: " + suns + 
-                                                " / descansos: " + daysoff;
+                                                " / descansos: " + daysoff + " [" + oData.lEmpWrkdDays[parseInt(group, 10)] + "]";
                         }
                         
                         return value_to_return;

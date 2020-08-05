@@ -41,6 +41,7 @@ class SRegistryRow {
         $this->dayInhability = 0;
         $this->dayVacations = 0;
         $this->events = [];
+        $this->adjusts = [];
         $this->hasAssign = false;
         $this->hasChecks = true;
         $this->hasSchedule = true;

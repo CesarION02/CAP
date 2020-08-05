@@ -799,6 +799,61 @@ class SDelayReportUtils {
         
         return false;
     }
+
+    public static function getTheoreticalDaysOffBasedOnDaysWorked($lData, $aEmployees, $startDate, $endDate)
+    {
+        $oStart = Carbon::parse($startDate);
+        $oEnd = Carbon::parse($endDate);
+
+        $diff = $oStart->diffInDays($oEnd);
+        $diff++;
+
+        if ($diff < 7) {
+            return [];
+        }
+
+        $aDates = [];
+        $oDate = clone $oStart;
+
+        /**
+         * crea un arreglo con los días a consultar
+         */
+        while ($oDate->lessThanOrEqualTo($oEnd)) {
+            $aDates[] = $oDate->toDateString();
+            $oDate->addDay();
+        }
+
+        $empWorkedDays = [];
+        $lColData = collect($lData);
+        foreach ($aEmployees as $idEmployee => $numEmployee) {
+            $daysWorked = 0;
+            foreach ($aDates as $sDate) {
+                $data = clone $lColData;
+                $info = $data->where('idEmployee', $idEmployee)
+                            ->where('hasChecks', true);
+
+                $result = $info->filter(function ($item) use ($sDate) {
+                            $oIndate = Carbon::parse($item->inDateTime);
+                            $oOutdate = Carbon::parse($item->outDateTime);
+                                return ($oIndate->toDateString() == $sDate) || 
+                                        ($oOutdate->toDateString() == $sDate);
+                            });
+
+                if (count($result) > 0) {
+                    $daysWorked++;
+                }
+            }
+
+            if ($daysWorked >= 7) {
+                $empWorkedDays[$numEmployee] = intval($daysWorked / 7);
+            }
+            else {
+                $empWorkedDays[$numEmployee] = 0;
+            }
+        }
+
+        return $empWorkedDays;
+    }
 }
 
 ?>

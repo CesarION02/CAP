@@ -31,6 +31,16 @@ class SCons {
    const CL_INHABILITY = 2;
    const CL_VACATIONS = 3;
 
+   const PP_TYPES = 
+                  [
+                     'JE' => 1,
+                     'JS' => 2,
+                     'OR' => 3,
+                     'OF' => 4,
+                     'DHE' => 5,
+                     'AHE' => 6
+                  ];
+
    const FROM_ASSIGN = 2;
    const FROM_WORKSH = 3;
 

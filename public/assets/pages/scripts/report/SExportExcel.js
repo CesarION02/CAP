@@ -19,6 +19,10 @@ function makeDocument() {
 
     if (oData.tReport == oData.REP_HR_EX) {
         columnNames.splice(4, 1);
+        columnNames[2] = columnNames[2].replace('<span class="nobr">', '');
+        columnNames[2] = columnNames[2].replace('</span>', '');
+        columnNames[3] = columnNames[2].replace('<span class="nobr">', '');
+        columnNames[3] = columnNames[2].replace('</span>', '');
     }
     else {
         columnNames.splice(5, 1);
@@ -61,6 +65,9 @@ function makeDocument() {
         }
 
         if (oData.tReport == oData.REP_HR_EX) {
+            value[12] = value[12].replace('<button class="btn btn-primary btn-xs"><span aria-hidden="true" class="glyphicon glyphicon-cog"></span></button>', '');
+            value[12] = value[12].replace('</p>', '');
+            value[12] = value[12].replace('<p>', '');
             value.splice(4, 1);
         }
         else {
