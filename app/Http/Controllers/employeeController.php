@@ -237,12 +237,12 @@ class employeeController extends Controller
     private function updEmployee($jEmployee, $id)
     {
         $config = \App\SUtils\SConfiguration::getConfigurations();
-        $department = DepartmentRH::where('id',$jEmployee->dept_rh_id);
-        if($department->default_dept_id != null){
-            $dept = $department->default_dept_id;
-        }else{
-            $dept = $config->dept_pre;
-        }
+        //$department = DepartmentRH::where('id',$jEmployee->dept_rh_id);
+        //if($department->default_dept_id != null){
+            //$dept = $department->default_dept_id;
+        //}else{
+            //$dept = $config->dept_pre;
+        //}
         employees::where('id', $id)
                     ->update(
                             [
@@ -290,9 +290,9 @@ class employeeController extends Controller
         $emp->external_id = $jEmployee->id_employee;
         $emp->company_id = $this->companies[$jEmployee->company_id];
         $emp->dept_rh_id = $this->rhdepartments[$jEmployee->dept_rh_id];
-        $department = DepartmentRH::where('id',$jEmployee->dept_rh_id);
-        if($department->default_dept_id != null){
-            $emp->department_id = $department->default_dept_id;
+        $department = DepartmentRH::where('id',$jEmployee->dept_rh_id)->get();
+        if($department[0]->default_dept_id != null){
+            $emp->department_id = $department[0]->default_dept_id;
         }else{
             $emp->department_id = $config->dept_pre;
         }
