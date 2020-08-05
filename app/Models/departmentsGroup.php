@@ -14,4 +14,8 @@ class departmentsGroup extends Model
     public function group_user(){
         return $this->hasMany('App\Models\group_dept_user');
     }
+
+    public function department(){
+        return $this->hasMany('App\Models\department');
+    }
 }

@@ -6,6 +6,8 @@ class SReg {
         $this->date = '';
         $this->entrada = false;
         $this->salida = false;
+        $this->num_entrada = 0;
+        $this->num_salida = 0;
     }
 }
 ?>

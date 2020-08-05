@@ -13,4 +13,13 @@ class DepartmentRH extends Model
                             'external_id',
                             'is_delete'
                         ];
+    
+    public function department(){
+        return $this->hasMany('App\department');
+    }
+
+    
+    public function default_dept(){
+        return $this->belongsTo('App\Models\department','default_dept_id');
+    }
 }

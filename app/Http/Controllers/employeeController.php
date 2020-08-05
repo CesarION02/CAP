@@ -233,18 +233,26 @@ class employeeController extends Controller
      */
     private function updEmployee($jEmployee, $id)
     {
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+        $department = DepartmentRH::where('id',$jEmployee->dept_rh_id);
+        if($department->default_dept_id != null){
+            $dept = $department->default_dept_id;
+        }else{
+            $dept = $config->dept_pre;
+        }
         employees::where('id', $id)
                     ->update(
                             [
                             'num_employee' => $jEmployee->num_employee,
-                            'name' => ucwords($jEmployee->firstname." ".$jEmployee->lastname),
-                            'names' => ucwords($jEmployee->firstname),
-                            'first_name' => ucwords($jEmployee->lastname),
+                            'name' => $jEmployee->firstname." ".$jEmployee->lastname,
+                            'names' => $jEmployee->firstname,
+                            'first_name' => $jEmployee->lastname,
                             'admission_date' => $jEmployee->admission_date,
                             'leave_date' => $jEmployee->leave_date,
                             'is_overtime' => $jEmployee->extra_time,
                             'company_id' => $this->companies[$jEmployee->company_id],
                             'dept_rh_id' => $this->rhdepartments[$jEmployee->dept_rh_id],
+                            //'department_id' => $dept,
                             'way_pay_id' => $jEmployee->way_pay == 1 ? 2 : 1,
                             'is_active' => $jEmployee->is_active,
                             'is_delete' => $jEmployee->is_deleted,
@@ -261,22 +269,31 @@ class employeeController extends Controller
      */
     private function insertEmployee($jEmployee)
     {
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+
         $emp = new employees();
 
         $emp->num_employee = $jEmployee->num_employee;
-        $emp->name = ucwords($jEmployee->firstname." ".$jEmployee->lastname);
-        $emp->names = ucwords($jEmployee->firstname);
-        $emp->first_name = ucwords($jEmployee->lastname);
+        $emp->name = $jEmployee->firstname." ".$jEmployee->lastname;
+        $emp->names = $jEmployee->firstname;
+        $emp->first_name = $jEmployee->lastname;
         $emp->admission_date = $jEmployee->admission_date;
         $emp->leave_date = $jEmployee->leave_date;
         $emp->nip = 0;
         $emp->is_overtime = $jEmployee->extra_time;
-        $emp->way_register_id = 1; // pendiente
+        $emp->way_register_id = 2; // pendiente
         $emp->ben_pol_id = 1; // estricto
         $emp->job_id = 25; // ???
         $emp->external_id = $jEmployee->id_employee;
         $emp->company_id = $this->companies[$jEmployee->company_id];
         $emp->dept_rh_id = $this->rhdepartments[$jEmployee->dept_rh_id];
+        $department = DepartmentRH::where('id',$jEmployee->dept_rh_id);
+        if($department->default_dept_id != null){
+            $emp->department_id = $department->default_dept_id;
+        }else{
+            $emp->department_id = $config->dept_pre;
+        }
+        $emp->is_config = 0;
         $emp->way_pay_id = $jEmployee->way_pay == 1 ? 2 : 1;
         $emp->is_active = $jEmployee->is_active;
         $emp->is_delete = $jEmployee->is_deleted;
@@ -369,7 +386,7 @@ class employeeController extends Controller
     }
 
     public function outstandingemployees(){
-        $datas = employees::where('is_delete','0')->where('department_id', 99)->orderBy('id')->get();
+        $datas = employees::where('is_delete','0')->where('is_config', 0)->orderBy('id')->get();
         $datas->each(function($datas){
             $datas->job;
             $datas->department;
@@ -400,6 +417,7 @@ class employeeController extends Controller
         $employee->job_id = 25;
         $employee->ben_pol_id = $request->ben_pol_id;
         $employee->updated_by = session()->get('user_id');
+        $employee->is_config = 1;
         $employee->save();
 
 
@@ -439,15 +457,30 @@ class employeeController extends Controller
         return response()->json(array($departments,$pertenece));
 
     }
-    public function enviarForaneos($id){
-        $config = \App\SUtils\SConfiguration::getConfigurations();
-        $employee = employees::findOrFail($id);
-        $employee->department_id = $config->dept_foraneo;
-        $employee->job_id = $config->job_foraneo;
-        $employee->updated_by = session()->get('user_id');
-        $employee->save();
+    public function enviarForaneos(Request $request,$id){
+        if ($request->ajax()) {
+            $config = \App\SUtils\SConfiguration::getConfigurations();
+            $employee = employees::findOrFail($id);
+            $employee->department_id = $config->dept_foraneo;
+            $employee->job_id = $config->job_foraneo;
+            $employee->updated_by = session()->get('user_id');
+            $employee->is_config = 1;
+            $employee->save();
         
-        return redirect('employee/outstanding');
+            return response()->json(['mensaje' => 'ok']);
+        } else {
+            abort(404);
+        }
+    }
+    public function confirmarConfiguracion(Request $request,$id){
+        if ($request->ajax()) {
+            $employee = employees::findOrFail($id);
+            $employee->is_config = 1;
+            $employee->save();
+            return response()->json(['mensaje' => 'ok']);
+        } else {
+            abort(404);
+        }
     }
     public function foraneos(){
         $config = \App\SUtils\SConfiguration::getConfigurations();
@@ -459,3 +492,4 @@ class employeeController extends Controller
         return view('employee.outstandingemp', compact('datas'))->with('foraneos',1);   
     }
 }
+

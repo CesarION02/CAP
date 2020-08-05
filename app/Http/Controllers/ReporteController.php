@@ -932,4 +932,422 @@ class ReporteController extends Controller
         $fechaAux2=date_format($datefin, 'd-m-Y');
         return view('report.reportRevision')->with('lRows',$lRow)->with('lRows1',$lRow1)->with('inicio',$fechaAux1)->with('fin',$fechaAux2)->with('diff',$diferencia)->with('numEmpleados',$numEmpleados)->with('numEmpleados1',$numEmpleados1)->with('programado',$lProg)->with('programado1',$lProg1);
     }
+
+    public function reporteCheckView(){
+        return view('report.reportCheckView');
+    }
+
+    public function generarReporteCheck(Request $request){
+        $sStartDate = $request->start_date;
+        $sEndDate = $request->end_date;
+
+        $inicio = Carbon::parse($sStartDate);
+        $fin = Carbon::parse($sEndDate);
+        $diferencia = ($inicio->diffInDays($fin));
+
+        $empleadosSemanal = DB::table('employees')
+                                ->join('jobs','jobs.id','=','employees.job_id')
+                                ->join('departments','departments.id','=','jobs.department_id')
+                                ->whereIn('dept_group_id',[1,4,6,7,8,9])
+                                ->where('is_active','=',1)
+                                ->where('way_pay_id','=',2)
+                                ->select('employees.id AS id')
+                                ->get();
+        $empleadosQuincenal = DB::table('employees')
+                                ->join('jobs','jobs.id','=','employees.job_id')
+                                ->join('departments','departments.id','=','jobs.department_id')
+                                ->whereIn('dept_group_id',[1,4,6,7,8,9])
+                                ->where('is_active','=',1)
+                                ->where('way_pay_id','=',1)
+                                ->select('employees.id AS id')
+                                ->get();
+        
+        
+        
+        
+        $dateS = Carbon::parse($sStartDate);
+        $dateE = Carbon::parse($sEndDate);
+        $auxIni = Carbon::parse($sStartDate);
+        $auxFin = Carbon::parse($sEndDate);
+        
+        $auxContador = 0;
+        $j = 0;
+        $i = 0;
+        $lRow = [];
+        $lProg = [];
+        for( $x = 0 ; count($empleadosSemanal) > $x ; $x++ ){
+            $programado = false;
+            $empleado = DB::table('employees')
+                        ->where('id',$empleadosSemanal[$x]->id)
+                        ->get();
+            $registros = DB::table('registers')
+                        ->join('employees','employees.id','=','registers.employee_id')
+                        ->where('employee_id',$empleadosSemanal[$x]->id)
+                        ->whereBetween('date',[$sStartDate,$sEndDate])
+                        ->groupBy('date')
+                        ->select('date AS date','employee_id AS id','employees.name AS name')
+                        ->get();
+            $asignacion = DB::table('schedule_assign')
+                    ->where('is_delete',0)
+                    ->where('employee_id',$empleadosSemanal[$x]->id)
+                    ->where('start_date','<=',$sStartDate)
+                    ->where(function ($query) use ($sStartDate,$sEndDate) {
+                        return $query->where('start_date','<=',$sStartDate)
+                        ->orwhereBetween('end_date', [$sStartDate,$sEndDate]);
+                    })
+                    ->get();
+            
+            $programacion = DB::table('week_department_day')
+                    ->join('day_workshifts','week_department_day.id','=','day_workshifts.day_id')
+                    ->join('day_workshifts_employee','day_workshifts.id','=','day_workshifts_employee.day_id')
+                    ->join('workshifts','day_workshifts.workshift_id','=','workshifts.id')
+                    ->join('type_day','day_workshifts_employee.type_day_id','=','type_day.id')
+                    ->join('employees','employees.id','=','day_workshifts_employee.employee_id')
+                    ->where('employees.id',$empleadosSemanal[$x]->id)
+                    ->where('week_department_day.date',$sStartDate)
+                    ->get();
+            if(count($asignacion) > 0 || count($programacion) > 0){
+                $programado = true;
+            }       
+            $j = $auxContador;
+            $i = 0;
+            $idEmpleado = $empleadosSemanal[$x]->id;
+            $nameEmpleado = $empleado[0]->name;
+            $lProg[$x] = $programado;
+            while( $auxFin >= $auxIni ){
+                $row = new SReg();
+                if($i < count($registros)){
+                    $auxComparacion = Carbon::parse($registros[$i]->date);    
+                    
+                    if( $auxIni == $auxComparacion ){
+                        $row->idEmployee = $idEmpleado;
+                        $row->nameEmployee = $nameEmpleado;
+                        $row->date = $auxIni->toDateString();
+                        $row->entrada = true;
+                        $i++;
+                        $auxIni->addDay();
+                    }else if($auxIni < $auxComparacion){
+                        $row->idEmployee = $idEmpleado;
+                        $row->nameEmployee = $nameEmpleado;
+                        $row->date = $auxIni->toDateString();
+                        $row->entrada = false;
+                        $auxIni->addDay();
+                    }
+                    
+                }else{
+                    $row->idEmployee = $idEmpleado;
+                    $row->nameEmployee = $nameEmpleado;
+                    $row->date = $auxIni->toDateString();
+                    $row->entrada = false;
+                    $auxIni->addDay();
+                }
+                $lRow [$j] = $row;
+                $j++;
+            }
+            
+            $auxContador = $j;
+            $auxIni = Carbon::parse($sStartDate);
+        } 
+        //$lEmpSem = SGenUtils::toEmployeeIds(0, 0, null, $lEmpSem);
+        //$lEmpQui = SGenUtils::toEmployeeIds(0, 0, null, $lEmpQui);
+        $numEmpleados = count($empleadosSemanal);
+        $dateS = Carbon::parse($sStartDate);
+        $dateE = Carbon::parse($sEndDate);
+        $auxIni = Carbon::parse($sStartDate);
+        $auxFin = Carbon::parse($sEndDate);
+        
+        $auxContador = 0;
+        $j = 0;
+        $i = 0;
+        $lRow1 = [];
+        $lProg1 = [];
+        for( $x = 0 ; count($empleadosQuincenal) > $x ; $x++ ){
+            $programado = false;
+            $empleado = DB::table('employees')
+                        ->where('id',$empleadosQuincenal[$x]->id)
+                        ->get();
+            $registros = DB::table('registers')
+                        ->join('employees','employees.id','=','registers.employee_id')
+                        ->where('employee_id',$empleadosQuincenal[$x]->id)
+                        ->whereBetween('date',[$sStartDate,$sEndDate])
+                        ->groupBy('date')
+                        ->select('date AS date','employee_id AS id','employees.name AS name')
+                        ->get();
+            $asignacion = DB::table('schedule_assign')
+                    ->where('is_delete',0)
+                    ->where('employee_id',$empleadosQuincenal[$x]->id)
+                    ->where('start_date','<=',$sStartDate)
+                    ->where(function ($query) use ($sStartDate,$sEndDate) {
+                        return $query->where('start_date','<=',$sStartDate)
+                        ->orwhereBetween('end_date', [$sStartDate,$sEndDate]);
+                    })
+                    ->get();
+            
+            $programacion = DB::table('week_department_day')
+                    ->join('day_workshifts','week_department_day.id','=','day_workshifts.day_id')
+                    ->join('day_workshifts_employee','day_workshifts.id','=','day_workshifts_employee.day_id')
+                    ->join('workshifts','day_workshifts.workshift_id','=','workshifts.id')
+                    ->join('type_day','day_workshifts_employee.type_day_id','=','type_day.id')
+                    ->join('employees','employees.id','=','day_workshifts_employee.employee_id')
+                    ->where('employees.id',$empleadosQuincenal[$x]->id)
+                    ->where('week_department_day.date',$sStartDate)
+                    ->get();
+            if(count($asignacion) > 0 || count($programacion) > 0){
+                $programado = true;
+            }       
+            $j = $auxContador;
+            $i = 0;
+            $idEmpleado = $empleadosQuincenal[$x]->id;
+            $nameEmpleado = $empleado[0]->name;
+            $lProg1[$x] = $programado;
+            while( $auxFin >= $auxIni ){
+                $row = new SReg();
+                if($i < count($registros)){
+                    $auxComparacion = Carbon::parse($registros[$i]->date);    
+                    
+                    if( $auxIni == $auxComparacion ){
+                        $row->idEmployee = $idEmpleado;
+                        $row->nameEmployee = $nameEmpleado;
+                        $row->date = $auxIni->toDateString();
+                        $row->entrada = true;
+                        $i++;
+                        $auxIni->addDay();
+                    }else if($auxIni < $auxComparacion){
+                        $row->idEmployee = $idEmpleado;
+                        $row->nameEmployee = $nameEmpleado;
+                        $row->date = $auxIni->toDateString();
+                        $row->entrada = false;
+                        $auxIni->addDay();
+                    }
+                    
+                }else{
+                    $row->idEmployee = $idEmpleado;
+                    $row->nameEmployee = $nameEmpleado;
+                    $row->date = $auxIni->toDateString();
+                    $row->entrada = false;
+                    $auxIni->addDay();
+                }
+                $lRow1 [$j] = $row;
+                $j++;
+            }
+            
+            $auxContador = $j;
+            $auxIni = Carbon::parse($sStartDate);
+        } 
+        //$lEmpSem = SGenUtils::toEmployeeIds(0, 0, null, $lEmpSem);
+        //$lEmpQui = SGenUtils::toEmployeeIds(0, 0, null, $lEmpQui);
+        $numEmpleados1 = count($empleadosQuincenal);
+        //$lRowsSem = SDataProcess::process($sStartDate, $sEndDate, 2, $lEmpSem);
+        //$lRowsQui = SDataProcess::process($sStartDate, $sEndDate, 1, $lEmpQui);
+        $dateini = date_create($sStartDate);
+        $datefin = date_create($sEndDate);
+        $fechaAux1=date_format($dateini, 'd-m-Y');
+        $fechaAux2=date_format($datefin, 'd-m-Y');
+        return view('report.reportCheck')->with('lRows',$lRow)->with('lRows1',$lRow1)->with('inicio',$fechaAux1)->with('fin',$fechaAux2)->with('diff',$diferencia)->with('numEmpleados',$numEmpleados)->with('numEmpleados1',$numEmpleados1)->with('programado',$lProg)->with('programado1',$lProg1);
+    }
+
+    public function reporteNumRegisterView(){
+        return view('report.reportNumRegisterView');
+    }
+
+    public function generarReporteNumRegister(Request $request){
+        $sStartDate = $request->start_date;
+        $sEndDate = $request->end_date;
+
+        $inicio = Carbon::parse($sStartDate);
+        $fin = Carbon::parse($sEndDate);
+        $diferencia = ($inicio->diffInDays($fin));
+
+        $empleadosSemanal = DB::table('employees')
+                                ->join('jobs','jobs.id','=','employees.job_id')
+                                ->join('departments','departments.id','=','jobs.department_id')
+                                ->whereIn('dept_group_id',[1,4,6,7,8,9])
+                                ->where('is_active','=',1)
+                                ->where('way_pay_id','=',2)
+                                ->select('employees.id AS id')
+                                ->get();
+        $empleadosQuincenal = DB::table('employees')
+                                ->join('jobs','jobs.id','=','employees.job_id')
+                                ->join('departments','departments.id','=','jobs.department_id')
+                                ->whereIn('dept_group_id',[1,4,6,7,8,9])
+                                ->where('is_active','=',1)
+                                ->where('way_pay_id','=',1)
+                                ->select('employees.id AS id')
+                                ->get();
+        
+        
+        
+        
+        $dateS = Carbon::parse($sStartDate);
+        $dateE = Carbon::parse($sEndDate);
+        $auxIni = Carbon::parse($sStartDate);
+        $auxFin = Carbon::parse($sEndDate);
+        
+        $auxContador = 0;
+        $j = 0;
+        $i = 0;
+        $lRow = [];
+        $lProg = [];
+        for( $x = 0 ; count($empleadosSemanal) > $x ; $x++ ){
+            $programado = false;
+            $empleado = DB::table('employees')
+                        ->where('id',$empleadosSemanal[$x]->id)
+                        ->get();
+            $asignacion = DB::table('schedule_assign')
+                    ->where('is_delete',0)
+                    ->where('employee_id',$empleadosSemanal[$x]->id)
+                    ->where('start_date','<=',$sStartDate)
+                    ->where(function ($query) use ($sStartDate,$sEndDate) {
+                        return $query->where('start_date','<=',$sStartDate)
+                        ->orwhereBetween('end_date', [$sStartDate,$sEndDate]);
+                    })
+                    ->get();
+            
+            $programacion = DB::table('week_department_day')
+                    ->join('day_workshifts','week_department_day.id','=','day_workshifts.day_id')
+                    ->join('day_workshifts_employee','day_workshifts.id','=','day_workshifts_employee.day_id')
+                    ->join('workshifts','day_workshifts.workshift_id','=','workshifts.id')
+                    ->join('type_day','day_workshifts_employee.type_day_id','=','type_day.id')
+                    ->join('employees','employees.id','=','day_workshifts_employee.employee_id')
+                    ->where('employees.id',$empleadosSemanal[$x]->id)
+                    ->where('week_department_day.date',$sStartDate)
+                    ->get();
+            if(count($asignacion) > 0 || count($programacion) > 0){
+                $programado = true;
+            }       
+            $j = $auxContador;
+            $i = 0;
+            $idEmpleado = $empleadosSemanal[$x]->id;
+            $nameEmpleado = $empleado[0]->name;
+            $lProg[$x] = $programado;
+            while( $auxFin >= $auxIni ){
+                $row = new SReg();   
+                    
+                $row->nameEmployee = $nameEmpleado;
+                $row->date = $auxIni->toDateString();
+                $fecha = $auxIni->toDateString();
+                $numeroEntrada = DB::table('registers')
+                                    ->where('date',$fecha)
+                                    ->where('employee_id',$idEmpleado)
+                                    ->where('type_id',1)
+                                    ->select(DB::raw('COUNT(id) as numero'))
+                                    ->get();
+                $numeroSalida = DB::table('registers')
+                                    ->where('date',$fecha)
+                                    ->where('employee_id',$idEmpleado)
+                                    ->where('type_id',2)
+                                    ->select(DB::raw('COUNT(id) as numero'))
+                                    ->get();
+                if(isset($numeroEntrada[0])){
+                    $row->num_entrada = $numeroEntrada[0]->numero;
+                }else{
+                    $row->num_entrada = 0;
+                }
+                if(isset($numeroSalida[0])){
+                    $row->num_salida = $numeroSalida[0]->numero; 
+                }else{
+                    $row->num_salida = 0;
+                }     
+                $auxIni->addDay();
+                
+                $lRow [$j] = $row;
+                $j++;
+            }
+            
+            $auxContador = $j;
+            $auxIni = Carbon::parse($sStartDate);
+        } 
+        //$lEmpSem = SGenUtils::toEmployeeIds(0, 0, null, $lEmpSem);
+        //$lEmpQui = SGenUtils::toEmployeeIds(0, 0, null, $lEmpQui);
+        $numEmpleados = count($empleadosSemanal);
+        $dateS = Carbon::parse($sStartDate);
+        $dateE = Carbon::parse($sEndDate);
+        $auxIni = Carbon::parse($sStartDate);
+        $auxFin = Carbon::parse($sEndDate);
+        
+        $auxContador = 0;
+        $j = 0;
+        $i = 0;
+        $lRow1 = [];
+        $lProg1 = [];
+        for( $x = 0 ; count($empleadosQuincenal) > $x ; $x++ ){
+            $programado = false;
+            $empleado = DB::table('employees')
+                        ->where('id',$empleadosQuincenal[$x]->id)
+                        ->get();
+            $asignacion = DB::table('schedule_assign')
+                    ->where('is_delete',0)
+                    ->where('employee_id',$empleadosQuincenal[$x]->id)
+                    ->where('start_date','<=',$sStartDate)
+                    ->where(function ($query) use ($sStartDate,$sEndDate) {
+                        return $query->where('start_date','<=',$sStartDate)
+                        ->orwhereBetween('end_date', [$sStartDate,$sEndDate]);
+                    })
+                    ->get();
+            
+            $programacion = DB::table('week_department_day')
+                    ->join('day_workshifts','week_department_day.id','=','day_workshifts.day_id')
+                    ->join('day_workshifts_employee','day_workshifts.id','=','day_workshifts_employee.day_id')
+                    ->join('workshifts','day_workshifts.workshift_id','=','workshifts.id')
+                    ->join('type_day','day_workshifts_employee.type_day_id','=','type_day.id')
+                    ->join('employees','employees.id','=','day_workshifts_employee.employee_id')
+                    ->where('employees.id',$empleadosQuincenal[$x]->id)
+                    ->where('week_department_day.date',$sStartDate)
+                    ->get();
+            if(count($asignacion) > 0 || count($programacion) > 0){
+                $programado = true;
+            }       
+            $j = $auxContador;
+            $i = 0;
+            $idEmpleado = $empleadosQuincenal[$x]->id;
+            $nameEmpleado = $empleado[0]->name;
+            $lProg1[$x] = $programado;
+            while( $auxFin >= $auxIni ){
+                $row = new SReg();   
+                    
+                $row->nameEmployee = $nameEmpleado;
+                $row->date = $auxIni->toDateString();
+                $fecha = $auxIni->toDateString();
+                $numeroEntrada = DB::table('registers')
+                                    ->where('date',$fecha)
+                                    ->where('employee_id',$idEmpleado)
+                                    ->where('type_id',1)
+                                    ->select(DB::raw('COUNT(id) as numero'))
+                                    ->get();
+                $numeroSalida = DB::table('registers')
+                                    ->where('date',$fecha)
+                                    ->where('employee_id',$idEmpleado)
+                                    ->where('type_id',2)
+                                    ->select(DB::raw('COUNT(id) as numero'))
+                                    ->get();
+                if(isset($numeroEntrada[0])){
+                    $row->num_entrada = $numeroEntrada[0]->numero;
+                }else{
+                    $row->num_entrada = 0;
+                }
+                if(isset($numeroSalida[0])){
+                    $row->num_salida = $numeroSalida[0]->numero; 
+                }else{
+                    $row->num_salida = 0;
+                }     
+                $auxIni->addDay();
+                
+                $lRow1 [$j] = $row;
+                $j++;
+            }
+            
+            $auxContador = $j;
+            $auxIni = Carbon::parse($sStartDate);
+        } 
+        //$lEmpSem = SGenUtils::toEmployeeIds(0, 0, null, $lEmpSem);
+        //$lEmpQui = SGenUtils::toEmployeeIds(0, 0, null, $lEmpQui);
+        $numEmpleados1 = count($empleadosQuincenal);
+        //$lRowsSem = SDataProcess::process($sStartDate, $sEndDate, 2, $lEmpSem);
+        //$lRowsQui = SDataProcess::process($sStartDate, $sEndDate, 1, $lEmpQui);
+        $dateini = date_create($sStartDate);
+        $datefin = date_create($sEndDate);
+        $fechaAux1=date_format($dateini, 'd-m-Y');
+        $fechaAux2=date_format($datefin, 'd-m-Y');
+        return view('report.reportNumRegister')->with('lRows',$lRow)->with('lRows1',$lRow1)->with('inicio',$fechaAux1)->with('fin',$fechaAux2)->with('diff',$diferencia)->with('numEmpleados',$numEmpleados)->with('numEmpleados1',$numEmpleados1)->with('programado',$lProg)->with('programado1',$lProg1);
+    }
 }

@@ -24,12 +24,14 @@ class shiftprogrammingController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index($id)
-    {   $typeArea = $id;
+    {   
+        $typeArea = $id;
         $week = DB::table('pdf_week')
                 ->join('week','week.id','=','pdf_week.week_id')
                 ->select('week.start_date AS start','week.end_date AS end','week.id AS id')
                 ->get();
-        $newest = week::where('is_delete','=',0)->orderBy('updated_at')->first();
+        $newest = week::where('is_delete','=',0)->orderBy('updated_at','asc')->first();
+
         return view('shiftprogramming.index', compact('typeArea'),compact('newest'))->with('week',$week);
 
     }
@@ -402,7 +404,7 @@ class shiftprogrammingController extends Controller
             if($request->pdfFlag == 0){
                 $guardarPdf = new pdf_week();
             }else{
-                $guardarPdf = pdf_week::where('week_id', $week->id)->get();
+                $guardarPdf = pdf_week::where('week_id','=',$week->id)->first();
             }
             
             $guardarPdf->week_id = $week->id;
@@ -433,17 +435,19 @@ class shiftprogrammingController extends Controller
         PDF::AddPage();
 
         PDF::SetFont('helvetica','B',16);
-        PDF::Cell(55, 10, 'Rol de turnos del', 0, false, 'C', 0, '', 0, false, 'M', 'M');
-        PDF::Cell(25,10,$fini,0,false,'C',0,'',1,false,'M','M');
-        PDF::Cell(10,10,$formateoIni[2],0,false,'C',0,'',1,false,'M','M');
-        PDF::Cell(10,10,'al',0,false,'C',0,'',1,false,'M','M');
-        PDF::Cell(25,10,$fin,0,false,'C',0,'',1,false,'M','M');
-        PDF::Cell(10,10,$formateoFin[2],0,false,'C',0,'',1,false,'M','M');
-        PDF::Cell(10,10,'de',0,false,'C',0,'',1,false,'M','M');
-        PDF::Cell(20,10,$nombreMes,0,false,'C',0,'',1,false,'M','M');
-        PDF::Cell(10,10,'de',0,false,'C',0,'',1,false,'M','M');
-        PDF::Cell(15,10,$formateoFin[0],0,false,'C',0,'',1,false,'M','M');
-        
+        //PDF::Cell(50, 10, 'Rol de turnos del', 0, false, 'C', 0, '', 0, false, 'M', 'M');
+        //PDF::Cell(20,10,$fini,0,false,'C',0,'',1,false,'M','M');
+        //PDF::Cell(10,10,$formateoIni[2],0,false,'C',0,'',1,false,'M','M');
+        //PDF::Cell(8,10,'al',0,false,'C',0,'',1,false,'M','M');
+        //PDF::Cell(20,10,$fin,0,false,'C',0,'',1,false,'M','M');
+        //PDF::Cell(10,10,$formateoFin[2],0,false,'C',0,'',1,false,'M','M');
+        //PDF::Cell(8,10,'de',0,false,'C',0,'',1,false,'M','M');
+        //PDF::Cell(15,10,$nombreMes,0,false,'C',0,'',1,false,'M','M');
+        //PDF::Cell(10,10,'de',0,false,'C',0,'',1,false,'M','M');
+        //PDF::Cell(15,10,$formateoFin[0],0,false,'C',0,'',1,false,'M','M');
+
+        $titulo = 'Rol de turnos del '.$fini.' '.$formateoIni[2].' al '.$fin.' '.$formateoFin[2].' de '.$nombreMes.' de '.$formateoFin[0];
+        PDF::Cell(170,10, $titulo,0,false,'C',0,'',1,false,'M','M');
         $departments = DB::table('week_department')
                         ->join('departments','week_department.department_id','=','departments.id')
                         ->where('week_id',$week->id)
@@ -858,7 +862,7 @@ class shiftprogrammingController extends Controller
         $week = DB::table('week')
                         ->where('week.is_delete','0')
                         ->where('week.id',$request->semana)
-                        ->select('week.start_date AS start','week.end_date AS end')
+                        ->select('week.start_date AS start','week.end_date AS end','week.id AS id')
                         ->get();
         
         

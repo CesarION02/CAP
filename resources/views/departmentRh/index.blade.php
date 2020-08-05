@@ -60,12 +60,8 @@ Departamentos
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Departamentos</h3>
-                @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:departamentos"])
+                <h3 class="box-title">Departamentos RH</h3>
                 <div class="box-tools pull-right">
-                    <a href="{{route('crear_departamento')}}" class="btn btn-block btn-success btn-sm">
-                        <i class="fa fa-fw fa-plus-circle"></i> Nuevo registro
-                    </a>
                 </div>
             </div>
             <div class="box-body">
@@ -73,8 +69,7 @@ Departamentos
                     <thead>
                         <tr>
                             <th>Nombre departamento</th>
-                            <th>Area</th>
-                            <th>Departamento RH</th>
+                            <th>Departamento predeterminado</th>
                             <th class="width70"></th>
                         </tr>
                     </thead>
@@ -82,18 +77,11 @@ Departamentos
                         @foreach ($datas as $data)
                         <tr>
                             <td>{{$data->name}}</td>
-                            <td>{{$data->area->name}}</td>
-                            <td>{{$data->rh->name}}</td>
+                            <td>{{$data->default_dept->name}}</td>
                             <td>
-                                <a href="{{route('editar_departamento', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Editar este registro">
+                                <a href="{{route('editar_departamento_rh', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Editar este registro">
                                     <i class="fa fa-fw fa-pencil"></i>
                                 </a>
-                                <form action="{{route('eliminar_departamento', ['id' => $data->id])}}" class="d-inline form-eliminar" method="POST">
-                                    @csrf @method("delete")
-                                    <button type="submit" class="btn-accion-tabla eliminar tooltipsC" title="Eliminar este registro">
-                                        <i class="fa fa-fw fa-trash text-danger"></i>
-                                    </button>
-                                </form>
                             </td>
                         </tr>
                         @endforeach
