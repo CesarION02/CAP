@@ -125,6 +125,7 @@
         function GlobalData () {
 
             this.lRows = <?php echo json_encode($lRows) ?>;
+            this.lEmpWrkdDays = <?php echo json_encode($lEmpWrkdDays) ?>;
             this.adjTypes = <?php echo json_encode($adjTypes) ?>;
             this.lAdjusts = <?php echo json_encode($lAdjusts) ?>;
             this.tReport = <?php echo json_encode($tReport) ?>;
@@ -308,7 +309,7 @@
                                                 " / tiempo retardo: " + minsDelay + " min " + 
                                                 " / salida anticipada: " + minsBeforeOut  + " min" + 
                                                 " / primas dominicales: " + suns + 
-                                                " / descansos: " + daysoff;
+                                                " / descansos: " + daysoff + " [" + oData.lEmpWrkdDays[parseInt(group, 10)] + "]";
                         }
                         
                         return value_to_return;

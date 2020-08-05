@@ -10,7 +10,7 @@ class SReportRow {
             row[5] = delayMins;
             row[6] = premMins;
             row[7] = sundays;
-            row[8] = daysOff;
+            row[8] = daysOff + " [" + oData.lEmpWrkdDays[parseInt(numEmploye, 10)] + "]";
             row[9] = "";
             row[10] = "";
         }

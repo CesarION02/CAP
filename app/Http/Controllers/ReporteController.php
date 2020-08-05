@@ -436,6 +436,9 @@ class ReporteController extends Controller
 
         $lRows = SDataProcess::process($sStartDate, $sEndDate, $payWay, $lEmployees);
 
+        $aEmployees = $lEmployees->pluck('num_employee', 'id');
+        $lEmpWrkdDays = SDelayReportUtils::getTheoreticalDaysOffBasedOnDaysWorked($lRows, $aEmployees, $sStartDate, $sEndDate);
+
         $sPayWay = "";
         switch ($payWay) {
             case \SCons::PAY_W_Q :
@@ -475,6 +478,7 @@ class ReporteController extends Controller
                     ->with('sTitle', 'Reporte de Retardos y Percepciones Variables')
                     ->with('adjTypes', $adjTypes)
                     ->with('lAdjusts', $lAdjusts)
+                    ->with('lEmpWrkdDays', $lEmpWrkdDays)
                     ->with('lRows', $lRows);
     }
 
