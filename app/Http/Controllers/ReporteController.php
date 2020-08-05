@@ -507,6 +507,7 @@ class ReporteController extends Controller
                         ->join('areas','areas.id','=','departments.area_id')
                         ->orderBy('employees.job_id')
                         ->where('employees.is_delete','0')
+                        ->where('employees.is_active', true)
                         ->where('employees.way_pay_id',$payWay);
                 for($i = 0 ; count($id) > $i ; $i++ ){
                    if($i != 0){
@@ -527,6 +528,7 @@ class ReporteController extends Controller
                         ->join('department_group','department_group.id','=','departments.dept_group_id')
                         ->orderBy('employees.job_id')
                         ->where('employees.is_delete','0')
+                        ->where('employees.is_active', true)
                         ->where('employees.way_pay_id',$payWay);
                 for($i = 0 ; count($id) > $i ; $i++ ){
                    if($i != 0){
@@ -544,6 +546,7 @@ class ReporteController extends Controller
                 $employees = DB::table('employees')
                         ->join('dept_rh','dept_rh.id','=','employees.dept_rh_id')
                         ->where('employees.is_delete','0')
+                        ->where('employees.is_active', true)
                         ->where('employees.way_pay_id',$payWay);
                 for($i = 0 ; count($id) > $i ; $i++ ){
                    if($i != 0){

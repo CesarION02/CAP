@@ -19,6 +19,7 @@ class SEventsUtils {
         if ($idEmployee == 0 || $idEmployee == null) {
             if ($dept > 0) {
                 $employees = employees::where('is_delete','0')
+                                    ->where('is_active', true)
                                     ->where('department_id', $dept)
                                     ->orderBy('id', 'ASC')
                                     ->pluck('id');

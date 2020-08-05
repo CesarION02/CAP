@@ -20,14 +20,14 @@ class SyncController extends Controller
 
     public function syncronizeWithERP($lastSyncDate = "")
     {
-        // $jsonString = file_get_contents(base_path('response_from_siie.json'));
-        $client = new Client([
-            'base_uri' => 'localhost:9000',
-            'timeout' => 10.0,
-        ]);
+        $jsonString = file_get_contents(base_path('response_from_siie.json'));
+        // $client = new Client([
+        //     'base_uri' => 'localhost:9000',
+        //     'timeout' => 10.0,
+        // ]);
 
-        $response = $client->request('GET', 'getInfoERP/2019-01-01 00:00:00');
-        $jsonString = $response->getBody()->getContents();
+        // $response = $client->request('GET', 'getInfoERP/2019-01-01 00:00:00');
+        // $jsonString = $response->getBody()->getContents();
         $data = json_decode($jsonString);
 
         // dd($data);

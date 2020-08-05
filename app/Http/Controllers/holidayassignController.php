@@ -47,7 +47,7 @@ class holidayassignController extends Controller
      */
     public function create($tipo)
     {
-        $employee = employees::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
+        $employee = employees::where('is_delete','0')->where('is_active', true)->orderBy('id','ASC')->pluck('id','name');
         $department = department::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
         $area = area::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
         $holiday = holiday::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
@@ -169,7 +169,7 @@ class holidayassignController extends Controller
      */
     public function edit($id)
     {
-        $employee = employees::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
+        $employee = employees::where('is_delete','0')->where('is_active', true)->orderBy('id','ASC')->pluck('id','name');
         $department = department::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
         $area = area::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
         $holiday = holiday::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');

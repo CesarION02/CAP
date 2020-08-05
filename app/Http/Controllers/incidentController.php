@@ -54,6 +54,7 @@ class incidentController extends Controller
         $incidents = $incidents->pluck('id','name');
 
         $employees = employees::where('is_delete','0')
+                                ->where('is_active', true)
                                 ->orderBy('id','ASC')
                                 ->pluck('id','name');
 
@@ -107,7 +108,7 @@ class incidentController extends Controller
     public function edit($id)
     {
         $incidents = typeincident::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
-        $employees = employees::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
+        $employees = employees::where('is_delete','0')->where('is_active', true)->orderBy('id','ASC')->pluck('id','name');
         $data = incident::findOrFail($id);
         return view('incident.edit', compact('data'))->with('incidents',$incidents)->with('employees',$employees);
     }

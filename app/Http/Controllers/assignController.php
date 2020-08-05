@@ -44,7 +44,7 @@ class assignController extends Controller
      */
     public function create($tipo)
     {
-        $employee = employees::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
+        $employee = employees::where('is_delete','0')->where('is_active', true)->orderBy('id','ASC')->pluck('id','name');
         $department = department::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
         $schedule_template = schedule_template::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
 
@@ -129,7 +129,7 @@ class assignController extends Controller
      */
     public function edit($id)
     {
-        $employee = employees::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
+        $employee = employees::where('is_delete','0')->where('is_active', true)->orderBy('id','ASC')->pluck('id','name');
         $department = department::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
         $schedule_template = schedule_template::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
         $datas = assign_schedule::find($id);
@@ -291,6 +291,7 @@ class assignController extends Controller
         $lSchedules = $this->getData($startDate, $endDate);
 
         $lEmployees = employees::where('is_delete', false)
+                                ->where('is_active', true)
                                 ->select('id', 'num_employee', 'name')
                                 ->orderBy('name', 'ASC')
                                 ->orderBy('num_employee', 'ASC')
