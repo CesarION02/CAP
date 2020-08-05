@@ -42,12 +42,16 @@ Empleados
                             <td>{{$data->department_id == null ? "" : $data->department->name}}</td>
                             <td>{{$data->job_id == null ? "" : $data->job->name}}</td>
                             <td>
+                                @if(isset($foraneos))
+
+                                @else
                                 <form action="{{route('terminar_configurar', ['id' => $data->id])}}" class="d-inline form-configurar" method="POST">
                                     @csrf @method("delete")
                                     <button type="submit" class="btn-accion-tabla tooltipsC" title="Confirmar departamento">
                                         <i class="fa fa-fw fa-check text-danger"></i>
                                     </button>
                                 </form>
+                                @endif
                                 <a href="{{route('editar_empleado_faltante', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Editar este registro">
                                     <i class="fa fa-fw fa-pencil"></i>
                                 </a>
@@ -57,7 +61,7 @@ Empleados
                                 <form action="{{route('enviar_empleado_foraneo', ['id' => $data->id])}}" class="d-inline form-eliminar" method="POST">
                                     @csrf @method("delete")
                                     <button type="submit" class="btn-accion-tabla eliminar tooltipsC" title="Enviar a foraneo">
-                                        <i class="fa fa-fw fa-trash text-danger"></i>
+                                        <i class="fa fa-fw fa-truck  text-danger"></i>
                                     </button>
                                 </form>
                                 @endif
