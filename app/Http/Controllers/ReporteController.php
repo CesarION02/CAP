@@ -348,8 +348,8 @@ class ReporteController extends Controller
 
         return view('report.reportsGen')
                     ->with('tReport', \SCons::REP_HR_EX)
-                    ->with('sTitle', 'Reporte de Retardos y Percepciones Variables')
-                    ->with('sRoute', 'reportepercepvariables')
+                    ->with('sTitle', 'Reporte de Tiempos Extra')
+                    ->with('sRoute', 'reportetiemposextra')
                     ->with('lEmployees', $lEmployees)
                     ->with('startOfWeek', $config->startOfWeek);
     }
@@ -401,7 +401,7 @@ class ReporteController extends Controller
     }
 
     /**
-     * Muestra reporte de reatrdos y percepciones variables
+     * Muestra reporte de tiempos extra
      *
      * @param Request $request
      * @return void
@@ -411,6 +411,13 @@ class ReporteController extends Controller
         $sStartDate = $request->start_date;
         $sEndDate = $request->end_date;
         $iEmployee = $request->emp_id;
+
+        $oStartDate = Carbon::parse($sStartDate);
+        $oEndDate = Carbon::parse($sEndDate);
+
+        if (! $oStartDate->lessThanOrEqualTo($oEndDate)) {
+            return \Redirect::back()->withErrors(['Error', 'La fecha de inicio debe ser previa a la fecha final']);
+        }
 
         if ($request->optradio == "employee") {
             if ($iEmployee > 0) {
@@ -475,7 +482,7 @@ class ReporteController extends Controller
                     ->with('sStartDate', $sStartDate)
                     ->with('sEndDate', $sEndDate)
                     ->with('sPayWay', $sPayWay)
-                    ->with('sTitle', 'Reporte de Retardos y Percepciones Variables')
+                    ->with('sTitle', 'Reporte de Tiempos Extra')
                     ->with('adjTypes', $adjTypes)
                     ->with('lAdjusts', $lAdjusts)
                     ->with('lEmpWrkdDays', $lEmpWrkdDays)

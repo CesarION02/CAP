@@ -90,8 +90,8 @@ Route::get('report/generarReporteRegs/{type}','ReporteController@registriesRepor
 Route::get('report/reporteRegistros','ReporteController@reporteRegistrosView')->name('generarreporteRegistros');
 Route::get('report/reporteRetardos','ReporteController@genDelayReport')->name('generarreporteRetardos');
 Route::get('report/viewReporteRetardos','ReporteController@delaysReport')->name('reporteRetardos');
-Route::get('report/reportepercepcionesvariables','ReporteController@genHrExReport')->name('generarreportepervariables');
-Route::get('report/viewpercepvariables','ReporteController@hrExtReport')->name('reportepercepvariables');
+Route::get('report/reportetiemposextra','ReporteController@genHrExReport')->name('generarreportetiemposextra');
+Route::get('report/viewtiemposextra','ReporteController@hrExtReport')->name('reportetiemposextra');
 
 /* RUTAS DE AJUSTES DE PRENÓMINA */
 Route::get('prepayrollrowadjusts', 'prepayrollAdjustController@getAdjustsFromRow')->name('ajustes_renglon');

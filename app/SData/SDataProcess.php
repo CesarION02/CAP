@@ -512,6 +512,9 @@ class SDataProcess {
                             }
 
                             $newRow->isSpecialSchedule = $result->auxIsSpecialSchedule;
+                            if ($newRow->isSpecialSchedule) {
+                                $newRow->others = $newRow->others."Horario especial (".$result->auxWorkshift->name."). ";
+                            }
                         }
 
                         $newRow->outDate = $newRow->inDate;
@@ -574,6 +577,9 @@ class SDataProcess {
         }
         else {
             $oRow->isSpecialSchedule = $result->auxIsSpecialSchedule;
+            if ($oRow->isSpecialSchedule) {
+                $oRow->others = $oRow->others."Horario especial (".$result->auxWorkshift->name."). ";
+            }
 
             $oRow->scheduleFrom = SDataProcess::getOrigin($result);
 
