@@ -2,6 +2,7 @@
 
 @section('styles1')
     <link rel="stylesheet" href="{{asset("daterangepicker/daterangepicker.css")}}">
+    <link rel="stylesheet" href="{{ asset("assets/css/reportD.css") }}">
 @endsection
 
 @section('title')
@@ -72,16 +73,29 @@
                     <br>
                     <div class="row">
                         <div class="col-md-3">
-                            Período*:
+                            Fecha inicio:*
+                            <br>
+                            Fecha fin:*
                         </div>
-                        <div class="col-md-6 col-md-offset-1">
-                            <div id="reportrange" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
+                        <div class="col-md-3 col-md-offset-1">
+                            {{-- <div id="reportrange" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
                                 <i class="fa fa-calendar"></i>&nbsp;
                                 <span></span> <i class="fa fa-caret-down"></i>
-                            </div>
+                            </div> --}}
+                            <input type="date" name="start_date" class="form-control" required>
+                            <input type="date" name="end_date" class="form-control" required>
                         </div>
-                        <input :value="startDate" type="hidden" name="start_date">
-                        <input :value="endDate" type="hidden" name="end_date">
+                        {{-- <input :value="startDate" type="hidden" name="start_date">
+                        <input :value="endDate" type="hidden" name="end_date"> --}}
+                        <div class="col-md-4">
+                            <label>Código de colores:</label>
+                            <br>
+                            <span class="label delays">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span> (Retardos)
+                            <br>
+                            <span class="label check">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span> (Necesita revisión)
+                            <br>
+                            <span class="label absence">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span> (Faltas o sin checadas)
+                        </div>
                     </div>
                 </div>
                 <div class="box-footer">
