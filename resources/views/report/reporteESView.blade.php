@@ -3,7 +3,7 @@
     <link rel="stylesheet" href="{{ asset("dt/datatables.css") }}">
 @endsection
 @section('title')
-Reporte Entradas/Salidas
+Reporte de registros
 @endsection
 
 @section('content')
@@ -31,7 +31,7 @@ Reporte Entradas/Salidas
                                     <th>Hora salida</th>
                                     @switch($reportType)
                                             @case(1)
-                                                <th>Area</th>
+                                                <th>Área</th>
                                             @break
                                             @case(2)
                                                 <th>Grupo</th>

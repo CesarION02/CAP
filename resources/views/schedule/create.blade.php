@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-Plantilla Horario
+Plantilla horario
 @endsection
 
 @section("scripts")
@@ -15,7 +15,7 @@ Plantilla Horario
         @include('includes.mensaje')
         <div class="box box-danger">
             <div class="box-header with-border">
-                <h3 class="box-title">Crear Plantillas horarios fijos</h3>
+                <h3 class="box-title">Crear plantilla horario fijo</h3>
                 <div class="box-tools pull-right">
                     <a href="{{route('plantilla')}}" class="btn btn-block btn-info btn-sm">
                         <i class="fa fa-fw fa-reply-all"></i> Volver al listado

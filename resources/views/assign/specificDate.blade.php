@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-Fecha Especifica
+Fecha Específica
 @endsection
 
 @section("scripts")

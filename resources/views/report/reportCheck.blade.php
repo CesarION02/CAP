@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-Turno
+Reporte revisión
 @endsection
 
 @section("scripts")
@@ -72,7 +72,7 @@ Turno
                         
                         <tr>
                             <th>Empleado</th>
-                            <th>Programacion</th>
+                            <th>Programación</th>
                             @for($i = 0 ; $diff >= $i ; $i++)
 
                                 <th><?php echo date("d-m-Y",strtotime($inicio."+ ".$i." days")); ?></th>

@@ -3,7 +3,7 @@ function agregar() {
     contador++;
     var nameDiv = "div";
     nameDiv += contador;
-    var div = '<div class="form-group ' + nameDiv + '"><label class="col-lg-3 control-label">Plantilla</label><div class="col-lg-3"><select name="horario' + contador + '" id="horario' + contador + '">'
+    var div = '<div class="form-group ' + nameDiv + '"><label class="col-lg-3 control-label">Plantilla</label><div class="col-lg-4"><select name="horario' + contador + '" id="horario' + contador + '">'
     $.ajax({
         type: 'get',
         url: 'schedule_template',

@@ -5,7 +5,7 @@
         </div>
 </div>
 <div class="form-group">
-        <label for="employee_id" class="col-lg-3 control-label requerido">Area:</label>
+        <label for="employee_id" class="col-lg-3 control-label requerido">Área:</label>
         <div class="col-lg-8">
             <select id="area_id" name="area_id" class="form-control">
                 @foreach($areas as $area => $index)

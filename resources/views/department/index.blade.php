@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-Departamentos
+Departamentos CAP
 @endsection
 
 @section("scripts")
@@ -73,7 +73,7 @@ Departamentos
                     <thead>
                         <tr>
                             <th>Nombre departamento</th>
-                            <th>Area</th>
+                            <th>Área</th>
                             <th>Departamento nominas</th>
                             <th class="width70"></th>
                         </tr>

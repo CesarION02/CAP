@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-Ver/Editar Asignacion
+Ver/Editar asignacion
 @endsection
 
 @section("scripts")

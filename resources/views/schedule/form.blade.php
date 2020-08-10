@@ -1,5 +1,5 @@
 <div class="form-group">
-        <label for="nombre" class="col-lg-3 control-label">Nombre Plantilla:</label>
+        <label for="nombre" class="col-lg-3 control-label">Nombre plantilla:</label>
         <div class="col-lg-6">
             <input type="text" name="name" id="name" class="form-control" required value=<?php if(isset($datas)){ echo $datas[0]->Name;}else{echo " ";} ?> >
         </div>
@@ -13,7 +13,7 @@
     
 </div>
 <div class="form-group">
-    <label for="cut_id" class="col-lg-3 control-label requerido">Recortar Reporte secretaria:</label>
+    <label for="cut_id" class="col-lg-3 control-label requerido">Recortar reporte secretaria:</label>
     <div class="col-lg-6">
         <select id="cut_id" name="cut_id" class="form-control">
             @foreach($cuts as $cut => $index)

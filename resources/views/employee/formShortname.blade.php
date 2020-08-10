@@ -1,5 +1,5 @@
 <div class="form-group">
-    <label for="num_employee" class="col-lg-3 control-label">Numero Empleado:</label>
+    <label for="num_employee" class="col-lg-3 control-label">Numero empleado:</label>
     <div class="col-lg-8">
         <input type="number" name="num_employee" id="num_employee" class="form-control" value="{{old('num_employee', $data->num_employee ?? '')}}" disabled>
     </div>
@@ -41,7 +41,7 @@
     </div>
 </div>
 <div class="form-group">
-    <label for="job_id" class="col-lg-3 control-label readonly">Puesto Anterior:</label>
+    <label for="job_id" class="col-lg-3 control-label readonly">Puesto anterior:</label>
     <div class="col-lg-8" id="jobaux" name="jobaux">
         <input type="text" name="jobanterior" id="jobanterior" value="{{$data->job->name}}">       
     </div>

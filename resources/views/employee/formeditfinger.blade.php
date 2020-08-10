@@ -5,7 +5,7 @@
         </div>
 </div>
 <div class="form-group">
-        <label for="num_employee" class="col-lg-3 control-label requerido">Numero Empleado:</label>
+        <label for="num_employee" class="col-lg-3 control-label requerido">Número empleado:</label>
         <div class="col-lg-8">
             <input type="number" name="num_employee" id="num_employee" class="form-control" value="{{old('num_employee', $data->num_employee ?? '')}}" readonly>
         </div>

@@ -28,7 +28,7 @@
                     @endif
                 @endfor 
             @else
-                <option value="0">Seleccione Turno</option>
+                <option value="0">Seleccione turno</option>
                 @for($i = 0 ; count($workshifts) > $i ; $i++)
                     <option value="{{$workshifts[$i]->id}}">{{$workshifts[$i]->name.' '.$workshifts[$i]->entrada.' - '.$workshifts[$i]->salida}}</option>
                 @endfor

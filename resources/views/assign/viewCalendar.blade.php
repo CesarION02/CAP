@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-Turno
+Horario específico
 @endsection
 
 @section("scripts")
@@ -62,7 +62,7 @@ Turno
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Turno</h3>
+                <h3 class="box-title">Horario en día específico</h3>
                 <div class="box-tools pull-right">
                 </div>
             </div>
