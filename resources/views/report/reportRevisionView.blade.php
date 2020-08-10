@@ -13,7 +13,7 @@ Reporte revision
         @include('includes.mensaje')
         <div class="box box-danger">
             <div class="box-header with-border">
-                <h3 class="box-title">Reporte revisión</h3>
+                <h3 class="box-title">Reporte revisión entrada / salida</h3>
                 <div class="box-tools pull-right">
                 </div>
             </div>

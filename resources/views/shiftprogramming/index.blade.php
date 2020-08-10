@@ -1,7 +1,7 @@
 
 @extends("theme.$theme.layout")
 @section('title')
-Programacion de Turnos
+Programacion de turnos
 @endsection
 
 @section("scripts")
@@ -33,19 +33,19 @@ Programacion de Turnos
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Programacion Turnos</h3>
+                <h3 class="box-title">Asignar turnos</h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:programacionturnos"])
             </div>
             <div class="box-body">
                 <div class="tab">
-                    <button class="tablinks" onclick="cambioPestana(event, 'Nueva')">Nueva Programacion</button>
-                    <button class="tablinks" onclick="cambioPestana(event, 'Antigua')">Programacion Anterior</button>
+                    <button class="tablinks" onclick="cambioPestana(event, 'Nueva')">Nueva programación</button>
+                    <button class="tablinks" onclick="cambioPestana(event, 'Antigua')">Programacion anterior</button>
                     
                   </div>
                   
                   <!-- Tab content -->
                   <div id="Nueva" class="tabcontent">
-                    <h3>Programación de Turnos</h3>
+                    <h3>Programación de turnos</h3>
                     <div class="row" style="margin:5px">
                       <div class="col-md-6"><button id="nuevo" name="nuevo" disabled onclick="new_shiftprogramming()"><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span></button> <input type="date" id="fechaini" name="fechaini"><input type="date" id="fechafin" name="fechafin" readonly></div>
                       @if(isset($newest))
@@ -85,7 +85,7 @@ Programacion de Turnos
                     <div class="row" style="margin:10px">
                       <div class="col-md-3" style="margin:5px">
                         <select id="semana" name="semana">
-                          <option value="0">Selecciona Semana</option>
+                          <option value="0">Selecciona semana</option>
                           @for( $i = 0 ; count($week) > $i ; $i++){
                             <option value={{$week[$i]->id}}>{{$week[$i]->start.' a '.$week[$i]->end}}</option>
                           }

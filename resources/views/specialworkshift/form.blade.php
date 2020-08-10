@@ -6,7 +6,7 @@
                 <input type="text" name="employee_id" id="employee_id" value="{{$datas[0]->nameEmp}}" readonly>
             @else
                 <select name="employee_id" id="employee_id">
-                    <option value="0">Seleccione Empleado</option>
+                    <option value="0">Seleccion empleado</option>
                     @for($i = 0 ; count($employees) > $i ; $i++)
                         <option value="{{$employees[$i]->idEmployee}}">{{$employees[$i]->nameEmployee}}</option>
                     @endfor
@@ -19,7 +19,7 @@
     <div class="col-lg-8">
         <select name="workshift_id" id="workshift_id">
             @if(isset($datas))
-                <option value="0">Seleccione Turno</option>
+                <option value="0">Seleccione turno</option>
                 @for($i = 0 ; count($workshifts) > $i ; $i++)
                     @if($datas[0]->idWork == $workshifts[$i]->id)
                         <option selected value="{{$workshifts[$i]->id}}">{{$workshifts[$i]->name.' '.$workshifts[$i]->entrada.' - '.$workshifts[$i]->salida}}</option>

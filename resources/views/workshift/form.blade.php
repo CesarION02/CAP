@@ -5,13 +5,13 @@
         </div>
     </div>
     <div class="form-group">
-        <label for="entry" class="col-lg-3 control-label requerido">Hora Entrada:</label>
+        <label for="entry" class="col-lg-3 control-label requerido">Hora entrada:</label>
         <div class="col-lg-8">
             <input type="time" name="entry" id="entry" class="form-control" value="{{old('entry', $data->entry ?? '')}}" required>
         </div>
     </div>
     <div class="form-group">
-        <label for="departure" class="col-lg-3 control-label requerido">Hora Salida:</label>
+        <label for="departure" class="col-lg-3 control-label requerido">Hora salida:</label>
         <div class="col-lg-8">
             <input type="time" name="departure" id="departure" class="form-control" value="{{old('departure', $data->departure ?? '')}}" required>
         </div>
@@ -29,7 +29,7 @@
             </div>
     </div>
     <div class="form-group">
-        <label for="cut_id" class="col-lg-3 control-label requerido">Recortar Reporte secretaria:</label>
+        <label for="cut_id" class="col-lg-3 control-label requerido">Recortar reporte secretaria:</label>
         <div class="col-lg-8">
             <select id="cut_id" name="cut_id" class="form-control">
                 @foreach($datas as $data => $index)

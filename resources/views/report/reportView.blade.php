@@ -32,9 +32,9 @@
                                     <th>Hora salida</th>
                                     {{-- <th v-if="oData.tReport == oData.REP_DELAY">Retardo (min)</th>
                                     <th v-else>Horas Extra</th> --}}
-                                    <th>Horas Extra Dobles</th>
+                                    <th>Horas extra dobles</th>
                                     {{-- <th v-if="oData.tReport == oData.REP_HR_EX">Hr_progr_Sal</th> --}}
-                                    <th>Horas Extra Triples</th>
+                                    <th>Horas extra triples</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -183,11 +183,11 @@
                 "buttons": [
                         'pageLength',
                         {
-                            extend: 'excel',
+                            extend: 'excel', 
                             
                         },
                         {
-                            extend: 'copy',
+                            extend: 'copy', text: 'copiar'
                             
                         },
                         {
@@ -195,7 +195,7 @@
                             
                         },
                         {
-                            extend: 'print',
+                            extend: 'print', text: 'imprimir'
                             
                         }
                     ]

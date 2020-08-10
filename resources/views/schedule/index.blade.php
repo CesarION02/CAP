@@ -40,7 +40,7 @@ Plantilla horarios fijos
                 [ 'Mostrar 10', 'Mostrar 25', 'Mostrar 50', 'Mostrar 100', 'Mostrar todo' ]
             ],
             "buttons": [
-                    'copy', 'csv', 'excel', 'print'
+                { extend: 'copy', text: 'Copiar'}, 'csv', 'excel', { extend: 'print', text: 'Imprimir'}
                 ]
         });
     });

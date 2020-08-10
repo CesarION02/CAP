@@ -11,7 +11,7 @@
     </div>
 </div>
 <div class="form-group">
-    <label for="email" class="col-lg-3 control-label requerido">Password:</label>
+    <label for="email" class="col-lg-3 control-label requerido">Contraseña:</label>
     <div class="col-lg-8">
         <input type="password" name="password" id="password" class="form-control" value="{{old('password', $data->password ?? '')}}" required>
     </div>

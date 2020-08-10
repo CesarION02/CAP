@@ -13,7 +13,7 @@ Reporte Entradas/Salidas
         @include('includes.mensaje')
         <div class="box box-danger">
             <div class="box-header with-border">
-                <h3 class="box-title">Reporte de registros</h3>
+                <h3 class="box-title">Reporte 2</h3>
                 <div class="box-tools pull-right">
                 </div>
             </div>
@@ -106,7 +106,7 @@ Reporte Entradas/Salidas
                     [ 'Mostrar 10', 'Mostrar 25', 'Mostrar 50', 'Mostrar 100', 'Mostrar todo' ]
                 ],
                 "buttons": [
-                        'pageLength', 'copy', 'csv', 'excel', 'print'
+                        '{ extend: 'copy', text: 'Copiar'}, 'csv', 'excel', { extend: 'print', text: 'Imprimir'}
                     ]
             });
         });

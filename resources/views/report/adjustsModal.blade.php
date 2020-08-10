@@ -6,13 +6,13 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title">Ajustes de Prenómina</h4>
+        <h4 class="modal-title">Ajustes de prenómina</h4>
       </div>
       <div class="modal-body">
         <div class="row">
           <div class="col-md-offset-1 col-md-10">
             <div class="row">
-              <div class="col-md-4"><label for="">Tipo de Ajuste:*</label></div>
+              <div class="col-md-4"><label for="">Tipo de ajuste:*</label></div>
               <div class="col-md-8">
                 <select v-model="adjType" class="form-control" v-on:change="onTypeChange()">
                   <option v-for="adjT in vData.adjTypes" :value="adjT.id">@{{ adjT.type_code + '-' + adjT.type_name }}</option>

@@ -46,7 +46,7 @@ Turnos
                 [ 'Mostrar 10', 'Mostrar 25', 'Mostrar 50', 'Mostrar 100', 'Mostrar todo' ]
             ],
             "buttons": [
-                    'pageLength', 'copy', 'csv', 'excel', 'print'
+                { extend: 'copy', text: 'Copiar'}, 'csv', 'excel', { extend: 'print', text: 'Imprimir'}
                 ]
         });
     });
@@ -75,7 +75,7 @@ Turnos
                             <th>Nombre</th>
                             <th>Entrada</th>
                             <th>Salida</th>
-                            <th>Horas Trabajar</th>
+                            <th>Horas trabajar</th>
                             <th>Tiempo extra</th>
                             <th>Orden</th>
                             <th class="width70"></th>
