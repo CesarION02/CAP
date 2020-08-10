@@ -17,7 +17,7 @@
         </div>
     </div>
     <div class="form-group">
-            <label for="work_time" class="col-lg-3 control-label requerido">Horas trabajar:</label>
+            <label for="work_time" class="col-lg-3 control-label requerido">Horas jornada:</label>
             <div class="col-lg-8">
                 <input type="number" name="work_time" id="work_time" class="form-control" value="{{old('work_time', $data->work_time ?? '')}}" required>
             </div>
