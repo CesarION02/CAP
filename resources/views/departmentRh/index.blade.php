@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-Departamentos nominas
+Departamentos nóminas
 @endsection
 
 @section("scripts")
@@ -47,7 +47,22 @@ Departamentos nominas
                 [ 'Mostrar 10', 'Mostrar 25', 'Mostrar 50', 'Mostrar 100', 'Mostrar todo' ]
             ],
             "buttons": [
-                    'copy', 'csv', 'excel', 'print'
+                    {
+                        extend: 'copy',
+                        text: 'Copiar'
+                    },
+                    {
+                        extend: 'csv',
+                        text: 'CSV'
+                    },
+                    {
+                        extend: 'excel',
+                        text: 'Excel'
+                    },
+                    {
+                        extend: 'print',
+                        text: 'Imprimir'
+                    }
                 ]
         });
     });
@@ -60,7 +75,7 @@ Departamentos nominas
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Departamentos nominas</h3>
+                <h3 class="box-title">Departamentos nóminas</h3>
                 <div class="box-tools pull-right">
                 </div>
             </div>
@@ -68,7 +83,7 @@ Departamentos nominas
                 <table class="table table-striped table-bordered table-hover" id="myTable">
                     <thead>
                         <tr>
-                            <th>Nombre departamento nominas</th>
+                            <th>Nombre departamento nóminas</th>
                             <th>Departamento CAP predeterminado</th>
                             <th class="width70"></th>
                         </tr>

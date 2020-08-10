@@ -328,24 +328,28 @@
                         'pageLength',
                         {
                             extend: 'copy',
+                            text: 'Copiar',
                             exportOptions: {
                                 columns: oData.toExport
                             }
                         },
                         {
                             extend: 'csv',
+                            text: 'CSV',
                             exportOptions: {
                                 columns: oData.toExport
                             }
                         },
                         {
                             extend: 'excel',
+                            text: 'Excel',
                             exportOptions: {
                                 columns: oData.toExport
                             }
                         },
                         {
                             extend: 'print',
+                            text: 'Imprimir',
                             exportOptions: {
                                 columns: oData.toExport
                             }

@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-    Departamentos nominas
+    Departamentos nóminas
 @endsection
 
 @section("scripts")
@@ -14,7 +14,7 @@
         @include('includes.mensaje')
         <div class="box box-danger">
             <div class="box-header with-border">
-                <h3 class="box-title">Editar departamentos nominas</h3>
+                <h3 class="box-title">Editar departamentos nóminas</h3>
                 <div class="box-tools pull-right">
                     <a href="{{route('departamento_rh')}}" class="btn btn-block btn-info btn-sm">
                         <i class="fa fa-fw fa-reply-all"></i> Volver al listado

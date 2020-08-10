@@ -16,7 +16,7 @@
         </div>
 </div>
 <div class="form-group">
-    <label for="employee_id" class="col-lg-3 control-label requerido">Departamento nominas:</label>
+    <label for="employee_id" class="col-lg-3 control-label requerido">Departamento nóminas:</label>
     <div class="col-lg-8">
         @if(isset($data))
             <select id="rh_department_id" name="rh_department_id" class="form-control">
