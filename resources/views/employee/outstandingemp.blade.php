@@ -29,7 +29,7 @@ Empleados
                         <tr>
                             <th>Número empleado</th>
                             <th>Nombre empleado</th>
-                            <th>Departamento</th>
+                            <th>Departamento CAP</th>
                             <th>Puesto</th>
                             <th class="width70"></th>
                         </tr>

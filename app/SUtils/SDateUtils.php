@@ -44,31 +44,45 @@ class SDateUtils {
                 return $semanas;
             break;
             case 1:
-                $quincenas = DB::table('hrs_prepay_cut')
+                $quincenaIni = DB::table('hrs_prepay_cut')
                         ->where('is_delete','0')
-                        ->whereBetween('dt_cut', [$iIni, $iFin])
+                        //->whereBetween('dt_cut', [$iIni, $iFin])
+                        ->where('dt_cut','<=',$iIni)
+                        ->where('year','=',$iYear)
+                        ->orderBy('dt_cut','DESC')
+                        ->select('num AS num', 'dt_cut AS cut')
+                        ->get();
+                $quincenaFin = DB::table('hrs_prepay_cut')
+                        ->where('is_delete','0')
+                        ->where('dt_cut','>=',$iFin)
                         ->where('year','=',$iYear)
                         ->select('num AS num', 'dt_cut AS cut')
                         ->get();
+                $inicioquincena = $quincenaIni[0]->num;
+                $finquincena = $quincenaFin[0]->num;
                 $faltante = 0;
-                $contadorAux = count($quincenas);
-                $comparacion = $quincenas[$contadorAux-1]->cut;
-                if($comparacion != $iFin){
-                    $faltante = 1;
+                //$contadorAux = count($quincenas);
+                //$comparacion = $quincenas[$contadorAux-1]->cut;
+                //if($comparacion != $iFin){
+                    //$faltante = 1;
+                //}
+                //for($i = 0 ; $contadorAux > $i ; $i ++){
+                    //$quincena[$i] = $quincenas[$i]->num;
+                //}
+                for($i = 0 ; $finquincena > $inicioquincena ; $i++){
+                    $quincena[$i] = $inicioquincena;
+                    $inicioquincena++;
                 }
-                for($i = 0 ; $contadorAux > $i ; $i ++){
-                    $quincena[$i] = $quincenas[$i]->num;
-                }
-                if($faltante == 1){
-                    $auxiliar = $quincenas[$contadorAux-1]->num;
-                    $quincena[$contadorAux] = $auxiliar + 1;
-                }
+                //if($faltante == 1){
+                    //$auxiliar = $quincenas[$contadorAux-1]->num;
+                    //$quincena[$contadorAux] = $auxiliar + 1;
+                //}
 
                 $quincenas = DB::table('hrs_prepay_cut')
                 ->where('is_delete','0')
                 ->where('year','=',$iYear)
                 ->whereIn('num',$quincena)
-                ->select('id AS id', 'id AS id')
+                ->select('id AS id')
                 ->get();
 
                 for ($i = 0 ; count($quincenas) > $i ; $i++ ){

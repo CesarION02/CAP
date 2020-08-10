@@ -31,7 +31,7 @@ Empleados
                     <thead>
                         <tr>
                             <th>Nombre usuario</th>
-                            <th>Grupos de departamentos</th>
+                            <th>Grupos de departamentos CAP</th>
                             <th class="width70"></th>
                         </tr>
                     </thead>

@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-    Grupos de departamentos
+    Grupos de departamentos CAP
 @endsection
 
 @section('content')
@@ -9,7 +9,7 @@
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Grupos de departamentos</h3>
+                <h3 class="box-title">Grupos de departamentos CAP</h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:grupodep"])
                 <div class="box-tools pull-right">
                     <div class="row">

@@ -1,5 +1,5 @@
 <div class="form-group">
-    <label for="employee_id" class="col-lg-3 control-label requerido">Departamento predeterminado:</label>
+    <label for="employee_id" class="col-lg-3 control-label requerido">Departamento CAP predeterminado:</label>
     <div class="col-lg-8">
         @if(isset($data))
             <select id="department_id" name="department_id" class="form-control">

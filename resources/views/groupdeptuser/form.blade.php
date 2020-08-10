@@ -15,7 +15,7 @@
     </div>
 </div>
 <div class="form-group">
-    <label for="horario" class="col-lg-3 control-label">Grupos departamentos:</label>
+    <label for="horario" class="col-lg-3 control-label">Grupos departamentos CAP:</label>
     <div class="col-lg-3">
         <?php $comparacion = 0; ?>
         <select class="chosen-select" id="dgu" name="dgu[]" multiple>

@@ -34,7 +34,7 @@ Empleados
                             <th>Nombre corto</th>
                             <th>Número empleado</th>
                             <th>Manera de checar</th>
-                            <th>Departamento</th>
+                            <th>Departamento CAP</th>
                             <th>Puesto</th>
                             <th class="width70"></th>
                         </tr>
