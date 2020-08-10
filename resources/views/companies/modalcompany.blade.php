@@ -10,14 +10,14 @@
       </div>
       <div class="modal-body">
         <div class="row">
-          <div class="col-md-3">RFC</div>
+          <div class="col-md-3">RFC:*</div>
           <div class="col-md-9">
             <input type="text" class="form-control" v-model="oCompany.fiscal_id">
           </div>
         </div>
         <br>
         <div class="row">
-          <div class="col-md-3">Nombre</div>
+          <div class="col-md-3">Nombre:*</div>
           <div class="col-md-9">
             <input type="text" class="form-control" v-model="oCompany.name">
           </div>

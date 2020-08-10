@@ -11,7 +11,7 @@
         <div class="modal-body">
             <div class="row">
                 <div class="col-md-2 col-md-offset-1">
-                    <label for="">Fecha</label>
+                    <label for="">Fecha:*</label>
                 </div>
                 <div class="col-md-4">
                     <input id="st_date" type="date" v-model="dtDate" class="form-control">
@@ -26,7 +26,7 @@
             <br>
             <div v-show="! bHoliday" class="row">
                 <div class="col-md-2 col-md-offset-1">
-                    <label for="">Empleado</label>
+                    <label for="">Empleado:</label>
                 </div>
                 <div class="col-md-8">
                     <div>
@@ -45,13 +45,13 @@
                 <div class="col-md-2 col-md-offset-1">
                     <div class="row">
                         <div class="col-md-12">
-                            <label for="">Festivo</label>
+                            <label for="">Festivo:</label>
                         </div>
                     </div>
                     <br>
                     <div class="row">
                         <div class="col-md-12">
-                            <label for="">Info.</label>
+                            <label for="">Observ.:</label>
                         </div>
                     </div>
                 </div>

@@ -23,8 +23,8 @@
             <form action="{{ route(''.$sRoute.'') }}" id="theForm">
                 <div class="box-body" id="reportApp">
                     <div class="row">
-                        <div class="col-md-3">
-                            Filtrar por:
+                        <div class="col-md-3 requerido">
+                            Filtrar por:*
                         </div>
                         <div class="col-md-3 col-md-offset-1">
                             <label><input v-model="picked" v-on:change="onFilterTypeChange()" type="radio" name="optradio" value="period">Periodicidad de pago</label>
@@ -37,7 +37,7 @@
                     <div>
                         <div class="row">
                             <div class="col-md-3">
-                                Periodicidad de pago*:
+                                Periodicidad de pago:*
                             </div>
                             <div class="col-md-4 col-md-offset-1">
                                 <select :disabled="picked == 'employee'" name="pay_way" id="pay_way" class="form-control" v-model="iPayWay">
@@ -52,7 +52,7 @@
                     <div>
                         <div class="row">
                             <div class="col-md-3">
-                                Empleado*:
+                                Empleado:*
                             </div>
                             <div class="col-md-7 col-md-offset-1">
                                 <select :disabled="picked == 'period'" v-model='idEmployee' name="emp_id" form="theForm" id="emp_id" class="form-control" placeholder="Selecciona empleado...">
@@ -64,7 +64,7 @@
                     </div>
                     <div class="row">
                         <div class="col-md-3">
-                            Filtrar*:
+                            Filtrar:*
                         </div>
                         <div class="col-md-7 col-md-offset-1">
                             @include('filters.adept')

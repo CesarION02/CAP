@@ -348,7 +348,7 @@ class ReporteController extends Controller
 
         return view('report.reportsGen')
                     ->with('tReport', \SCons::REP_HR_EX)
-                    ->with('sTitle', 'Reporte de Tiempos Extra')
+                    ->with('sTitle', 'Reporte de tiempos extra')
                     ->with('sRoute', 'reportetiemposextra')
                     ->with('lEmployees', $lEmployees)
                     ->with('startOfWeek', $config->startOfWeek);
@@ -396,7 +396,7 @@ class ReporteController extends Controller
                     ->with('sStartDate', $sStartDate)
                     ->with('sEndDate', $sEndDate)
                     ->with('sPayWay', $sPayWay)
-                    ->with('sTitle', 'Reporte de Retardos')
+                    ->with('sTitle', 'Reporte de retardos')
                     ->with('lRows', $lRows);
     }
 
@@ -482,7 +482,7 @@ class ReporteController extends Controller
                     ->with('sStartDate', $sStartDate)
                     ->with('sEndDate', $sEndDate)
                     ->with('sPayWay', $sPayWay)
-                    ->with('sTitle', 'Reporte de Tiempos Extra')
+                    ->with('sTitle', 'Reporte de tiempos extra')
                     ->with('adjTypes', $adjTypes)
                     ->with('lAdjusts', $lAdjusts)
                     ->with('lEmpWrkdDays', $lEmpWrkdDays)
@@ -609,7 +609,7 @@ class ReporteController extends Controller
                         ->select('employees.id AS idEmp','incidents_day.date as Date')
                         ->get();
         return view('report.reportView')
-                    ->with('sTitle', 'Reporte de Checadas')
+                    ->with('sTitle', 'Reporte de checadas')
                     ->with('lRows', $lRows)
                     ->with('festivos', $diasFestivos)
                     ->with('incapacidades',$incapacidades)

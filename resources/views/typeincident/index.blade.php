@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-Tipo Incidentes
+Tipo incidentes
 @endsection
 
 @section("scripts")
@@ -13,7 +13,7 @@ Tipo Incidentes
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Tipo Incidentes</h3>
+                <h3 class="box-title">Tipo incidentes</h3>
                 <div class="box-tools pull-right">
                     <a href="{{route('crear_tipoincidente')}}" class="btn btn-block btn-success btn-sm">
                         <i class="fa fa-fw fa-plus-circle"></i> Nuevo registro

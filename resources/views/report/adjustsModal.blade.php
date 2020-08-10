@@ -12,7 +12,7 @@
         <div class="row">
           <div class="col-md-offset-1 col-md-10">
             <div class="row">
-              <div class="col-md-4"><label for="">Tipo de Ajuste</label></div>
+              <div class="col-md-4"><label for="">Tipo de Ajuste:*</label></div>
               <div class="col-md-8">
                 <select v-model="adjType" class="form-control" v-on:change="onTypeChange()">
                   <option v-for="adjT in vData.adjTypes" :value="adjT.id">@{{ adjT.type_code + '-' + adjT.type_name }}</option>
@@ -21,14 +21,14 @@
             </div>
             <br>
             <div class="row">
-              <div class="col-md-4"><label for="">Minutos</label></div>
+              <div class="col-md-4"><label for="">Minutos:</label></div>
               <div class="col-md-8">
                 <input v-model="overMins" :disabled="! minsEnabled" type="number" min="0" class="form-control">
               </div>
             </div>
             <br>
             <div class="row">
-              <div class="col-md-4"><label for="">Comentarios</label></div>
+              <div class="col-md-4"><label for="">Comentarios:</label></div>
               <div class="col-md-8">
                 <input v-model="comments" type="text" class="form-control">
               </div>
