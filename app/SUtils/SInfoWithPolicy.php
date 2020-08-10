@@ -1103,7 +1103,7 @@ class SInfoWithPolicy{
                         
                     }
 
-                        SInfoWithPolicy::closePeriod( $semanas[$i]->id, $sTypePay);
+                    SInfoWithPolicy::closePeriod( $semanas[$i]->id, $sTypePay, $inicio->year);
                         
                 }
             break;
@@ -1167,7 +1167,7 @@ class SInfoWithPolicy{
                         }
                     }
 
-                    SInfoWithPolicy::closePeriod( $quincenas[$i]->id, $sTypePay);    
+                    SInfoWithPolicy::closePeriod( $quincenas[$i]->id, $sTypePay, $inicio->year);    
                 }
                 
             break;
@@ -1228,11 +1228,12 @@ class SInfoWithPolicy{
         }
       }
 
-      public static function closePeriod ($num_period,$type){
+      public static function closePeriod ($num_period,$type, $year = 0){
         if( $type == 2 ){
 
             $period_processed = new period_processed();
             $period_processed->num_week = $num_period;
+            $period_processed->year = $year;
             $period_processed->is_week = 1;
             $period_processed->is_close = 0;
             $period_processed->created_by = session()->get('user_id');
