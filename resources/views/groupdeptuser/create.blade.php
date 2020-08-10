@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-Asignar Horario
+Asignar grupo departamento
 @endsection
 @section('styles1')
     <link rel="stylesheet" href="{{asset("assets/css/chosen.min.css")}}">

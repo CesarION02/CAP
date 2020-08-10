@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-Dias Festivos
+Dias festivos
 @endsection
 
 @section("scripts")
@@ -60,7 +60,7 @@ Dias Festivos
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Dias Festivos</h3>
+                <h3 class="box-title">Dias festivos</h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:diasfestivos"])
                 <div class="box-tools pull-right">
                     <a href="{{route('crear_festivo')}}" class="btn btn-block btn-success btn-sm">
@@ -73,7 +73,7 @@ Dias Festivos
                     <thead>
                         <tr>
                             <th>Nombre</th>
-                            <th>Dia</th>
+                            <th>Día</th>
                             <th>Año</th>
                             <th class="width70"></th>
                         </tr>

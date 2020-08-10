@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-Turnos
+Turno especial
 @endsection
 
 @section("scripts")

@@ -5,7 +5,7 @@
         </div>
 </div>
 <div class="form-group">
-        <label for="employee_id" class="col-lg-3 control-label requerido">Area:</label>
+        <label for="employee_id" class="col-lg-3 control-label requerido">Área:</label>
         <div class="col-lg-8">
             <select id="area_id" name="area_id" class="form-control">
                 @foreach($areas as $area => $index)
@@ -16,7 +16,7 @@
         </div>
 </div>
 <div class="form-group">
-    <label for="employee_id" class="col-lg-3 control-label requerido">Departamento RH:</label>
+    <label for="employee_id" class="col-lg-3 control-label requerido">Departamento nominas:</label>
     <div class="col-lg-8">
         @if(isset($data))
             <select id="rh_department_id" name="rh_department_id" class="form-control">

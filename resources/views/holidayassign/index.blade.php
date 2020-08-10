@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-Asignar Día Festivo
+Asignar día festivo
 @endsection
 
 @section("scripts")
@@ -64,7 +64,7 @@ Asignar Día Festivo
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Asignar Día Festivo</h3>
+                <h3 class="box-title">Asignar día festivo</h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:asignacionfestivos"])
                 <div class="box-tools pull-right">
                     <a href="{{route('crear_asignacion_festivo','1')}}" class="btn btn-block btn-success btn-sm">
@@ -74,7 +74,7 @@ Asignar Día Festivo
                         <i class="fa fa-fw fa-plus-circle"></i> Asignar por departamento
                     </a>
                     <a href="{{route('crear_asignacion_festivo','3')}}" class="btn btn-block btn-success btn-sm">
-                            <i class="fa fa-fw fa-plus-circle"></i> Asignar por area
+                            <i class="fa fa-fw fa-plus-circle"></i> Asignar por área
                         </a>
                 </div>
             </div>
@@ -82,8 +82,8 @@ Asignar Día Festivo
                 <table class="table table-striped table-bordered table-hover" id="myTable">
                     <thead>
                         <tr>
-                            <th>Area</th>
-                            <th>Departamento</th>
+                            <th>Área</th>
+                            <th>Departamento CAP</th>
                             <th>Empleado</th>
                             <th>Día</th>
                             <th>Grupo</th>

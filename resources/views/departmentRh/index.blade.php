@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-Departamentos
+Departamentos nominas
 @endsection
 
 @section("scripts")
@@ -60,7 +60,7 @@ Departamentos
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Departamentos RH</h3>
+                <h3 class="box-title">Departamentos nominas</h3>
                 <div class="box-tools pull-right">
                 </div>
             </div>
@@ -68,8 +68,8 @@ Departamentos
                 <table class="table table-striped table-bordered table-hover" id="myTable">
                     <thead>
                         <tr>
-                            <th>Nombre departamento</th>
-                            <th>Departamento predeterminado</th>
+                            <th>Nombre departamento nominas</th>
+                            <th>Departamento CAP predeterminado</th>
                             <th class="width70"></th>
                         </tr>
                     </thead>

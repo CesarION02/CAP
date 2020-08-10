@@ -17,7 +17,7 @@
         </div>
     </div>
     <div class="form-group">
-        <label for="start_date" class="col-lg-3 control-label">Fecha Inicio:</label>
+        <label for="start_date" class="col-lg-3 control-label">Fecha inicio:</label>
         <div class="col-lg-3">
             @if(isset($datas))
                 <input type="date" name="start_date" id="start_date" value="{{$datas->start_date}}" >
@@ -25,7 +25,7 @@
             <input type="date" name="start_date" id="start_date">
             @endif
         </div>  
-        <label for="departamento" class="col-lg-2 control-label">Fecha Fin:</label>
+        <label for="departamento" class="col-lg-2 control-label">Fecha fin:</label>
         <div class="col-lg-3">
             @if(isset($datas))
                 <input type="date" name="end_date" id="end_date" value="{{$datas->end_date}}" >
@@ -73,7 +73,7 @@
 
     @else
         <div class="form-group">
-            <label for="departamento" class="col-lg-3 control-label">Departamentos:</label>
+            <label for="departamento" class="col-lg-3 control-label">Departamentos CAP:</label>
             <div class="col-lg-8">              
                 <select name="departamento" id="departamento">  
                     <option value=0>Seleccionar Departamento</option>

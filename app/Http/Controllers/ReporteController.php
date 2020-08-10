@@ -126,7 +126,32 @@ class ReporteController extends Controller
             case 4:
                 $lEmployees = employees::select('id', 'name', 'num_employee')->where('is_delete', false)->get();
                 break;
-            
+            case 5:
+                $numero = session()->get('name');
+                $usuario = DB::table('users')
+                    ->where('name',$numero)
+                    ->get();
+                $dgu = DB::table('group_dept_user')
+                    ->where('user_id',$usuario[0]->id)
+                    ->select('groupdept_id AS id')
+                    ->get();
+                $Adgu = [];
+                for($i=0;count($dgu)>$i;$i++){
+                $Adgu[$i]=$dgu[$i]->id;
+                }
+                //$lEmployees = employees::select('id', 'name', 'num_employee')->where('is_delete', false)->->get(); 
+                $lEmployees = DB::table('employees')
+                        ->join('jobs','jobs.id','=','employees.job_id')
+                        ->join('departments','departments.id','=','employees.department_id')
+                        ->join('department_group','department_group.id','=','departments.dept_group_id')
+                        ->orderBy('employees.job_id')
+                        ->where('employees.is_delete','0')
+                        ->where('employees.is_active','1')
+                        ->whereIn('departments.dept_group_id',$Adgu)
+                        ->orderBy('employees.name')
+                        ->select('employees.name AS name','employees.num_employee AS num_employee','employees.id AS id')
+                        ->get();
+                break;
             default:
                 # code...
                 break;
@@ -195,6 +220,14 @@ class ReporteController extends Controller
                                     ->orderBy('e.name')
                                     ->orderBy('time');
                 break;
+            case 5:
+                $register = $register->whereIn('e.id', $values)
+                                    ->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id')
+                                    ->groupBy('date','type_id','e.name','e.num_employee')
+                                    ->orderBy('date')
+                                    ->orderBy('e.name')
+                                    ->orderBy('time');
+                break;
             
             default:
                 # code...
@@ -245,7 +278,32 @@ class ReporteController extends Controller
                                         ->orderBy('name', 'ASC')
                                         ->get();
                 break;
-            
+            case 5:
+                $numero = session()->get('name');
+                $usuario = DB::table('users')
+                        ->where('name',$numero)
+                        ->get();
+                $dgu = DB::table('group_dept_user')
+                        ->where('user_id',$usuario[0]->id)
+                        ->select('groupdept_id AS id')
+                        ->get();
+                $Adgu = [];
+                for($i=0;count($dgu)>$i;$i++){
+                    $Adgu[$i]=$dgu[$i]->id;
+                }
+                //$lEmployees = employees::select('id', 'name', 'num_employee')->where('is_delete', false)->->get(); 
+                $lEmployees = DB::table('employees')
+                            ->join('jobs','jobs.id','=','employees.job_id')
+                            ->join('departments','departments.id','=','employees.department_id')
+                            ->join('department_group','department_group.id','=','departments.dept_group_id')
+                            ->orderBy('employees.job_id')
+                            ->where('employees.is_delete','0')
+                            ->where('employees.is_active','1')
+                            ->whereIn('departments.dept_group_id',$Adgu)
+                            ->orderBy('employees.name')
+                            ->select('employees.name AS name','employees.num_employee AS num_employee','employees.id AS id')
+                            ->get();
+                break;
             default:
                 # code...
                 break;
@@ -314,7 +372,14 @@ class ReporteController extends Controller
                                     ->orderBy('e.name')
                                     ->orderBy('time');
                 break;
-            
+            case 5:
+                $register = $register->whereIn('e.id', $values)
+                                    ->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id')
+                                    ->groupBy('date','type_id','e.name','e.num_employee')
+                                    ->orderBy('date')
+                                    ->orderBy('e.name')
+                                    ->orderBy('time');
+                break;
             default:
                 # code...
                 break;
@@ -503,7 +568,7 @@ class ReporteController extends Controller
         $tipoDatos = $request->tipodato;
         $payWay = $request->way_pay;
         $id = $request->vals;
-        $prueba = SInfoWithPolicy::preProcessInfo($sStartDate,$year,$sEndDate,$payWay);
+        
         switch($request->reportType){
             case 1:
                 
@@ -527,6 +592,9 @@ class ReporteController extends Controller
                 for($i = 0 ; count($employees) > $i ; $i++){
                     $lEmployees[$i] = $employees[$i]->id; 
                 }
+                if($i == 0){
+                    return redirect('report/datosreportestps/1/2')->with('mensaje','La periodicidad de pago tiene un error');
+                }
             break;
             case 2:
                 $employees = DB::table('employees')
@@ -548,6 +616,9 @@ class ReporteController extends Controller
                 for($i = 0 ; count($employees) > $i ; $i++){
                     $lEmployees[$i] = $employees[$i]->id; 
                 }
+                if($i == 0){
+                    return redirect('report/datosreportestps/2/2')->with('mensaje','La periodicidad de pago tiene un error');
+                }
             break;
             case 3:
                 $employees = DB::table('employees')
@@ -566,12 +637,32 @@ class ReporteController extends Controller
                 for($i = 0 ; count($employees) > $i ; $i++){
                     $lEmployees[$i] = $employees[$i]->id; 
                 }
+                if($i == 0){
+                    return redirect('report/datosreportestps/3/2')->with('mensaje','La periodicidad de pago tiene un error');
+                }
             break;
             case 4:
+                $comprobacion = DB::table('employees')
+                        ->orderBy('employees.job_id')
+                        ->where('employees.is_delete','0')
+                        ->where('employees.is_active', true)
+                        ->where('employees.way_pay_id',$payWay);
+                for($i = 0 ; count($id) > $i ; $i++ ){
+                    if($i != 0){
+                        $comprobacion = $comprobacion->OrWhere('employees.id',$id[$i]);
+                    }else{
+                        $comprobacion = $comprobacion->where('employees.id',$id[$i]);
+                    }
+                }
+                $comprobacion = $comprobacion->get();
+                if(count($comprobacion) == 0){
+                    return redirect('report/datosreportestps/4/2')->with('mensaje','La periodicidad de pago tiene un error');    
+                }
                 $lEmployees = $id; 
             break;
             
         }
+        $prueba = SInfoWithPolicy::preProcessInfo($sStartDate,$year,$sEndDate,$payWay);
         //$lEmployees[0] = 32; 
         $lRows = DB::table('processed_data')
                         ->join('employees','employees.id','=','processed_data.employee_id')
@@ -611,7 +702,6 @@ class ReporteController extends Controller
         return view('report.reportView')
                     ->with('sTitle', 'Reporte de checadas')
                     ->with('lRows', $lRows)
-                    ->with('festivos', $diasFestivos)
                     ->with('incapacidades',$incapacidades)
                     ->with('vacaciones',$vacaciones)
                     ->with('tipo', $tipoDatos);

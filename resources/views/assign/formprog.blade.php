@@ -1,5 +1,5 @@
 <div class="form-group">
-    <label for="start_date" class="col-lg-3 control-label">Fecha Inicio:</label>
+    <label for="start_date" class="col-lg-3 control-label">Fecha inicio:</label>
     <div class="col-lg-3">
         @if(isset($datas))
             <input type="date" name="start_date" id="start_date" value="{{$datas->start_date}}" >
@@ -7,7 +7,7 @@
         <input type="date" name="start_date" id="start_date">
         @endif
     </div>  
-    <label for="departamento" class="col-lg-2 control-label">Fecha Fin:</label>
+    <label for="departamento" class="col-lg-2 control-label">Fecha fin:</label>
     <div class="col-lg-3">
         @if(isset($datas))
             <input type="date" name="end_date" id="end_date" value="{{$datas->end_date}}" >
@@ -29,7 +29,7 @@
 </div>
 <div class="form-group">
     <label for="horario" class="col-lg-3 control-label">Plantilla:</label>
-    <div class="col-lg-3">
+    <div class="col-lg-4">
         <select name="horario1" id="horario1">
             @foreach($schedule_template as $schedule_template => $index)
                 @if(isset($datas))

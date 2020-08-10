@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-    Asignacion Horarios
+    Asignacion horarios
 @endsection
 
 @section("scripts")

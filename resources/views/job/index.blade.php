@@ -73,7 +73,7 @@ Puestos
                     <thead>
                         <tr>
                             <th>Nombre puesto</th>
-                            <th>Departamento</th>
+                            <th>Departamento CAP</th>
                             <th class="width70"></th>
                         </tr>
                     </thead>

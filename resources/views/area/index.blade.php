@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-Areas
+Áreas
 @endsection
 
 @section("scripts")
@@ -60,7 +60,7 @@ Areas
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Areas</h3>
+                <h3 class="box-title">Áreas</h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:areas"])
                 <div class="box-tools pull-right">
                     <a href="{{route('crear_area')}}" class="btn btn-block btn-success btn-sm">
@@ -72,7 +72,7 @@ Areas
                 <table class="table table-striped table-bordered table-hover" id="myTable">
                     <thead>
                         <tr>
-                            <th>Nombre area</th>
+                            <th>Nombre área</th>
                             <th class="width70"></th>
                         </tr>
                     </thead>

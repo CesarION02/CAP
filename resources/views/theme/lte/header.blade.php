@@ -31,13 +31,13 @@
               <li class="user-header">
                 <p>
                   {{session()->get('name')}} - {{session()->get('user')}}
-                  <small>Member since Nov. 2012</small>
+                  
                 </p>
               </li>
               <!-- Menu Footer-->
               <li class="user-footer">
                 <div class="pull-left">
-                  <a href="#" class="btn btn-default btn-flat">Profile</a>
+                  
                 </div>
                 <div class="pull-right">
                   <a href="{{route('logout')}}" class="btn btn-default btn-flat">Salir</a>
@@ -46,9 +46,7 @@
             </ul>
           </li>
           <!-- Control Sidebar Toggle Button -->
-          <li>
-            <a href="#" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a>
-          </li>
+          
         </ul>
       </div>
     </nav>

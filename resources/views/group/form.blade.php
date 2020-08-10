@@ -1,5 +1,5 @@
 <div class="form-group">
-    <label for="nombre" class="col-lg-3 control-label requerido">Nombre Grupo:</label>
+    <label for="nombre" class="col-lg-3 control-label requerido">Nombre grupo:</label>
     <div class="col-lg-8">
     <input type="text" name="name" id="name" class="form-control" required value="<?php if(isset($group)){ echo $group[0]->name;}else{echo " ";} ?>" />
     </div>

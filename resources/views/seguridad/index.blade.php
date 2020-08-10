@@ -29,11 +29,11 @@
 <body class="hold-transition login-page">
     <div class="login-box">
         <div class="login-logo">
-            <a href="{{route('inicio')}}">Checador </a>
+            <a href="{{route('inicio')}}">CAP Administrador </a>
         </div>
         <!-- /.login-logo -->
         <div class="login-box-body">
-            <p class="login-box-msg">Inicio su session</p>
+            <p class="login-box-msg">Inicie su sesion</p>
             @if ($errors->any())
                 <div class="alert alert-danger alert-dismissible">
                     <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
@@ -47,7 +47,7 @@
             <form action="{{route('login_post')}}" method="POST" autocomplete="off">
                 @csrf
                 <div class="form-group has-feedback">
-                    <input type="text" name="email" class="form-control" value="{{old('email')}}" placeholder="Email">
+                    <input type="text" name="email" class="form-control" value="{{old('email')}}" placeholder="correo">
                     <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
                 </div>
                 <div class="form-group has-feedback">
@@ -58,7 +58,7 @@
                     <div class="col-xs-8"></div>
                     <!-- /.col -->
                     <div class="col-xs-4">
-                        <button type="submit" class="btn btn-primary btn-block btn-flat">Login</button>
+                        <button type="submit" class="btn btn-primary btn-block btn-flat">Entrar</button>
                     </div>
                     <!-- /.col -->
                 </div>
@@ -72,5 +72,8 @@
     <!-- Bootstrap 3.3.7 -->
     <script src="{{asset("assets/$theme/bower_components/bootstrap/dist/js/bootstrap.min.js")}}"></script>
 </body>
+<footer>
+    <center><strong>Copyright &copy; Software Aplicado.</strong> Todos los derechos reservados.</center>
+</footer>
 
 </html>

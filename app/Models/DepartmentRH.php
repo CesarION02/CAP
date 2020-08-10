@@ -11,7 +11,8 @@ class DepartmentRH extends Model
                             'code',
                             'name',
                             'external_id',
-                            'is_delete'
+                            'is_delete',
+                            'default_dept_id'
                         ];
     
     public function department(){

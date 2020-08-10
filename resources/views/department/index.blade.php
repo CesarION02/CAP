@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-Departamentos
+Departamentos CAP
 @endsection
 
 @section("scripts")
@@ -60,7 +60,7 @@ Departamentos
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Departamentos</h3>
+                <h3 class="box-title">Departamentos CAP</h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:departamentos"])
                 <div class="box-tools pull-right">
                     <a href="{{route('crear_departamento')}}" class="btn btn-block btn-success btn-sm">
@@ -73,8 +73,8 @@ Departamentos
                     <thead>
                         <tr>
                             <th>Nombre departamento</th>
-                            <th>Area</th>
-                            <th>Departamento RH</th>
+                            <th>Área</th>
+                            <th>Departamento nominas</th>
                             <th class="width70"></th>
                         </tr>
                     </thead>

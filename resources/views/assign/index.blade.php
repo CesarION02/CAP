@@ -1,15 +1,49 @@
 @extends("theme.$theme.layout")
 @section('title')
-Asignar Plantilla
+Asignar plantilla
 @endsection
 
 @section("scripts")
 <script src="{{asset("assets/pages/scripts/admin/datatable/index.js")}}" type="text/javascript"></script>
 <script src="{{asset("assets/pages/scripts/admin/funciones.js")}}" type="text/javascript"></script>
 <script>
-    $(document).ready( function () {
-    $('#myTable').DataTable();
-    } );
+        $(document).ready( function () {
+            $('#myTable').DataTable({
+                "language": {
+                    "sProcessing":     "Procesando...",
+                    "sLengthMenu":     "Mostrar _MENU_ registros",
+                    "sZeroRecords":    "No se encontraron resultados",
+                    "sEmptyTable":     "Ningún dato disponible en esta tabla",
+                    "sInfo":           "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+                    "sInfoEmpty":      "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered":   "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix":    "",
+                    "sSearch":         "Buscar:",
+                    "sUrl":            "",
+                    "sInfoThousands":  ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst":    "Primero",
+                        "sLast":     "Último",
+                        "sNext":     "Siguiente",
+                        "sPrevious": "Anterior"
+                    },
+                    "oAria": {
+                        "sSortAscending":  ": Activar para ordenar la columna de manera ascendente",
+                        "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                    }
+                },
+                "colReorder": true,
+                "dom": 'Bfrtip',
+                "lengthMenu": [
+                    [ 10, 25, 50, 100, -1 ],
+                    [ 'Mostrar 10', 'Mostrar 25', 'Mostrar 50', 'Mostrar 100', 'Mostrar todo' ]
+                ],
+                "buttons": [
+                        'copy', 'csv', 'excel', 'print'
+                    ]
+            });
+        });
 
     $(document).ready(function() {
         $('.js-example-basic-multiple').select2();
@@ -24,7 +58,7 @@ Asignar Plantilla
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Asignar Plantilla Horarios</h3>
+                <h3 class="box-title">Asignar plantilla horarios</h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:asignacionhorario"])
                 <div class="box-tools pull-right">
                     <a href="{{route('crear_asignacion','1')}}" class="btn btn-block btn-success btn-sm">
@@ -39,12 +73,12 @@ Asignar Plantilla
                 <table class="table table-striped table-bordered table-hover" id="myTable">
                     <thead>
                         <tr>
-                            <th>Departamento</th>
+                            <th>Departamento CAP</th>
                             <th>Empleado</th>
                             <th>Horario</th>
                             <th>Grupo</th>
-                            <th>Fecha Inicio</th>
-                            <th>Fecha Fin</th>
+                            <th>Fecha inicio</th>
+                            <th>Fecha fin</th>
                             <th class="width70"></th>
                         </tr>
                     </thead>
