@@ -33,7 +33,7 @@
         </div>
         <!-- /.login-logo -->
         <div class="login-box-body">
-            <p class="login-box-msg">Inicie su sesion</p>
+            <p class="login-box-msg">Inicie su sesión</p>
             @if ($errors->any())
                 <div class="alert alert-danger alert-dismissible">
                     <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
@@ -47,7 +47,7 @@
             <form action="{{route('login_post')}}" method="POST" autocomplete="off">
                 @csrf
                 <div class="form-group has-feedback">
-                    <input type="text" name="email" class="form-control" value="{{old('email')}}" placeholder="correo">
+                    <input type="text" name="email" class="form-control" value="{{old('email')}}" placeholder="Correo">
                     <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
                 </div>
                 <div class="form-group has-feedback">
