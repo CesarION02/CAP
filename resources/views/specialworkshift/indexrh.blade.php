@@ -1,10 +1,18 @@
 @extends("theme.$theme.layout")
 @section('title')
-Grupos de turnos
+Turno especial
 @endsection
 
 @section("scripts")
 <script src="{{asset("assets/pages/scripts/admin/datatable/index.js")}}" type="text/javascript"></script>
+<script src="{{ asset("dt/datatables.js") }}" type="text/javascript"></script>
+<script src="{{ asset('dt/dataTables.buttons.min.js') }}"></script>
+	<script src="{{ asset('dt/buttons.flash.min.js') }}"></script>
+	<script src="{{ asset('dt/jszip.min.js') }}"></script>
+	<script src="{{ asset('dt/pdfmake.min.js') }}"></script>
+	<script src="{{ asset('dt/vfs_fonts.js') }}"></script>
+	<script src="{{ asset('dt/buttons.html5.min.js') }}"></script>
+	<script src="{{ asset('dt/buttons.print.min.js') }}"></script>
 <script>
     $(document).ready( function () {
         $('#myTable').DataTable({
@@ -32,33 +40,18 @@ Grupos de turnos
                     "sSortDescending": ": Activar para ordenar la columna de manera descendente"
                 }
             },
-            "colReorder": true,
-            "dom": 'Bfrtip',
+           
             "lengthMenu": [
                 [ 10, 25, 50, 100, -1 ],
                 [ 'Mostrar 10', 'Mostrar 25', 'Mostrar 50', 'Mostrar 100', 'Mostrar todo' ]
             ],
             "buttons": [
-                    {
-                        extend: 'copy',
-                        text: 'Copiar'
-                    },
-                    {
-                        extend: 'csv',
-                        text: 'CSV'
-                    },
-                    {
-                        extend: 'excel',
-                        text: 'Excel'
-                    },
-                    {
-                        extend: 'print',
-                        text: 'Imprimir'
-                    }
+                { extend: 'copy', text: 'Copiar'}, 'csv', 'excel', { extend: 'print', text: 'Imprimir'}
                 ]
         });
     });
 </script>
+
 @endsection
 
 @section('content')
@@ -67,10 +60,9 @@ Grupos de turnos
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Grupos de turnos</h3>
-                @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:grupoturnos"])
+                <h3 class="box-title">Turnos especiales</h3>
                 <div class="box-tools pull-right">
-                    <a href="{{route('crear_grupo')}}" class="btn btn-block btn-success btn-sm">
+                    <a href="{{route('crear_turno_especial')}}" class="btn btn-block btn-success btn-sm">
                         <i class="fa fa-fw fa-plus-circle"></i> Nuevo
                     </a>
                 </div>
@@ -79,25 +71,24 @@ Grupos de turnos
                 <table class="table table-striped table-bordered table-hover" id="myTable">
                     <thead>
                         <tr>
-                            <th>Nombre grupo</th>
+                            <th>Empleado</th>
+                            <th>Fecha</th>
+                            <th>Turno</th>
+                            <th>Aprobado</th>
                             <th class="width70"></th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($datas as $data)
                         <tr>
-                            <td>{{$data->name}}</td>
+                            <td>{{$data->nameEmp}}</td>
+                            <td>{{$data->date}}</td>
+                            <td>{{$data->nameWork}}</td>
+                            <td>{{$data->is_approved ? "SÍ" : "NO"}}</td>
                             <td>
-                                <a href="{{route('ver_grupo', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Ver este registro">
-                                    <i class="fa fa-fw fa-binoculars"></i>
-                                </a>
-                                <a href="{{route('editar_grupo', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
-                                    <i class="fa fa-fw fa-pencil"></i>
-                                </a>
-                                <form action="{{route('eliminar_grupo', ['id' => $data->id])}}" class="d-inline form-eliminar" method="POST">
-                                    @csrf @method("delete")
-                                    <button type="submit" class="btn-accion-tabla eliminar tooltipsC" title="Eliminar este registro">
-                                        <i class="fa fa-fw fa-trash text-danger"></i>
+                                <form action="{{ route('aprobar_turno_especial', ['id' => $data->id]) }}" class="d-inline" method="PUT">
+                                    <button type="submit" class="btn-accion-tabla" title="Aprobar/Desaprobar turno especial">
+                                        <i class="{{ $data->is_approved ? 'glyphicon glyphicon-ban-circle' : 'glyphicon glyphicon-ok' }}"></i>
                                     </button>
                                 </form>
                             </td>

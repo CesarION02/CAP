@@ -5,7 +5,7 @@
     </div>
 </div>
 <div class="form-group">
-    <label for="nombre" class="col-lg-3 control-label">Nombre:</label>
+    <label for="nombre" class="col-lg-3 control-label">Nombre empleado:</label>
     <div class="col-lg-8">
     <input type="text" name="name" id="name" class="form-control" value="{{old('name', $data->name ?? '')}}" disabled/>
     </div>

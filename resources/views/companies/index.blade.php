@@ -15,7 +15,7 @@
                     <div class="row">
                         <div class="col-md-2 col-md-offset-10">
                             <button class="btn btn-block btn-success btn-sm" v-on:click="createCompany()">
-                                <i class="fa fa-fw fa-plus-circle"></i> Nuevo registro
+                                <i class="fa fa-fw fa-plus-circle"></i> Nuevo
                             </button>
                         </div>
                     </div>
@@ -46,7 +46,7 @@
                         <tr>
                             <th>Empresa</th>
                             <th>RFC</th>
-                            <th>Acciones</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -59,7 +59,7 @@
                             </td>
                             <td>
                                 <button v-on:click="editCompany(company)" 
-                                    class="btn-accion-tabla tooltipsC" title="Editar este registro">
+                                    class="btn-accion-tabla tooltipsC" title="Modificar este registro">
                                     <i class="fa fa-fw fa-pencil"></i>
                                 </button>
                                 <button v-show="! company.is_delete" v-on:click="prevDeleteCompany(company)" 

@@ -17,7 +17,7 @@
         </div>
         <br>
         <div class="row">
-          <div class="col-md-3">Nombre:*</div>
+          <div class="col-md-3">Nombre empresa:*</div>
           <div class="col-md-9">
             <input type="text" class="form-control" v-model="oCompany.name">
           </div>

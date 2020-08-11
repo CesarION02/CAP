@@ -46,7 +46,7 @@
                         <tr>
                             <th>Grupo</th>
                             <th>Departamentos asignados</th>
-                            <th>Acciones</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -59,7 +59,7 @@
                                     <i class="glyphicon glyphicon-list-alt"></i>
                                 </button>
                                 <button v-on:click="editGrpModal(group)" 
-                                    class="btn-accion-tabla tooltipsC" title="Editar este registro">
+                                    class="btn-accion-tabla tooltipsC" title="Modificar este registro">
                                     <i class="fa fa-fw fa-pencil"></i>
                                 </button>
                                 <button v-show="! group.is_delete" v-on:click="prevDeleteGroup(group)" 

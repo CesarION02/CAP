@@ -21,7 +21,7 @@ Usuarios
                 <h3 class="box-title">Usuarios</h3>
                 <div class="box-tools pull-right">
                     <a href="{{route('crear_usuario')}}" class="btn btn-block btn-success btn-sm">
-                        <i class="fa fa-fw fa-plus-circle"></i> Nuevo registro
+                        <i class="fa fa-fw fa-plus-circle"></i> Nuevo
                     </a>
                 </div>
             </div>
@@ -40,7 +40,7 @@ Usuarios
                             <td>{{$data->name}}</td>
                             <td>{{$data->email}}</td>
                             <td>
-                                <a href="{{route('editar_usuario', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Editar este registro">
+                                <a href="{{route('editar_usuario', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
                                     <i class="fa fa-fw fa-pencil"></i>
                                 </a>
                                 <form action="{{route('eliminar_usuario', ['id' => $data->id])}}" class="d-inline form-eliminar" method="POST">

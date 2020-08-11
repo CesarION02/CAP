@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-Tipo incidentes
+Tipo incidencias
 @endsection
 
 @section("scripts")
@@ -16,7 +16,7 @@ Tipo incidentes
                 <h3 class="box-title">Tipo incidentes</h3>
                 <div class="box-tools pull-right">
                     <a href="{{route('crear_tipoincidente')}}" class="btn btn-block btn-success btn-sm">
-                        <i class="fa fa-fw fa-plus-circle"></i> Nuevo registro
+                        <i class="fa fa-fw fa-plus-circle"></i> Nuevo
                     </a>
                 </div>
             </div>
@@ -33,7 +33,7 @@ Tipo incidentes
                         <tr>
                             <td>{{$data->name}}</td>
                             <td>
-                                <a href="{{route('editar_tipoincidente', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Editar este registro">
+                                <a href="{{route('editar_tipoincidente', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
                                     <i class="fa fa-fw fa-pencil"></i>
                                 </a>
                                 <form action="{{route('eliminar_tipoincidente', ['id' => $data->id])}}" class="d-inline form-eliminar" method="POST">

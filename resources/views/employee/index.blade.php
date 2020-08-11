@@ -71,7 +71,7 @@ Empleados
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:empleados"])
                 <div class="box-tools pull-right">
                     <!--<a href="{{route('crear_empleado')}}" class="btn btn-block btn-success btn-sm">
-                        <i class="fa fa-fw fa-plus-circle"></i> Nuevo registro
+                        <i class="fa fa-fw fa-plus-circle"></i> Nuevo
                     </a>!-->
                 </div>
             </div>
@@ -98,7 +98,7 @@ Empleados
                             <td>{{$data->department == null ? "" : $data->department->name}}</td>
                             <td>{{$data->job == null ? "" : $data->job->name}}</td>
                             <td>
-                                <a href="{{route('editar_empleado', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Editar este registro">
+                                <a href="{{route('editar_empleado', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
                                     <i class="fa fa-fw fa-pencil"></i>
                                 </a>
                                 <form action="{{route('eliminar_empleado', ['id' => $data->id])}}" class="d-inline form-eliminar" method="POST">

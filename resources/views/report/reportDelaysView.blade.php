@@ -58,7 +58,7 @@
                                     <th v-if="vData.tReport == vData.REP_HR_EX">Prima Dominical</th>
                                     <th v-if="vData.tReport == vData.REP_HR_EX">Descanso</th>
                                     <th v-if="vData.tReport == vData.REP_HR_EX">Observaciones</th>
-                                    <th>Incidentes</th>
+                                    <th>Incidencias</th>
                                     <th>Ajustes</th>
                                 </tr>
                             </thead>

@@ -16,7 +16,7 @@ Roles
                 <h3 class="box-title">Roles</h3>
                 <div class="box-tools pull-right">
                     <a href="{{route('crear_rol')}}" class="btn btn-block btn-success btn-sm">
-                        <i class="fa fa-fw fa-plus-circle"></i> Nuevo registro
+                        <i class="fa fa-fw fa-plus-circle"></i> Nuevo
                     </a>
                 </div>
             </div>
@@ -33,7 +33,7 @@ Roles
                         <tr>
                             <td>{{$data->name}}</td>
                             <td>
-                                <a href="{{route('editar_rol', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Editar este registro">
+                                <a href="{{route('editar_rol', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
                                     <i class="fa fa-fw fa-pencil"></i>
                                 </a>
                                 <form action="{{route('eliminar_rol', ['id' => $data->id])}}" class="d-inline form-eliminar" method="POST">

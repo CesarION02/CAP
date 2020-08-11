@@ -57,7 +57,7 @@ Plantilla horarios fijos
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:platillahorario"])
                 <div class="box-tools pull-right">
                     <a href="{{route('crear_plantilla')}}" class="btn btn-block btn-success btn-sm">
-                        <i class="fa fa-fw fa-plus-circle"></i> Nuevo registro
+                        <i class="fa fa-fw fa-plus-circle"></i> Nuevo
                     </a>
                 </div>
             </div>
@@ -89,7 +89,7 @@ Plantilla horarios fijos
                                         @endif
                                     <?php $contador++;?>
                                     @endfor
-                                        <td><a href="{{route('editar_plantilla', ['id' => $datas[$contador-1]->idSchedule])}}" class="btn-accion-tabla tooltipsC" title="Editar este registro"><i class="fa fa-fw fa-pencil"></i></a>
+                                        <td><a href="{{route('editar_plantilla', ['id' => $datas[$contador-1]->idSchedule])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro"><i class="fa fa-fw fa-pencil"></i></a>
                                         <form action="{{route('eliminar_plantilla', ['id' => $datas[$contador-1]->idSchedule])}}" class="d-inline form-eliminar" method="POST">
                                         @csrf @method("delete")
                                         <button type="submit" class="btn-accion-tabla eliminar tooltipsC" title="Eliminar este registro">

@@ -50,7 +50,7 @@ Programacion de turnos
                       <div class="col-md-6"><button id="nuevo" name="nuevo" disabled onclick="new_shiftprogramming()"><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span></button> <input type="date" id="fechaini" name="fechaini"><input type="date" id="fechafin" name="fechafin" readonly></div>
                       @if(isset($newest))
                         <div class="col-md-3">
-                            <button class="btn btn-warning" id="editar" name="editar" onclick="editShift()"><span class="glyphicon glyphicon-edit" aria-hidden="true"> Editar más reciente</span></button>
+                            <button class="btn btn-warning" id="editar" name="editar" onclick="editShift()"><span class="glyphicon glyphicon-edit" aria-hidden="true"> Modificar más reciente</span></button>
                         </div>
                       @endif
                     </div>

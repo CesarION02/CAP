@@ -94,7 +94,7 @@ Departamentos nóminas
                             <td>{{$data->name}}</td>
                             <td>{{$data->default_dept->name}}</td>
                             <td>
-                                <a href="{{route('editar_departamento_rh', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Editar este registro">
+                                <a href="{{route('editar_departamento_rh', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
                                     <i class="fa fa-fw fa-pencil"></i>
                                 </a>
                             </td>
