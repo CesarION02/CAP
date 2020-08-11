@@ -79,7 +79,7 @@ Dias festivos
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:diasfestivos"])
                 <div class="box-tools pull-right">
                     <a href="{{route('crear_festivo')}}" class="btn btn-block btn-success btn-sm">
-                        <i class="fa fa-fw fa-plus-circle"></i> Nuevo registro
+                        <i class="fa fa-fw fa-plus-circle"></i> Nuevo
                     </a>
                 </div>
             </div>
@@ -100,7 +100,7 @@ Dias festivos
                             <td>{{$data->fecha}}</td>
                             <td>{{$data->year}}</td>
                             <td>
-                                <a href="{{route('editar_festivo', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Editar este registro">
+                                <a href="{{route('editar_festivo', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
                                     <i class="fa fa-fw fa-pencil"></i>
                                 </a>
                                 <form action="{{route('eliminar_festivo', ['id' => $data->id])}}" class="d-inline form-eliminar" method="POST">

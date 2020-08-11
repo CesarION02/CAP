@@ -47,10 +47,16 @@
                 [ 'Mostrar 10', 'Mostrar 25', 'Mostrar 50', 'Mostrar 100', 'Mostrar todo' ]
             ],
             "buttons": [
-                {
-                    extend: 'copy',
-                    text: 'Copiar'
-                }, 'csv', 'excel', 'print'
+                    {
+                        extend: 'copy',
+                        text: 'Copiar'
+                    }, 
+                    'csv', 
+                    'excel', 
+                    {
+                        extend: 'print',
+                        text: 'Imprimir'
+                    }
                 ]
         });
     });
@@ -67,7 +73,7 @@
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:areas"])
                 <div class="box-tools pull-right">
                     <a href="{{route('crear_area')}}" class="btn btn-block btn-success btn-sm">
-                        <i class="fa fa-fw fa-plus-circle"></i> Nuevo registro
+                        <i class="fa fa-fw fa-plus-circle"></i> Nuevo
                     </a>
                 </div>
             </div>
@@ -84,7 +90,7 @@
                         <tr>
                             <td>{{$data->name}}</td>
                             <td>
-                                <a href="{{route('editar_area', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Editar este registro">
+                                <a href="{{route('editar_area', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
                                     <i class="fa fa-fw fa-pencil"></i>
                                 </a>
                                 <form action="{{route('eliminar_area', ['id' => $data->id])}}" class="d-inline form-eliminar" method="POST">

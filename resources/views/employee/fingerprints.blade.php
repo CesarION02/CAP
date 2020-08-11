@@ -100,7 +100,7 @@ Empleados
                                 @endif
                             
                             <td>
-                                <a href="{{route('editarhuella', ['id' => $employee->idEmployee])}}" class="btn-accion-tabla tooltipsC" title="Editar este registro">
+                                <a href="{{route('editarhuella', ['id' => $employee->idEmployee])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
                                     <i class="fa fa-fw fa-pencil"></i>
                                 </a>
                                 <form action="{{route('desactivar', ['id' => $employee->idEmployee])}}" class="d-inline form-eliminar" method="POST">

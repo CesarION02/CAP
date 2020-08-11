@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-Incidentes
+Incidencias
 @endsection
 
 @section("scripts")
@@ -12,11 +12,11 @@ Incidentes
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Incidentes</h3>
+                <h3 class="box-title">Incidencias</h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:nolaborables"])
                 <div class="box-tools pull-right">
                     <a href="{{ route('crear_incidente', $incidentType) }}" class="btn btn-block btn-success btn-sm">
-                        <i class="fa fa-fw fa-plus-circle"></i> Nuevo registro
+                        <i class="fa fa-fw fa-plus-circle"></i> Nuevo
                     </a>
                 </div>
             </div>
@@ -24,7 +24,7 @@ Incidentes
                 <table class="table table-striped table-bordered table-hover" id="tabla-data">
                     <thead>
                         <tr>
-                            <th>Tipo incidente</th>
+                            <th>Tipo incidencia</th>
                             <th>Fecha inicio</th>
                             <th>Fecha fin</th>
                             <th>Empleado</th>
@@ -40,7 +40,7 @@ Incidentes
                             <td>{{$data->employee->name}}</td>
                             
                             <td>
-                                <a href="{{route('editar_incidente', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Editar este registro">
+                                <a href="{{route('editar_incidente', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
                                     <i class="fa fa-fw fa-pencil"></i>
                                 </a>
                                 <form action="{{route('eliminar_incidente', ['id' => $data->id])}}" class="d-inline form-eliminar" method="POST">

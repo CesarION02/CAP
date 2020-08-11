@@ -94,7 +94,7 @@ Empleados
                             <td>{{$employee->nameDepartment}}</td>
                             <td>{{$employee->nameJob}}</td>
                             <td>
-                                <a href="{{route('editar_nombrecorto', ['id' => $employee->idEmployee])}}" class="btn-accion-tabla tooltipsC" title="Editar este registro">
+                                <a href="{{route('editar_nombrecorto', ['id' => $employee->idEmployee])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
                                     <i class="fa fa-fw fa-pencil"></i>
                                 </a>
                             </td>

@@ -16,7 +16,7 @@ Usuarios Roles
                 <h3 class="box-title">Usuario Roles</h3>
                 <div class="box-tools pull-right">
                     <a href="{{route('crear_rol_user')}}" class="btn btn-block btn-success btn-sm">
-                        <i class="fa fa-fw fa-plus-circle"></i> Nuevo registro
+                        <i class="fa fa-fw fa-plus-circle"></i> Nuevo
                     </a>
                 </div>
             </div>

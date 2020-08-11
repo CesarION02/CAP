@@ -63,7 +63,7 @@ Turno especial
                 <h3 class="box-title">Turnos especiales</h3>
                 <div class="box-tools pull-right">
                     <a href="{{route('crear_turno_especial')}}" class="btn btn-block btn-success btn-sm">
-                        <i class="fa fa-fw fa-plus-circle"></i> Nuevo registro
+                        <i class="fa fa-fw fa-plus-circle"></i> Nuevo
                     </a>
                 </div>
             </div>
@@ -74,6 +74,7 @@ Turno especial
                             <th>Empleado</th>
                             <th>Fecha</th>
                             <th>Turno</th>
+                            <th>Aprobado</th>
                             <th class="width70"></th>
                         </tr>
                     </thead>
@@ -83,8 +84,9 @@ Turno especial
                             <td>{{$data->nameEmp}}</td>
                             <td>{{$data->date}}</td>
                             <td>{{$data->nameWork}}</td>
+                            <td>{{$data->is_approved ? "SÍ" : "NO"}}</td>
                             <td>
-                                <a href="{{route('editar_turno_especial', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Editar este registro">
+                                <a href="{{route('editar_turno_especial', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
                                     <i class="fa fa-fw fa-pencil"></i>
                                 </a>
                                 <form action="{{route('eliminar_turno_especial', ['id' => $data->id])}}" class="d-inline form-eliminar" method="POST">

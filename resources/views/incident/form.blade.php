@@ -1,5 +1,5 @@
 <div class="form-group">
-    <label for="Tipoincidente" class="col-lg-3 control-label requerido">Tipo Incidente:</label>
+    <label for="Tipoincidente" class="col-lg-3 control-label requerido">Tipo Incidencia:</label>
     <div class="col-lg-8">
         <select id="type_incidents_id" name="type_incidents_id" class="form-control">
             @foreach($incidents as $type => $index)

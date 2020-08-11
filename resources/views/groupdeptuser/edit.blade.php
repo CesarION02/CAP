@@ -23,7 +23,7 @@
                 <h3 class="box-title">Grupo departamentos - usuarios</h3>
                 <div class="box-tools pull-right">
                     <a href="{{route('dgu')}}" class="btn btn-block btn-info btn-sm">
-                        <i class="fa fa-fw fa-reply-all"></i> Volver al listado
+                        <i class="fa fa-fw fa-reply-all"></i> Regresar
                     </a>
                 </div>
             </div>

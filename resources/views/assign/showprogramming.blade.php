@@ -98,7 +98,7 @@ Plantilla horarios
                                     @endif
                                 </td>
                                 <td>
-                                    <a href="{{route('editar_programacion', ['id' => $assign->idAssign])}}" class="btn-accion-tabla tooltipsC" title="Ver/Editar este registro">
+                                    <a href="{{route('editar_programacion', ['id' => $assign->idAssign])}}" class="btn-accion-tabla tooltipsC" title="Ver/Modificar este registro">
                                         <i class="fa fa-fw fa-pencil"></i>
                                     </a>
                                     <form action="{{route('eliminar', ['id' => $assign->idAssign])}}" class="d-inline form-eliminar" method="POST">

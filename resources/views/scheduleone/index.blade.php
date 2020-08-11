@@ -58,7 +58,7 @@
                             <th>Fecha</th>
                             <th>Num</th>
                             <th>Empleado</th>
-                            <th>Acciones</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -72,7 +72,7 @@
                             </td>
                             <td>
                                 <button v-on:click="onShowEditModal(schedule)" 
-                                        class="btn-accion-tabla tooltipsC" title="Editar este registro">
+                                        class="btn-accion-tabla tooltipsC" title="Modificar este registro">
                                     <i class="fa fa-fw fa-pencil"></i>
                                 </button>
                                 <button v-on:click="prevDeleteAssignament(schedule)" 
