@@ -83,7 +83,7 @@ Plantilla horarios fijos
                                     <td>{{$datas[$contador]->nameTem}}</td>
                                     @for($j = 0 ; 7 > $j ; $j++)    
                                         @if($datas[$contador]->entry == null)
-                                            <td>Inhabil</td>
+                                            <td>Inhábil</td>
                                         @else
                                             <td>{{$datas[$contador]->entry.'-'.$datas[$contador]->departure}}</td>
                                         @endif

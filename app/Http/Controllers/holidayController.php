@@ -15,7 +15,7 @@ class holidayController extends Controller
      */
     public function index()
     {
-        $datas = holiday::where('is_delete','0')->orderBy('id')->get();
+        $datas = holiday::where('is_delete','0')->orderBy('year')->orderBy('fecha')->get();
         return view('holiday.index', compact('datas'));
     }
 

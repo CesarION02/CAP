@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-    Turnos
+    Turno semanal
 @endsection
 
 @section("scripts")

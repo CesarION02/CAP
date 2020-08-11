@@ -26,7 +26,7 @@ class employeeController extends Controller
     {
         $datas = employees::where('is_delete', false)
                             ->where('is_active', true)
-                            ->orderBy('id')->get();
+                            ->orderBy('name')->get();
 
         $datas->each(function($datas){
             $datas->job;
@@ -389,7 +389,7 @@ class employeeController extends Controller
     }
 
     public function outstandingemployees(){
-        $datas = employees::where('is_delete','0')->where('is_active', true)->where('is_config', 0)->orderBy('id')->get();
+        $datas = employees::where('is_delete','0')->where('is_active', true)->where('is_config', 0)->orderBy('name')->get();
         $datas->each(function($datas){
             $datas->job;
             $datas->department;
@@ -490,7 +490,7 @@ class employeeController extends Controller
         $datas = employees::where('is_delete','0')
                             ->where('is_active', true)
                             ->where('department_id', $config->dept_foraneo)
-                            ->orderBy('id')
+                            ->orderBy('name')
                             ->get();
 
         $datas->each(function($datas){

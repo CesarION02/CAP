@@ -1,19 +1,19 @@
 <div class="form-group">
-        <label for="nombre" class="col-lg-3 control-label">Nombre plantilla:</label>
+        <label for="nombre" class="col-lg-3 control-label requerido">Plantilla:</label>
         <div class="col-lg-6">
             <input type="text" name="name" id="name" class="form-control" required value=<?php if(isset($datas)){ echo $datas[0]->Name;}else{echo " ";} ?> >
         </div>
         
 </div>
 <div class="form-group">
-    <label for="overtimepershift" class="col-lg-3 control-label">Tiempo extra:</label>
+    <label for="overtimepershift" class="col-lg-3 control-label requerido">Tiempo extra:</label>
     <div class="col-lg-6">
         <input type="number" step="0.5" name="overtimepershift" id="overtimepershift" class="form-control" required value=<?php if(isset($datas)){ echo $datas[0]->overtimepershift;}else{echo " ";} ?> >
     </div>
     
 </div>
 <div class="form-group">
-    <label for="cut_id" class="col-lg-3 control-label requerido">Recortar reporte secretaria:</label>
+    <label for="cut_id" class="col-lg-3 control-label requerido">Manera recortar:</label>
     <div class="col-lg-6">
         <select id="cut_id" name="cut_id" class="form-control">
             @foreach($cuts as $cut => $index)
@@ -24,7 +24,7 @@
     </div>
 </div>
 <div class="form-group">
-        <label for="lunes" class="col-lg-2 control-label">Lunes:</label>
+        <label for="lunes" class="col-lg-2 control-label requerido">Lunes:</label>
         <div class="col-md-2">
             <input type="time" name="lunesE" id="lunesE" class="form-control" value=<?php if(isset($datas)){ echo $datas[0]->entry;}else{echo " ";}?> >
         </div>
@@ -37,7 +37,7 @@
         
 </div>
 <div class="form-group">
-        <label for="martes" class="col-lg-2 control-label">Martes:</label>
+        <label for="martes" class="col-lg-2 control-label requerido">Martes:</label>
         <div class="col-md-2">
             <input type="time" name="martesE" id="martesE" class="form-control" value=<?php if(isset($datas)){ echo $datas[1]->entry;}else{echo " ";}?> >
         </div>
@@ -52,7 +52,7 @@
         </div>
 </div>
 <div class="form-group">
-        <label for="miercoles" class="col-lg-2 control-label">Miercoles:</label>
+        <label for="miercoles" class="col-lg-2 control-label requerido">Miercoles:</label>
         <div class="col-md-2">
             <input type="time" name="miercolesE" id="miercolesE" class="form-control" value=<?php if(isset($datas)){ echo $datas[2]->entry;}else{echo " ";}?> >
         </div>
@@ -67,7 +67,7 @@
         </div>
 </div>
 <div class="form-group">
-        <label for="jueves" class="col-lg-2 control-label">Jueves:</label>
+        <label for="jueves" class="col-lg-2 control-label requerido">Jueves:</label>
         <div class="col-md-2">
             <input type="time" name="juevesE" id="juevesE" class="form-control" value=<?php if(isset($datas)){ echo $datas[3]->entry;}else{echo " ";}?>>
         </div>
@@ -82,7 +82,7 @@
         </div>
 </div>
 <div class="form-group">
-        <label for="viernes" class="col-lg-2 control-label">Viernes:</label>
+        <label for="viernes" class="col-lg-2 control-label requerido">Viernes:</label>
         <div class="col-md-2">
             <input type="time" name="viernesE" id="viernesE" class="form-control" value=<?php if(isset($datas)){ echo $datas[4]->entry;}else{echo " ";}?> >
         </div>
@@ -97,7 +97,7 @@
         </div>
 </div>
 <div class="form-group">
-        <label for="sabado" class="col-lg-2 control-label">Sabado:</label>
+        <label for="sabado" class="col-lg-2 control-label requerido">Sabado:</label>
         <div class="col-md-2">
             <input type="time" name="sabadoE" id="sabadoE" class="form-control" value=<?php if(isset($datas)){ echo $datas[5]->entry;}else{echo " ";}?> >
         </div>
@@ -112,7 +112,7 @@
         </div>
 </div>
 <div class="form-group">
-        <label for="domingo" class="col-lg-2 control-label">Domingo:</label>
+        <label for="domingo" class="col-lg-2 control-label requerido">Domingo:</label>
         <div class="col-md-2">
             <input type="time" name="domingoE" id="domingoE" class="form-control" value=<?php if(isset($datas)){ echo $datas[6]->entry;}else{echo " ";}?> >
         </div>

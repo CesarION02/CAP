@@ -20,7 +20,7 @@
         @include('includes.mensaje')
         <div class="box box-danger">
             <div class="box-header with-border">
-                <h3 class="box-title">Grupo departamentos - usuarios</h3>
+                <h3 class="box-title"> Modificar usuario vs gpo depto CAP</h3>
                 <div class="box-tools pull-right">
                     <a href="{{route('dgu')}}" class="btn btn-block btn-info btn-sm">
                         <i class="fa fa-fw fa-reply-all"></i> Regresar

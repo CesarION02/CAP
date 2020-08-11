@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-Fecha específica
+Horario fecha exacta
 @endsection
 
 @section("scripts")
@@ -20,11 +20,10 @@ Fecha específica
         @include('includes.mensaje')
         <div class="box box-danger">
             <div class="box-header with-border">
-                <h3 class="box-title">Selccionar fecha exacta</h3>
+                <h3 class="box-title">Horario fecha exacta</h3>
+                @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:diaespecifico"])
                 <div class="box-tools pull-right">
-                    <a href="{{route('asignacion')}}" class="btn btn-block btn-info btn-sm">
-                        
-                    </a>
+                    
                 </div>
             </div>
             <form action="{{route('mostrar_fecha')}}" id="form-general" class="form-horizontal" method="POST" autocomplete="off">

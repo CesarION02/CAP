@@ -99,7 +99,7 @@ Dias festivos
                             <td>{{$data->name}}</td>
                             <td>{{$data->fecha}}</td>
                             <td>{{$data->year}}</td>
-                            <td>
+                           {{-- <td>
                                 <a href="{{route('editar_festivo', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
                                     <i class="fa fa-fw fa-pencil"></i>
                                 </a>
@@ -109,7 +109,7 @@ Dias festivos
                                         <i class="fa fa-fw fa-trash text-danger"></i>
                                     </button>
                                 </form>
-                            </td>
+                            </td> --}}
                         </tr>
                         @endforeach
 

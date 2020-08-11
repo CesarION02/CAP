@@ -72,12 +72,12 @@ Turnos
                 <table class="table table-striped table-bordered table-hover" id="myTable">
                     <thead>
                         <tr>
-                            <th>Nombre</th>
-                            <th>Entrada</th>
-                            <th>Salida</th>
-                            <th>Horas trabajar</th>
-                            <th>Tiempo extra</th>
-                            <th>Orden</th>
+                            <th>Turno</th>
+                            <th>Hr entrada</th>
+                            <th>Hr salida</th>
+                            <th>Horas jornada</th>
+                            <th>Horas extra</th>
+                            <th>Posición rotación</th>
                             <th class="width70"></th>
                         </tr>
                     </thead>

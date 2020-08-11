@@ -77,7 +77,7 @@ Empleados
                     <thead>
                         <tr>
                             <th>Número empleado</th>
-                            <th>Nombre empleado</th>
+                            <th>Empleado</th>
                             <th>Departamento CAP</th>
                             <th>Puesto</th>
                             <th class="width70"></th>
@@ -109,7 +109,7 @@ Empleados
                                 @else
                                 <form action="{{route('enviar_empleado_foraneo', ['id' => $data->id])}}" class="d-inline form-eliminar" method="POST">
                                     @csrf @method("delete")
-                                    <button type="submit" class="btn-accion-tabla eliminar tooltipsC" title="Enviar a foraneo">
+                                    <button type="submit" class="btn-accion-tabla eliminar tooltipsC" title="Enviar a foráneo">
                                         <i class="fa fa-fw fa-truck  text-danger"></i>
                                     </button>
                                 </form>

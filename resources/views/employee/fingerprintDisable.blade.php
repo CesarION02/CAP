@@ -67,10 +67,10 @@ Empleados
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Empleados desactivados</h3>
+                <h3 class="box-title">Huellas digitales empleados inactivos</h3>
                 <div class="box-tools pull-right">
-                    <a href="{{route('huellas')}}" class="btn btn-block btn-success btn-sm">
-                        <i class="fa fa-fw fa-check-circle"></i>Activos
+                    <a href="{{route('huellas')}}" class="btn btn-block btn-info btn-sm">
+                        <i class="fa fa-fw fa-check-circle"></i>Empleados activos
                     </a>
                 </div>
             </div>
@@ -79,9 +79,9 @@ Empleados
                     <thead>
                         <tr>
                             <th>Número empleado</th>
-                            <th>Nombre empleado</th>
+                            <th>Empleado</th>
                             <th>Manera de checar</th>
-                            <th>Huella</th>
+                            <th>Huella digital</th>
                             <th class="width70"></th>
                         </tr>
                     </thead>
