@@ -65,6 +65,7 @@ var app = new Vue({
             })
             .then(res => {
                 console.log(res);
+                this.vRow.labelUpd = true;
                 this.setRowAdjusts();
                 oGui.showOk();
             })
@@ -80,6 +81,7 @@ var app = new Vue({
             axios.delete(route)
             .then(res => {
                 console.log(res);
+                this.vRow.labelUpd = true;
                 this.setRowAdjusts();
                 oGui.showOk();
             })
@@ -138,6 +140,10 @@ var app = new Vue({
                         }
                     }
                 }
+            }
+
+            if (oRow.labelUpd) {
+                labels += '¡Pendiente de actualizar!';
             }
 
             return labels;
