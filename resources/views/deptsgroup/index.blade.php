@@ -11,35 +11,37 @@
             <div class="box-header with-border">
                 <h3 class="box-title">Grupos de departamentos CAP</h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:grupodep"])
-                <div class="box-tools pull-right">
-                    <div class="row">
-                        <div class="col-md-2 col-md-offset-10">
-                            {{-- <a v-on:click="newGroupModal()" class="btn btn-block btn-success btn-sm">
-                                <i class="fa fa-fw fa-plus-circle"></i> Nuevo
-                            </a> --}}
-                            <a href="{{route('crear_grupodepts')}}" class="btn btn-block btn-success btn-sm">
-                                <i class="fa fa-fw fa-plus-circle"></i> Nuevo
-                            </a>
-                        </div>
-                    </div>
-                    <br>
-                    <div class="row">
-                        <form action="{{ route('depts_grp') }}">
-                            <div class="col-md-3 col-md-offset-9">
-                                <div class="input-group">
-                                    <select v-model="vueData.iFilter" class="form-control" name="filter_acts">
-                                        <option value="1" selected>Activos</option>
-                                        <option value="2">Inactivos</option>
-                                        <option value="3">Todos</option>
-                                    </select>
-                                    <span class="input-group-btn">
-                                        <button class="btn btn-default" type="submit">
-                                            <i class="glyphicon glyphicon-search"></i>
-                                        </button>
-                                    </span>
-                                </div>
+                <div class="row">
+                    <div class="col-md-3 col-md-offset-9">
+                        <div class="row">
+                            <div class="col-md-12">
+                                {{-- <a v-on:click="newGroupModal()" class="btn btn-block btn-success btn-sm">
+                                    <i class="fa fa-fw fa-plus-circle"></i> Nuevo
+                                </a> --}}
+                                <a href="{{route('crear_grupodepts')}}" class="btn btn-block btn-success btn-sm">
+                                    <i class="fa fa-fw fa-plus-circle"></i> Nuevo
+                                </a>
                             </div>
-                        </form>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <form action="{{ route('depts_grp') }}">
+                                <div class="col-md-12">
+                                    <div class="input-group">
+                                        <select v-model="vueData.iFilter" class="form-control" name="filter_acts">
+                                            <option value="1" selected>Activos</option>
+                                            <option value="2">Inactivos</option>
+                                            <option value="3">Todos</option>
+                                        </select>
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-default" type="submit">
+                                                <i class="glyphicon glyphicon-search"></i>
+                                            </button>
+                                        </span>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
