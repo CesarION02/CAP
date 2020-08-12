@@ -14,7 +14,7 @@ class areaController extends Controller
      */
     public function index()
     {
-        $datas = area::where('is_delete','0')->orderBy('id')->get();
+        $datas = area::where('is_delete','0')->orderBy('name')->get();
         return view('area.index', compact('datas'));
     }
 

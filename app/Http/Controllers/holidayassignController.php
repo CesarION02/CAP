@@ -30,7 +30,7 @@ class holidayassignController extends Controller
      */
     public function index()
     {
-        $datas = holidayassign::where('is_delete','0')->orderBy('id')->get();
+        $datas = holidayassign::where('is_delete','0')->orderBy('name')->get();
         $datas->each(function($datas){
             $datas->department;
             $datas->employee;
@@ -47,10 +47,10 @@ class holidayassignController extends Controller
      */
     public function create($tipo)
     {
-        $employee = employees::where('is_delete','0')->where('is_active', true)->orderBy('id','ASC')->pluck('id','name');
-        $department = department::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
-        $area = area::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
-        $holiday = holiday::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
+        $employee = employees::where('is_delete','0')->where('is_active', true)->orderBy('name','ASC')->pluck('id','name');
+        $department = department::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
+        $area = area::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
+        $holiday = holiday::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
 
         return view('holidayassign.create')->with('employee',$employee)->with('department',$department)->with('holiday',$holiday)->with('area',$area)->with('flag',0)->with('tipo',$tipo);
     }
@@ -169,10 +169,10 @@ class holidayassignController extends Controller
      */
     public function edit($id)
     {
-        $employee = employees::where('is_delete','0')->where('is_active', true)->orderBy('id','ASC')->pluck('id','name');
-        $department = department::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
-        $area = area::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
-        $holiday = holiday::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
+        $employee = employees::where('is_delete','0')->where('is_active', true)->orderBy('name','ASC')->pluck('id','name');
+        $department = department::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
+        $area = area::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
+        $holiday = holiday::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
         $datas = holidayassign::find($id);
         $auxiliar = 0;
         $empleados = 0;

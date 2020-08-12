@@ -18,12 +18,12 @@
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:guardiassabatinas"])
                 <div class="box-tools pull-right">
                     <div class="row">
-                        <div class="col-md-3 col-md-offset-9">
-                            <button type="button" class="btn btn-info" v-on:click="refresh()">
+                        <div class="col-md-2 col-md-offset-10">
+                            {{-- <button type="button" class="btn btn-info" v-on:click="refresh()">
                                 <i class="glyphicon glyphicon-refresh"></i>
-                            </button>
+                            </button> --}}
                             <button type="button" class="btn btn-success" v-on:click="onShowModal()">
-                                <i class="fa fa-fw fa-plus-circle"></i> Nueva guardia
+                                <i class="fa fa-fw fa-plus-circle"></i> Nuevo
                             </button>
                         </div>
                     </div>
