@@ -2,7 +2,9 @@
 @section('title')
 Plantilla horarios fijos
 @endsection
-
+@section("styles1")
+<link ref="{{asset("assets/css/prueba.css")}}" rel="stylesheet" type="text/css">
+@endsection
 @section("scripts")
 <script src="{{asset("assets/pages/scripts/schedule/copiar.js")}}" type="text/javascript"></script>
 <script src="{{asset("assets/pages/scripts/admin/datatable/index.js")}}" type="text/javascript"></script>
@@ -79,8 +81,8 @@ Plantilla horarios fijos
                     </a>
                 </div>
             </div>
-            <div class="box-body">
-                <table class="table table-striped table-bordered table-hover" id="myTable">
+            <div >
+                <table class="table table-striped table-bordered table-hover table-responsive" id="myTable">
                     <thead>
                         <tr>
                             <th>Plantilla</th>
@@ -103,7 +105,7 @@ Plantilla horarios fijos
                                         @if($datas[$contador]->entry == null)
                                             <td>Inhábil</td>
                                         @else
-                                            <td>{{$datas[$contador]->entry.'-'.$datas[$contador]->departure}}</td>
+                                            <td>{{$datas[$contador]->entry.' '.$datas[$contador]->departure}}</td>
                                         @endif
                                     <?php $contador++;?>
                                     @endfor

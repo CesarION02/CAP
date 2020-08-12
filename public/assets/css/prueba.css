@@ -1,0 +1,6 @@
+#MyTable {
+    margin: 0 auto;
+    clear: both;
+    width: 100%;
+    table-layout: fixed;
+}

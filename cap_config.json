@@ -1,5 +1,5 @@
 {
-    "lastSyncDateTime": "2020-05-11 13:20:08",
+    "lastSyncDateTime": "2020-08-07 08:15:37",
     "startOfWeek": 1,
     "policy": "1",
     "toleranceMinutes": 20,
@@ -7,5 +7,6 @@
     "maxGapSchedule": 90,
     "dept_foraneo": 100,
     "job_foraneo": 25,
-    "dept_pre": 99
+    "dept_pre": 99,
+    "admin_rol": 1
 }

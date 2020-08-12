@@ -139,20 +139,20 @@ class employeeController extends Controller
     }
 
     public function supervisorsView(){
-        
-        $numero = session()->get('name');
-        $usuario = DB::table('users')
+        if (session()->get('rol_id') != 1){
+            $numero = session()->get('name');
+            $usuario = DB::table('users')
                     ->where('name',$numero)
                     ->get();
-        $dgu = DB::table('group_dept_user')
+            $dgu = DB::table('group_dept_user')
                     ->where('user_id',$usuario[0]->id)
                     ->select('groupdept_id AS id')
                     ->get();
-        $Adgu = [];
-        for($i=0;count($dgu)>$i;$i++){
-            $Adgu[$i]=$dgu[$i]->id;
-        }
-        $employees = DB::table('employees')
+            $Adgu = [];
+            for($i=0;count($dgu)>$i;$i++){
+                $Adgu[$i]=$dgu[$i]->id;
+            }
+            $employees = DB::table('employees')
                         ->join('jobs','jobs.id','=','employees.job_id')
                         ->join('departments','departments.id','=','employees.department_id')
                         ->join('department_group','department_group.id','=','departments.dept_group_id')
@@ -163,6 +163,18 @@ class employeeController extends Controller
                         ->orderBy('employees.name')
                         ->select('employees.name AS nameEmployee','employees.num_employee AS numEmployee','employees.short_name AS shortName','employees.id AS idEmployee','jobs.name AS nameJob','departments.name AS nameDepartment')
                         ->get();
+        }else{
+            $employees = DB::table('employees')
+                        ->join('jobs','jobs.id','=','employees.job_id')
+                        ->join('departments','departments.id','=','employees.department_id')
+                        ->join('department_group','department_group.id','=','departments.dept_group_id')
+                        ->orderBy('employees.job_id')
+                        ->where('employees.is_delete','0')
+                        ->where('employees.is_active','1')
+                        ->orderBy('employees.name')
+                        ->select('employees.name AS nameEmployee','employees.num_employee AS numEmployee','employees.short_name AS shortName','employees.id AS idEmployee','jobs.name AS nameJob','departments.name AS nameDepartment')
+                        ->get();   
+        }
         return view('employee.supervisorsView', compact('employees'));
     }
 
@@ -428,28 +440,32 @@ class employeeController extends Controller
     }
     public function jobs(Request $request){
         $pertenece = 0;
-        $numero = session()->get('name');
-        $usuario = DB::table('users')
+        if (session()->get('rol_id') != 1){
+            $numero = session()->get('name');
+            $usuario = DB::table('users')
                     ->where('name',$numero)
                     ->get();
-        $dgu = DB::table('group_dept_user')
+            $dgu = DB::table('group_dept_user')
                     ->where('user_id',$usuario[0]->id)
                     ->select('groupdept_id AS id')
                     ->get();
-        $Adgu = [];
-        $grupo = DB::table('departments')
+            $Adgu = [];
+            $grupo = DB::table('departments')
                     ->where('id',$request->departamento)
                     ->get();
 
-        if(isset($dgu[0])){
-            for($i=0;count($dgu)>$i;$i++){
-                $Adgu[$i]=$dgu[$i]->id;
-            }
-            for($i = 0; count($Adgu) > $i ; $i++){
-                if($Adgu[$i] == $grupo[0]->dept_group_id){
-                    $pertenece = 1;
+            if(isset($dgu[0])){
+                for($i=0;count($dgu)>$i;$i++){
+                    $Adgu[$i]=$dgu[$i]->id;
+                }
+                for($i = 0; count($Adgu) > $i ; $i++){
+                    if($Adgu[$i] == $grupo[0]->dept_group_id){
+                        $pertenece = 1;
+                    }
                 }
             }
+        }else{
+            $pertenece = 1;
         }
         $departments = DB::table('jobs')
                         ->where('is_delete','0')
