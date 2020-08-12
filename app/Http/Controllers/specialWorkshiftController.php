@@ -54,7 +54,11 @@ class specialWorkshiftController extends Controller
                         ->where('week_department_day.week_department_id',null)
                         ->whereIn('departments.dept_group_id',$Adgu)
                         ->orderBy('employees.name')
-                        ->select('week_department_day.date AS date','employees.name AS nameEmp','workshifts.name AS nameWork','day_workshifts_employee.id AS id')
+                        ->select('week_department_day.date AS date',
+                                    'employees.name AS nameEmp',
+                                    'workshifts.name AS nameWork',
+                                    'week_department_day.is_approved',
+                                    'day_workshifts_employee.id AS id')
                         ->get();
         }else{
             $datas = DB::table('day_workshifts_employee')
@@ -75,6 +79,51 @@ class specialWorkshiftController extends Controller
                         ->get();   
         }
         return view('specialworkshift.index')->with('datas',$datas);
+
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexrh()
+    {   
+        $numero = session()->get('name');
+        $usuario = DB::table('users')
+                    ->where('name',$numero)
+                    ->get();
+        $dgu = DB::table('group_dept_user')
+                    ->where('user_id',$usuario[0]->id)
+                    ->select('groupdept_id AS id')
+                    ->get();
+        $Adgu = [];
+        for($i=0;count($dgu)>$i;$i++){
+            $Adgu[$i]=$dgu[$i]->id;
+        }
+        $datas = DB::table('day_workshifts_employee')
+                        ->join('employees','employees.id','=','day_workshifts_employee.employee_id')
+                        ->join('day_workshifts','day_workshifts.id','=','day_workshifts_employee.day_id')
+                        ->join('workshifts','workshifts.id','=','day_workshifts.workshift_id')
+                        ->join('week_department_day','week_department_day.id','=','day_workshifts.day_id')
+                        ->join('jobs','jobs.id','=','employees.job_id')
+                        ->join('departments','departments.id','=','employees.department_id')
+                        ->join('department_group','department_group.id','=','departments.dept_group_id')
+                        ->orderBy('week_department_day.date')
+                        ->where('employees.is_delete','0')
+                        ->where('employees.is_active','1')
+                        ->where('day_workshifts_employee.is_delete',0)
+                        ->where('week_department_day.week_department_id',null)
+                        ->whereIn('departments.dept_group_id',$Adgu)
+                        ->orderBy('employees.name')
+                        ->select('week_department_day.date AS date',
+                                    'employees.name AS nameEmp',
+                                    'workshifts.name AS nameWork',
+                                    'week_department_day.is_approved',
+                                    'day_workshifts_employee.id AS id')
+                        ->get();
+        
+        return view('specialworkshift.indexrh')->with('datas',$datas);
 
     }
 
@@ -222,6 +271,25 @@ class specialWorkshiftController extends Controller
         $week_department_day->save(); 
 
         return redirect('specialworkshift')->with('mensaje', 'Turno especial actualizado con exito');
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function updateApproved($id)
+    {
+        $day_workshift_employee = day_workshifts_employee::findOrFail($id);
+        
+        $day_workshifts = day_workshifts::findOrFail($day_workshift_employee->day_id);
+
+        $week_department_day = week_department_day::findOrFail($day_workshifts->day_id);
+        $week_department_day->is_approved = $week_department_day->is_approved ? false : true;
+        $week_department_day->save();
+
+        return redirect('specialworkshiftrh')->with('mensaje', 'Turno especial actualizado con exito');
     }
 
     /**

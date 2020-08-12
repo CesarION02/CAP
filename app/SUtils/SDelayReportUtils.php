@@ -639,7 +639,8 @@ class SDelayReportUtils {
                                     ->orderBy('wdd.created_at', 'DESC');
 
         if ($isSpecial) {
-            $lWEmployee = $lWEmployee->whereNull('wdd.week_department_id');
+            $lWEmployee = $lWEmployee->whereNull('wdd.week_department_id')
+                                        ->where('is_approved', true);
         }
                                     
         $lWEmployee = $lWEmployee->get();
