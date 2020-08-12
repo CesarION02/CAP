@@ -28,7 +28,7 @@ class groupController extends Controller
      */
     public function create()
     {
-        $workshift = workshift::where('is_delete','0')->orderBy('id','ASC')->get();
+        $workshift = workshift::where('is_delete','0')->orderBy('name','ASC')->get();
         $numero = count($workshift);
         return view('group.create')->with('workshift',$workshift)->with('numero',$numero);
     }
@@ -95,7 +95,7 @@ class groupController extends Controller
                     ->where('group_workshifts.id',$id)
                     ->select('group_workshifts_lines.workshifts_id AS workshift','group_workshifts.id AS id', 'group_workshifts.name AS name')
                     ->get();
-        $workshift = workshift::where('is_delete','0')->orderBy('id','ASC')->get();
+        $workshift = workshift::where('is_delete','0')->orderBy('name','ASC')->get();
         return view('group.edit', compact('group'))->with('workshift',$workshift);
     }
 

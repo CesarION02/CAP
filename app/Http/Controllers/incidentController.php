@@ -45,7 +45,7 @@ class incidentController extends Controller
      */
     public function create($incidentType = 0)
     {
-        $incidents = typeincident::orderBy('id','ASC');
+        $incidents = typeincident::orderBy('name','ASC');
 
         if ($incidentType > 0) {
             $incidents = $incidents->where('id', $incidentType);
@@ -55,7 +55,7 @@ class incidentController extends Controller
 
         $employees = employees::where('is_delete','0')
                                 ->where('is_active', true)
-                                ->orderBy('id','ASC')
+                                ->orderBy('name','ASC')
                                 ->pluck('id','name');
 
         return view('incident.create')
@@ -107,8 +107,8 @@ class incidentController extends Controller
      */
     public function edit($id)
     {
-        $incidents = typeincident::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
-        $employees = employees::where('is_delete','0')->where('is_active', true)->orderBy('id','ASC')->pluck('id','name');
+        $incidents = typeincident::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
+        $employees = employees::where('is_delete','0')->where('is_active', true)->orderBy('name','ASC')->pluck('id','name');
         $data = incident::findOrFail($id);
         return view('incident.edit', compact('data'))->with('incidents',$incidents)->with('employees',$employees);
     }

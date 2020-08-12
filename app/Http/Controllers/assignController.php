@@ -28,7 +28,7 @@ class assignController extends Controller
      */
     public function index()
     {
-        $datas = assign_schedule::where('is_delete','0')->orderBy('id')->get();
+        $datas = assign_schedule::where('is_delete','0')->orderBy('name')->get();
         $datas->each(function($datas){
             $datas->department;
             $datas->employee;
@@ -44,9 +44,9 @@ class assignController extends Controller
      */
     public function create($tipo)
     {
-        $employee = employees::where('is_delete','0')->where('is_active', true)->orderBy('id','ASC')->pluck('id','name');
-        $department = department::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
-        $schedule_template = schedule_template::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
+        $employee = employees::where('is_delete','0')->where('is_active', true)->orderBy('name','ASC')->pluck('id','name');
+        $department = department::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
+        $schedule_template = schedule_template::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
 
         return view('assign.create')->with('employee',$employee)->with('department',$department)->with('schedule_template',$schedule_template)->with('flag',0)->with('tipo',$tipo);
     }
@@ -129,9 +129,9 @@ class assignController extends Controller
      */
     public function edit($id)
     {
-        $employee = employees::where('is_delete','0')->where('is_active', true)->orderBy('id','ASC')->pluck('id','name');
-        $department = department::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
-        $schedule_template = schedule_template::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
+        $employee = employees::where('is_delete','0')->where('is_active', true)->orderBy('name','ASC')->pluck('id','name');
+        $department = department::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
+        $schedule_template = schedule_template::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
         $datas = assign_schedule::find($id);
         $auxiliar = 0;
         $empleados = 0;
@@ -559,7 +559,7 @@ class assignController extends Controller
                 ->whereIn('departments.dept_group_id',$Adgu)
                 ->select('employees.id AS id','employees.name AS name', 'department_group.name AS nameGroup')
                 ->get();
-        $schedule_template = schedule_template::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
+        $schedule_template = schedule_template::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
 
         return view('assign.programming')->with('employees',$employee)->with('schedule_template',$schedule_template)->with('idGroup',$id);   
     }

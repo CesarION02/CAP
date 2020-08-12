@@ -43,8 +43,8 @@ class employeeController extends Controller
      */
     public function create()
     {
-        $way = way_register::orderBy('id','ASC')->pluck('id','name');
-        $job = job::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
+        $way = way_register::orderBy('name','ASC')->pluck('id','name');
+        $job = job::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
         $benPols = benefitsPolice::orderBy('name','ASC')->pluck('id','name');
         
         return view('employee.create')->with('way',$way)
@@ -83,8 +83,8 @@ class employeeController extends Controller
      */
     public function edit($id)
     {
-        $way = way_register::orderBy('id','ASC')->pluck('id','name');
-        $department = department::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');;
+        $way = way_register::orderBy('name','ASC')->pluck('id','name');
+        $department = department::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');;
         $benPols = benefitsPolice::orderBy('name','ASC')->pluck('id','name');
         $data = employees::findOrFail($id);
 
@@ -399,7 +399,7 @@ class employeeController extends Controller
 
     public function editoutstanding($id){
         $way = way_register::orderBy('id','ASC')->pluck('id','name');
-        $departments = department::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
+        $departments = department::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
         $benPols = benefitsPolice::orderBy('name','ASC')->pluck('id','name');
         $data = employees::findOrFail($id);
 

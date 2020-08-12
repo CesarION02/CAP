@@ -68,8 +68,8 @@ class deptgroupuserController extends Controller
      */
     public function create()
     {
-        $user = User::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
-        $department = departmentsGroup::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
+        $user = User::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
+        $department = departmentsGroup::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
 
         return view('groupdeptuser.create')->with('users',$user)->with('departments',$department);
     }
@@ -118,7 +118,7 @@ class deptgroupuserController extends Controller
                         ->where('id',$id)
                         ->select('id AS id','name AS nombre')
                         ->get();
-        $department = departmentsGroup::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
+        $department = departmentsGroup::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
 
         $datas = DB::table('group_dept_user')
             ->join('department_group','group_dept_user.groupdept_id','=','department_group.id')

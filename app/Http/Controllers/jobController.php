@@ -16,7 +16,7 @@ class jobController extends Controller
      */
     public function index()
     {
-        $datas = job::where('is_delete','0')->orderBy('id')->get();
+        $datas = job::where('is_delete','0')->orderBy('name')->get();
         $datas->each(function($datas){
             $datas->department;
         });
@@ -30,7 +30,7 @@ class jobController extends Controller
      */
     public function create()
     {
-        $department = department::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
+        $department = department::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
         return view('job.create')->with('departments',$department);;
     }
 
@@ -68,7 +68,7 @@ class jobController extends Controller
      */
     public function edit($id)
     {
-        $department = department::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
+        $department = department::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
         $data = job::findOrFail($id);
         return view('job.edit', compact('data'))->with('departments',$department);
     }

@@ -16,7 +16,7 @@ class departmentController extends Controller
      */
     public function index()
     {
-        $datas = department::where('is_delete','0')->orderBy('id')->get();
+        $datas = department::where('is_delete','0')->orderBy('name')->get();
         $datas->each(function($datas){
             $datas->area;
             $datas->rh;
@@ -31,7 +31,7 @@ class departmentController extends Controller
      */
     public function create()
     {
-        $area = area::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
+        $area = area::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
         $deptrhs = DepartmentRH::where('is_delete',0)->pluck('id','name');
         return view('department.create')->with('areas',$area)->with('deptrhs',$deptrhs);
     }
@@ -71,7 +71,7 @@ class departmentController extends Controller
      */
     public function edit($id)
     {
-        $area = area::where('is_delete','0')->orderBy('id','ASC')->pluck('id','name');
+        $area = area::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
         $data = department::findOrFail($id);
         $deptrhs = DepartmentRH::where('is_delete',0)->pluck('id','name');
         return view('department.edit', compact('data'))->with('areas',$area)->with('deptrhs',$deptrhs);
