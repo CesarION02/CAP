@@ -68,6 +68,8 @@ Route::get('shiftprogramming/{id}', 'shiftprogrammingController@index')->name('p
 
 /* RUTAS DE TURNOS ESPECIALES */
 Route::get('specialworkshift', 'specialWorkshiftController@index')->name('turno_especial');
+Route::get('specialworkshiftrh', 'specialWorkshiftController@indexrh')->name('turno_especial_rh');
+Route::get('specialworkshiftapprove/{id}', 'specialWorkshiftController@updateApproved')->name('aprobar_turno_especial');
 Route::get('specialworkshift/create', 'specialWorkshiftController@create')->name('crear_turno_especial');
 Route::post('specialworkshift', 'specialWorkshiftController@store')->name('guardar_turno_especial');
 Route::get('specialworkshift/{id}/edit', 'specialWorkshiftController@edit')->name('editar_turno_especial');
@@ -232,9 +234,12 @@ Route::put('departmentRH/{id}', 'DeptsRhController@update')->name('actualizar_de
 
 /* RUTAS DEPARTAMENTOS */
 Route::get('deptsgroup', 'DeptsGroupController@index')->name('depts_grp');
+Route::get('deptsgroup/create', 'DeptsGroupController@create')->name('crear_grupodepts');
 Route::post('deptsgroup', 'DeptsGroupController@store')->name('guardar_grupodepts');
 Route::delete('deptsgroup/{id}', 'DeptsGroupController@delete')->name('eliminar_grupodepts');
 Route::put('deptsgroup/{id}/{name}', 'DeptsGroupController@edit')->name('actualizar_grupodepts');
+Route::get('deptsgroupedit/{id}', 'DeptsGroupController@editAll')->name('modificar_grupodepts');
+Route::put('deptsgroup/{id}', 'DeptsGroupController@update')->name('upd_grupodepts');
 
 /* RUTAS PUESTOS */
 Route::get('job', 'jobController@index')->name('puesto');

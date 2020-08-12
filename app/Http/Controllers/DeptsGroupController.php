@@ -39,19 +39,30 @@ class DeptsGroupController extends Controller
                     ->with('iFilter', $iFilter);
     }
 
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        return view('deptsgroup.create');
+    }
+
     public function store(Request $request)
     {
-        $obj = json_decode($request->group);
+        // $obj = json_decode($request->group);
 
         $newGroup = new departmentsGroup();
-        $newGroup->name = $obj->name;
+        $newGroup->name = $request->name;
         $newGroup->is_delete = false;
-        $newGroup->updated_by = session()->get('user_id');
-        $newGroup->created_by = session()->get('user_id');
+        // $newGroup->updated_by = session()->get('user_id');
+        // $newGroup->created_by = session()->get('user_id');
 
         $newGroup->save();
 
-        return json_encode($newGroup);
+        // return json_encode($newGroup);
+        return redirect('deptsgroup')->with('mensaje', 'El grupo fue creado con exito');
     }
 
     public function edit($id, $name)
@@ -61,6 +72,30 @@ class DeptsGroupController extends Controller
                                 'updated_by' => session()->get('user_id')]);
 
         return $id;
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function editAll($id)
+    {
+        $data = departmentsGroup::findOrFail($id);
+        return view('deptsgroup.edit', compact('data'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $deptsGroup = departmentsGroup::find($id);
+
+        $deptsGroup->name = $request->name;
+        // $deptsGroup->updated_by = session()->get('user_id');
+
+        $deptsGroup->save();
+
+        return redirect('deptsgroup')->with('mensaje', 'Grupo actualizado con exito');
     }
 
     public function delete($id)
