@@ -197,7 +197,7 @@ class employeeController extends Controller
         $employee->job_id = $request->job_id;
         $employee->updated_by = session()->get('user_id');
         $employee->update();
-        return redirect('employee/supervisorsView')->with('mensaje', 'Empleado actualizado con exito');    
+        return redirect('supervisorsView')->with('mensaje', 'Empleado actualizado con exito');    
     }
 
     /**
@@ -346,7 +346,7 @@ class employeeController extends Controller
         $actualizar->way_register_id = $request->way_register_id;
         $actualizar->updated_by = session()->get('user_id');
         $actualizar->save();
-        return redirect('employee')->with('mensaje', 'Empleado actualizado con exito');
+        return redirect('fingerprint')->with('mensaje', 'Empleado actualizado con exito');
     }
 
     public function desactivar(Request $request,$id){
@@ -424,7 +424,7 @@ class employeeController extends Controller
         $employee->save();
 
 
-        return redirect('employee/outstanding')->with('mensaje', 'Empleado actualizado con exito');
+        return redirect('outstanding')->with('mensaje', 'Empleado actualizado con exito');
     }
     public function jobs(Request $request){
         $pertenece = 0;
