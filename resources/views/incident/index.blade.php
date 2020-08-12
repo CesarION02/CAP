@@ -103,7 +103,7 @@ Incidencias
                             <th>Fecha inicio</th>
                             <th>Fecha fin</th>
                             <th>Empleado</th>
-                            <th class="width70"></th>
+                            {{-- <th class="width70"></th> --}}
                         </tr>
                     </thead>
                     <tbody>
@@ -114,7 +114,7 @@ Incidencias
                             <td>{{$data->end_date}}</td>
                             <td>{{$data->employee->name}}</td>
                             
-                            <td>
+                            {{-- <td>
                                 <a href="{{route('editar_incidente', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
                                     <i class="fa fa-fw fa-pencil"></i>
                                 </a>
@@ -124,7 +124,7 @@ Incidencias
                                         <i class="fa fa-fw fa-trash text-danger"></i>
                                     </button>
                                 </form>
-                            </td>
+                            </td> --}}
                         </tr>
                         @endforeach
 

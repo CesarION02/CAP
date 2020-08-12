@@ -14,8 +14,11 @@
                 <div class="box-tools pull-right">
                     <div class="row">
                         <div class="col-md-2 col-md-offset-10">
-                            <a v-on:click="newGroupModal()" class="btn btn-block btn-success btn-sm">
-                                <i class="fa fa-fw fa-plus-circle"></i> Nuevo Grupo
+                            {{-- <a v-on:click="newGroupModal()" class="btn btn-block btn-success btn-sm">
+                                <i class="fa fa-fw fa-plus-circle"></i> Nuevo
+                            </a> --}}
+                            <a href="{{route('crear_grupodepts')}}" class="btn btn-block btn-success btn-sm">
+                                <i class="fa fa-fw fa-plus-circle"></i> Nuevo
                             </a>
                         </div>
                     </div>
@@ -58,10 +61,9 @@
                                     class="btn-accion-tabla tooltipsC" title="Modificar departamentos">
                                     <i class="glyphicon glyphicon-list-alt"></i>
                                 </button>
-                                <button v-on:click="editGrpModal(group)" 
-                                    class="btn-accion-tabla tooltipsC" title="Modificar este registro">
+                                <a :href="'./././deptsgroupedit/' + group.id" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
                                     <i class="fa fa-fw fa-pencil"></i>
-                                </button>
+                                </a>
                                 <button v-show="! group.is_delete" v-on:click="prevDeleteGroup(group)" 
                                     class="btn-accion-tabla tooltipsC" title="Borrar este registro">
                                     <i class="glyphicon glyphicon-trash"></i>
