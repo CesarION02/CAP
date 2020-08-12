@@ -5,6 +5,15 @@ Empleados
 
 @section("scripts")
 <script src="{{asset("assets/pages/scripts/admin/datatable/indexFaltantes.js")}}" type="text/javascript"></script>
+<script src="{{asset("assets/pages/scripts/admin/datatable/index.js")}}" type="text/javascript"></script>
+<script src="{{ asset("dt/datatables.js") }}" type="text/javascript"></script>
+<script src="{{ asset('dt/dataTables.buttons.min.js') }}"></script>
+	<script src="{{ asset('dt/buttons.flash.min.js') }}"></script>
+	<script src="{{ asset('dt/jszip.min.js') }}"></script>
+	<script src="{{ asset('dt/pdfmake.min.js') }}"></script>
+	<script src="{{ asset('dt/vfs_fonts.js') }}"></script>
+	<script src="{{ asset('dt/buttons.html5.min.js') }}"></script>
+	<script src="{{ asset('dt/buttons.print.min.js') }}"></script>
 <script>
     $(document).ready( function () {
         $('#myTable').DataTable({
@@ -39,18 +48,13 @@ Empleados
                 [ 'Mostrar 10', 'Mostrar 25', 'Mostrar 50', 'Mostrar 100', 'Mostrar todo' ]
             ],
             "buttons": [
+                    'pageLength',
                     {
                         extend: 'copy',
                         text: 'Copiar'
-                    },
-                    {
-                        extend: 'csv',
-                        text: 'CSV'
-                    },
-                    {
-                        extend: 'excel',
-                        text: 'Excel'
-                    },
+                    }, 
+                    'csv', 
+                    'excel', 
                     {
                         extend: 'print',
                         text: 'Imprimir'

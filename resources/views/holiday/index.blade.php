@@ -47,18 +47,13 @@ Dias festivos
                 [ 'Mostrar 10', 'Mostrar 25', 'Mostrar 50', 'Mostrar 100', 'Mostrar todo' ]
             ],
             "buttons": [
+                    'pageLength',
                     {
                         extend: 'copy',
                         text: 'Copiar'
-                    },
-                    {
-                        extend: 'csv',
-                        text: 'CSV'
-                    },
-                    {
-                        extend: 'excel',
-                        text: 'Excel'
-                    },
+                    }, 
+                    'csv', 
+                    'excel', 
                     {
                         extend: 'print',
                         text: 'Imprimir'
@@ -90,7 +85,6 @@ Dias festivos
                             <th>Nombre</th>
                             <th>Día</th>
                             <th>Año</th>
-                            <th class="width70"></th>
                         </tr>
                     </thead>
                     <tbody>

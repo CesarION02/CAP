@@ -71,9 +71,18 @@ Reporte Entradas/Salidas
 
     <script src="{{asset("assets/pages/scripts/report/regisView.js")}}" type="text/javascript"></script>
 
+    <script src="{{asset("assets/pages/scripts/admin/datatable/index.js")}}" type="text/javascript"></script>
+    <script src="{{ asset("dt/datatables.js") }}" type="text/javascript"></script>
+    <script src="{{ asset('dt/dataTables.buttons.min.js') }}"></script>
+        <script src="{{ asset('dt/buttons.flash.min.js') }}"></script>
+        <script src="{{ asset('dt/jszip.min.js') }}"></script>
+        <script src="{{ asset('dt/pdfmake.min.js') }}"></script>
+        <script src="{{ asset('dt/vfs_fonts.js') }}"></script>
+        <script src="{{ asset('dt/buttons.html5.min.js') }}"></script>
+        <script src="{{ asset('dt/buttons.print.min.js') }}"></script>
     <script>
-        $(document).ready(function() {
-            $('#checks_table').DataTable({
+        $(document).ready( function () {
+            $('#myTable').DataTable({
                 "language": {
                     "sProcessing":     "Procesando...",
                     "sLengthMenu":     "Mostrar _MENU_ registros",
@@ -99,14 +108,23 @@ Reporte Entradas/Salidas
                     }
                 },
                 "colReorder": true,
-                "scrollX": true,
                 "dom": 'Bfrtip',
                 "lengthMenu": [
                     [ 10, 25, 50, 100, -1 ],
                     [ 'Mostrar 10', 'Mostrar 25', 'Mostrar 50', 'Mostrar 100', 'Mostrar todo' ]
                 ],
                 "buttons": [
-                        '{ extend: 'copy', text: 'Copiar'}, 'csv', 'excel', { extend: 'print', text: 'Imprimir'}
+                        'pageLength',
+                        {
+                            extend: 'copy',
+                            text: 'Copiar'
+                        }, 
+                        'csv', 
+                        'excel', 
+                        {
+                            extend: 'print',
+                            text: 'Imprimir'
+                        }
                     ]
             });
         });

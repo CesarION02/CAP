@@ -90,8 +90,8 @@ Route::get('report/generarReporteRegs/{type}','ReporteController@registriesRepor
 Route::get('report/reporteRegistros','ReporteController@reporteRegistrosView')->name('generarreporteRegistros');
 Route::get('report/reporteRetardos','ReporteController@genDelayReport')->name('generarreporteRetardos');
 Route::get('report/viewReporteRetardos','ReporteController@delaysReport')->name('reporteRetardos');
-Route::get('report/reportetiemposextra','ReporteController@genHrExReport')->name('generarreportetiemposextra');
-Route::get('report/viewtiemposextra','ReporteController@hrExtReport')->name('reportetiemposextra');
+Route::get('report/reportepercepcionesvariables','ReporteController@genHrExReport')->name('generarreportepervariables');
+Route::get('report/viewpercepvariables','ReporteController@hrExtReport')->name('reportepercepvariables');
 
 /* RUTAS DE AJUSTES DE PRENÓMINA */
 Route::get('prepayrollrowadjusts', 'prepayrollAdjustController@getAdjustsFromRow')->name('ajustes_renglon');
@@ -132,15 +132,15 @@ Route::get('employees/foraneos', 'employeeController@foraneos')->name('foraneos'
 Route::delete('employees/enviarForaneos/{id}', 'employeeController@enviarForaneos')->name('enviar_empleado_foraneo');
 Route::put('employee/outstanding/{id}', 'employeeController@updateoutstanding')->name('actualizar_empleado_faltante');
 Route::get('employee/puesto','employeeController@jobs')->name('puesto');
-Route::get('employee/outstanding', 'employeeController@outstandingemployees')->name('empleados_pendientes');
+Route::get('outstanding', 'employeeController@outstandingemployees')->name('empleados_pendientes');
 Route::get('employee/{id}/editoutstanding', 'employeeController@editoutstanding')->name('editar_empleado_faltante');
 Route::delete('employee/fingerprint/{id}', 'employeeController@desactivar')->name('desactivar');
 Route::delete('employee/fingerprint/disable/{id}', 'employeeController@activar')->name('activar');
-Route::get('employee/fingerprint', 'employeeController@fingerprints')->name('huellas');
+Route::get('fingerprint', 'employeeController@fingerprints')->name('huellas');
 Route::get('employee/fingerprint/disable', 'employeeController@fingerprintsDisable')->name('huellasActivar');
 Route::get('employee/{id}/editFinger','employeeController@fingerprintEdit')->name('editarhuella');
 Route::put('employee/fingerprint/{id}', 'employeeController@Editfingerprint')->name('edicionhuella');
-Route::get('employee/supervisorsView', 'employeeController@supervisorsView')->name('supervisores');
+Route::get('supervisorsView', 'employeeController@supervisorsView')->name('supervisores');
 Route::get('employee/{id}/editShortname', 'employeeController@editShortname')->name('editar_nombrecorto');
 Route::put('employee/supervisorsView/{id}', 'employeeController@updateShortname')->name('actualizar_nombrecorto');
 Route::get('employee', 'employeeController@index')->name('empleado');
@@ -178,7 +178,7 @@ Route::delete('week/{id}', 'weekController@destroy')->name('eliminar_semana');
 
 /* RUTAS DE ASIGNACION HORARIOS */
 Route::get('assign/programming/schedule_template','assignController@schedule_template')->name('agregar');
-Route::get('assign/viewProgramming','assignController@viewProgramming')->name('index_programacion');
+Route::get('assigns/viewProgramming','assignController@viewProgramming')->name('index_programacion');
 Route::get('assign/showProgramming/{id}','assignController@editProgramming')->name('editar_programacion');
 Route::get('assign/specificDate/','assignController@viewSpecificDate')->name('fecha_especifica');
 Route::post('assign/mostrarFecha', 'assignController@mostrarFecha')->name('mostrar_fecha');

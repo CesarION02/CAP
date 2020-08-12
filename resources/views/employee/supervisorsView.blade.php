@@ -1,10 +1,19 @@
 @extends("theme.$theme.layout")
 @section('title')
-Empleados
+Mis empleados
 @endsection
 
 @section("scripts")
 <script src="{{asset("assets/pages/scripts/admin/datatable/index.js")}}" type="text/javascript"></script>
+<script src="{{asset("assets/pages/scripts/admin/datatable/index.js")}}" type="text/javascript"></script>
+<script src="{{ asset("dt/datatables.js") }}" type="text/javascript"></script>
+<script src="{{ asset('dt/dataTables.buttons.min.js') }}"></script>
+	<script src="{{ asset('dt/buttons.flash.min.js') }}"></script>
+	<script src="{{ asset('dt/jszip.min.js') }}"></script>
+	<script src="{{ asset('dt/pdfmake.min.js') }}"></script>
+	<script src="{{ asset('dt/vfs_fonts.js') }}"></script>
+	<script src="{{ asset('dt/buttons.html5.min.js') }}"></script>
+	<script src="{{ asset('dt/buttons.print.min.js') }}"></script>
 <script>
     $(document).ready( function () {
         $('#myTable').DataTable({
@@ -33,12 +42,14 @@ Empleados
                 }
             },
             "colReorder": true,
-            "dom": 'Bfrtip',
-            "lengthMenu": [
-                [ 10, 25, 50, 100, -1 ],
-                [ 'Mostrar 10', 'Mostrar 25', 'Mostrar 50', 'Mostrar 100', 'Mostrar todo' ]
-            ],
-            "buttons": [
+                "scrollX": true,
+                "dom": 'Bfrtip',
+                "lengthMenu": [
+                    [ 10, 25, 50, 100, -1 ],
+                    [ 'Mostrar 10', 'Mostrar 25', 'Mostrar 50', 'Mostrar 100', 'Mostrar todo' ]
+                ],
+                "buttons": [
+                        'pageLength',
                     {
                         extend: 'copy',
                         text: 'Copiar'
@@ -67,7 +78,7 @@ Empleados
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Empleados</h3>
+                <h3 class="box-title">Mis empleados</h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:nombrecorto"])
                 <div class="box-tools pull-right">
 

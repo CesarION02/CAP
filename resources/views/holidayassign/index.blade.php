@@ -47,6 +47,7 @@ Asignar día festivo
                 [ 'Mostrar 10', 'Mostrar 25', 'Mostrar 50', 'Mostrar 100', 'Mostrar todo' ]
             ],
             "buttons": [
+                'pageLength',
                 { extend: 'copy', text: 'Copiar'}, 'csv', 'excel', { extend: 'print', text: 'Imprimir'}
                 ]
         });
@@ -67,15 +68,21 @@ Asignar día festivo
                 <h3 class="box-title">Asignar día festivo</h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:asignacionfestivos"])
                 <div class="box-tools pull-right">
-                    <a href="{{route('crear_asignacion_festivo','1')}}" class="btn btn-block btn-success btn-sm">
-                        <i class="fa fa-fw fa-plus-circle"></i> Asignar por empleado
-                    </a>
-                    <a href="{{route('crear_asignacion_festivo','2')}}" class="btn btn-block btn-success btn-sm">
-                        <i class="fa fa-fw fa-plus-circle"></i> Asignar por departamento
-                    </a>
-                    <a href="{{route('crear_asignacion_festivo','3')}}" class="btn btn-block btn-success btn-sm">
-                            <i class="fa fa-fw fa-plus-circle"></i> Asignar por área
-                        </a>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-info">Asignar</button>
+                      
+                        <button type="button" class="btn btn-info dropdown-toggle"
+                                data-toggle="dropdown">
+                          <span class="caret"></span>
+                          <span class="sr-only">Desplegar menú</span>
+                        </button>
+                      
+                        <ul class="dropdown-menu" role="menu">
+                          <li><a href="{{route('crear_asignacion_festivo','1')}}">Por empleado</a>
+                            <li><a href="{{route('crear_asignacion_festivo','2')}}">Por departamento</a>
+                                <li><a href="{{route('crear_asignacion_festivo','3')}}">Por área</a>
+                        </ul>
+                    </div>
                 </div>
             </div>
             <div class="box-body">

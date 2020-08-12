@@ -28,7 +28,7 @@ class assignController extends Controller
      */
     public function index()
     {
-        $datas = assign_schedule::where('is_delete','0')->orderBy('name')->get();
+        $datas = assign_schedule::where('is_delete','0')->orderBy('id')->get();
         $datas->each(function($datas){
             $datas->department;
             $datas->employee;
@@ -607,7 +607,7 @@ class assignController extends Controller
             $asignacion->updated_by = 1;
             $asignacion->save();
         } 
-        $url =  'assign/viewProgramming';
+        $url =  'assigns/viewProgramming';
         
         return redirect($url)->with('mensaje','Asignación fue creada con exito');
     }
@@ -674,7 +674,7 @@ class assignController extends Controller
             }
             
         }  
-        $url =  'assign/viewProgramming';
+        $url =  'assigns/viewProgramming';
         return redirect($url)->with('mensaje','Asignación fue actualizada con exito');
     }
 

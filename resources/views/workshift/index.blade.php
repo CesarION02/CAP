@@ -40,13 +40,24 @@ Turnos
                     "sSortDescending": ": Activar para ordenar la columna de manera descendente"
                 }
             },
-           
+            "colReorder": true,
+            "dom": 'Bfrtip',
             "lengthMenu": [
                 [ 10, 25, 50, 100, -1 ],
                 [ 'Mostrar 10', 'Mostrar 25', 'Mostrar 50', 'Mostrar 100', 'Mostrar todo' ]
             ],
             "buttons": [
-                { extend: 'copy', text: 'Copiar'}, 'csv', 'excel', { extend: 'print', text: 'Imprimir'}
+                    'pageLength',
+                    {
+                        extend: 'copy',
+                        text: 'Copiar'
+                    }, 
+                    'csv', 
+                    'excel', 
+                    {
+                        extend: 'print',
+                        text: 'Imprimir'
+                    }
                 ]
         });
     });

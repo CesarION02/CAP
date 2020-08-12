@@ -30,7 +30,7 @@ class holidayassignController extends Controller
      */
     public function index()
     {
-        $datas = holidayassign::where('is_delete','0')->orderBy('name')->get();
+        $datas = holidayassign::where('is_delete','0')->orderBy('id')->get();
         $datas->each(function($datas){
             $datas->department;
             $datas->employee;
