@@ -360,7 +360,7 @@ class SDataProcess {
                             $newRow->outDateTime = $newRow->inDate;
                             $date = $newRow->outDate;
                             $time = null;
-                            $adjs = SPrepayrollAdjustUtils::getAdjustForCase($date, $time, 1, \SCons::PP_TYPES['JS'], $newRow->idEmployee);
+                            $adjs = SPrepayrollAdjustUtils::getAdjustForCase($date, $time, 2, \SCons::PP_TYPES['JS'], $newRow->idEmployee);
                     
                             if (count($adjs) == 0) {
                                 $newRow->comments = $newRow->comments."Sin salida. ";
@@ -521,7 +521,7 @@ class SDataProcess {
                         $newRow->outDateTime = $newRow->inDate;
                         $date = $newRow->outDate;
                         $time = null;
-                        $adjs = SPrepayrollAdjustUtils::getAdjustForCase($date, $time, 1, \SCons::PP_TYPES['JS'], $newRow->idEmployee);
+                        $adjs = SPrepayrollAdjustUtils::getAdjustForCase($date, $time, 2, \SCons::PP_TYPES['JS'], $newRow->idEmployee);
                 
                         if (count($adjs) == 0) {
                             $newRow->comments = $newRow->comments."Sin salida. ";
@@ -885,11 +885,12 @@ class SDataProcess {
 
             $cIn = false;
             $cOut = false;
-
+            $adjIn = SPrepayrollAdjustUtils::hasTheAdjustType($oRow->adjusts, \SCons::PP_TYPES['JE']);
+            $adjOut = SPrepayrollAdjustUtils::hasTheAdjustType($oRow->adjusts, \SCons::PP_TYPES['JS']);
             if ($oRow->hasCheckIn) {
                 $mayBeOverTime = false;
                 $cIn = SDataProcess::isCheckSchedule($oRow->inDateTime, $oRow->inDateTimeSch, $mayBeOverTime);
-                if ($cIn && !SPrepayrollAdjustUtils::hasTheAdjustType($oRow->adjusts, \SCons::PP_TYPES['JE'])) {
+                if ($cIn && !$adjIn) {
                     $oRow->comments = $oRow->comments."Entrada atípica. ";
                     $oRow->isAtypicalIn = true;
                 }
@@ -898,12 +899,12 @@ class SDataProcess {
                 //$mayBeOverTime = $aEmployeeOverTime[$oRow->idEmployee];
                 $mayBeOverTime = false;
                 $cOut = SDataProcess::isCheckSchedule($oRow->outDateTime, $oRow->outDateTimeSch, $mayBeOverTime);
-                if ($cOut && !SPrepayrollAdjustUtils::hasTheAdjustType($oRow->adjusts, \SCons::PP_TYPES['JS'])) {
+                if ($cOut && !$adjOut) {
                     $oRow->comments = $oRow->comments."Salida atípica. ";
                     $oRow->isAtypicalOut = true;
                 }
             }
-            if ($cIn || $cOut) {
+            if (($cIn || $cOut) && (! $adjIn && ! $adjOut)) {
                 $oRow->comments = $oRow->comments."Revisar horario. ";
                 $oRow->isCheckSchedule = true;
             }
