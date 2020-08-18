@@ -414,7 +414,7 @@ class ReporteController extends Controller
         return view('report.reportsGen')
                     ->with('tReport', \SCons::REP_HR_EX)
                     ->with('sTitle', 'Reporte de tiempos extra')
-                    ->with('sRoute', 'reportepercepvariables')
+                    ->with('sRoute', 'reportetiemposextra')
                     ->with('lEmployees', $lEmployees)
                     ->with('startOfWeek', $config->startOfWeek);
     }
