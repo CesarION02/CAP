@@ -25,3 +25,27 @@ $(document).on('change', '#semana', function() {
         }
     });
 });
+$(document).on('change', '#anio', function() {
+    var anio = document.getElementById("anio").value;
+
+    $.ajax({
+        type: 'get',
+        url: 'recoverWeek',
+        data: { 'anio': anio },
+
+        success: function(data) {
+            var aux = '<select id="semana" name="semana"><option value="0">Selecciona semana</option>'
+            for (var i = 0; data.length > i; i++) {
+                aux += '<option value="' + data[i].id + '">' + data[i].start + '-' + data[i].end + '</option>'
+            }
+            aux += '</select>'
+
+            $("#selectsemana").empty("");
+            $("#selectsemana").append(aux);
+
+        },
+        error: function() {
+            console.log('falle');
+        }
+    });
+});

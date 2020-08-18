@@ -77,6 +77,7 @@ Departamentos nóminas
         <div class="box">
             <div class="box-header with-border">
                 <h3 class="box-title">Departamentos nóminas</h3>
+                @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:departamentosnominas"])
                 <div class="box-tools pull-right">
                 </div>
             </div>
@@ -84,7 +85,7 @@ Departamentos nóminas
                 <table class="table table-striped table-bordered table-hover" id="myTable">
                     <thead>
                         <tr>
-                            <th>Nombre departamento nóminas</th>
+                            <th>Departamento nóminas</th>
                             <th>Departamento CAP predeterminado</th>
                             <th class="width70"></th>
                         </tr>

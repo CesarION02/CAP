@@ -14,7 +14,7 @@
         @include('includes.mensaje')
         <div class="box box-danger">
             <div class="box-header with-border">
-                <h3 class="box-title">Crear Usuario - Rol</h3>
+                <h3 class="box-title">Crear usuario vs rol</h3>
                 <div class="box-tools pull-right">
                     <a href="{{route('rol_user')}}" class="btn btn-block btn-info btn-sm">
                         <i class="fa fa-fw fa-reply-all"></i> Regresar

@@ -44,7 +44,7 @@ class workshiftController extends Controller
         $workshift->updated_by = session()->get('user_id');
         $workshift->created_by = session()->get('user_id');
         $workshift->save();
-        return redirect('workshift')->with('mensaje', 'Incidente creado con exito');
+        return redirect('workshift')->with('mensaje', 'Incidente creado con éxito');
     }
 
     /**
@@ -83,7 +83,7 @@ class workshiftController extends Controller
         $workshift = workshift::findOrFail($id);
         $workshift->updated_by = session()->get('user_id');
         $workshift->update($request->all());
-        return redirect('workshift')->with('mensaje', 'Turno actualizado con exito');
+        return redirect('workshift')->with('mensaje', 'Turno actualizado con éxito');
     }
 
     /**

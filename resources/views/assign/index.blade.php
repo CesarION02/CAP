@@ -72,7 +72,7 @@ Asignar plantilla
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Asignar plantilla horarios</h3>
+                <h3 class="box-title">Asignar horario global</h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:asignacionhorario"])
                 <div class="box-tools pull-right">
                     <a href="{{route('crear_asignacion','1')}}" class="btn btn-block btn btn-info btn-sm">

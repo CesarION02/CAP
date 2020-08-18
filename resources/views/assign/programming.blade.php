@@ -24,6 +24,9 @@ Asignar horario fijo
             <div class="box-header with-border">
                 <h3 class="box-title">Asignar horario fijo</h3>
                 <div class="box-tools pull-right">
+                    <a href="{{route('index_programacion')}}" class="btn btn-block btn-info btn-sm">
+                        <i class="fa fa-fw fa-reply-all"></i> Regresar
+                    </a>
                 </div>
             </div>
             <form action="{{route('guardar')}}" id="form-general" class="form-horizontal" method="POST" autocomplete="off">

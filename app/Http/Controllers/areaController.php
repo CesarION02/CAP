@@ -42,7 +42,7 @@ class areaController extends Controller
         $area->updated_by = session()->get('user_id');
         $area->created_by = session()->get('user_id');
         $area->save();
-        return redirect('area')->with('mensaje','Area fue creada con exito');
+        return redirect('area')->with('mensaje','Área fue creada con éxito');
     }
 
     /**
@@ -81,7 +81,7 @@ class areaController extends Controller
         $area = area::findOrFail($id);
         $area->updated_by = session()->get('user_id');
         $area->update($request->all());
-        return redirect('area')->with('mensaje', 'Area actualizada con exito');
+        return redirect('area')->with('mensaje', 'Área actualizada con éxito');
     }
 
     /**

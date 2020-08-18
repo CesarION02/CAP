@@ -88,7 +88,7 @@ Departamentos CAP
                 <table class="table table-striped table-bordered table-hover" id="myTable">
                     <thead>
                         <tr>
-                            <th>Nombre departamento</th>
+                            <th>Departamento CAP</th>
                             <th>Área</th>
                             <th>Departamento nóminas</th>
                             <th class="width70"></th>

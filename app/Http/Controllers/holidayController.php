@@ -44,7 +44,7 @@ class holidayController extends Controller
 
         $holiday->save();
 
-        return redirect('holidays')->with('mensaje', 'Día Festivo creado con exito');
+        return redirect('holidays')->with('mensaje', 'Día Festivo creado con éxito');
     }
 
     /**
@@ -104,7 +104,7 @@ class holidayController extends Controller
     public function update(Request $request, $id)
     {
         holiday::findOrFail($id)->update($request->all());
-        return redirect('holidays')->with('mensaje', 'Dia Festivo actualizado con exito');
+        return redirect('holidays')->with('mensaje', 'Dia Festivo actualizado con éxito');
     }
 
     /**

@@ -82,7 +82,7 @@
                 <table class="table table-striped table-bordered table-hover" id="myTable">
                     <thead>
                         <tr>
-                            <th>Nombre área</th>
+                            <th>Área</th>
                             <th class="width70"></th>
                         </tr>
                     </thead>

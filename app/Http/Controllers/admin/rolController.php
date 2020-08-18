@@ -39,7 +39,7 @@ class rolController extends Controller
     public function store(ValidacionRol $request)
     {
         rol::create($request->all());
-        return redirect('admin/rol')->with('mensaje', 'Rol creado con exito');
+        return redirect('admin/rol')->with('mensaje', 'Rol creado con éxito');
     }
 
     /**
@@ -75,7 +75,7 @@ class rolController extends Controller
     public function update(Request $request, $id)
     {
         rol::findOrFail($id)->update($request->all());
-        return redirect('admin/rol')->with('mensaje', 'Rol actualizado con exito');
+        return redirect('admin/rol')->with('mensaje', 'Rol actualizado con éxito');
     }
 
     /**

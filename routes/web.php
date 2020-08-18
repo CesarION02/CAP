@@ -60,6 +60,7 @@ Route::get('shiftprogramming/turnos', 'shiftprogrammingController@turnos')->name
 Route::get('shiftprogramming/newRow','shiftprogrammingController@newRow')->name('nuevo_renglon');
 Route::get('shiftprogramming/workShift','shiftprogrammingController@workShift')->name('recuperar_turno');
 Route::get('shiftprogramming/recoverPDF','shiftprogrammingController@recoverPDF')->name('recuperarPDF');
+Route::get('shiftprogramming/recoverWeek','shiftprogrammingController@recoverWeek')->name('recuperarWeek');
 Route::get('shiftprogramming/copyRol','shiftprogrammingController@copyRol')->name('copiarRol');
 Route::get('shiftprogramming/rotRol','shiftprogrammingController@rotRol')->name('rotarRol');
 Route::get('shiftprogramming/editRol','shiftprogrammingController@editRol')->name('editarRol');

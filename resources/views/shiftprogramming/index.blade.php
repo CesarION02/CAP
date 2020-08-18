@@ -83,20 +83,25 @@ Programacion de turnos
                   
                   <div id="Antigua" class="tabcontent">
                     <div class="row" style="margin:10px">
-                      <div class="col-md-3" style="margin:5px">
-                        <select id="semana" name="semana">
-                          <option value="0">Selecciona semana</option>
-                          @for( $i = 0 ; count($week) > $i ; $i++){
-                            <option value={{$week[$i]->id}}>{{$week[$i]->start.' a '.$week[$i]->end}}</option>
+                      <div class="col-md-2" style="margin:5px">
+                        <select id="anio" name="anio">
+                          <option value="0">Seleccione año</option>
+                          @for( $i = 0 ; count($year) > $i ; $i++){
+                            <option value={{$year[$i]->year}}>{{$year[$i]->year}}</option>
                           }
                           @endfor
                         </select>
                       </div>
-                      <div class="col-md-2">
-                          <button class="btn btn-warning" id="copiar" name="copiar" disabled onclick="copyShift()"><span class="glyphicon glyphicon-copy" aria-hidden="true"> Copiar</span></button>
+                      <div class="col-md-3" style="margin:5px" id="selectsemana">
+                        <select id="semana" name="semana">
+                          <option value="0">Selecciona semana</option>
+                        </select>
                       </div>
                       <div class="col-md-2">
-                          <button class="btn btn-warning" id="rotar" name="rotar" disabled onclick="rotateShift()"><span class="glyphicon glyphicon-repeat" aria-hidden="true"> Rotar</span></button>
+                          <button class="btn btn-block btn-warning btn-sm" id="copiar" name="copiar" disabled onclick="copyShift()"><span class="glyphicon glyphicon-copy" aria-hidden="true"> Crear copia</span></button>
+                      </div>
+                      <div class="col-md-2">
+                          <button class="btn btn-block btn-warning btn-sm" id="rotar" name="rotar" disabled onclick="rotateShift()"><span class="glyphicon glyphicon-repeat" aria-hidden="true"> Crear rotación</span></button>
                       </div>
                     </div>
                     <input type="hidden" value="0" id="pastWeek">

@@ -89,11 +89,13 @@ Incidencias
                     @endswitch
                 </h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:nolaborables"])
+                @if($incidentType == 14)
                 <div class="box-tools pull-right">
                     <a href="{{ route('crear_incidente', $incidentType) }}" class="btn btn-block btn-success btn-sm">
                         <i class="fa fa-fw fa-plus-circle"></i> Nuevo
                     </a>
                 </div>
+                @endif
             </div>
             <div class="box-body">
                 <table class="table table-striped table-bordered table-hover" id="tabla-data">

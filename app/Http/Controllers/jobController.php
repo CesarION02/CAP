@@ -46,7 +46,7 @@ class jobController extends Controller
         $job->updated_by = session()->get('user_id');
         $job->created_by = session()->get('user_id');
         $job->save();
-        return redirect('job')->with('mensaje','Puesto fue creado con exito');
+        return redirect('job')->with('mensaje','Puesto fue creado con éxito');
     }
 
     /**
@@ -85,7 +85,7 @@ class jobController extends Controller
         $job = job::findOrFail($id);
         $job->updated_by = session()->get('user_id');
         $job->update($request->all());
-        return redirect('job')->with('mensaje', 'Puesto actualizado con exito');
+        return redirect('job')->with('mensaje', 'Puesto actualizado con éxito');
     }
 
     /**

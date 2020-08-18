@@ -73,7 +73,7 @@ Puestos
                 <table class="table table-striped table-bordered table-hover" id="myTable">
                     <thead>
                         <tr>
-                            <th>Nombre puesto</th>
+                            <th>Puesto</th>
                             <th>Departamento CAP</th>
                             <th class="width70"></th>
                         </tr>

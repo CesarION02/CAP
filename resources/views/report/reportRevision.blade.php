@@ -16,7 +16,7 @@ Turno
 	<script src="{{ asset('dt/buttons.print.min.js') }}"></script>
 <script>
     $(document).ready( function () {
-        $('#myTable').DataTable({
+        $('#checks_table').DataTable({
             "language": {
                 "sProcessing":     "Procesando...",
                 "sLengthMenu":     "Mostrar _MENU_ registros",
@@ -81,7 +81,7 @@ Turno
                         
                         <tr>
                             <th>Empleado</th>
-                            <th>Programacion</th>
+                            <th>Programación</th>
                             @for($i = 0 ; $diff >= $i ; $i++)
 
                                 <th><?php echo date("d-m-Y",strtotime($inicio."+ ".$i." days")); ?></th>

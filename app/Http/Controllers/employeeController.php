@@ -61,7 +61,7 @@ class employeeController extends Controller
     public function store(Request $request)
     {
         employees::create($request->all());
-        return redirect('employee')->with('mensaje','Empleado fue creado con exito');
+        return redirect('employee')->with('mensaje','Empleado fue creado con éxito');
     }
 
     /**
@@ -116,7 +116,7 @@ class employeeController extends Controller
         $employee->save();
 
 
-        return redirect('employee')->with('mensaje', 'Empleado actualizado con exito');
+        return redirect('employee')->with('mensaje', 'Empleado actualizado con éxito');
     }
 
     /**
@@ -179,26 +179,35 @@ class employeeController extends Controller
     }
 
     public function editShortname ($id) {
-        $data = employees::findOrFail($id);
-        $data->job;
-        $numero = session()->get('name');
-        $usuario = DB::table('users')
+        if (session()->get('rol_id') != 1){
+            $data = employees::findOrFail($id);
+            $data->job;
+            $numero = session()->get('name');
+            $usuario = DB::table('users')
                     ->where('name',$numero)
                     ->get();
-        $dgu = DB::table('group_dept_user')
+            $dgu = DB::table('group_dept_user')
                     ->where('user_id',$usuario[0]->id)
                     ->select('groupdept_id AS id')
                     ->get();
-        $Adgu = [];
-        for($i=0;count($dgu)>$i;$i++){
-            $Adgu[$i]=$dgu[$i]->id;
-        }
-        $departments = DB::table('departments')
+            $Adgu = [];
+            for($i=0;count($dgu)>$i;$i++){
+                $Adgu[$i]=$dgu[$i]->id;
+            }
+            $departments = DB::table('departments')
                         ->join('department_group','department_group.id','=','departments.dept_group_id')
                         ->whereIn('departments.dept_group_id',$Adgu)
                         ->select('departments.id AS idDep','departments.name AS nameDep')
                         ->get();
-        
+        }else{
+            $data = employees::findOrFail($id);
+            $data->job; 
+            $departments = DB::table('departments')
+                        ->join('department_group','department_group.id','=','departments.dept_group_id')
+                        ->where('departments.is_delete',0)
+                        ->select('departments.id AS idDep','departments.name AS nameDep')
+                        ->get();  
+        }
         return view('employee.editShortname')->with('data',$data)->with('departments',$departments);    
     }
 
@@ -209,7 +218,7 @@ class employeeController extends Controller
         $employee->job_id = $request->job_id;
         $employee->updated_by = session()->get('user_id');
         $employee->update();
-        return redirect('supervisorsView')->with('mensaje', 'Empleado actualizado con exito');    
+        return redirect('supervisorsView')->with('mensaje', 'Empleado actualizado con éxito');    
     }
 
     /**
@@ -358,7 +367,7 @@ class employeeController extends Controller
         $actualizar->way_register_id = $request->way_register_id;
         $actualizar->updated_by = session()->get('user_id');
         $actualizar->save();
-        return redirect('fingerprint')->with('mensaje', 'Empleado actualizado con exito');
+        return redirect('fingerprint')->with('mensaje', 'Empleado actualizado con éxito');
     }
 
     public function desactivar(Request $request,$id){
@@ -436,7 +445,7 @@ class employeeController extends Controller
         $employee->save();
 
 
-        return redirect('outstanding')->with('mensaje', 'Empleado actualizado con exito');
+        return redirect('outstanding')->with('mensaje', 'Empleado actualizado con éxito');
     }
     public function jobs(Request $request){
         $pertenece = 0;

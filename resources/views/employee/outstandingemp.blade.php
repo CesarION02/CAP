@@ -71,8 +71,15 @@ Empleados
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Departamento - empleado</h3>
-                @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:asignacionpstoydeptopen"])
+                @if(isset($foraneos))
+                
+                    <h3 class="box-title">Empleados fóraneos</h3>
+                    @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:empleadoforaneo"])
+                @else
+                    <h3 class="box-title">Empleado vs. departamento</h3>
+                    @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:asignacionpstoydeptopen"])
+                @endif
+                
                 <div class="box-tools pull-right">
                 </div>
             </div>

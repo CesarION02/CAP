@@ -56,7 +56,7 @@
                     <thead>
                         <tr>
                             <th>Fecha</th>
-                            <th>Num</th>
+                            <th>Número empleado</th>
                             <th>Empleado</th>
                             <th></th>
                         </tr>

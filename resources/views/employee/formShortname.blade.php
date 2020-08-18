@@ -1,11 +1,11 @@
 <div class="form-group">
-    <label for="num_employee" class="col-lg-3 control-label">Numero empleado:</label>
+    <label for="num_employee" class="col-lg-3 control-label">Número empleado:</label>
     <div class="col-lg-8">
         <input type="number" name="num_employee" id="num_employee" class="form-control" value="{{old('num_employee', $data->num_employee ?? '')}}" disabled>
     </div>
 </div>
 <div class="form-group">
-    <label for="nombre" class="col-lg-3 control-label">Nombre empleado:</label>
+    <label for="nombre" class="col-lg-3 control-label">Empleado:</label>
     <div class="col-lg-8">
     <input type="text" name="name" id="name" class="form-control" value="{{old('name', $data->name ?? '')}}" disabled/>
     </div>

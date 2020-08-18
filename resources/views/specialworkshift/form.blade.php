@@ -6,7 +6,7 @@
                 <input type="text" name="employee_id" id="employee_id" value="{{$datas[0]->nameEmp}}" readonly>
             @else
                 <select name="employee_id" id="employee_id">
-                    <option value="0">Seleccion empleado</option>
+                    <option value="0">Seleccione empleado</option>
                     @for($i = 0 ; count($employees) > $i ; $i++)
                         <option value="{{$employees[$i]->idEmployee}}">{{$employees[$i]->nameEmployee}}</option>
                     @endfor

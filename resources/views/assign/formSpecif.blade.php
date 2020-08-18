@@ -1,6 +1,6 @@
 
 <div class="form-group">
-    <label for="start_date" class="col-lg-3 control-label">Fecha inicio:</label>
+    <label for="start_date" class="col-lg-3 control-label">Semana:</label>
     <div class="col-lg-3">
         <input type="week" name="semana" id="semana" required>
     </div>  

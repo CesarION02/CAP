@@ -30,7 +30,7 @@ class DeptsRhController extends Controller
         $department->updated_by = session()->get('user_id');
         $department->default_dept_id = $request->department_id;
         $department->save();
-        return redirect('departmentRH')->with('mensaje', 'Departamento RH actualizado con exito');
+        return redirect('departmentRH')->with('mensaje', 'Departamento RH actualizado con éxito');
     }
     
     public function saveRhDeptsFromJSON($lSiieRhDepts)

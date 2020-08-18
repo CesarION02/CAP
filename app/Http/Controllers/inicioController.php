@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use DB;
 
 class inicioController extends Controller
 {
@@ -13,7 +14,13 @@ class inicioController extends Controller
      */
     public function index()
     {
-        return view('inicio');
+        $rol = session()->get('rol_id');
+        $datas = DB::table('home_menus_rol')
+                        ->join('menu','menu.id','=','home_menus_rol.menu_id')
+                        ->where('home_menus_rol.rol_id',$rol)
+                        ->select('menu.name AS nombreMenu', 'menu.url AS url', 'home_menus_rol.icono AS icono')
+                        ->get();
+        return view('inicio')->with('datas',$datas);
     }
 
     /**

@@ -68,7 +68,7 @@ class groupController extends Controller
         }
 
 
-        return redirect('group')->with('mensaje','Grupo fue creado con exito');
+        return redirect('group')->with('mensaje','Grupo fue creado con éxito');
     }
 
     /**
@@ -127,7 +127,7 @@ class groupController extends Controller
             $group_workshift_line->save();    
         }
 
-        return redirect('group')->with('mensaje','Grupo fue edita con exito');
+        return redirect('group')->with('mensaje','Grupo fue edita con éxito');
     }
 
     /**

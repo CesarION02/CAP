@@ -15,7 +15,7 @@ class SyncController extends Controller
 
         $this->syncronizeWithERP($config->lastSyncDateTime);
 
-        return redirect('/')->with('mensaje', 'Sincronizado');
+        return redirect()->back()->with('mensaje', 'Sincronizado');
     }
 
     public function syncronizeWithERP($lastSyncDate = "")

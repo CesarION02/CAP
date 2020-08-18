@@ -89,7 +89,7 @@ Mis empleados
                     <thead>
                         <tr>
                             <th>Número empleado</th>
-                            <th>Nombre empleado</th>
+                            <th>Empleado</th>
                             <th>Nombre corto</th>
                             <th>Departamento CAP</th>
                             <th>Puesto</th>

@@ -49,7 +49,7 @@ class departmentController extends Controller
         $department->updated_by = session()->get('user_id');
         $department->created_by = session()->get('user_id');
         $department->save();
-        return redirect('department')->with('mensaje','Departamento fue creado con exito');
+        return redirect('department')->with('mensaje','Departamento fue creado con éxito');
     }
 
     /**
@@ -89,7 +89,7 @@ class departmentController extends Controller
         $department = department::findOrFail($id);
         $department->updated_by = session()->get('user_id');
         $department->update($request->all());
-        return redirect('department')->with('mensaje', 'Departamento actualizado con exito');
+        return redirect('department')->with('mensaje', 'Departamento actualizado con éxito');
     }
 
     /**

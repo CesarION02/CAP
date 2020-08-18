@@ -62,7 +62,7 @@ class DeptsGroupController extends Controller
         $newGroup->save();
 
         // return json_encode($newGroup);
-        return redirect('deptsgroup')->with('mensaje', 'El grupo fue creado con exito');
+        return redirect('deptsgroup')->with('mensaje', 'El grupo fue creado con éxito');
     }
 
     public function edit($id, $name)
@@ -95,7 +95,7 @@ class DeptsGroupController extends Controller
 
         $deptsGroup->save();
 
-        return redirect('deptsgroup')->with('mensaje', 'Grupo actualizado con exito');
+        return redirect('deptsgroup')->with('mensaje', 'Grupo actualizado con éxito');
     }
 
     public function delete($id)

@@ -30,9 +30,14 @@ class shiftprogrammingController extends Controller
                 ->join('week','week.id','=','pdf_week.week_id')
                 ->select('week.start_date AS start','week.end_date AS end','week.id AS id')
                 ->get();
+        $year = DB::table('pdf_week')
+                ->join('week','week.id','=','pdf_week.week_id')
+                ->groupBy('week.year')
+                ->select('week.year AS year')
+                ->get();
         $newest = week::where('is_delete','=',0)->orderBy('updated_at','asc')->first();
 
-        return view('shiftprogramming.index', compact('typeArea'),compact('newest'))->with('week',$week);
+        return view('shiftprogramming.index', compact('typeArea'),compact('newest'))->with('week',$week)->with('year',$year);
 
     }
 
@@ -105,6 +110,17 @@ class shiftprogrammingController extends Controller
     public function recoverPDF(Request $request){
         $namePdf = pdf_week::where('week_id','=',$request->semana)->where('is_delete','=','0')->orderBy('updated_at')->first();
         return response()->json($namePdf);
+    }
+
+    public function recoverWeek(Request $request){
+        $weeks = DB::table('pdf_week')
+        ->join('week','week.id','=','pdf_week.week_id')
+        ->where('week.year',$request->anio)
+        ->orderBy('week.week_number','DESC')
+        ->select('week.start_date AS start','week.end_date AS end','week.id AS id')
+        ->get();
+
+        return response()->json($weeks);
     }
 
     public function newShift(Request $request){

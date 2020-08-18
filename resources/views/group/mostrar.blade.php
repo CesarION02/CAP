@@ -67,7 +67,7 @@ Grupos de turnos
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Grupo de turno</h3>
+                <h3 class="box-title">Grupo de turno semanales</h3>
                 <div class="box-tools pull-right">
                     <a href="{{route('grupo')}}" class="btn btn-block btn-info btn-sm">
                         <i class="fa fa-fw fa-reply-all"></i> Regresar

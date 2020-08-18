@@ -76,12 +76,12 @@ Turno
                 </div>
             </div>
             <div class="box-body table-responsive">
-                <table class="table table-striped table-bordered table-hover " id="checks_table">
+                <table class="table table-striped table-bordered table-hover " id="myTable">
                     <thead>
                         
                         <tr>
                             <th>Empleado</th>
-                            <th>Programacion</th>
+                            <th>Programado</th>
                             @for($i = 0 ; $diff >= $i ; $i++)
 
                                 <th><?php echo date("d-m-Y",strtotime($inicio."+ ".$i." days")); ?></th>
