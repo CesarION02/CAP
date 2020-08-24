@@ -2,6 +2,7 @@ class SReportRow {
     createRowBottom(tReport, numEmploye, hrs, delayMins, premMins, sundays, daysOff) {
         let row = [];
         if (tReport == oData.REP_HR_EX) {
+            let daysOffTheorical = oData.lEmpWrkdDays[parseInt(numEmploye, 10)];
             row[0] = numEmploye;
             row[1] = "";
             row[2] = "";
@@ -10,7 +11,8 @@ class SReportRow {
             row[5] = delayMins;
             row[6] = premMins;
             row[7] = sundays;
-            row[8] = daysOff + " [" + oData.lEmpWrkdDays[parseInt(numEmploye, 10)] + "]";
+            row[8] = daysOff + 
+                        " [" + (daysOffTheorical == undefined ? 0 : daysOffTheorical)  + "]";
             row[9] = "";
             row[10] = "";
         }
