@@ -1078,7 +1078,7 @@ class SDataProcess {
 
         $oRow->isOnSchedule = true;
         
-        if (abs($comparisonIn->diffMinutes) <= $config->maxGapMinutes && abs($comparisonOut->diffMinutes) <= $config->maxGapMinutes) {
+        if (abs($comparisonIn->diffMinutes) <= $config->maxGapSchedule && abs($comparisonOut->diffMinutes) <= $config->maxGapSchedule) {
             $oRow->inDateTimeSch = $inDate.' 14:30:00';
             $oRow->outDateTimeSch = $outDate.' 22:30:00';
             $oRow->overDefaultMins = 30;
@@ -1088,7 +1088,7 @@ class SDataProcess {
         $comparisonIn = SDelayReportUtils::compareDates($oRow->inDateTime, $inDate.' 18:30:00');
         $comparisonOut = SDelayReportUtils::compareDates($oRow->outDateTime, $outDate.' 06:30:00');
         
-        if (abs($comparisonIn->diffMinutes) <= $config->maxGapMinutes && abs($comparisonOut->diffMinutes) <= $config->maxGapMinutes) {
+        if (abs($comparisonIn->diffMinutes) <= $config->maxGapSchedule && abs($comparisonOut->diffMinutes) <= $config->maxGapSchedule) {
             $oRow->inDateTimeSch = $inDate.' 18:30:00';
             $oRow->outDateTimeSch = $outDate.' 06:30:00';
             $oRow->overDefaultMins = 300;
@@ -1098,7 +1098,7 @@ class SDataProcess {
         $comparisonIn = SDelayReportUtils::compareDates($oRow->inDateTime, $inDate.' 22:30:00');
         $comparisonOut = SDelayReportUtils::compareDates($oRow->outDateTime, $outDate.' 06:30:00');
         
-        if (abs($comparisonIn->diffMinutes) <= $config->maxGapMinutes && abs($comparisonOut->diffMinutes) <= $config->maxGapMinutes) {
+        if (abs($comparisonIn->diffMinutes) <= $config->maxGapSchedule && abs($comparisonOut->diffMinutes) <= $config->maxGapSchedule) {
             $oRow->inDateTimeSch = $inDate.' 22:30:00';
             $oRow->outDateTimeSch = $outDate.' 06:30:00';
             if ($oRow->outDateTime <= $sEndDate) {
@@ -1110,7 +1110,7 @@ class SDataProcess {
         $comparisonIn = SDelayReportUtils::compareDates($oRow->inDateTime, $inDate.' 06:30:00');
         $comparisonOut = SDelayReportUtils::compareDates($oRow->outDateTime, $outDate.' 18:30:00');
         
-        if (abs($comparisonIn->diffMinutes) <= $config->maxGapMinutes && abs($comparisonOut->diffMinutes) <= $config->maxGapMinutes) {
+        if (abs($comparisonIn->diffMinutes) <= $config->maxGapSchedule && abs($comparisonOut->diffMinutes) <= $config->maxGapSchedule) {
             $oRow->inDateTimeSch = $inDate.' 06:30:00';
             $oRow->outDateTimeSch = $outDate.' 18:30:00';
             $oRow->overDefaultMins = 240;
@@ -1203,7 +1203,7 @@ class SDataProcess {
     public static function addSundayPay($lData)
     {
         foreach ($lData as $oRow) {
-            if (! $oRow->hasChecks || ! $oRow->workable) {
+            if (! $oRow->hasChecks) {
                 continue;
             }
 

@@ -305,11 +305,12 @@
                             value_to_return = group +' (Retardo total = ' + mins + ' mins)';
                         }
                         else {
+                            let dayOffTheo = oData.lEmpWrkdDays[parseInt(group, 10)];
                             value_to_return = "TOTAL " + group +': tiempo extra: ' + convertToHoursMins(mins) + 
                                                 " / tiempo retardo: " + minsDelay + " min " + 
                                                 " / salida anticipada: " + minsBeforeOut  + " min" + 
                                                 " / primas dominicales: " + suns + 
-                                                " / descansos: " + daysoff + " [" + oData.lEmpWrkdDays[parseInt(group, 10)] + "]";
+                                                " / descansos: " + daysoff + " [" + (dayOffTheo == undefined ? 0 : dayOffTheo) + "]";
                         }
                         
                         return value_to_return;
