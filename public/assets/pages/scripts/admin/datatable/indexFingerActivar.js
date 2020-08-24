@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    $("#myTable").on('submit', '.form-eliminar', function() {
+    $("#myTable").on('submit', '.form-activar', function() {
         event.preventDefault();
         const form = $(this);
         swal({

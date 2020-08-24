@@ -505,18 +505,18 @@ class SDelayReportUtils {
         $secondDate = (clone $firstDate)->addDays(6);
 
         $search = true;
+        $i = 0;
         while ($search) {
-            for ($i = 0; $i < $count; $i++) {
                 if ($oDtCompare->between($firstDate, $secondDate)) {
                     return $schedules[$i]->schedule_template_id;
                 }
                 $firstDate = (clone $firstDate)->addDays(7);
                 $secondDate = (clone $firstDate)->addDays(6);
-            }
-
-            if ($oDtCompare->isAfter($secondDate)) {
-                return null;
-            }
+                $i++;
+                if($i == $count){
+                    $i = 0;
+                }
+                
         }
     }
 

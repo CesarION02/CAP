@@ -118,6 +118,7 @@ Route::post('user', 'userController@store')->name('guardar_usuario');
 Route::get('user/{id}/edit', 'userController@edit')->name('editar_usuario');
 Route::put('user/{id}', 'userController@update')->name('actualizar_usuario');
 Route::delete('user/{id}', 'userController@destroy')->name('eliminar_usuario');
+Route::delete('user/disable/{id}', 'userController@activar')->name('activar_usuario');
 
 
 /* RUTAS DE EMPRESAS */
@@ -218,6 +219,7 @@ Route::post('area', 'areaController@store')->name('guardar_area');
 Route::get('area/{id}/edit', 'areaController@edit')->name('editar_area');
 Route::put('area/{id}', 'areaController@update')->name('actualizar_area');
 Route::delete('area/{id}', 'areaController@destroy')->name('eliminar_area');
+Route::delete('area/disable/{id}', 'areaController@activar')->name('activar_area');
 
 /* RUTAS DEPARTAMENTOS */
 Route::get('department', 'departmentController@index')->name('departamento');
@@ -227,6 +229,7 @@ Route::get('department/{id}/edit', 'departmentController@edit')->name('editar_de
 Route::put('department/{id}', 'departmentController@update')->name('actualizar_departamento');
 Route::delete('department/{id}', 'departmentController@destroy')->name('eliminar_departamento');
 Route::put('upddepartments', 'departmentController@updateDepts')->name('actualizar_departamentos');
+Route::delete('department/disable/{id}', 'departmentController@activar')->name('activar_departamento');
 
 /* RUTAS DEPARTAMENTOS RH */
 Route::get('departmentRH', 'DeptsRhController@index')->name('departamento_rh');
@@ -249,6 +252,7 @@ Route::post('job', 'jobController@store')->name('guardar_puesto');
 Route::get('job/{id}/edit', 'jobController@edit')->name('editar_puesto');
 Route::put('job/{id}', 'jobController@update')->name('actualizar_puesto');
 Route::delete('job/{id}', 'jobController@destroy')->name('eliminar_puesto');
+Route::delete('job/disable/{id}', 'jobController@activar')->name('activar_puesto');
 
 /* RUTAS CAPTURA INCIDENTES */
 Route::get('incidents/{type?}', 'incidentController@index')->name('incidentes');

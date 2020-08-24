@@ -4,6 +4,7 @@ Departamentos CAP
 @endsection
 
 @section("scripts")
+<script src="{{asset("assets/pages/scripts/admin/datatable/indexFingerActivar.js")}}" type="text/javascript"></script>
 <script src="{{asset("assets/pages/scripts/admin/datatable/index.js")}}" type="text/javascript"></script>
 <script src="{{ asset("dt/datatables.js") }}" type="text/javascript"></script>
 <script src="{{ asset('dt/dataTables.buttons.min.js') }}"></script>
@@ -78,10 +79,56 @@ Departamentos CAP
             <div class="box-header with-border">
                 <h3 class="box-title">Departamentos CAP</h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:departamentos"])
-                <div class="box-tools pull-right">
-                    <a href="{{route('crear_departamento')}}" class="btn btn-block btn-success btn-sm">
-                        <i class="fa fa-fw fa-plus-circle"></i> Nuevo
-                    </a>
+                <div class="row">
+                    <div class="col-md-3 col-md-offset-9">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <a href="{{route('crear_departamento')}}" class="btn btn-block btn-success btn-sm">
+                                    <i class="fa fa-fw fa-plus-circle"></i> Nuevo
+                                </a>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <form action="{{ route('departamento') }}">
+                                <div class="col-md-12">
+                                    <div class="input-group">
+                                        @switch($iFilter)
+                                            @case(1)
+                                                <select class="form-control" name="filter_acts">
+                                                <option value="1" selected>Activos</option>
+                                                <option value="2">Inactivos</option>
+                                                <option value="3">Todos</option>
+                                                </select>
+
+                                                @break
+                                            @case(2)
+                                                <select class="form-control" name="filter_acts">
+                                                    <option value="1">Activos</option>
+                                                    <option value="2" selected>Inactivos</option>
+                                                    <option value="3">Todos</option>
+                                                </select>
+                                                @break
+                                            @case(3)
+                                                <select class="form-control" name="filter_acts">
+                                                    <option value="1">Activos</option>
+                                                    <option value="2">Inactivos</option>
+                                                    <option value="3" selected>Todos</option>
+                                                </select>
+                                                @break
+                                            @default
+                                                
+                                        @endswitch
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-default" type="submit">
+                                                <i class="glyphicon glyphicon-search"></i>
+                                            </button>
+                                        </span>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="box-body">
@@ -91,6 +138,7 @@ Departamentos CAP
                             <th>Departamento CAP</th>
                             <th>Área</th>
                             <th>Departamento nóminas</th>
+                            <th>Estado</th>
                             <th class="width70"></th>
                         </tr>
                     </thead>
@@ -100,16 +148,31 @@ Departamentos CAP
                             <td>{{$data->name}}</td>
                             <td>{{$data->area->name}}</td>
                             <td>{{$data->rh->name}}</td>
+                            @if($data->is_delete == 0)
+                                <td>Activo</td>
+                            @else
+                                <td>Inactivo</td>
+                            @endif
                             <td>
                                 <a href="{{route('editar_departamento', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
                                     <i class="fa fa-fw fa-pencil"></i>
                                 </a>
+                                @if($iFilter == 2)
+                                <form action="{{route('activar_departamento', ['id' => $data->id])}}" class="d-inline form-activar" method="POST">
+                                    @csrf @method("delete")
+                                    <button type="submit" class="btn-accion-tabla eliminar tooltipsC" title="Activar este registro">
+                                        <i class="fa fa-fw fa-check-circle text-danger"></i>
+                                    </button>
+                                </form>
+                                @elseif($iFilter == 1)
                                 <form action="{{route('eliminar_departamento', ['id' => $data->id])}}" class="d-inline form-eliminar" method="POST">
                                     @csrf @method("delete")
                                     <button type="submit" class="btn-accion-tabla eliminar tooltipsC" title="Eliminar este registro">
                                         <i class="fa fa-fw fa-trash text-danger"></i>
                                     </button>
                                 </form>
+                                @endif
+                                
                             </td>
                         </tr>
                         @endforeach

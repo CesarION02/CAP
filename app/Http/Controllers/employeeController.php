@@ -326,18 +326,46 @@ class employeeController extends Controller
         $emp->save();
     }
 
-    public function fingerprints(){
-        $employees = DB::table('employees')
+    public function fingerprints(Request $request){
+        $iFilter = $request->filter_acts == null ? 1 : $request->filter_acts;
+        switch ($iFilter) {
+            case 1:
+                $employees = DB::table('employees')
                         ->leftjoin('fingerprints','employees.id','=','fingerprints.employee_id')
                         ->join('way_register','way_register.id','=','employees.way_register_id')
                         ->groupBy('employees.id')
                         ->orderBy('employees.name')
                         ->where('employees.is_delete','0')
                         ->where('employees.is_active', '1')
-                        ->select('employees.id AS idEmployee','employees.name AS nameEmployee','way_register.name AS way','fingerprints.id AS fingerprint','employees.num_employee AS num')
-                        ->get(); 
+                        ->select('employees.id AS idEmployee','employees.name AS nameEmployee','way_register.name AS way','fingerprints.id AS fingerprint','employees.num_employee AS num','employees.is_delete AS is_delete')
+                        ->get();
+                break;
+            case 2:
+                $employees = DB::table('employees')
+                        ->leftjoin('fingerprints','employees.id','=','fingerprints.employee_id')
+                        ->join('way_register','way_register.id','=','employees.way_register_id')
+                        ->groupBy('employees.id')
+                        ->orderBy('employees.name')
+                        ->where('employees.is_delete','2')
+                        ->where('employees.is_active', '1')
+                        ->select('employees.id AS idEmployee','employees.name AS nameEmployee','way_register.name AS way','fingerprints.id AS fingerprint','employees.num_employee AS num','employees.is_delete AS is_delete')
+                        ->get();
+                break;
+            
+            default:
+                $employees = DB::table('employees')
+                    ->leftjoin('fingerprints','employees.id','=','fingerprints.employee_id')
+                    ->join('way_register','way_register.id','=','employees.way_register_id')
+                    ->groupBy('employees.id')
+                    ->orderBy('employees.name')
+                    ->where('employees.is_active', '1')
+                    ->select('employees.id AS idEmployee','employees.name AS nameEmployee','way_register.name AS way','fingerprints.id AS fingerprint','employees.num_employee AS num','employees.is_delete AS is_delete')
+                    ->get();
+                break;
+        }
+         
         
-        return view('employee.fingerprints')->with('employees',$employees); 
+        return view('employee.fingerprints')->with('employees',$employees)->with('iFilter',$iFilter); 
     }
     public function fingerprintsDisable(){
         $employees = DB::table('employees')

@@ -12,10 +12,24 @@ class areaController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $datas = area::where('is_delete','0')->orderBy('name')->get();
-        return view('area.index', compact('datas'));
+        $iFilter = $request->filter_acts == null ? 1 : $request->filter_acts;
+
+        switch ($iFilter) {
+            case 1:
+                $datas = area::where('is_delete','0')->orderBy('name')->get();
+                break;
+            case 2:
+                $datas = area::where('is_delete','1')->orderBy('name')->get();
+                break;
+            
+            default:
+                $datas = area::orderBy('name')->get();
+                break;
+        }
+        
+        return view('area.index', compact('datas'))->with('iFilter',$iFilter);
     }
 
     /**
@@ -102,5 +116,17 @@ class areaController extends Controller
         } else {
             abort(404);
         }
+    }
+    public function activar(Request $request,$id){
+        if ($request->ajax()) {
+            $area = area::find($id);
+            $area->fill($request->all());
+            $area->is_delete = 0;
+            $area->updated_by = session()->get('user_id');
+            $area->save();
+            return response()->json(['mensaje' => 'ok']);
+        } else {
+            abort(404);
+        }    
     }
 }

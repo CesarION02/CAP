@@ -14,14 +14,36 @@ class departmentController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $datas = department::where('is_delete','0')->orderBy('name')->get();
-        $datas->each(function($datas){
-            $datas->area;
-            $datas->rh;
-        });
-        return view('department.index', compact('datas'));
+        $iFilter = $request->filter_acts == null ? 1 : $request->filter_acts;
+
+        switch ($iFilter) {
+            case 1:
+                $datas = department::where('is_delete','0')->orderBy('name')->get();
+                $datas->each(function($datas){
+                    $datas->area;
+                    $datas->rh;
+                });
+                break;
+            case 2:
+                $datas = department::where('is_delete','1')->orderBy('name')->get();
+                $datas->each(function($datas){
+                    $datas->area;
+                    $datas->rh;
+                });
+                break;
+            
+            default:
+                $datas = department::orderBy('name')->get();
+                $datas->each(function($datas){
+                    $datas->area;
+                    $datas->rh;
+                });
+                break;
+        }
+        
+        return view('department.index', compact('datas'))->with('iFilter',$iFilter);
     }
 
     /**
@@ -110,6 +132,18 @@ class departmentController extends Controller
         } else {
             abort(404);
         }
+    }
+    public function activar(Request $request,$id){
+        if ($request->ajax()) {
+            $department = department::find($id);
+            $department->fill($request->all());
+            $department->is_delete = 0;
+            $department->updated_by = session()->get('user_id');
+            $department->save();
+            return response()->json(['mensaje' => 'ok']);
+        } else {
+            abort(404);
+        }    
     }
 
     /**

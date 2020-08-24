@@ -14,10 +14,24 @@ class workshiftController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $datas = workshift::where('is_delete','0')->orderBy('name')->get();
-        return view('workshift.index', compact('datas'));
+        $iFilter = $request->filter_acts == null ? 1 : $request->filter_acts;
+
+        switch ($iFilter) {
+            case 1:
+                $datas = workshift::where('is_delete','0')->orderBy('name')->get();
+                break;
+            case 2:
+                $datas = workshift::where('is_delete','1')->orderBy('name')->get();
+                break;
+            
+            default:
+                $datas = workshift::orderBy('name')->get();
+                break;
+        }
+        
+        return view('workshift.index', compact('datas'))->with('iFilter',$iFilter);
     }
 
     /**
@@ -104,5 +118,17 @@ class workshiftController extends Controller
         } else {
             abort(404);
         }        
+    }
+    public function activar(Request $request,$id){
+        if ($request->ajax()) {
+            $workshift = workshift::find($id);
+            $workshift->fill($request->all());
+            $workshift->is_delete = 0;
+            $workshift->updated_by = session()->get('user_id');
+            $workshift->save();
+            return response()->json(['mensaje' => 'ok']);
+        } else {
+            abort(404);
+        }    
     }
 }

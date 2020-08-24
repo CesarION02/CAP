@@ -14,13 +14,33 @@ class jobController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $datas = job::where('is_delete','0')->orderBy('name')->get();
-        $datas->each(function($datas){
-            $datas->department;
-        });
-        return view('job.index', compact('datas'));
+        $iFilter = $request->filter_acts == null ? 1 : $request->filter_acts;
+
+        switch ($iFilter) {
+            case 1:
+                $datas = job::where('is_delete','0')->orderBy('name')->get();
+                $datas->each(function($datas){
+                    $datas->department;
+                });
+                break;
+            case 2:
+                $datas = job::where('is_delete','1')->orderBy('name')->get();
+                $datas->each(function($datas){
+                    $datas->department;
+                });
+                break;
+            
+            default:
+                $datas = job::orderBy('name')->get();
+                $datas->each(function($datas){
+                    $datas->department;
+                });
+                break;
+        }
+        
+        return view('job.index', compact('datas'))->with('iFilter',$iFilter);
     }
 
     /**
@@ -106,5 +126,17 @@ class jobController extends Controller
         } else {
             abort(404);
         }
+    }
+    public function activar(Request $request,$id){
+        if ($request->ajax()) {
+            $job = job::find($id);
+            $job->fill($request->all());
+            $job->is_delete = 0;
+            $job->updated_by = session()->get('user_id');
+            $job->save();
+            return response()->json(['mensaje' => 'ok']);
+        } else {
+            abort(404);
+        }    
     }
 }

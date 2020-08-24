@@ -13,14 +13,34 @@ class userController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $datas = User::where('is_delete','0')->orderBy('id')->get();
-        $datas->each(function($datas){
-            $datas->area;
-        });
+        $iFilter = $request->filter_acts == null ? 1 : $request->filter_acts;
 
-        return view('user.index', compact('datas'));
+        switch ($iFilter) {
+            case 1:
+                $datas = User::where('is_delete','0')->orderBy('id')->get();
+                $datas->each(function($datas){
+                    $datas->area;
+                });
+                break;
+            case 2:
+                $datas = User::where('is_delete','1')->orderBy('id')->get();
+                $datas->each(function($datas){
+                    $datas->area;
+                });
+                break;
+            
+            default:
+                $datas = User::orderBy('id')->get();
+                $datas->each(function($datas){
+                    $datas->area;
+                });
+                break;
+        }
+        
+
+        return view('user.index', compact('datas'))->with('iFilter',$iFilter);
     }
 
     /**
@@ -115,6 +135,19 @@ class userController extends Controller
         } else {
             abort(404);
         }
+    }
+
+    public function activar(Request $request,$id){
+        if ($request->ajax()) {
+            $user = User::find($id);
+            $user->fill($request->all());
+            $user->is_delete = 0;
+            $user->updated_by = session()->get('user_id');
+            $user->save();
+            return response()->json(['mensaje' => 'ok']);
+        } else {
+            abort(404);
+        }    
     }
 
     public function change(){
