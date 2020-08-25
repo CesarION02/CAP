@@ -268,6 +268,28 @@ class SDataProcess {
         $isOut = false;
 
         if ($registry->type_id == \SCons::REG_OUT) {
+            if (! $isNew) {
+                $b24Hr = SDataProcess::gapInAndOut24Hr($newRow->inDateTime, $registry->date.' '.$registry->time);
+                if ($b24Hr) {
+                    $newRow->outDate = $newRow->inDate;
+                    $newRow->outDateTime = $newRow->inDate;
+                    $newRow->comments = $newRow->comments."Sin salida. ";
+                    $newRow->hasCheckOut = false;
+
+                    $response = array();
+                    $response[] = true;
+                    $response[] = $newRow;
+                    $response[] = true;
+                    $response[] = null;
+
+                    if ($isOut) {
+                        $response[501] = true;
+                    }
+
+                    return $response;
+                }
+            }
+
             $result = SDelayReportUtils::getSchedule($sStartDate, $sEndDate, $idEmployee, $registry, clone $qWorkshifts, \SCons::REP_HR_EX);
 
             // no tiene horario para el día actual
@@ -631,6 +653,26 @@ class SDataProcess {
         }
         
         return 0;
+    }
+
+    /**
+     * Retorna TRUE si la diferencia en minutos entre las fechas es mayor o igual a 24 horas,
+     * esto si ambas son diferentes de NULL
+     *
+     * @param string $inDateTime
+     * @param string $outDateTime
+     * 
+     * @return boolean
+     */
+    public static function gapInAndOut24Hr($inDateTime, $outDateTime)
+    {
+        if ($inDateTime != null && $outDateTime != null) {
+            $oComparison = SDelayReportUtils::compareDates($inDateTime, $outDateTime);
+
+            return $oComparison->diffMinutes >= 1440;
+        }
+
+        return false;
     }
 
     /**
