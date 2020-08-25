@@ -460,11 +460,13 @@ class employeeController extends Controller
         $departments = department::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
         $benPols = benefitsPolice::orderBy('name','ASC')->pluck('id','name');
         $data = employees::findOrFail($id);
+        $policy = policy_extratime::orderBy('id')->pluck('id','name');
 
         return view('employee.editoutstanding', compact('data'))
                                         ->with('way',$way)
                                         ->with('department',$departments)
-                                        ->with('benPols',$benPols);    
+                                        ->with('benPols',$benPols)
+                                        ->with('policy',$policy);    
     }
     public function updateoutstanding(Request $request, $id)
     {
@@ -477,6 +479,7 @@ class employeeController extends Controller
         }
         $employee->job_id = 25;
         $employee->ben_pol_id = $request->ben_pol_id;
+        $employee->policy_extratime_id = $request->policy_id;
         $employee->updated_by = session()->get('user_id');
         $employee->is_config = 1;
         $employee->save();
