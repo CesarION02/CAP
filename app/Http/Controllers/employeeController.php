@@ -10,6 +10,7 @@ use App\Models\department;
 use App\Models\benefitsPolice;
 use App\Models\company;
 use App\Models\DepartmentRH;
+use App\Models\policy_extratime;
 use DB;
 
 class employeeController extends Controller
@@ -46,10 +47,12 @@ class employeeController extends Controller
         $way = way_register::orderBy('name','ASC')->pluck('id','name');
         $job = job::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
         $benPols = benefitsPolice::orderBy('name','ASC')->pluck('id','name');
+        $policy = policy_extratime::orderBy('id')->pluck('id','name');
         
         return view('employee.create')->with('way',$way)
                                         ->with('job',$job)
-                                        ->with('benPols',$benPols);
+                                        ->with('benPols',$benPols)
+                                        ->with('policy',$policy);
     }
 
     /**
@@ -87,11 +90,13 @@ class employeeController extends Controller
         $department = department::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');;
         $benPols = benefitsPolice::orderBy('name','ASC')->pluck('id','name');
         $data = employees::findOrFail($id);
+        $policy = policy_extratime::orderBy('id')->pluck('id','name');
 
         return view('employee.edit', compact('data'))
                                         ->with('way',$way)
                                         ->with('department',$department)
-                                        ->with('benPols',$benPols);
+                                        ->with('benPols',$benPols)
+                                        ->with('policy',$policy);
     }
 
     /**
@@ -109,9 +114,11 @@ class employeeController extends Controller
         $employee->department_id = $request->department_id;
         if(isset($request->job_id)){
             $employee->job_id = $request->job_id;
+        }else{
+            $employee->job_id = 25;
         }
-        $employee->job_id = 25;
         $employee->ben_pol_id = $request->ben_pol_id;
+        $employee->policy_extratime_id = $request->policy_id;
         $employee->updated_by = session()->get('user_id');
         $employee->save();
 
@@ -208,7 +215,8 @@ class employeeController extends Controller
                         ->select('departments.id AS idDep','departments.name AS nameDep')
                         ->get();  
         }
-        return view('employee.editShortname')->with('data',$data)->with('departments',$departments);    
+        $policy = policy_extratime::orderBy('id')->pluck('id','name');
+        return view('employee.editShortname')->with('data',$data)->with('departments',$departments)->with('policy',$policy);    
     }
 
     public function updateShortname (Request $request, $id){
@@ -216,6 +224,7 @@ class employeeController extends Controller
         $employee->short_name = $request->short_name;
         $employee->department_id = $request->department_id;
         $employee->job_id = $request->job_id;
+        $employee->policy_extratime_id = $request->policy_id;
         $employee->updated_by = session()->get('user_id');
         $employee->update();
         return redirect('supervisorsView')->with('mensaje', 'Empleado actualizado con éxito');    

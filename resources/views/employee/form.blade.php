@@ -29,10 +29,21 @@
         </div>
 </div>
 <div class="form-group">
-        <label for="is_overtime" class="col-lg-3 control-label">Tiempo extra:</label>
+        <label for="is_overtime" class="col-lg-3 control-label requerido">Tiempo extra:</label>
         <div class="col-lg-8">
-                <input type="checkbox" value="1" name="is_overtime" id="is_overtime"
-                         {{ (isset($data->is_overtime) && $data->is_overtime) ? 'checked="checked" ' : '' }}>
+                <select id="policy_id" name="policy_id" class="form-control">
+                        @foreach($policy as $policy => $index)
+                            @if(isset($data))
+                                    @if($index == $data->policy_extratime_id)
+                                            <option value="{{ $index }}" selected> {{$policy}}</option>       
+                                    @else
+                                            <option value="{{ $index }}" > {{$policy}}</option>
+                                    @endif
+                            @else
+                                    <option value="{{ $index }}" > {{$policy}}</option>
+                            @endif
+                        @endforeach
+                    </select>
         </div>
 </div>
 <div class="form-group">

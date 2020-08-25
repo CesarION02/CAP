@@ -26,10 +26,15 @@ class employees extends Model
                             'external_id',
                             'is_active',
                             'is_delete',
+                            'policy_extratime_id'
                             ];
 
     public function job(){
         return $this->belongsTo('App\Models\job','job_id');
+    }
+
+    public function policy(){
+        return $this->belongsTo('App\Models\policy_extratime','policy_extratime_id');
     }
 
     public function way_register(){
