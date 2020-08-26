@@ -84,8 +84,8 @@ Plantilla horarios
                     <thead>
                         <tr>
                             <th>Empleado</th>
-                            <th>Fecha inicio</th>
-                            <th>Fecha fin</th>
+                            <th>Fecha inicial</th>
+                            <th>Fecha final</th>
                             <th class="width70"></th>
                         </tr>
                     </thead>

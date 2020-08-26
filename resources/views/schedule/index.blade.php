@@ -88,10 +88,10 @@ Plantilla horarios fijos
                             <th>Plantilla</th>
                             <th>Lunes</th>
                             <th>Martes</th>
-                            <th>Miercoles</th>
+                            <th>Miércoles</th>
                             <th>Jueves</th>
                             <th>Viernes</th>
-                            <th>Sabado</th>
+                            <th>Sábado</th>
                             <th>Domingo</th>
                             <th class="width70"></th>
                         </tr>

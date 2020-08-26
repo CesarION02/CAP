@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-Asignar día festivo
+Asignar días festivos
 @endsection
 
 @section("scripts")
@@ -10,6 +10,9 @@ Asignar día festivo
         $(document).ready(function() {
             $('.js-example-basic-multiple').select2();
         });
+        function resetTheSelect() {
+            $('.js-example-basic-multiple').val(null).trigger("change");
+        }
 </script>
 @endsection
 
@@ -20,7 +23,7 @@ Asignar día festivo
         @include('includes.mensaje')
         <div class="box box-danger">
             <div class="box-header with-border">
-                <h3 class="box-title">Asignar día festivo</h3>
+                <h3 class="box-title">Asignar días festivos</h3>
                 <div class="box-tools pull-right">
                     <a href="{{route('asignacion_festivo')}}" class="btn btn-block btn-info btn-sm">
                         <i class="fa fa-fw fa-reply-all"></i> Regresar

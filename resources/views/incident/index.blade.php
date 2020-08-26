@@ -3,17 +3,24 @@
 Incidencias
 @endsection
 
+@section('styles1')
+<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/themes/smoothness/jquery-ui.css">
+@endsection
+
 @section("scripts")
 <script src="{{asset("assets/pages/scripts/admin/index.js")}}" type="text/javascript"></script>
 <script src="{{asset("assets/pages/scripts/admin/datatable/index.js")}}" type="text/javascript"></script>
 <script src="{{ asset("dt/datatables.js") }}" type="text/javascript"></script>
 <script src="{{ asset('dt/dataTables.buttons.min.js') }}"></script>
-	<script src="{{ asset('dt/buttons.flash.min.js') }}"></script>
-	<script src="{{ asset('dt/jszip.min.js') }}"></script>
-	<script src="{{ asset('dt/pdfmake.min.js') }}"></script>
-	<script src="{{ asset('dt/vfs_fonts.js') }}"></script>
-	<script src="{{ asset('dt/buttons.html5.min.js') }}"></script>
-	<script src="{{ asset('dt/buttons.print.min.js') }}"></script>
+<script src="{{ asset('dt/buttons.flash.min.js') }}"></script>
+<script src="{{ asset('dt/jszip.min.js') }}"></script>
+<script src="{{ asset('dt/pdfmake.min.js') }}"></script>
+<script src="{{ asset('dt/vfs_fonts.js') }}"></script>
+<script src="{{ asset('dt/buttons.html5.min.js') }}"></script>
+<script src="{{ asset('dt/buttons.print.min.js') }}"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>
+<script src="{{ asset('monthpicker/jquery.mtz.monthpicker.js') }}"></script>
+
 <script>
     $(document).ready( function () {
         $('#tabla-data').DataTable({
@@ -69,6 +76,33 @@ Incidencias
         });
     });
 </script>
+<script>
+    $('#yearmonth-picker').monthpicker();
+
+    function setFilterType(fType) {
+        document.getElementById("filter-type").value = fType;
+    }
+
+    function setFilterTypeClass() {
+        this.filterType = <?php echo json_encode($filterType) ?>;
+        this.filterType = this.filterType + "";
+        switch (this.filterType) {
+            case "1":
+                var element = document.getElementById("monthBtn");
+                element.classList.add("active");
+                break;
+            case "2":
+                var element = document.getElementById("yearBtn");
+                element.classList.add("active");
+                break;
+        
+            default:
+                break;
+        }
+    }
+
+    setFilterTypeClass();
+</script>
 @endsection
 @section('content')
 <div class="row">
@@ -89,21 +123,36 @@ Incidencias
                     @endswitch
                 </h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:nolaborables"])
-                @if($incidentType == 14)
-                <div class="box-tools pull-right">
-                    <a href="{{ route('crear_incidente', $incidentType) }}" class="btn btn-block btn-success btn-sm">
-                        <i class="fa fa-fw fa-plus-circle"></i> Nuevo
-                    </a>
+                <div class="row">
+                    <div class="col-md-3 col-md-offset-9">
+                        @if($incidentType == 14)
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <a href="{{ route('crear_incidente', $incidentType) }}" class="btn btn-block btn-success btn-sm">
+                                        <i class="fa fa-fw fa-plus-circle"></i> Nuevo
+                                    </a>
+                                </div>
+                            </div>
+                        @endif
+                        <div class="row">
+                            <div class="col-md-12">
+                                <form action="{{ route($sroute, $incidentType) }}">
+                                    @include('filters.monthyear', 
+                                                ['monthYear' => $monthYear, 
+                                                'sroute' => $sroute])
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                @endif
             </div>
             <div class="box-body">
                 <table class="table table-striped table-bordered table-hover" id="tabla-data">
                     <thead>
                         <tr>
                             <th>Tipo incidencia</th>
-                            <th>Fecha inicio</th>
-                            <th>Fecha fin</th>
+                            <th>Fecha inicial</th>
+                            <th>Fecha final</th>
                             <th>Empleado</th>
                             {{-- <th class="width70"></th> --}}
                         </tr>

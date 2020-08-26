@@ -11,6 +11,9 @@
         $(document).ready(function() {
             $('.js-example-basic-multiple').select2();
         });
+        function resetTheSelect() {
+            $('.js-example-basic-multiple').val(null).trigger("change");
+        }
 </script>
 @endsection
 

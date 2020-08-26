@@ -3,7 +3,10 @@
     <label for="start_date" class="col-lg-3 control-label">Semana:</label>
     <div class="col-lg-3">
         <input type="week" name="semana" id="semana" required>
-    </div>  
+    </div>
+    <p>
+        <b>Nota</b>: Este control no está soportado en Firefox, Safari o Internet Explorer 11 (o anterior).
+    </p>
 </div>
 <div class="form-group">
     <label for="empleado" class="col-lg-3 control-label">Empleados:</label>

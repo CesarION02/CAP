@@ -13,7 +13,7 @@
     
 </div>
 <div class="form-group">
-    <label for="cut_id" class="col-lg-3 control-label requerido">Manera recortar:</label>
+    <label for="cut_id" class="col-lg-3 control-label requerido">Política recorte:</label>
     <div class="col-lg-6">
         <select id="cut_id" name="cut_id" class="form-control">
             @foreach($cuts as $cut => $index)
@@ -52,7 +52,7 @@
         </div>
 </div>
 <div class="form-group">
-        <label for="miercoles" class="col-lg-2 control-label requerido">Miercoles:</label>
+        <label for="miercoles" class="col-lg-2 control-label requerido">Miércoles:</label>
         <div class="col-md-2">
             <input type="time" name="miercolesE" id="miercolesE" class="form-control" value=<?php if(isset($datas)){ echo $datas[2]->entry;}else{echo " ";}?> >
         </div>
@@ -97,7 +97,7 @@
         </div>
 </div>
 <div class="form-group">
-        <label for="sabado" class="col-lg-2 control-label requerido">Sabado:</label>
+        <label for="sabado" class="col-lg-2 control-label requerido">Sábado:</label>
         <div class="col-md-2">
             <input type="time" name="sabadoE" id="sabadoE" class="form-control" value=<?php if(isset($datas)){ echo $datas[5]->entry;}else{echo " ";}?> >
         </div>
