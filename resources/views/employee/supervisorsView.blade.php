@@ -89,8 +89,8 @@ Mis empleados
                     <thead>
                         <tr>
                             <th>Nombre empleado</th>
-                            <th>Número empleado</th>
                             <th>Nombre corto</th>
+                            <th>Número empleado</th>
                             <th>Departamento CAP</th>
                             <th>Puesto</th>
                             <th class="width70"></th>
@@ -100,8 +100,8 @@ Mis empleados
                         @foreach ($employees as $employee)
                         <tr>
                             <td>{{$employee->nameEmployee}}</td>
-                            <td>{{$employee->numEmployee}}</td>
                             <td>{{$employee->shortName}}</td>
+                            <td>{{$employee->numEmployee}}</td>
                             <td>{{$employee->nameDepartment}}</td>
                             <td>{{$employee->nameJob}}</td>
                             <td>
