@@ -1,5 +1,5 @@
 <div class="form-group">
-        <label for="nombre" class="col-lg-3 control-label">Empleado:</label>
+        <label for="nombre" class="col-lg-3 control-label">Nombre empleado:</label>
         <div class="col-lg-8">
         <input type="text" name="name" id="name" class="form-control" value="{{old('name', $data->name ?? '')}}" readonly/>
         </div>
@@ -11,7 +11,7 @@
         </div>
 </div>
 <div class="form-group">
-        <label for="way_register_id" class="col-lg-3 control-label requerido">Manera checar:</label>
+        <label for="way_register_id" class="col-lg-3 control-label requerido">Política registro:</label>
         <div class="col-lg-8">
                 <select id="way_register_id" name="way_register_id" class="form-control">
                     @foreach($way as $way => $index)

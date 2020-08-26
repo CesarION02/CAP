@@ -11,7 +11,7 @@ Bienvenido
                 <h2 class="box-title">Bienvenido {{session()->get('name')}}</h2>
             </div>
             <div class="box-body">
-                <div class="form-group"><div class="col-md-12"><center><h2>Accesos rápidos</h2></center></div></div>
+                <div class="form-group"><div class="col-md-12"><center><h2></h2></center></div></div>
                 <br><br>
                 <br><br>
                 <?php $contador = 0 ; ?>

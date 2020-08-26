@@ -11,7 +11,7 @@ class DeptsGroupController extends Controller
 {
     public function index(Request $request) 
     {
-        $iFilter = $request->filter_acts == null ? 1 : $request->filter_acts;
+        $iFilter = $request->ifilter == 0 ? 1 : $request->ifilter;
 
         $lGroups = DB::table('department_group AS dg')->selectRaw('id, name, is_delete, "" AS depts');
 

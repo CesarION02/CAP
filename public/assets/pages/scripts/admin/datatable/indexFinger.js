@@ -3,8 +3,8 @@ $(document).ready(function() {
         event.preventDefault();
         const form = $(this);
         swal({
-            title: '¿ Está seguro que deseas desactivar el registro ?',
-            text: "Esta acción puede ser revertida!",
+            title: '¿Está seguro que deseas desactivar el registro?',
+            text: "¡Esta acción puede ser revertida!",
             icon: 'warning',
             buttons: {
                 cancel: "Cancelar",
