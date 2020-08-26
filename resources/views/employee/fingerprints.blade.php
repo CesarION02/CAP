@@ -7,6 +7,7 @@ Empleados
 <script src="{{asset("assets/pages/scripts/admin/datatable/indexFingerActivar.js")}}" type="text/javascript"></script>
 <script src="{{asset("assets/pages/scripts/admin/datatable/indexFinger.js")}}" type="text/javascript"></script>
 <script src="{{asset("assets/pages/scripts/admin/datatable/index.js")}}" type="text/javascript"></script>
+<script src="{{asset("assets/pages/scripts/filter.js")}}" type="text/javascript"></script>
 <script src="{{ asset("dt/datatables.js") }}" type="text/javascript"></script>
 <script src="{{ asset('dt/dataTables.buttons.min.js') }}"></script>
 	<script src="{{ asset('dt/buttons.flash.min.js') }}"></script>
@@ -74,13 +75,13 @@ Empleados
             <div class="box-header with-border">
                 @switch($iFilter)
                     @case(1)
-                        <h3 class="box-title">Huellas digitales empleados activos</h3>
+                        <h3 class="box-title">Huellas digitales (activos)</h3>
                     @break
                     @case(2)
-                        <h3 class="box-title">Huellas digitales empleados inactivos</h3>
+                        <h3 class="box-title">Huellas digitales (inactivos)</h3>
                     @break
                     @case(3)
-                        <h3 class="box-title">Huellas digitales empleados todos</h3>
+                        <h3 class="box-title">Huellas digitales (todos)</h3>
                     @break
                 @endswitch
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:huellas"])
@@ -94,39 +95,27 @@ Empleados
                         <br>
                         <div class="row">
                             <form action="{{ route('huellas') }}">
-                                <div class="col-md-12">
-                                    <div class="input-group">
+                                <input type="hidden" id="ifilter" name="ifilter">
+                                <div class="col-md-16">
+                                    <div class="btn-group" role="group" aria-label="Basic example">
                                         @switch($iFilter)
                                             @case(1)
-                                                <select class="form-control" name="filter_acts">
-                                                <option value="1" selected>Activos</option>
-                                                <option value="2">Inactivos</option>
-                                                <option value="3">Todos</option>
-                                                </select>
-
-                                                @break
+                                            <button onclick="filter(1)" type="submit" class="btn btn-secondary active">Activos</button>
+                                            <button onclick="filter(2)" type="submit" class="btn btn-secondary">Inactivos</button>
+                                            <button onclick="filter(3)" type="submit" class="btn btn-secondary">Todos</button>
+                                            @break
                                             @case(2)
-                                                <select class="form-control" name="filter_acts">
-                                                    <option value="1">Activos</option>
-                                                    <option value="2" selected>Inactivos</option>
-                                                    <option value="3">Todos</option>
-                                                </select>
-                                                @break
+                                            <button onclick="filter(1)" type="submit" class="btn btn-secondary">Activos</button>
+                                            <button onclick="filter(2)" type="submit" class="btn btn-secondary active">Inactivos</button>
+                                            <button onclick="filter(3)" type="submit" class="btn btn-secondary">Todos</button>
+                                            @break
                                             @case(3)
-                                                <select class="form-control" name="filter_acts">
-                                                    <option value="1">Activos</option>
-                                                    <option value="2">Inactivos</option>
-                                                    <option value="3" selected>Todos</option>
-                                                </select>
-                                                @break
-                                            @default
-                                                
+                                            <button onclick="filter(1)" type="submit" class="btn btn-secondary">Activos</button>
+                                            <button onclick="filter(2)" type="submit" class="btn btn-secondary">Inactivos</button>
+                                            <button onclick="filter(3)" type="submit" class="btn btn-secondary active">Todos</button>
+                                            @break
                                         @endswitch
-                                        <span class="input-group-btn">
-                                            <button class="btn btn-default" type="submit">
-                                                <i class="glyphicon glyphicon-search"></i>
-                                            </button>
-                                        </span>
+                                        
                                     </div>
                                 </div>
                             </form>
@@ -138,9 +127,9 @@ Empleados
                 <table class="table table-striped table-bordered table-hover" id="myTable">
                     <thead>
                         <tr>
+                            <th>Nombre empleado</th>
                             <th>Número empleado</th>
-                            <th>Empleado</th>
-                            <th>Manera de checar</th>
+                            <th>Política registro</th>
                             <th>Huella digital</th>
                             <th>Estado</th>
                             <th class="width70"></th>
@@ -149,8 +138,8 @@ Empleados
                     <tbody>
                         @foreach ($employees as $employee)
                         <tr>
-                            <td>{{$employee->num}}</td>
                             <td>{{$employee->nameEmployee}}</td>
+                            <td>{{$employee->num}}</td>
                             <td>{{$employee->way}}</td>
                             
                                 @if($employee->fingerprint != null)

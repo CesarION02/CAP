@@ -70,7 +70,7 @@ Usuario vs grupo departamentos CAP
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Usuario vs. grupo departamento CAP</h3>
+                <h3 class="box-title">Usuarios vs. grupos de departamentos CAP</h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:asignaciongposdept"])
                 <div class="box-tools pull-right">
                     <a href="{{route('crear_dgu')}}" class="btn btn-block btn-success btn-sm">
@@ -82,8 +82,8 @@ Usuario vs grupo departamentos CAP
                 <table class="table table-striped table-bordered table-hover" id="myTable">
                     <thead>
                         <tr>
-                            <th>Nombre usuario</th>
-                            <th>Grupos de departamentos CAP</th>
+                            <th>Usuario</th>
+                            <th>Grupos departamentos CAP</th>
                             <th class="width70"></th>
                         </tr>
                     </thead>

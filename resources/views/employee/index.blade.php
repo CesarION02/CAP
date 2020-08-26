@@ -76,7 +76,7 @@ Empleados
                             <th>Nombre empleado</th>
                             <th>Nombre corto</th>
                             <th>Número empleado</th>
-                            <th>Manera de checar</th>
+                            <th>Política registro</th>
                             <th>Departamento CAP</th>
                             <th>Puesto</th>
                             <th class="width70"></th>

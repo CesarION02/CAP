@@ -76,7 +76,7 @@ Empleados
                     <h3 class="box-title">Empleados fóraneos</h3>
                     @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:empleadoforaneo"])
                 @else
-                    <h3 class="box-title">Empleado vs. departamento</h3>
+                    <h3 class="box-title">Empleados vs. departamentos CAP</h3>
                     @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:asignacionpstoydeptopen"])
                 @endif
                 
@@ -87,8 +87,8 @@ Empleados
                 <table class="table table-striped table-bordered table-hover" id="myTable">
                     <thead>
                         <tr>
+                            <th>Nombre empleado</th>
                             <th>Número empleado</th>
-                            <th>Empleado</th>
                             <th>Departamento CAP</th>
                             <th>Puesto</th>
                             <th class="width70"></th>
@@ -97,8 +97,8 @@ Empleados
                     <tbody>
                         @foreach ($datas as $data)
                         <tr>
-                            <td>{{$data->num_employee}}</td>
                             <td>{{$data->name}}</td>
+                            <td>{{$data->num_employee}}</td>
                             <td>{{$data->department_id == null ? "" : $data->department->name}}</td>
                             <td>{{$data->job_id == null ? "" : $data->job->name}}</td>
                             <td>

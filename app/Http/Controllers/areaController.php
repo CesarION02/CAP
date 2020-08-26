@@ -14,7 +14,8 @@ class areaController extends Controller
      */
     public function index(Request $request)
     {
-        $iFilter = $request->filter_acts == null ? 1 : $request->filter_acts;
+        
+        $iFilter = $request->ifilter == 0 ? 1 : $request->ifilter;
 
         switch ($iFilter) {
             case 1:

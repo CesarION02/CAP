@@ -20,7 +20,7 @@ class DeptsRhController extends Controller
     public function edit($id)
     {
         $data = DepartmentRH::findOrFail($id);
-        $departments = department::where('is_delete',0)->where('rh_department_id',$id)->pluck('id','name');
+        $departments = department::where('is_delete',0)->pluck('id','name');
         return view('departmentRH.edit', compact('data'))->with('departments',$departments);
     }
 

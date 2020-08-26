@@ -35,7 +35,7 @@ class shiftprogrammingController extends Controller
                 ->groupBy('week.year')
                 ->select('week.year AS year')
                 ->get();
-        $newest = week::where('is_delete','=',0)->orderBy('updated_at','asc')->first();
+        $newest = week::where('is_delete','=',0)->orderBy('updated_at','desc')->first();
 
         return view('shiftprogramming.index', compact('typeArea'),compact('newest'))->with('week',$week)->with('year',$year);
 
@@ -440,11 +440,12 @@ class shiftprogrammingController extends Controller
         $formateoIni = explode('-',$week->start_date);
         $fechaInicio = $formateoIni[2].'-'.$formateoIni[1].'-'.$formateoIni[0];
         $dias = array('','Lunes','Martes','Miercoles','Jueves','Viernes','Sabado','Domingo');
-        $meses = array('','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic');
-        $fini = $dias[date('N', strtotime($fechaInicio))];
+        $diasTitulo = array('','lunes','martes','miercoles','jueves','viernes','sabado','domingo');
+        $meses = array('','Ene.','Feb.','Mar.','Abr.','May.','Jun.','Jul.','Ago.','Sep.','Oct.','Nov.','Dic.');
+        $fini = $diasTitulo[date('N', strtotime($fechaInicio))];
         $formateoFin = explode('-',$week->end_date);
         $fechaFin = $formateoFin[2].'-'.$formateoFin[1].'-'.$formateoFin[0];
-        $fin = $dias[date('N', strtotime($fechaFin))];
+        $fin = $diasTitulo[date('N', strtotime($fechaFin))];
         $nombreMes = $meses[date('n', strtotime($fechaFin))];
         PDF::SetTitle('Rol de Turnos');
         $renglones=2;

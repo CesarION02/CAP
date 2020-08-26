@@ -16,18 +16,18 @@ class workshiftController extends Controller
      */
     public function index(Request $request)
     {
-        $iFilter = $request->filter_acts == null ? 1 : $request->filter_acts;
+        $iFilter = $request->ifilter == 0 ? 1 : $request->ifilter;
 
         switch ($iFilter) {
             case 1:
-                $datas = workshift::where('is_delete','0')->orderBy('name')->get();
+                $datas = workshift::where('is_delete','0')->orderBy('name')->orderBy('entry')->orderBy('departure')->get();
                 break;
             case 2:
-                $datas = workshift::where('is_delete','1')->orderBy('name')->get();
+                $datas = workshift::where('is_delete','1')->orderBy('name')->orderBy('entry')->orderBy('departure')->get();
                 break;
             
             default:
-                $datas = workshift::orderBy('name')->get();
+                $datas = workshift::orderBy('name')->orderBy('entry')->orderBy('departure')->get();
                 break;
         }
         

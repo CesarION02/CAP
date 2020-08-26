@@ -9,7 +9,17 @@
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Grupos de departamentos CAP</h3>
+                @switch($iFilter)
+                    @case (1)
+                        <h3 class="box-title">Grupo de departamentos CAP (activos)</h3>
+                    @break
+                    @case (2)
+                        <h3 class="box-title">Grupo de departamentos CAP (inactivos)</h3>
+                    @break
+                    @case (3)
+                        <h3 class="box-title">Grupo de departamentos CAP (todos)</h3>
+                    @break
+                @endswitch
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:grupodep"])
                 <div class="row">
                     <div class="col-md-3 col-md-offset-9">
@@ -26,21 +36,30 @@
                         <br>
                         <div class="row">
                             <form action="{{ route('depts_grp') }}">
-                                <div class="col-md-12">
-                                    <div class="input-group">
-                                        <select v-model="vueData.iFilter" class="form-control" name="filter_acts">
-                                            <option value="1" selected>Activos</option>
-                                            <option value="2">Inactivos</option>
-                                            <option value="3">Todos</option>
-                                        </select>
-                                        <span class="input-group-btn">
-                                            <button class="btn btn-default" type="submit">
-                                                <i class="glyphicon glyphicon-search"></i>
-                                            </button>
-                                        </span>
+                                <input type="hidden" id="ifilter" name="ifilter">
+                                <div class="col-md-16">
+                                    <div class="btn-group" role="group" aria-label="Basic example">
+                                        @switch($iFilter)
+                                            @case(1)
+                                            <button onclick="filter(1)" type="submit" class="btn btn-secondary active">Activos</button>
+                                            <button onclick="filter(2)" type="submit" class="btn btn-secondary">Inactivos</button>
+                                            <button onclick="filter(3)" type="submit" class="btn btn-secondary">Todos</button>
+                                            @break
+                                            @case(2)
+                                            <button onclick="filter(1)" type="submit" class="btn btn-secondary">Activos</button>
+                                            <button onclick="filter(2)" type="submit" class="btn btn-secondary active">Inactivos</button>
+                                            <button onclick="filter(3)" type="submit" class="btn btn-secondary">Todos</button>
+                                            @break
+                                            @case(3)
+                                            <button onclick="filter(1)" type="submit" class="btn btn-secondary">Activos</button>
+                                            <button onclick="filter(2)" type="submit" class="btn btn-secondary">Inactivos</button>
+                                            <button onclick="filter(3)" type="submit" class="btn btn-secondary active">Todos</button>
+                                            @break
+                                        @endswitch
                                     </div>
                                 </div>
                             </form>
+                
                         </div>
                     </div>
                 </div>
@@ -90,6 +109,7 @@
 <script src="{{ asset("assets/js/axios.js") }}" type="text/javascript"></script>
 <script src="{{ asset("assets/js/vue.js") }}" type="text/javascript"></script>
 <script src="{{ asset("dt/datatables.js") }}" type="text/javascript"></script>
+<script src="{{asset("assets/pages/scripts/filter.js")}}" type="text/javascript"></script>
 <script src="{{ asset("assets/pages/scripts/SGui.js") }}" type="text/javascript"></script>
 <script>
         function ServerData () {
