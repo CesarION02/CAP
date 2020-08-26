@@ -88,8 +88,8 @@ Mis empleados
                 <table class="table table-striped table-bordered table-hover" id="myTable">
                     <thead>
                         <tr>
+                            <th>Nombre empleado</th>
                             <th>Número empleado</th>
-                            <th>Empleado</th>
                             <th>Nombre corto</th>
                             <th>Departamento CAP</th>
                             <th>Puesto</th>
@@ -99,8 +99,8 @@ Mis empleados
                     <tbody>
                         @foreach ($employees as $employee)
                         <tr>
-                            <td>{{$employee->numEmployee}}</td>
                             <td>{{$employee->nameEmployee}}</td>
+                            <td>{{$employee->numEmployee}}</td>
                             <td>{{$employee->shortName}}</td>
                             <td>{{$employee->nameDepartment}}</td>
                             <td>{{$employee->nameJob}}</td>

@@ -39,7 +39,7 @@ Programacion de turnos
             <div class="box-body">
                 <div class="tab">
                     <button class="tablinks" onclick="cambioPestana(event, 'Nueva')">Nueva programación</button>
-                    <button class="tablinks" onclick="cambioPestana(event, 'Antigua')">Programacion anterior</button>
+                    <button class="tablinks" onclick="cambioPestana(event, 'Antigua')">Programación anterior</button>
                     
                   </div>
                   
@@ -50,7 +50,10 @@ Programacion de turnos
                       <div class="col-md-6"><button id="nuevo" name="nuevo" disabled onclick="new_shiftprogramming()"><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span></button> <input type="date" id="fechaini" name="fechaini"><input type="date" id="fechafin" name="fechafin" readonly></div>
                       @if(isset($newest))
                         <div class="col-md-3">
-                            <button class="btn btn-warning" id="editar" name="editar" onclick="editShift()"><span class="glyphicon glyphicon-edit" aria-hidden="true"> Modificar más reciente</span></button>
+                            <button class="btn btn-block btn-warning btn-sm" id="editar" name="editar" onclick="editShift()"> <i class="fa fa-fw fa-pencil-square-o"></i>Modificar más reciente</button>
+                        </div>
+                        <div class="col-md-3">
+                          <input type="text" value="{{$newest->start_date.' a '.$newest->end_date}}"
                         </div>
                       @endif
                     </div>
@@ -98,10 +101,10 @@ Programacion de turnos
                         </select>
                       </div>
                       <div class="col-md-2">
-                          <button class="btn btn-block btn-warning btn-sm" id="copiar" name="copiar" disabled onclick="copyShift()"><span class="glyphicon glyphicon-copy" aria-hidden="true"> Crear copia</span></button>
+                          <button class="btn btn-block btn-warning btn-sm" id="copiar" name="copiar" disabled onclick="copyShift()"><i class="fa fa-fw fa-files-o"></i> Crear copia</span></button>
                       </div>
-                      <div class="col-md-2">
-                          <button class="btn btn-block btn-warning btn-sm" id="rotar" name="rotar" disabled onclick="rotateShift()"><span class="glyphicon glyphicon-repeat" aria-hidden="true"> Crear rotación</span></button>
+                      <div class="col-md-3">
+                          <button class="btn btn-block btn-warning btn-sm" id="rotar" name="rotar" disabled onclick="rotateShift()"><i class="fa fa-fw fa-repeat"></i> Crear copia y rotar</span></button>
                       </div>
                     </div>
                     <input type="hidden" value="0" id="pastWeek">

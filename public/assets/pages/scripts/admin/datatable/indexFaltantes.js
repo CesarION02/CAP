@@ -3,8 +3,8 @@ $(document).ready(function() {
         event.preventDefault();
         const form = $(this);
         swal({
-            title: '¿ Está seguro que desea enviar a foraneo ?',
-            text: "Esta acción se puede revertir!",
+            title: '¿Está seguro que desea enviar a foráneo?',
+            text: "¡Esta acción se puede revertir!",
             icon: 'warning',
             buttons: {
                 cancel: "Cancelar",

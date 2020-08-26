@@ -15,7 +15,7 @@
 Route::get('seguridad/login', 'seguridad\LoginController@index')->name('login');
 Route::post('seguridad/login', 'seguridad\LoginController@login')->name('login_post');
 Route::get('seguridad/logout', 'seguridad\LoginController@logout')->name('logout');
-Route::get('/','inicioController@Index')->name('inicio');
+
 Route::group(['prefix' => 'admin', 'namespace' => 'admin', 'middleware' => ['auth', 'superadmin']], function () {
     Route::get('', 'adminController@index');
     Route::get('permission', 'permissionController@index')->name('permission');
@@ -51,6 +51,8 @@ Route::group(['prefix' => 'admin', 'namespace' => 'admin', 'middleware' => ['aut
 });
 
 Route::group(['middleware' => ['auth']], function() {
+
+Route::get('/','inicioController@Index')->name('inicio');
     /* RUTAS PROGRAMACION DE TURNOS */
 Route::get('shiftprogramming/copyRol','shiftprogrammingController@copyRol')->name('copiarRol');
 Route::post('shiftprogramming/subirArchivo', 'shiftprogrammingController@subirArchivo')->name('subir_archivo');
