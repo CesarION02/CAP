@@ -120,7 +120,7 @@ Empleados
                                 @else
                                 <form action="{{route('enviar_empleado_foraneo', ['id' => $data->id])}}" class="d-inline form-eliminar" method="POST">
                                     @csrf @method("delete")
-                                    <button type="submit" class="btn-accion-tabla eliminar tooltipsC" title="Enviar a foráneo">
+                                    <button type="submit" class="btn-accion-tabla eliminar tooltipsC" title="Enviar a foráneos">
                                         <i class="fa fa-fw fa-truck  text-danger"></i>
                                     </button>
                                 </form>
