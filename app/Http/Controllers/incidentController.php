@@ -21,13 +21,56 @@ class incidentController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index($incidentType = 0)
+    public function index($incidentType = 0, Request $request)
     {
+        if ($request->month_year == null) {
+            $today = Carbon::now();
+            $m = $today->month < 10 ? '0'.$today->month : $today->month;
+            $monthYear = $m.'/'.$today->year;
+        }
+        else {
+            $monthYear = str_replace('-', '/', $request->month_year);
+        }
+
+        $filterType = null;
+        if ($request->filter_type != null) {
+            $filterType = $request->filter_type;
+        }
+        else {
+            $filterType = 1;
+        }
+
+        $arr = explode("/", $monthYear);
+        if (count($arr) > 1) {
+            $month = $arr[0];
+            $year = $arr[1];
+        }
+        else {
+            $year = $arr[0];
+            $filterType = 2;
+        }
+
         $datas = incident::where('is_delete','0')->orderBy('id');
         if ($incidentType > 0) {
             $datas = $datas->where('type_incidents_id', $incidentType);
         }
 
+        switch ($filterType) {
+            case 1:
+                $datas = $datas->whereRaw('MONTH(start_date) = '.$month)
+                                ->whereRaw('YEAR(start_date) = '.$year);
+                break;
+            case 2:
+                $datas = $datas->whereRaw('YEAR(start_date) = '.$year);
+                $monthYear = $year;
+                break;
+            
+            default:
+                $datas = $datas->whereRaw('MONTH(start_date) = '.$month)
+                                ->whereRaw('YEAR(start_date) = '.$year);
+                break;
+        }
+        
         $datas = $datas->get();
 
         $datas->each(function($datas){
@@ -35,7 +78,14 @@ class incidentController extends Controller
             $datas->employee;
         });
 
-        return view('incident.index', compact('datas'), compact('incidentType'));
+        $sroute = 'incidentes';
+
+        return view('incident.index')
+                    ->with('incidentType', $incidentType)
+                    ->with('datas', $datas)
+                    ->with('sroute', $sroute)
+                    ->with('filterType', $filterType)
+                    ->with('monthYear', $monthYear);
     }
 
     /**

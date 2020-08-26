@@ -1,5 +1,5 @@
 <div class="form-group">
-    <label for="festivo" class="col-lg-3 control-label">Plantilla:</label>
+    <label for="festivo" class="col-lg-3 control-label">Día festivo:</label>
     <div class="col-lg-3">
         <select name="festivo" id="festivo">
             @foreach($holiday as $holiday => $index)
@@ -63,7 +63,7 @@
 
     @case(2)
     <div class="form-group">
-        <label for="departamento" class="col-lg-3 control-label">Departamentos:</label>
+        <label for="departamento" class="col-lg-3 control-label">Departamento:</label>
         <div class="col-lg-8">              
             <select name="departamento" id="departamento">  
                 <option value=0>Seleccionar Departamento</option>
@@ -81,10 +81,10 @@
     
     @break
     @case(3)
-    <label for="area" class="col-lg-3 control-label">Area:</label>
+    <label for="area" class="col-lg-3 control-label">Área:</label>
     <div class="col-lg-8">              
         <select name="area" id="area">  
-            <option value=0>Seleccionar Area</option>
+            <option value=0>Seleccionar Área</option>
             @foreach($area as $area => $index)
                     @if((isset($datas)) == true && $datas->area_id == $index)
                         <option selected value="{{$index}}">{{$area}}</option>

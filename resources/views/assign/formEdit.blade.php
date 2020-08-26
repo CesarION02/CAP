@@ -1,5 +1,5 @@
 <div class="form-group">
-    <label for="start_date" class="col-lg-3 control-label">Fecha inicio:</label>
+    <label for="start_date" class="col-lg-3 control-label">Fecha inicial:</label>
     <div class="col-lg-3">
         @if(isset($assigns))
             <input type="date" name="start_date" id="start_date" value="{{$assigns[0]->startDate}}" >
@@ -7,7 +7,7 @@
         <input type="date" name="start_date" id="start_date">
         @endif
     </div>  
-    <label for="departamento" class="col-lg-2 control-label">Fecha fin:</label>
+    <label for="departamento" class="col-lg-2 control-label">Fecha final:</label>
     <div class="col-lg-3">
         @if(isset($assigns))
             <input type="date" name="end_date" id="end_date" value="{{$assigns[0]->endDate}}" >

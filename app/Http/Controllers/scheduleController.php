@@ -36,7 +36,7 @@ class scheduleController extends Controller
      */
     public function create()
     {
-        $cuts = cut::where('is_delete','0')->orderBy('name')->pluck('id','name');
+        $cuts = cut::where('is_delete','0')->orderBy('id')->pluck('id','name');
         return view('schedule.create', compact('cuts'));
     }
 
@@ -184,7 +184,7 @@ class scheduleController extends Controller
      */
     public function edit($id)
     {
-        $cuts = cut::where('is_delete','0')->orderBy('name')->pluck('id','name');
+        $cuts = cut::where('is_delete','0')->orderBy('id')->pluck('id','name');
         $datas = DB::table('schedule_day')
                     ->join('schedule_template','schedule_template.id','=','schedule_day.schedule_template_id')
                     ->orderBy('schedule_template.id')

@@ -16,38 +16,40 @@
             <div class="box-header with-border">
                 <h3 class="box-title">Guardias sabatinas</h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:guardiassabatinas"])
-                <div class="box-tools pull-right">
-                    <div class="row">
-                        <div class="col-md-2 col-md-offset-10">
-                            {{-- <button type="button" class="btn btn-info" v-on:click="refresh()">
-                                <i class="glyphicon glyphicon-refresh"></i>
-                            </button> --}}
-                            <button type="button" class="btn btn-success" v-on:click="onShowModal()">
-                                <i class="fa fa-fw fa-plus-circle"></i> Nuevo
-                            </button>
-                        </div>
-                    </div>
-                    <br>
-                    <div class="row">
-                        <form action="{{ route('asignar_uno') }}">
-                            <input type="hidden" name="start_date" v-model="sStartDate">
-                            <input type="hidden" name="end_date" v-model="sEndDate">
-                            <div class="col-md-5 col-md-offset-7">
-                                <div class="input-group">
-                                    <div id="reportrange" 
-                                        v-on:change="onShowModal()"
-                                        style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
-                                        <i class="fa fa-calendar"></i>&nbsp;
-                                        <span></span> <i class="fa fa-caret-down"></i>
-                                    </div>
-                                    <span class="input-group-btn">
-                                        <button class="btn btn-default" type="submit">
-                                            <i class="glyphicon glyphicon-search"></i>
-                                        </button>
-                                    </span>
-                                </div>
+                <div class="row">
+                    <div class="col-md-5 col-md-offset-7">
+                        <div class="row">
+                            <div class="col-md-3 col-md-offset-8">
+                                {{-- <button type="button" class="btn btn-info" v-on:click="refresh()">
+                                    <i class="glyphicon glyphicon-refresh"></i>
+                                </button> --}}
+                                <button type="button" class="btn btn-success" v-on:click="onShowModal()">
+                                    <i class="fa fa-fw fa-plus-circle"></i> Nuevo
+                                </button>
                             </div>
-                        </form>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <form action="{{ route('asignar_uno') }}">
+                                    <input type="hidden" name="start_date" v-model="sStartDate">
+                                    <input type="hidden" name="end_date" v-model="sEndDate">
+                                    <div class="input-group">
+                                        <div id="reportrange" 
+                                            v-on:change="onShowModal()"
+                                            style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
+                                            <i class="fa fa-calendar"></i>&nbsp;
+                                            <span></span> <i class="fa fa-caret-down"></i>
+                                        </div>
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-default" type="submit">
+                                                <i class="glyphicon glyphicon-search"></i>
+                                            </button>
+                                        </span>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

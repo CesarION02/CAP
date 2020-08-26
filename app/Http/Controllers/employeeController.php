@@ -277,7 +277,7 @@ class employeeController extends Controller
                     ->update(
                             [
                             'num_employee' => $jEmployee->num_employee,
-                            'name' => ucwords(strtolower($jEmployee->firstname." ".$jEmployee->lastname)),
+                            'name' => ucwords(strtolower($jEmployee->lastname." ".$jEmployee->firstname)),
                             'names' => ucwords(strtolower($jEmployee->firstname)),
                             'first_name' => ucwords(strtolower($jEmployee->lastname)),
                             'admission_date' => $jEmployee->admission_date,
@@ -307,7 +307,7 @@ class employeeController extends Controller
         $emp = new employees();
 
         $emp->num_employee = $jEmployee->num_employee;
-        $emp->name = ucwords(strtolower($jEmployee->firstname." ".$jEmployee->lastname));
+        $emp->name = ucwords(strtolower($jEmployee->lastname." ".$jEmployee->firstname));
         $emp->names = ucwords(strtolower($jEmployee->firstname));
         $emp->first_name = ucwords(strtolower($jEmployee->lastname));
         $emp->admission_date = $jEmployee->admission_date;

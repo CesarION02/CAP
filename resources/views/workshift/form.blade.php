@@ -29,7 +29,7 @@
             </div>
     </div>
     <div class="form-group">
-        <label for="cut_id" class="col-lg-3 control-label requerido">Manera de recortar:</label>
+        <label for="cut_id" class="col-lg-3 control-label requerido">Política recorte:</label>
         <div class="col-lg-8">
             <select id="cut_id" name="cut_id" class="form-control">
                 @foreach($datas as $data => $index)

@@ -91,8 +91,8 @@ Asignar plantilla
                             <th>Empleado</th>
                             <th>Horario</th>
                             <th>Grupo</th>
-                            <th>Fecha inicio</th>
-                            <th>Fecha fin</th>
+                            <th>Fecha inicial</th>
+                            <th>Fecha final</th>
                             <th class="width70"></th>
                         </tr>
                     </thead>

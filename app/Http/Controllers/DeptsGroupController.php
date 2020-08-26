@@ -31,6 +31,7 @@ class DeptsGroupController extends Controller
         
         $lDepts = department::where('is_delete', false)
                                 ->select('id', 'name', 'dept_group_id')
+                                ->orderBy('name', 'ASC')
                                 ->get();
 
         return view('deptsgroup.index')

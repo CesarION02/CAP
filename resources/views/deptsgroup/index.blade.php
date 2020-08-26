@@ -69,7 +69,7 @@
                     <thead>
                         <tr>
                             <th>Grupo</th>
-                            <th>Departamentos asignados</th>
+                            <th>Departamentos CAP asignados</th>
                             <th></th>
                         </tr>
                     </thead>

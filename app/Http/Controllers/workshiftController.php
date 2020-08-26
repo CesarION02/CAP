@@ -41,7 +41,7 @@ class workshiftController extends Controller
      */
     public function create()
     {
-        $datas = cut::where('is_delete','0')->orderBy('name')->pluck('id','name');
+        $datas = cut::where('is_delete','0')->orderBy('id')->pluck('id','name');
 
         return view('workshift.create', compact('datas'));
     }
@@ -80,7 +80,7 @@ class workshiftController extends Controller
      */
     public function edit($id)
     {
-        $datas = cut::where('is_delete','0')->orderBy('name')->pluck('id','name');
+        $datas = cut::where('is_delete','0')->orderBy('id')->pluck('id','name');
         $data = workshift::findOrFail($id);
         return view('workshift.edit', compact('data'))->with('datas',$datas);
     }

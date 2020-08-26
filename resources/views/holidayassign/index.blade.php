@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-Asignar día festivo
+Asignar días festivos
 @endsection
 
 @section("scripts")
@@ -65,7 +65,7 @@ Asignar día festivo
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Asignar día festivo</h3>
+                <h3 class="box-title">Asignar días festivos</h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:asignacionfestivos"])
                 <div class="box-tools pull-right">
                     <div class="btn-group">

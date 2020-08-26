@@ -20,14 +20,14 @@ class departmentController extends Controller
 
         switch ($iFilter) {
             case 1:
-                $datas = department::where('is_delete','0')->orderBy('name')->get();
+                $datas = department::where('is_delete','0')->orderBy('name', 'ASC')->get();
                 $datas->each(function($datas){
                     $datas->area;
                     $datas->rh;
                 });
                 break;
             case 2:
-                $datas = department::where('is_delete','1')->orderBy('name')->get();
+                $datas = department::where('is_delete','1')->orderBy('name', 'ASC')->get();
                 $datas->each(function($datas){
                     $datas->area;
                     $datas->rh;
@@ -54,7 +54,7 @@ class departmentController extends Controller
     public function create()
     {
         $area = area::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
-        $deptrhs = DepartmentRH::where('is_delete',0)->pluck('id','name');
+        $deptrhs = DepartmentRH::where('is_delete',0)->orderBy('name', 'ASC')->pluck('id','name');
         return view('department.create')->with('areas',$area)->with('deptrhs',$deptrhs);
     }
 
@@ -95,7 +95,7 @@ class departmentController extends Controller
     {
         $area = area::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
         $data = department::findOrFail($id);
-        $deptrhs = DepartmentRH::where('is_delete',0)->pluck('id','name');
+        $deptrhs = DepartmentRH::where('is_delete',0)->orderBy('name', 'ASC')->pluck('id','name');
         return view('department.edit', compact('data'))->with('areas',$area)->with('deptrhs',$deptrhs);
     }
 
@@ -164,6 +164,7 @@ class departmentController extends Controller
 
         $lResp = department::where('is_delete', false)
                     ->select('id', 'name', 'dept_group_id')
+                    ->orderBy('name', 'ASC')
                     ->get();
 
         return json_encode($lResp);

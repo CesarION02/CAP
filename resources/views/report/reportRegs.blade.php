@@ -22,11 +22,11 @@ Reporte Entradas/Salidas
                 <div class="box-body" id="reportApp">
                     <div class="row">
                         <div class="col-md-5 col-md-offset-1">
-                            <label for="start_date">Fecha inicio:</label>
+                            <label for="start_date">Fecha inicial:</label>
                             <input type="date" name="start_date" id="start_date" :value="startDate">
                         </div>
                         <div class="col-md-5">
-                            <label for="end_date">Fecha fin:</label>
+                            <label for="end_date">Fecha final:</label>
                             <input type="date" name="end_date" id="end_date" :value="endDate">
                         </div>
                     </div>
