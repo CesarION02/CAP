@@ -88,7 +88,7 @@ Dias festivos
                         @foreach ($datas as $data)
                         <tr>
                             <td>{{$data->name}}</td>
-                            <td>{{$data->fecha}}</td>
+                            <td>{{\App\SUtils\SDateTimeUtils::orderDate($data->fecha)}}</td>
                             <td>{{$data->year}}</td>
                            {{-- <td>
                                 <a href="{{route('editar_festivo', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">

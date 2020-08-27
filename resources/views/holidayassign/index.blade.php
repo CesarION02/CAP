@@ -79,7 +79,7 @@ Asignar días festivos
                       
                         <ul class="dropdown-menu" role="menu">
                           <li><a href="{{route('crear_asignacion_festivo','1')}}">Por empleado</a>
-                            <li><a href="{{route('crear_asignacion_festivo','2')}}">Por departamento</a>
+                            <li><a href="{{route('crear_asignacion_festivo','2')}}">Por departamento CAP</a>
                                 <li><a href="{{route('crear_asignacion_festivo','3')}}">Por área</a>
                         </ul>
                     </div>
@@ -129,7 +129,7 @@ Asignar días festivos
                                 <td>@if($data->date == null)
                                         N/A
                                     @else
-                                        {{$data->date}}
+                                        {{\App\SUtils\SDateTimeUtils::orderDate($data->date)}}
                                     @endif
                                 </td>
                                 <td>

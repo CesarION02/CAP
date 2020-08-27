@@ -50,11 +50,11 @@ Programacion de turnos
                     <div class="row" style="margin:5px">
                       <div class="col-md-6"><button id="nuevo" name="nuevo" disabled onclick="new_shiftprogramming()"><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span></button> <input type="date" id="fechaini" name="fechaini"><input type="date" id="fechafin" name="fechafin" readonly></div>
                       @if(isset($newest))
-                        <div class="col-md-3">
-                            <button class="btn btn-block btn-warning btn-sm" id="editar" name="editar" onclick="editShift()"> <i class="fa fa-fw fa-pencil-square-o"></i>Modificar más reciente</button>
+                        <div class="col-md-2">
+                            <button class="btn btn-block btn-warning btn-sm" id="editar" name="editar" onclick="editShift()"> Modificar anterior</button>
                         </div>
-                        <div class="col-md-3">
-                          <input type="text" value="{{$fechaini.' a '.$fechafin}}" readonly>
+                        <div class="col-md-4">
+                          <input type="text" value="{{$fechaini.' a '.$fechafin}}" size="25" readonly>
                         </div>
                       @endif
                     </div>

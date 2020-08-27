@@ -65,7 +65,7 @@
                     </thead>
                     <tbody>
                         <tr v-for="schedule in vueServerData.lSchedules">
-                            <td>@{{ schedule.start_date }}</td>
+                            <td>@{{ \App\SUtils\SDateTimeUtils::orderDate(schedule.start_date) }}</td>
                             <td>@{{ vueGui.pad(schedule.num_employee, 6) }}</td>
                             <td>@{{ schedule.name }}
                                     <i v-show="schedule.text_description != undefined" 

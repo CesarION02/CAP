@@ -63,7 +63,7 @@ class SDateTimeUtils {
     public static function orderDate($date){
         $dateAux = explode('-',$date);
 
-        $newDate = ''.$dateAux[2].'-'.$dateAux[1].'-'.$dateAux[0];
+        $newDate = ''.$dateAux[2].'/'.$dateAux[1].'/'.$dateAux[0];
 
         return $newDate;
     }

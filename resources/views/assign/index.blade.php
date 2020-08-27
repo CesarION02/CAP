@@ -121,13 +121,13 @@ Asignar plantilla
                                 <td>@if($data->start_date == null)
                                         N/A
                                     @else
-                                        {{$data->start_date}}
+                                        {{\App\SUtils\SDateTimeUtils::orderDate($data->start_date)}}
                                     @endif
                                 </td>
                                 <td>@if($data->end_date == null)
                                         N/A
                                     @else
-                                        {{$data->end_date}}
+                                        {{\App\SUtils\SDateTimeUtils::orderDate($data->end_date)}}
                                     @endif
                                 </td>
                                 <td>

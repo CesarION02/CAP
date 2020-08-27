@@ -143,7 +143,7 @@ Turno especial
                         @foreach ($datas as $data)
                         <tr>
                             <td>{{$data->nameEmp}}</td>
-                            <td>{{$data->date}}</td>
+                            <td>{{\App\SUtils\SDateTimeUtils::orderDate($data->date)}}</td>
                             <td>{{$data->nameWork}}</td>
                             <td>{{$data->is_approved ? "SÍ" : "NO"}}</td>
                             <td>
