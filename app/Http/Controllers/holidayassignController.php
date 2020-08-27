@@ -84,7 +84,7 @@ class holidayassignController extends Controller
 
                 $holiday = new holidayassign();
                 $holiday->employee_id = $empleados[0];
-                $holiday->holiday_id = $request->festivo;
+                $holiday->holiday_id = $request->semana;
                 $holiday->date = $date;
                 $holiday->created_by = 1;
                 $holiday->updated_by = 1;
@@ -106,7 +106,7 @@ class holidayassignController extends Controller
                     $holiday = new holidayassign();
                     $holiday->employee_id = $empleados[$y];
                     $holiday->date = $date;
-                    $holiday->holiday_id = $request->festivo;
+                    $holiday->holiday_id = $request->semana;
                     $holiday->group_assign_id = $grupo->id;
                     $holiday->created_by = 1;
                     $holiday->updated_by = 1;
@@ -124,7 +124,7 @@ class holidayassignController extends Controller
 
             $holiday = new holidayassign();
             $holiday->department_id = $request->departamento;
-            $holiday->holiday_id = $request->festivo;
+            $holiday->holiday_id = $request->semana;
             $holiday->date = $date;
             $holiday->created_by = 1;
             $holiday->updated_by = 1;
@@ -139,7 +139,7 @@ class holidayassignController extends Controller
 
             $holiday = new holidayassign();
             $holiday->area_id = $request->area;
-            $holiday->holiday_id = $request->festivo;
+            $holiday->holiday_id = $request->semana;
             $holiday->date = $date;
             $holiday->created_by = 1;
             $holiday->updated_by = 1;

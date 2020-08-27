@@ -93,11 +93,11 @@ Plantilla horarios
                             @foreach ($assigns as $assign)
                             <tr>
                                 <td>{{$assign->name}}</td>
-                                <td>{{$assign->startDate}}</td>
+                                <td>{{\App\SUtils\SDateTimeUtils::orderDate($assign->startDate)}}</td>
                                 <td>@if($assign->endDate == null)
                                         N/A
                                     @else
-                                        {{$assign->endDate}}
+                                        {{\App\SUtils\SDateTimeUtils::orderDate($assign->endDate)}}
                                     @endif
                                 </td>
                                 <td>

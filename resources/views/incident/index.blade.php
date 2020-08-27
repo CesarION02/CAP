@@ -178,8 +178,8 @@ Incidencias
                         @foreach ($datas as $data)
                         <tr>
                             <td>{{$data->typeincident->name}}</td>
-                            <td>{{$data->start_date}}</td>
-                            <td>{{$data->end_date}}</td>
+                            <td>{{\App\SUtils\SDateTimeUtils::orderDate($data->start_date)}}</td>
+                            <td>{{\App\SUtils\SDateTimeUtils::orderDate($data->end_date)}}</td>
                             <td>{{$data->employee->name}}</td>
                             
                             {{-- <td>
