@@ -14,6 +14,7 @@ use App\Models\day_workshifts_employee;
 use App\Models\pdf_week;
 use DateTime;
 use DB;
+use Carbon\Carbon;
 use PDF;
 
 
@@ -24,8 +25,102 @@ class specialWorkshiftController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {   
+        $start_date = null;
+        $end_date = null;
+        if ($request->start_date == null) {
+            $now = Carbon::now();
+            $start_date = $now->startOfMonth()->toDateString();
+            $end_date = $now->endOfMonth()->toDateString();
+        }
+        else {
+            $start_date = $request->start_date;
+            $end_date = $request->end_date;
+        }
+
+        if (session()->get('rol_id') != 1){
+            $numero = session()->get('name');
+            $usuario = DB::table('users')
+                    ->where('name',$numero)
+                    ->get();
+            $dgu = DB::table('group_dept_user')
+                    ->where('user_id',$usuario[0]->id)
+                    ->select('groupdept_id AS id')
+                    ->get();
+            $Adgu = [];
+            for($i=0;count($dgu)>$i;$i++){
+                $Adgu[$i]=$dgu[$i]->id;
+            }
+            $datas = DB::table('day_workshifts_employee')
+                        ->join('employees','employees.id','=','day_workshifts_employee.employee_id')
+                        ->join('day_workshifts','day_workshifts.id','=','day_workshifts_employee.day_id')
+                        ->join('workshifts','workshifts.id','=','day_workshifts.workshift_id')
+                        ->join('week_department_day','week_department_day.id','=','day_workshifts.day_id')
+                        ->join('jobs','jobs.id','=','employees.job_id')
+                        ->join('departments','departments.id','=','employees.department_id')
+                        ->join('department_group','department_group.id','=','departments.dept_group_id')
+                        ->orderBy('week_department_day.date')
+                        ->where('employees.is_delete','0')
+                        ->where('employees.is_active','1')
+                        ->where('day_workshifts_employee.is_delete',0)
+                        ->where('week_department_day.week_department_id',null)
+                        ->whereBetween('week_department_day.date', [$start_date, $end_date])
+                        ->whereIn('departments.dept_group_id',$Adgu)
+                        ->orderBy('employees.name')
+                        ->select('week_department_day.date AS date',
+                                    'employees.name AS nameEmp',
+                                    'workshifts.name AS nameWork',
+                                    'week_department_day.is_approved',
+                                    'day_workshifts_employee.id AS id')
+                        ->get();
+        }else{
+            $datas = DB::table('day_workshifts_employee')
+                        ->join('employees','employees.id','=','day_workshifts_employee.employee_id')
+                        ->join('day_workshifts','day_workshifts.id','=','day_workshifts_employee.day_id')
+                        ->join('workshifts','workshifts.id','=','day_workshifts.workshift_id')
+                        ->join('week_department_day','week_department_day.id','=','day_workshifts.day_id')
+                        ->join('jobs','jobs.id','=','employees.job_id')
+                        ->join('departments','departments.id','=','employees.department_id')
+                        ->join('department_group','department_group.id','=','departments.dept_group_id')
+                        ->orderBy('week_department_day.date')
+                        ->where('employees.is_delete','0')
+                        ->where('employees.is_active','1')
+                        ->where('day_workshifts_employee.is_delete',0)
+                        ->where('week_department_day.week_department_id',null)
+                        ->whereBetween('week_department_day.date', [$start_date, $end_date])
+                        ->orderBy('employees.name')
+                        ->select('week_department_day.date AS date','employees.name AS nameEmp','workshifts.name AS nameWork','day_workshifts_employee.id AS id','week_department_day.is_approved AS is_approved')
+                        ->get();   
+        }
+        return view('specialworkshift.index')
+                                ->with('datas',$datas)
+                                ->with('start_date', $start_date)
+                                ->with('end_date', $end_date);
+
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexrh(Request $request)
+    {   
+        $start_date = null;
+        $end_date = null;
+        if ($request->start_date == null) {
+            $now = Carbon::now();
+            $start_date = $now->startOfMonth()->toDateString();
+            $end_date = $now->endOfMonth()->toDateString();
+            $filterType = "2";
+        }
+        else {
+            $start_date = $request->start_date;
+            $end_date = $request->end_date;
+            $filterType = $request->filter_apprvd;
+        }
+
         if (session()->get('rol_id') != 1){
             $numero = session()->get('name');
             $usuario = DB::table('users')
@@ -58,8 +153,7 @@ class specialWorkshiftController extends Controller
                                     'employees.name AS nameEmp',
                                     'workshifts.name AS nameWork',
                                     'week_department_day.is_approved',
-                                    'day_workshifts_employee.id AS id')
-                        ->get();
+                                    'day_workshifts_employee.id AS id');
         }else{
             $datas = DB::table('day_workshifts_employee')
                         ->join('employees','employees.id','=','day_workshifts_employee.employee_id')
@@ -75,55 +169,29 @@ class specialWorkshiftController extends Controller
                         ->where('day_workshifts_employee.is_delete',0)
                         ->where('week_department_day.week_department_id',null)
                         ->orderBy('employees.name')
-                        ->select('week_department_day.date AS date','employees.name AS nameEmp','workshifts.name AS nameWork','day_workshifts_employee.id AS id','week_department_day.is_approved AS is_approved')
-                        ->get();   
+                        ->select('week_department_day.date AS date','employees.name AS nameEmp','workshifts.name AS nameWork','day_workshifts_employee.id AS id','week_department_day.is_approved AS is_approved');
         }
-        return view('specialworkshift.index')->with('datas',$datas);
 
-    }
-
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function indexrh()
-    {   
-        $numero = session()->get('name');
-        $usuario = DB::table('users')
-                    ->where('name',$numero)
-                    ->get();
-        $dgu = DB::table('group_dept_user')
-                    ->where('user_id',$usuario[0]->id)
-                    ->select('groupdept_id AS id')
-                    ->get();
-        $Adgu = [];
-        for($i=0;count($dgu)>$i;$i++){
-            $Adgu[$i]=$dgu[$i]->id;
+        if ($filterType != "2") {
+            $datas = $datas->whereBetween('week_department_day.date', [$start_date, $end_date]);
         }
-        $datas = DB::table('day_workshifts_employee')
-                        ->join('employees','employees.id','=','day_workshifts_employee.employee_id')
-                        ->join('day_workshifts','day_workshifts.id','=','day_workshifts_employee.day_id')
-                        ->join('workshifts','workshifts.id','=','day_workshifts.workshift_id')
-                        ->join('week_department_day','week_department_day.id','=','day_workshifts.day_id')
-                        ->join('jobs','jobs.id','=','employees.job_id')
-                        ->join('departments','departments.id','=','employees.department_id')
-                        ->join('department_group','department_group.id','=','departments.dept_group_id')
-                        ->orderBy('week_department_day.date')
-                        ->where('employees.is_delete','0')
-                        ->where('employees.is_active','1')
-                        ->where('day_workshifts_employee.is_delete',0)
-                        ->where('week_department_day.week_department_id',null)
-                        ->whereIn('departments.dept_group_id',$Adgu)
-                        ->orderBy('employees.name')
-                        ->select('week_department_day.date AS date',
-                                    'employees.name AS nameEmp',
-                                    'workshifts.name AS nameWork',
-                                    'week_department_day.is_approved',
-                                    'day_workshifts_employee.id AS id')
-                        ->get();
+
+        if ($filterType > "0") {
+            if ($filterType == "1") {
+                $datas = $datas->where('week_department_day.is_approved', true);
+            }
+            else {
+                $datas = $datas->where('week_department_day.is_approved', false);
+            }
+        }
+
+        $datas = $datas->get();
         
-        return view('specialworkshift.indexrh')->with('datas',$datas);
+        return view('specialworkshift.indexrh')
+                                    ->with('datas',$datas)
+                                    ->with('start_date', $start_date)
+                                    ->with('end_date', $end_date)
+                                    ->with('filterType', $filterType);
 
     }
 

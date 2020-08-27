@@ -4,7 +4,7 @@ Incidencias
 @endsection
 
 @section('styles1')
-<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" href="{{asset("daterangepicker/daterangepicker.css")}}">
 @endsection
 
 @section("scripts")
@@ -18,8 +18,8 @@ Incidencias
 <script src="{{ asset('dt/vfs_fonts.js') }}"></script>
 <script src="{{ asset('dt/buttons.html5.min.js') }}"></script>
 <script src="{{ asset('dt/buttons.print.min.js') }}"></script>
-<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>
-<script src="{{ asset('monthpicker/jquery.mtz.monthpicker.js') }}"></script>
+<script src="{{ asset("assets/js/moment/moment.js") }}" type="text/javascript"></script>
+<script src="{{ asset("daterangepicker/daterangepicker.js") }}" type="text/javascript"></script>
 
 <script>
     $(document).ready( function () {
@@ -77,31 +77,35 @@ Incidencias
     });
 </script>
 <script>
-    $('#yearmonth-picker').monthpicker();
+    $(function() {
+        var start = moment(<?php echo json_encode($start_date) ?>);
+        var end = moment(<?php echo json_encode($end_date) ?>);
 
-    function setFilterType(fType) {
-        document.getElementById("filter-type").value = fType;
-    }
-
-    function setFilterTypeClass() {
-        this.filterType = <?php echo json_encode($filterType) ?>;
-        this.filterType = this.filterType + "";
-        switch (this.filterType) {
-            case "1":
-                var element = document.getElementById("monthBtn");
-                element.classList.add("active");
-                break;
-            case "2":
-                var element = document.getElementById("yearBtn");
-                element.classList.add("active");
-                break;
-        
-            default:
-                break;
+        function cb(start, end) {
+            $('#reportrange span').html(start.format('D MMMM YYYY') + ' - ' + end.format('D MMMM YYYY'));
+            document.getElementById("start-date").value = start.format('YYYY-MM-DD');
+            document.getElementById("end-date").value = end.format('YYYY-MM-DD');
         }
-    }
 
-    setFilterTypeClass();
+        $('#reportrange').daterangepicker({
+            startDate: start,
+            endDate: end,
+            showDropdowns: true,
+            ranges: {
+                'Este mes': [moment().startOf('month'), moment().endOf('month')],
+                'Mes pasado': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+                'Este año': [moment().startOf('year'), moment().endOf('year')],
+                'Año pasado': [moment().subtract(1, 'year').startOf('year'), moment().subtract(1, 'year').endOf('year')]
+            }
+        }, cb);
+
+        cb(start, end);
+    });
+
+    $('#reportrange').on('apply.daterangepicker', function(ev, picker) {
+        document.getElementById("start-date").value = picker.startDate.format('YYYY-MM-DD');
+        document.getElementById("end-date").value = picker.endDate.format('YYYY-MM-DD');
+    });
 </script>
 @endsection
 @section('content')
@@ -124,10 +128,10 @@ Incidencias
                 </h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:nolaborables"])
                 <div class="row">
-                    <div class="col-md-3 col-md-offset-9">
+                    <div class="col-md-5 col-md-offset-7">
                         @if($incidentType == 14)
                             <div class="row">
-                                <div class="col-md-12">
+                                <div class="col-md-4 col-md-offset-8">
                                     <a href="{{ route('crear_incidente', $incidentType) }}" class="btn btn-block btn-success btn-sm">
                                         <i class="fa fa-fw fa-plus-circle"></i> Nuevo
                                     </a>
@@ -136,10 +140,22 @@ Incidencias
                         @endif
                         <div class="row">
                             <div class="col-md-12">
-                                <form action="{{ route($sroute, $incidentType) }}">
-                                    @include('filters.monthyear', 
-                                                ['monthYear' => $monthYear, 
-                                                'sroute' => $sroute])
+                                <form action="{{ route('incidentes', $incidentType) }}">
+                                    <input type="hidden" id="start-date" name="start_date">
+                                    <input type="hidden" id="end-date" name="end_date">
+                                    <div class="input-group">
+                                        <div id="reportrange" 
+                                            v-on:change="onShowModal()"
+                                            style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
+                                            <i class="fa fa-calendar"></i>&nbsp;
+                                            <span></span> <i class="fa fa-caret-down"></i>
+                                        </div>
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-default" type="submit">
+                                                <i class="glyphicon glyphicon-search"></i>
+                                            </button>
+                                        </span>
+                                    </div>
                                 </form>
                             </div>
                         </div>

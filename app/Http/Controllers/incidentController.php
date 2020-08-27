@@ -23,31 +23,16 @@ class incidentController extends Controller
      */
     public function index($incidentType = 0, Request $request)
     {
-        if ($request->month_year == null) {
-            $today = Carbon::now();
-            $m = $today->month < 10 ? '0'.$today->month : $today->month;
-            $monthYear = $m.'/'.$today->year;
+        $start_date = null;
+        $end_date = null;
+        if ($request->start_date == null) {
+            $now = Carbon::now();
+            $start_date = $now->startOfMonth()->toDateString();
+            $end_date = $now->endOfMonth()->toDateString();
         }
         else {
-            $monthYear = str_replace('-', '/', $request->month_year);
-        }
-
-        $filterType = null;
-        if ($request->filter_type != null) {
-            $filterType = $request->filter_type;
-        }
-        else {
-            $filterType = 1;
-        }
-
-        $arr = explode("/", $monthYear);
-        if (count($arr) > 1) {
-            $month = $arr[0];
-            $year = $arr[1];
-        }
-        else {
-            $year = $arr[0];
-            $filterType = 2;
+            $start_date = $request->start_date;
+            $end_date = $request->end_date;
         }
 
         $datas = incident::where('is_delete','0')->orderBy('id');
@@ -55,21 +40,7 @@ class incidentController extends Controller
             $datas = $datas->where('type_incidents_id', $incidentType);
         }
 
-        switch ($filterType) {
-            case 1:
-                $datas = $datas->whereRaw('MONTH(start_date) = '.$month)
-                                ->whereRaw('YEAR(start_date) = '.$year);
-                break;
-            case 2:
-                $datas = $datas->whereRaw('YEAR(start_date) = '.$year);
-                $monthYear = $year;
-                break;
-            
-            default:
-                $datas = $datas->whereRaw('MONTH(start_date) = '.$month)
-                                ->whereRaw('YEAR(start_date) = '.$year);
-                break;
-        }
+        $datas = $datas->whereBetween('start_date', [$start_date, $end_date]);
         
         $datas = $datas->get();
 
@@ -84,8 +55,8 @@ class incidentController extends Controller
                     ->with('incidentType', $incidentType)
                     ->with('datas', $datas)
                     ->with('sroute', $sroute)
-                    ->with('filterType', $filterType)
-                    ->with('monthYear', $monthYear);
+                    ->with('start_date', $start_date)
+                    ->with('end_date', $end_date);
     }
 
     /**
