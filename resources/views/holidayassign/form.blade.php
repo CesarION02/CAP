@@ -75,7 +75,7 @@
 
     @case(2)
     <div class="form-group">
-        <label for="departamento" class="col-lg-3 control-label requerido">Departamento:</label>
+        <label for="departamento" class="col-lg-3 control-label requerido">Departamento CAP:</label>
         <div class="col-lg-8">              
             <select name="departamento" id="departamento">  
                 <option value=0>Seleccionar Departamento</option>
