@@ -22,6 +22,7 @@ Programacion de turnos
 <script src="{{asset("assets/pages/scripts/shiftprogramming/copiar.js")}}" type="text/javascript"></script>
 <script src="{{asset("assets/pages/scripts/shiftprogramming/rotar.js")}}" type="text/javascript"></script>
 <script src="{{asset("assets/pages/scripts/shiftprogramming/editar.js")}}" type="text/javascript"></script>
+<script src="{{asset("assets/pages/scripts/orderDate.js")}}" type="text/javascript"></script>
 @endsection
 @section("styles")
 <link rel="stylesheet" href="{{asset("assets/css/table.css")}}">
@@ -53,7 +54,7 @@ Programacion de turnos
                             <button class="btn btn-block btn-warning btn-sm" id="editar" name="editar" onclick="editShift()"> <i class="fa fa-fw fa-pencil-square-o"></i>Modificar más reciente</button>
                         </div>
                         <div class="col-md-3">
-                          <input type="text" value="{{$newest->start_date.' a '.$newest->end_date}}">
+                          <input type="text" value="{{$fechaini.' a '.$fechafin}}" readonly>
                         </div>
                       @endif
                     </div>

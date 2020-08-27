@@ -12,6 +12,7 @@ use App\Models\week_department_day;
 use App\Models\day_workshifts;
 use App\Models\day_workshifts_employee;
 use App\Models\pdf_week;
+use App\SUtils\SDateTimeUtils;
 use DateTime;
 use DB;
 use PDF;
@@ -36,8 +37,15 @@ class shiftprogrammingController extends Controller
                 ->select('week.year AS year')
                 ->get();
         $newest = week::where('is_delete','=',0)->orderBy('updated_at','desc')->first();
+        if($newest != null){
+            $fechaini = SDateTimeUtils::orderDate($newest->start_date);
+            $fechafin = SDateTimeUtils::orderDate($newest->end_date);
+        }else{
+            $fechaini = null;
+            $fechafin = null;
+        }
 
-        return view('shiftprogramming.index', compact('typeArea'),compact('newest'))->with('week',$week)->with('year',$year);
+        return view('shiftprogramming.index', compact('typeArea'),compact('newest'))->with('week',$week)->with('year',$year)->with('fechaini',$fechaini)->with('fechafin',$fechafin);
 
     }
 
@@ -439,9 +447,9 @@ class shiftprogrammingController extends Controller
         $nombrePdf = 'RolTur'.$week->week_number.''.$week->year;
         $formateoIni = explode('-',$week->start_date);
         $fechaInicio = $formateoIni[2].'-'.$formateoIni[1].'-'.$formateoIni[0];
-        $dias = array('','Lunes','Martes','Miercoles','Jueves','Viernes','Sabado','Domingo');
-        $diasTitulo = array('','lunes','martes','miercoles','jueves','viernes','sabado','domingo');
-        $meses = array('','Ene.','Feb.','Mar.','Abr.','May.','Jun.','Jul.','Ago.','Sep.','Oct.','Nov.','Dic.');
+        $dias = array('','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo');
+        $diasTitulo = array('','lunes','martes','miércoles','jueves','viernes','sábado','domingo');
+        $meses = array('','ene.','feb.','mar.','abr.','may.','jun.','jul.','ago.','sep.','oct.','nov.','dic.');
         $fini = $diasTitulo[date('N', strtotime($fechaInicio))];
         $formateoFin = explode('-',$week->end_date);
         $fechaFin = $formateoFin[2].'-'.$formateoFin[1].'-'.$formateoFin[0];

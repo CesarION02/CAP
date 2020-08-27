@@ -15,7 +15,7 @@
     <label for="festivo" class="col-lg-3 control-label requerido">Día festivo:</label>
     <div class="col-lg-3" id="selectfestivo">
         <select name="festivo" id="festivo">
-            <option value="">Seleccionar día festivo</option>
+            <option value="">Seleccione día festivo</option>
             @foreach($holiday as $holiday => $index)
                 @if(isset($datas))
                     @if($datas->holiday_id == $index)

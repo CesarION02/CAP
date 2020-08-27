@@ -8,6 +8,7 @@
 <script src="{{asset("assets/pages/scripts/schedule/copiar.js")}}" type="text/javascript"></script>
 <script src="{{asset("assets/pages/scripts/schedule/bloquear.js")}}" type="text/javascript"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.0.12/dist/js/select2.min.js"></script>
+<script src="{{asset("assets/pages/scripts/orderDate.js")}}" type="text/javascript"></script>
 <script>
         $(document).ready(function() {
             $('.js-example-basic-multiple').select2();

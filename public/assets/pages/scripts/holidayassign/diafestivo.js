@@ -7,9 +7,9 @@ $(document).on('change', '#anio', function() {
         data: { 'anio': anio },
 
         success: function(data) {
-            var aux = '<select id="semana" name="semana"><option value="0">Selecciona semana</option>'
+            var aux = '<select id="semana" name="semana"><option value="0">Seleccione día festivo</option>'
             for (var i = 0; data.length > i; i++) {
-                aux += '<option value="' + data[i].id + '">' + data[i].name + '-' + data[i].fecha + '</option>'
+                aux += '<option value="' + data[i].id + '">' + data[i].name + ' (' + order(data[i].fecha) + ') </option>'
             }
             aux += '</select>'
 
