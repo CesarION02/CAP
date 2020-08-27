@@ -107,7 +107,7 @@ Empleados
                                 @else
                                 <form action="{{route('terminar_configurar', ['id' => $data->id])}}" class="d-inline form-configurar" method="POST">
                                     @csrf @method("delete")
-                                    <button type="submit" class="btn-accion-tabla tooltipsC" title="Confirmar departamento">
+                                    <button type="submit" class="btn-accion-tabla tooltipsC" title="Confirmar departamento CAP">
                                         <i class="fa fa-fw fa-check text-danger"></i>
                                     </button>
                                 </form>

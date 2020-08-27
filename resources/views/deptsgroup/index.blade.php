@@ -79,7 +79,7 @@
                             <td>@{{ group.depts }}</td>
                             <td>
                                 <button v-on:click="showGrpModal(group)" 
-                                    class="btn-accion-tabla tooltipsC" title="Modificar departamentos">
+                                    class="btn-accion-tabla tooltipsC" title="Modificar departamentos CAP">
                                     <i class="glyphicon glyphicon-list-alt"></i>
                                 </button>
                                 <a :href="'./././deptsgroupedit/' + group.id" class="btn-accion-tabla tooltipsC" title="Modificar este registro">

@@ -76,7 +76,7 @@
             <label for="departamento" class="col-lg-3 control-label">Departamentos CAP:</label>
             <div class="col-lg-8">              
                 <select name="departamento" id="departamento">  
-                    <option value=0>Seleccionar Departamento</option>
+                    <option value=0>Seleccione departamento</option>
                     @foreach($department as $department => $index)
                             @if((isset($datas)) == true && $datas->department_id == $index)
                                 <option selected value="{{$index}}">{{$department}}</option>

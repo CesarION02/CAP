@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-Asignar grupo departamento
+Asignar grupo departamento CAP
 @endsection
 @section('styles1')
     <link rel="stylesheet" href="{{asset("assets/css/chosen.min.css")}}">

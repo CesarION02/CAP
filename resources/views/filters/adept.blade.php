@@ -3,7 +3,7 @@
         <select name="i_filter" id="i_filter" class="form-control" onchange="onChangeFilter()">
             <option value="0">Sin filtro (todos)</option>
             <option value="1">Áreas</option>
-            <option value="2">Departamentos</option>
+            <option value="2">Departamentos CAP</option>
         </select>
     </div>
     <div class="col-md-6">

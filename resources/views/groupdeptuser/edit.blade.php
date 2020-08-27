@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-    Grupo departamentos - usuarios
+    Grupo departamentos CAP - usuarios
 @endsection
 
 @section('styles1')

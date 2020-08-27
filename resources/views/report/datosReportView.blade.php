@@ -62,7 +62,7 @@ Reporte Entradas/Salidas
                     </div>
                     <div class="row" v-else-if="oData.reportType == 3">
                         <div class="col-md-10 col-md-offset-1">
-                            <label for="cars">Elige departamento(s):</label>
+                            <label for="cars">Elige departamento(s) CAP:</label>
                             
                             <select data-placeholder="Selecciona opciones..." style="width: 60%" class="chosen-select" id="cars" name="vals[]" multiple>
                                 <option v-for="dept in oData.departaments" :value="dept.id">@{{ dept.name }}</option>
