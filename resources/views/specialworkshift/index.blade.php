@@ -105,6 +105,8 @@ Turno especial
                         <i class="fa fa-fw fa-plus-circle"></i> Nuevo
                     </a>
                 </div>
+                <br>
+                <br>
                 <div class="row">
                     <div class="col-md-5 col-md-offset-7">
                         <form action="{{ route('turno_especial') }}">
