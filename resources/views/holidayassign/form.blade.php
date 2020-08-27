@@ -1,7 +1,21 @@
+
 <div class="form-group">
-    <label for="festivo" class="col-lg-3 control-label">Día festivo:</label>
+    <label for="date" class="col-lg-3 control-label requerido">Año:</label>
     <div class="col-lg-3">
+        <select id="anio" name="anio" required>
+            <option value="0">Seleccione año</option>
+            @for( $i = 0 ; count($year) > $i ; $i++){
+              <option value={{$year[$i]->year}}>{{$year[$i]->year}}</option>
+            }
+            @endfor
+        </select>
+    </div>  
+</div>
+<div class="form-group">
+    <label for="festivo" class="col-lg-3 control-label requerido">Día festivo:</label>
+    <div class="col-lg-3" id="selectfestivo">
         <select name="festivo" id="festivo">
+            <option value="">Seleccionar día festivo</option>
             @foreach($holiday as $holiday => $index)
                 @if(isset($datas))
                     @if($datas->holiday_id == $index)
@@ -9,18 +23,16 @@
                     @else
                         <option value="{{$index}}">{{$holiday}}</option>
                     @endif
-                @else
-                    <option value="{{$index}}">{{$holiday}}</option>
                 @endif
             @endforeach
         </select>
     </div>
-    <label for="date" class="col-lg-3 control-label">Fecha:</label>
+    <label for="date" class="col-lg-3 control-label requerido">Fecha:</label>
     <div class="col-lg-3">
         @if(isset($datas))
             <input type="date" name="date" id="date" value="{{$datas->date}}" >
         @else
-            <input type="date" name="date" id="date">
+            <input type="date" name="date" id="date" disabled>
         @endif
     </div>  
 </div>
@@ -31,7 +43,7 @@
 @switch($tipo)
     @case(1)
     <div class="form-group">
-        <label for="empleado" class="col-lg-3 control-label">Empleados:</label>
+        <label for="empleado" class="col-lg-3 control-label requerido">Empleados:</label>
         <div class="col-lg-8">
             <select multiple style="width: 95%" class="js-example-basic-multiple" name="empleado[]" id="empleado">
                 @if($flag == 0)
@@ -63,7 +75,7 @@
 
     @case(2)
     <div class="form-group">
-        <label for="departamento" class="col-lg-3 control-label">Departamento:</label>
+        <label for="departamento" class="col-lg-3 control-label requerido">Departamento:</label>
         <div class="col-lg-8">              
             <select name="departamento" id="departamento">  
                 <option value=0>Seleccionar Departamento</option>
@@ -81,7 +93,7 @@
     
     @break
     @case(3)
-    <label for="area" class="col-lg-3 control-label">Área:</label>
+    <label for="area" class="col-lg-3 control-label requerido">Área:</label>
     <div class="col-lg-8">              
         <select name="area" id="area">  
             <option value=0>Seleccionar Área</option>

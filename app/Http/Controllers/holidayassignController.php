@@ -50,9 +50,10 @@ class holidayassignController extends Controller
         $employee = employees::where('is_delete','0')->where('is_active', true)->orderBy('name','ASC')->pluck('id','name');
         $department = department::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
         $area = area::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
+        $year = holiday::where('is_delete','0')->groupBy('year')->select('year AS year')->get();
         $holiday = holiday::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
 
-        return view('holidayassign.create')->with('employee',$employee)->with('department',$department)->with('holiday',$holiday)->with('area',$area)->with('flag',0)->with('tipo',$tipo);
+        return view('holidayassign.create')->with('employee',$employee)->with('department',$department)->with('holiday',$holiday)->with('area',$area)->with('flag',0)->with('tipo',$tipo)->with('year',$year);
     }
 
     /**
@@ -357,5 +358,14 @@ class holidayassignController extends Controller
         } else {
             abort(404);
         }
+    }
+
+    public function recoverHoliday(Request $request){
+        $holidays = DB::table('holidays')
+        ->where('holidays.year',$request->anio)
+        ->select('fecha AS fecha','name AS name','id AS id')
+        ->get();
+
+        return response()->json($holidays);
     }
 }

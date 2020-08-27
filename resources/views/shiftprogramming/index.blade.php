@@ -53,7 +53,7 @@ Programacion de turnos
                             <button class="btn btn-block btn-warning btn-sm" id="editar" name="editar" onclick="editShift()"> <i class="fa fa-fw fa-pencil-square-o"></i>Modificar más reciente</button>
                         </div>
                         <div class="col-md-3">
-                          <input type="text" value="{{$newest->start_date.' a '.$newest->end_date}}"
+                          <input type="text" value="{{$newest->start_date.' a '.$newest->end_date}}">
                         </div>
                       @endif
                     </div>

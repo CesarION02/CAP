@@ -207,6 +207,7 @@ Route::delete('assignone/{id}', 'assignController@deleteOne')->name('eliminar_un
 Route::get('assignonedata', 'assignController@getData')->name('get_data');
 
 /* RUTAS DE ASIGNACION HOLIDAYS */
+Route::get('holidayassign/recoverHoliday','holidayassignController@recoverHoliday')->name('recuperarholiday');
 Route::get('holidayassign', 'holidayassignController@index')->name('asignacion_festivo');
 Route::get('holidayassign/create/{id}', 'holidayassignController@create')->name('crear_asignacion_festivo');
 Route::post('holidayassign', 'holidayassignController@store')->name('guardar_asignacion_festivo');

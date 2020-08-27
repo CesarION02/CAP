@@ -19,6 +19,7 @@ class inicioController extends Controller
                         ->join('menu','menu.id','=','home_menus_rol.menu_id')
                         ->where('home_menus_rol.rol_id',$rol)
                         ->select('menu.name AS nombreMenu', 'menu.url AS url', 'home_menus_rol.icono AS icono')
+                        ->orderBy('home_menus_rol.order')
                         ->get();
         return view('inicio')->with('datas',$datas);
     }
