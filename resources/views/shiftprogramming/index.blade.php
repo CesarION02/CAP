@@ -97,7 +97,7 @@ Programacion de turnos
                       </div>
                       <div class="col-md-3" style="margin:5px" id="selectsemana">
                         <select id="semana" name="semana">
-                          <option value="0">Selecciona semana</option>
+                          <option value="0">Seleccione semana</option>
                         </select>
                       </div>
                       <div class="col-md-2">

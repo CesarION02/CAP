@@ -34,7 +34,7 @@ $(document).on('change', '#anio', function() {
         data: { 'anio': anio },
 
         success: function(data) {
-            var aux = '<select id="semana" name="semana"><option value="0">Selecciona semana</option>'
+            var aux = '<select id="semana" name="semana"><option value="0">Seleccione semana</option>'
             for (var i = 0; data.length > i; i++) {
                 aux += '<option value="' + data[i].id + '">' + data[i].start + '-' + data[i].end + '</option>'
             }
