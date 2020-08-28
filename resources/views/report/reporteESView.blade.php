@@ -101,7 +101,8 @@ Reporte de registros
 
 @section("scripts")
     <script src="{{ asset("assets/js/chosen.jquery.min.js") }}" type="text/javascript"></script>
-    
+    <script src="{{ asset("assets/js/moment/moment.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/js/moment/datetime-moment.js") }}" type="text/javascript"></script>
     <script src="{{ asset("dt/datatables.js") }}" type="text/javascript"></script>
     <script src="{{ asset('dt/dataTables.buttons.min.js') }}"></script>
 	<script src="{{ asset('dt/buttons.flash.min.js') }}"></script>
@@ -113,6 +114,7 @@ Reporte de registros
 
     <script>
         $(document).ready(function() {
+            $.fn.dataTable.moment('DD/MM/YYYY');
             $('#checks_table').DataTable({
                 "language": {
                     "sProcessing":     "Procesando...",

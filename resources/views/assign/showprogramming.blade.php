@@ -8,6 +8,8 @@ Plantilla horarios
 <script src="{{asset("assets/pages/scripts/admin/datatable/index.js")}}" type="text/javascript"></script>
 <script src="{{ asset("dt/datatables.js") }}" type="text/javascript"></script>
 <script src="{{ asset('dt/dataTables.buttons.min.js') }}"></script>
+<script src="{{ asset("assets/js/moment/moment.js") }}" type="text/javascript"></script>
+<script src="{{ asset("assets/js/moment/datetime-moment.js") }}" type="text/javascript"></script>
 	<script src="{{ asset('dt/buttons.flash.min.js') }}"></script>
 	<script src="{{ asset('dt/jszip.min.js') }}"></script>
 	<script src="{{ asset('dt/pdfmake.min.js') }}"></script>
@@ -16,6 +18,7 @@ Plantilla horarios
 	<script src="{{ asset('dt/buttons.print.min.js') }}"></script>
 <script>
     $(document).ready( function () {
+        $.fn.dataTable.moment('DD/MM/YYYY');
         $('#myTable').DataTable({
             "language": {
                 "sProcessing":     "Procesando...",
@@ -41,6 +44,7 @@ Plantilla horarios
                     "sSortDescending": ": Activar para ordenar la columna de manera descendente"
                 }
             },
+            "order": [[ 1, 'desc' ], [ 2, 'desc' ]],
             "colReorder": true,
             "dom": 'Bfrtip',
             "lengthMenu": [

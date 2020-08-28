@@ -18,9 +18,11 @@ Turno especial
 	<script src="{{ asset('dt/buttons.html5.min.js') }}"></script>
     <script src="{{ asset('dt/buttons.print.min.js') }}"></script>
     <script src="{{ asset("assets/js/moment/moment.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/js/moment/datetime-moment.js") }}" type="text/javascript"></script>
     <script src="{{ asset("daterangepicker/daterangepicker.js") }}" type="text/javascript"></script>
 <script>
     $(document).ready( function () {
+        $.fn.dataTable.moment('DD/MM/YYYY');
         $('#myTable').DataTable({
             "language": {
                 "sProcessing":     "Procesando...",
@@ -46,6 +48,7 @@ Turno especial
                     "sSortDescending": ": Activar para ordenar la columna de manera descendente"
                 }
             },
+            "order": [[ 1, 'desc' ]],
             "colReorder": true,
             "dom": 'Bfrtip',
             "lengthMenu": [
