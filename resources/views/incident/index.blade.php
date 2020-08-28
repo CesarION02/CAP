@@ -19,10 +19,13 @@ Incidencias
 <script src="{{ asset('dt/buttons.html5.min.js') }}"></script>
 <script src="{{ asset('dt/buttons.print.min.js') }}"></script>
 <script src="{{ asset("assets/js/moment/moment.js") }}" type="text/javascript"></script>
+<script src="{{ asset("assets/js/moment/datetime-moment.js") }}" type="text/javascript"></script>
 <script src="{{ asset("daterangepicker/daterangepicker.js") }}" type="text/javascript"></script>
 
 <script>
     $(document).ready( function () {
+        $.fn.dataTable.moment('DD/MM/YYYY');
+
         $('#tabla-data').DataTable({
             "language": {
                 "sProcessing":     "Procesando...",
