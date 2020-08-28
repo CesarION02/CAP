@@ -58,9 +58,12 @@ Dias festivos
                         extend: 'print',
                         text: 'Imprimir'
                     }
-                ]
+                ],
         });
+
     });
+
+
 </script>
 @endsection
 

@@ -50,12 +50,12 @@ Reporte de registros
                                         @if($lRegistries[$i]->type_id == 1)
                                             <td>{{$lRegistries[$i]->num_employee}}</td>
                                             <td>{{$lRegistries[$i]->name}}</td>
-                                            <td>{{$lRegistries[$i]->date}}</td>
+                                            <td>{{\App\SUtils\SDateTimeUtils::orderDate($lRegistries[$i]->date)}}</td>
                                             <td>{{$lRegistries[$i]->time}}</td>
                                             @if(($i+1) < count($lRegistries))
                                                 @if($lRegistries[$i]->num_employee == $lRegistries[$i+1]->num_employee && $lRegistries[$i+1]->type_id == 2)
                                                     <?php $i++; ?>
-                                                    <td>{{$lRegistries[$i]->date}}</td>
+                                                    <td>{{\App\SUtils\SDateTimeUtils::orderDate($lRegistries[$i]->date)}}</td>
                                                     <td>{{$lRegistries[$i]->time}}</td>
                                                 @else
                                                     <td>--</td>
@@ -70,7 +70,7 @@ Reporte de registros
                                             <td>{{$lRegistries[$i]->name}}</td>
                                             <td>--</td>
                                             <td>--</td>
-                                            <td>{{$lRegistries[$i]->date}}</td>
+                                            <td>{{\App\SUtils\SDateTimeUtils::orderDate($lRegistries[$i]->date)}}</td>
                                             <td>{{$lRegistries[$i]->time}}</td>
                                         @endif
                                         
