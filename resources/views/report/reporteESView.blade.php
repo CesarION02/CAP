@@ -50,12 +50,12 @@ Reporte de registros
                                         @if($lRegistries[$i]->type_id == 1)
                                             <td>{{$lRegistries[$i]->num_employee}}</td>
                                             <td>{{$lRegistries[$i]->name}}</td>
-                                            <td>{{$lRegistries[$i]->date}}</td>
+                                            <td>{{\App\SUtils\SDateTimeUtils::orderDate($lRegistries[$i]->date)}}</td>
                                             <td>{{$lRegistries[$i]->time}}</td>
                                             @if(($i+1) < count($lRegistries))
                                                 @if($lRegistries[$i]->num_employee == $lRegistries[$i+1]->num_employee && $lRegistries[$i+1]->type_id == 2)
                                                     <?php $i++; ?>
-                                                    <td>{{$lRegistries[$i]->date}}</td>
+                                                    <td>{{\App\SUtils\SDateTimeUtils::orderDate($lRegistries[$i]->date)}}</td>
                                                     <td>{{$lRegistries[$i]->time}}</td>
                                                 @else
                                                     <td>--</td>
@@ -70,7 +70,7 @@ Reporte de registros
                                             <td>{{$lRegistries[$i]->name}}</td>
                                             <td>--</td>
                                             <td>--</td>
-                                            <td>{{$lRegistries[$i]->date}}</td>
+                                            <td>{{\App\SUtils\SDateTimeUtils::orderDate($lRegistries[$i]->date)}}</td>
                                             <td>{{$lRegistries[$i]->time}}</td>
                                         @endif
                                         
@@ -101,7 +101,8 @@ Reporte de registros
 
 @section("scripts")
     <script src="{{ asset("assets/js/chosen.jquery.min.js") }}" type="text/javascript"></script>
-    
+    <script src="{{ asset("assets/js/moment/moment.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/js/moment/datetime-moment.js") }}" type="text/javascript"></script>
     <script src="{{ asset("dt/datatables.js") }}" type="text/javascript"></script>
     <script src="{{ asset('dt/dataTables.buttons.min.js') }}"></script>
 	<script src="{{ asset('dt/buttons.flash.min.js') }}"></script>
@@ -113,6 +114,7 @@ Reporte de registros
 
     <script>
         $(document).ready(function() {
+            $.fn.dataTable.moment('DD/MM/YYYY');
             $('#checks_table').DataTable({
                 "language": {
                     "sProcessing":     "Procesando...",

@@ -13,7 +13,18 @@ Reporte Entradas/Salidas
         @include('includes.mensaje')
         <div class="box box-danger">
             <div class="box-header with-border">
-                <h3 class="box-title">Reporte STPS</h3>
+                @switch($tipoDatos)
+                    @case(1)
+                    <h3 class="box-title">Reporte prenómina</h3>
+                    @break
+                    @case(2)
+                    <h3 class="box-title">Reporte STPS</h3>
+                    @break
+                    @case(3)
+                    <h3 class="box-title">Reporte prenómina</h3>
+                    @break
+                @endswitch
+                
                 <div class="box-tools pull-right">
                 </div>
             </div>
@@ -62,7 +73,7 @@ Reporte Entradas/Salidas
                     </div>
                     <div class="row" v-else-if="oData.reportType == 3">
                         <div class="col-md-10 col-md-offset-1">
-                            <label for="cars">Elige departamento(s) CAP:</label>
+                            <label for="cars">Elige departamento(s) nóminas:</label>
                             
                             <select data-placeholder="Selecciona opciones..." style="width: 60%" class="chosen-select" id="cars" name="vals[]" multiple>
                                 <option v-for="dept in oData.departaments" :value="dept.id">@{{ dept.name }}</option>
@@ -74,7 +85,7 @@ Reporte Entradas/Salidas
                             <label for="cars">Elige empleado(s):</label>
                             
                             <select data-placeholder="Selecciona opciones..." style="width: 60%" class="chosen-select" id="cars" name="vals[]" multiple>
-                                <option v-for="employee in oData.employees" :value="employee.id">@{{ employee.name + ' ' + employee.num_employee }}</option>
+                                <option v-for="employee in oData.employees" :value="employee.id">@{{ employee.name + ' - ' + employee.num_employee }}</option>
                             </select>
                         </div>
                     </div>

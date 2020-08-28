@@ -13,7 +13,7 @@ Reporte Entradas/Salidas
         @include('includes.mensaje')
         <div class="box box-danger">
             <div class="box-header with-border">
-                <h3 class="box-title">Reporte 2</h3>
+                <h3 class="box-title">Reporte entrada/salida 2</h3>
                 <div class="box-tools pull-right">
                 </div>
             </div>
