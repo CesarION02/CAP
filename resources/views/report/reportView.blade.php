@@ -13,17 +13,19 @@
         @include('includes.mensaje')
         <div class="box box-danger">
             <div class="box-header with-border">
+            @switch($tipo)
                 @case(1)
                     <h3 class="box-title">Reporte prenómina</h3>
-                    @break
-                    @case(2)
+                @break
+                @case(2)
                     <h3 class="box-title">Reporte STPS</h3>
-                    @break
-                    @case(3)
+                @break
+                @case(3)
                     <h3 class="box-title">Reporte prenómina</h3>
-                    @break
+                @break
                 <div class="box-tools pull-right">
                 </div>
+             @endswitch
             </div>
             <div class="box-body" >
                 <div class="row">
@@ -51,8 +53,9 @@
                                     <td>{{ $lRows[$i]->num_employee  }}</td>
                                     <td>{{ $lRows[$i]->name }}</td>
                                     {{-- <td>@{{ row.inDate }}</td> --}}
-                                    <td>{{ $lRows[$i]->inDate }}</td>
+                                    
                                     @if($lRows[$i]->haschecks == 1)
+                                        <td>{{ \App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->inDate) }}</td>
                                         @if($tipo != 2)
                                             <td>{{ $lRows[$i]->inDateTime }}</td>
                                         @else
@@ -63,7 +66,7 @@
                                             @endif
                                         @endif
                                     
-                                        <td>{{ $lRows[$i]->outDate }}</td>
+                                        <td>{{ \App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->outDate) }}</td>
                                     
                                         @if($tipo != 2)
                                             <td>{{ $lRows[$i]->outDateTime }}</td>
@@ -87,18 +90,33 @@
                                             <td align="center">{{ $lRows[$i]->extraTripleMinsNoficial }}</td>
                                         @endif
                                     @elseif($lRows[$i]->hasabsence==1)
+                                        @if($lRows[$i]->inDate != null)
+                                        <td>{{\App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->inDate)}}</td>
+                                        @else
+                                        <td>{{\App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->outDate)}}</td>
+                                        @endif
                                         <td>{{ 'Falta'}}</td>
                                         <td></td>
                                         <td></td>
                                         <td></td>
                                         <td></td>
                                     @elseif($lRows[$i]->is_dayoff==1)
+                                        @if($lRows[$i]->inDate != null)
+                                            <td>{{\App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->inDate)}}</td>
+                                        @else
+                                            <td>{{\App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->outDate)}}</td>
+                                        @endif
                                         <td>{{ 'Descanso'}}</td>
                                         <td></td>
                                         <td></td>
                                         <td></td>
                                         <td></td>
                                     @elseif($lRows[$i]->is_holiday==1)
+                                        @if($lRows[$i]->inDate != null)
+                                        <td>{{\App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->inDate)}}</td>
+                                        @else
+                                            <td>{{\App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->outDate)}}</td>
+                                        @endif
                                         <td>{{ 'Día festivo'}}</td>
                                         <td></td>
                                         <td></td>
@@ -107,16 +125,22 @@
                                     @else
                                         @for( $j = 0 ; count($incapacidades) > $j ; $j++)
                                             @if ($lRows[$i]->employee_id == $incapacidades[$j]->idEmp && ($lRows[$i]->inDate == $incapacidades[$j]->Date || $lRows[$i]->outDate == $incapacidades[$j]->Date))
-                                            <td>{{ 'Incapacidad'}}</td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
+                                                @if($lRows[$i]->inDate != null)
+                                                    <td>{{\App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->inDate)}}</td>
+                                                @else
+                                                    <td>{{\App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->outDate)}}</td>
+                                                @endif
+                                                <td>{{ 'Incapacidad'}}</td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
                                             @endif
                                         @endfor
                                         @for( $j = 0 ; count($vacaciones) > $j ; $j++)
                                             @if ($lRows[$i]->employee_id == $vacaciones[$j]->idEmp && ($lRows[$i]->inDate == $vacaciones[$j]->Date || $lRows[$i]->outDate == $vacaciones[$j]->Date))
                                             <td>{{ 'Vacaciones'}}</td>
+                                            <td></td>
                                             <td></td>
                                             <td></td>
                                             <td></td>
@@ -147,6 +171,8 @@
 	<script src="{{ asset('dt/vfs_fonts.js') }}"></script>
 	<script src="{{ asset('dt/buttons.html5.min.js') }}"></script>
     <script src="{{ asset('dt/buttons.print.min.js') }}"></script>
+    <script src="{{ asset("assets/js/moment/moment.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/js/moment/datetime-moment.js") }}" type="text/javascript"></script>
 
         
 
@@ -154,6 +180,7 @@
 
     <script>
         $(document).ready(function() {
+            $.fn.dataTable.moment('DD/MM/YYYY');
             $('#delays_table').DataTable({
                 "language": {
                     "sProcessing":     "Procesando...",
