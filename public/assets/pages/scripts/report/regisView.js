@@ -1,7 +1,8 @@
 var app = new Vue({
     el: '#reportApp',
     data: {
-      oData: oData
+      oData: oData,
+      vueGui: oGui
     },
     methods: {
         onChangeOp() {

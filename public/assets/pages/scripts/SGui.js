@@ -39,4 +39,8 @@ class SGui {
 
     return [day, month, year].join('/');
 }
+  formatDateTime(dateTime) {
+    let dt = moment(dateTime).format('DD/MM/YYYY HH:mm:ss');
+    return dt;
+  }
 }

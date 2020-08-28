@@ -67,9 +67,9 @@
                                     <td>@{{ vueGui.pad(row.numEmployee, 6) }}</td>
                                     <td>@{{ row.employee }}</td>
                                     {{-- <td>@{{ row.inDate }}</td> --}}
-                                    <td>@{{ moment(row.inDateTime).format('dd/MM/YYYY hh:mm:ss');  }}</td>
+                                    <td>@{{ vueGui.formatDateTime(row.inDateTime) }}</td>
                                     {{-- <td>@{{ row.outDate }}</td> --}}
-                                    <td>@{{ row.outDateTime }}</td>
+                                    <td>@{{ vueGui.formatDateTime(row.outDateTime) }}</td>
                                     {{-- <td v-if="vData.tReport == vData.REP_DELAY">@{{ row.delayMins }}</td>
                                     <td v-else>@{{ row.extraHours }}</td> --}}
                                     <td>@{{ row.overMinsTotal < 0 ? null : row.overMinsTotal }}</td>
@@ -176,6 +176,8 @@
     <script src="{{asset("assets/pages/scripts/report/DelayReport.js")}}" type="text/javascript"></script>
 
     <script>
+        $.fn.dataTable.moment('DD/MM/YYYY HH:mm:ss');
+
         var oTable = $('#delays_table').DataTable({
                 "language": {
                     "sProcessing":     "Procesando...",

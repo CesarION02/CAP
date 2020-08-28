@@ -34,7 +34,7 @@ Reporte Entradas/Salidas
                                 <tr v-for="registry in oData.lRegistries">
                                     <td>@{{ registry.num_employee }}</td>
                                     <td>@{{ registry.name }}</td>
-                                    <td>@{{ registry.date }}</td>
+                                    <td>@{{ vueGui.formatDate(registry.date) }}</td>
                                     <td>@{{ registry.time }}</td>
                                     <td>@{{ registry.type_id == 1 ? "ENTRADA" : "SALIDA" }}</td>
                                 </tr>
@@ -58,7 +58,8 @@ Reporte Entradas/Salidas
 	<script src="{{ asset('dt/pdfmake.min.js') }}"></script>
 	<script src="{{ asset('dt/vfs_fonts.js') }}"></script>
 	<script src="{{ asset('dt/buttons.html5.min.js') }}"></script>
-	<script src="{{ asset('dt/buttons.print.min.js') }}"></script>
+    <script src="{{ asset('dt/buttons.print.min.js') }}"></script>
+    <script src="{{ asset("assets/pages/scripts/SGui.js") }}" type="text/javascript"></script>
     
     <script>
         function GlobalData () {
@@ -66,22 +67,27 @@ Reporte Entradas/Salidas
             this.lRegistries = <?php echo json_encode($lRegistries) ?>;
         }
         
+        var oGui = new SGui();
         var oData = new GlobalData();
     </script>
-
     <script src="{{asset("assets/pages/scripts/report/regisView.js")}}" type="text/javascript"></script>
 
     <script src="{{asset("assets/pages/scripts/admin/datatable/index.js")}}" type="text/javascript"></script>
     <script src="{{ asset("dt/datatables.js") }}" type="text/javascript"></script>
     <script src="{{ asset('dt/dataTables.buttons.min.js') }}"></script>
-        <script src="{{ asset('dt/buttons.flash.min.js') }}"></script>
-        <script src="{{ asset('dt/jszip.min.js') }}"></script>
-        <script src="{{ asset('dt/pdfmake.min.js') }}"></script>
-        <script src="{{ asset('dt/vfs_fonts.js') }}"></script>
-        <script src="{{ asset('dt/buttons.html5.min.js') }}"></script>
-        <script src="{{ asset('dt/buttons.print.min.js') }}"></script>
+    <script src="{{ asset('dt/buttons.flash.min.js') }}"></script>
+    <script src="{{ asset('dt/jszip.min.js') }}"></script>
+    <script src="{{ asset('dt/pdfmake.min.js') }}"></script>
+    <script src="{{ asset('dt/vfs_fonts.js') }}"></script>
+    <script src="{{ asset('dt/buttons.html5.min.js') }}"></script>
+    <script src="{{ asset('dt/buttons.print.min.js') }}"></script>
+    <script src="{{ asset("assets/js/moment/moment.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/js/moment/datetime-moment.js") }}" type="text/javascript"></script>
+
     <script>
         $(document).ready( function () {
+            $.fn.dataTable.moment('DD/MM/YYYY');
+
             $('#myTable').DataTable({
                 "language": {
                     "sProcessing":     "Procesando...",
