@@ -67,7 +67,7 @@
                                     <td>@{{ vueGui.pad(row.numEmployee, 6) }}</td>
                                     <td>@{{ row.employee }}</td>
                                     {{-- <td>@{{ row.inDate }}</td> --}}
-                                    <td>@{{ row.inDateTime }}</td>
+                                    <td>@{{ moment(row.inDateTime).format('dd/MM/YYYY hh:mm:ss');  }}</td>
                                     {{-- <td>@{{ row.outDate }}</td> --}}
                                     <td>@{{ row.outDateTime }}</td>
                                     {{-- <td v-if="vData.tReport == vData.REP_DELAY">@{{ row.delayMins }}</td>
@@ -120,6 +120,8 @@
     <script src="{{ asset('dt/buttons.print.min.js') }}"></script>
     <script src="{{ asset("js/excel/xlsx.full.min.js") }}" type="text/javascript"></script>
     <script src="{{ asset("js/excel/FileSaver.min.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/js/moment/moment.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/js/moment/datetime-moment.js") }}" type="text/javascript"></script>
     
     <script>
         function GlobalData () {
