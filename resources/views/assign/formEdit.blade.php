@@ -1,5 +1,5 @@
 <div class="form-group">
-    <label for="start_date" class="col-lg-3 control-label">Fecha inicial:</label>
+    <label for="start_date" class="col-lg-3 control-label requerido">Fecha inicial:</label>
     <div class="col-lg-3">
         @if(isset($assigns))
             <input type="date" name="start_date" id="start_date" value="{{$assigns[0]->startDate}}" >
@@ -23,7 +23,7 @@
         $orden = "orden".$auxContador
     ?>
     <div class="form-group">
-        <label for="plantilla" class="col-lg-3 control-label">Plantilla:</label>
+        <label for="plantilla" class="col-lg-3 control-label requerido">Plantilla:</label>
         <div class="col-lg-3">    
             <input type="text" value="{{$assigns[$i]->templateName}}" disabled>
         </div>

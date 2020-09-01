@@ -78,8 +78,11 @@ Horario específico
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Horario en día específico</h3>
+                <h3 class="box-title">Horario fecha exacta</h3>
                 <div class="box-tools pull-right">
+                    <a href="{{route('fecha_especifica')}}" class="btn btn-block btn-info btn-sm">
+                        <i class="fa fa-fw fa-reply-all"></i> Regresar
+                    </a>
                 </div>
             </div>
             <div class="box-body">

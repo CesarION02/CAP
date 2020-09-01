@@ -1,5 +1,5 @@
 <div class="form-group">
-    <label for="start_date" class="col-lg-3 control-label">Fecha inicial:</label>
+    <label for="start_date" class="col-lg-3 control-label requerido">Fecha inicial:</label>
     <div class="col-lg-3">
         @if(isset($datas))
             <input type="date" name="start_date" id="start_date" value="{{$datas->start_date}}" >
@@ -18,7 +18,7 @@
 </div> 
 
 <div class="form-group">
-    <label for="empleado" class="col-lg-3 control-label">Empleados:</label>
+    <label for="empleado" class="col-lg-3 control-label requerido">Empleados:</label>
     <div class="col-lg-8">
         <select style="width: 95%" class="js-example-basic-multiple" name="empleado" id="empleado">
             @foreach($employees as $employee)
@@ -28,7 +28,7 @@
     </div>
 </div>
 <div class="form-group">
-    <label for="horario" class="col-lg-3 control-label">Plantilla:</label>
+    <label for="horario" class="col-lg-3 control-label requerido">Plantilla:</label>
     <div class="col-lg-4">
         <select name="horario1" id="horario1">
             @foreach($schedule_template as $schedule_template => $index)
@@ -44,9 +44,9 @@
             @endforeach
         </select>
     </div>
-    <label for="orden" class="col-lg-1 control-label">Orden:</label>
+    <label for="orden" class="col-lg-2 control-label requerido">Orden:</label>
     <div class="col-md-1">
-        <input type="number" name="orden1" id="orden1" style="width:70%" disabled>
+        <input type="number" name="orden1" id="orden1" value="1" style="width:70%" disabled>
     </div>
     <div class="col-lg-1">
         <button type="button" class="btn btn-primary" onclick="agregar()"><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span></button>

@@ -6,6 +6,7 @@ Asignar horario
 @section("scripts")
 <script src="{{asset("assets/pages/scripts/assign/bloquear.js")}}" type="text/javascript"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.0.12/dist/js/select2.min.js"></script>
+<script src="{{asset("assets/pages/scripts/fecha.js")}}" type="text/javascript"></script>
 <script>
         $(document).ready(function() {
             $('.js-example-basic-multiple').select2();

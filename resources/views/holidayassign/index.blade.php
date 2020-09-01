@@ -93,11 +93,11 @@ Asignar días festivos
                 <table class="table table-striped table-bordered table-hover" id="myTable">
                     <thead>
                         <tr>
-                            <th>Área</th>
-                            <th>Departamento CAP</th>
                             <th>Empleado</th>
+                            <th>Grupo empleados</th>
+                            <th>Departamento CAP</th>
+                            <th>Área</th>
                             <th>Día</th>
-                            <th>Grupo</th>
                             <th>Fecha</th>
                             <th class="width70"></th>
                         </tr>
@@ -105,10 +105,16 @@ Asignar días festivos
                     <tbody>
                             @foreach ($datas as $data)
                             <tr>
-                                <td>@if($data->area_id == null)
+                                <td>@if($data->employee_id == null)
                                         N/A
                                     @else
-                                        {{$data->area->name}}
+                                        {{$data->employee->name}}
+                                    @endif
+                                </td>
+                                <td>@if($data->group_assign_id == null)
+                                        N/A
+                                    @else
+                                        {{$data->group_assign_id}}
                                     @endif
                                 </td>
                                 <td>@if($data->department_id == null)
@@ -117,19 +123,13 @@ Asignar días festivos
                                         {{$data->department->name}}
                                     @endif
                                 </td>
-                                <td>@if($data->employee_id == null)
+                                <td>@if($data->area_id == null)
                                         N/A
                                     @else
-                                    {{$data->employee->name}}
-                                    @endif
-                                    </td>
-                                <td>{{$data->holiday->name}}</td>
-                                <td>@if($data->group_assign_id == null)
-                                        N/A
-                                    @else
-                                        {{$data->group_assign_id}}
+                                        {{$data->area->name}}
                                     @endif
                                 </td>
+                                <td>{{$data->holiday->name}}</td>
                                 <td>@if($data->date == null)
                                         N/A
                                     @else

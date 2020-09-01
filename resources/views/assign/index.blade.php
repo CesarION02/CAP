@@ -44,7 +44,7 @@ Asignar plantilla
                     "sSortDescending": ": Activar para ordenar la columna de manera descendente"
                 }
             },
-            "order": [[ 4, 'desc' ], [ 5, 'desc' ]],
+            "order": [[0,'asc'],[ 4, 'desc' ], [ 5, 'desc' ]],
             "colReorder": true,
             "dom": 'Bfrtip',
             "lengthMenu": [
@@ -83,7 +83,7 @@ Asignar plantilla
                         <i class="fa fa-fw fa-plus-circle"></i> Asignar por empleado
                     </a>
                     <a href="{{route('crear_asignacion','2')}}" class="btn btn-block btn btn-info btn-sm">
-                            <i class="fa fa-fw fa-plus-circle"></i> Asignar por departamento
+                            <i class="fa fa-fw fa-plus-circle"></i> Asignar por depto. CAP
                         </a>
                 </div>
             </div>
@@ -91,10 +91,10 @@ Asignar plantilla
                 <table class="table table-striped table-bordered table-hover" id="myTable">
                     <thead>
                         <tr>
-                            <th>Departamento CAP</th>
                             <th>Empleado</th>
+                            <th>Grupo empleados</th>
+                            <th>Departamento CAP</th>
                             <th>Horario</th>
-                            <th>Grupo</th>
                             <th>Fecha inicial</th>
                             <th>Fecha final</th>
                             <th class="width70"></th>
@@ -103,25 +103,25 @@ Asignar plantilla
                     <tbody>
                             @foreach ($datas as $data)
                             <tr>
-                                <td>@if($data->department_id == null)
-                                        N/A
-                                    @else
-                                        {{$data->department->name}}
-                                    @endif
-                                </td>
                                 <td>@if($data->employee_id == null)
                                         N/A
                                     @else
                                     {{$data->employee->name}}
                                     @endif
-                                    </td>
-                                <td>{{$data->schedule->name}}</td>
+                                </td>
                                 <td>@if($data->group_assign_id == null)
                                         N/A
                                     @else
                                         {{$data->group_assign_id}}
                                     @endif
                                 </td>
+                                <td>@if($data->department_id == null)
+                                        N/A
+                                    @else
+                                        {{$data->department->name}}
+                                    @endif
+                                </td>
+                                <td>{{$data->schedule->name}}</td>
                                 <td>@if($data->start_date == null)
                                         N/A
                                     @else
