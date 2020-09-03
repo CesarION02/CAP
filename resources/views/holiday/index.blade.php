@@ -3,18 +3,23 @@
 Dias festivos
 @endsection
 
+@section('styles1')
+    <link rel="stylesheet" href="{{asset("daterangepicker/daterangepicker.css")}}">
+@endsection
+
 @section("scripts")
-<script src="{{asset("assets/pages/scripts/admin/datatable/index.js")}}" type="text/javascript"></script>
-<script src="{{ asset("dt/datatables.js") }}" type="text/javascript"></script>
-<script src="{{ asset('dt/dataTables.buttons.min.js') }}"></script>
-<script src="{{ asset("assets/js/moment/moment.js") }}" type="text/javascript"></script>
-<script src="{{ asset("assets/js/moment/datetime-moment.js") }}" type="text/javascript"></script>
+    <script src="{{asset("assets/pages/scripts/admin/datatable/index.js")}}" type="text/javascript"></script>
+    <script src="{{ asset("dt/datatables.js") }}" type="text/javascript"></script>
+    <script src="{{ asset('dt/dataTables.buttons.min.js') }}"></script>
+    <script src="{{ asset("assets/js/moment/moment.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/js/moment/datetime-moment.js") }}" type="text/javascript"></script>
 	<script src="{{ asset('dt/buttons.flash.min.js') }}"></script>
 	<script src="{{ asset('dt/jszip.min.js') }}"></script>
 	<script src="{{ asset('dt/pdfmake.min.js') }}"></script>
 	<script src="{{ asset('dt/vfs_fonts.js') }}"></script>
 	<script src="{{ asset('dt/buttons.html5.min.js') }}"></script>
-	<script src="{{ asset('dt/buttons.print.min.js') }}"></script>
+    <script src="{{ asset('dt/buttons.print.min.js') }}"></script>
+    <script src="{{ asset("daterangepicker/daterangepicker.js") }}" type="text/javascript"></script>
 <script>
     $(document).ready( function () {
         $.fn.dataTable.moment('DD/MM/YYYY');
@@ -43,7 +48,7 @@ Dias festivos
                     "sSortDescending": ": Activar para ordenar la columna de manera descendente"
                 }
             },
-            "order": [[ 2, 'desc' ], [ 1, 'desc' ]],
+            "order": [[ 0, 'desc' ], [ 1, 'desc' ], [2, 'asc']],
             "colReorder": true,
             "dom": 'Bfrtip',
             "lengthMenu": [
@@ -69,6 +74,36 @@ Dias festivos
 
 
 </script>
+<script>
+    $(function() {
+        var start = moment(<?php echo json_encode($start_date) ?>);
+        var end = moment(<?php echo json_encode($end_date) ?>);
+
+        function cb(start, end) {
+            $('#reportrange span').html(start.format('D MMMM YYYY') + ' - ' + end.format('D MMMM YYYY'));
+            document.getElementById("start-date").value = start.format('YYYY-MM-DD');
+            document.getElementById("end-date").value = end.format('YYYY-MM-DD');
+        }
+
+        $('#reportrange').daterangepicker({
+            startDate: start,
+            endDate: end,
+            ranges: {
+                'Este mes': [moment().startOf('month'), moment().endOf('month')],
+                'Mes pasado': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+                'Este año': [moment().startOf('year'), moment().endOf('year')],
+                'Año pasado': [moment().subtract(1, 'year').startOf('year'), moment().subtract(1, 'year').endOf('year')]
+            }
+        }, cb);
+
+        cb(start, end);
+    });
+
+    $('#reportrange').on('apply.daterangepicker', function(ev, picker) {
+        document.getElementById("start-date").value = picker.startDate.format('YYYY-MM-DD');
+        document.getElementById("end-date").value = picker.endDate.format('YYYY-MM-DD');
+    });
+</script>
 @endsection
 
 @section('content')
@@ -79,24 +114,42 @@ Dias festivos
             <div class="box-header with-border">
                 <h3 class="box-title">Días festivos</h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:diasfestivos"])
-                <div class="box-tools pull-right">
+                <div class="row">
+                    <div class="col-md-6 col-md-offset-6">
+                        <form action="{{ route('festivo') }}">
+                            <input type="hidden" id="start-date" name="start_date">
+                            <input type="hidden" id="end-date" name="end_date">
+                            <div class="input-group">
+                                <div id="reportrange" 
+                                    style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
+                                    <i class="fa fa-calendar"></i>&nbsp;
+                                    <span></span> <i class="fa fa-caret-down"></i>
+                                </div>
+                                <span class="input-group-btn">
+                                    <button class="btn btn-default" type="submit">
+                                        <i class="glyphicon glyphicon-search"></i>
+                                    </button>
+                                </span>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
             <div class="box-body">
                 <table class="table table-striped table-bordered table-hover" id="myTable">
                     <thead>
                         <tr>
-                            <th>Día festivo</th>
-                            <th>Día</th>
                             <th>Año</th>
+                            <th>Fecha</th>
+                            <th>Día festivo</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($datas as $data)
                         <tr>
-                            <td>{{$data->name}}</td>
-                            <td>{{\App\SUtils\SDateTimeUtils::orderDate($data->fecha)}}</td>
                             <td>{{$data->year}}</td>
+                            <td>{{\App\SUtils\SDateTimeUtils::orderDate($data->fecha)}}</td>
+                            <td>{{$data->name}}</td>
                            {{-- <td>
                                 <a href="{{route('editar_festivo', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
                                     <i class="fa fa-fw fa-pencil"></i>

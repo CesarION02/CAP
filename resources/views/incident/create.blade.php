@@ -4,7 +4,7 @@
 @endsection
 
 @section("scripts")
-
+<script src="{{asset("assets/pages/scripts/fecha.js")}}" type="text/javascript"></script>
 
 @endsection
 
