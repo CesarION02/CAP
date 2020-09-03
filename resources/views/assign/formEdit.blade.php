@@ -23,9 +23,9 @@
         $orden = "orden".$auxContador
     ?>
     <div class="form-group">
-        <label for="plantilla" class="col-lg-3 control-label requerido">Plantilla:</label>
-        <div class="col-lg-3">    
-            <input type="text" value="{{$assigns[$i]->templateName}}" disabled>
+        <label for="plantilla" class="col-lg-3 control-label requerido">Horario:</label>
+        <div class="col-lg-5">    
+            <input type="text" value="{{$assigns[$i]->templateName}}" size="35" disabled>
         </div>
         <label for="orden" class="col-lg-1 control-label">Orden:</label>
         <div class="col-md-1">

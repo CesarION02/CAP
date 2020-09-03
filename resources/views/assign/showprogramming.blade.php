@@ -44,7 +44,7 @@ Plantilla horarios
                     "sSortDescending": ": Activar para ordenar la columna de manera descendente"
                 }
             },
-            "order": [[ 0, 'asc' ], [ 2, 'desc' ], [ 3, 'desc' ]],
+            "order": [[ 0, 'asc' ], [ 1, 'desc' ], [ 2, 'desc' ]],
             "colReorder": true,
             "dom": 'Bfrtip',
             "lengthMenu": [
@@ -88,9 +88,9 @@ Plantilla horarios
                     <thead>
                         <tr>
                             <th>Empleado</th>
-                            <th>Horario</th>
                             <th>Fecha inicial</th>
                             <th>Fecha final</th>
+                            <th>Horario</th>
                             <th class="width70"></th>
                         </tr>
                     </thead>
@@ -98,7 +98,6 @@ Plantilla horarios
                             @foreach ($assigns as $assign)
                             <tr>
                                 <td>{{$assign->name}}</td>
-                                <td>{{$assign->template}}</td>
                                 <td>{{\App\SUtils\SDateTimeUtils::orderDate($assign->startDate)}}</td>
                                 <td>@if($assign->endDate == null)
                                         N/A
@@ -106,6 +105,7 @@ Plantilla horarios
                                         {{\App\SUtils\SDateTimeUtils::orderDate($assign->endDate)}}
                                     @endif
                                 </td>
+                                <td>{{$assign->template}}</td>
                                 <td>
                                     <a href="{{route('editar_programacion', ['id' => $assign->idAssign])}}" class="btn-accion-tabla tooltipsC" title="Ver/Modificar este registro">
                                         <i class="fa fa-fw fa-pencil"></i>

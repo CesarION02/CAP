@@ -28,7 +28,7 @@
     </div>
 </div>
 <div class="form-group">
-    <label for="horario" class="col-lg-3 control-label requerido">Plantilla:</label>
+    <label for="horario" class="col-lg-3 control-label requerido">Horario:</label>
     <div class="col-lg-4">
         <select name="horario1" id="horario1">
             @foreach($schedule_template as $schedule_template => $index)

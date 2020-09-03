@@ -43,7 +43,7 @@ Dias festivos
                     "sSortDescending": ": Activar para ordenar la columna de manera descendente"
                 }
             },
-            "order": [[ 2, 'desc' ], [ 1, 'desc' ]],
+            "order": [[ 0, 'desc' ], [ 1, 'desc' ], [2, 'asc']],
             "colReorder": true,
             "dom": 'Bfrtip',
             "lengthMenu": [
@@ -86,17 +86,17 @@ Dias festivos
                 <table class="table table-striped table-bordered table-hover" id="myTable">
                     <thead>
                         <tr>
-                            <th>Día festivo</th>
-                            <th>Día</th>
                             <th>Año</th>
+                            <th>Fecha</th>
+                            <th>Día festivo</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($datas as $data)
                         <tr>
-                            <td>{{$data->name}}</td>
-                            <td>{{\App\SUtils\SDateTimeUtils::orderDate($data->fecha)}}</td>
                             <td>{{$data->year}}</td>
+                            <td>{{\App\SUtils\SDateTimeUtils::orderDate($data->fecha)}}</td>
+                            <td>{{$data->name}}</td>
                            {{-- <td>
                                 <a href="{{route('editar_festivo', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
                                     <i class="fa fa-fw fa-pencil"></i>

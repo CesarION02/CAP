@@ -93,18 +93,27 @@ Asignar días festivos
                 <table class="table table-striped table-bordered table-hover" id="myTable">
                     <thead>
                         <tr>
+                            <th>Fecha</th>
+                            <th>Día festivo</th>
                             <th>Empleado</th>
                             <th>Grupo empleados</th>
                             <th>Departamento CAP</th>
                             <th>Área</th>
-                            <th>Día</th>
-                            <th>Fecha</th>
+                            
+                            
                             <th class="width70"></th>
                         </tr>
                     </thead>
                     <tbody>
                             @foreach ($datas as $data)
                             <tr>
+                                <td>@if($data->date == null)
+                                    N/A
+                                @else
+                                    {{\App\SUtils\SDateTimeUtils::orderDate($data->date)}}
+                                @endif
+                                </td>
+                                <td>{{$data->holiday->name}}</td>
                                 <td>@if($data->employee_id == null)
                                         N/A
                                     @else
@@ -129,13 +138,8 @@ Asignar días festivos
                                         {{$data->area->name}}
                                     @endif
                                 </td>
-                                <td>{{$data->holiday->name}}</td>
-                                <td>@if($data->date == null)
-                                        N/A
-                                    @else
-                                        {{\App\SUtils\SDateTimeUtils::orderDate($data->date)}}
-                                    @endif
-                                </td>
+                                
+                                
                                 <td>
                                     <a href="{{route('editar_asignacion_festivo', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
                                         <i class="fa fa-fw fa-pencil"></i>

@@ -8,7 +8,7 @@ $(document).on('change', '#end_date', function() {
             document.getElementById('end_date').value = ini;
         }
     } else {
-        swal("Error", "La fecha inicial no puede ser vacia", "warning")
+        swal("Error", "La fecha inicial no puede ser vacía", "warning")
         document.getElementById('end_date').value = ini;
     }
 });
