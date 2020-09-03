@@ -44,7 +44,7 @@ Asignar plantilla
                     "sSortDescending": ": Activar para ordenar la columna de manera descendente"
                 }
             },
-            "order": [[0,'asc'],[ 4, 'desc' ], [ 5, 'desc' ]],
+            "order": [[0,'asc'],[ 3, 'desc' ], [ 4, 'desc' ]],
             "colReorder": true,
             "dom": 'Bfrtip',
             "lengthMenu": [
