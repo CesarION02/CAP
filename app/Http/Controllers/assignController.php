@@ -29,13 +29,25 @@ class assignController extends Controller
     public function index()
     {
         $iTemplateId = env('TMPLTE_SATURDAYS', 0);
-        $datas = assign_schedule::where('is_delete','0')->where('schedule_template_id','!=',$iTemplateId)->orderBy('start_date','DESC')->get();
-        $datas->each(function($datas){
-            $datas->department;
-            $datas->employee;
-            $datas->schedule;
-        });
-        return view('assign.index', compact('datas'));    
+        
+        $datas = DB::select("SELECT a.fecha_inicio, a.fecha_fin, b.name AS nombreEmpleado, s.name AS nombreHorario, a.group_assign_id, a.id
+        FROM (
+            SELECT MAX(start_date) as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE schedule_template_id != ".$iTemplateId." GROUP By p.employee_id
+        ) a
+        INNER JOIN employees b ON a.employee_id = b.id
+        INNER JOIN schedule_template s ON a.schedule_template_id = s.id
+        GROUP By a.employee_id");
+
+        $datasDept = DB::select("SELECT a.fecha_inicio, a.fecha_fin, b.name AS nombreEmpleado, s.name AS nombreHorario, a.group_assign_id, a.id
+        FROM (
+            SELECT MAX(start_date) as fecha_inicio, end_date as fecha_fin ,p.department_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE schedule_template_id != ".$iTemplateId." GROUP By p.department_id
+        ) a
+        INNER JOIN departments b ON a.department_id = b.id
+        INNER JOIN schedule_template s ON a.schedule_template_id = s.id
+        GROUP By a.department_id");
+
+
+        return view('assign.index', compact('datas'))->with('datasD',$datasDept);    
     }
 
     /**
@@ -711,10 +723,17 @@ class assignController extends Controller
                     ->select('groupdept_id AS id')
                     ->get();
             $Adgu = [];
+            $adguString="";
             for($i=0;count($dgu)>$i;$i++){
                 $Adgu[$i]=$dgu[$i]->id;
+                if($i == 0){
+                    $adguString = $adguString.$dgu[$i]->id;
+                }else{
+                    $adguString = $adguString.", ".$dgu[$i]->id;
+                }
+                
             }
-            $assigns = DB::table('schedule_assign')
+            /*$assigns = DB::table('schedule_assign')
                 ->join('employees','employees.id','=','schedule_assign.employee_id')
                 ->join('schedule_template','schedule_template.id','=','schedule_assign.schedule_template_id')
                 ->join('jobs','jobs.id','=','employees.job_id')
@@ -725,14 +744,37 @@ class assignController extends Controller
                 ->select('schedule_template.name AS template','employees.id AS id','employees.name AS name','schedule_assign.start_date AS startDate','schedule_assign.end_date AS endDate','schedule_assign.id AS idAssign')
                 ->orderBy('employees.id')
                 ->orderBy('schedule_assign.group_schedules_id')
-                ->groupBy('schedule_assign.group_schedules_id','employees.id')
-                ->get();   
+                ->groupBy('employees.id')
+                ->get(); 
+              */  
+                $query = "SELECT a.fecha_inicio, a.fecha_fin, b.name AS nombreEmpleado, s.name AS nombreHorario, a.group_assign_id, a.id
+                FROM (
+                    SELECT MAX(start_date) as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE schedule_template_id != ".$iTemplateId." GROUP By p.employee_id
+                ) a
+                INNER JOIN employees b ON a.employee_id = b.id
+                INNER JOIN schedule_template s ON a.schedule_template_id = s.id
+                INNER JOIN jobs j ON b.job_id = j.id
+                INNER JOIN departments d ON j.department_id = d.id
+                INNER JOIN department_group g ON d.dept_group_id = g.id
+                WHERE g.id IN (".$adguString. ")
+                 GROUP By a.employee_id";
+                $assigns = DB::select("SELECT a.fecha_inicio, a.fecha_fin, b.name AS nombreEmpleado, s.name AS nombreHorario, a.group_assign_id, a.id
+                FROM (
+                    SELECT MAX(start_date) as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE schedule_template_id != ".$iTemplateId." GROUP By p.employee_id
+                ) a
+                INNER JOIN employees b ON a.employee_id = b.id
+                INNER JOIN schedule_template s ON a.schedule_template_id = s.id
+                INNER JOIN jobs j ON b.job_id = j.id
+                INNER JOIN departments d ON j.department_id = d.id
+                INNER JOIN department_group g ON d.dept_group_id = g.id
+                WHERE g.id IN (".$adguString. ")
+                 GROUP By a.employee_id");
         }else{
             $numero = session()->get('name');
             $usuario = DB::table('users')
                     ->where('name',$numero)
                     ->get();
-            $assigns = DB::table('schedule_assign')
+            /*$assigns = DB::table('schedule_assign')
                 ->join('employees','employees.id','=','schedule_assign.employee_id')
                 ->join('schedule_template','schedule_template.id','=','schedule_assign.schedule_template_id')
                 ->join('jobs','jobs.id','=','employees.job_id')
@@ -742,8 +784,19 @@ class assignController extends Controller
                 ->select('schedule_template.name AS template','employees.id AS id','employees.name AS name','schedule_assign.start_date AS startDate','schedule_assign.end_date AS endDate','schedule_assign.id AS idAssign')
                 ->orderBy('employees.name')
                 ->orderBy('schedule_assign.group_schedules_id')
-                ->groupBy('schedule_assign.group_schedules_id','employees.id')
-                ->get();     
+                ->groupBy('employees.id')
+                ->get();
+            */ 
+                $assigns = DB::select("SELECT a.fecha_inicio, a.fecha_fin, b.name AS nombreEmpleado, s.name AS nombreHorario, a.group_assign_id, a.id
+                FROM (
+                    SELECT MAX(start_date) as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE schedule_template_id != ".$iTemplateId." GROUP By p.employee_id
+                ) a
+                INNER JOIN employees b ON a.employee_id = b.id
+                INNER JOIN schedule_template s ON a.schedule_template_id = s.id
+                INNER JOIN jobs j ON b.job_id = j.id
+                INNER JOIN departments d ON j.department_id = d.id
+                INNER JOIN department_group g ON d.dept_group_id = g.id
+                GROUP By a.employee_id");    
         }
         return view('assign.showprogramming')->with('assigns',$assigns)->with('dgroup',$usuario[0]->id);
     }

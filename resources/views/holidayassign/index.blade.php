@@ -43,7 +43,7 @@ Asignar días festivos
                     "sSortDescending": ": Activar para ordenar la columna de manera descendente"
                 }
             },
-            "order": [[ 5, 'desc' ]],
+            "order": [[ 0, 'desc' ]],
             "colReorder": true,
             "dom": 'Bfrtip',
             "lengthMenu": [

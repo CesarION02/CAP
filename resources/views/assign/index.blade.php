@@ -94,20 +94,17 @@ Asignar plantilla
                             <th>Empleado</th>
                             <th>Grupo empleados</th>
                             <th>Departamento CAP</th>
-                            <th>Horario</th>
                             <th>Fecha inicial</th>
                             <th>Fecha final</th>
+                            <th>Horario</th>
                             <th class="width70"></th>
                         </tr>
                     </thead>
                     <tbody>
                             @foreach ($datas as $data)
                             <tr>
-                                <td>@if($data->employee_id == null)
-                                        N/A
-                                    @else
-                                    {{$data->employee->name}}
-                                    @endif
+                                <td>
+                                    {{$data->nombreEmpleado}}
                                 </td>
                                 <td>@if($data->group_assign_id == null)
                                         N/A
@@ -115,23 +112,61 @@ Asignar plantilla
                                         {{$data->group_assign_id}}
                                     @endif
                                 </td>
-                                <td>@if($data->department_id == null)
+                                <td>
+                                    N/A
+                                </td>
+                                
+                                <td>@if($data->fecha_inicio == null)
                                         N/A
                                     @else
-                                        {{$data->department->name}}
+                                        {{\App\SUtils\SDateTimeUtils::orderDate($data->fecha_inicio)}}
                                     @endif
                                 </td>
-                                <td>{{$data->schedule->name}}</td>
-                                <td>@if($data->start_date == null)
+                                <td>@if($data->fecha_fin == null)
                                         N/A
                                     @else
-                                        {{\App\SUtils\SDateTimeUtils::orderDate($data->start_date)}}
+                                        {{\App\SUtils\SDateTimeUtils::orderDate($data->fecha_fin)}}
                                     @endif
                                 </td>
-                                <td>@if($data->end_date == null)
+                                <td>{{$data->nombreHorario}}</td>
+                                <td>
+                                    <a href="{{route('editar_asignacion', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
+                                        <i class="fa fa-fw fa-pencil"></i>
+                                    </a>
+                                    <form action="{{route('eliminar_asignacion', ['id' => $data->id])}}" class="d-inline form-eliminar" method="POST">
+                                        @csrf @method("delete")
+                                        <button type="submit" class="btn-accion-tabla eliminar tooltipsC" title="Eliminar este registro">
+                                            <i class="fa fa-fw fa-trash text-danger"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            @endforeach
+                            @foreach ($datasD as $data)
+                            <tr>
+                                <td>
+                                    N/A
+                                </td>
+                                <td>@if($data->group_assign_id == null)
                                         N/A
                                     @else
-                                        {{\App\SUtils\SDateTimeUtils::orderDate($data->end_date)}}
+                                        {{$data->group_assign_id}}
+                                    @endif
+                                </td>
+                                <td>
+                                    {{$data->nombreEmpleado}}
+                                </td>
+                                <td>{{$data->nombreHorario}}</td>
+                                <td>@if($data->fecha_inicio == null)
+                                        N/A
+                                    @else
+                                        {{\App\SUtils\SDateTimeUtils::orderDate($data->fecha_inicio)}}
+                                    @endif
+                                </td>
+                                <td>@if($data->fecha_fin == null)
+                                        N/A
+                                    @else
+                                        {{\App\SUtils\SDateTimeUtils::orderDate($data->fecha_fin)}}
                                     @endif
                                 </td>
                                 <td>

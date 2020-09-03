@@ -97,20 +97,20 @@ Plantilla horarios
                     <tbody>
                             @foreach ($assigns as $assign)
                             <tr>
-                                <td>{{$assign->name}}</td>
-                                <td>{{\App\SUtils\SDateTimeUtils::orderDate($assign->startDate)}}</td>
-                                <td>@if($assign->endDate == null)
+                                <td>{{$assign->nombreEmpleado}}</td>
+                                <td>{{\App\SUtils\SDateTimeUtils::orderDate($assign->fecha_inicio)}}</td>
+                                <td>@if($assign->fecha_fin == null)
                                         N/A
                                     @else
-                                        {{\App\SUtils\SDateTimeUtils::orderDate($assign->endDate)}}
+                                        {{\App\SUtils\SDateTimeUtils::orderDate($assign->fecha_fin)}}
                                     @endif
                                 </td>
-                                <td>{{$assign->template}}</td>
+                                <td>{{$assign->nombreHorario}}</td>
                                 <td>
-                                    <a href="{{route('editar_programacion', ['id' => $assign->idAssign])}}" class="btn-accion-tabla tooltipsC" title="Ver/Modificar este registro">
+                                    <a href="{{route('editar_programacion', ['id' => $assign->id])}}" class="btn-accion-tabla tooltipsC" title="Ver/Modificar este registro">
                                         <i class="fa fa-fw fa-pencil"></i>
                                     </a>
-                                    <form action="{{route('eliminar', ['id' => $assign->idAssign])}}" class="d-inline form-eliminar" method="POST">
+                                    <form action="{{route('eliminar', ['id' => $assign->id])}}" class="d-inline form-eliminar" method="POST">
                                         @csrf @method("delete")
                                         <button type="submit" class="btn-accion-tabla eliminar tooltipsC" title="Eliminar este registro">
                                             <i class="fa fa-fw fa-trash text-danger"></i>
