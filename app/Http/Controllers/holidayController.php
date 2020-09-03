@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\holiday;
 use App\Models\holidayAux;
+use Carbon\Carbon;
 
 class holidayController extends Controller
 {
@@ -13,10 +14,29 @@ class holidayController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $datas = holiday::where('is_delete','0')->orderBy('year')->orderBy('fecha')->get();
-        return view('holiday.index', compact('datas'));
+        $start_date = null;
+        $end_date = null;
+        if ($request->start_date == null) {
+            $now = Carbon::now();
+            $start_date = $now->startOfMonth()->toDateString();
+            $end_date = $now->endOfMonth()->toDateString();
+        }
+        else {
+            $start_date = $request->start_date;
+            $end_date = $request->end_date;
+        }
+
+        $datas = holiday::where('is_delete','0')
+                            ->whereBetween('fecha', [$start_date, $end_date])
+                            ->orderBy('year')
+                            ->orderBy('fecha')
+                            ->get();
+
+        return view('holiday.index', compact('datas'))
+                        ->with('start_date', $start_date)
+                        ->with('end_date', $end_date);
     }
 
     /**
