@@ -6,7 +6,7 @@
         <div class="modal-content">
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal">&times;</button>
-            <h4 class="modal-title">Guardia</h4>
+            <h4 class="modal-title">Guardia sabatina</h4>
         </div>
         <div class="modal-body">
             <div class="row">
@@ -26,7 +26,7 @@
             <br>
             <div v-show="! bHoliday" class="row">
                 <div class="col-md-2 col-md-offset-1">
-                    <label for="">Empleado:</label>
+                    <label for="">Empleado:*</label>
                 </div>
                 <div class="col-md-8">
                     <div>
@@ -45,7 +45,7 @@
                 <div class="col-md-2 col-md-offset-1">
                     <div class="row">
                         <div class="col-md-12">
-                            <label for="">Festivo:</label>
+                            <label for="">Festivo:*</label>
                         </div>
                     </div>
                     <br>

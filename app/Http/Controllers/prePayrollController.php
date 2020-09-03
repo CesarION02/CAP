@@ -289,12 +289,15 @@ class prePayrollController extends Controller
         
         foreach ($lSiieCuts as $jCut) {
             try {
-                $id = $lCapCuts[$jCut->id_cal];
-                $this->updCutPrepayQ($jCut, $id);
+                if (isset($lCapCuts[$jCut->id_cal])) {
+                    $id = $lCapCuts[$jCut->id_cal];
+                    $this->updCutPrepayQ($jCut, $id);
+                }
+                else {
+                    $this->insertCutPrepayQ($jCut);
+                }
             }
-            catch (\Throwable $th) {
-                $this->insertCutPrepayQ($jCut);
-            }
+            catch (\Throwable $th) { }
         }
     }
     

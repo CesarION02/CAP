@@ -198,12 +198,15 @@ class incidentController extends Controller
                             
         foreach ($lAbsences as $jAbs) {
             try {
-                $id = $lCapAbss[$jAbs->id_emp.'_'.$jAbs->id_abs];
-                $oIncident = $this->updIncident($jAbs, $id);
+                if (isset($lCapAbss[$jAbs->id_emp.'_'.$jAbs->id_abs])) {
+                    $id = $lCapAbss[$jAbs->id_emp.'_'.$jAbs->id_abs];
+                    $oIncident = $this->updIncident($jAbs, $id);
+                }
+                else {
+                    $oIncident = $this->insertIncident($jAbs);
+                }
             }
-            catch (\Throwable $th) {
-                $oIncident = $this->insertIncident($jAbs);
-            }
+            catch (\Throwable $th) { }
 
             $this->saveDays($oIncident);
         }

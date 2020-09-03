@@ -168,12 +168,15 @@ class holidayController extends Controller
 
         foreach ($lSiieHolidays as $jHoliday) {
             try {
-                $id = $lCapHolidays[$jHoliday->year.'_'.$jHoliday->id_holiday];
-                $this->updHoliday($jHoliday, $id);
+                if (isset($lCapHolidays[$jHoliday->year.'_'.$jHoliday->id_holiday])) {
+                    $id = $lCapHolidays[$jHoliday->year.'_'.$jHoliday->id_holiday];
+                    $this->updHoliday($jHoliday, $id);
+                }
+                else {
+                    $this->insertHoliday($jHoliday);
+                }
             }
-            catch (\Throwable $th) {
-                $this->insertHoliday($jHoliday);
-            }
+            catch (\Throwable $th) { }
         }
     }
     

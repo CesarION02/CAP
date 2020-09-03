@@ -40,11 +40,15 @@ class DeptsRhController extends Controller
 
         foreach ($lSiieRhDepts as $jRhDept) {
             try {
-                $id = $lCapRhDepts[$jRhDept->id_department];
-                $this->updRhDept($jRhDept, $id);
+                if (isset($lCapRhDepts[$jRhDept->id_department])) {
+                    $id = $lCapRhDepts[$jRhDept->id_department];
+                    $this->updRhDept($jRhDept, $id);
+                }
+                else {
+                    $this->insertRhDept($jRhDept);
+                }
             }
             catch (\Throwable $th) {
-                $this->insertRhDept($jRhDept);
             }
         }
     }

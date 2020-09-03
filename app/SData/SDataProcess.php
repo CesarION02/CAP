@@ -42,7 +42,8 @@ class SDataProcess {
         $aEmployeeBen = $lEmployees->pluck('ben_pol_id', 'id');
         $lDataWithAbs = SDataProcess::addAbsences($lData53_2, $aEmployeeBen);
 
-        $aEmployeeOverTime = $lEmployees->pluck('is_overtime', 'id');
+        // $aEmployeeOverTime = $lEmployees->pluck('is_overtime', 'id');
+        $aEmployeeOverTime = $lEmployees->pluck('policy_extratime_id', 'id');
         $lData = SDataProcess::addDelaysAndOverTime($lDataWithAbs, $aEmployeeOverTime, $sEndDate);
 
         $lDataWSun = SDataProcess::addSundayPay($lData);
@@ -535,7 +536,7 @@ class SDataProcess {
 
                             $newRow->isSpecialSchedule = $result->auxIsSpecialSchedule;
                             if ($newRow->isSpecialSchedule) {
-                                $newRow->others = $newRow->others."Horario especial (".$result->auxWorkshift->name."). ";
+                                $newRow->others = $newRow->others."Turno especial (".$result->auxWorkshift->name."). ";
                             }
                         }
 
@@ -600,7 +601,7 @@ class SDataProcess {
         else {
             $oRow->isSpecialSchedule = $result->auxIsSpecialSchedule;
             if ($oRow->isSpecialSchedule) {
-                $oRow->others = $oRow->others."Horario especial (".$result->auxWorkshift->name."). ";
+                $oRow->others = $oRow->others."Turno especial (".$result->auxWorkshift->name."). ";
             }
 
             $oRow->scheduleFrom = SDataProcess::getOrigin($result);
@@ -884,7 +885,8 @@ class SDataProcess {
 
             $withDiscount = false;
             if (SDataProcess::journeyCompleted($oRow->inDateTime, $oRow->inDateTimeSch, $oRow->outDateTime, $oRow->outDateTimeSch)) {
-                if ($aEmployeeOverTime[$oRow->idEmployee]) {
+                $extendJourney = SDelayReportUtils::compareDates($oRow->inDateTimeSch, $oRow->outDateTimeSch);
+                if ($aEmployeeOverTime[$oRow->idEmployee] == 2 || ($aEmployeeOverTime[$oRow->idEmployee] == 3 && $extendJourney->diffMinutes > 480)) {
                     // minutos extra trabajados y filtrados por bandera de "genera horas extra"
                     // Ajuste de prenómina
                     $date = $oRow->outDate == null ? $oRow->outDateTime : $oRow->outDate;
@@ -1095,10 +1097,10 @@ class SDataProcess {
         $comparison = SDelayReportUtils::compareDates($sDateTime, $sDateTimeSch);
 
         if ($isOut) {
-            return $comparison->diffMinutes > 0 && $comparison->diffMinutes > $config->maxGapMinutes;
+            return $comparison->diffMinutes > 0 && $comparison->diffMinutes > $config->maxGapCheckSchedule;
         }
         
-        return abs($comparison->diffMinutes) > $config->maxGapMinutes;
+        return abs($comparison->diffMinutes) > $config->maxGapCheckSchedule;
     }
 
     /**
