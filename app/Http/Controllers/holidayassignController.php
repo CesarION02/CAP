@@ -18,6 +18,7 @@ use App\Models\holidayassign;
 use App\SUtils\SEventsUtils;
 use DateTime;
 use DB;
+use Carbon\Carbon;
 use DatePeriod;
 use DateInterval;
 
@@ -28,16 +29,35 @@ class holidayassignController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $datas = holidayassign::where('is_delete','0')->orderBy('id')->get();
+        $start_date = null;
+        $end_date = null;
+        if ($request->start_date == null) {
+            $now = Carbon::now();
+            $start_date = $now->startOfMonth()->toDateString();
+            $end_date = $now->endOfMonth()->toDateString();
+        }
+        else {
+            $start_date = $request->start_date;
+            $end_date = $request->end_date;
+        }
+
+        $datas = holidayassign::where('is_delete','0')
+                                    ->whereBetween('date', [$start_date, $end_date])
+                                    ->orderBy('id')
+                                    ->get();
+
         $datas->each(function($datas){
             $datas->department;
             $datas->employee;
             $datas->area;
             $datas->holiday;
         });
-        return view('holidayassign.index', compact('datas')); 
+
+        return view('holidayassign.index', compact('datas'))
+                        ->with('start_date', $start_date)
+                        ->with('end_date', $end_date); 
     }
 
     /**
