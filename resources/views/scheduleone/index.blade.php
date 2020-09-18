@@ -66,12 +66,12 @@
                     <tbody>
                         <tr v-for="schedule in vueServerData.lSchedules">
                             <td>@{{ vueGui.formatDate(schedule.start_date) }}</td>
-                            <td>@{{ vueGui.pad(schedule.num_employee, 6) }}</td>
                             <td>@{{ schedule.name }}
                                     <i v-show="schedule.text_description != undefined" 
                                     class="glyphicon glyphicon-info-sign" 
                                     :title="schedule.text_description"></i>
                             </td>
+                            <td>@{{ vueGui.pad(schedule.num_employee, 6) }}</td>
                             <td>
                                 <button v-on:click="onShowEditModal(schedule)" 
                                         class="btn-accion-tabla tooltipsC" title="Modificar este registro">

@@ -13,11 +13,15 @@ class fdyController extends Controller
         
         foreach ($lSiieFdy as $jFdy) {
             try {
-                $id = $lCapFDYs[$jFdy->year];
-                $this->updFDY($jFdy, $id);
+                if (isset( $lCapFDYs[$jFdy->year])) {
+                    $id = $lCapFDYs[$jFdy->year];
+                    $this->updFDY($jFdy, $id);
+                }
+                else {
+                    $this->insertFdy($jFdy);
+                }
             }
             catch (\Throwable $th) {
-                $this->insertFdy($jFdy);
             }
         }
     }
@@ -45,8 +49,8 @@ class fdyController extends Controller
         $fdy->dt_date = $jFdy->dt_date;
         $fdy->external_id = $jFdy->year;
         $fdy->is_delete = $jFdy->is_deleted;
-        $RhDept->created_by = session()->get('user_id');
-        $RhDept->updated_by = session()->get('user_id');
+        $fdy->created_by = session()->get('user_id');
+        $fdy->updated_by = session()->get('user_id');
 
         $fdy->save();
     }

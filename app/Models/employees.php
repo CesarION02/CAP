@@ -17,6 +17,7 @@ class employees extends Model
                             'admission_date date',
                             'leave_date date',
                             'is_overtime',
+                            'policy_extratime_id',
                             'company_id',
                             'nip',
                             'way_register_id',

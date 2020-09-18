@@ -248,12 +248,15 @@ class employeeController extends Controller
 
         foreach ($lEmployees as $jEmployee) {
             try {
-                $id = $lCapEmployees[$jEmployee->id_employee];
-                $this->updEmployee($jEmployee, $id);
+                if (isset($lCapEmployees[$jEmployee->id_employee])) {
+                    $id = $lCapEmployees[$jEmployee->id_employee];
+                    $this->updEmployee($jEmployee, $id);
+                }
+                else {
+                    $this->insertEmployee($jEmployee);
+                }
             }
-            catch (\Throwable $th) {
-                $this->insertEmployee($jEmployee);
-            }
+            catch (\Throwable $th) { }
         }
     }
 
@@ -277,12 +280,13 @@ class employeeController extends Controller
                     ->update(
                             [
                             'num_employee' => $jEmployee->num_employee,
-                            'name' => ucwords(strtolower($jEmployee->lastname." ".$jEmployee->firstname)),
+                            'name' => ucwords(strtolower($jEmployee->lastname.", ".$jEmployee->firstname)),
                             'names' => ucwords(strtolower($jEmployee->firstname)),
                             'first_name' => ucwords(strtolower($jEmployee->lastname)),
                             'admission_date' => $jEmployee->admission_date,
                             'leave_date' => $jEmployee->leave_date,
-                            'is_overtime' => $jEmployee->extra_time,
+                            // 'is_overtime' => $jEmployee->extra_time,
+                            'policy_extratime_id' => $jEmployee->overtime_policy + 1,
                             'company_id' => $this->companies[$jEmployee->company_id],
                             'dept_rh_id' => $this->rhdepartments[$jEmployee->dept_rh_id],
                             //'department_id' => $dept,
@@ -307,13 +311,14 @@ class employeeController extends Controller
         $emp = new employees();
 
         $emp->num_employee = $jEmployee->num_employee;
-        $emp->name = ucwords(strtolower($jEmployee->lastname." ".$jEmployee->firstname));
+        $emp->name = ucwords(strtolower($jEmployee->lastname.", ".$jEmployee->firstname));
         $emp->names = ucwords(strtolower($jEmployee->firstname));
         $emp->first_name = ucwords(strtolower($jEmployee->lastname));
         $emp->admission_date = $jEmployee->admission_date;
         $emp->leave_date = $jEmployee->leave_date;
         $emp->nip = 0;
-        $emp->is_overtime = $jEmployee->extra_time;
+        // $emp->is_overtime = $jEmployee->extra_time;
+        $emp->policy_extratime_id = $jEmployee->overtime_policy + 1;
         $emp->way_register_id = 2; // pendiente
         $emp->ben_pol_id = 1; // estricto
         $emp->job_id = 25; // ???
