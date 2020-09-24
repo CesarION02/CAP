@@ -2,10 +2,6 @@
 
 use Carbon\Carbon;
 use App\SUtils\SDelayReportUtils;
-use App\SUtils\SDateTimeUtils;
-use App\SUtils\SRegistryRow;
-use App\SUtils\SPrepayrollAdjustUtils;
-use App\Http\Controllers\prePayrollController;
 
 class SOverJourneyCore {
 
@@ -100,6 +96,8 @@ class SOverJourneyCore {
                             $journeyMin += $workedTime->diffMinutes;
                         }
                     }
+
+                    $oRow->isDayRepeated = true;
                 }
             }
             else {

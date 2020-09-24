@@ -494,19 +494,19 @@ class SDataProcess {
                         
                         if ($oFoundRegistry != null) {
                             if ($oFoundRegistry->date == $oDateAux->toDateString()) {
-                                $config = \App\SUtils\SConfiguration::getConfigurations();
+                                // $config = \App\SUtils\SConfiguration::getConfigurations();
 
-                                $registryAux = (object) [
-                                    'type_id' => \SCons::REG_OUT,
-                                    'time' => $oFoundRegistry->time,
-                                    'date' => $oFoundRegistry->date,
-                                    'employee_id' => $idEmployee
-                                ];
+                                // $registryAux = (object) [
+                                //     'type_id' => \SCons::REG_IN,
+                                //     'time' => $oFoundRegistry->time,
+                                //     'date' => $oFoundRegistry->date,
+                                //     'employee_id' => $idEmployee
+                                // ];
 
-                                $sched = SDelayReportUtils::getSchedule($oDateAux->toDateString(), $oDateAux->toDateString(), $idEmployee, $registryAux, clone $qWorkshifts, \SCons::REP_HR_EX);
-                                if ($sched != null && abs($sched->diffMinutes) <= $config->maxGapMinutes) {
+                                // $sched = SDelayReportUtils::getSchedule($oDateAux->toDateString(), $oDateAux->toDateString(), $idEmployee, $registryAux, clone $qWorkshifts, \SCons::REP_DELAY);
+                                // if ($sched != null && abs($sched->diffMinutes) <= $config->maxGapMinutes) {
                                     $isOut = true;
-                                }
+                                // }
                             }
 
                             $isNew = false;
@@ -1165,7 +1165,7 @@ class SDataProcess {
         if (abs($comparisonIn->diffMinutes) <= $config->maxGapSchedule && abs($comparisonOut->diffMinutes) <= $config->maxGapSchedule) {
             $oRow->inDateTimeSch = $inDate.' 22:30:00';
             $oRow->outDateTimeSch = $outDate.' 06:30:00';
-            if ($oRow->outDateTime <= $sEndDate) {
+            if ($oRow->outDateTime <= $sEndDate.' 23:59:59') {
                 $oRow->overDefaultMins = 60;
             }
             return $oRow;
