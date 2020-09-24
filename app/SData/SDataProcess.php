@@ -5,6 +5,7 @@ use App\SUtils\SDelayReportUtils;
 use App\SUtils\SDateTimeUtils;
 use App\SUtils\SRegistryRow;
 use App\SUtils\SPrepayrollAdjustUtils;
+use App\SData\SOverJourneyCore;
 use App\Http\Controllers\prePayrollController;
 
 class SDataProcess {
@@ -17,6 +18,11 @@ class SDataProcess {
      * var_dump(Carbon::THURSDAY);   // int(4)
      * var_dump(Carbon::FRIDAY);     // int(5)
      * var_dump(Carbon::SATURDAY);   // int(6)
+     * 
+     * "maxGapMinutes": (minutos), minutos para búsqueda de checadas un día antes o después, no solo por el tipo de checada.
+     * "maxGapSchedule": (minutos), minutos de holgura para "encajonar" checadas en un horario en la función determineSchedule().
+     *                              También se usa para determinar si las checadas fueron de entrada o salida en los procesos iniciales.
+     * "maxGapCheckSchedule": (minutos), minutos tomados en cuenta para poner la leyenda "revisar horario".
      */
 
      /**
@@ -48,7 +54,11 @@ class SDataProcess {
 
         $lDataWSun = SDataProcess::addSundayPay($lData);
 
-        return $lDataWSun;
+        // return $lDataWSun;
+
+        $lAllData = SOverJourneyCore::processOverTimeByOverJourney($lDataWSun, $sStartDate);
+
+        return $lAllData;
     }
 
     /**
@@ -440,6 +450,7 @@ class SDataProcess {
                         $newRow->outDateTime = $result->variableDateTime->format('Y-m-d   H:i:s');
                         $newRow->outDateTimeSch = $result->pinnedDateTime->format('Y-m-d   H:i:s');
                         $newRow->cutId = SDelayReportUtils::getCutId($result);
+                        $newRow->overtimeCheckPolicy = SDelayReportUtils::getOvertimePolicy($result);
 
                         $isNew = true;
                         $again = false;
@@ -624,6 +635,7 @@ class SDataProcess {
             $oRow->inDateTimeSch = $sInSchedule;
     
             $oRow->cutId = SDelayReportUtils::getCutId($result);
+            $oRow->overtimeCheckPolicy = SDelayReportUtils::getOvertimePolicy($result);
             // minutos configurados en la tabla
             $oRow->overDefaultMins = SDelayReportUtils::getExtraTime($result);
             // minutos por turnos de más de 8 horas
@@ -820,7 +832,7 @@ class SDataProcess {
                 $oRow->overScheduleMins = 0;
 
                 $oRow->overMinsTotal = 0;
-                $oRow->extraHours = SDelayReportUtils::convertToHoursMins($oRow->overMinsTotal);
+                // $oRow->extraHours = SDelayReportUtils::convertToHoursMins($oRow->overMinsTotal);
 
                 continue;
             }
@@ -884,6 +896,8 @@ class SDataProcess {
             }
 
             $withDiscount = false;
+            $bWork8hr = true;
+            $oRow->hasWorkedJourney8hr = SDataProcess::journeyCompleted($oRow->inDateTime, $oRow->inDateTimeSch, $oRow->outDateTime, $oRow->outDateTimeSch, $bWork8hr);
             if (SDataProcess::journeyCompleted($oRow->inDateTime, $oRow->inDateTimeSch, $oRow->outDateTime, $oRow->outDateTimeSch)) {
                 $extendJourney = SDelayReportUtils::compareDates($oRow->inDateTimeSch, $oRow->outDateTimeSch);
                 if ($aEmployeeOverTime[$oRow->idEmployee] == 2 || ($aEmployeeOverTime[$oRow->idEmployee] == 3 && $extendJourney->diffMinutes > 480)) {
@@ -959,7 +973,7 @@ class SDataProcess {
 
             // suma de minutos extra totales.
             $oRow->overMinsTotal = $oRow->overWorkedMins + $oRow->overDefaultMins + $oRow->overScheduleMins;
-            $oRow->extraHours = SDelayReportUtils::convertToHoursMins($oRow->overMinsTotal);
+            // $oRow->extraHours = SDelayReportUtils::convertToHoursMins($oRow->overMinsTotal);
 
         }
 
@@ -1056,10 +1070,12 @@ class SDataProcess {
      * @param string $inDateTimeSch
      * @param string $outDateTime
      * @param string $outDateTimeSch
+     * @param boolean $bWork8hr si este parámetro es TRUE la función 
+     *                          indicará únicamente si trabajó 8 horas o más o no
      * 
      * @return boolean
      */
-    public static function journeyCompleted($inDateTime, $inDateTimeSch, $outDateTime, $outDateTimeSch)
+    public static function journeyCompleted($inDateTime, $inDateTimeSch, $outDateTime, $outDateTimeSch, $bWork8hr = false)
     {
         if ($inDateTime == null || $inDateTimeSch == null || $outDateTime == null || $outDateTimeSch == null) {
             return false;
@@ -1069,6 +1085,10 @@ class SDataProcess {
         $comparisonSched = SDelayReportUtils::compareDates($inDateTimeSch, $outDateTimeSch);
         
         $config = \App\SUtils\SConfiguration::getConfigurations();
+
+        if ($bWork8hr) {
+            return $comparisonCheck->diffMinutes >= (480 - $config->toleranceMinutes);
+        }
 
         return $comparisonCheck->diffMinutes >= ($comparisonSched->diffMinutes - $config->toleranceMinutes)
                 || $comparisonCheck->diffMinutes >= (480 - $config->toleranceMinutes);

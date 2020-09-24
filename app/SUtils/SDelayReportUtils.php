@@ -186,6 +186,27 @@ class SDelayReportUtils {
         }
     }
 
+
+    /**
+     * Obtiene la política de tiempo extra, para saber si este se le atribuye 
+     *  a la fecha de entrada o salida
+     *
+     * @param SDateComparison $oComparison
+     * @return int overtime_check_policy
+     */
+    public static function getOvertimePolicy($oComparison) {
+        if ($oComparison->auxScheduleDay != null) {
+            return $oComparison->auxScheduleDay->overtime_check_policy;
+        }
+        else {
+            if ($oComparison->auxWorkshift != null) {
+                return $oComparison->auxWorkshift->overtime_check_policy;
+            }
+            
+            return 0;
+        }
+    }
+
     /**
      * Obtiene las checadas dado un rango de fechas y filtra por tipo de pago
      *
@@ -325,6 +346,7 @@ class SDelayReportUtils {
                                         'w.overtimepershift',
                                         'w.departure', 
                                         'w.cut_id',
+                                        'w.overtime_check_policy',
                                         'w.agreed_extra',
                                         'td.name AS td_name', 
                                         'td.short_name', 
@@ -551,6 +573,7 @@ class SDelayReportUtils {
                                     'sd.is_active',
                                     'sd.schedule_template_id',
                                     'st.cut_id',
+                                    'st.overtime_check_policy',
                                     'st.agreed_extra',
                                     'st.is_night',
                                     'st.overtimepershift')

@@ -73,7 +73,7 @@
                                     {{-- <td v-if="vData.tReport == vData.REP_DELAY">@{{ row.delayMins }}</td>
                                     <td v-else>@{{ row.extraHours }}</td> --}}
                                     <td>@{{ row.overMinsTotal < 0 ? null : row.overMinsTotal }}</td>
-                                    <td>@{{ row.extraHours }}</td>
+                                    <td>@{{ vueGui.formatMinsToHHmm(row.overMinsTotal < 0 ? 0 : row.overMinsTotal) }}</td>
                                     {{-- <td v-if="vData.tReport == vData.REP_HR_EX">@{{ row.outDateTimeSch }}</td> --}}
                                     <td v-if="vData.tReport == vData.REP_HR_EX">@{{ row.entryDelayMinutes }}</td>
                                     <td v-if="vData.tReport == vData.REP_HR_EX">@{{ row.prematureOut }}</td>

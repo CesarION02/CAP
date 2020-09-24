@@ -28,19 +28,35 @@ class SGui {
 
   formatDate(date) {
     var d = new Date(date),
-        month = '' + (d.getMonth() + 1),
-        day = '' + d.getDate(),
-        year = d.getFullYear();
+      month = '' + (d.getMonth() + 1),
+      day = '' + d.getDate(),
+      year = d.getFullYear();
 
-    if (month.length < 2) 
-        month = '0' + month;
-    if (day.length < 2) 
-        day = '0' + day;
+    if (month.length < 2)
+      month = '0' + month;
+    if (day.length < 2)
+      day = '0' + day;
 
     return [day, month, year].join('/');
-}
+  }
+
   formatDateTime(dateTime) {
     let dt = moment(dateTime).format('DD/MM/YYYY HH:mm:ss');
     return dt;
+  }
+
+  /**
+   * Convierte minutos decimales a horas en formato HH:mm
+   * 
+   * @param {integer} mins 
+   */
+  formatMinsToHHmm(mins) {
+    let hours = Math.floor(mins / 60);  
+    let minutes = mins % 60;
+
+    hours = hours < 10 ? ('0' + hours) : hours;
+    minutes = minutes < 10 ? ('0' + minutes) : minutes;
+
+    return hours + ":" + minutes;
   }
 }

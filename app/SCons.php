@@ -46,6 +46,8 @@ class SCons {
 
    const INACTIVE_DAY = 15;
    
+   const OVERTIME_CHECK_POLICY_IN = 1;
+   const OVERTIME_CHECK_POLICY_OUT = 2;
 }
 
 ?>
