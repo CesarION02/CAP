@@ -25,6 +25,8 @@ class SOverJourneyCore {
                 $currentDate = $sStartDate;
                 $idEmployee = $oRow->idEmployee;
             }
+
+            \Log::info($oRow->employee.' '.$oRow->inDateTime);
             
             again:
             if (($oRow->overtimeCheckPolicy == \SCons::OVERTIME_CHECK_POLICY_OUT && $currentDate == $oRow->outDate) || 
@@ -109,8 +111,9 @@ class SOverJourneyCore {
 
                 $currentDate = $oDate->toDateString();
                 $firstTime = true;
-
-                goto again;
+                if ($currentDate <= $oRow->outDate) {
+                    goto again;
+                }
             }
         }
 
