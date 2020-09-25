@@ -448,11 +448,11 @@ class SInfoWithPolicy{
                 }
 
                 for( $j = 0 ; count($lRows) > $j ; $j++ ){
-                        if($lRows[$j]->hasSchedule == true){
+                        //if($lRows[$j]->hasSchedule == true){
                             $minutosExtra = $lRows[$j]->overDefaultMins + $lRows[$j]->overWorkedMins;
-                        }else{
-                            $minutosExtra = $lRows[$j]->overWorkedMins;
-                        }        
+                        //}else{
+                         //   $minutosExtra = $lRows[$j]->overWorkedMins;
+                        //}        
                         // si tiene más de una hora de tiempo extra
                         if( $minutosExtra >= 60 ){
                             $horasCompletas = intdiv($minutosExtra,60);
@@ -723,31 +723,38 @@ class SInfoWithPolicy{
         $contadorAusencia = 0;
         $contadorSinextra = 0;
         if($diferencia != 7){ return $lRows;}
-        if(count($lRows) < 7){ return $lRows;};
-        for($i = 0 ; $diferencia > $i ; $i++){
-            if( $lRows[$i]->hasChecks == false ){
-                if( $lRows[$i]->hasAbsence == true ){
-                    $aAbsence[$contadorAusencia] = $i;
-                    $contadorAusencia++;
-                }else{
-                    $semanaNoCompleta = true;
-                }
-                
-            }elseif( $lRows[$i]->hasChecks == true ){
-                if( $lRows[$i]->extraDoubleMins == 0 && $lRows[$i]->extraTripleMins == 0 && $lRows[$i]->isSunday == 0){
-                    $aWithoutExtra[$contadorSinextra] = $i;
-                    $contadorSinextra++;
-                }else{
-                    $extraTotales = $lRows[$i]->extraDoubleMins +  $lRows[$i]->extraTripleMins;
-                    if( ( $horaExtraMenor > $extraTotales || $horaExtraMenor == 0 ) && $lRows[$i]->isSunday == 0 ){
-                        $horaExtraMenor = $extraTotales;
-                        $extraMenorPosicion = $i;
-                    }
-                }
-                $diasCorrectos[$auxCorrectos] = $i;
-                $auxCorrectos++;
+        $days = 0;
+        for($i= 0 ; count($lRows) > $i ; $i++){
+            if($lRows[$i]->isDayRepeated == false){
+                $days++; 
             }
-        
+        }
+        if($days < 7){ return $lRows;};
+        for($i = 0 ; count($lRows) > $i ; $i++){
+            if($lRows[$i]->isDayRepeated == false){
+                if( $lRows[$i]->hasChecks == false ){
+                    if( $lRows[$i]->hasAbsence == true ){
+                        $aAbsence[$contadorAusencia] = $i;
+                        $contadorAusencia++;
+                    }else{
+                        $semanaNoCompleta = true;
+                    }
+                
+                }elseif( $lRows[$i]->hasChecks == true ){
+                    if( $lRows[$i]->extraDoubleMins == 0 && $lRows[$i]->extraTripleMins == 0 && $lRows[$i]->isSunday == 0){
+                        $aWithoutExtra[$contadorSinextra] = $i;
+                        $contadorSinextra++;
+                    }else{
+                        $extraTotales = $lRows[$i]->extraDoubleMins +  $lRows[$i]->extraTripleMins;
+                        if( ( $horaExtraMenor > $extraTotales || $horaExtraMenor == 0 ) && $lRows[$i]->isSunday == 0 ){
+                            $horaExtraMenor = $extraTotales;
+                            $extraMenorPosicion = $i;
+                        }
+                    }
+                    $diasCorrectos[$auxCorrectos] = $i;
+                    $auxCorrectos++;
+                }
+            }
 
         }
 
@@ -857,7 +864,8 @@ class SInfoWithPolicy{
                 $i = $contador[0];
                 $diferencia = 7 - $diferencia;
                 if($diferencia != 1){ 
-                for($i ; $diferencia > $i ; $i++){
+                for($i ; count($lRows[$i]) > $i ; $i++){
+                    if($lRows[$i]->isDayRepeated == false){
                     if( $lRows[$i]->hasChecks == false ){
                         if( $lRows[$i]->hasAbsence == true ){
                             $aAbsence[$contadorAusencia] = $i;
@@ -880,7 +888,7 @@ class SInfoWithPolicy{
                         $diasCorrectos[$auxCorrectos] = $i;
                         $auxCorrectos++;
                     }
-                
+                    }
         
                 }
                 $contador[0] = $i;
@@ -978,8 +986,16 @@ class SInfoWithPolicy{
                 $contadorSinextra = 0;
                 $i = $contador[0];
                 $diferencia = 7 + $contador[0];
-                if ( $diferencia < count($lRows) ){
-                    for($i ; $diferencia > $i ; $i++){
+                $days = 0;
+                for( $j = $i ; count($lRows) > $j ; $j++){
+                    if($lRows[$j]->isDayRepeated == false){
+                        $days++;
+                    }
+                }
+                if ( $diferencia < $days ){
+                    for($i ; $lRows[$i] > $i ; $i++){
+                        if( $lRows[$i]->isDayRepeated == false){
+
                         if( $lRows[$i]->hasChecks == false ){
                             if( $lRows[$i]->hasAbsence == true ){
                                 $aAbsence[$contadorAusencia] = $i;
@@ -1003,7 +1019,7 @@ class SInfoWithPolicy{
                             $auxCorrectos++;
                         }
                     
-            
+                        }
                     }
                     $contador[0] = $i;
                     $contador[1] = 0;
@@ -1077,7 +1093,7 @@ class SInfoWithPolicy{
                 $empleados = DB::table('employees')
                                 ->where('is_active','=',1)
                                 ->where('way_pay_id','=',2)
-                                //->where('id',57)
+                                //->where('id',122)
                                 ->select('id AS id')
                                 ->get();
                 $num_empleados = count($empleados);
@@ -1215,6 +1231,7 @@ class SInfoWithPolicy{
             $processed->ischecksschedule = $lRows[$i]->isCheckSchedule;
             $processed->istypedaychecked = $lRows[$i]->isTypeDayChecked;
             $processed->hasabsence = $lRows[$i]->hasAbsence;
+            $processed->isOverJourney = $lRows[$i]->isOverJourney;
             if($tipo == 2){
                 $processed->week = $periodo;
             }else{

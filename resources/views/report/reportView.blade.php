@@ -49,18 +49,27 @@
                             </thead>
                             <tbody>
                                 @for($i = 0 ; count($lRows) > $i ; $i++)
+                                @if($lRows[$i]->isOverJourney == false )
                                 <tr>
                                     <td>{{ $lRows[$i]->num_employee  }}</td>
                                     <td>{{ $lRows[$i]->name }}</td>
                                     {{-- <td>@{{ row.inDate }}</td> --}}
                                     
-                                    @if($lRows[$i]->haschecks == 1)
+                                    @if($lRows[$i]->haschecks == 1 && $lRows[$i]->is_dayoff == 0)
                                         <td>{{ \App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->inDate) }}</td>
                                         @if($tipo != 2)
-                                            <td>{{ $lRows[$i]->inDateTime }}</td>
+                                            @if($lRows[$i]->inDateTime == '00:20:20')
+                                                <td>{{ 'Sin checada' }}</td>
+                                            @else
+                                                <td>{{ $lRows[$i]->inDateTime }}</td>
+                                            @endif
                                         @else
                                             @if($lRows[$i]->inDateTimeNoficial == null)
-                                                <td>{{ $lRows[$i]->inDateTime }}</td>   
+                                                @if($lRows[$i]->inDateTime == '00:20:20')
+                                                    <td>{{ 'Sin checada' }}</td>
+                                                @else
+                                                    <td>{{ $lRows[$i]->inDateTime }}</td>
+                                                @endif  
                                             @else
                                                 <td>{{ $lRows[$i]->inDateTimeNoficial }}</td>
                                             @endif
@@ -69,10 +78,19 @@
                                         <td>{{ \App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->outDate) }}</td>
                                     
                                         @if($tipo != 2)
-                                            <td>{{ $lRows[$i]->outDateTime }}</td>
+                                            
+                                            @if($lRows[$i]->outDateTime == '00:20:20')
+                                                <td>{{ 'Sin checada' }}</td>
+                                            @else
+                                                <td>{{ $lRows[$i]->outDateTime }}</td>
+                                            @endif
                                         @else
                                             @if($lRows[$i]->outDateTimeNoficial == null)
-                                                <td>{{ $lRows[$i]->outDateTime }}</td>   
+                                                @if($lRows[$i]->outDateTime == '00:20:20')
+                                                    <td>{{ 'Sin checada' }}</td>
+                                                @else
+                                                    <td>{{ $lRows[$i]->outDateTime }}</td>
+                                                @endif  
                                             @else
                                                 <td>{{ $lRows[$i]->outDateTimeNoficial }}</td>
                                             @endif
@@ -150,6 +168,7 @@
                                     @endif
                                     {{-- <td v-if="oData.tReport == oData.REP_HR_EX">@{{ row.outDateTimeSch }}</td> --}}
                                 </tr>
+                                @endif
                                 @endfor
                             </tbody>
                         </table>
