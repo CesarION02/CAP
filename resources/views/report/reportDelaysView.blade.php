@@ -33,7 +33,7 @@
                 </col-md-10>
                     <div class="col-md-2">
                         <div id="wrapper">
-                            <button class="btn btn-info" id="button-a">Crear excel</button>
+                            <button class="btn btn-info" id="button-a">Crear Excel</button>
                         </div>
                     </div>
                 </div>
@@ -42,7 +42,7 @@
                         <table id="delays_table" class="table table-condensed" style="width:100%">
                             <thead>
                                 <tr>
-                                    <th>Num Empleado</th>
+                                    <th>Num. Emp.</th>
                                     <th>Empleado</th>
                                     {{-- <th>Fecha entrada</th> --}}
                                     <th><span class="nobr">Fecha-hora</span> entrada</th>
