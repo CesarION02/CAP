@@ -20,7 +20,7 @@ class SDelayReportUtils {
         else {
             if ($oComparison->auxWorkshift != null) {
                 $oAux = $oComparison->auxWorkshift;
-                if ($oAux->name == "Noche") {
+                if ($oAux->is_night) {
                     $night = true;
                 }
             }
@@ -347,6 +347,7 @@ class SDelayReportUtils {
                                         'w.departure', 
                                         'w.cut_id',
                                         'w.overtime_check_policy',
+                                        'w.is_night',
                                         'w.agreed_extra',
                                         'td.name AS td_name', 
                                         'td.short_name', 
