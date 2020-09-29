@@ -993,7 +993,7 @@ class SInfoWithPolicy{
                     }
                 }
                 if ( $diferencia < $days ){
-                    for($i ; $lRows[$i] > $i ; $i++){
+                    for($i ; count($lRows[$i]) > $i ; $i++){
                         if( $lRows[$i]->isDayRepeated == false){
 
                         if( $lRows[$i]->hasChecks == false ){
