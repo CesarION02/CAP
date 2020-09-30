@@ -1181,6 +1181,26 @@ class SDataProcess {
             return $oRow;
         }
 
+        $comparisonIn = SDelayReportUtils::compareDates($oRow->inDateTime, $inDate.' 06:30:00');
+        $comparisonOut = SDelayReportUtils::compareDates($oRow->outDateTime, $outDate.' 14:30:00');
+        
+        if (abs($comparisonIn->diffMinutes) <= $config->maxGapSchedule && abs($comparisonOut->diffMinutes) <= $config->maxGapSchedule) {
+            $oRow->inDateTimeSch = $inDate.' 06:30:00';
+            $oRow->outDateTimeSch = $outDate.' 14:30:00';
+            $oRow->overDefaultMins = 0;
+            return $oRow;
+        }
+
+        $comparisonIn = SDelayReportUtils::compareDates($oRow->inDateTime, $inDate.' 08:30:00');
+        $comparisonOut = SDelayReportUtils::compareDates($oRow->outDateTime, $outDate.' 16:30:00');
+        
+        if (abs($comparisonIn->diffMinutes) <= $config->maxGapSchedule && abs($comparisonOut->diffMinutes) <= $config->maxGapSchedule) {
+            $oRow->inDateTimeSch = $inDate.' 08:30:00';
+            $oRow->outDateTimeSch = $outDate.' 16:30:00';
+            $oRow->overDefaultMins = 0;
+            return $oRow;
+        }
+
         $oRow->isOnSchedule = false;
 
         return $oRow;
