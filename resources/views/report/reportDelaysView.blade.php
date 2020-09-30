@@ -27,10 +27,12 @@
             <div class="box-body" id="reportDelayApp">
                 @include('report.adjustsModal')
                 <div class="row">
-                    <div class="col-md-10">
+                    <div class="col-md-8">
                         <p>Periodo: <b>{{ $sStartDate }}</b> - <b>{{ $sEndDate }}</b>. P. pago: <b>{{ $sPayWay }}</b>.</p>
                     </div>
-                </col-md-10>
+                    <div class="col-md-2">
+                        <a href="{{ route('generarreportetiemposextra') }}" target="_blank" class="btn btn-success">Nuevo reporte</a>
+                    </div>
                     <div class="col-md-2">
                         <div id="wrapper">
                             <button class="btn btn-info" id="button-a">Crear Excel</button>
@@ -90,6 +92,7 @@
                                 </tr>
                             </tbody>
                             <button onclick="topFunction()" id="myBtn" title="Ir arriba">Ir arriba</button>
+                            <a href="{{ route('generarreportetiemposextra') }}" target="_blank" id="newButton" title="Nuevo reporte">Nuevo reporte</a>
                         </table>
                     </div>
                 </div>
@@ -366,6 +369,7 @@
     <script>
         //Get the button:
         mybutton = document.getElementById("myBtn");
+        theNewButton = document.getElementById("newButton");
 
         // When the user scrolls down 20px from the top of the document, show the button
         window.onscroll = function() {scrollFunction()};
@@ -373,8 +377,10 @@
         function scrollFunction() {
             if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
                 mybutton.style.display = "block";
+                theNewButton.style.display = "block";
             } else {
                 mybutton.style.display = "none";
+                theNewButton.style.display = "none";
             }
         }
 

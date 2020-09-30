@@ -45,8 +45,10 @@
         <div class="row">
           <div class="col-md-offset-1 col-md-10">
             <ul class="list-group">
-              <li v-for="rowAdj in rowAdjusts" class="list-group-item list-group-item-info">@{{ rowAdj.type_code + 
-                                                '-' + rowAdj.type_name + ((rowAdj.comments != null && rowAdj.comments.length > 0) ? (' / ' + rowAdj.comments) : '') }}
+              <li v-for="rowAdj in rowAdjusts" class="list-group-item list-group-item-info">
+                    @{{ rowAdj.type_code + '-' + rowAdj.type_name + 
+                      ((rowAdj.comments != null && rowAdj.comments.length > 0) ? (' / ' + rowAdj.comments) : '')
+                      + (rowAdj.minutes > 0 ? (' / ' + rowAdj.minutes + ' min') : '') }}
                   <button type="button" class="close" data-dismiss="alert" aria-label="Close" v-on:click="deleteAdjust(rowAdj)">
                       <span aria-hidden="true">&times;</span>
                     </button>

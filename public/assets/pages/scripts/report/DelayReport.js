@@ -52,6 +52,10 @@ var app = new Vue({
                     break;
             }
 
+            if (! this.validate()) {
+                return;
+            }
+
             let route = '../prepayrolladjust';
 
             axios.post(route, {
@@ -72,6 +76,35 @@ var app = new Vue({
             .catch(function(error) {
                 console.log(error);
             });
+        },
+        validate() {
+            if (this.adjType == oData.ADJ_CONS.DHE || this.adjType == oData.ADJ_CONS.AHE) {
+                if (! Number.isInteger(parseInt(this.overMins, 10))) {
+                    oGui.showError("El valor de minutos debe ser entero");
+                    return false;
+                }
+                if (parseInt(this.overMins, 10) <= 0) {
+                    oGui.showError("El valor de minutos debe ser mayor a cero");
+                    return false;
+                }
+            }
+
+            if (this.adjType == oData.ADJ_CONS.DHE) {
+                let minsToDiscount = 0;
+                for (const elem of this.rowAdjusts) {
+                    if (elem.adjust_type_id == oData.ADJ_CONS.DHE) {
+                        minsToDiscount += elem.minutes;
+                    }
+                }
+
+                if ((parseInt(this.overMins, 10) + minsToDiscount) > this.vRow.overWorkedMins) {
+                    oGui.showError("No se puede descontar " + this.overMins + " min de tiempo extra. (Solo se puede descontar " +
+                        "tiempo extra generado a partir de la hora de salida)");
+                    return false;
+                }
+            }
+
+            return true;
         },
         deleteAdjust(oAdj) {
             oGui.showLoading(3000);
@@ -134,7 +167,8 @@ var app = new Vue({
                         let tiime = adj.dt_time != null ? (' ' + adj.dt_time) : '';
                         if ((adj.dt_date + tiime) == oRow.outDateTime) {
                             labels += adj.type_code + ' ';
-                            if (adj.adjust_type_id == oData.ADJ_CONS.AHE) {
+                            if (adj.adjust_type_id == oData.ADJ_CONS.AHE ||
+                                adj.adjust_type_id == oData.ADJ_CONS.DHE) {
                                 labels += adj.minutes + 'min ';
                             }
                         }
@@ -149,7 +183,7 @@ var app = new Vue({
             return labels;
         },
         onTypeChange() {
-            this.minsEnabled = this.adjType == 6;
+            this.minsEnabled = this.adjType == oData.ADJ_CONS.DHE || this.adjType == oData.ADJ_CONS.AHE;
             this.overMins = 0;
         }
     },

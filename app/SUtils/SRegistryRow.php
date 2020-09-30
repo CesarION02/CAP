@@ -24,6 +24,7 @@ class SRegistryRow {
         $this->overDefaultMins = null;
         $this->overScheduleMins = null;
         $this->overWorkedMins = null;
+        $this->overMinsByAdjs = null;
         $this->overMinsTotal = null;
         $this->cutId = null;
         $this->extraHours = "00:00";

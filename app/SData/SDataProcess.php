@@ -895,7 +895,6 @@ class SDataProcess {
                 $oRow->prematureOut = SDataProcess::getPrematureTime($oRow->outDateTime, $oRow->outDateTimeSch);
             }
 
-            $withDiscount = false;
             $bWork8hr = true;
             $oRow->hasWorkedJourney8hr = SDataProcess::journeyCompleted($oRow->inDateTime, $oRow->inDateTimeSch, $oRow->outDateTime, $oRow->outDateTimeSch, $bWork8hr);
             if (SDataProcess::journeyCompleted($oRow->inDateTime, $oRow->inDateTimeSch, $oRow->outDateTime, $oRow->outDateTimeSch)) {
@@ -905,16 +904,19 @@ class SDataProcess {
                     // Ajuste de prenómina
                     $date = $oRow->outDate == null ? $oRow->outDateTime : $oRow->outDate;
                     $time = strlen($oRow->outDateTime) > 10 ? substr($oRow->outDateTime, -8) : null;
-                    $adjs = SPrepayrollAdjustUtils::getAdjustForCase($date, $time, 2, \SCons::PP_TYPES['DHE'], $oRow->idEmployee);
                     
-                    if (count($adjs) > 0) {
-                        $oRow->overWorkedMins = 0;
-                        foreach ($adjs as $adj) {
-                            $oRow->adjusts[] = $adj;
+                    $oRow->overWorkedMins = SDataProcess::getOverTime($oRow->inDateTime, $oRow->inDateTimeSch, $oRow->outDateTime, $oRow->outDateTimeSch);
+                    if ($oRow->overWorkedMins > 0) {
+                        $adjs = SPrepayrollAdjustUtils::getAdjustForCase($date, $time, 2, \SCons::PP_TYPES['DHE'], $oRow->idEmployee);
+                        $discountMins = 0;
+                        if (count($adjs) > 0) {
+                            foreach ($adjs as $adj) {
+                                $discountMins += $adj->minutes;
+                                $oRow->adjusts[] = $adj;
+                            }
                         }
-                    }
-                    else {
-                        $oRow->overWorkedMins = SDataProcess::getOverTime($oRow->inDateTime, $oRow->inDateTimeSch, $oRow->outDateTime, $oRow->outDateTimeSch);
+
+                        $oRow->overWorkedMins = $oRow->overWorkedMins >= $discountMins ? ($oRow->overWorkedMins - $discountMins) : 0;
                     }
                 }
             }
@@ -925,20 +927,18 @@ class SDataProcess {
             }
 
             // Ajuste de prenómina
-            if (! $withDiscount) {
-                $date = $oRow->outDate == null ? $oRow->outDateTime : $oRow->outDate;
-                $time = strlen($oRow->outDateTime) > 10 ? substr($oRow->outDateTime, -8) : null;
-                $adjs = SPrepayrollAdjustUtils::getAdjustForCase($date, $time, 2, \SCons::PP_TYPES['AHE'], $oRow->idEmployee);
+            $date = $oRow->outDate == null ? $oRow->outDateTime : $oRow->outDate;
+            $time = strlen($oRow->outDateTime) > 10 ? substr($oRow->outDateTime, -8) : null;
+            $adjs = SPrepayrollAdjustUtils::getAdjustForCase($date, $time, 2, \SCons::PP_TYPES['AHE'], $oRow->idEmployee);
 
-                if (count($adjs) > 0) {
-                    $minsExtraByAdj = 0;
-                    foreach ($adjs as $adj) {
-                        $minsExtraByAdj += $adj->minutes;
-                        $oRow->adjusts[] = $adj;
-                    }
-
-                    $oRow->overWorkedMins += $minsExtraByAdj;
+            if (count($adjs) > 0) {
+                $minsExtraByAdj = 0;
+                foreach ($adjs as $adj) {
+                    $minsExtraByAdj += $adj->minutes;
+                    $oRow->adjusts[] = $adj;
                 }
+
+                $oRow->overMinsByAdjs = $minsExtraByAdj;
             }
 
             $cIn = false;
@@ -972,7 +972,7 @@ class SDataProcess {
             }
 
             // suma de minutos extra totales.
-            $oRow->overMinsTotal = $oRow->overWorkedMins + $oRow->overDefaultMins + $oRow->overScheduleMins;
+            $oRow->overMinsTotal = $oRow->overWorkedMins + $oRow->overDefaultMins + $oRow->overScheduleMins + $oRow->overMinsByAdjs;
             // $oRow->extraHours = SDelayReportUtils::convertToHoursMins($oRow->overMinsTotal);
 
         }
