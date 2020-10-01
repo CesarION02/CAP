@@ -826,7 +826,7 @@ class SDataProcess {
     {
         $consumAdjs = [];
         foreach ($lData as $oRow) {
-            if (! $oRow->hasChecks || ! $oRow->workable) {
+            if (! $oRow->workable) {
                 $oRow->overWorkedMins = 0;
                 $oRow->overDefaultMins = 0;
                 $oRow->overScheduleMins = 0;
@@ -837,93 +837,102 @@ class SDataProcess {
                 continue;
             }
 
-            $cIn = false;
-            $cOut = false;
+            if ($oRow->hasChecks) {
+                $cIn = false;
+                $cOut = false;
 
-            if (! $oRow->isSpecialSchedule) {
-                if ($oRow->hasCheckIn) {
-                    $mayBeOverTime = false;
-                    $cIn = SDataProcess::isCheckSchedule($oRow->inDateTime, $oRow->inDateTimeSch, $mayBeOverTime);
+                if (! $oRow->isSpecialSchedule) {
+                    if ($oRow->hasCheckIn) {
+                        $mayBeOverTime = false;
+                        $cIn = SDataProcess::isCheckSchedule($oRow->inDateTime, $oRow->inDateTimeSch, $mayBeOverTime);
+                    }
+                    if ($oRow->hasCheckOut) {
+                        //$mayBeOverTime = $aEmployeeOverTime[$oRow->idEmployee];
+                        $mayBeOverTime = false;
+                        $cOut = SDataProcess::isCheckSchedule($oRow->outDateTime, $oRow->outDateTimeSch, $mayBeOverTime);
+                    }
+                    if (($cIn && $cOut) || ! $oRow->hasSchedule) {
+                        $oRow = SDataProcess::determineSchedule($oRow, $sEndDate);
+                    }
                 }
-                if ($oRow->hasCheckOut) {
-                    //$mayBeOverTime = $aEmployeeOverTime[$oRow->idEmployee];
-                    $mayBeOverTime = false;
-                    $cOut = SDataProcess::isCheckSchedule($oRow->outDateTime, $oRow->outDateTimeSch, $mayBeOverTime);
-                }
-                if (($cIn && $cOut) || ! $oRow->hasSchedule) {
-                    $oRow = SDataProcess::determineSchedule($oRow, $sEndDate);
-                }
-            }
 
-            // minutos de retardo
-            $mins = SDataProcess::getDelayMins($oRow->inDateTime, $oRow->inDateTimeSch);
-            if ($mins > 0) {
-                $hasDelay = true;
+                // minutos de retardo
+                $mins = SDataProcess::getDelayMins($oRow->inDateTime, $oRow->inDateTimeSch);
+                if ($mins > 0) {
+                    $hasDelay = true;
 
-                // Ajuste de prenómina
-                $date = $oRow->inDate == null ? $oRow->inDateTime : $oRow->inDate;
-                $time = strlen($oRow->inDateTime) > 10 ? substr($oRow->inDateTime, -8) : null;
-                $adjs = SPrepayrollAdjustUtils::getAdjustsOfRow($date, $date, $oRow->idEmployee, \SCons::PP_TYPES['OR']);
+                    // Ajuste de prenómina
+                    $date = $oRow->inDate == null ? $oRow->inDateTime : $oRow->inDate;
+                    $time = strlen($oRow->inDateTime) > 10 ? substr($oRow->inDateTime, -8) : null;
+                    $adjs = SPrepayrollAdjustUtils::getAdjustsOfRow($date, $date, $oRow->idEmployee, \SCons::PP_TYPES['OR']);
 
-                if (count($adjs) > 0) {
-                    foreach ($adjs as $adj) {
-                        if (! in_array($adj->id, $consumAdjs)) {
-                            if ($adj->apply_to == 1) {
-                                if ($adj->dt_date == $date) {
-                                    if ($time == $adj->dt_time) {
-                                        $hasDelay = false;
-                                        $consumAdjs[] = $adj->id;
-                                        $oRow->adjusts[] = $adj;
+                    if (count($adjs) > 0) {
+                        foreach ($adjs as $adj) {
+                            if (! in_array($adj->id, $consumAdjs)) {
+                                if ($adj->apply_to == 1) {
+                                    if ($adj->dt_date == $date) {
+                                        if ($time == $adj->dt_time) {
+                                            $hasDelay = false;
+                                            $consumAdjs[] = $adj->id;
+                                            $oRow->adjusts[] = $adj;
+                                        }
                                     }
                                 }
                             }
                         }
                     }
-                }
 
-                if ($hasDelay) {
-                    $oRow->entryDelayMinutes = $mins;
-                    $oRow->comments = $oRow->comments."Retardo. ";
-                }
-            }
-            else {
-                $oRow->entryDelayMinutes = 0;
-            }
-
-            // minutos de salida anticipada
-            if ($oRow->hasCheckOut) {
-                $oRow->prematureOut = SDataProcess::getPrematureTime($oRow->outDateTime, $oRow->outDateTimeSch);
-            }
-
-            $bWork8hr = true;
-            $oRow->hasWorkedJourney8hr = SDataProcess::journeyCompleted($oRow->inDateTime, $oRow->inDateTimeSch, $oRow->outDateTime, $oRow->outDateTimeSch, $bWork8hr);
-            if (SDataProcess::journeyCompleted($oRow->inDateTime, $oRow->inDateTimeSch, $oRow->outDateTime, $oRow->outDateTimeSch)) {
-                $extendJourney = SDelayReportUtils::compareDates($oRow->inDateTimeSch, $oRow->outDateTimeSch);
-                if ($aEmployeeOverTime[$oRow->idEmployee] == 2 || ($aEmployeeOverTime[$oRow->idEmployee] == 3 && $extendJourney->diffMinutes > 480)) {
-                    // minutos extra trabajados y filtrados por bandera de "genera horas extra"
-                    // Ajuste de prenómina
-                    $date = $oRow->outDate == null ? $oRow->outDateTime : $oRow->outDate;
-                    $time = strlen($oRow->outDateTime) > 10 ? substr($oRow->outDateTime, -8) : null;
-                    
-                    $oRow->overWorkedMins = SDataProcess::getOverTime($oRow->inDateTime, $oRow->inDateTimeSch, $oRow->outDateTime, $oRow->outDateTimeSch);
-                    if ($oRow->overWorkedMins > 0) {
-                        $adjs = SPrepayrollAdjustUtils::getAdjustForCase($date, $time, 2, \SCons::PP_TYPES['DHE'], $oRow->idEmployee);
-                        $discountMins = 0;
-                        if (count($adjs) > 0) {
-                            foreach ($adjs as $adj) {
-                                $discountMins += $adj->minutes;
-                                $oRow->adjusts[] = $adj;
-                            }
-                        }
-
-                        $oRow->overWorkedMins = $oRow->overWorkedMins >= $discountMins ? ($oRow->overWorkedMins - $discountMins) : 0;
+                    if ($hasDelay) {
+                        $oRow->entryDelayMinutes = $mins;
+                        $oRow->comments = $oRow->comments."Retardo. ";
                     }
+                }
+                else {
+                    $oRow->entryDelayMinutes = 0;
+                }
+
+                // minutos de salida anticipada
+                if ($oRow->hasCheckOut) {
+                    $oRow->prematureOut = SDataProcess::getPrematureTime($oRow->outDateTime, $oRow->outDateTimeSch);
+                }
+
+                $bWork8hr = true;
+                $oRow->hasWorkedJourney8hr = SDataProcess::journeyCompleted($oRow->inDateTime, $oRow->inDateTimeSch, $oRow->outDateTime, $oRow->outDateTimeSch, $bWork8hr);
+                if (SDataProcess::journeyCompleted($oRow->inDateTime, $oRow->inDateTimeSch, $oRow->outDateTime, $oRow->outDateTimeSch)) {
+                    $extendJourney = SDelayReportUtils::compareDates($oRow->inDateTimeSch, $oRow->outDateTimeSch);
+                    if ($aEmployeeOverTime[$oRow->idEmployee] == 2 || ($aEmployeeOverTime[$oRow->idEmployee] == 3 && $extendJourney->diffMinutes > 480)) {
+                        // minutos extra trabajados y filtrados por bandera de "genera horas extra"
+                        // Ajuste de prenómina
+                        $date = $oRow->outDate == null ? $oRow->outDateTime : $oRow->outDate;
+                        $time = strlen($oRow->outDateTime) > 10 ? substr($oRow->outDateTime, -8) : null;
+                        
+                        $oRow->overWorkedMins = SDataProcess::getOverTime($oRow->inDateTime, $oRow->inDateTimeSch, $oRow->outDateTime, $oRow->outDateTimeSch);
+                        if ($oRow->overWorkedMins > 0) {
+                            $adjs = SPrepayrollAdjustUtils::getAdjustForCase($date, $time, 2, \SCons::PP_TYPES['DHE'], $oRow->idEmployee);
+                            $discountMins = 0;
+                            if (count($adjs) > 0) {
+                                foreach ($adjs as $adj) {
+                                    $discountMins += $adj->minutes;
+                                    $oRow->adjusts[] = $adj;
+                                }
+                            }
+
+                            $oRow->overWorkedMins = $oRow->overWorkedMins >= $discountMins ? ($oRow->overWorkedMins - $discountMins) : 0;
+                        }
+                    }
+                }
+                else {
+                    $oRow->overWorkedMins = 0;
+                    $oRow->overDefaultMins = 0;
+                    $oRow->overScheduleMins = 0;
                 }
             }
             else {
                 $oRow->overWorkedMins = 0;
                 $oRow->overDefaultMins = 0;
                 $oRow->overScheduleMins = 0;
+
+                $oRow->overMinsTotal = 0;
             }
 
             // Ajuste de prenómina
@@ -941,40 +950,41 @@ class SDataProcess {
                 $oRow->overMinsByAdjs = $minsExtraByAdj;
             }
 
-            $cIn = false;
-            $cOut = false;
-            $adjIn = SPrepayrollAdjustUtils::hasTheAdjustType($oRow->adjusts, \SCons::PP_TYPES['JE']);
-            $adjOut = SPrepayrollAdjustUtils::hasTheAdjustType($oRow->adjusts, \SCons::PP_TYPES['JS']);
-            if ($oRow->hasCheckIn) {
-                $mayBeOverTime = false;
-                $cIn = SDataProcess::isCheckSchedule($oRow->inDateTime, $oRow->inDateTimeSch, $mayBeOverTime);
-                if ($cIn && !$adjIn) {
-                    $oRow->comments = $oRow->comments."Entrada atípica. ";
-                    $oRow->isAtypicalIn = true;
+            if ($oRow->hasChecks) {
+                $cIn = false;
+                $cOut = false;
+                $adjIn = SPrepayrollAdjustUtils::hasTheAdjustType($oRow->adjusts, \SCons::PP_TYPES['JE']);
+                $adjOut = SPrepayrollAdjustUtils::hasTheAdjustType($oRow->adjusts, \SCons::PP_TYPES['JS']);
+                if ($oRow->hasCheckIn) {
+                    $mayBeOverTime = false;
+                    $cIn = SDataProcess::isCheckSchedule($oRow->inDateTime, $oRow->inDateTimeSch, $mayBeOverTime);
+                    if ($cIn && !$adjIn) {
+                        $oRow->comments = $oRow->comments."Entrada atípica. ";
+                        $oRow->isAtypicalIn = true;
+                    }
                 }
-            }
-            if ($oRow->hasCheckOut) {
-                //$mayBeOverTime = $aEmployeeOverTime[$oRow->idEmployee];
-                $mayBeOverTime = false;
-                $cOut = SDataProcess::isCheckSchedule($oRow->outDateTime, $oRow->outDateTimeSch, $mayBeOverTime);
-                if ($cOut && !$adjOut) {
-                    $oRow->comments = $oRow->comments."Salida atípica. ";
-                    $oRow->isAtypicalOut = true;
+                if ($oRow->hasCheckOut) {
+                    //$mayBeOverTime = $aEmployeeOverTime[$oRow->idEmployee];
+                    $mayBeOverTime = false;
+                    $cOut = SDataProcess::isCheckSchedule($oRow->outDateTime, $oRow->outDateTimeSch, $mayBeOverTime);
+                    if ($cOut && !$adjOut) {
+                        $oRow->comments = $oRow->comments."Salida atípica. ";
+                        $oRow->isAtypicalOut = true;
+                    }
                 }
-            }
-            if (($cIn || $cOut) && (! $adjIn && ! $adjOut)) {
-                $oRow->comments = $oRow->comments."Revisar horario. ";
-                $oRow->isCheckSchedule = true;
-            }
+                if (($cIn || $cOut) && (! $adjIn && ! $adjOut)) {
+                    $oRow->comments = $oRow->comments."Revisar horario. ";
+                    $oRow->isCheckSchedule = true;
+                }
 
-            if ($oRow->isAtypicalOut && $oRow->isAtypicalIn) {
-                $oRow->overDefaultMins = 0;
+                if ($oRow->isAtypicalOut && $oRow->isAtypicalIn) {
+                    $oRow->overDefaultMins = 0;
+                }
             }
 
             // suma de minutos extra totales.
             $oRow->overMinsTotal = $oRow->overWorkedMins + $oRow->overDefaultMins + $oRow->overScheduleMins + $oRow->overMinsByAdjs;
             // $oRow->extraHours = SDelayReportUtils::convertToHoursMins($oRow->overMinsTotal);
-
         }
 
         return $lData;

@@ -24,7 +24,7 @@ class SPrepayrollAdjustUtils {
                         ->where('is_delete', false)
                         ->where('pa.employee_id', $employeId);
 
-        if ($adjType == "") {
+        if ($adjType != "") {
             if (is_array($adjType)) {
                 $lAdjusts = $lAdjusts->whereIn('pa.adjust_type_id', $adjType);
             }
