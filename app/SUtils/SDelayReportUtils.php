@@ -151,7 +151,17 @@ class SDelayReportUtils {
             return 0;
         }
 
-        $comp = SDelayReportUtils::compareDates($inDateTime, $outDateTime);
+        $inComp = SDelayReportUtils::compareDates($inDateTime, $inDateTimeSch);
+
+        $inDateComp = "";
+        if ($inComp->diffMinutes < 0) {
+            $inDateComp = $inDateTime;
+        }
+        else {
+            $inDateComp = $inDateTimeSch;
+        }
+
+        $comp = SDelayReportUtils::compareDates($inDateComp, $outDateTime);
         
         $mins = abs($comp->diffMinutes);
         
