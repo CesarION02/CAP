@@ -618,8 +618,6 @@ class SDataProcess {
             $oRow->scheduleFrom = SDataProcess::getOrigin($result);
 
             if ($oRow->scheduleFrom == \SCons::FROM_ASSIGN && ! $result->auxScheduleDay->is_active) {
-                $oRow->outDate = $result->variableDateTime->toDateString();
-                $oRow->outDateTime = $result->variableDateTime->toDateTimeString();
                 $oRow->comments = $oRow->comments."No laborable. ";
                 $oRow->workable = false;
 
@@ -745,6 +743,19 @@ class SDataProcess {
                 }
             }
 
+            $holidays = SDataProcess::getHolidays($oRow->idEmployee, $sDt->toDateString());
+
+            if ($holidays == null) {
+                continue;
+            }
+
+            $num = sizeof($holidays);
+
+            if ($num > 0) {
+                $oRow->isHoliday = $num;
+                $oRow->others = $oRow->others.'Festivo. ';
+            }
+
             if ($oRow->isTypeDayChecked || $oRow->hasAssign) {
                 continue;
             }
@@ -795,8 +806,8 @@ class SDataProcess {
                 break;
 
             case \SCons::T_DAY_HOLIDAY:
-                $oRow->isHoliday++;
-                $text = "Festivo";
+                // $oRow->isHoliday++;
+                // $text = "Festivo";
                 break;
 
             case \SCons::T_DAY_DAY_OFF:
@@ -808,9 +819,55 @@ class SDataProcess {
                 break;
         }
 
-        $oRow->others."".$text.". ";
+        $oRow->others = $oRow->others.$text.". ";
 
         return $oRow;
+    }
+
+    private static function getHolidays($idEmployee, $sDt)
+    {
+        /**
+         * SELECT 
+         *       distinct h.id, h.name, ha.date
+         *   FROM
+         *       holiday_assign ha
+         *           INNER JOIN
+         *       holidays h ON ha.holiday_id = h.id
+         *           LEFT JOIN
+         *       areas a ON ha.area_id = a.id
+         *           LEFT JOIN
+         *       departments da ON a.id = da.area_id
+         *           LEFT JOIN
+         *       employees ea ON da.id = ea.department_id
+         *           LEFT JOIN
+         *       departments d ON ha.department_id = d.id
+         *           LEFT JOIN
+         *       employees e ON d.id = e.department_id
+         *   WHERE
+         *       ha.date = '2020-09-22'
+         *       AND ha.is_delete = FALSE
+         *       AND (ha.employee_id = 24 OR ea.id = 24 OR e.id = 24);
+         */
+
+        $holidays = \DB::table('holiday_assign AS ha')
+                        ->join('holidays AS h', 'ha.holiday_id', '=', 'h.id')
+                        ->leftJoin('areas AS a', 'ha.area_id', '=', 'a.id')
+                        ->leftJoin('departments AS da', 'da.area_id', '=', 'a.id')
+                        ->leftJoin('employees AS ea', 'da.id', '=', 'ea.department_id')
+                        ->leftJoin('departments AS d', 'd.id', '=', 'ha.department_id')
+                        ->leftJoin('employees AS e', 'd.id', '=', 'e.department_id')
+                        ->select('h.id AS h_id', 'ha.date', 'h.name')
+                        ->where('ha.date', $sDt)
+                        ->where('ha.is_delete', false)
+                        ->where(function ($query) use ($idEmployee) {
+                            $query->where('ha.employee_id', '=', $idEmployee)
+                            ->orWhere('ea.id', '=', $idEmployee)
+                            ->orWhere('e.id', '=', $idEmployee);
+                        })
+                        ->distinct('h_id')
+                        ->get();
+        
+        return $holidays;
     }
 
     /**
