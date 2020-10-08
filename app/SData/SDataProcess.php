@@ -743,7 +743,14 @@ class SDataProcess {
                 }
             }
 
-            $holidays = SDataProcess::getHolidays($oRow->idEmployee, $sDt->toDateString());
+            if ($oRow->outDateTimeSch == null) {
+                $sOutDt = Carbon::parse($oRow->outDateTime);
+            }
+            else {
+                $sOutDt = Carbon::parse($oRow->outDateTimeSch);
+            }
+
+            $holidays = SDataProcess::getHolidays($oRow->idEmployee, $sOutDt->toDateString());
 
             if ($holidays == null) {
                 continue;
