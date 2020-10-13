@@ -54,8 +54,30 @@
                                     <td>{{ $lRows[$i]->num_employee  }}</td>
                                     <td>{{ $lRows[$i]->name }}</td>
                                     {{-- <td>@{{ row.inDate }}</td> --}}
-                                    
-                                    @if($lRows[$i]->haschecks == 1 && $lRows[$i]->is_dayoff == 0)
+                                    @if ($lRows[$i]->hasAdjust == 1)
+                                        @if($lRows[$i]->inDate != null)
+                                            <td>{{ \App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->inDate) }}</td>
+                                        @else
+                                            <td></td>
+                                        @endif
+                                        <td>Se justifica la entrada</td>
+                                        @if($lRows[$i]->outDate != null)
+                                            <td>{{ \App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->outDate) }}</td>
+                                        @else
+                                            <td></td>
+                                        @endif
+                                        <td>Se justifica la salida</td>
+                                        @if($tipo == 1)
+                                            <td align="center">{{ $lRows[$i]->extraDobleMins + $lRows[$i]->extraDobleMinsNoficial }}</td>
+                                            <td align="center">{{ $lRows[$i]->extraTripleMins + $lRows[$i]->extraTripleMinsNoficial }}</td>
+                                        @elseif($tipo == 2)
+                                            <td align="center">{{ $lRows[$i]->extraDobleMins }}</td>
+                                            <td align="center">{{ $lRows[$i]->extraTripleMins }}</td>
+                                        @else
+                                            <td align="center">{{ $lRows[$i]->extraDobleMinsNoficial }}</td>
+                                            <td align="center">{{ $lRows[$i]->extraTripleMinsNoficial }}</td>
+                                        @endif
+                                    @elseif($lRows[$i]->haschecks == 1 && $lRows[$i]->is_dayoff == 0 )
                                         <td>{{ \App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->inDate) }}</td>
                                         @if($tipo != 2)
                                             @if($lRows[$i]->inDateTime == '00:20:20')

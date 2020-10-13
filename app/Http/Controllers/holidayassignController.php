@@ -165,6 +165,33 @@ class holidayassignController extends Controller
             $holiday->updated_by = 1;
             $holiday->save(); 
         break;
+        case 4:
+            $empleados = employees::where('is_delete','0')->where('is_active', true)->orderBy('name','ASC')->get();   
+            for($i = 0 ; count($empleados) > $i ; $i++){
+                $listEmp[$i] = $empleados[$i]->id;
+            }
+            $grupo = new group_assign();
+                $grupo->created_by = 1;
+                $grupo->updated_by = 1;
+                $grupo->save();
+
+                $events = SEventsUtils::getAllEvents($date, $listEmp, 0, 0, 0);
+
+                if (count($events) > 0) {
+                    return back()->withInput()->withErrors(['Ya hay incidencias o días festivos para esta fecha']);
+                }
+    
+                for($y = 0 ; count($listEmp) > $y ; $y++){
+                    $holiday = new holidayassign();
+                    $holiday->employee_id = $listEmp[$y];
+                    $holiday->date = $date;
+                    $holiday->holiday_id = $request->semana;
+                    $holiday->group_assign_id = $grupo->id;
+                    $holiday->created_by = 1;
+                    $holiday->updated_by = 1;
+                    $holiday->save();
+                }
+        break;
 
     }
         
@@ -193,8 +220,10 @@ class holidayassignController extends Controller
         $employee = employees::where('is_delete','0')->where('is_active', true)->orderBy('name','ASC')->pluck('id','name');
         $department = department::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
         $area = area::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
+        
         $holiday = holiday::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
         $datas = holidayassign::find($id);
+        
         $auxiliar = 0;
         $empleados = 0;
         if($datas->employee_id == 0){

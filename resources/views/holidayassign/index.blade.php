@@ -139,9 +139,10 @@ Asignar días festivos
                                     </button>
                                 
                                     <ul class="dropdown-menu" role="menu">
-                                    <li><a href="{{route('crear_asignacion_festivo','1')}}">Por empleado</a>
+                                        <li><a href="{{route('crear_asignacion_festivo','1')}}">Por empleado</a>
                                         <li><a href="{{route('crear_asignacion_festivo','2')}}">Por departamento CAP</a>
-                                            <li><a href="{{route('crear_asignacion_festivo','3')}}">Por área</a>
+                                        <li><a href="{{route('crear_asignacion_festivo','3')}}">Por área</a>
+                                        <li><a href="{{route('crear_asignacion_festivo','4')}}">Global</a></li>
                                     </ul>
                                 </div>
                             </div>

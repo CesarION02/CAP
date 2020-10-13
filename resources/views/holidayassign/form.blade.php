@@ -1,4 +1,4 @@
-
+@if(isset($year))
 <div class="form-group">
     <label for="date" class="col-lg-3 control-label requerido">Año:</label>
     <div class="col-lg-3">
@@ -11,6 +11,7 @@
         </select>
     </div>  
 </div>
+@endif
 <div class="form-group">
     <label for="festivo" class="col-lg-3 control-label requerido">Día festivo:</label>
     <div class="col-lg-5" id="selectfestivo">
@@ -20,8 +21,6 @@
                 @if(isset($datas))
                     @if($datas->holiday_id == $index)
                         <option selected value="{{$index}}">{{$holiday}}</option>
-                    @else
-                        <option value="{{$index}}">{{$holiday}}</option>
                     @endif
                 @endif
             @endforeach
