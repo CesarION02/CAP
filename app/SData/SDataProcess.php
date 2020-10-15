@@ -618,6 +618,8 @@ class SDataProcess {
             $oRow->scheduleFrom = SDataProcess::getOrigin($result);
 
             if ($oRow->scheduleFrom == \SCons::FROM_ASSIGN && ! $result->auxScheduleDay->is_active) {
+                $oRow->outDate = $result->variableDateTime->toDateString();
+                $oRow->outDateTime = $result->variableDateTime->toDateTimeString();
                 $oRow->comments = $oRow->comments."No laborable. ";
                 $oRow->workable = false;
 
