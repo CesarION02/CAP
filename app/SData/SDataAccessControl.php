@@ -63,9 +63,9 @@ class SDataAccessControl {
                     $text = "Vacaciones";
                     break;
     
-                case \SCons::T_DAY_HOLIDAY:
-                    $text = "Festivo";
-                    break;
+                // case \SCons::T_DAY_HOLIDAY:
+                //     $text = "Festivo";
+                //     break;
     
                 case \SCons::T_DAY_DAY_OFF:
                     break;
@@ -79,6 +79,24 @@ class SDataAccessControl {
             
             $lEvents[] = $oEvent;
         }
+
+        $holidays = SDataProcess::getHolidays($id, $dtDate);
+
+        if ($holidays != null) {
+            $num = sizeof($holidays);
+    
+            if ($num > 0) {
+                foreach ($holidays as $holiday) {
+                    $oEvent = new SAuxEvent();
+                    $oEvent->dtDate = $dtDate;
+                    $oEvent->typeId = \SCons::T_DAY_HOLIDAY;
+                    $oEvent->typeName = $holiday->name;
+                    
+                    $lEvents[] = $oEvent;
+                }
+            }
+        }
+
 
         return $lEvents;
     }
