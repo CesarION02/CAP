@@ -13,6 +13,8 @@ use Illuminate\Http\Request;
 |
 */
 
+Route::post('login', 'api\\AuthController@login');
+
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
@@ -29,3 +31,29 @@ Route::get('prepayroll', [
 Route::get('absdelays', [
     'uses' => 'externalSrcsController@getAbsDelays'
 ]);
+
+Route::group(['middleware' => 'auth:api'], function() {
+
+    /**
+     * API Control Access CAP
+    */
+
+    /*
+    * get employees
+    **/
+    Route::get('employees', [
+        'uses' => 'AccessControlController@getEmployees'
+    ]);
+    /*
+    * get id employee by ID
+    **/
+    Route::get('infobynum', [
+        'uses' => 'AccessControlController@getInfoByEmployeeNumber'
+    ]);
+    /*
+    * get id employee by ID
+    **/
+    Route::get('infobyid', [
+        'uses' => 'AccessControlController@getAllInfoById'
+    ]);
+});
