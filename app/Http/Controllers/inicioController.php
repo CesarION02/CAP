@@ -13,7 +13,9 @@ class inicioController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index()
-    {
+    {   $config = \App\SUtils\SConfiguration::getConfigurations();
+
+        $correcto = \App\Http\Controllers\SyncController::syncronizeWithERP($config->lastSyncDateTime);
         $rol = session()->get('rol_id');
         $datas = DB::table('home_menus_rol')
                         ->join('menu','menu.id','=','home_menus_rol.menu_id')
@@ -21,7 +23,13 @@ class inicioController extends Controller
                         ->select('menu.name AS nombreMenu', 'menu.url AS url', 'home_menus_rol.icono AS icono')
                         ->orderBy('home_menus_rol.order')
                         ->get();
-        return view('inicio')->with('datas',$datas);
+        if( $correcto != 0){
+            return view('inicio')->with('datas',$datas)->with('mensaje', 'Sincronizado');
+        }else{
+            return view('inicio')->with('datas',$datas)->with('mensaje', 'No se pudo sincronizar');
+        }
+        
+        
     }
 
     /**
