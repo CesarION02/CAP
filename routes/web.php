@@ -274,6 +274,11 @@ Route::get('holidays/{id}/edit', 'holidayController@edit')->name('editar_festivo
 Route::put('holidays/{id}', 'holidayController@update')->name('actualizar_festivo');
 Route::delete('holidays/{id}', 'holidayController@destroy')->name('eliminar_festivo');
 
+/* PERIODOS PROCESADOS */
+Route::get('periods', 'periodController@index')->name('periodo');
+Route::get('periods/create', 'periodController@create')->name('crear_periodo');
+Route::post('periods', 'periodController@store')->name('guardar_periodo');
+
 /* RUTAS DIAS FESTIVOS AUXILIARES (Guardias sabatinas)*/
 Route::post('holidaysaux', 'holidayController@storeAux')->name('festivo_aux');
 Route::delete('holidaysaux/{id}', 'holidayController@destroyAux')->name('eliminar_festivo_aux');

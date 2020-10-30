@@ -47,9 +47,9 @@ class SDateUtils {
                 $quincenaIni = DB::table('hrs_prepay_cut')
                         ->where('is_delete','0')
                         //->whereBetween('dt_cut', [$iIni, $iFin])
-                        ->where('dt_cut','<=',$iIni)
+                        ->where('dt_cut','>=',$iIni)
                         ->where('year','=',$iYear)
-                        ->orderBy('dt_cut','DESC')
+                        ->orderBy('dt_cut','ASC')
                         ->select('num AS num', 'dt_cut AS cut')
                         ->get();
                 $quincenaFin = DB::table('hrs_prepay_cut')
@@ -69,9 +69,13 @@ class SDateUtils {
                 //for($i = 0 ; $contadorAux > $i ; $i ++){
                     //$quincena[$i] = $quincenas[$i]->num;
                 //}
-                for($i = 0 ; $finquincena > $inicioquincena ; $i++){
-                    $quincena[$i] = $inicioquincena;
-                    $inicioquincena++;
+                if($finquincena > $inicioquincena){
+                    for($i = 0 ; $finquincena > $inicioquincena ; $i++){
+                        $quincena[$i] = $inicioquincena;
+                        $inicioquincena++;
+                    }
+                }else{
+                    $quincena[0] = $inicioquincena;
                 }
                 //if($faltante == 1){
                     //$auxiliar = $quincenas[$contadorAux-1]->num;

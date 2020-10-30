@@ -1,6 +1,13 @@
 @extends("theme.$theme.layout")
 @section('styles1')
     <link rel="stylesheet" href="{{ asset("dt/datatables.css") }}">
+    <link rel="stylesheet" href="{{ asset("assets/css/reportD.css") }}">
+    <style>
+        tr {
+            font-size: 70%;
+        }
+        span.nobr { white-space: nowrap; }
+    </style>
 @endsection
 @section('title')
 {{ $sTitle }}
@@ -33,166 +40,225 @@
                         <table id="delays_table" class="table table-condensed" style="width:100%">
                             <thead>
                                 <tr>
-                                    <th></th>
+                                    <th>#</th>
                                     <th>Empleado</th>
-                                    {{-- <th>Fecha entrada</th> --}}
                                     <th>Fecha entrada</th></th>
                                     <th>Hora entrada</th>
                                     <th>Fecha salida</th>
                                     <th>Hora salida</th>
-                                    {{-- <th v-if="oData.tReport == oData.REP_DELAY">Retardo (min)</th>
-                                    <th v-else>Horas Extra</th> --}}
                                     <th>Horas extra dobles</th>
-                                    {{-- <th v-if="oData.tReport == oData.REP_HR_EX">Hr_progr_Sal</th> --}}
                                     <th>Horas extra triples</th>
+                                    <th>Prima dominical</th>
                                 </tr>
                             </thead>
                             <tbody>
+                                <?php $idEmployee = $lRows[0]->employee_id; $totalextrad = 0; $totaldominical = 0;$totalextrat = 0; ?>
                                 @for($i = 0 ; count($lRows) > $i ; $i++)
-                                @if($lRows[$i]->isOverJourney == false )
-                                <tr>
-                                    <td>{{ $lRows[$i]->num_employee  }}</td>
-                                    <td>{{ $lRows[$i]->name }}</td>
-                                    {{-- <td>@{{ row.inDate }}</td> --}}
-                                    @if ($lRows[$i]->hasAdjust == 1)
-                                        @if($lRows[$i]->inDate != null)
-                                            <td>{{ \App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->inDate) }}</td>
-                                        @else
+                                    @if($idEmployee != $lRows[$i]->employee_id)
+                                        <tr>
+                                            <td>{{ $lRows[$i]->num_employee  }}</td>
+                                            <td>{{ $lRows[$i]->name }}</td>
+                                            <td>Totales:</td>
                                             <td></td>
-                                        @endif
-                                        <td>Se justifica la entrada</td>
-                                        @if($lRows[$i]->outDate != null)
-                                            <td>{{ \App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->outDate) }}</td>
-                                        @else
                                             <td></td>
-                                        @endif
-                                        <td>Se justifica la salida</td>
-                                        @if($tipo == 1)
-                                            <td align="center">{{ $lRows[$i]->extraDobleMins + $lRows[$i]->extraDobleMinsNoficial }}</td>
-                                            <td align="center">{{ $lRows[$i]->extraTripleMins + $lRows[$i]->extraTripleMinsNoficial }}</td>
-                                        @elseif($tipo == 2)
-                                            <td align="center">{{ $lRows[$i]->extraDobleMins }}</td>
-                                            <td align="center">{{ $lRows[$i]->extraTripleMins }}</td>
-                                        @else
-                                            <td align="center">{{ $lRows[$i]->extraDobleMinsNoficial }}</td>
-                                            <td align="center">{{ $lRows[$i]->extraTripleMinsNoficial }}</td>
-                                        @endif
-                                    @elseif($lRows[$i]->haschecks == 1 && $lRows[$i]->is_dayoff == 0 )
-                                        <td>{{ \App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->inDate) }}</td>
-                                        @if($tipo != 2)
-                                            @if($lRows[$i]->inDateTime == '00:20:20')
-                                                <td>{{ 'Sin checada' }}</td>
-                                            @else
-                                                <td>{{ $lRows[$i]->inDateTime }}</td>
-                                            @endif
-                                        @else
-                                            @if($lRows[$i]->inDateTimeNoficial == null)
-                                                @if($lRows[$i]->inDateTime == '00:20:20')
-                                                    <td>{{ 'Sin checada' }}</td>
-                                                @else
-                                                    <td>{{ $lRows[$i]->inDateTime }}</td>
-                                                @endif  
-                                            @else
-                                                <td>{{ $lRows[$i]->inDateTimeNoficial }}</td>
-                                            @endif
-                                        @endif
-                                    
-                                        <td>{{ \App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->outDate) }}</td>
-                                    
-                                        @if($tipo != 2)
-                                            
-                                            @if($lRows[$i]->outDateTime == '00:20:20')
-                                                <td>{{ 'Sin checada' }}</td>
-                                            @else
-                                                <td>{{ $lRows[$i]->outDateTime }}</td>
-                                            @endif
-                                        @else
-                                            @if($lRows[$i]->outDateTimeNoficial == null)
-                                                @if($lRows[$i]->outDateTime == '00:20:20')
-                                                    <td>{{ 'Sin checada' }}</td>
-                                                @else
-                                                    <td>{{ $lRows[$i]->outDateTime }}</td>
-                                                @endif  
-                                            @else
-                                                <td>{{ $lRows[$i]->outDateTimeNoficial }}</td>
-                                            @endif
-                                        @endif
-                                    {{-- <td v-if="oData.tReport == oData.REP_DELAY">@{{ row.delayMins }}</td>
-                                    <td v-else>@{{ row.extraHours }}</td> --}}
-                                        @if($tipo == 1)
-                                            <td align="center">{{ $lRows[$i]->extraDobleMins + $lRows[$i]->extraDobleMinsNoficial }}</td>
-                                            <td align="center">{{ $lRows[$i]->extraTripleMins + $lRows[$i]->extraTripleMinsNoficial }}</td>
-                                        @elseif($tipo == 2)
-                                            <td align="center">{{ $lRows[$i]->extraDobleMins }}</td>
-                                            <td align="center">{{ $lRows[$i]->extraTripleMins }}</td>
-                                        @else
-                                            <td align="center">{{ $lRows[$i]->extraDobleMinsNoficial }}</td>
-                                            <td align="center">{{ $lRows[$i]->extraTripleMinsNoficial }}</td>
-                                        @endif
-                                    @elseif($lRows[$i]->hasabsence==1)
-                                        @if($lRows[$i]->inDate != null)
-                                        <td>{{\App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->inDate)}}</td>
-                                        @else
-                                        <td>{{\App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->outDate)}}</td>
-                                        @endif
-                                        <td>{{ 'Falta'}}</td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                    @elseif($lRows[$i]->is_dayoff==1)
-                                        @if($lRows[$i]->inDate != null)
-                                            <td>{{\App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->inDate)}}</td>
-                                        @else
-                                            <td>{{\App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->outDate)}}</td>
-                                        @endif
-                                        <td>{{ 'Descanso'}}</td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                    @elseif($lRows[$i]->is_holiday==1)
-                                        @if($lRows[$i]->inDate != null)
-                                        <td>{{\App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->inDate)}}</td>
-                                        @else
-                                            <td>{{\App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->outDate)}}</td>
-                                        @endif
-                                        <td>{{ 'Día festivo'}}</td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
+                                            <td></td>
+                                            <td>{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($totalextrad) }}</td>
+                                            <td>{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($totalextrat) }}</td>
+                                            <td>{{ $totaldominical }}</td>
+
+                                        </tr>
+                                        <?php $idEmployee = $lRows[$i]->employee_id; $i--;?>
                                     @else
-                                        @for( $j = 0 ; count($incapacidades) > $j ; $j++)
-                                            @if ($lRows[$i]->employee_id == $incapacidades[$j]->idEmp && ($lRows[$i]->inDate == $incapacidades[$j]->Date || $lRows[$i]->outDate == $incapacidades[$j]->Date))
+                                        @if($lRows[$i]->isOverJourney == false )
+                                            <tr>
+                                            <td>{{ $lRows[$i]->num_employee  }}</td>
+                                            <td>{{ $lRows[$i]->name }}</td>
+                                            {{-- <td>@{{ row.inDate }}</td> --}}
+                                            @if ($lRows[$i]->hasAdjust == 1)
+                                                @if($lRows[$i]->inDate != null)
+                                                    <td>{{ \App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->inDate) }}</td>
+                                                @else
+                                                    <td></td>
+                                                @endif
+                                                <td>Se justifica la entrada</td>
+                                                @if($lRows[$i]->outDate != null)
+                                                    <td>{{ \App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->outDate) }}</td>
+                                                @else
+                                                    <td></td>
+                                                @endif
+                                                <td>Se justifica la salida</td>
+                                                @if($tipo == 1)
+                                                    <td align="center">{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($lRows[$i]->extraDobleMins + $lRows[$i]->extraDobleMinsNoficial) }}</td>
+                                                    <td align="center">{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($lRows[$i]->extraTripleMins + $lRows[$i]->extraTripleMinsNoficial) }}</td>
+                                                @elseif($tipo == 2)
+                                                    <td align="center">{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($lRows[$j]->extraDoubleMins) }}</td>
+                                                    <td align="center">{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($lRows[$i]->extraTripleMins) }}</td>
+                                                @else
+                                                    <td align="center">{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($lRows[$j]->extraDoubleMins)}}</td>
+                                                    <td align="center">{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($lRows[$i]->extraTripleMinsNoficial) }}</td>
+                                                @endif
+                                                <?php $totalextrad = $totalextrad + $lRows[$i]->extraDobleMins; $totalextrat = $totalextrat + $lRows[$i]->extraTripleMins; ?>
+                                                @if($lRows[$i]->is_sunday == 1)
+                                                    <td align="center">{{"1"}}</td>
+                                                    <?php $totaldominical = $totaldominical + 1; ?>
+                                                @else
+                                                    <td></td>
+                                                @endif
+                                            @elseif($lRows[$i]->haschecks == 1 && $lRows[$i]->is_dayoff == 0 && $lRows[$i]->is_holiday == 0 )
+                                                <td>{{ \App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->inDate) }}</td>
+                                                @if($tipo != 2)
+                                                    @if($lRows[$i]->inDateTime == '00:20:20')
+                                                        <td>{{ 'Sin checada' }}</td>
+                                                    @else
+                                                        <td>{{ $lRows[$i]->inDateTime }}</td>
+                                                    @endif
+                                                @else
+                                                    @if($lRows[$i]->inDateTimeNoficial == null)
+                                                        @if($lRows[$i]->inDateTime == '00:20:20')
+                                                            <td>{{ 'Sin checada' }}</td>
+                                                        @else
+                                                            <td>{{ $lRows[$i]->inDateTime }}</td>
+                                                        @endif  
+                                                    @else
+                                                        <td>{{ $lRows[$i]->inDateTimeNoficial }}</td>
+                                                    @endif
+                                                @endif
+                                        
+                                                <td>{{ \App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->outDate) }}</td>
+                                        
+                                                @if($tipo != 2)
+                                                
+                                                    @if($lRows[$i]->outDateTime == '00:20:20')
+                                                        <td>{{ 'Sin checada' }}</td>
+                                                    @else
+                                                        <td>{{ $lRows[$i]->outDateTime }}</td>
+                                                    @endif
+                                                @else
+                                                    @if($lRows[$i]->outDateTimeNoficial == null)
+                                                        @if($lRows[$i]->outDateTime == '00:20:20')
+                                                            <td>{{ 'Sin checada' }}</td>
+                                                        @else
+                                                            <td>{{ $lRows[$i]->outDateTime }}</td>
+                                                        @endif  
+                                                    @else
+                                                        <td>{{ $lRows[$i]->outDateTimeNoficial }}</td>
+                                                    @endif
+                                                @endif
+                                        {{-- <td v-if="oData.tReport == oData.REP_DELAY">@{{ row.delayMins }}</td>
+                                        <td v-else>@{{ row.extraHours }}</td> --}}
+                                                @if($tipo == 1)
+                                                    <td align="center">{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($lRows[$i]->extraDobleMins + $lRows[$i]->extraDobleMinsNoficial) }}</td>
+                                                    <td align="center">{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($lRows[$i]->extraTripleMins + $lRows[$i]->extraTripleMinsNoficial) }}</td>
+                                                @elseif($tipo == 2)
+                                                    <td align="center">{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($lRows[$i]->extraDobleMins) }}</td>
+                                                    <td align="center">{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($lRows[$i]->extraTripleMins) }}</td>
+                                                @else
+                                                    <td align="center">{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($lRows[$i]->extraDobleMinsNoficial) }}</td>
+                                                    <td align="center">{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($lRows[$i]->extraTripleMinsNoficial) }}</td>
+                                                @endif
+                                                <?php $totalextrad = $totalextrad + $lRows[$i]->extraDobleMins; $totalextrat = $totalextrat + $lRows[$i]->extraTripleMins; ?>
+                                                @if($lRows[$i]->is_sunday == 1)
+                                                    <td align="center">{{"1"}}</td>
+                                                    <?php $totaldominical = $totaldominical + 1; ?>
+                                                @else
+                                                    <td> </td>
+                                                @endif
+                                            @elseif($lRows[$i]->hasabsence==1)
                                                 @if($lRows[$i]->inDate != null)
                                                     <td>{{\App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->inDate)}}</td>
                                                 @else
                                                     <td>{{\App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->outDate)}}</td>
                                                 @endif
-                                                <td>{{ 'Incapacidad'}}</td>
+                                                <td>{{ 'Falta'}}</td>
                                                 <td></td>
                                                 <td></td>
                                                 <td></td>
                                                 <td></td>
+                                                <td></td>
+                                            @elseif($lRows[$i]->is_dayoff==1)
+                                                @if($lRows[$i]->inDate != null)
+                                                    <td>{{\App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->inDate)}}</td>
+                                                @else
+                                                    <td>{{\App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->outDate)}}</td>
+                                                @endif
+                                                <td>{{ 'Descanso'}}</td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                            @elseif($lRows[$i]->is_holiday==1)
+                                                @if($lRows[$i]->inDate != null)
+                                                    <td>{{\App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->inDate)}}</td>
+                                                @else
+                                                    <td>{{\App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->outDate)}}</td>
+                                                @endif
+                                                <td>{{ 'Día festivo'}}</td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                            @else
+                                                @for( $j = 0 ; count($incapacidades) > $j ; $j++)
+                                                    @if ($lRows[$i]->employee_id == $incapacidades[$j]->idEmp && ($lRows[$i]->inDate == $incapacidades[$j]->Date || $lRows[$i]->outDate == $incapacidades[$j]->Date))
+                                                        @if($lRows[$i]->inDate != null)
+                                                            <td>{{\App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->inDate)}}</td>
+                                                        @else
+                                                            <td>{{\App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->outDate)}}</td>
+                                                        @endif
+                                                        <td>{{ 'Incapacidad'}}</td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                    @endif
+                                                @endfor
+                                                @for( $j = 0 ; count($vacaciones) > $j ; $j++)
+                                                    @if ($lRows[$i]->employee_id == $vacaciones[$j]->idEmp && ($lRows[$i]->inDate == $vacaciones[$j]->Date || $lRows[$i]->outDate == $vacaciones[$j]->Date))
+                                                        <td>{{ 'Vacaciones'}}</td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                    @endif
+                                                @endfor
+                                                @for( $j = 0 ; count($inasistencia) > $j ; $j++)
+                                                    @if ($lRows[$i]->employee_id == $inasistencia[$j]->idEmp && ($lRows[$i]->inDate == $inasistencia[$j]->Date || $lRows[$i]->outDate == $inasistencia[$j]->Date))
+                                                        <td>{{'Inasistencia'}}</td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                    @endif
+                                                @endfor
                                             @endif
-                                        @endfor
-                                        @for( $j = 0 ; count($vacaciones) > $j ; $j++)
-                                            @if ($lRows[$i]->employee_id == $vacaciones[$j]->idEmp && ($lRows[$i]->inDate == $vacaciones[$j]->Date || $lRows[$i]->outDate == $vacaciones[$j]->Date))
-                                            <td>{{ 'Vacaciones'}}</td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            @endif
-                                        @endfor
+                                        {{-- <td v-if="oData.tReport == oData.REP_HR_EX">@{{ row.outDateTimeSch }}</td> --}}
+                                            </tr>
+                                        @endif
                                     @endif
-                                    {{-- <td v-if="oData.tReport == oData.REP_HR_EX">@{{ row.outDateTimeSch }}</td> --}}
-                                </tr>
-                                @endif
                                 @endfor
+                                <tr>
+                                    <td>{{ $lRows[$i-1]->num_employee  }}</td>
+                                    <td>{{ $lRows[$i-1]->name }}</td>
+                                    <td>Totales:</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td align="center">{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($totalextrad) }}</td>
+                                    <td align="center">{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($totalextrat) }}</td>
+                                    <td align="center">{{ $totaldominical }}</td>
+
+                                </tr>
                             </tbody>
+                            <?php $cadenaregreso = 'datosreportestps/'.$reporttype.'/'.$tipo;?>
+                            <button onclick="topFunction()" id="myBtn" title="Ir arriba">Ir arriba</button>
+                            <a href="{{ $cadenaregreso }}"  id="newButton" title="Nuevo reporte">Nuevo reporte</a>
                         </table>
                     </div>
                 </div>
@@ -256,6 +322,7 @@
                     [ 10, 25, 50, 100, -1 ],
                     [ 'Mostrar 10', 'Mostrar 25', 'Mostrar 50', 'Mostrar 100', 'Mostrar todo' ]
                 ],
+                "iDisplayLength": -1,
                 "buttons": [
                         'pageLength',
                         {
@@ -277,5 +344,30 @@
                     ]
             });
         });
+    </script>
+
+    <script>
+        //Get the button:
+        mybutton = document.getElementById("myBtn");
+        theNewButton = document.getElementById("newButton");
+
+        // When the user scrolls down 20px from the top of the document, show the button
+        window.onscroll = function() {scrollFunction()};
+
+        function scrollFunction() {
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                mybutton.style.display = "block";
+                theNewButton.style.display = "block";
+            } else {
+                mybutton.style.display = "none";
+                theNewButton.style.display = "none";
+            }
+        }
+
+        // When the user clicks on the button, scroll to the top of the document
+        function topFunction() {
+            document.body.scrollTop = 0; // For Safari
+            document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+        }
     </script>
 @endsection

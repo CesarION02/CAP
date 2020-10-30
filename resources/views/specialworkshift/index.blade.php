@@ -5,6 +5,7 @@ Turno especial
 
 @section('styles1')
     <link rel="stylesheet" href="{{asset("daterangepicker/daterangepicker.css")}}">
+    
 @endsection
 
 @section("scripts")

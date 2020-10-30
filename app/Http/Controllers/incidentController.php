@@ -35,9 +35,10 @@ class incidentController extends Controller
             $end_date = $request->end_date;
         }
 
-        $datas = incident::where('is_delete','0')->orderBy('id');
+        $datas = incident::where('is_delete','0')->orderBy('incidents.id');
         if ($incidentType > 0) {
-            $datas = $datas->where('type_incidents_id', $incidentType);
+            $datas = $datas->join('type_incidents','incidents.type_incidents_id',"=",'type_incidents.id')
+                            ->where('is_agreement', 1);
         }
 
         $datas = $datas->whereBetween('start_date', [$start_date, $end_date]);
@@ -69,7 +70,7 @@ class incidentController extends Controller
         $incidents = typeincident::orderBy('name','ASC');
 
         if ($incidentType > 0) {
-            $incidents = $incidents->where('id', $incidentType);
+            $incidents = $incidents->where('is_agreement', 1);
         }
 
         $incidents = $incidents->pluck('id','name');

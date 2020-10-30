@@ -29,6 +29,8 @@ class SRegistryRow {
         $this->overMinsTotal = null;
         $this->cutId = null;
         $this->extraHours = "00:00";
+        $this->hasAbsence = false;
+        $this->workable = true;
         $this->isSunday = 0;
         $this->isDayOff = 0;
         $this->isHoliday = 0;
@@ -53,7 +55,6 @@ class SRegistryRow {
         $this->overtimeCheckPolicy = 2;
         $this->isDayRepeated = false;
         $this->scheduleFrom = 0;
-        $this->workable = true;
         $this->hasCheckOut = true;
         $this->hasCheckIn = true;
         $this->isAtypicalIn = false;

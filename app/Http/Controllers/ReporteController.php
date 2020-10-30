@@ -699,11 +699,26 @@ class ReporteController extends Controller
                         })
                         ->select('employees.id AS idEmp','incidents_day.date as Date')
                         ->get();
+        $inasistencia = DB::table('incidents')
+                        ->join('employees','employees.id','=','incidents.employee_id')
+                        ->join('incidents_day','incidents_day.incidents_id','=','incidents.id')
+                        ->where('employees.is_delete','0')
+                        ->where('employees.is_active','1')
+                        ->whereIn('employees.id',$lEmployees)
+                        ->where('incidents.cls_inc_id',1)
+                        ->where(function ($query) use ($sStartDate,$sEndDate) {
+                                return $query->whereBetween('start_date', [$sStartDate,$sEndDate])
+                                ->orwhereBetween('end_date', [$sStartDate,$sEndDate]);
+                        })
+                        ->select('employees.id AS idEmp','incidents_day.date as Date')
+                        ->get();
         return view('report.reportView')
                     ->with('sTitle', 'Reporte de checadas')
                     ->with('lRows', $lRows)
                     ->with('incapacidades',$incapacidades)
                     ->with('vacaciones',$vacaciones)
+                    ->with('inasistencia',$inasistencia)
+                    ->with('reporttype',$request->reportType)
                     ->with('tipo', $tipoDatos);
     } 
 

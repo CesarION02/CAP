@@ -17,7 +17,7 @@
             <div class="box-header with-border">
                 <h3 class="box-title">@switch($incidentType)
                     @case(14)
-                        Asignar capacitación
+                        Asignar otras incidencias
                         @break
                     @case(2)
                         
