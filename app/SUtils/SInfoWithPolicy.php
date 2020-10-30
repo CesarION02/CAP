@@ -1565,7 +1565,7 @@ class SInfoWithPolicy{
                 $empleados = DB::table('employees')
                                 ->where('is_active','=',1)
                                 ->where('way_pay_id','=',1)
-                                ->where('id',21)
+                                //->where('id',21)
                                 ->where('department_id','!=',$config->dept_foraneo)
                                 ->where('job_id','!=',$config->job_foraneo)
                                 ->orderBy('id')
