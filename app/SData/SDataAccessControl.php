@@ -30,7 +30,7 @@ class SDataAccessControl {
                         ->whereRaw("'" . $dtDate . "' BETWEEN start_date AND end_date")
                         ->select('i.external_key', 'i.nts', 'ti.name AS type_name')
                         ->where('i.is_delete', false)
-                        ->whereNotIn('ti.id', [14])
+                        ->whereNotIn('ti.id', [14, 15])
                         ->orderBy('i.id', 'ASC')
                         ->get();
 
