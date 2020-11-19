@@ -157,9 +157,7 @@ Asignar días festivos
                             <th>Fecha</th>
                             <th>Día festivo</th>
                             <th>Empleado</th>
-                            <th>Grupo empleados</th>
-                            <th>Departamento CAP</th>
-                            <th>Área</th>
+                            
                             
                             
                             <th class="width70"></th>
@@ -181,25 +179,6 @@ Asignar días festivos
                                         {{$data->employee->name}}
                                     @endif
                                 </td>
-                                <td>@if($data->group_assign_id == null)
-                                        N/A
-                                    @else
-                                        {{$data->group_assign_id}}
-                                    @endif
-                                </td>
-                                <td>@if($data->department_id == null)
-                                        N/A
-                                    @else
-                                        {{$data->department->name}}
-                                    @endif
-                                </td>
-                                <td>@if($data->area_id == null)
-                                        N/A
-                                    @else
-                                        {{$data->area->name}}
-                                    @endif
-                                </td>
-                                
                                 
                                 <td>
                                     <a href="{{route('editar_asignacion_festivo', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">

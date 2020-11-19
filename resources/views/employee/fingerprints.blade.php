@@ -153,9 +153,11 @@ Empleados
                                 <td>Inactivo</td>
                             @endif
                             <td>
-                                <a href="{{route('editarhuella', ['id' => $employee->idEmployee])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
-                                    <i class="fa fa-fw fa-pencil"></i>
-                                </a>
+                                @if($rol == 1 || $rol == 7)
+                                    <a href="{{route('editarhuella', ['id' => $employee->idEmployee])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
+                                        <i class="fa fa-fw fa-pencil"></i>
+                                    </a>
+                                @endif
                                 @if($iFilter == 2)
                                 <form action="{{route('activar', ['id' => $employee->idEmployee])}}" class="d-inline form-activar" method="POST">
                                     @csrf @method("delete")

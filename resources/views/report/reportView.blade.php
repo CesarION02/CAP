@@ -228,7 +228,11 @@
                                                 @endfor
                                                 @for( $j = 0 ; count($inasistencia) > $j ; $j++)
                                                     @if ($lRows[$i]->employee_id == $inasistencia[$j]->idEmp && ($lRows[$i]->inDate == $inasistencia[$j]->Date || $lRows[$i]->outDate == $inasistencia[$j]->Date))
-                                                        <td>{{'Inasistencia'}}</td>
+                                                        @if($inasistencia[$j]->tipo == 14)
+                                                            <td>{{'Capacitación'}}</td>   
+                                                        @else
+                                                            <td>{{'Inasistencia'}}</td>
+                                                        @endif
                                                         <td></td>
                                                         <td></td>
                                                         <td></td>

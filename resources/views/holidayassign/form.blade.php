@@ -48,7 +48,7 @@
         <label for="empleado" class="col-lg-3 control-label requerido">Empleados:</label>
         <div class="col-lg-8">
             <select multiple style="width: 95%" class="js-example-basic-multiple" name="empleado[]" id="empleado">
-                @if($flag == 0)
+                
                     @foreach($employee as $employee => $index)
                         @if((isset($datas)) == true && $datas->employee_id == $index)
                             <option selected value="{{$index}}">{{$employee}}</option>
@@ -56,20 +56,7 @@
                             <option value="{{$index}}">{{$employee}}</option>
                         @endif
                     @endforeach
-                @else
-                    @foreach($employee as $employee => $index)
-                        <?php $seleccion = 0; ?>
-                        @for($i = 0 ; count($empleados) > $i ; $i++)
-                            @if($empleados[$i]->idEmp == $index)
-                                <option selected value="{{$index}}">{{$employee}}</option>    
-                                $seleccion = 1;
-                            @endif
-                        @endfor
-                        @if($seleccion != 1)
-                        <option value="{{$index}}">{{$employee}}</option>    
-                        @endif
-                    @endforeach
-                @endif
+                
             </select>    
         </div>
     </div>

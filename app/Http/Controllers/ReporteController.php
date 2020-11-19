@@ -710,7 +710,7 @@ class ReporteController extends Controller
                                 return $query->whereBetween('start_date', [$sStartDate,$sEndDate])
                                 ->orwhereBetween('end_date', [$sStartDate,$sEndDate]);
                         })
-                        ->select('employees.id AS idEmp','incidents_day.date as Date')
+                        ->select('employees.id AS idEmp','incidents_day.date as Date','incidents.type_incidents_id as tipo')
                         ->get();
         return view('report.reportView')
                     ->with('sTitle', 'Reporte de checadas')

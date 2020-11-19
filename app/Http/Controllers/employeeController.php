@@ -377,9 +377,9 @@ class employeeController extends Controller
                     ->get();
                 break;
         }
-         
+        $rol = session()->get('rol_id');
         
-        return view('employee.fingerprints')->with('employees',$employees)->with('iFilter',$iFilter); 
+        return view('employee.fingerprints')->with('employees',$employees)->with('iFilter',$iFilter)->with('rol',$rol); 
     }
     public function fingerprintsDisable(){
         $employees = DB::table('employees')
@@ -457,6 +457,8 @@ class employeeController extends Controller
             $datas->job;
             $datas->department;
         });
+
+        
         return view('employee.outstandingemp', compact('datas'));    
     }
 

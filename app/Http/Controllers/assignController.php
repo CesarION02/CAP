@@ -32,7 +32,7 @@ class assignController extends Controller
         
         $datas = DB::select("SELECT a.fecha_inicio, a.fecha_fin, b.name AS nombreEmpleado, s.name AS nombreHorario, a.group_assign_id, a.id
         FROM (
-            SELECT MAX(start_date) as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE schedule_template_id != ".$iTemplateId." GROUP By p.employee_id
+            SELECT MAX(start_date) as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE is_delete = 0 AND schedule_template_id != ".$iTemplateId." GROUP By p.employee_id
         ) a
         INNER JOIN employees b ON a.employee_id = b.id
         INNER JOIN schedule_template s ON a.schedule_template_id = s.id
@@ -40,7 +40,7 @@ class assignController extends Controller
 
         $datasDept = DB::select("SELECT a.fecha_inicio, a.fecha_fin, b.name AS nombreEmpleado, s.name AS nombreHorario, a.group_assign_id, a.id
         FROM (
-            SELECT MAX(start_date) as fecha_inicio, end_date as fecha_fin ,p.department_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE schedule_template_id != ".$iTemplateId." GROUP By p.department_id
+            SELECT MAX(start_date) as fecha_inicio, end_date as fecha_fin ,p.department_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE is_delete = 0 AND schedule_template_id != ".$iTemplateId." GROUP By p.department_id
         ) a
         INNER JOIN departments b ON a.department_id = b.id
         INNER JOIN schedule_template s ON a.schedule_template_id = s.id
@@ -749,7 +749,7 @@ class assignController extends Controller
               */  
                 $query = "SELECT a.fecha_inicio, a.fecha_fin, b.name AS nombreEmpleado, s.name AS nombreHorario, a.group_assign_id, a.id
                 FROM (
-                    SELECT MAX(start_date) as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE schedule_template_id != ".$iTemplateId." GROUP By p.employee_id
+                    SELECT MAX(start_date) as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE is_delete = 0 AND schedule_template_id != ".$iTemplateId." GROUP By p.employee_id
                 ) a
                 INNER JOIN employees b ON a.employee_id = b.id
                 INNER JOIN schedule_template s ON a.schedule_template_id = s.id
@@ -760,7 +760,7 @@ class assignController extends Controller
                  GROUP By a.employee_id";
                 $assigns = DB::select("SELECT a.fecha_inicio, a.fecha_fin, b.name AS nombreEmpleado, s.name AS nombreHorario, a.group_assign_id, a.id
                 FROM (
-                    SELECT MAX(start_date) as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE schedule_template_id != ".$iTemplateId." GROUP By p.employee_id
+                    SELECT MAX(start_date) as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE is_delete = 0 AND schedule_template_id != ".$iTemplateId." GROUP By p.employee_id
                 ) a
                 INNER JOIN employees b ON a.employee_id = b.id
                 INNER JOIN schedule_template s ON a.schedule_template_id = s.id
@@ -789,7 +789,7 @@ class assignController extends Controller
             */ 
                 $assigns = DB::select("SELECT a.fecha_inicio, a.fecha_fin, b.name AS nombreEmpleado, s.name AS nombreHorario, a.group_assign_id, a.id
                 FROM (
-                    SELECT MAX(start_date) as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE schedule_template_id != ".$iTemplateId." GROUP By p.employee_id
+                    SELECT MAX(start_date) as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE is_delete = 0 AND schedule_template_id != ".$iTemplateId." GROUP By p.employee_id
                 ) a
                 INNER JOIN employees b ON a.employee_id = b.id
                 INNER JOIN schedule_template s ON a.schedule_template_id = s.id

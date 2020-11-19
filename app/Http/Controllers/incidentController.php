@@ -100,7 +100,10 @@ class incidentController extends Controller
         $incident->created_by = 1;
         $incident->updated_by = 1;
 
+
         $incident->save();
+
+        $this->daysIncidents($incident->id,$incident->start_date,$incident->end_date,$incident->employee_id);
 
         if ($request->incident_type > 0) {
             return redirect()->route('incidentes', [$request->incident_type])->with('mensaje', 'Incidente creado con éxito');
@@ -270,6 +273,31 @@ class incidentController extends Controller
         $abs->save();
 
         return $abs;
+    }
+
+    public function daysIncidents($incident_id,$ini,$fin,$employee_id)
+    {
+        
+
+        $oStartDate = Carbon::parse($ini.' 00:00:00');
+        $oEndDate = Carbon::parse($fin.' 00:00:00');
+        $oDate = clone $oStartDate;
+
+        $days = [];
+        $dayCounter = 1;
+        while ($oDate->lessThanOrEqualTo($oEndDate)) {
+            $sDate = $oDate->toDateString();
+            $day = new incidentDay();
+            $day->incidents_id = $incident_id;
+            $day->date = $sDate;
+            $day->num_day = $dayCounter;
+            $day->is_delete = 0;
+
+            $day->save();
+            $dayCounter++;
+            $oDate->addDay();
+        }
+
     }
 
     public function saveDays($oIncident)

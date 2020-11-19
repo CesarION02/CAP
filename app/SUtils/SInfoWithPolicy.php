@@ -1525,7 +1525,7 @@ class SInfoWithPolicy{
                 $empleados = DB::table('employees')
                                 ->where('is_active','=',1)
                                 ->where('way_pay_id','=',2)
-                                //->where('id',89)
+                                //->where('id',47)
                                 ->orderBy('id')
                                 ->select('id AS id','policy_extratime_id AS extratime')
                                 ->get();
