@@ -24,7 +24,15 @@ class SDataAccessControl {
 
     public static function getAbsences($id, $dtDate)
     {
-        $lAbsences = prePayrollController::searchAbsence($id, $dtDate);
+        $lAbsences = \DB::table('incidents AS i')
+                        ->join('type_incidents AS ti', 'i.type_incidents_id', '=', 'ti.id')
+                        ->where('employee_id', $id)
+                        ->whereRaw("'" . $dtDate . "' BETWEEN start_date AND end_date")
+                        ->select('i.external_key', 'i.nts', 'ti.name AS type_name')
+                        ->where('i.is_delete', false)
+                        ->whereNotIn('ti.id', [14, 15])
+                        ->orderBy('i.id', 'ASC')
+                        ->get();
 
         return $lAbsences;
     }
