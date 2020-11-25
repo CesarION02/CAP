@@ -709,7 +709,14 @@ class SInfoWithPolicy{
                 if($extratime != 1){
 
                     for( $j = 0 ; count($lRows) > $j ; $j++ ){
-                        if($lRows[$j]->workable == 0){$lRows[$j]->isDayOff = 1;}
+                        if($lRows[$j]->workable == 0){
+                            $lRows[$j]->isDayOff = 1;
+                            if($lRows[$j]->hasChecks == 0){
+                                $lRows[$j]->work_dayoff = 0;
+                            }else{
+                                $lRows[$j]->work_dayoff = 1;
+                            }
+                        }
                         if($lRows[$j]->extraDoubleMinsNoficial != 0 || $lRows[$j]->extraTripleMinsNoficial != 0 || $lRows[$j]->extraDoubleMinsNoficial != 0 || $lRows[$j]->extraTripleMinsNoficial != 0){
                             $mediaHoraD = $lRows[$j]->extraDoubleMinsNoficial % 60;
                             $mediaHoraT = $lRows[$j]->extraTripleMinsNoficial % 60;
@@ -841,7 +848,14 @@ class SInfoWithPolicy{
                     }
                 }else{
                     for( $j = 0 ; count($lRows) > $j ; $j++ ){
-                        if($lRows[$j]->workable == 0){$lRows[$j]->isDayOff = 1;}
+                        if($lRows[$j]->workable == 0){
+                            $lRows[$j]->isDayOff = 1;
+                            if($lRows[$j]->hasChecks == 0){
+                                $lRows[$j]->work_dayoff = 0;
+                            }else{
+                                $lRows[$j]->work_dayoff = 1;
+                            }
+                        }
                         if($lRows[$j]->outDateTimeSch != null){
                             $salidaO = Carbon::parse($lRows[$j]->outDateTime);
                             $salidaP = Carbon::parse($lRows[$j]->outDateTimeSch);
@@ -879,7 +893,14 @@ class SInfoWithPolicy{
             break;
             case 2:
                 for( $j = 0 ; count($lRows) > $j ; $j++ ){
-                    if($lRows[$j]->workable == 0){$lRows[$j]->isDayOff = 1;}
+                    if($lRows[$j]->workable == 0){
+                        $lRows[$j]->isDayOff = 1;
+                        if($lRows[$j]->hasChecks == 0){
+                            $lRows[$j]->work_dayoff = 0;
+                        }else{
+                            $lRows[$j]->work_dayoff = 1;
+                        }
+                    }
                     if($lRows[$j]->extraDoubleMinsNoficial != 0 || $lRows[$j]->extraTripleMinsNoficial != 0 || $lRows[$j]->extraDoubleMinsNoficial != 0 || $lRows[$j]->extraTripleMinsNoficial != 0){
                         $mediaHoraD = $lRows[$j]->extraDoubleMinsNoficial % 60;
                         $mediaHoraT = $lRows[$j]->extraTripleMinsNoficial % 60;
@@ -1077,6 +1098,12 @@ class SInfoWithPolicy{
             }
             }else{
                 $lRows[$i]->isDayOff = 1;
+                if($lRows[$i]->hasChecks == 0){
+                    $lRows[$i]->work_dayoff = 0;
+                }else{
+                    $lRows[$i]->work_dayoff = 1;
+                }
+
                 $semanaNoCompleta = 1;
             }
         }
@@ -1084,12 +1111,27 @@ class SInfoWithPolicy{
         if($semanaNoCompleta != true){
             if(isset($aAbsence)){
                 $lRows[$aAbsence[0]]->isDayOff = 1;
+                if($lRows[$aAbsence[0]]->hasChecks == 0){
+                    $lRows[$aAbsence[0]]->work_dayoff = 0;
+                }else{
+                    $lRows[$aAbsence[0]]->work_dayoff = 1;
+                }
                 $lRows[$aAbsence[0]]->hasAbsence = false;
             }else{
                     if(isset($aWithoutExtra)){
                         $lRows[$aWithoutExtra[0]]->isDayOff = 1;
+                        if($lRows[$aWithoutExtra[0]]->hasChecks == 0){
+                            $lRows[$aWithoutExtra[0]]->work_dayoff = 0;
+                        }else{
+                            $lRows[$aWithoutExtra[0]]->work_dayoff = 1;
+                        }
                     }else{
-                        $lRows[$extraMenorPosicion]->isDayOff = 1; 
+                        $lRows[$extraMenorPosicion]->isDayOff = 1;
+                        if($lRows[$extraMenorPosicion]->hasChecks == 0){
+                            $lRows[$extraMenorPosicion]->work_dayoff = 0;
+                        }else{
+                            $lRows[$extraMenorPosicion]->work_dayoff = 1;
+                        } 
                         if( $diasCorrectos[0] == $extraMenorPosicion ){
                             $diaSumar = 1;
                         }else{
@@ -1296,6 +1338,11 @@ class SInfoWithPolicy{
                     }
                     }else{
                         $lRows[$i]->isDayOff = 1;
+                        if($lRows[$i]->hasChecks == 0){
+                            $lRows[$i]->work_dayoff = 0;
+                        }else{
+                            $lRows[$i]->work_dayoff = 1;
+                        }
                         $semanaNoCompleta = 1;
                     }
         
@@ -1304,9 +1351,20 @@ class SInfoWithPolicy{
                 if($semanaNoCompleta != true){
                     if(isset($aAbsence)){
                         $lRows[$aAbsence[0]]->isDayOff = 1;
+                        if($lRows[$aAbsence[0]]->hasChecks == 0){
+                            $lRows[$aAbsence[0]]->work_dayoff = 0;
+                        }else{
+                            $lRows[$aAbsence[0]]->work_dayoff = 1;
+                        }
                         $lRows[$aAbsence[0]]->hasAbsence = false;
                     }else{
                         $lRows[$extraMenorPosicion]->isDayOff = 1; 
+                        
+                        if($lRows[$extraMenorPosicion]->hasChecks == 0){
+                            $lRows[$extraMenorPosicion]->work_dayoff = 0;
+                        }else{
+                            $lRows[$extraMenorPosicion]->work_dayoff = 1;
+                        }
                         if( $diasCorrectos[0] == $extraMenorPosicion ){
                             $diaSumar = 1;
                         }else{
@@ -1454,6 +1512,11 @@ class SInfoWithPolicy{
                         }
                         }else{
                             $lRows[$i]->isDayOff = 1;
+                            if($lRows[$i]->hasChecks == 0){
+                                $lRows[$i]->work_dayoff = 0;
+                            }else{
+                                $lRows[$i]->work_dayoff = 1;
+                            }
                             $semanaNoCompleta = 1;
                         }
                     }
@@ -1463,9 +1526,20 @@ class SInfoWithPolicy{
                     if($semanaNoCompleta != true){
                         if(isset($aAbsence)){
                             $lRows[$aAbsence[0]]->isDayOff = 1;
+                            if($lRows[$aAbsence[0]]->hasChecks == 0){
+                                $lRows[$aAbsence[0]]->work_dayoff = 0;
+                            }else{
+                                $lRows[$aAbsence[0]]->work_dayoff = 1;
+                            }
                             $lRows[$aAbsence[0]]->hasAbsence = false;
                         }else{
                             $lRows[$extraMenorPosicion]->isDayOff = 1; 
+                            
+                            if($lRows[$extraMenorPosicion]->hasChecks == 0){
+                                $lRows[$extraMenorPosicion]->work_dayoff = 0;
+                            }else{
+                                $lRows[$extraMenorPosicion]->work_dayoff = 1;
+                            }
                             if( $diasCorrectos[0] == $extraMenorPosicion ){
                                 $diaSumar = 1;
                             }else{
@@ -1672,6 +1746,7 @@ class SInfoWithPolicy{
             $processed->hasabsence = $lRows[$i]->hasAbsence;
             $processed->isOverJourney = $lRows[$i]->isOverJourney;
             $processed->hasAdjust = $lRows[$i]->hasAdjust;
+            $processed->work_dayoff = $lRows[$i]->work_dayoff;
             if($tipo == 2){
                 $processed->week = $periodo;
             }else{
