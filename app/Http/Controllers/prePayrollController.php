@@ -196,21 +196,6 @@ class prePayrollController extends Controller
                     $day->is_sunday = sizeof($withSunday);
     
                     /**
-                     * Obtener festivos
-                     */
-                    $lColl = clone $lCExtrasDay;
-                    $withHolidays = $lColl->groupBy('employee_id')->map(function ($row) {
-                                                $registry = (object) [
-                                                    'holidays' => $row->sum('is_holiday'),
-                                                ];
-    
-                                                return $registry;
-                                            });
-                    if (sizeof($withHolidays) > 0) {
-                        $day->holiday_id = $withHolidays{$idEmployee}->holidays;
-                    }
-    
-                    /**
                      * Obtención de incidencias o eventos
                      */
                     $lAbsences = prePayrollController::searchAbsence($idEmployee, $sDate);
@@ -229,6 +214,7 @@ class prePayrollController extends Controller
                 }
 
                 if ($dataType == \SCons::OTHER_DATA || $dataType == \SCons::ALL_DATA) {
+                    
                     /**
                      * Obtener descansos
                      */
@@ -243,6 +229,21 @@ class prePayrollController extends Controller
                                             });
                     if (sizeof($withDaysOff) > 0) {
                         $day->n_days_off = $withDaysOff{$idEmployee}->daysOff;
+                    }
+
+                     /**
+                     * Obtener festivos
+                     */
+                    $lColl = clone $lCExtrasDay;
+                    $withHolidays = $lColl->groupBy('employee_id')->map(function ($row) {
+                                                $registry = (object) [
+                                                    'holidays' => $row->sum('is_holiday'),
+                                                ];
+    
+                                                return $registry;
+                                            });
+                    if (sizeof($withHolidays) > 0) {
+                        $day->holiday_id = $withHolidays{$idEmployee}->holidays;
                     }
                 }
 
