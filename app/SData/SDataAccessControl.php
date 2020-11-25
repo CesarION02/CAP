@@ -37,57 +37,24 @@ class SDataAccessControl {
         return $lAbsences;
     }
 
+    public static function getAllowedAbsences($id, $dtDate)
+    {
+        $lAbsences = \DB::table('incidents AS i')
+                        ->join('type_incidents AS ti', 'i.type_incidents_id', '=', 'ti.id')
+                        ->where('employee_id', $id)
+                        ->whereRaw("'" . $dtDate . "' BETWEEN start_date AND end_date")
+                        ->select('i.external_key', 'i.nts', 'ti.name AS type_name')
+                        ->where('i.is_delete', false)
+                        ->whereIn('ti.id', [14, 15])
+                        ->orderBy('i.id', 'ASC')
+                        ->get();
+
+        return $lAbsences;
+    }
+
     public static function getEvents($id, $dtDate)
     {
-        $lWorkshifts = SDelayReportUtils::getWorkshifts($dtDate, $dtDate, 0, [$id]);
-        $lWorks = clone $lWorkshifts;
-        $events = SDelayReportUtils::checkEvents($lWorks, $id, $dtDate);
-
-        if ($events == null) {
-            return [];
-        }
-
         $lEvents = [];
-        foreach ($events as $event) {
-            $typeId = $event->type_day_id;
-
-            $oEvent = new SAuxEvent();
-            if ($typeId == \SCons::T_DAY_NORMAL) {
-                continue;
-            }
-
-            $oEvent->dtDate = $dtDate;
-            $oEvent->typeId = $typeId;
-            
-    
-            $text = "";
-    
-            switch ($typeId) {
-                case \SCons::T_DAY_INHABILITY:
-                    $text = "Incapacidad";
-                    break;
-    
-                case \SCons::T_DAY_VACATION:
-                    $text = "Vacaciones";
-                    break;
-    
-                // case \SCons::T_DAY_HOLIDAY:
-                //     $text = "Festivo";
-                //     break;
-    
-                case \SCons::T_DAY_DAY_OFF:
-                    break;
-    
-                default:
-                    # code...
-                    break;
-            }
-    
-            $oEvent->typeName = $text;
-            
-            $lEvents[] = $oEvent;
-        }
-
         $holidays = SDataProcess::getHolidays($id, $dtDate);
 
         if ($holidays != null) {
@@ -182,6 +149,116 @@ class SDataAccessControl {
         }
 
         return $sDate." ".$time;
+    }
+
+    /**
+     * Determina si el empleado tiene autorizado el ingreso al sistema
+     *
+     * @param [type] $oData
+     * @param [type] $id
+     * @param [type] $dtDate
+     * @param [type] $time
+     * @param [type] $inMins
+     * @param [type] $outMins
+     * @return boolean
+     */
+    public static function isAuthorized($oData = null, $id, $dtDate, $time, $inMins, $outMins)
+    {
+        $result = [];
+        $reason = "";
+
+        // Si el empleado tiene incidencias programadas
+        if ($oData->absences != null && count($oData->absences) > 0) {
+            $reason = "";
+            foreach ($oData->absences as $abs) {
+                $reason = $reason == "" ? $abs->type_name : ($reason . ", " . $abs->type_name);
+            }
+            
+            $reasons = "El empleado tiene incidencias: " . $reason . " para el día de hoy";
+            
+            $result[0] = false;
+            $result[1] = $reasons;
+            
+            return $result;
+        }
+
+         // Si el empleado tiene eventos programados
+         if ($oData->events != null && count($oData->events) > 0) {
+            foreach ($oData->events as $event) {
+                $reason = $reason == "" ? $event->typeName : ($reason.", ".$event->typeName);
+            }
+
+            $reasons = "El empleado tiene programado: " . $reason . " para el día de hoy";
+            $result[0] = false;
+            $result[1] = $reasons;
+            
+            return $result;
+        }
+        
+        // si el empleado tiene un horario
+        if ($oData->schedule != null) {
+            // Si el empleado está o no en su horario
+            if (SDataAccessControl::isOnShift($oData->schedule->inDateTimeSch, $oData->schedule->outDateTimeSch,  $dtDate . ' ' . $time, $inMins, $outMins)) {
+                $result[0] = true;
+                $result[1] = "Autorizado";
+            
+                return $result;
+            }
+            else {
+                $result[0] = false;
+                $result[1] = "El empleado está fuera de su horario";
+            
+                return $result;
+            }
+        }
+        else {
+            /**
+             * Incidencias permitidas
+             */
+            $allowedAbs = SDataAccessControl::getAllowedAbsences($id, $dtDate);
+
+            if (count($allowedAbs) > 0) {
+                $result[0] = true;
+                $reason = "El empleado tiene ";
+                foreach ($allowedAbs as $abs) {
+                    $reason = $reason.$abs->type_name;
+                }
+
+                $result[1] = $reason;
+
+                return $result;
+            }
+
+            $result[0] = false;
+            $result[1] = "El empleado no tiene horario asignado para el día de hoy";
+            
+            return $result;
+        }
+    }
+
+    /**
+     * Determina si la fecha/hora en la que el empleado checó están dentro del horario del empleado
+     *
+     * @param string $inDateTimeSch
+     * @param string $outDateTimeSch
+     * @param string $dateTime
+     * @param integer $inMins Minutos de tolerancia previos a la hora de entrada (cuántos minutos puede entrar antes)
+     * @param integer $outMins Minutos de tolerancia de salida, (cuántos minutos después de su horario de salida se le permite la entrada)
+     * 
+     * @return boolean
+     */
+    private static function isOnShift($inDateTimeSch, $outDateTimeSch, $dateTime, $inMins = 0, $outMins = 0)
+    {
+        $oDateTime = Carbon::parse($dateTime);
+        $oInDateTimeSch = Carbon::parse($inDateTimeSch);
+        $oOutDateTimeSch = Carbon::parse($outDateTimeSch);
+
+        $oInDateTimeSch->subMinutes($inMins); 
+        $oOutDateTimeSch->addMinutes($outMins);
+
+        $res = $oDateTime->between($oInDateTimeSch, $oOutDateTimeSch, true);
+
+        return $res;
     }
 
 }
