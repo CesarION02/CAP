@@ -196,21 +196,6 @@ class prePayrollController extends Controller
                     $day->is_sunday = sizeof($withSunday);
     
                     /**
-                     * Obtener descansos
-                     */
-                    $lColl = clone $lCExtrasDay;
-                    $withDaysOff = $lColl->groupBy('employee_id')->map(function ($row) {
-                                                $registry = (object) [
-                                                    'daysOff' => $row->sum('is_dayoff'),
-                                                ];
-    
-                                                return $registry;
-                                            });
-                    if (sizeof($withDaysOff) > 0) {
-                        $day->n_days_off = $withDaysOff{$idEmployee}->daysOff;
-                    }
-    
-                    /**
                      * Obtener festivos
                      */
                     $lColl = clone $lCExtrasDay;
@@ -240,6 +225,24 @@ class prePayrollController extends Controller
     
                             $day->events[] = $abs;
                         }
+                    }
+                }
+
+                if ($dataType == \SCons::OTHER_DATA || $dataType == \SCons::ALL_DATA) {
+                    /**
+                     * Obtener descansos
+                     */
+                    $lColl = clone $lCExtrasDay;
+                    $lColl = $lColl->where('work_dayoff', true);
+                    $withDaysOff = $lColl->groupBy('employee_id')->map(function ($row) {
+                                                $registry = (object) [
+                                                    'daysOff' => $row->sum('is_dayoff'),
+                                                ];
+    
+                                                return $registry;
+                                            });
+                    if (sizeof($withDaysOff) > 0) {
+                        $day->n_days_off = $withDaysOff{$idEmployee}->daysOff;
                     }
                 }
 
