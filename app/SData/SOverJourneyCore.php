@@ -18,6 +18,7 @@ class SOverJourneyCore {
     {
         $idEmployee = 0;
         $currentDate = null;
+        $config = \App\SUtils\SConfiguration::getConfigurations();
         foreach ($lData as $oRow) {
             if ($idEmployee != $oRow->idEmployee) {
                 $firstTime = true;
@@ -36,6 +37,15 @@ class SOverJourneyCore {
                  * en su ausencia.
                  */
                 if (!$oRow->hasChecks || !$oRow->hasCheckIn || ! $oRow->hasCheckOut) {
+                    continue;
+                }
+
+                $dtStart = Carbon::parse($oRow->outDate.' 00:00');
+                $dtOut = Carbon::parse($oRow->outDateTime);
+
+                $wkedTime = SDelayReportUtils::compareDates($dtStart, $dtOut);
+
+                if ($wkedTime->diffMinutes <= $config->minMinsOverNextDay) {
                     continue;
                 }
 

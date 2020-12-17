@@ -10,7 +10,7 @@ class SDelayReportUtils {
      * @param SDateComparison $oComparison
      * @return String "yyyy-MM-dd hh:mm:ss"
      */
-    public static function getScheduleIn($oComparison) {
+    public static function getScheduleIn($oComparison, $inDateTime = null) {
         $night = false;
         $sDate = "";
         if ($oComparison->auxScheduleDay != null) {
@@ -35,10 +35,42 @@ class SDelayReportUtils {
             $sDate = $oAuxDate->subDay()->toDateString();
         }
         else {
-            $sDate = $oComparison->pinnedDateTime->toDateString();
+            if ($inDateTime != null) {
+                $indtt = Carbon::parse($inDateTime);
+                if ($indtt->toDateString() != $oComparison->pinnedDateTime->toDateString()) {
+                    $sDate = $indtt->toDateString();
+                }
+                else {
+                    $sDate = $oComparison->pinnedDateTime->toDateString();
+                }
+            }
+            else {
+                $sDate = $oComparison->pinnedDateTime->toDateString();
+            }
         }
 
         return $sDate." ".$time;
+    }
+
+    /**
+     * Determina la hora de entrada programada en base al objeto recibido
+     *
+     * @param SDateComparison $oComparison
+     * @return String "yyyy-MM-dd hh:mm:ss"
+     */
+    public static function isNight($oComparison) {
+        if ($oComparison->auxScheduleDay != null) {
+            $oAux = $oComparison->auxScheduleDay;
+            return $oAux->is_night;
+        }
+        else {
+            if ($oComparison->auxWorkshift != null) {
+                $oAux = $oComparison->auxWorkshift;
+                return $oAux->is_night;
+            }
+        }
+
+        return false;
     }
 
     /**
