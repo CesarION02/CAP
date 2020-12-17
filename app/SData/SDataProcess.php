@@ -626,13 +626,15 @@ class SDataProcess {
                 return $oRow;
             }
 
+            $sInSchedule = SDelayReportUtils::getScheduleIn($result, $oRow->inDateTime);
+            $oRow->inDateTimeSch = $sInSchedule;
+
+            if (! SDelayReportUtils::isNight($result) && $result->variableDateTime->toDateString() != $oRow->inDateTime) {
+                $oRow->outDateTimeSch = $oRow->inDate.' '.$result->pinnedDateTime->toTimeString();
+            }
+            
             $oRow->outDate = $result->variableDateTime->toDateString();
             $oRow->outDateTime = $result->variableDateTime->toDateTimeString();
-            $oRow->outDateTimeSch = $result->pinnedDateTime->toDateTimeString();
-    
-            $sInSchedule = SDelayReportUtils::getScheduleIn($result);
-    
-            $oRow->inDateTimeSch = $sInSchedule;
     
             $oRow->cutId = SDelayReportUtils::getCutId($result);
             $oRow->overtimeCheckPolicy = SDelayReportUtils::getOvertimePolicy($result);

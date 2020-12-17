@@ -1,11 +1,12 @@
 {
-    "lastSyncDateTime": "2020-10-30 07:37:28",
+    "lastSyncDateTime": "2020-12-09 07:57:04",
     "startOfWeek": 1,
     "policy": "1",
     "toleranceMinutes": 20,
     "maxGapMinutes": 60,
     "maxGapSchedule": 90,
     "maxGapCheckSchedule": 120,
+    "minMinsOverNextDay": 180,
     "dept_foraneo": 100,
     "job_foraneo": 25,
     "dept_pre": 99,

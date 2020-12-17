@@ -212,7 +212,7 @@ class incidentController extends Controller
             }
             catch (\Throwable $th) { }
 
-            $this->saveDays($oIncident);
+            // $this->saveDays($oIncident);
         }
     }
 

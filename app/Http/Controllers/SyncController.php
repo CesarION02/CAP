@@ -16,13 +16,12 @@ class SyncController extends Controller
 
         $correcto = $this->syncronizeWithERP($config->lastSyncDateTime);
 
-        if( $correcto != 0){
+        if ($correcto != 0) {
             return redirect()->back()->with('mensaje', 'Sincronizado');
-        }else{
+        }
+        else {
             return redirect()->back()->with('mensaje', 'No se pudo sincronizar');
         }
-
-        
     }
 
     public static function syncronizeWithERP($lastSyncDate = "")
@@ -32,38 +31,39 @@ class SyncController extends Controller
             'base_uri' => '192.168.1.233:9000',
             'timeout' => 10.0,
         ]);
-        
-        try{
-        $response = $client->request('GET', 'getInfoERP/'.$lastSyncDate);
-        $jsonString = $response->getBody()->getContents();
-        $data = json_decode($jsonString);
 
-        // dd($data);
-        $deptRhCont = new DeptsRhController();
-        $deptRhCont->saveRhDeptsFromJSON($data->departments);
-       
-        $empCont = new employeeController();
-        $empCont->saveEmployeesFromJSON($data->employees);
+        try {
+            $response = $client->request('GET', 'getInfoERP/' . $lastSyncDate);
+            $jsonString = $response->getBody()->getContents();
+            $data = json_decode($jsonString);
 
-        $fdyCont = new fdyController();
-        $fdyCont->saveFDYFromJSON($data->fdys);
+            // dd($data);
+            $deptRhCont = new DeptsRhController();
+            $deptRhCont->saveRhDeptsFromJSON($data->departments);
 
-        $holidayCont = new holidayController();
-        $holidayCont->saveHolidaysFromJSON($data->holidays);
+            $empCont = new employeeController();
+            $empCont->saveEmployeesFromJSON($data->employees);
 
-        $absCont = new incidentController();
-        $absCont->saveAbsencesFromJSON($data->absences);
+            $fdyCont = new fdyController();
+            $fdyCont->saveFDYFromJSON($data->fdys);
 
-        $prepayCont = new prePayrollController();
-        $prepayCont->saveCutCalendarFromJSON($data->cuts);
+            $holidayCont = new holidayController();
+            $holidayCont->saveHolidaysFromJSON($data->holidays);
 
-        $newDate = Carbon::now();
-        $newDate->subMinutes(30);
+            $absCont = new incidentController();
+            $absCont->saveAbsencesFromJSON($data->absences);
 
-        \App\SUtils\SConfiguration::setConfiguration('lastSyncDateTime', $newDate->toDateTimeString());
+            $prepayCont = new prePayrollController();
+            $prepayCont->saveCutCalendarFromJSON($data->cuts);
 
-        return 1;
-        }catch(RequestException $e){
+            $newDate = Carbon::now();
+            $newDate->subMinutes(30);
+
+            \App\SUtils\SConfiguration::setConfiguration('lastSyncDateTime', $newDate->toDateTimeString());
+
+            return 1;
+        }
+        catch (RequestException $e) {
             return 0;
         }
     }
