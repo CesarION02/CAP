@@ -1072,7 +1072,7 @@ class SInfoWithPolicy{
                         $aAbsence[$contadorAusencia] = $i;
                         $contadorAusencia++;
                     }elseif( $lRows[$i]->isHoliday == true ){
-                        if($lRows[$i]->extraDobleMins > 0){
+                        if($lRows[$i]->extraDoubleMins > 0){
                             $aHoliday[$contadorHoliday] = $i;
                             $contadorHoliday++;
                         }
@@ -1595,11 +1595,11 @@ class SInfoWithPolicy{
         $pendientesProcesar = SDateUtils::isProcessed($semanas,$iYear,$sTypePay);
         if($pendientesProcesar[0] != 0){
         switch($sTypePay){
-            case 2:
+             case 2:
                 $empleados = DB::table('employees')
                                 ->where('is_active','=',1)
                                 ->where('way_pay_id','=',2)
-                                //->where('id',47)
+                                //->where('id',59)
                                 ->orderBy('id')
                                 ->select('id AS id','policy_extratime_id AS extratime')
                                 ->get();
