@@ -632,6 +632,9 @@ class SDataProcess {
             if (! SDelayReportUtils::isNight($result) && $result->variableDateTime->toDateString() != $oRow->inDateTime) {
                 $oRow->outDateTimeSch = $oRow->inDate.' '.$result->pinnedDateTime->toTimeString();
             }
+            else {
+                $oRow->outDateTimeSch = $result->pinnedDateTime->toDateTimeString();
+            }
             
             $oRow->outDate = $result->variableDateTime->toDateString();
             $oRow->outDateTime = $result->variableDateTime->toDateTimeString();
