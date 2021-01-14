@@ -629,7 +629,7 @@ class SDataProcess {
             $sInSchedule = SDelayReportUtils::getScheduleIn($result, $oRow->inDateTime);
             $oRow->inDateTimeSch = $sInSchedule;
 
-            if (! SDelayReportUtils::isNight($result) && $result->variableDateTime->toDateString() != $oRow->inDateTime) {
+            if (! SDelayReportUtils::isNight($result) && $oRow->inDateTime != null && $result->variableDateTime->toDateString() != $oRow->inDateTime) {
                 $oRow->outDateTimeSch = $oRow->inDate.' '.$result->pinnedDateTime->toTimeString();
             }
             else {
@@ -863,6 +863,8 @@ class SDataProcess {
          *       AND (ha.employee_id = 24 OR ea.id = 24 OR e.id = 24);
          */
 
+        // \DB::enableQueryLog();
+
         $holidays = \DB::table('holiday_assign AS ha')
                         ->join('holidays AS h', 'ha.holiday_id', '=', 'h.id')
                         ->leftJoin('areas AS a', 'ha.area_id', '=', 'a.id')
@@ -880,6 +882,8 @@ class SDataProcess {
                         })
                         ->distinct('h_id')
                         ->get();
+
+        // dd(\DB::getQueryLog());
         
         return $holidays;
     }
