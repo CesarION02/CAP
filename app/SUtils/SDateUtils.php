@@ -33,12 +33,16 @@ class SDateUtils {
                         ->where('year','=',$iYear)
                         ->select('num AS num')
                         ->get();
-                $contadorInicial = $inicio[0]->num;
-                $contadorFinal = $final[0]->num;
-                $contadorAux = 0;
-                for($contadorInicial ; $contadorFinal >= $contadorInicial ; $contadorInicial ++){
-                    $semanas[$contadorAux] = $contadorInicial;
-                    $contadorAux ++;
+                if( $inicio != null && $final != null ){        
+                    $contadorInicial = $inicio[0]->num;
+                    $contadorFinal = $final[0]->num;
+                    $contadorAux = 0;
+                    for($contadorInicial ; $contadorFinal >= $contadorInicial ; $contadorInicial ++){
+                        $semanas[$contadorAux] = $contadorInicial;
+                        $contadorAux ++;
+                    }
+                }else {
+                    $semanas[0] = 0;
                 }
 
                 return $semanas;
