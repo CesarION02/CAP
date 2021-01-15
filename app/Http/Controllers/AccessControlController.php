@@ -50,13 +50,17 @@ class AccessControlController extends Controller
             'dt_date' => 'required',
             'dt_time' => 'required',
             'num_emp' => 'required',
-            'next_days' => 'required'
+            'next_days' => 'required',
+            'mins_in' => 'required',
+            'mins_out' => 'required',
         ]);
 
         $numEmployee = $request->num_emp;
         $dtDate = $request->dt_date;
         $time = $request->dt_time;
         $nextDays = $request->next_days;
+        $minsIn = $request->mins_in;
+        $minsOut = $request->mins_out;
 
         $id = $this->getIdEmployeeByNumber($numEmployee);
 
@@ -66,7 +70,16 @@ class AccessControlController extends Controller
 
         $oData = $this->getInfo($id, $dtDate, $time, $nextDays);
 
-        return json_encode($oData);
+        $res = SDataAccessControl::isAuthorized($oData, $id, $dtDate, $time, $minsIn, $minsOut);
+
+        $oResData = clone $oData;
+
+        $oResData->absences = null;
+        $oResData->events = null;
+        $oResData->authorized = $res[0];
+        $oResData->message = $res[1];
+
+        return json_encode($oResData);
     }
 
     public function getInfo($idEmp, $dtDate, $time, $nextDays)
@@ -88,16 +101,29 @@ class AccessControlController extends Controller
             'dt_date' => 'required',
             'dt_time' => 'required',
             'id_emp' => 'required',
-            'next_days' => 'required'
+            'next_days' => 'required',
+            'mins_in' => 'required',
+            'mins_out' => 'required',
         ]);
 
         $idEmp = $request->id_emp;
         $dtDate = $request->dt_date;
         $time = $request->dt_time;
         $nextDays = $request->next_days;
+        $minsIn = $request->mins_in;
+        $minsOut = $request->mins_out;
 
         $oData = $this->getInfo($idEmp, $dtDate, $time, $nextDays);
 
-        return json_encode($oData);
+        $res = SDataAccessControl::isAuthorized($oData, $idEmp, $dtDate, $time, $minsIn, $minsOut);
+
+        $oResData = clone $oData;
+
+        $oResData->absences = null;
+        $oResData->events = null;
+        $oResData->authorized = $res[0];
+        $oResData->message = $res[1];
+
+        return json_encode($oResData);
     }
 }
