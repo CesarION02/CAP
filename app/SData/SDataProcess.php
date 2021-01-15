@@ -838,7 +838,7 @@ class SDataProcess {
         return $oRow;
     }
 
-    private static function getHolidays($idEmployee, $sDt)
+    public static function getHolidays($idEmployee, $sDt)
     {
         /**
          * SELECT 
