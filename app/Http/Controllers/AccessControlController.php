@@ -70,12 +70,14 @@ class AccessControlController extends Controller
 
         $oData = $this->getInfo($id, $dtDate, $time, $nextDays);
 
-        $res = SDataAccessControl::isAuthorized($oData, $id, $dtDate, $time, $minsIn, $minsOut);
-
+        
         $oResData = clone $oData;
-
+        
         $oResData->absences = null;
         $oResData->events = null;
+
+        $res = SDataAccessControl::isAuthorized($oData, $id, $dtDate, $time, $minsIn, $minsOut);
+        
         $oResData->authorized = $res[0];
         $oResData->message = $res[1];
 
