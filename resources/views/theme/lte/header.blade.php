@@ -37,7 +37,7 @@
               <!-- Menu Footer-->
               <li class="user-footer">
                 <div class="pull-left">
-                  
+                  <a href="192.168.1.233:8080/dokuwiki/doku.php?id=start" class="btn btn-default btn-flat">Manual usuario</a>
                 </div>
                 <div class="pull-right">
                   <a href="{{route('logout')}}" class="btn btn-default btn-flat">Salir</a>
