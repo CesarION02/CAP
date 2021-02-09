@@ -1079,6 +1079,9 @@ class SInfoWithPolicy{
                         }
                     }
                     else{
+                        if(sizeof($lRows[$i]->events)<1){
+                            $lRows[$i]->hasAbsence = true;
+                        }
                         $semanaNoCompleta = true;
                     }
                 
@@ -1658,7 +1661,7 @@ class SInfoWithPolicy{
                 $empleados = DB::table('employees')
                                 ->where('is_active','=',1)
                                 ->where('way_pay_id','=',2)
-                                //->where('id',49)
+                                //->where('id',1227)
                                 ->orderBy('id')
                                 ->select('id AS id','policy_extratime_id AS extratime')
                                 ->get();

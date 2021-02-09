@@ -558,13 +558,14 @@ class ReporteController extends Controller
     {
         $sStartDate = $request->start_date;
         $sEndDate = $request->end_date;
+        $year = Carbon::parse($sStartDate);
+        $year = $year->format('Y');
         $lEmployees = [];
         /**
          * 1: quincena
          * 2: semana
          * 3: todos
          */
-        $year = '2020';
         $tipoDatos = $request->tipodato;
         $payWay = $request->way_pay;
         $id = $request->vals;

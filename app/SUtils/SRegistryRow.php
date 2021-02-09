@@ -61,7 +61,6 @@ class SRegistryRow {
         $this->isAtypicalOut = false;
         $this->isCheckSchedule = false;
         $this->isTypeDayChecked = false;
-        $this->hasAbsence = false;
         $this->hasAdjust = false;
         $this->work_dayoff = 0;
         $this->others = "";

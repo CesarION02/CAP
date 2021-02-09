@@ -119,7 +119,7 @@ class SDateUtils {
                     $procesado = DB::table('period_processed')
                                 ->join('week_cut','week_cut.id','=','period_processed.num_week')
                                 ->where('week_cut.year','=',$iYear)
-                                ->where('num',$iPeriods[$i])
+                                ->where('week_cut.num',$iPeriods[$i])
                                 ->select('period_processed.updated_at AS update', 'fin AS fin')
                                 ->get();
                     if(empty($procesado[0])){
