@@ -57,4 +57,8 @@ class employees extends Model
         return $this->belongsTo('App\Models\department','department_id');
     }
 
+    public function special(){
+        return $this->hasMany('App\Models\specialworkshift');
+    }
+
 }

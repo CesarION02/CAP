@@ -573,6 +573,7 @@ class assignController extends Controller
                     ->join('departments','departments.id','=','jobs.department_id')
                     ->join('department_group','department_group.id','=','departments.dept_group_id')
                     ->whereIn('departments.dept_group_id',$Adgu)
+                    ->where('employees.is_active',1)
                     ->select('employees.id AS id','employees.name AS name', 'department_group.name AS nameGroup')
                     ->get();
         }else{
@@ -767,7 +768,8 @@ class assignController extends Controller
                 INNER JOIN jobs j ON b.job_id = j.id
                 INNER JOIN departments d ON j.department_id = d.id
                 INNER JOIN department_group g ON d.dept_group_id = g.id
-                WHERE g.id IN (".$adguString. ")
+                WHERE b.is_active = 1
+                AND g.id IN (".$adguString. ")
                  GROUP By a.employee_id");
         }else{
             $numero = session()->get('name');
@@ -796,6 +798,7 @@ class assignController extends Controller
                 INNER JOIN jobs j ON b.job_id = j.id
                 INNER JOIN departments d ON j.department_id = d.id
                 INNER JOIN department_group g ON d.dept_group_id = g.id
+                WHERE employees.is_active = 1
                 GROUP By a.employee_id");    
         }
         return view('assign.showprogramming')->with('assigns',$assigns)->with('dgroup',$usuario[0]->id);

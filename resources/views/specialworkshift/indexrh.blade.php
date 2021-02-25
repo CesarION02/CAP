@@ -115,9 +115,7 @@ Turno especial
     }
 
     function disableRangePicker(filterType) {
-        if (filterType == "2") {
-            document.getElementById('filter').style.display = 'none';
-        }
+        
     }
 
     setActiveClass(<?php echo json_encode($filterType) ?>);
@@ -167,7 +165,8 @@ Turno especial
                     <thead>
                         <tr>
                             <th>Empleado</th>
-                            <th>Fecha</th>
+                            <th>Fecha inicio</th>
+                            <th>Fecha fin</th>
                             <th>Turno</th>
                             <th>Aprobado</th>
                             <th class="width70"></th>
@@ -177,7 +176,8 @@ Turno especial
                         @foreach ($datas as $data)
                         <tr>
                             <td>{{$data->nameEmp}}</td>
-                            <td>{{\App\SUtils\SDateTimeUtils::orderDate($data->date)}}</td>
+                            <td>{{\App\SUtils\SDateTimeUtils::orderDate($data->datei)}}</td>
+                            <td>{{\App\SUtils\SDateTimeUtils::orderDate($data->dates)}}</td>
                             <td>{{$data->nameWork}}</td>
                             <td>{{$data->is_approved ? "SÍ" : "NO"}}</td>
                             <td>

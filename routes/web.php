@@ -97,7 +97,9 @@ Route::get('report/reporteRetardos','ReporteController@genDelayReport')->name('g
 Route::get('report/viewReporteRetardos','ReporteController@delaysReport')->name('reporteRetardos');
 Route::get('report/reportetiemposextra','ReporteController@genHrExReport')->name('generarreportetiemposextra');
 Route::get('report/viewtiemposextra','ReporteController@hrExtReport')->name('reportetiemposextra');
-
+/* Reporte incidencias */
+Route::get('report/reporteIncidencias', 'ReporteController@incidentReportView')->name('reporteIncidencias');
+Route::get('report/reporteIncidenciasGenerar', 'ReporteController@incidentReportGenerar')->name('reporteIncidenciasGenerar');
 /* RUTAS DE AJUSTES DE PRENÓMINA */
 Route::get('prepayrollrowadjusts', 'prepayrollAdjustController@getAdjustsFromRow')->name('ajustes_renglon');
 Route::post('prepayrolladjust', 'prepayrollAdjustController@storeAdjust')->name('guardar_ajuste');
@@ -174,6 +176,17 @@ Route::post('schedule', 'scheduleController@store')->name('guardar_plantilla');
 Route::get('schedule/{id}/edit', 'scheduleController@edit')->name('editar_plantilla');
 Route::put('schedule/{id}', 'scheduleController@update')->name('actualizar_plantilla');
 Route::delete('schedule/{id}', 'scheduleController@destroy')->name('eliminar_plantilla');
+
+/* RUTAS DE CHECADAS */
+Route::get('register','RegisterController@index')->name('checada');
+Route::get('register/create', 'RegisterController@create')->name('crear_checada');
+Route::post('register', 'RegisterController@store')->name('guardar_checada');
+Route::get('register/{id}/edit', 'RegisterController@edit')->name('editar_checada');
+Route::put('register/{id}', 'RegisterController@update')->name('actualizar_checada');
+Route::delete('register/{id}', 'RegisterController@destroy')->name('eliminar_checada');
+
+/* CONFIGURACION */
+Route::get('configuration','configController@index')->name('config');
 
 /* RUTAS DE CREACION SEMANAS */
 Route::get('week/firts','weekController@primerdia')->name('primer_dia');

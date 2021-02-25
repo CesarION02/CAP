@@ -9,6 +9,7 @@ use App\Models\area;
 use App\Models\prepayrollAdjType;
 use App\Models\prepayrollAdjust;
 use App\Models\DepartmentRH;
+use App\Models\typeincident;
 use App\Models\departmentsGroup;
 use App\SUtils\SDelayReportUtils;
 use App\SUtils\SInfoWithPolicy;
@@ -1466,4 +1467,72 @@ class ReporteController extends Controller
         $fechaAux2=date_format($datefin, 'd-m-Y');
         return view('report.reportNumRegister')->with('lRows',$lRow)->with('lRows1',$lRow1)->with('inicio',$fechaAux1)->with('fin',$fechaAux2)->with('diff',$diferencia)->with('numEmpleados',$numEmpleados)->with('numEmpleados1',$numEmpleados1)->with('programado',$lProg)->with('programado1',$lProg1);
     }
+    
+        // Reporte de incidencias
+        public function incidentReportView(){
+            $incidents = typeincident::select('id','name')->get();
+            $deptos = DepartmentRH::select('id','name')->where('is_delete',0)->get();
+            $employees = employees::select('id','name')->where('is_delete',0)->get();
+
+            return view('report.incidentReport')->with('incidents',$incidents)->with('deptos',$deptos)->with('employees',$employees);
+        }
+   
+        public function incidentReportGenerar(Request $request){
+            $sStartDate = $request->start_date;
+            $sEndDate = $request->end_date; 
+            
+            $employee = $request->employees;
+            $department = $request->dept;
+            $tipo = $request->tipo;
+            $incident = $request->incidents;
+
+            switch($tipo){
+                //Caso de departamentos
+                case 1:
+                    $datas = DB::table('incidents')
+                                    ->join('employees','incidents.employee_id','=','employees.id')
+                                    ->join('dept_rh','dept_rh.id','=','employees.dept_rh_id')
+                                    ->join('class_incident','class_incident.id','=','incidents.cls_inc_id')
+                                    ->join('type_incidents','type_incidents.id', '=', 'incidents.type_incidents_id')
+                                    ->whereBetween('incidents.start_date',[$sStartDate,$sEndDate])
+                                    ->whereBetween('incidents.end_date',[$sStartDate,$sEndDate])
+                                    ->where('dept_rh.id',$department) 
+                                    ->orderBy('incidents.start_date')
+                                    ->select('incidents.start_date AS fechaI','incidents.end_date AS fechaF','type_incidents.name AS tipo','dept_rh.name AS departamento');
+                    break;
+                //Caso de empleados
+                case 2:
+                    if($employee != 0){
+                        $datas = DB::table('incidents')
+                                    ->join('employees','incidents.employee_id','=','employees.id')
+                                    ->join('dept_rh','dept_rh.id','=','employees.dept_rh_id')
+                                    ->join('class_incident','class_incident.id','=','incidents.cls_inc_id')
+                                    ->join('type_incidents','type_incidents.id', '=', 'incidents.type_incidents_id')
+                                    ->whereBetween('incidents.start_date',[$sStartDate,$sEndDate])
+                                    ->whereBetween('incidents.end_date',[$sStartDate,$sEndDate])
+                                    ->where('employees.id',$employee) 
+                                    ->orderBy('incidents.start_date')
+                                    ->select('incidents.start_date AS fechaI','incidents.end_date AS fechaF','type_incidents.name AS tipo','employees.name AS empleado'); 
+                    }else{
+                        $datas = DB::table('incidents')
+                                    ->join('employees','incidents.employee_id','=','employees.id')
+                                    ->join('class_incident','class_incident.id','=','incidents.cls_inc_id')
+                                    ->join('type_incidents','type_incidents.id', '=', 'incidents.type_incidents_id')
+                                    ->whereBetween('incidents.start_date',[$sStartDate,$sEndDate])
+                                    ->whereBetween('incidents.end_date',[$sStartDate,$sEndDate])
+                                    ->orderBy('incidents.start_date')
+                                    ->select('incidents.start_date AS fechaI','incidents.end_date AS fechaF','type_incidents.name AS tipo','employees.name AS empleado');              
+                    }
+                    break;
+            }
+            //Si selecciono una incidencia en particular
+            if($incident != 0){
+                $datas = $datas->where('incidents.type_incidents_id',$employee)->get();
+            }else{
+                $datas = $datas->get();
+            }
+        
+
+            return view('report.incidentReportGenerar')->with('datas',$datas)->with('tipo',$tipo);
+        }
 }

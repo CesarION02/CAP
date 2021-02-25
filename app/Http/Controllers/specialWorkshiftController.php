@@ -12,6 +12,7 @@ use App\Models\week_department_day;
 use App\Models\day_workshifts;
 use App\Models\day_workshifts_employee;
 use App\Models\pdf_week;
+use App\Models\specialworkshift;
 use DateTime;
 use DB;
 use Carbon\Carbon;
@@ -27,6 +28,7 @@ class specialWorkshiftController extends Controller
      */
     public function index(Request $request)
     {   
+        $filterType = "2";
         $start_date = null;
         $end_date = null;
         if ($request->start_date == null) {
@@ -52,51 +54,42 @@ class specialWorkshiftController extends Controller
             for($i=0;count($dgu)>$i;$i++){
                 $Adgu[$i]=$dgu[$i]->id;
             }
-            $datas = DB::table('day_workshifts_employee')
-                        ->join('employees','employees.id','=','day_workshifts_employee.employee_id')
-                        ->join('day_workshifts','day_workshifts.id','=','day_workshifts_employee.day_id')
-                        ->join('workshifts','workshifts.id','=','day_workshifts.workshift_id')
-                        ->join('week_department_day','week_department_day.id','=','day_workshifts.day_id')
-                        ->join('jobs','jobs.id','=','employees.job_id')
+            $datas = DB::table('specialworkshift')
+                        ->join('employees','employees.id','=','specialworkshift.employee_id')
+                        ->join('workshifts','workshifts.id','=','specialworkshift.workshift_id')
                         ->join('departments','departments.id','=','employees.department_id')
                         ->join('department_group','department_group.id','=','departments.dept_group_id')
-                        ->orderBy('week_department_day.date')
                         ->where('employees.is_delete','0')
                         ->where('employees.is_active','1')
-                        ->where('day_workshifts_employee.is_delete',0)
-                        ->where('week_department_day.week_department_id',null)
-                        ->whereBetween('week_department_day.date', [$start_date, $end_date])
+                        ->where('employees.is_delete',0)
+                        ->where('specialworkshift.is_delete',0)
                         ->whereIn('departments.dept_group_id',$Adgu)
                         ->orderBy('employees.name')
-                        ->select('week_department_day.date AS date',
-                                    'employees.name AS nameEmp',
-                                    'workshifts.name AS nameWork',
-                                    'week_department_day.is_approved',
-                                    'day_workshifts_employee.id AS id')
-                        ->get();
+                        ->select('specialworkshift.dateI AS datei','specialworkshift.dateS AS dates','employees.name AS nameEmp','workshifts.name AS nameWork','specialworkshift.is_approved AS is_approved','specialworkshift.id AS id');
         }else{
-            $datas = DB::table('day_workshifts_employee')
-                        ->join('employees','employees.id','=','day_workshifts_employee.employee_id')
-                        ->join('day_workshifts','day_workshifts.id','=','day_workshifts_employee.day_id')
-                        ->join('workshifts','workshifts.id','=','day_workshifts.workshift_id')
-                        ->join('week_department_day','week_department_day.id','=','day_workshifts.day_id')
-                        ->join('jobs','jobs.id','=','employees.job_id')
+            $datas = DB::table('specialworkshift')
+                        ->join('employees','employees.id','=','specialworkshift.employee_id')
+                        ->join('workshifts','workshifts.id','=','specialworkshift.workshift_id')
                         ->join('departments','departments.id','=','employees.department_id')
                         ->join('department_group','department_group.id','=','departments.dept_group_id')
-                        ->orderBy('week_department_day.date')
                         ->where('employees.is_delete','0')
                         ->where('employees.is_active','1')
-                        ->where('day_workshifts_employee.is_delete',0)
-                        ->where('week_department_day.week_department_id',null)
-                        ->whereBetween('week_department_day.date', [$start_date, $end_date])
+                        ->where('employees.is_delete',0)
+                        ->where('specialworkshift.is_delete',0)
                         ->orderBy('employees.name')
-                        ->select('week_department_day.date AS date','employees.name AS nameEmp','workshifts.name AS nameWork','day_workshifts_employee.id AS id','week_department_day.is_approved AS is_approved')
-                        ->get();   
+                        ->select('specialworkshift.dateI AS datei','specialworkshift.dateS AS dates','employees.name AS nameEmp','workshifts.name AS nameWork','specialworkshift.is_approved AS is_approved' ,'specialworkshift.id AS id');   
         }
+
+        if ($filterType != "2") {
+            $datas = $datas->whereBetween('specialworkshift.dateI', [$start_date, $end_date]);
+        }
+        $datas = $datas->get();
+
         return view('specialworkshift.index')
                                 ->with('datas',$datas)
                                 ->with('start_date', $start_date)
-                                ->with('end_date', $end_date);
+                                ->with('end_date', $end_date)
+                                ->with('filterType', $filterType);
 
     }
 
@@ -134,54 +127,43 @@ class specialWorkshiftController extends Controller
             for($i=0;count($dgu)>$i;$i++){
                 $Adgu[$i]=$dgu[$i]->id;
             }
-            $datas = DB::table('day_workshifts_employee')
-                        ->join('employees','employees.id','=','day_workshifts_employee.employee_id')
-                        ->join('day_workshifts','day_workshifts.id','=','day_workshifts_employee.day_id')
-                        ->join('workshifts','workshifts.id','=','day_workshifts.workshift_id')
-                        ->join('week_department_day','week_department_day.id','=','day_workshifts.day_id')
-                        ->join('jobs','jobs.id','=','employees.job_id')
+
+            $datas = DB::table('specialworkshift')
+                        ->join('employees','employees.id','=','specialworkshift.employee_id')
+                        ->join('workshifts','workshifts.id','=','specialworkshift.workshift_id')
                         ->join('departments','departments.id','=','employees.department_id')
                         ->join('department_group','department_group.id','=','departments.dept_group_id')
-                        ->orderBy('week_department_day.date')
                         ->where('employees.is_delete','0')
                         ->where('employees.is_active','1')
-                        ->where('day_workshifts_employee.is_delete',0)
-                        ->where('week_department_day.week_department_id',null)
+                        ->where('employees.is_delete',0)
+                        ->where('specialworkshift.is_delete',0)
                         ->whereIn('departments.dept_group_id',$Adgu)
                         ->orderBy('employees.name')
-                        ->select('week_department_day.date AS date',
-                                    'employees.name AS nameEmp',
-                                    'workshifts.name AS nameWork',
-                                    'week_department_day.is_approved',
-                                    'day_workshifts_employee.id AS id');
+                        ->select('specialworkshift.dateI AS datei','specialworkshift.dateS AS dates','employees.name AS nameEmp','workshifts.name AS nameWork','specialworkshift.is_approved AS is_approved','specialworkshift.id AS id');
         }else{
-            $datas = DB::table('day_workshifts_employee')
-                        ->join('employees','employees.id','=','day_workshifts_employee.employee_id')
-                        ->join('day_workshifts','day_workshifts.id','=','day_workshifts_employee.day_id')
-                        ->join('workshifts','workshifts.id','=','day_workshifts.workshift_id')
-                        ->join('week_department_day','week_department_day.id','=','day_workshifts.day_id')
-                        ->join('jobs','jobs.id','=','employees.job_id')
+            $datas = DB::table('specialworkshift')
+                        ->join('employees','employees.id','=','specialworkshift.employee_id')
+                        ->join('workshifts','workshifts.id','=','specialworkshift.workshift_id')
                         ->join('departments','departments.id','=','employees.department_id')
                         ->join('department_group','department_group.id','=','departments.dept_group_id')
-                        ->orderBy('week_department_day.date')
                         ->where('employees.is_delete','0')
                         ->where('employees.is_active','1')
-                        ->where('day_workshifts_employee.is_delete',0)
-                        ->where('week_department_day.week_department_id',null)
+                        ->where('employees.is_delete',0)
+                        ->where('specialworkshift.is_delete',0)
                         ->orderBy('employees.name')
-                        ->select('week_department_day.date AS date','employees.name AS nameEmp','workshifts.name AS nameWork','day_workshifts_employee.id AS id','week_department_day.is_approved AS is_approved');
+                        ->select('specialworkshift.dateI AS datei','specialworkshift.dateS AS dates','employees.name AS nameEmp','workshifts.name AS nameWork','specialworkshift.is_approved AS is_approved','specialworkshift.id AS id');
         }
 
         if ($filterType != "2") {
-            $datas = $datas->whereBetween('week_department_day.date', [$start_date, $end_date]);
+            $datas = $datas->whereBetween('specialworkshift.dateI', [$start_date, $end_date]);
         }
 
         if ($filterType > "0") {
             if ($filterType == "1") {
-                $datas = $datas->where('week_department_day.is_approved', true);
+                $datas = $datas->where('specialworkshift.is_approved', true);
             }
             else {
-                $datas = $datas->where('week_department_day.is_approved', false);
+                $datas = $datas->where('specialworkshift.is_approved', false);
             }
         }
 
@@ -216,7 +198,6 @@ class specialWorkshiftController extends Controller
                 $Adgu[$i]=$dgu[$i]->id;
             }
             $employees = DB::table('employees')
-                        ->join('jobs','jobs.id','=','employees.job_id')
                         ->join('departments','departments.id','=','employees.department_id')
                         ->join('department_group','department_group.id','=','departments.dept_group_id')
                         ->where('employees.is_delete','0')
@@ -231,7 +212,6 @@ class specialWorkshiftController extends Controller
                         ->get();
         }else{
             $employees = DB::table('employees')
-                        ->join('jobs','jobs.id','=','employees.job_id')
                         ->join('departments','departments.id','=','employees.department_id')
                         ->join('department_group','department_group.id','=','departments.dept_group_id')
                         ->where('employees.is_delete','0')
@@ -255,27 +235,49 @@ class specialWorkshiftController extends Controller
      */
     public function store(Request $request)
     {
-        $week_department_day = new week_department_day();
-        $week_department_day->date = $request->date;
-        $week_department_day->week_department_id = null;
-        $week_department_day->status = 1;
-        $week_department_day->save();
+        $dateI = Carbon::parse($request->datei);
+        $dateS = Carbon::parse($request->dates);
+        $diferencia = ($dateI->diffInDays($dateS));
 
-        $day_workshifts = new day_workshifts();
-        $day_workshifts->name = 'na';
-        $day_workshifts->day_id = $week_department_day->id;
-        $day_workshifts->workshift_id = $request->workshift_id;
-        $day_workshifts->is_delete = 0;
-        $day_workshifts->save();
+        $special = new specialworkshift();
+        $special->employee_id = $request->employee_id;
+        $special->dateI = $request->datei;
+        $special->dateS = $request->dates;
+        $special->workshift_id = $request->workshift_id;
+        $special->updated_by = session()->get('user_id');
+        $special->created_by = session()->get('user_id');
+        $special->is_delete = 0;
+        $special->save();
 
-        $day_workshifts_employee = new day_workshifts_employee;
-        $day_workshifts_employee->employee_id = $request->employee_id;
-        $day_workshifts_employee->day_id = $day_workshifts->id;
-        $day_workshifts_employee->job_id = null;   
-        $day_workshifts_employee->is_rest = 0;
-        $day_workshifts_employee->type_day_id = 1;
-        $day_workshifts_employee->is_delete = 0; 
-        $day_workshifts_employee->save(); 
+        
+
+        for($i = 0 ; $diferencia >= $i ; $i++){
+            $week_department_day = new week_department_day();
+            $week_department_day->date = $dateI->toDateString();
+            $week_department_day->week_department_id = null;
+            $week_department_day->status = 1;
+            $week_department_day->special = $special->id;
+            $week_department_day->save();
+
+            $day_workshifts = new day_workshifts();
+            $day_workshifts->name = 'na';
+            $day_workshifts->day_id = $week_department_day->id;
+            $day_workshifts->workshift_id = $request->workshift_id;
+            $day_workshifts->is_delete = 0;
+            $day_workshifts->save();
+
+            $day_workshifts_employee = new day_workshifts_employee;
+            $day_workshifts_employee->employee_id = $request->employee_id;
+            $day_workshifts_employee->day_id = $day_workshifts->id;
+            $day_workshifts_employee->job_id = null;   
+            $day_workshifts_employee->is_rest = 0;
+            $day_workshifts_employee->type_day_id = 1;
+            $day_workshifts_employee->is_delete = 0; 
+            $day_workshifts_employee->save();
+            $dateI->addDay();
+        }
+        
+         
 
         return redirect('specialworkshift')->with('mensaje', 'Turno especial creado con exito');
     }
@@ -299,21 +301,53 @@ class specialWorkshiftController extends Controller
      */
     public function edit($id)
     {
-        $datas = DB::table('day_workshifts_employee')
-                        ->join('employees','employees.id','=','day_workshifts_employee.employee_id')
-                        ->join('day_workshifts','day_workshifts.id','=','day_workshifts_employee.day_id')
-                        ->join('workshifts','workshifts.id','=','day_workshifts.workshift_id')
-                        ->join('week_department_day','week_department_day.id','=','day_workshifts.day_id')
-                        ->where('day_workshifts_employee.id',$id)
-                        ->orderBy('employees.name')
-                        ->select('employees.id AS idEmployee','employees.name AS nameEmp','workshifts.id AS idWork','week_department_day.date AS date','day_workshifts_employee.id AS id')
-                        ->get();
-        $workshifts = DB::table('workshifts')
-                        ->where('is_delete',0)
-                        ->select('name AS name','entry AS entrada', 'departure AS salida','id AS id')
-                        ->get();
+        $datas = DB::table('specialworkshift')->where('id','=',$id)->get();
+                        
         
-        return view('specialworkshift.edit')->with('datas',$datas)->with('workshifts',$workshifts);
+        if (session()->get('rol_id') != 1){
+            $numero = session()->get('name');
+            $usuario = DB::table('users')
+                        ->where('name',$numero)
+                        ->get();
+            $dgu = DB::table('group_dept_user')
+                        ->where('user_id',$usuario[0]->id)
+                        ->select('groupdept_id AS id')
+                        ->get();
+            $Adgu = [];
+            for($i=0;count($dgu)>$i;$i++){
+                $Adgu[$i]=$dgu[$i]->id;
+            }
+            $employees = DB::table('employees')
+                            ->join('jobs','jobs.id','=','employees.job_id')
+                            ->join('departments','departments.id','=','employees.department_id')
+                            ->join('department_group','department_group.id','=','departments.dept_group_id')
+                            ->where('employees.is_delete','0')
+                            ->where('employees.is_active','1')
+                            ->whereIn('departments.dept_group_id',$Adgu)
+                            ->orderBy('employees.name')
+                            ->select('employees.name AS nameEmployee','employees.num_employee AS numEmployee','employees.short_name AS shortName','employees.id AS idEmployee')
+                            ->get();
+            $workshifts = DB::table('workshifts')
+                            ->where('is_delete',0)
+                            ->select('name AS name','entry AS entrada', 'departure AS salida','id AS id')
+                            ->get();
+        }else{
+            $employees = DB::table('employees')
+                            ->join('jobs','jobs.id','=','employees.job_id')
+                            ->join('departments','departments.id','=','employees.department_id')
+                            ->join('department_group','department_group.id','=','departments.dept_group_id')
+                            ->where('employees.is_delete','0')
+                            ->where('employees.is_active','1')
+                            ->orderBy('employees.name')
+                            ->select('employees.name AS nameEmployee','employees.num_employee AS numEmployee','employees.short_name AS shortName','employees.id AS idEmployee')
+                            ->get();
+            $workshifts = DB::table('workshifts')
+                            ->where('is_delete',0)
+                            ->select('name AS name','entry AS entrada', 'departure AS salida','id AS id')
+                            ->get();    
+        }
+        
+        return view('specialworkshift.edit')->with('datas',$datas)->with('employees',$employees)->with('workshifts',$workshifts);
 
     }
 
@@ -326,15 +360,51 @@ class specialWorkshiftController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $day_workshift_employee = day_workshifts_employee::findOrFail($id);
-        
-        $day_workshifts = day_workshifts::findOrFail($day_workshift_employee->day_id);
-        $day_workshifts->workshift_id = $request->workshift_id;
-        $day_workshifts->save(); 
+        $specialworkshift = specialworkshift::findOrFail($id);
 
-        $week_department_day = week_department_day::findOrFail($day_workshifts->day_id);
-        $week_department_day->date = $request->date;
-        $week_department_day->save(); 
+        $dateI = Carbon::parse($request->datei);
+        $dateS = Carbon::parse($request->dates);
+        $diferencia = ($dateI->diffInDays($dateS));
+
+        $specialworkshift->employee_id = $request->employee_id;
+        $specialworkshift->dateI = $request->datei;
+        $specialworkshift->dateS = $request->dates;
+        $specialworkshift->workshift_id = $request->workshift_id;
+        $specialworkshift->updated_by = session()->get('user_id');
+        $specialworkshift->is_delete = 0;
+        $specialworkshift->save();
+
+        $week_department_day = DB::table('week_department_day')->where('special','=',$id)->delete();
+
+        for($i = 0 ; $diferencia >= $i ; $i++){
+            $week_department_day = new week_department_day();
+            $week_department_day->date = $dateI->toDateString();
+            $week_department_day->week_department_id = null;
+            $week_department_day->status = 1;
+            $week_department_day->special = $id;
+            $week_department_day->save();
+
+            $day_workshifts = new day_workshifts();
+            $day_workshifts->name = 'na';
+            $day_workshifts->day_id = $week_department_day->id;
+            $day_workshifts->workshift_id = $request->workshift_id;
+            $day_workshifts->is_delete = 0;
+            $day_workshifts->save();
+
+            $day_workshifts_employee = new day_workshifts_employee;
+            $day_workshifts_employee->employee_id = $request->employee_id;
+            $day_workshifts_employee->day_id = $day_workshifts->id;
+            $day_workshifts_employee->job_id = null;   
+            $day_workshifts_employee->is_rest = 0;
+            $day_workshifts_employee->type_day_id = 1;
+            $day_workshifts_employee->is_delete = 0; 
+            $day_workshifts_employee->save();
+            $dateI->addDay();
+        }
+    
+
+
+         
 
         return redirect('specialworkshift')->with('mensaje', 'Turno especial actualizado con exito');
     }
@@ -347,13 +417,19 @@ class specialWorkshiftController extends Controller
      */
     public function updateApproved($id)
     {
-        $day_workshift_employee = day_workshifts_employee::findOrFail($id);
-        
-        $day_workshifts = day_workshifts::findOrFail($day_workshift_employee->day_id);
+        $specialworkshift = specialworkshift::findOrFail($id);
+        $specialworkshift->is_approved =  $specialworkshift->is_approved ? false : true;
+        $specialworkshift->save();
 
-        $week_department_day = week_department_day::findOrFail($day_workshifts->day_id);
-        $week_department_day->is_approved = $week_department_day->is_approved ? false : true;
-        $week_department_day->save();
+        $week_department_day = DB::table('week_department_day')->where('special','=',$id)->get();
+        for($i = 0 ; count($week_department_day) > $i ; $i++){
+            if($week_department_day[$i]->is_approved == 0){
+                DB::table('week_department_day')->where('id','=',$week_department_day[$i]->id)->update(['is_approved'=>1]);    
+            }else{
+                DB::table('week_department_day')->where('id','=',$week_department_day[$i]->id)->update(['is_approved'=>0]);    
+            }
+        }
+        
 
         return redirect('specialworkshiftrh')->with('mensaje', 'Turno especial actualizado con exito');
     }
@@ -367,9 +443,12 @@ class specialWorkshiftController extends Controller
     public function destroy(Request $request,$id)
     {
         if ($request->ajax()) {
-            $day_workshift_employee = day_workshifts_employee::findOrFail($id);
-            $day_workshift_employee->is_delete = 1;
-            $day_workshift_employee->save();
+            $special = specialworkshift::findOrFail($id);
+            $special->is_delete = 1;
+            $special->save();
+            
+            $week_department_day = DB::table('week_department_day')->where('special','=',$id)->delete();
+            
             return response()->json(['mensaje' => 'ok']);
         } else {
             abort(404);
