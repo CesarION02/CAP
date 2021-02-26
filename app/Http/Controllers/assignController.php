@@ -798,7 +798,7 @@ class assignController extends Controller
                 INNER JOIN jobs j ON b.job_id = j.id
                 INNER JOIN departments d ON j.department_id = d.id
                 INNER JOIN department_group g ON d.dept_group_id = g.id
-                WHERE employees.is_active = 1
+                WHERE b.is_active = 1
                 GROUP By a.employee_id");    
         }
         return view('assign.showprogramming')->with('assigns',$assigns)->with('dgroup',$usuario[0]->id);
