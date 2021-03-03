@@ -206,7 +206,7 @@ class SDataAccessControl {
             }
             else {
                 $result[0] = false;
-                $result[1] = "El empleado está fuera de su horario";
+                $result[1] = "Fuera del horario permitido. Revise horario";
             
                 return $result;
             }

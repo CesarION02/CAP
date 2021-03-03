@@ -48,9 +48,11 @@ class employeeController extends Controller
         $job = job::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
         $benPols = benefitsPolice::orderBy('name','ASC')->pluck('id','name');
         $policy = policy_extratime::orderBy('id')->pluck('id','name');
+        $department = department::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
         
         return view('employee.create')->with('way',$way)
                                         ->with('job',$job)
+                                        ->with('department',$department)
                                         ->with('benPols',$benPols)
                                         ->with('policy',$policy);
     }
@@ -63,7 +65,15 @@ class employeeController extends Controller
      */
     public function store(Request $request)
     {
-        employees::create($request->all());
+        $employee = new employees($request->all());
+
+        $employee->is_config = 0;
+        $employee->department_id = 99;
+        $employee->job_id = 25;
+        $employee->is_active = 1;
+
+        $employee->save();
+
         return redirect('employee')->with('mensaje','Empleado fue creado con éxito');
     }
 
@@ -87,7 +97,7 @@ class employeeController extends Controller
     public function edit($id)
     {
         $way = way_register::orderBy('name','ASC')->pluck('id','name');
-        $department = department::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');;
+        $department = department::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
         $benPols = benefitsPolice::orderBy('name','ASC')->pluck('id','name');
         $data = employees::findOrFail($id);
         $policy = policy_extratime::orderBy('id')->pluck('id','name');
