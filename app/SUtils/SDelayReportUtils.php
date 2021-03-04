@@ -272,7 +272,7 @@ class SDelayReportUtils {
                                 ->leftJoin('departments AS d', 'd.id', '=', 'j.department_id')
                                 ->whereBetween('r.date', [$startDate, $endDate])
                                 // ->select('r.*', 'd.id AS dept_id', 'e.num_employee', 'e.name', 'e.is_overtime')
-                                ->select('r.*', 'd.id AS dept_id', 'e.num_employee', 'e.name', 'e.policy_extratime_id')
+                                ->select('r.*', 'd.id AS dept_id', 'e.num_employee', 'e.name', 'e.policy_extratime_id', 'e.external_id')
                                 ->orderBy('employee_id', 'ASC')
                                 ->orderBy('date', 'ASC')
                                 ->orderBy('time', 'ASC');
@@ -319,7 +319,7 @@ class SDelayReportUtils {
                                 ->where('r.date', $sDate)
                                 ->where('e.id', $iEmployee)
                                 // ->select('r.*', 'e.num_employee', 'e.name', 'e.is_overtime')
-                                ->select('r.*', 'e.num_employee', 'e.name', 'e.policy_extratime_id');
+                                ->select('r.*', 'e.num_employee', 'e.name', 'e.policy_extratime_id', 'e.external_id');
 
         if ($iType == \SCons::REG_IN) {
             $registry = $registry->orderBy('date', 'DESC')

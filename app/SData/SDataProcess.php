@@ -180,6 +180,7 @@ class SDataProcess {
                     $otherRow->idEmployee = $idEmployee;
                     $otherRow->numEmployee = $oEmployee->num_employee;
                     $otherRow->employee = $oEmployee->name;
+                    $otherRow->external_id = $oEmployee->external_id;
 
                     $otherRow = SDataProcess::setDates($result, $otherRow, $sDate);
 
@@ -272,6 +273,7 @@ class SDataProcess {
             $newRow->idEmployee = $idEmployee;
             $newRow->numEmployee = $registry->num_employee;
             $newRow->employee = $registry->name;
+            $newRow->external_id = $registry->external_id;
         }
         
         $again = false;

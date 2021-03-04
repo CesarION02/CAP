@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-Empleados
+    {{ (isset($becarios) && $becarios ? 'Becarios' : 'Empleados') }}
 @endsection
 
 @section("scripts")
@@ -61,10 +61,10 @@ Empleados
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Empleados</h3>
+                <h3 class="box-title">{{ (isset($becarios) && $becarios ? 'Becarios' : 'Empleados') }}</h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:empleados"])
                 <div class="box-tools pull-right">
-                    <a href="{{route('crear_empleado')}}" class="btn btn-block btn-success btn-sm">
+                    <a href="{{route('crear_empleado', ['becario' => (isset($becarios) && $becarios)])}}" class="btn btn-block btn-success btn-sm">
                         <i class="fa fa-fw fa-plus-circle"></i> Nuevo
                     </a>
                 </div>
@@ -73,9 +73,9 @@ Empleados
                 <table class="table table-striped table-bordered table-hover" id="myTable">
                     <thead>
                         <tr>
-                            <th>Nombre empleado</th>
+                            <th>Nombre {{ (isset($becarios) && $becarios ? 'becario' : 'empleado') }}</th>
                             <th>Nombre corto</th>
-                            <th>Número empleado</th>
+                            <th>Número {{ (isset($becarios) && $becarios ? 'becario' : 'empleado') }}</th>
                             <th>Política registro</th>
                             <th>Departamento CAP</th>
                             <th>Puesto</th>
@@ -92,7 +92,7 @@ Empleados
                             <td>{{$data->department == null ? "" : $data->department->name}}</td>
                             <td>{{$data->job == null ? "" : $data->job->name}}</td>
                             <td>
-                                <a href="{{route('editar_empleado', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
+                                <a href="{{route('editar_empleado', ['id' => $data->id, 'becario' => (isset($becarios) && $becarios)])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
                                     <i class="fa fa-fw fa-pencil"></i>
                                 </a>
                             </td>

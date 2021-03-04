@@ -33,6 +33,7 @@ class employeeController extends Controller
             $datas->job;
             $datas->way_register;
         });
+
         return view('employee.index', compact('datas'));
 
     }
@@ -42,7 +43,7 @@ class employeeController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create($becario)
     {
         $way = way_register::orderBy('name','ASC')->pluck('id','name');
         $job = job::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
@@ -52,6 +53,7 @@ class employeeController extends Controller
         
         return view('employee.create')->with('way',$way)
                                         ->with('job',$job)
+                                        ->with('becario',$becario)
                                         ->with('department',$department)
                                         ->with('benPols',$benPols)
                                         ->with('policy',$policy);
@@ -94,7 +96,7 @@ class employeeController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit($id, $becario)
     {
         $way = way_register::orderBy('name','ASC')->pluck('id','name');
         $department = department::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
@@ -104,6 +106,7 @@ class employeeController extends Controller
 
         return view('employee.edit', compact('data'))
                                         ->with('way',$way)
+                                        ->with('becario', $becario)
                                         ->with('department',$department)
                                         ->with('benPols',$benPols)
                                         ->with('policy',$policy);
@@ -567,6 +570,7 @@ class employeeController extends Controller
             abort(404);
         }
     }
+
     public function foraneos(){
         $config = \App\SUtils\SConfiguration::getConfigurations();
         $datas = employees::where('is_delete','0')
@@ -580,6 +584,23 @@ class employeeController extends Controller
             $datas->department;
         });
         return view('employee.outstandingemp', compact('datas'))->with('foraneos',1);   
+    }
+
+    public function becarios(){
+        $datas = employees::where('is_delete','0')
+                            ->where('is_active', true)
+                            ->whereNull('external_id')
+                            ->orderBy('name')
+                            ->get();
+
+        $datas->each(function($datas){
+            $datas->job;
+            $datas->way_register;
+        });
+
+        $becarios = true;
+
+        return view('employee.index', compact('datas'))->with('becarios', $becarios); 
     }
 }
 

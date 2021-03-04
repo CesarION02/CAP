@@ -141,6 +141,7 @@ Route::delete('employees/enviarForaneos/{id}', 'employeeController@enviarForaneo
 Route::put('employee/outstanding/{id}', 'employeeController@updateoutstanding')->name('actualizar_empleado_faltante');
 Route::get('employee/puesto','employeeController@jobs')->name('puesto');
 Route::get('outstanding', 'employeeController@outstandingemployees')->name('empleados_pendientes');
+Route::get('employees/becarios', 'employeeController@becarios')->name('becarios');
 Route::get('employee/{id}/editoutstanding', 'employeeController@editoutstanding')->name('editar_empleado_faltante');
 Route::delete('employee/fingerprint/{id}', 'employeeController@desactivar')->name('desactivar');
 Route::delete('employee/fingerprint/disable/{id}', 'employeeController@activar')->name('activar');
@@ -152,9 +153,9 @@ Route::get('supervisorsView', 'employeeController@supervisorsView')->name('super
 Route::get('employee/{id}/editShortname', 'employeeController@editShortname')->name('editar_nombrecorto');
 Route::put('employee/supervisorsView/{id}', 'employeeController@updateShortname')->name('actualizar_nombrecorto');
 Route::get('employee', 'employeeController@index')->name('empleado');
-Route::get('employee/create', 'employeeController@create')->name('crear_empleado');
+Route::get('employee/{becario}/create', 'employeeController@create')->name('crear_empleado');
 Route::post('employee', 'employeeController@store')->name('guardar_empleado');
-Route::get('employee/{id}/edit', 'employeeController@edit')->name('editar_empleado');
+Route::get('employee/{id}/{becario}/edit', 'employeeController@edit')->name('editar_empleado');
 Route::put('employee/{id}', 'employeeController@update')->name('actualizar_empleado');
 Route::delete('employee/{id}', 'employeeController@destroy')->name('eliminar_empleado');
 
