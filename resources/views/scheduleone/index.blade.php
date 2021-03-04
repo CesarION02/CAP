@@ -58,8 +58,8 @@
                     <thead>
                         <tr>
                             <th>Fecha</th>
-                            <th>Número empleado</th>
-                            <th>Empleado</th>
+                            <th>Número colaborador</th>
+                            <th>Colaborador</th>
                             <th></th>
                         </tr>
                     </thead>

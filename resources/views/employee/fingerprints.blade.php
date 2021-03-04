@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-Empleados
+Colaboradores
 @endsection
 
 @section("scripts")
@@ -127,8 +127,8 @@ Empleados
                 <table class="table table-striped table-bordered table-hover" id="myTable">
                     <thead>
                         <tr>
-                            <th>Nombre empleado</th>
-                            <th>Número empleado</th>
+                            <th>Nombre colaborador</th>
+                            <th>Número colaborador</th>
                             <th>Política registro</th>
                             <th>Huella digital</th>
                             <th>Estado</th>

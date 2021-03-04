@@ -23,8 +23,8 @@ Reporte Entradas/Salidas
                         <table id="myTable" class="display" style="width:100%">
                             <thead>
                                 <tr>
-                                    <th># Empleado</th>
-                                    <th>Empleado</th>
+                                    <th># Colaborador</th>
+                                    <th>Colaborador</th>
                                     <th>Fecha</th>
                                     <th>Hora</th>
                                     <th>Tipo checada</th>

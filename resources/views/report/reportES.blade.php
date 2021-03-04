@@ -60,7 +60,7 @@ Reporte Entradas/Salidas
                     </div>
                     <div class="row" v-else-if="oData.reportType == 4">
                         <div class="col-md-10 col-md-offset-1">
-                            <label for="cars">Elige empleado(s):</label>
+                            <label for="cars">Elige colaborador(s):</label>
                             
                             <select data-placeholder="Selecciona opciones..." style="width: 60%" class="chosen-select" id="cars" name="vals[]" multiple>
                                 <option v-for="employee in oData.employees" :value="employee.id">@{{ employee.name + ' ' + employee.num_employee }}</option>
@@ -69,7 +69,7 @@ Reporte Entradas/Salidas
                     </div>
                     <div class="row" v-else-if="oData.reportType == 5">
                         <div class="col-md-10 col-md-offset-1">
-                            <label for="cars">Elige empleado(s):</label>
+                            <label for="cars">Elige colaborador(s):</label>
                             
                             <select data-placeholder="Selecciona opciones..." style="width: 60%" class="chosen-select" id="cars" name="vals[]" multiple>
                                 <option v-for="employee in oData.employees" :value="employee.id">@{{ employee.name + ' - ' + employee.num_employee }}</option>

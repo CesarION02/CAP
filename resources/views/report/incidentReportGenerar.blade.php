@@ -31,10 +31,10 @@
                             <thead>
                                 <tr>
                                     @if($tipo == 2)
-                                        <th>Empleado</th>
+                                        <th>Colaborador</th>
                                     @else
                                         <th>Departamento nómina</th>
-                                        <th>Empleado</th>
+                                        <th>Colaborador</th>
                                     @endif
                                     <th>Fecha inicio</th>
                                     <th>Fecha fin</th>

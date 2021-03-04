@@ -26,12 +26,12 @@
             <br>
             <div v-show="! bHoliday" class="row">
                 <div class="col-md-2 col-md-offset-1">
-                    <label for="">Empleado:*</label>
+                    <label for="">Colaborador:*</label>
                 </div>
                 <div class="col-md-8">
                     <div>
                         <select v-model="iEmployee"
-                                data-placeholder="Selecciona empleado..." id="sel_emp" 
+                                data-placeholder="Selecciona colaborador..." id="sel_emp" 
                                 style="width: 100%"
                                 class="chosen-select"
                                 >

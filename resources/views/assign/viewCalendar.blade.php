@@ -89,7 +89,7 @@ Horario específico
                 <table class="table table-striped table-bordered table-hover" id="checks_table">
                     <thead>
                         <tr>
-                            <th>Empleado</th>
+                            <th>Colaborador</th>
                             @for($i = 0 ; $diff >= $i ; $i++)
 
                                 <th><?php echo date("d-m-Y",strtotime($inicio."+ ".$i." days")); ?></th>

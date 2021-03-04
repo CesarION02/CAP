@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-Empleados
+Colaboradores
 @endsection
 
 @section("scripts")
@@ -67,10 +67,10 @@ Empleados
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Huellas digitales empleados inactivos</h3>
+                <h3 class="box-title">Huellas digitales colaboradores inactivos</h3>
                 <div class="box-tools pull-right">
                     <a href="{{route('huellas')}}" class="btn btn-block btn-info btn-sm">
-                        <i class="fa fa-fw fa-check-circle"></i>Empleados activos
+                        <i class="fa fa-fw fa-check-circle"></i>Colaboradores activos
                     </a>
                 </div>
             </div>
@@ -78,8 +78,8 @@ Empleados
                 <table class="table table-striped table-bordered table-hover" id="myTable">
                     <thead>
                         <tr>
-                            <th>Número empleado</th>
-                            <th>Empleado</th>
+                            <th>Número colaborador</th>
+                            <th>Colaborador</th>
                             <th>Manera de checar</th>
                             <th>Huella digital</th>
                             <th class="width70"></th>

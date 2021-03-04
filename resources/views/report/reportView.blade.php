@@ -41,7 +41,7 @@
                             <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>Empleado</th>
+                                    <th>Colaborador</th>
                                     <th>Fecha entrada</th></th>
                                     <th>Hora entrada</th>
                                     <th>Fecha salida</th>
