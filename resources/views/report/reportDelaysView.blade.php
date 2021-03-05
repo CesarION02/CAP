@@ -33,7 +33,7 @@
                     <div class="col-md-2">
                         <select class="form-control" name="sel-collaborator" id="sel-collaborator">
                             <option value="0" selected>Todos</option>
-                            <option value="1">Colaboradores</option>
+                            <option value="1">Empleados</option>
                             <option value="2">Becarios</option>
                         </select>
                     </div>

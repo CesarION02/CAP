@@ -673,6 +673,7 @@ class ReporteController extends Controller
                             $query->whereBetween('inDate',[$sStartDate,$sEndDate])
                             ->OrwhereBetween('outDate',[$sStartDate,$sEndDate]);
                         })
+                        ->select(['processed_data.*','employees.num_employee','employees.name', 'employees.external_id'])
                         ->get();
         //$lEmployees = $id;
         $incapacidades = DB::table('incidents')
