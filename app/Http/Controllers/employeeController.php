@@ -51,9 +51,16 @@ class employeeController extends Controller
         $policy = policy_extratime::orderBy('id')->pluck('id','name');
         $department = department::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
         
+        $numColl = null;
+        if ($becario) {
+            $numColl = employees::max('num_employee');
+            $numColl++;
+        }
+        
         return view('employee.create')->with('way',$way)
                                         ->with('job',$job)
                                         ->with('becario',$becario)
+                                        ->with('numColl', $numColl)
                                         ->with('department',$department)
                                         ->with('benPols',$benPols)
                                         ->with('policy',$policy);

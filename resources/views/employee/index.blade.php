@@ -64,7 +64,7 @@
                 <h3 class="box-title">{{ (isset($becarios) && $becarios ? 'Becarios' : 'Empleados') }}</h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:empleados"])
                 <div class="box-tools pull-right">
-                    <a href="{{route('crear_empleado', ['becario' => (isset($becarios) && $becarios)])}}" class="btn btn-block btn-success btn-sm">
+                    <a href="{{ route('crear_empleado', (isset($becarios) && $becarios) ? 1 : 0) }}" class="btn btn-block btn-success btn-sm">
                         <i class="fa fa-fw fa-plus-circle"></i> Nuevo
                     </a>
                 </div>

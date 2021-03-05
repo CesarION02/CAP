@@ -7,7 +7,7 @@
 <div class="form-group">
         <label for="num_employee" class="col-lg-3 control-label">Número {{ (isset($becario) && $becario ? 'becario' : 'empleado') }}:</label>
         <div class="col-lg-8">
-            <input type="number" name="num_employee" id="num_employee" class="form-control" value="{{old('num_employee', $data->num_employee ?? '')}}" {{ isset($data) ? "readonly" : "" }}>
+            <input type="number" name="num_employee" id="num_employee" class="form-control" value="{{ (isset($numColl) && $numColl > 0) ? $numColl : old('num_employee', $data->num_employee ?? '')}}" {{ isset($data) ? "readonly" : "" }}>
         </div>
 </div>
 <div class="form-group">
