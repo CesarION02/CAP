@@ -167,6 +167,15 @@ class SDataAccessControl {
         $result = [];
         $reason = "";
 
+        if (! $oData->employee->is_active || $oData->employee->is_delete) {
+            $reasons = "El empleado está desactivado en el sistema";
+            
+            $result[0] = false;
+            $result[1] = $reasons;
+            
+            return $result;
+        }
+
         // Si el empleado tiene incidencias programadas
         if ($oData->absences != null && count($oData->absences) > 0) {
             $reason = "";
