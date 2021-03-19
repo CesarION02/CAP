@@ -92,7 +92,7 @@
                             <td>{{$data->department == null ? "" : $data->department->name}}</td>
                             <td>{{$data->job == null ? "" : $data->job->name}}</td>
                             <td>
-                                <a href="{{route('editar_empleado', ['id' => $data->id, 'becario' => (isset($becarios) && $becarios)])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
+                                <a href="{{route('editar_empleado', ['id' => $data->id, 'becario' => (isset($becarios) && $becarios ? 1 : 0) ] )}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
                                     <i class="fa fa-fw fa-pencil"></i>
                                 </a>
                             </td>
