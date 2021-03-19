@@ -1358,6 +1358,9 @@ class SDataProcess {
                     $oRow->hasAbsence = true;
                     $oRow->comments = $oRow->comments."Falta. ";
                 }
+                else {
+                    $oRow->hasAbsence = false;
+                }
             }
         }
 
