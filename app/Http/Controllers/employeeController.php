@@ -342,6 +342,9 @@ class employeeController extends Controller
 
     public function fingerprints(Request $request){
         $iFilter = $request->ifilter == 0 ? 1 : $request->ifilter;
+        $iFilterH = $request->ifilterH == 0 ? 1 : $request->ifilterH;
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+        
         switch ($iFilter) {
             case 1:
                 $employees = DB::table('employees')
@@ -351,6 +354,7 @@ class employeeController extends Controller
                         ->orderBy('employees.name')
                         ->where('employees.is_delete','0')
                         ->where('employees.is_active', '1')
+                        ->where('employees.department_id','!=',$config->dept_foraneo)
                         ->select('employees.id AS idEmployee','employees.name AS nameEmployee','way_register.name AS way','fingerprints.id AS fingerprint','employees.num_employee AS num','employees.is_delete AS is_delete')
                         ->get();
                 break;
@@ -362,6 +366,7 @@ class employeeController extends Controller
                         ->orderBy('employees.name')
                         ->where('employees.is_delete','2')
                         ->where('employees.is_active', '1')
+                        ->where('employees.department_id',$config->dept_foraneo)
                         ->select('employees.id AS idEmployee','employees.name AS nameEmployee','way_register.name AS way','fingerprints.id AS fingerprint','employees.num_employee AS num','employees.is_delete AS is_delete')
                         ->get();
                 break;
@@ -379,7 +384,7 @@ class employeeController extends Controller
         }
         $rol = session()->get('rol_id');
         
-        return view('employee.fingerprints')->with('employees',$employees)->with('iFilter',$iFilter)->with('rol',$rol); 
+        return view('employee.fingerprints')->with('employees',$employees)->with('iFilter',$iFilter)->with('iFilterH',$iFilterH)->with('rol',$rol); 
     }
     public function fingerprintsDisable(){
         $employees = DB::table('employees')

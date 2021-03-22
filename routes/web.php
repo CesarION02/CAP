@@ -54,6 +54,7 @@ Route::group(['middleware' => ['auth']], function() {
 
 Route::get('/','inicioController@Index')->name('inicio');
     /* RUTAS PROGRAMACION DE TURNOS */
+
 Route::get('shiftprogramming/copyRol','shiftprogrammingController@copyRol')->name('copiarRol');
 Route::post('shiftprogramming/subirArchivo', 'shiftprogrammingController@subirArchivo')->name('subir_archivo');
 Route::post('shiftprogramming/guardar', 'shiftprogrammingController@guardar')->name('guardar_programacion');
@@ -67,7 +68,9 @@ Route::get('shiftprogramming/copyRol','shiftprogrammingController@copyRol')->nam
 Route::get('shiftprogramming/rotRol','shiftprogrammingController@rotRol')->name('rotarRol');
 Route::get('shiftprogramming/editRol','shiftprogrammingController@editRol')->name('editarRol');
 Route::get('shiftprogramming/newShift','shiftprogrammingController@newShift')->name('nueva_planeacion');
+Route::get('shiftprogramming/rh','shiftprogrammingController@rhview')->name('vista_programaciones');
 Route::get('shiftprogramming/{id}', 'shiftprogrammingController@index')->name('programacion');
+
 
 /* RUTAS DE TURNOS ESPECIALES */
 Route::get('specialworkshift', 'specialWorkshiftController@index')->name('turno_especial');

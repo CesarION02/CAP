@@ -11,3 +11,14 @@ function filter(filtro) {
             break;
     }
 }
+
+function filtroHuella(huella) {
+    switch (huella) {
+        case 1:
+            document.getElementById("ifilterH").value = 1;
+            break;
+        case 2:
+            document.getElementById("ifilterH").value = 2;
+            break;
+    }
+}
