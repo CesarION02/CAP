@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\SData\SDataAccessControl;
 use App\SUtils\SAccessControlData;
+use App\Models\AccessLog;
 use Validator;
 
 class AccessControlController extends Controller
@@ -44,6 +45,19 @@ class AccessControlController extends Controller
         return -1;
     }
 
+    public function getInfo($idEmp, $dtDate, $time, $nextDays)
+    {
+        $oData = new SAccessControlData();
+
+        $oData->employee = SDataAccessControl::getEmployee($idEmp);
+        $oData->absences = SDataAccessControl::getAbsences($idEmp, $dtDate);
+        $oData->events = SDataAccessControl::getEvents($idEmp, $dtDate);
+        $oData->schedule = SDataAccessControl::getSchedule($idEmp, $dtDate, $time);
+        $oData->nextSchedule = SDataAccessControl::getNextSchedule($idEmp, $dtDate, $nextDays);
+
+        return $oData;
+    }
+
     public function getInfoByEmployeeNumber(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -62,39 +76,13 @@ class AccessControlController extends Controller
         $minsIn = $request->mins_in;
         $minsOut = $request->mins_out;
 
-        $id = $this->getIdEmployeeByNumber($numEmployee);
+        $idEmp = $this->getIdEmployeeByNumber($numEmployee);
 
-        if ($id < 0) {
+        if ($idEmp < 0) {
             return json_encode(new SAccessControlData());
         }
 
-        $oData = $this->getInfo($id, $dtDate, $time, $nextDays);
-
-        
-        $oResData = clone $oData;
-        
-        $oResData->absences = null;
-        $oResData->events = null;
-
-        $res = SDataAccessControl::isAuthorized($oData, $id, $dtDate, $time, $minsIn, $minsOut);
-        
-        $oResData->authorized = $res[0];
-        $oResData->message = $res[1];
-
-        return json_encode($oResData);
-    }
-
-    public function getInfo($idEmp, $dtDate, $time, $nextDays)
-    {
-        $oData = new SAccessControlData();
-
-        $oData->employee = SDataAccessControl::getEmployee($idEmp);
-        $oData->absences = SDataAccessControl::getAbsences($idEmp, $dtDate);
-        $oData->events = SDataAccessControl::getEvents($idEmp, $dtDate);
-        $oData->schedule = SDataAccessControl::getSchedule($idEmp, $dtDate, $time);
-        $oData->nextSchedule = SDataAccessControl::getNextSchedule($idEmp, $dtDate, $nextDays);
-
-        return $oData;
+        return $this->processInfo($idEmp, $dtDate, $time, $nextDays, $minsIn, $minsOut, "NÚMERO");
     }
 
     public function getAllInfoById(Request $request)
@@ -115,6 +103,11 @@ class AccessControlController extends Controller
         $minsIn = $request->mins_in;
         $minsOut = $request->mins_out;
 
+        return $this->processInfo($idEmp, $dtDate, $time, $nextDays, $minsIn, $minsOut, "HUELLA");
+    }
+
+    private function processInfo($idEmp, $dtDate, $time, $nextDays, $minsIn, $minsOut, $sSource)
+    {
         $oData = $this->getInfo($idEmp, $dtDate, $time, $nextDays);
 
         $res = SDataAccessControl::isAuthorized($oData, $idEmp, $dtDate, $time, $minsIn, $minsOut);
@@ -126,6 +119,32 @@ class AccessControlController extends Controller
         $oResData->authorized = $res[0];
         $oResData->message = $res[1];
 
+        $schIn = null;
+        $schOut = null;
+        if ($oResData->schedule != null) {
+            $schIn = $oResData->schedule->inDateTimeSch;
+            $schOut = $oResData->schedule->outDateTimeSch;
+        }
+
+        $this->saveAccessLog($idEmp, $dtDate.' '.$time, $minsIn, $minsOut, $sSource, $oResData->authorized, $oResData->message, $schIn, $schOut);
+
         return json_encode($oResData);
+    }
+
+    private function saveAccessLog($idEmp, $dtTimeLog, $minsIn, $minsOut, $sSource, $authorized, $message, $schIn, $schOut)
+    {
+        $oLog = new AccessLog();
+
+        $oLog->employee_id = $idEmp;
+        $oLog->dt_time_log = $dtTimeLog;
+        $oLog->mins_in = $minsIn;
+        $oLog->mins_out = $minsOut;
+        $oLog->source = $sSource;
+        $oLog->is_authorized = $authorized;
+        $oLog->message = $message;
+        $oLog->sch_in_dt_time = $schIn;
+        $oLog->sch_out_dt_time = $schOut;
+
+        $oLog->save();
     }
 }

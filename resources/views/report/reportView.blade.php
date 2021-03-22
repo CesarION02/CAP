@@ -19,20 +19,29 @@
         @include('includes.form-error')
         @include('includes.mensaje')
         <div class="box box-danger">
-            <div class="box-header with-border">
-            @switch($tipo)
-                @case(1)
-                    <h3 class="box-title">Reporte prenómina</h3>
-                @break
-                @case(2)
-                    <h3 class="box-title">Reporte STPS</h3>
-                @break
-                @case(3)
-                    <h3 class="box-title">Reporte prenómina</h3>
-                @break
-                <div class="box-tools pull-right">
+            <div class="box-header with-border row">
+                <div class="col-md-10">
+                    @switch($tipo)
+                        @case(1)
+                            <h3 class="box-title">Reporte prenómina</h3>
+                        @break
+                        @case(2)
+                            <h3 class="box-title">Reporte STPS</h3>
+                        @break
+                        @case(3)
+                            <h3 class="box-title">Reporte prenómina</h3>
+                        @break
+                        <div class="box-tools pull-right">
+                        </div>
+                    @endswitch
                 </div>
-             @endswitch
+                <div class="col-md-2">
+                    <select class="form-control" name="sel-collaborator" id="sel-collaborator">
+                        <option value="0" selected>Todos</option>
+                        <option value="1">Empleados</option>
+                        <option value="2">Becarios</option>
+                    </select>
+                </div>
             </div>
             <div class="box-body" >
                 <div class="row">
@@ -41,7 +50,7 @@
                             <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>Empleado</th>
+                                    <th>Colaborador</th>
                                     <th>Fecha entrada</th></th>
                                     <th>Hora entrada</th>
                                     <th>Fecha salida</th>
@@ -49,6 +58,7 @@
                                     <th>Horas extra dobles</th>
                                     <th>Horas extra triples</th>
                                     <th>Prima dominical</th>
+                                    <th>external_id</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -56,8 +66,8 @@
                                 @for($i = 0 ; count($lRows) > $i ; $i++)
                                     @if($idEmployee != $lRows[$i]->employee_id)
                                         <tr>
-                                            <td>{{ $lRows[$i]->num_employee  }}</td>
-                                            <td>{{ $lRows[$i]->name }}</td>
+                                            <td>{{ $lRows[$i-1]->num_employee  }}</td>
+                                            <td>{{ $lRows[$i-1]->name }}</td>
                                             <td>Totales:</td>
                                             <td></td>
                                             <td></td>
@@ -65,15 +75,20 @@
                                             <td>{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($totalextrad) }}</td>
                                             <td>{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($totalextrat) }}</td>
                                             <td>{{ $totaldominical }}</td>
-
+                                            <td>{{ $lRows[$i-1]->external_id  }}</td>
                                         </tr>
-                                        <?php $idEmployee = $lRows[$i]->employee_id; $i--;?>
+                                        <?php 
+                                            $idEmployee = $lRows[$i]->employee_id; $i--;
+                                            $totaldominical = 0;
+                                            $totalextrad = 0;
+                                            $totalextrat = 0;
+                                        ?>
+                                        @continue
                                     @else
                                         @if($lRows[$i]->isOverJourney == false )
                                             <tr>
                                             <td>{{ $lRows[$i]->num_employee  }}</td>
                                             <td>{{ $lRows[$i]->name }}</td>
-                                            {{-- <td>@{{ row.inDate }}</td> --}}
                                             @if ($lRows[$i]->hasAdjust == 1)
                                                 @if($lRows[$i]->inDate != null)
                                                     <td>{{ \App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->inDate) }}</td>
@@ -144,8 +159,6 @@
                                                         <td>{{ $lRows[$i]->outDateTimeNoficial }}</td>
                                                     @endif
                                                 @endif
-                                        {{-- <td v-if="oData.tReport == oData.REP_DELAY">@{{ row.delayMins }}</td>
-                                        <td v-else>@{{ row.extraHours }}</td> --}}
                                                 @if($tipo == 1)
                                                     <td align="center">{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($lRows[$i]->extraDobleMins + $lRows[$i]->extraDobleMinsNoficial) }}</td>
                                                     <td align="center">{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($lRows[$i]->extraTripleMins + $lRows[$i]->extraTripleMinsNoficial) }}</td>
@@ -242,7 +255,7 @@
                                                     @endif
                                                 @endfor
                                             @endif
-                                        {{-- <td v-if="oData.tReport == oData.REP_HR_EX">@{{ row.outDateTimeSch }}</td> --}}
+                                                <td>{{ $lRows[$i]->external_id  }}</td>
                                             </tr>
                                         @endif
                                     @endif
@@ -257,7 +270,7 @@
                                     <td align="center">{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($totalextrad) }}</td>
                                     <td align="center">{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($totalextrat) }}</td>
                                     <td align="center">{{ $totaldominical }}</td>
-
+                                    <td>{{ $lRows[$i-1]->external_id  }}</td>
                                 </tr>
                             </tbody>
                             <?php $cadenaregreso = 'datosreportestps/'.$reporttype.'/'.$tipo;?>
@@ -292,7 +305,34 @@
     <script>
         $(document).ready(function() {
             $.fn.dataTable.moment('DD/MM/YYYY');
-            $('#delays_table').DataTable({
+
+            $.fn.dataTable.ext.search.push(
+                function( settings, data, dataIndex ) {
+                    // var min = parseInt( $('#min').val(), 10 );
+                    let collaboratorVal = parseInt( $('#sel-collaborator').val(), 10 );
+                    let externalId = 0;
+
+                    switch (collaboratorVal) {
+                        case 0:
+                            return true;
+
+                        case 1:
+                            externalId = parseInt( data[9] );
+                            return externalId > 0;
+
+                        case 2:
+                            externalId = parseInt( data[9] );
+                            return ! (externalId > 0);
+
+                        default:
+                            break;
+                    }
+
+                    return false;
+                }
+            );
+
+            var oTable = $('#delays_table').DataTable({
                 "language": {
                     "sProcessing":     "Procesando...",
                     "sLengthMenu":     "Mostrar _MENU_ registros",
@@ -317,9 +357,13 @@
                         "sSortDescending": ": Activar para ordenar la columna de manera descendente"
                     }
                 },
-                
-                
                 "colReorder": true,
+                columnDefs: [
+                    {
+                        targets: [ 9 ],
+                        visible: false
+                    }
+                ],
                 "scrollX": true,
                 "dom": 'Bfrtip',
                 "lengthMenu": [
@@ -346,6 +390,10 @@
                             
                         }
                     ]
+            });
+
+            $('#sel-collaborator').change( function() {
+                oTable.draw();
             });
         });
     </script>

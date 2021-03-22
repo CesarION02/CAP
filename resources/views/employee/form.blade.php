@@ -1,13 +1,13 @@
 <div class="form-group">
-        <label for="nombre" class="col-lg-3 control-label">Nombre empleado:</label>
+        <label for="nombre" class="col-lg-3 control-label">Nombre {{ (isset($becario) && $becario ? 'becario' : 'empleado') }}:</label>
         <div class="col-lg-8">
-        <input type="text" name="name" id="name" class="form-control" value="{{old('name', $data->name ?? '')}}" readonly/>
+                <input type="text" name="name" id="name" class="form-control" value="{{old('name', $data->name ?? '')}}" {{ isset($data) ? "readonly" : "" }}>
         </div>
 </div>
 <div class="form-group">
-        <label for="num_employee" class="col-lg-3 control-label">Número empleado:</label>
+        <label for="num_employee" class="col-lg-3 control-label">Número {{ (isset($becario) && $becario ? 'becario' : 'empleado') }}:</label>
         <div class="col-lg-8">
-            <input type="number" name="num_employee" id="num_employee" class="form-control" value="{{old('num_employee', $data->num_employee ?? '')}}" readonly>
+            <input type="number" name="num_employee" id="num_employee" class="form-control" value="{{ (isset($numColl) && $numColl > 0) ? $numColl : old('num_employee', $data->num_employee ?? '')}}" {{ isset($data) ? "readonly" : "" }}>
         </div>
 </div>
 <div class="form-group">
@@ -17,7 +17,7 @@
                     @foreach($way as $way => $index)
                         @if(isset($data))
                                 @if($index == $data->way_register_id)
-                                        <option value="{{ $index }}" selected> {{$way}}</option>       
+                                        <option value="{{ $index }}" selected> {{$way}}</option>
                                 @else
                                         <option value="{{ $index }}" > {{$way}}</option>
                                 @endif

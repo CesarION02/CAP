@@ -27,8 +27,15 @@
             <div class="box-body" id="reportDelayApp">
                 @include('report.adjustsModal')
                 <div class="row">
-                    <div class="col-md-8">
+                    <div class="col-md-6">
                         <p>Periodo: <b>{{ $sStartDate }}</b> - <b>{{ $sEndDate }}</b>. P. pago: <b>{{ $sPayWay }}</b>.</p>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-control" name="sel-collaborator" id="sel-collaborator">
+                            <option value="0" selected>Todos</option>
+                            <option value="1">Empleados</option>
+                            <option value="2">Becarios</option>
+                        </select>
                     </div>
                     <div class="col-md-2">
                         <a href="{{ route('generarreportetiemposextra') }}" target="_blank" class="btn btn-success">Nuevo reporte</a>
@@ -44,8 +51,8 @@
                         <table id="delays_table" class="table table-condensed" style="width:100%">
                             <thead>
                                 <tr>
-                                    <th>Num. Emp.</th>
-                                    <th>Empleado</th>
+                                    <th>Num. Col.</th>
+                                    <th>Colaborador</th>
                                     {{-- <th>Fecha entrada</th> --}}
                                     <th><span class="nobr">Fecha-hora</span> entrada</th>
                                     {{-- <th>Fecha salida</th> --}}
@@ -62,6 +69,7 @@
                                     <th v-if="vData.tReport == vData.REP_HR_EX">Observaciones</th>
                                     <th>Incidencias</th>
                                     <th>Ajustes</th>
+                                    <th>id_externo</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -89,6 +97,7 @@
                                         </button>
                                         <p>@{{ getAdjToRow(row) }}</p>
                                     </td>
+                                    <td>@{{ row.external_id }}</td>
                                 </tr>
                             </tbody>
                             <button onclick="topFunction()" id="myBtn" title="Ir arriba">Ir arriba</button>
@@ -181,8 +190,34 @@
     <script>
         $.fn.dataTable.moment('DD/MM/YYYY HH:mm:ss');
 
+        $.fn.dataTable.ext.search.push(
+            function( settings, data, dataIndex ) {
+                // var min = parseInt( $('#min').val(), 10 );
+                let collaboratorVal = parseInt( $('#sel-collaborator').val(), 10 );
+                let externalId = 0;
+
+                switch (collaboratorVal) {
+                    case 0:
+                        return true;
+
+                    case 1:
+                        externalId = parseInt( data[13] );
+                        return externalId > 0;
+
+                    case 2:
+                        externalId = parseInt( data[13] );
+                        return ! (externalId > 0);
+
+                    default:
+                        break;
+                }
+
+                return false;
+            }
+        );
+
         var oTable = $('#delays_table').DataTable({
-                "language": {
+                language: {
                     "sProcessing":     "Procesando...",
                     "sLengthMenu":     "Mostrar _MENU_ registros",
                     "sZeroRecords":    "No se encontraron resultados",
@@ -210,10 +245,10 @@
                     header: true
                 },
                 order: [[0, 'asc']],
-                "columnDefs": [
+                columnDefs: [
                     {
-                        "targets": [ oData.hiddenCol ],
-                        "visible": false
+                        targets: [ oData.hiddenCol, 13 ],
+                        visible: false
                     },
                     {
                         targets: [ 0 ],
@@ -363,6 +398,10 @@
                             }
                         }
                     ]
+            });
+
+            $('#sel-collaborator').change( function() {
+                oTable.draw();
             });
     </script>
 

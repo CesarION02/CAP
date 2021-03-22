@@ -9,6 +9,7 @@ class SRegistryRow {
         $this->idEmployee = 0;
         $this->numEmployee = 0;
         $this->employee = 0;
+        $this->external_id = 0;
         $this->inDate = null;
         $this->inDateTime = null;
         $this->inDateTimeSch = null;

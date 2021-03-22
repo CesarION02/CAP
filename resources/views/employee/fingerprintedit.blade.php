@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-    Empleados
+    Colaboradores
 @endsection
 
 @section("scripts")

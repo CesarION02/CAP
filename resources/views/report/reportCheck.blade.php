@@ -80,7 +80,7 @@ Reporte revisión
                     <thead>
                         
                         <tr>
-                            <th>Empleado</th>
+                            <th>Colaborador</th>
                             <th>Programación</th>
                             @for($i = 0 ; $diff >= $i ; $i++)
 

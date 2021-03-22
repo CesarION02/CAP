@@ -20,9 +20,38 @@ Reporte de registros
 	<script src="{{ asset('dt/buttons.html5.min.js') }}"></script>
 	<script src="{{ asset('dt/buttons.print.min.js') }}"></script>
 <script>
+    var iReportType = <?php echo json_encode($reportType) ?>;
+
     $(document).ready( function () {
         $.fn.dataTable.moment('DD/MM/YYYY');
-        $('#checks_table').DataTable({
+
+        $.fn.dataTable.ext.search.push(
+            function( settings, data, dataIndex ) {
+                // var min = parseInt( $('#min').val(), 10 );
+                let collaboratorVal = parseInt( $('#sel-collaborator').val(), 10 );
+                let externalId = 0;
+
+                switch (collaboratorVal) {
+                    case 0:
+                        return true;
+
+                    case 1:
+                        externalId = parseInt( data[iReportType != 4 ? 7 : 6] );
+                        return externalId > 0;
+
+                    case 2:
+                        externalId = parseInt( data[iReportType != 4 ? 7 : 6] );
+                        return ! (externalId > 0);
+
+                    default:
+                        break;
+                }
+
+                return false;
+            }
+        );
+
+        var oTable = $('#checks_table').DataTable({
             "language": {
                 "sProcessing":     "Procesando...",
                 "sLengthMenu":     "Mostrar _MENU_ registros",
@@ -48,6 +77,12 @@ Reporte de registros
                 }
             },
             "colReorder": true,
+            columnDefs: [
+                    {
+                        targets: [ iReportType != 4 ? 7 : 6 ],
+                        visible: false
+                    }
+                ],
             "dom": 'Bfrtip',
             "lengthMenu": [
                 [ 10, 25, 50, 100, -1 ],
@@ -67,6 +102,10 @@ Reporte de registros
                     }
                 ]
         });
+
+        $('#sel-collaborator').change( function() {
+            oTable.draw();
+        });
     });
 </script>
 
@@ -77,9 +116,16 @@ Reporte de registros
         @include('includes.form-error')
         @include('includes.mensaje')
         <div class="box box-danger">
-            <div class="box-header with-border">
-                <h3 class="box-title">Reporte ES</h3>
-                <div class="box-tools pull-right">
+            <div class="box-header with-border row">
+                <div class="col-md-10">
+                    <h3 class="box-title">Reporte ES</h3>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-control" name="sel-collaborator" id="sel-collaborator">
+                        <option value="0" selected>Todos</option>
+                        <option value="1">Empleados</option>
+                        <option value="2">Becarios</option>
+                    </select>
                 </div>
             </div>
             <div class="box-body" id="reportApp">
@@ -89,7 +135,7 @@ Reporte de registros
                             <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>Empleado</th>
+                                    <th>Colaborador</th>
                                     <th>Fecha entrada</th>
                                     <th>Hora entrada</th>
                                     <th>Fecha salida</th>
@@ -107,6 +153,7 @@ Reporte de registros
                                             @case(4)
                                             @break
                                     @endswitch
+                                    <th>external_id</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -152,6 +199,7 @@ Reporte de registros
                                             @case(4)
                                             @break
                                         @endswitch
+                                        <td>{{ $lRegistries[$i]->external_id }}</td>
                                     </tr>
                                 @endfor
                             </tbody>

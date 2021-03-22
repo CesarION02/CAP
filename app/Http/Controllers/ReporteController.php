@@ -183,7 +183,7 @@ class ReporteController extends Controller
                                     ->join('departments AS d', 'd.id', '=', 'j.department_id')
                                     ->join('areas AS a', 'a.id', '=', 'd.area_id')
                                     ->whereIn('a.id', $values)
-                                    ->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id','a.name AS areaname')
+                                    ->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id','a.name AS areaname', 'e.external_id')
                                     ->groupBy('e.name','date','type_id','e.num_employee','a.name')
                                     ->orderBy('e.name')
                                     ->orderBy('date')
@@ -195,7 +195,7 @@ class ReporteController extends Controller
                                     ->join('departments AS d', 'd.id', '=', 'j.department_id')
                                     ->join('department_group AS dg', 'dg.id', '=', 'd.dept_group_id')
                                     ->whereIn('dg.id', $values)
-                                    ->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id','dg.name AS groupname')
+                                    ->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id','dg.name AS groupname', 'e.external_id')
                                     ->groupBy('date','type_id','e.name','e.num_employee')
                                     ->orderBy('e.name')
                                     ->orderBy('date')
@@ -206,7 +206,7 @@ class ReporteController extends Controller
                 $register = $register->join('jobs AS j', 'j.id', '=', 'e.job_id')
                                     ->join('departments AS d', 'd.id', '=', 'j.department_id')
                                     ->whereIn('d.id', $values)
-                                    ->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id','d.name AS depname')
+                                    ->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id','d.name AS depname', 'e.external_id')
                                     ->groupBy('date','type_id','e.name','e.num_employee')
                                     ->orderBy('e.name')
                                     ->orderBy('date')
@@ -215,7 +215,7 @@ class ReporteController extends Controller
                 break;
             case 4:
                 $register = $register->whereIn('e.id', $values)
-                                    ->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id')
+                                    ->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id', 'e.external_id')
                                     ->groupBy('date','type_id','e.name','e.num_employee')
                                     ->orderBy('date')
                                     ->orderBy('e.name')
@@ -223,7 +223,7 @@ class ReporteController extends Controller
                 break;
             case 5:
                 $register = $register->whereIn('e.id', $values)
-                                    ->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id')
+                                    ->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id', 'e.external_id')
                                     ->groupBy('date','type_id','e.name','e.num_employee')
                                     ->orderBy('date')
                                     ->orderBy('e.name')
@@ -386,7 +386,7 @@ class ReporteController extends Controller
                 break;
         }
 
-        $register = $register->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id')
+        $register = $register->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id', 'e.external_id')
                                 ->whereBetween('r.date', [$startDate, $endDate])
                                 ->get();
 
@@ -673,6 +673,7 @@ class ReporteController extends Controller
                             $query->whereBetween('inDate',[$sStartDate,$sEndDate])
                             ->OrwhereBetween('outDate',[$sStartDate,$sEndDate]);
                         })
+                        ->select(['processed_data.*','employees.num_employee','employees.name', 'employees.external_id'])
                         ->get();
         //$lEmployees = $id;
         $incapacidades = DB::table('incidents')

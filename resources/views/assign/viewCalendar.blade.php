@@ -89,7 +89,7 @@ Horario específico
                 <table class="table table-striped table-bordered table-hover" id="checks_table">
                     <thead>
                         <tr>
-                            <th>Empleado</th>
+                            <th>Colaborador</th>
                             @for($i = 0 ; $diff >= $i ; $i++)
 
                                 <th><?php echo date("d-m-Y",strtotime($inicio."+ ".$i." days")); ?></th>
@@ -97,20 +97,17 @@ Horario específico
                         </tr>
                     </thead>
                     <tbody>
-                        
-                            
                             @if ($info == 0)
                                 <th colspan="8">No hay registros para esas fechas</th>
                             @else
-                                @for($i = 0 ; count($calendario) > $i ; $i)
-                                <tr>
-                                    <th>{{$calendario[$i]->Nombre}}</th>
-                                    @for($j = 0 ; 7 > $j ; $j++)       
-                                        <td>{{$calendario[$i]->Entrada.' - '.$calendario[$i]->Salida}}</td>
-                                        <?php $i++;?>    
-                                    @endfor
-                                </tr>    
-                                @endfor
+                                @foreach ($calendario as $elem)
+                                    <tr>
+                                        <th>{{ $elem[0]->Nombre }}</th>
+                                        @foreach ($elem as $day)
+                                            <td>{{ ($day->Entrada == null ? '' : $day->Entrada).' - '.($day->Salida == null ? '' : $day->Salida) }}</td>
+                                        @endforeach
+                                    </tr>
+                                @endforeach
                             @endif
                     </tbody>
                 </table>

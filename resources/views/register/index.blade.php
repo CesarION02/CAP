@@ -145,8 +145,8 @@ Checadas
                 <table class="table table-striped table-bordered table-hover" id="myTable">
                     <thead>
                         <tr>
-                            <th>Nombre empleado</th>
-                            <th>Número empleado</th>
+                            <th>Nombre colaborador</th>
+                            <th>Número colaborador</th>
                             <th>Fecha</th>
                             <th>Hora</th>
                             <th>Tipo</th>

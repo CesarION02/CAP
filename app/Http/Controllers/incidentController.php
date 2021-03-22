@@ -193,9 +193,15 @@ class incidentController extends Controller
                                 '3_1' => '12',
                                 '3_2' => '13',
                             ];
-
+        
+        $keys = [];
+        foreach ($lAbsences as $jAbs) {
+            $keys[] = "".$jAbs->id_emp."_".$jAbs->id_abs."";
+        }
+        
         $lCapAbss = incident::select('id', 'external_key')
-                                    ->pluck('id', 'external_key');
+                                ->whereIn('external_key', $keys)
+                                ->pluck('id', 'external_key');
 
         $this->employees = employees::select('id', 'external_id')
                             ->pluck('id', 'external_id');
@@ -212,7 +218,7 @@ class incidentController extends Controller
             }
             catch (\Throwable $th) { }
 
-            // $this->saveDays($oIncident);
+            $this->saveDays($oIncident);
         }
     }
 

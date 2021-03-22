@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-Empleados
+Colaboradores
 @endsection
 
 @section("scripts")
@@ -73,10 +73,10 @@ Empleados
             <div class="box-header with-border">
                 @if(isset($foraneos))
                 
-                    <h3 class="box-title">Empleados fóraneos</h3>
+                    <h3 class="box-title">Colaboradores fóraneos</h3>
                     @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:empleadoforaneo"])
                 @else
-                    <h3 class="box-title">Empleados vs. departamentos CAP</h3>
+                    <h3 class="box-title">Colaboradores vs. departamentos CAP</h3>
                     @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:asignacionpstoydeptopen"])
                 @endif
                 
@@ -87,8 +87,8 @@ Empleados
                 <table class="table table-striped table-bordered table-hover" id="myTable">
                     <thead>
                         <tr>
-                            <th>Nombre empleado</th>
-                            <th>Número empleado</th>
+                            <th>Nombre colaborador</th>
+                            <th>Número colaborador</th>
                             <th>Departamento CAP</th>
                             <th>Puesto</th>
                             <th class="width70"></th>

@@ -1063,7 +1063,7 @@ class SInfoWithPolicy{
                 if(count($lRows[$i]->adjusts) != 0){
                     for($x = 0 ; count($lRows[$i]->adjusts) > $x ; $x++){
                         if($lRows[$i]->adjusts[$x]->adjust_type_id == 4){
-                            $baderaAjuste = 1;
+                            $banderaAjuste = 1;
                             $lRows[$i]->hasAdjust = true;
                         }    
                     }

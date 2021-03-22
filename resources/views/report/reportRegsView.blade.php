@@ -12,9 +12,17 @@ Reporte Entradas/Salidas
         @include('includes.form-error')
         @include('includes.mensaje')
         <div class="box box-danger">
-            <div class="box-header with-border">
-                <h3 class="box-title">Reporte entrada/salida 2</h3>
-                <div class="box-tools pull-right">
+            <div class="box-header with-border row">
+                <div class="col-md-10">
+                    <h3 class="box-title">Reporte entrada/salida 2</h3>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-control" name="sel-collaborator" id="sel-collaborator">
+                        <option value="0" selected>Todos</option>
+                        <option value="1">Empleados</option>
+                        <option value="2">Becarios</option>
+                    </select>
+                </div>
                 </div>
             </div>
             <div class="box-body" id="reportApp">
@@ -23,11 +31,12 @@ Reporte Entradas/Salidas
                         <table id="myTable" class="display" style="width:100%">
                             <thead>
                                 <tr>
-                                    <th># Empleado</th>
-                                    <th>Empleado</th>
+                                    <th># Colaborador</th>
+                                    <th>Colaborador</th>
                                     <th>Fecha</th>
                                     <th>Hora</th>
                                     <th>Tipo checada</th>
+                                    <th>external_id</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -37,6 +46,7 @@ Reporte Entradas/Salidas
                                     <td>@{{ vueGui.formatDate(registry.date) }}</td>
                                     <td>@{{ registry.time }}</td>
                                     <td>@{{ registry.type_id == 1 ? "ENTRADA" : "SALIDA" }}</td>
+                                    <td>@{{ registry.external_id }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -88,7 +98,33 @@ Reporte Entradas/Salidas
         $(document).ready( function () {
             $.fn.dataTable.moment('DD/MM/YYYY');
 
-            $('#myTable').DataTable({
+            $.fn.dataTable.ext.search.push(
+                function( settings, data, dataIndex ) {
+                    // var min = parseInt( $('#min').val(), 10 );
+                    let collaboratorVal = parseInt( $('#sel-collaborator').val(), 10 );
+                    let externalId = 0;
+
+                    switch (collaboratorVal) {
+                        case 0:
+                            return true;
+
+                        case 1:
+                            externalId = parseInt( data[5] );
+                            return externalId > 0;
+
+                        case 2:
+                            externalId = parseInt( data[5] );
+                            return ! (externalId > 0);
+
+                        default:
+                            break;
+                    }
+
+                    return false;
+                }
+            );
+
+            var oTable = $('#myTable').DataTable({
                 "language": {
                     "sProcessing":     "Procesando...",
                     "sLengthMenu":     "Mostrar _MENU_ registros",
@@ -114,6 +150,12 @@ Reporte Entradas/Salidas
                     }
                 },
                 "colReorder": true,
+                columnDefs: [
+                    {
+                        targets: [ 5 ],
+                        visible: false
+                    }
+                ],
                 "dom": 'Bfrtip',
                 "lengthMenu": [
                     [ 10, 25, 50, 100, -1 ],
@@ -132,6 +174,10 @@ Reporte Entradas/Salidas
                             text: 'Imprimir'
                         }
                     ]
+            });
+
+            $('#sel-collaborator').change( function() {
+                oTable.draw();
             });
         });
     </script>

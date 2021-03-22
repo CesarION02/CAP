@@ -30,7 +30,7 @@
                             <label><input v-model="picked" v-on:change="onFilterTypeChange()" type="radio" name="optradio" value="period">Periodicidad de pago</label>
                         </div>
                         <div class="col-md-3">
-                            <label><input v-model="picked" v-on:change="onFilterTypeChange()" type="radio" name="optradio" value="employee">Empleado</label>
+                            <label><input v-model="picked" v-on:change="onFilterTypeChange()" type="radio" name="optradio" value="employee">Colaborador</label>
                         </div>
                     </div>
                     <br>
@@ -52,10 +52,10 @@
                     <div>
                         <div class="row">
                             <div class="col-md-3">
-                                Empleado:*
+                                Colaborador:*
                             </div>
                             <div class="col-md-7 col-md-offset-1">
-                                <select :disabled="picked == 'period'" v-model='idEmployee' name="emp_id" form="theForm" id="emp_id" class="form-control" placeholder="Selecciona empleado...">
+                                <select :disabled="picked == 'period'" v-model='idEmployee' name="emp_id" form="theForm" id="emp_id" class="form-control" placeholder="Selecciona colaborador...">
                                     <option v-for="employee in lEmps" :value="employee.id">@{{ employee.name }}</option>
                                 </select>
                             </div>
