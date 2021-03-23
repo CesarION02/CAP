@@ -17,6 +17,7 @@ class SRegistryRow {
         $this->outDate = null;
         $this->outDateTime = null;
         $this->outDateTimeSch = null;
+        $this->scheduleText = "";
         $this->outDateTimeNoficial = null;
         $this->entryDelayMinutes = null;
         $this->prematureOut = null;

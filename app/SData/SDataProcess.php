@@ -619,6 +619,13 @@ class SDataProcess {
 
             $oRow->scheduleFrom = SDataProcess::getOrigin($result);
 
+            if ($oRow->scheduleFrom == \SCons::FROM_ASSIGN) {
+                $oRow->scheduleText = strtoupper($result->auxScheduleDay->template_name);
+            }
+            else {
+                $oRow->scheduleText = strtoupper($result->auxWorkshift->name);
+            }
+
             if ($oRow->scheduleFrom == \SCons::FROM_ASSIGN && ! $result->auxScheduleDay->is_active) {
                 $oRow->outDate = $result->variableDateTime->toDateString();
                 $oRow->outDateTime = $result->variableDateTime->toDateTimeString();
