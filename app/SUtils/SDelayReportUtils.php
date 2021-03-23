@@ -619,6 +619,7 @@ class SDelayReportUtils {
                                     'st.overtime_check_policy',
                                     'st.agreed_extra',
                                     'st.is_night',
+                                    'st.name AS template_name',
                                     'st.overtimepershift')
                             ->where('schedule_template_id', $templateId)
                             ->where('day_num', $day)
