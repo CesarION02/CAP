@@ -1781,7 +1781,7 @@ class SInfoWithPolicy{
             $processed->outDateTime = $lRows[$i]->outDateTime;
             $processed->outDateTimeNoficial = $lRows[$i]->outDateTimeNoficial;
             $processed->diffMins = $lRows[$i]->diffMins;
-            $processed->delayMins = $lRows[$i]->delayMins;
+            $processed->delayMins = $lRows[$i]->entryDelayMinutes;
             $processed->overDefaultMins = $lRows[$i]->overDefaultMins;
             $processed->overScheduleMins = $lRows[$i]->overScheduleMins;
             $processed->overWorkedMins = $lRows[$i]->overWorkedMins;
