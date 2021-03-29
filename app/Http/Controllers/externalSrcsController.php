@@ -5,13 +5,11 @@ namespace App\Http\Controllers;
 use Validator;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use App\SUtils\SDelayReportUtils;
+use App\SUtils\SInfoWithPolicy;
 use App\SUtils\SDataHeader;
 use App\SUtils\SDataRow;
 use App\Models\employees;
-use App\Http\Controllers\prePayrollController;
 use App\SUtils\SGenUtils;
-use App\SData\SDataProcess;
 
 class externalSrcsController extends Controller
 {
@@ -49,15 +47,31 @@ class externalSrcsController extends Controller
 
         $lEmployees = SGenUtils::toEmployeeIds($payType, 0, null, $lCapEmployees);
 
-        $lRows = SDataProcess::process($startDate, $endDate, $payType, $lEmployees);
-        $cReport = collect($lRows);
+        // $lRows = SDataProcess::process($startDate, $endDate, $payType, $lEmployees);
+        // $cReport = collect($lRows);
+
+        $oDate = Carbon::parse($startDate);
+
+         /**
+         * Obtiene el reporte de horas extra, que contiene también domingos y festivos.
+         */
+        $info = SInfoWithPolicy::preProcessInfo($startDate, $oDate->year, $endDate, $payType);
+        $lExtras = \DB::table('processed_data')
+                                ->join('employees','employees.id','=','processed_data.employee_id')
+                                ->whereIn('employees.id', $lCapEmployees)
+                                ->where(function($query) use ($startDate, $endDate) {
+                                    $query->whereBetween('inDate',[$startDate, $endDate])
+                                    ->OrwhereBetween('outDate',[$startDate, $endDate]);
+                                })
+                                ->get();
+        $cReport = collect($lExtras);
 
         $oHeader = new SDataHeader();
 
         $cData = clone $cReport;
-        $lGrouped = $cData->groupBy('idEmployee')->map(function ($row) {
+        $lGrouped = $cData->groupBy('employee_id')->map(function ($row) {
                                 $registry = (object) [
-                                    'totalDelayMins' => $row->sum('entryDelayMinutes'),
+                                    'totalDelayMins' => $row->sum('delayMins'),
                                 ];
 
                         return $registry;
@@ -80,8 +94,8 @@ class externalSrcsController extends Controller
 
             $cData1 = clone $cReport;
 
-            $counted = $cData1->where('idEmployee', $oEmployee->id);
-            $counted = $counted->where('hasAbsence', true);
+            $counted = $cData1->where('employee_id', $oEmployee->id);
+            $counted = $counted->where('hasabsence', true);
 
             if (sizeof($counted) > 0) {
                 $oRow->absences = sizeof($counted);
@@ -89,12 +103,13 @@ class externalSrcsController extends Controller
 
             $lAuxReport = clone $cReport;
             $lColRep = collect($lAuxReport);
-                        $lColRep = $lColRep->where('idEmployee', $oEmployee->id);
+                        $lColRep = $lColRep->where('employee_id', $oEmployee->id);
                         $lColRep = $lColRep->filter(function ($item) {
-                                            // replace stristr with your choice of matching function
-                                            return (stristr($item->comments, 'Sin entrada') || stristr($item->comments, 'Sin salida'))
-                                                    && (! stristr($item->comments, 'Sin horario'));
+                                            return (stristr($item->comments, 'Sin entrada') || stristr($item->comments, 'Sin salida'));
                                         });
+                        // $lColRep = $lColRep->filter(function ($item) {
+                        //                 return (! $item->hasCheckOut || ! $item->hasCheckIn);
+                        //             });
 
             if (sizeof($lColRep) > 0) {
                 $oRow->hasNoChecks = true;
