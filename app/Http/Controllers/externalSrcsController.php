@@ -105,7 +105,8 @@ class externalSrcsController extends Controller
             $lColRep = collect($lAuxReport);
                         $lColRep = $lColRep->where('employee_id', $oEmployee->id);
                         $lColRep = $lColRep->filter(function ($item) {
-                                            return (stristr($item->comments, 'Sin entrada') || stristr($item->comments, 'Sin salida'));
+                                            return (stristr($item->comments, 'Sin entrada') || stristr($item->comments, 'Sin salida'))
+                                                    && (! stristr($item->comments, 'Sin horario'));
                                         });
                         // $lColRep = $lColRep->filter(function ($item) {
                         //                 return (! $item->hasCheckOut || ! $item->hasCheckIn);
@@ -116,6 +117,29 @@ class externalSrcsController extends Controller
 
                 if ($oEmployee->ben_pol_id == \SCons::BEN_POL_STRICT) {
                     $oRow->lostBonus = true;
+                }
+            }
+
+            if (! $oRow->lostBonus) {
+                $oDateIndex = Carbon::parse($startDate);
+                $oDateEnd = Carbon::parse($endDate);
+
+                while ($oDateIndex->lessThanOrEqualTo($oDateEnd)) {
+                    $lAbsences = prePayrollController::searchAbsence($oEmployee->id, $oDateIndex->toDateString());
+                        
+                    if (sizeof($lAbsences) > 0) {
+                        $lAbs = collect($lAbsences);
+                        // Revisa si la incidencia es permitida, si no, pierde el bono
+                        $lAbs = $lAbs->whereNotIn('type_id', [3, 7, 12, 14, 15, 16]);
+
+                        if (sizeof($lAbs) > 0) {
+                            $oRow->lostBonus = true;
+                            // $oRow->hasAbss = true;
+                            break;
+                        }
+                    }
+
+                    $oDateIndex->addDay();
                 }
             }
 
