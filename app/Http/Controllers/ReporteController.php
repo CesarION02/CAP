@@ -569,6 +569,7 @@ class ReporteController extends Controller
          */
         $tipoDatos = $request->tipodato;
         $payWay = $request->way_pay;
+        $id = 0;
         $id = $request->vals;
         
         switch($request->reportType){
@@ -662,6 +663,18 @@ class ReporteController extends Controller
                 }
                 $lEmployees = $id; 
             break;
+            case 5:
+                $employees = DB::table('employees')
+                    ->orderBy('employees.job_id')
+                    ->where('employees.is_delete','0')
+                    ->where('employees.is_active', true)
+                    ->where('employees.way_pay_id',$payWay)
+                    ->get();
+
+                    for($i = 0 ; count($employees) > $i ; $i++){
+                        $lEmployees[$i] = $employees[$i]->id; 
+                    }
+                break;
             
         }
         $prueba = SInfoWithPolicy::preProcessInfo($sStartDate,$year,$sEndDate,$payWay);
