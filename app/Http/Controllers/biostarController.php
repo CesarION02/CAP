@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Psr7\Request as GuzzleRequest;
+use Illuminate\Http\Request;
 
 class biostarController extends Controller
 {
@@ -81,16 +82,24 @@ class biostarController extends Controller
         return $data;
     }
 
-    public function indexUsersBiostar()
+    public function indexUsersBiostar(Request $request)
     {
         $data = $this->getUsers();
 
-        $lUsers = [];
-        foreach ($data->UserCollection->rows as $row) {
-            if (($row->fingerprint_template_count > 0 && $row->face_count > 0) || $row->user_id == 1) {
-                continue;
-            }
+        $filterType = $request->filter_users == null ? 1 : $request->filter_users;
 
+        $usrCollection = collect($data->UserCollection->rows);
+
+        $usrCollection = $usrCollection->where('user_id', '!=', 1);
+        
+        if ($filterType != 0) {
+            $usrCollection = $usrCollection->filter(function ($value, $key) {
+                return $value->fingerprint_template_count == 0 || $value->face_count == 0;
+            });
+        }
+        
+        $lUsers = [];
+        foreach ($usrCollection as $row) {
             $usr = (object) [
                 'id_user' => $row->user_id,
                 'user_name' => $row->name,
@@ -102,6 +111,7 @@ class biostarController extends Controller
         }
 
         return view('biostar.indexhc')
+                            ->with('filterType', $filterType)
                             ->with('lUsers', $lUsers);
     }
 }
