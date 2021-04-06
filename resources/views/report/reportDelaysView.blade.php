@@ -59,6 +59,7 @@
                                     <th><span class="nobr">Fecha-hora</span> salida</th>
                                     {{-- <th v-if="vData.tReport == vData.REP_DELAY">Retardo (min)</th>
                                     <th v-else>Horas Extra</th> --}}
+                                    <th>Horario</th>
                                     <th>Tiempo retardo (min)</th>
                                     <th>Tiempo extra (hr)</th>
                                     {{-- <th v-if="vData.tReport == vData.REP_HR_EX">Hr_progr_Sal</th> --}}
@@ -80,6 +81,7 @@
                                     <td>@{{ vueGui.formatDateTime(row.inDateTime) }}</td>
                                     {{-- <td>@{{ row.outDate }}</td> --}}
                                     <td>@{{ vueGui.formatDateTime(row.outDateTime) }}</td>
+                                    <td>@{{ row.scheduleText }}</td>
                                     {{-- <td v-if="vData.tReport == vData.REP_DELAY">@{{ row.delayMins }}</td>
                                     <td v-else>@{{ row.extraHours }}</td> --}}
                                     <td>@{{ row.overMinsTotal < 0 ? null : row.overMinsTotal }}</td>
@@ -148,13 +150,14 @@
             this.ADJ_CONS = <?php echo json_encode(\SCons::PP_TYPES) ?>;
 
             // this.minsCol = this.tReport == this.REP_DELAY ? 4 : 4;
-            this.minsCol = 4;
-            this.minsBeforeCol = 7;
-            this.minsDelayCol = this.tReport == this.REP_DELAY ? 4 : 6;
-            this.sunCol = 8;
-            this.dayoffCol = 9;
-            this.hiddenCol = this.tReport == this.REP_DELAY ? 5 : 4;
-            this.toExport = this.tReport == this.REP_DELAY ? [0, 1, 2, 3, 4, 6] : [0, 1, 2, 3, 5, 6, 7, 8, 9, 10, 11];
+            this.minsCol = 5;
+            this.minsBeforeCol = 8;
+            this.minsDelayCol = this.tReport == this.REP_DELAY ? 4 : 7;
+            this.sunCol = 9;
+            this.dayoffCol = 10;
+            this.hiddenColExId = 14;
+            this.hiddenCol = this.tReport == this.REP_DELAY ? 5 : 5;
+            this.toExport = this.tReport == this.REP_DELAY ? [0, 1, 2, 3, 4, 6] : [0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12];
         }
         
         var oData = new GlobalData();
@@ -247,7 +250,7 @@
                 order: [[0, 'asc']],
                 columnDefs: [
                     {
-                        targets: [ oData.hiddenCol, 13 ],
+                        targets: [ oData.hiddenCol, oData.hiddenColExId ],
                         visible: false
                     },
                     {
