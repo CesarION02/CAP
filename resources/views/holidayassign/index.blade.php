@@ -140,9 +140,11 @@ Asignar días festivos
                                 
                                     <ul class="dropdown-menu" role="menu">
                                         <li><a href="{{route('crear_asignacion_festivo','1')}}">Por colaborador</a>
-                                        <li><a href="{{route('crear_asignacion_festivo','2')}}">Por departamento CAP</a>
-                                        <li><a href="{{route('crear_asignacion_festivo','3')}}">Por área</a>
-                                        <li><a href="{{route('crear_asignacion_festivo','4')}}">Global</a></li>
+                                        @if($session == 1 || $session == 3)
+                                            <li><a href="{{route('crear_asignacion_festivo','2')}}">Por departamento CAP</a>
+                                            <li><a href="{{route('crear_asignacion_festivo','3')}}">Por área</a>
+                                            <li><a href="{{route('crear_asignacion_festivo','4')}}">Global</a></li>
+                                        @endif
                                     </ul>
                                 </div>
                             </div>
@@ -164,27 +166,17 @@ Asignar días festivos
                         </tr>
                     </thead>
                     <tbody>
-                            @foreach ($datas as $data)
+                            @for ($i = 0 ; count($employees) > $i ; $i++)
                             <tr>
-                                <td>@if($data->date == null)
-                                    N/A
-                                @else
-                                    {{\App\SUtils\SDateTimeUtils::orderDate($data->date)}}
-                                @endif
-                                </td>
-                                <td>{{$data->holiday->name}}</td>
-                                <td>@if($data->employee_id == null)
-                                        N/A
-                                    @else
-                                        {{$data->employee->name}}
-                                    @endif
-                                </td>
+                                <td>{{\App\SUtils\SDateTimeUtils::orderDate($employees[$i]->date)}}</td>
+                                <td>{{$employees[$i]->nameHoliday}}</td>
+                                <td>{{$employees[$i]->nameEmployee}}</td>
                                 
                                 <td>
-                                    <a href="{{route('editar_asignacion_festivo', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
+                                    <a href="{{route('editar_asignacion_festivo', ['id' => $employees[$i]->id])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
                                         <i class="fa fa-fw fa-pencil"></i>
                                     </a>
-                                    <form action="{{route('eliminar_asignacion_festivo', ['id' => $data->id])}}" class="d-inline form-eliminar" method="POST">
+                                    <form action="{{route('eliminar_asignacion_festivo', ['id' => $employees[$i]->id])}}" class="d-inline form-eliminar" method="POST">
                                         @csrf @method("delete")
                                         <button type="submit" class="btn-accion-tabla eliminar tooltipsC" title="Eliminar este registro">
                                             <i class="fa fa-fw fa-trash text-danger"></i>
@@ -192,7 +184,7 @@ Asignar días festivos
                                     </form>
                                 </td>
                             </tr>
-                            @endforeach
+                            @endfor
                     </tbody>
                 </table>
             </div>

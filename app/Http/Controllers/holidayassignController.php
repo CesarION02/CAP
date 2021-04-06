@@ -43,9 +43,11 @@ class holidayassignController extends Controller
             $end_date = $request->end_date;
         }
 
+        /* Codigo holiday sin filtro de mis empleados
+
         $datas = holidayassign::where('is_delete','0')
                                     ->whereBetween('date', [$start_date, $end_date])
-                                    ->orderBy('id')
+                                    ->orderBy('date')
                                     ->get();
 
         $datas->each(function($datas){
@@ -55,7 +57,53 @@ class holidayassignController extends Controller
 
         return view('holidayassign.index', compact('datas'))
                         ->with('start_date', $start_date)
-                        ->with('end_date', $end_date); 
+                        ->with('end_date', $end_date);
+        */ 
+
+        if (session()->get('rol_id') != 1){
+            $numero = session()->get('name');
+            $usuario = DB::table('users')
+                    ->where('name',$numero)
+                    ->get();
+            $dgu = DB::table('group_dept_user')
+                    ->where('user_id',$usuario[0]->id)
+                    ->select('groupdept_id AS id')
+                    ->get();
+            $Adgu = [];
+            for($i=0;count($dgu)>$i;$i++){
+                $Adgu[$i]=$dgu[$i]->id;
+            }
+            $employees = DB::table('holiday_assign')
+                        ->join('employees','employees.id','=','holiday_assign.employee_id')
+                        ->join('holidays','holidays.id','=','holiday_assign.holiday_id')
+                        ->join('departments','departments.id','=','employees.department_id')
+                        ->join('department_group','department_group.id','=','departments.dept_group_id')
+                        ->where('employees.is_delete','0')
+                        ->where('employees.is_active','1')
+                        ->whereBetween('date', [$start_date, $end_date])
+                        ->whereIn('departments.dept_group_id',$Adgu)
+                        ->orderBy('employees.name')
+                        ->select('employees.name AS nameEmployee','holiday_assign.date AS date','holidays.name AS nameHoliday','holiday_assign.id AS id')
+                        ->get();
+        }else{
+            $employees = DB::table('holiday_assign')
+                        ->join('employees','employees.id','=','holiday_assign.employee_id')
+                        ->join('holidays','holidays.id','=','holiday_assign.holiday_id')
+                        ->join('departments','departments.id','=','employees.department_id')
+                        ->join('department_group','department_group.id','=','departments.dept_group_id')
+                        ->orderBy('employees.job_id')
+                        ->where('employees.is_delete','0')
+                        ->where('employees.is_active','1')
+                        ->whereBetween('date', [$start_date, $end_date])
+                        ->orderBy('employees.name')
+                        ->select('employees.name AS nameEmployee','holiday_assign.date AS date','holidays.name AS nameHoliday','holiday_assign.id AS id')
+                        ->get();   
+        }
+        $session = session()->get('rol_id');
+        return view('holidayassign.index', compact('employees'))
+                        ->with('start_date', $start_date)
+                        ->with('end_date', $end_date)
+                        ->with('session', $session);
     }
 
     /**
@@ -64,8 +112,25 @@ class holidayassignController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function create($tipo)
-    {
-        $employee = employees::where('is_delete','0')->where('is_active', true)->orderBy('name','ASC')->pluck('id','name');
+    {   
+        if (session()->get('rol_id') != 1){
+            $numero = session()->get('name');
+            $usuario = DB::table('users')
+                    ->where('name',$numero)
+                    ->get();
+            $dgu = DB::table('group_dept_user')
+                    ->where('user_id',$usuario[0]->id)
+                    ->select('groupdept_id AS id')
+                    ->get();
+            $Adgu = [];
+            for($i=0;count($dgu)>$i;$i++){
+                $Adgu[$i]=$dgu[$i]->id;
+            }
+            $employee = employees::where('is_delete','0')->where('is_active', true)->whereIn('departments.dept_group_id',$Adgu)->orderBy('name','ASC')->pluck('id','name');
+        }else{
+            $employee = employees::where('is_delete','0')->where('is_active', true)->orderBy('name','ASC')->pluck('id','name');       
+        }
+        
         $department = department::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
         $area = area::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
         $year = holiday::where('is_delete','0')->groupBy('year')->select('year AS year')->get();
