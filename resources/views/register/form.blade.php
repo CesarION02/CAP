@@ -46,27 +46,40 @@
         
     </div>
 </div>
-<div class="form-group">
+@if(! isset($datas))
+    <div class="form-group">
+        <label for="nombre" class="col-lg-3 control-label requerido" for="optradio">Tipo checada:</label>
+        <div class="row">
+            <div class="col-md-2">
+                <label><input v-model="picked" v-on:change="onTypeChange()" type="radio" name="optradio" value="single">Sencilla</label>
+            </div>
+            <div class="col-md-2">
+                <label><input v-model="picked" v-on:change="onTypeChange()" type="radio" name="optradio" value="cut">Corte</label>
+            </div>
+        </div>
+    </div>
+@endif
+<div class="form-group" v-if="isSingle">
     <label for="nombre" class="col-lg-3 control-label requerido" for="start_date">Tipo checada:</label>
     <div class="col-lg-8">
-        
+
         @if(isset($datas))
             @if($datas->type_id == 1)
                 <select name="type_id" id="type_id">
-                    <option value="0">Seleccione colaborador</option>
+                    <option value="0">Seleccione tipo</option>
                     <option selected value="1">Entrada</option>
                     <option value="2">Salida</option>
                 </select>
             @else
                 <select name="type_id" id="type_id">
-                    <option value="0">Seleccione colaborador</option>
+                    <option value="0">Seleccione tipo</option>
                     <option value="1">Entrada</option>
                     <option selected value="2">Salida</option>
                 </select>
             @endif
         @else
             <select name="type_id" id="type_id">
-                <option value="0">Seleccione colaborador</option>
+                <option value="0">Seleccione tipo</option>
                 <option value="1">Entrada</option>
                 <option value="2">Salida</option>
             </select>

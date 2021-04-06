@@ -3,11 +3,8 @@
     Checadas
 @endsection
 
-@section("scripts")
-@endsection
-
 @section('content')
-<div class="row">
+<div class="row" id="divRegistries">
     <div class="col-lg-12">
         @include('includes.form-error')
         @include('includes.mensaje')
@@ -34,5 +31,10 @@
             </form>
         </div>
     </div>
-</div> 
+</div>
+@endsection
+
+@section("scripts")
+    <script src="{{ asset("assets/js/vue.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/js/vues/SVueRegistries.js") }}" type="text/javascript"></script>
 @endsection
