@@ -7,6 +7,7 @@
             $this->absences = 0;
             $this->hasNoChecks = false;
             $this->lostBonus = false;
+            // $this->hasAbss = false;
         }
     }
 

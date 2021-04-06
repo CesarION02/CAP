@@ -95,7 +95,8 @@ Colaboradores
                         <br>
                         <div class="row">
                             <form action="{{ route('huellas') }}">
-                                <input type="hidden" id="ifilter" name="ifilter">
+                                <input type="hidden" id="ifilter" name="ifilter" value="{{$iFilter}}">
+                                <input type="hidden" id="ifilterH" name="ifilterH" value="{{$iFilterH}}">
                                 <div class="col-md-16">
                                     <div class="btn-group" role="group" aria-label="Basic example">
                                         @switch($iFilter)
@@ -113,6 +114,23 @@ Colaboradores
                                             <button onclick="filter(1)" type="submit" class="btn btn-secondary">Activos</button>
                                             <button onclick="filter(2)" type="submit" class="btn btn-secondary">Inactivos</button>
                                             <button onclick="filter(3)" type="submit" class="btn btn-secondary active">Todos</button>
+                                            @break
+                                        @endswitch
+                                        
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="btn-group" role="group" aria-label="Basic example">
+                                        @switch($iFilterH)
+                                            @case(1)
+                                            <button onclick="filtroHuella(1)" type="submit" class="btn btn-secondary active">Con huella</button>
+                                            <button onclick="filtroHuella(2)" type="submit" class="btn btn-secondary">Sin huella</button>
+                                            
+                                            @break
+                                            @case(2)
+                                            <button onclick="filtroHuella(1)" type="submit" class="btn btn-secondary">Con huella</button>
+                                            <button onclick="filtroHuella(2)" type="submit" class="btn btn-secondary active">Sin huella</button>
+                                            
                                             @break
                                         @endswitch
                                         
@@ -137,45 +155,91 @@ Colaboradores
                     </thead>
                     <tbody>
                         @foreach ($employees as $employee)
-                        <tr>
-                            <td>{{$employee->nameEmployee}}</td>
-                            <td>{{$employee->num}}</td>
-                            <td>{{$employee->way}}</td>
-                            
+                            @if($iFilterH == 1)
                                 @if($employee->fingerprint != null)
-                                    <td style="background-color:green"><font color="white">Registrada</font></td>
-                                @else
-                                    <td style="background-color:red"><font color="white">No registrada</font></td>
+                                    <tr>
+                                        <td>{{$employee->nameEmployee}}</td>
+                                        <td>{{$employee->num}}</td>
+                                        <td>{{$employee->way}}</td>
+                                        
+                                            @if($employee->fingerprint != null)
+                                                <td style="background-color:green"><font color="white">Registrada</font></td>
+                                            @else
+                                                <td style="background-color:red"><font color="white">No registrada</font></td>
+                                            @endif
+                                        @if($employee->is_delete == 0)
+                                            <td>Activo</td>
+                                        @else
+                                            <td>Inactivo</td>
+                                        @endif
+                                        <td>
+                                            @if($rol == 1 || $rol == 7)
+                                                <a href="{{route('editarhuella', ['id' => $employee->idEmployee])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
+                                                    <i class="fa fa-fw fa-pencil"></i>
+                                                </a>
+                                            @endif
+                                            @if($iFilter == 2)
+                                            <form action="{{route('activar', ['id' => $employee->idEmployee])}}" class="d-inline form-activar" method="POST">
+                                                @csrf @method("delete")
+                                                <button type="submit" class="btn-accion-tabla eliminar tooltipsC" title="Activar este registro">
+                                                    <i class="fa fa-fw fa-check-circle text-danger"></i>
+                                                </button>
+                                            </form>
+                                            @elseif($iFilter == 1)
+                                            <form action="{{route('desactivar', ['id' => $employee->idEmployee])}}" class="d-inline form-eliminar" method="POST">
+                                                @csrf @method("delete")
+                                                <button type="submit" class="btn-accion-tabla eliminar tooltipsC" title="Desactivar este registro">
+                                                    <i class="fa fa-fw fa-times-circle text-danger"></i>
+                                                </button>
+                                            </form>
+                                            @endif
+                                            
+                                        </td>
+                                    </tr>
                                 @endif
-                            @if($employee->is_delete == 0)
-                                <td>Activo</td>
                             @else
-                                <td>Inactivo</td>
+                                @if($employee->fingerprint == null)
+                                    <tr>
+                                        <td>{{$employee->nameEmployee}}</td>
+                                        <td>{{$employee->num}}</td>
+                                        <td>{{$employee->way}}</td>
+                                        
+                                            @if($employee->fingerprint != null)
+                                                <td style="background-color:green"><font color="white">Registrada</font></td>
+                                            @else
+                                                <td style="background-color:red"><font color="white">No registrada</font></td>
+                                            @endif
+                                        @if($employee->is_delete == 0)
+                                            <td>Activo</td>
+                                        @else
+                                            <td>Inactivo</td>
+                                        @endif
+                                        <td>
+                                            @if($rol == 1 || $rol == 7)
+                                                <a href="{{route('editarhuella', ['id' => $employee->idEmployee])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
+                                                    <i class="fa fa-fw fa-pencil"></i>
+                                                </a>
+                                            @endif
+                                            @if($iFilter == 2)
+                                            <form action="{{route('activar', ['id' => $employee->idEmployee])}}" class="d-inline form-activar" method="POST">
+                                                @csrf @method("delete")
+                                                <button type="submit" class="btn-accion-tabla eliminar tooltipsC" title="Activar este registro">
+                                                    <i class="fa fa-fw fa-check-circle text-danger"></i>
+                                                </button>
+                                            </form>
+                                            @elseif($iFilter == 1)
+                                            <form action="{{route('desactivar', ['id' => $employee->idEmployee])}}" class="d-inline form-eliminar" method="POST">
+                                                @csrf @method("delete")
+                                                <button type="submit" class="btn-accion-tabla eliminar tooltipsC" title="Desactivar este registro">
+                                                    <i class="fa fa-fw fa-times-circle text-danger"></i>
+                                                </button>
+                                            </form>
+                                            @endif
+                                            
+                                        </td>
+                                    </tr>
+                                @endif
                             @endif
-                            <td>
-                                @if($rol == 1 || $rol == 7)
-                                    <a href="{{route('editarhuella', ['id' => $employee->idEmployee])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
-                                        <i class="fa fa-fw fa-pencil"></i>
-                                    </a>
-                                @endif
-                                @if($iFilter == 2)
-                                <form action="{{route('activar', ['id' => $employee->idEmployee])}}" class="d-inline form-activar" method="POST">
-                                    @csrf @method("delete")
-                                    <button type="submit" class="btn-accion-tabla eliminar tooltipsC" title="Activar este registro">
-                                        <i class="fa fa-fw fa-check-circle text-danger"></i>
-                                    </button>
-                                </form>
-                                @elseif($iFilter == 1)
-                                <form action="{{route('desactivar', ['id' => $employee->idEmployee])}}" class="d-inline form-eliminar" method="POST">
-                                    @csrf @method("delete")
-                                    <button type="submit" class="btn-accion-tabla eliminar tooltipsC" title="Desactivar este registro">
-                                        <i class="fa fa-fw fa-times-circle text-danger"></i>
-                                    </button>
-                                </form>
-                                @endif
-                                
-                            </td>
-                        </tr>
                         @endforeach
 
                     </tbody>
