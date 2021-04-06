@@ -49,6 +49,16 @@ class shiftprogrammingController extends Controller
 
     }
 
+    public function rhview(){
+        $year = DB::table('pdf_week')
+                ->join('week','week.id','=','pdf_week.week_id')
+                ->groupBy('week.year')
+                ->select('week.year AS year')
+                ->get();
+                
+        return view('shiftprogramming.view', compact('year'));
+    }
+
     /**
      * Show the form for creating a new resource.
      *

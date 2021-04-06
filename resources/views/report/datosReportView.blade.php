@@ -89,6 +89,7 @@ Reporte Entradas/Salidas
                             </select>
                         </div>
                     </div>
+                   
                 </div>
                 <div class="box-footer">
                     <div class="col-lg-3"></div>

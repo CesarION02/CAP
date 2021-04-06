@@ -14,7 +14,7 @@
         @include('includes.mensaje')
         <div class="box box-danger">
             <div class="box-header with-border">
-                <h3 class="box-title">Modificar turno especial</h3>
+                <h3 class="box-title">Modificar cambio turno</h3>
                 <div class="box-tools pull-right">
                     <a href="{{route('turno_especial')}}" class="btn btn-block btn-info btn-sm">
                         <i class="fa fa-fw fa-reply-all"></i> Regresar

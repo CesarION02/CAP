@@ -130,7 +130,7 @@ Turno especial
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Turnos especiales</h3>
+                <h3 class="box-title">Cambio turnos</h3>
                 <form action="{{ route('turno_especial_rh') }}">
                     <div class="row">
                         <div class="col-md-4 col-md-offset-3">

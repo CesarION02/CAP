@@ -58,7 +58,7 @@
                                     <th>Horas extra dobles</th>
                                     <th>Horas extra triples</th>
                                     <th>Prima dominical</th>
-                                    <th>external_id</th>
+                                    
                                 </tr>
                             </thead>
                             <tbody>
@@ -72,10 +72,10 @@
                                             <td></td>
                                             <td></td>
                                             <td></td>
-                                            <td>{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($totalextrad) }}</td>
-                                            <td>{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($totalextrat) }}</td>
-                                            <td>{{ $totaldominical }}</td>
-                                            <td>{{ $lRows[$i-1]->external_id  }}</td>
+                                            <td align="center">{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($totalextrad) }}</td>
+                                            <td align="center">{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($totalextrat) }}</td>
+                                            <td align="center">{{ $totaldominical }}</td>
+                                            <td></td>
                                         </tr>
                                         <?php 
                                             $idEmployee = $lRows[$i]->employee_id; $i--;
@@ -255,7 +255,7 @@
                                                     @endif
                                                 @endfor
                                             @endif
-                                                <td>{{ $lRows[$i]->external_id  }}</td>
+                                                
                                             </tr>
                                         @endif
                                     @endif
@@ -270,7 +270,7 @@
                                     <td align="center">{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($totalextrad) }}</td>
                                     <td align="center">{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($totalextrat) }}</td>
                                     <td align="center">{{ $totaldominical }}</td>
-                                    <td>{{ $lRows[$i-1]->external_id  }}</td>
+                                    <td></td>
                                 </tr>
                             </tbody>
                             <?php $cadenaregreso = 'datosreportestps/'.$reporttype.'/'.$tipo;?>
@@ -304,33 +304,7 @@
 
     <script>
         $(document).ready(function() {
-            $.fn.dataTable.moment('DD/MM/YYYY');
-
-            $.fn.dataTable.ext.search.push(
-                function( settings, data, dataIndex ) {
-                    // var min = parseInt( $('#min').val(), 10 );
-                    let collaboratorVal = parseInt( $('#sel-collaborator').val(), 10 );
-                    let externalId = 0;
-
-                    switch (collaboratorVal) {
-                        case 0:
-                            return true;
-
-                        case 1:
-                            externalId = parseInt( data[9] );
-                            return externalId > 0;
-
-                        case 2:
-                            externalId = parseInt( data[9] );
-                            return ! (externalId > 0);
-
-                        default:
-                            break;
-                    }
-
-                    return false;
-                }
-            );
+            
 
             var oTable = $('#delays_table').DataTable({
                 "language": {
@@ -358,12 +332,6 @@
                     }
                 },
                 "colReorder": true,
-                columnDefs: [
-                    {
-                        targets: [ 9 ],
-                        visible: false
-                    }
-                ],
                 "scrollX": true,
                 "dom": 'Bfrtip',
                 "lengthMenu": [
