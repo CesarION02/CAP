@@ -11,5 +11,6 @@
     "job_foraneo": 25,
     "dept_pre": 99,
     "admin_rol": 1,
-    "policy_cut": 1
+    "policy_cut": 1,
+    "urlBiostar": "https://192.168.1.16:444"
 }

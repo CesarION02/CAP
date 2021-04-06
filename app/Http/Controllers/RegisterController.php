@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\register;
-use App\Models\employees;
 use App\Models\Dateregister;
 use Carbon\Carbon;
 use DB;
@@ -117,20 +116,49 @@ class RegisterController extends Controller
     public function store(Request $request)
     {
         $register = new register();
+
         $register->employee_id = $request->employee_id;
         $register->date = $request->date;
-        $register->time = $request->time;
-        $register->type_id = $request->type_id;
         $register->form_creation_id = 2;
         $register->user_id = session()->get('user_id');
-        $register->save();
+        $register->time = $request->time;
+        $register->type_id = $request->type_id;
 
         $dateregister = new Dateregister();
-        $dateregister->register_id = $register->id;
         $dateregister->updated_by = session()->get('user_id');
         $dateregister->created_by = session()->get('user_id');
         $dateregister->is_delete = 0;
-        $dateregister->save();
+
+        // si solo se va a insertar una checada
+        if ($request->optradio == "single") {
+            $register->save();
+
+            $dateregister->register_id = $register->id;
+            $dateregister->save();
+        }
+        // si se va a insertar un corte (entrada y salida)
+        else {
+            $oDate = Carbon::parse($request->date.' '.$request->time);
+
+            $register1 = clone $register;
+
+            $register->type_id = 1;
+            $register->save();
+
+            $oDate->addSecond();
+            $register1->date = $oDate->toDateString();
+            $register1->time = $oDate->toTimeString();
+            $register1->type_id = 2;
+            $register1->save();
+
+            $dateregister1 = clone $dateregister;
+
+            $dateregister->register_id = $register->id;
+            $dateregister->save();
+
+            $dateregister1->register_id = $register1->id;
+            $dateregister1->save();
+        }
 
         return redirect('register')->with('mensaje','Checada creada con éxito');
     }

@@ -325,9 +325,10 @@ Route::get('workshift/{id}/edit', 'workshiftController@edit')->name('editar_turn
 Route::put('workshift/{id}', 'workshiftController@update')->name('actualizar_turno');
 Route::delete('workshift/{id}', 'workshiftController@destroy')->name('eliminar_turno');
 
-
-
-
+/* RUTAS BIOSTAR */
+Route::get('biostar/getusers', 'biostarController@getUsers')->name('get_biostar_users');
+Route::get('biostar/usersr', 'biostarController@indexUsersBiostar')->name('biostar_users_index');
+Route::get('biostar/login', 'biostarController@login')->name('biostar_login');
 
 /* RUTAS PERMISO_ROL */
 Route::get('permiso-rol', 'permisorolController@index')->name('permiso_rol');
