@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use GuzzleHttp\Client as GuzzleClient;
 use Illuminate\Http\Request;
 use App\Models\register;
+use App\Models\employees;
 use Carbon\Carbon;
 use DB;
 
