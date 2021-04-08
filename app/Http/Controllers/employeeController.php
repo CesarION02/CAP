@@ -623,7 +623,10 @@ class employeeController extends Controller
                             ->select('e.id', 'e.name', 'e.biostar_id')
                             ->where('e.is_delete', '0')
                             ->where('e.is_active', true)
-                            ->where('e.department_id', '!=', $config->dept_foraneo)
+                            ->where(function ($query) use ($config) {
+                                $query->whereNull('e.department_id')
+                                      ->orWhere('e.department_id', '!=', $config->dept_foraneo);
+                            })
                             ->orderBy('e.name')
                             ->get();
 
