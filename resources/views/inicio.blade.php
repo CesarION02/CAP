@@ -6,15 +6,7 @@ Bienvenido
 <div class="row">
     <div class="col-lg-12">
         @include('includes.mensaje')
-        @if($mensaje)
-            <div class="alert alert-success alert-dismissible" data-auto-dismiss="3000">
-                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                <h4><i class="icon fa fa-check"></i>Mensaje sistema checador</h4>
-                <ul>
-                    <li>{{ $mensaje }}</li>
-                </ul>
-            </div>
-        @endif
+        
         <div class="box">
             <div class="box-header with-border">
                 <h2 class="box-title">Bienvenido {{session()->get('name')}}</h2>

@@ -9,18 +9,20 @@ use GuzzleHttp\Exception\RequestException;
 
 class SyncController extends Controller
 {
-    public function toSyncronize()
+    public static function toSyncronize()
     {
         // \App\SUtils\SConfiguration::addConfiguration('lastSyncDateTime', '2020-04-01 00:00:00');
         $config = \App\SUtils\SConfiguration::getConfigurations();
 
-        $correcto = $this->syncronizeWithERP($config->lastSyncDateTime);
+        $correcto = SyncController::syncronizeWithERP($config->lastSyncDateTime);
 
-        if ($correcto != 0) {
-            return redirect()->back()->with('mensaje', 'Sincronizado');
+        $sincronizado = \App\Http\Controllers\biostarController::insertEvents();
+
+        if ($sincronizado != 0) {
+            return redirect()->back()->with('mensaje', 'Sincronizado BioStar');
         }
         else {
-            return redirect()->back()->with('mensaje', 'No se pudo sincronizar');
+            return redirect()->back()->with('mensaje', 'No se pudo sincronizar BioStar');
         }
     }
 

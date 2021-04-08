@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Psr7\Request as GuzzleRequest;
+use App\Models\register;
+use Carbon\Carbon;
+use DB;
 
 class biostarController extends Controller
 {
-    public function login()
+    public static function login()
     {
         $headers = [
             'Content-Type' => 'application/json',
@@ -45,9 +48,9 @@ class biostarController extends Controller
         return null;
     }
 
-    public function getUsers()
+    public static function getUsers()
     {
-        $rez = $this->login();
+        $rez = biostarController::login();
 
         if ($rez == null) {
             return null;
@@ -83,7 +86,7 @@ class biostarController extends Controller
 
     public function indexUsersBiostar()
     {
-        $data = $this->getUsers();
+        $data = biostarController::getUsers();
 
         $lUsers = [];
         foreach ($data->UserCollection->rows as $row) {
@@ -103,5 +106,77 @@ class biostarController extends Controller
 
         return view('biostar.indexhc')
                             ->with('lUsers', $lUsers);
+    }
+
+    public static function getEvents(){
+        $rez = biostarController::login();
+
+        if ($rez == null) {
+            return null;
+        }
+
+        $headers = [
+            'Content-Type' => 'application/json',
+            'bs-session-id' => $rez,
+            'Accept-Encoding' => 'gzip, deflate, br'
+        ];
+
+        $config = \App\SUtils\SConfiguration::getConfigurations(); 
+        
+        
+        $client = new GuzzleClient([
+            // Base URI is used with relative requests
+            'base_uri' => $config->urlBiostar."/api/",
+            // You can set any number of default request options.
+            'timeout'  => 2.0,
+            'headers' => $headers,
+            'verify' => false
+        ]);
+        
+        $fecha_biostar = Carbon::parse($config->lastEventSyncDateTime);
+        $fecha_biostar = $fecha_biostar->toISOString();
+        $body = '{"Query": {"limit": 2,"conditions": [{"column": "event_type_id.code","operator": 0,"values": ["4867"]},{"column": "datetime","operator": 5,"values": ["'.$fecha_biostar.'"]}],"orders": [{"column": "datetime","descending": false}]}}';
+        //$body = json_encode($body);
+        $r = $client->request('POST', 'events/search', [
+            'body' => $body
+        ]);
+        $response = $r;
+        $response = $r->getBody()->getContents();
+        $data = json_decode($response);
+
+        return $data;
+    }
+    
+    public static function insertEvents(){
+        $data = biostarController::getEvents();
+        
+        $lEvents = [];
+        if($data->EventCollection->rows == ""){return 1;}
+        foreach ($data->EventCollection->rows as $row) {
+
+            $checada = (object) [
+                'user_id' => $row->user_id->user_id,
+                //'user_name' => $row->user_id->name,
+                'date' => Carbon::parse($row->server_datetime)->toDateString(),
+                'time' => Carbon::parse($row->server_datetime)->toTimeString(),
+                'tna_key' => $row->tna_key
+            ];
+
+            $lEvents[] = $checada;
+        }
+        for( $i = 0 ; count($lEvents) > $i ; $i++){
+
+            $employee_id = DB::table('employees')->where('biostar_id',$lEvents[$i]->user_id);
+            $register = new register();
+            $register->employee_id = $lEvents[$i]->user_id;
+            $register->date = $lEvents[$i]->date;
+            $register->time = $lEvents[$i]->time;
+            $register->type_id = $lEvents[$i]->tna_key;
+            $register->form_creation_id = 4;
+            $register->save();  
+        }
+        $newDate = Carbon::now();
+        \App\SUtils\SConfiguration::setConfiguration('lastEventSyncDateTime', $newDate->toDateTimeString());
+        return 1;
     }
 }
