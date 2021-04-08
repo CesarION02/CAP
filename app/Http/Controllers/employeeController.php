@@ -614,5 +614,21 @@ class employeeController extends Controller
 
         return view('employee.index', compact('datas'))->with('becarios', $becarios); 
     }
+
+    public function colabVsBiostar()
+    {
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+        
+        $lEmployees = DB::table('employees AS e')
+                            ->select('e.id', 'e.name', 'e.biostar_id')
+                            ->where('e.is_delete', '0')
+                            ->where('e.is_active', true)
+                            ->where('e.department_id', '!=', $config->dept_foraneo)
+                            ->orderBy('e.name')
+                            ->get();
+
+        return view('biostar.indexbiostarid')
+                            ->with('lEmployees', $lEmployees);
+    }
 }
 
