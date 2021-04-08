@@ -135,7 +135,7 @@ class biostarController extends Controller
         
         $fecha_biostar = Carbon::parse($config->lastEventSyncDateTime);
         $fecha_biostar = $fecha_biostar->toISOString();
-        $body = '{"Query": {"limit": 2,"conditions": [{"column": "event_type_id.code","operator": 0,"values": ["4867"]},{"column": "datetime","operator": 5,"values": ["'.$fecha_biostar.'"]}],"orders": [{"column": "datetime","descending": false}]}}';
+        $body = '{"Query": {"limit": 100000,"conditions": [{"column": "event_type_id.code","operator": 0,"values": ["4867"]},{"column": "datetime","operator": 5,"values": ["'.$fecha_biostar.'"]}],"orders": [{"column": "datetime","descending": false}]}}';
         //$body = json_encode($body);
         $r = $client->request('POST', 'events/search', [
             'body' => $body
@@ -164,17 +164,28 @@ class biostarController extends Controller
 
             $lEvents[] = $checada;
         }
-        for( $i = 0 ; count($lEvents) > $i ; $i++){
+        DB::beginTransaction();
+        try{
+            for( $i = 0 ; count($lEvents) > $i ; $i++){
 
-            $employee_id = DB::table('employees')->where('biostar_id',$lEvents[$i]->user_id);
-            $register = new register();
-            $register->employee_id = $lEvents[$i]->user_id;
-            $register->date = $lEvents[$i]->date;
-            $register->time = $lEvents[$i]->time;
-            $register->type_id = $lEvents[$i]->tna_key;
-            $register->form_creation_id = 4;
-            $register->save();  
+                $employee_id = DB::table('employees')->where('biostar_id',$lEvents[$i]->user_id)->get();
+                $register = new register();
+                $register->employee_id = $employee_id[0]->id;
+                $register->date = $lEvents[$i]->date;
+                $register->time = $lEvents[$i]->time;
+                $register->type_id = $lEvents[$i]->tna_key;
+                $register->form_creation_id = 4;
+                $register->save();  
+
+                
+            }
+            
+        } catch (\Exception $e) {
+            DB::rollback(); 
+            return 0;
+
         }
+        DB::commit();
         $newDate = Carbon::now();
         \App\SUtils\SConfiguration::setConfiguration('lastEventSyncDateTime', $newDate->toDateTimeString());
         return 1;
