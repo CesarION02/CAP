@@ -48,7 +48,32 @@ class biostarController extends Controller
         return null;
     }
 
-    public static function getUsers()
+    /**
+     * Cerrar sesión
+     *
+     * @return void
+     */
+    public static function logout($sessionId)
+    {
+        $headers = [
+                'Content-Type' => 'application/json',
+                'bs-session-id' => $sessionId
+            ];
+
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+        $client = new GuzzleClient([
+            // Base URI is used with relative requests
+            'base_uri' => $config->urlBiostar."/api/",
+            // You can set any number of default request options.
+            'timeout'  => 2.0,
+            'headers' => $headers,
+            'verify' => false
+        ]);
+
+        $r = $client->request('POST', 'logout');
+    }
+
+    public function getUsers()
     {
         $rez = biostarController::login();
 
@@ -81,31 +106,64 @@ class biostarController extends Controller
         $response = $r->getBody()->getContents();
         $data = json_decode($response);
 
+        biostarController::logout($rez);
+
         return $data;
     }
 
-    public function indexUsersBiostar()
+    public function indexUsersBiostar(Request $request)
     {
-        $data = biostarController::getUsers();
+        $data = $this->getUsers();
 
+        $filterType = $request->filter_users == null ? 1 : $request->filter_users;
+
+        $usrCollection = collect($data->UserCollection->rows);
+
+        $usrCollection = $usrCollection->where('user_id', '!=', 1);
+        
+        if ($filterType != 0) {
+            $usrCollection = $usrCollection->filter(function ($value, $key) {
+                return $value->fingerprint_template_count == 0 || $value->face_count == 0;
+            });
+        }
+        
         $lUsers = [];
-        foreach ($data->UserCollection->rows as $row) {
-            if (($row->fingerprint_template_count > 0 && $row->face_count > 0) || $row->user_id == 1) {
-                continue;
-            }
-
+        foreach ($usrCollection as $row) {
             $usr = (object) [
                 'id_user' => $row->user_id,
                 'user_name' => $row->name,
                 'has_fingerprint' => $row->fingerprint_template_count > 0,
-                'has_face' => $row->face_count > 0
+                'has_face' => $row->face_count > 0,
+                'has_card' => $row->card_count > 0
             ];
 
             $lUsers[] = $usr;
         }
 
         return view('biostar.indexhc')
+                            ->with('filterType', $filterType)
                             ->with('lUsers', $lUsers);
+    }
+
+    /**
+     * Modificación del id de biostar correspondiente al empleado
+     *
+     * @param Request $request
+     * 
+     * @return void
+     */
+    public function updateBiostarId(Request $request)
+    {
+        $data = json_decode($request->emp_row);
+
+        employees::where('id', $data->id)
+                    ->update(
+                            [
+                                'biostar_id' => $data->biostar_id > 0 ? $data->biostar_id : null,
+                            ]
+                        );
+
+        return json_encode("OK");
     }
 
     public static function getEvents(){
