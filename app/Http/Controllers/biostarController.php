@@ -193,8 +193,42 @@ class biostarController extends Controller
         
         $fecha_biostar = Carbon::parse($config->lastEventSyncDateTime);
         $fecha_biostar = $fecha_biostar->toISOString();
-        $body = '{"Query": {"limit": 100000,"conditions": [{"column": "event_type_id.code","operator": 0,"values": ["4867"]},{"column": "datetime","operator": 5,"values": ["'.$fecha_biostar.'"]}],"orders": [{"column": "datetime","descending": false}]}}';
-        //$body = json_encode($body);
+        //$body = '{"Query": {"limit": 100000,"conditions": [{"column": "event_type_id.code","operator": 0,"values": ["4867"]},{"column": "datetime","operator": 5,"values": ["'.$fecha_biostar.'"]}],"orders": [{"column": "datetime","descending": false}]}}';
+        // Reservada para traer la información del checador nuevo de planta. 
+        $body = '{
+            "Query": {
+              "limit": 100000,
+              "conditions": [
+                {
+                  "column": "event_type_id.code",
+                  "operator": 2,
+                  "values": [
+                    "4865","4867"
+                  ]
+                },
+                {
+                  "column": "datetime",
+                  "operator": 5,
+                  "values": [
+                    "'.$fecha_biostar.'"
+                  ]
+                },
+                {
+                  "column":"device_id.id",
+                  "operator": 2,
+                  "values": [
+                    "545406209","542390428"
+                  ]
+                }
+              ],
+              "orders": [
+                {
+                  "column": "datetime",
+                  "descending": false
+                }
+              ]
+            }
+          }';
         $r = $client->request('POST', 'events/search', [
             'body' => $body
         ]);
