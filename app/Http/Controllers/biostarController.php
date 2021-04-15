@@ -187,7 +187,7 @@ class biostarController extends Controller
             // Base URI is used with relative requests
             'base_uri' => $config->urlBiostar."/api/",
             // You can set any number of default request options.
-            'timeout'  => 2.0,
+            'timeout'  => 5.0,
             'headers' => $headers,
             'verify' => false
         ]);
@@ -198,7 +198,7 @@ class biostarController extends Controller
         // Reservada para traer la información del checador nuevo de planta. 
         $body = '{
             "Query": {
-              "limit": 100000,
+              "limit": 1000000,
               "conditions": [
                 {
                   "column": "event_type_id.code",
@@ -260,8 +260,11 @@ class biostarController extends Controller
         DB::beginTransaction();
         try{
             for( $i = 0 ; count($lEvents) > $i ; $i++){
-
+                $revision = $lEvents[$i];
                 $employee_id = DB::table('employees')->where('biostar_id',$lEvents[$i]->user_id)->get();
+                if(count($employee_id) == 0){
+                    continue;
+                }
                 $register = new register();
                 $register->employee_id = $employee_id[0]->id;
                 $register->date = $lEvents[$i]->date;
