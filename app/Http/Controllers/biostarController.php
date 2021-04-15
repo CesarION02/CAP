@@ -3,8 +3,9 @@
 namespace App\Http\Controllers;
 
 use GuzzleHttp\Client as GuzzleClient;
-use GuzzleHttp\Psr7\Request as GuzzleRequest;
+use Illuminate\Http\Request;
 use App\Models\register;
+use App\Models\employees;
 use Carbon\Carbon;
 use DB;
 
