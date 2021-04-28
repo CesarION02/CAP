@@ -16,6 +16,15 @@
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php"])
             </div>
             <div class="box-body" id="appEmpVsBiostar">
+                <div class="row">
+                    <div class="col-md-offset-10 col-md-2">
+                        <select class="form-control" id="sel-biostar-opt">
+                            <option value="0" selected>Todos</option>
+                            <option value="1">Vinculados</option>
+                            <option value="2">Faltantes</option>
+                        </select>
+                    </div>
+                </div>
                 <table class="table table-striped table-bordered table-hover" id="empb_table">
                     <thead>
                         <tr>
@@ -25,6 +34,7 @@
                             <th>Depto GH</th>
                             <th>ID BioStar</th>
                             <th>Editar</th>
+                            <th>extId</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -46,6 +56,7 @@
                                     <i class="glyphicon glyphicon-ok"></i>
                                 </button>
                             </td>
+                            <td>@{{ empRow.biostar_id }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -72,7 +83,31 @@
 
     <script>
         $(document).ready( function () {
-            $('#empb_table').DataTable({
+            $.fn.dataTable.ext.search.push(
+                function( settings, data, dataIndex ) {
+                    // var min = parseInt( $('#min').val(), 10 );
+                    let biostarOpt = parseInt( $('#sel-biostar-opt').val(), 10 );
+                    let externalId = data[6];
+
+                    switch (biostarOpt) {
+                        case 0:
+                            return true;
+
+                        case 1:
+                            return parseInt( externalId ) > 0;
+
+                        case 2:
+                            return externalId == "" || parseInt( externalId ) == 0;
+
+                        default:
+                            break;
+                    }
+
+                    return false;
+                }
+            );
+
+            var oTable = $('#empb_table').DataTable({
                 "language": {
                     "sProcessing":     "Procesando...",
                     "sLengthMenu":     "Mostrar _MENU_ registros",
@@ -98,6 +133,12 @@
                     }
                 },
                 "colReorder": true,
+                columnDefs: [
+                    {
+                        targets: [ 6 ],
+                        visible: false
+                    },
+                ],
                 "dom": 'Bfrtip',
                 "lengthMenu": [
                     [ 10, 25, 50, 100, -1 ],
@@ -108,7 +149,12 @@
                     { extend: 'copy', text: 'Copiar'}, 'csv', 'excel', { extend: 'print', text: 'Imprimir'}
                     ]
             });
+
+            $('#sel-biostar-opt').change( function() {
+                oTable.draw();
+            });
         });
+
     </script>
 
     <script>
