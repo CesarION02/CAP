@@ -619,16 +619,18 @@ class employeeController extends Controller
     {
         $config = \App\SUtils\SConfiguration::getConfigurations();
         
+        
         $lEmployees = DB::table('employees AS e')
-                            ->select('e.id', 'e.name', 'e.biostar_id')
-                            ->where('e.is_delete', '0')
-                            ->where('e.is_active', true)
-                            ->where(function ($query) use ($config) {
-                                $query->whereNull('e.department_id')
-                                      ->orWhere('e.department_id', '!=', $config->dept_foraneo);
-                            })
-                            ->orderBy('e.name')
-                            ->get();
+                        ->leftjoin('dept_rh AS drh', 'e.dept_rh_id','=','drh.id')
+                        ->select('e.id', 'e.name', 'e.num_employee', 'e.biostar_id', 'drh.name AS depto_gh')
+                        ->where('e.is_delete', '0')
+                        ->where('e.is_active', true)
+                        ->where(function ($query) use ($config) {
+                            $query->whereNull('e.department_id')
+                                    ->orWhere('e.department_id', '!=', $config->dept_foraneo);
+                        })
+                        ->orderBy('e.name')
+                        ->get();
 
         return view('biostar.indexbiostarid')
                             ->with('lEmployees', $lEmployees);

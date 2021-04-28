@@ -12,7 +12,7 @@
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Colaborador vs Biostar</h3>
+                <h3 class="box-title">Colaborador vs BioStar</h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php"])
             </div>
             <div class="box-body" id="appEmpVsBiostar">
@@ -21,16 +21,20 @@
                         <tr>
                             <th>ID CAP</th>
                             <th>Colaborador CAP</th>
-                            <th>ID Biostar</th>
+                            <th>Num colab.</th>
+                            <th>Depto GH</th>
+                            <th>ID BioStar</th>
                             <th>Editar</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="empRow in lVueEmployees">
                             <td>@{{ oVueGui.pad(empRow.id, 6) }}</td>
-                            <td>@{{ empRow.name }}</td>
+                            <td>@{{ empRow.name.toUpperCase() }}</td>
+                            <td style="text-align: center;">@{{ empRow.num_employee }}</td>
+                            <td>@{{ empRow.depto_gh }}</td>
                             <td>
-                                <input :id="empRow.id" type="number" v-model="empRow.biostar_id" :disabled="!empRow.actionEnabled" style="text-align: center;">
+                                <input :id="empRow.id" type="number" v-model="empRow.biostar_id" :disabled="!empRow.actionEnabled" style="text-align: center; width: 100px;">
                             </td>
                             <td>
                                 <button v-on:click="editBiostarId(empRow)"
