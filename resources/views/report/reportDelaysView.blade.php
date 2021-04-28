@@ -204,11 +204,11 @@
                         return true;
 
                     case 1:
-                        externalId = parseInt( data[13] );
+                        externalId = parseInt( data[14] );
                         return externalId > 0;
 
                     case 2:
-                        externalId = parseInt( data[13] );
+                        externalId = parseInt( data[14] );
                         return ! (externalId > 0);
 
                     default:

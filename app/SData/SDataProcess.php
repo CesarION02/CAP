@@ -169,7 +169,7 @@ class SDataProcess {
                         }
                     }
 
-                    if ($sDate == $newRow->outDate) {
+                    if ($newRow != null && $sDate == $newRow->outDate) {
                         continue;
                     }
 
