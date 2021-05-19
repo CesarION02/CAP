@@ -193,6 +193,7 @@ class incidentController extends Controller
                                 '3_1' => '12',
                                 '3_2' => '13',
                                 '1_8' => '16',
+                                '1_9' => '18',
                             ];
         
         $keys = [];
@@ -217,7 +218,9 @@ class incidentController extends Controller
                     $oIncident = $this->insertIncident($jAbs);
                 }
             }
-            catch (\Throwable $th) { }
+            catch (\Throwable $th) {
+                $error = $th;
+            }
 
             $this->saveDays($oIncident);
         }
