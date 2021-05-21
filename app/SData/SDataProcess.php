@@ -169,6 +169,10 @@ class SDataProcess {
                         }
                     }
 
+                    if ($newRow != null && $sDate == $newRow->outDate) {
+                        continue;
+                    }
+
                     $registry = (object) [
                                     'date' => $sDate,
                                     'time' => '12:00:00'
@@ -531,7 +535,7 @@ class SDataProcess {
                             else {
                                 if ($result->auxWorkshift != null) {
                                     $oAux = $result->auxWorkshift;
-                                    if ($oAux->name == "Noche") {
+                                    if ($oAux->is_night) {
                                         $night = true;
                                     }
                                 }
@@ -539,22 +543,24 @@ class SDataProcess {
                                     return 0;
                                 }
                             }
-                            if ($night) {
-                                $newRow->outDateTimeSch = $result->pinnedDateTime->toDateTimeString();
-                            }
-                            else {
+                            if (! $night) {
                                 $result->pinnedDateTime->subDay();
-                                $newRow->outDateTimeSch = $result->pinnedDateTime->toDateTimeString();
                             }
+
+                            $newRow->outDateTimeSch = $result->pinnedDateTime->toDateTimeString();
+                            $newRow->outDate = $result->pinnedDateTime->toDateString();
+                            $newRow->outDateTime = $result->pinnedDateTime->toDateString();
 
                             $newRow->isSpecialSchedule = $result->auxIsSpecialSchedule;
                             if ($newRow->isSpecialSchedule) {
                                 $newRow->others = $newRow->others."Turno especial (".$result->auxWorkshift->name."). ";
                             }
                         }
+                        else {
+                            $newRow->outDate = $newRow->inDate;
+                            $newRow->outDateTime = $newRow->inDate;
+                        }
 
-                        $newRow->outDate = $newRow->inDate;
-                        $newRow->outDateTime = $newRow->inDate;
                         $date = $newRow->outDate;
                         $time = null;
                         $adjs = SPrepayrollAdjustUtils::getAdjustForCase($date, $time, 2, \SCons::PP_TYPES['JS'], $newRow->idEmployee);
@@ -1384,7 +1390,7 @@ class SDataProcess {
     public static function addSundayPay($lData)
     {
         foreach ($lData as $oRow) {
-            if (! $oRow->hasChecks) {
+            if (! $oRow->hasChecks || !$oRow->hasCheckOut) {
                 continue;
             }
 

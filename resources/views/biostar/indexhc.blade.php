@@ -30,8 +30,8 @@
                 <table class="table table-striped table-bordered table-hover" id="h_r_table">
                     <thead>
                         <tr>
-                            <th>ID Biostar</th>
-                            <th>Colaborador Biostar</th>
+                            <th>ID BioStar</th>
+                            <th>Colaborador BioStar</th>
                             <th>Huella</th>
                             <th>Rostro</th>
                         </tr>
