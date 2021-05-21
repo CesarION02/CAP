@@ -74,7 +74,7 @@ class SDateUtils {
                     //$quincena[$i] = $quincenas[$i]->num;
                 //}
                 if($finquincena > $inicioquincena){
-                    for($i = 0 ; $finquincena > $inicioquincena ; $i++){
+                    for($i = 0 ; $finquincena >= $inicioquincena ; $i++){
                         $quincena[$i] = $inicioquincena;
                         $inicioquincena++;
                     }
@@ -131,7 +131,7 @@ class SDateUtils {
                 if($pendientes[0] != 0){
                 $semanasEliminar = DB::table('week_cut')
                                 ->whereIn('num',$pendientes)
-                                ->where('year',$iYear)
+                                //->where('year',$iYear)
                                 ->select('id AS id')
                                 ->get();
                 for($i = 0 ; count($semanasEliminar) > $i ; $i++ ){
@@ -180,7 +180,7 @@ class SDateUtils {
                         ->get();
             if($final[0]->num > 1){
                 $inicioAux = DB::table('hrs_prepay_cut')
-                ->where('year', $final[0]->year)
+                //->where('year', $final[0]->year)
                 ->where('num', ($final[0]->num)-1)
                 ->select('dt_cut AS cut')
                 ->get(); 
@@ -201,12 +201,12 @@ class SDateUtils {
             $primeraSemana = DB::table('week_cut')
                         ->where('ini','<=',$inicio->format('Y-m-d'))
                         ->where('fin','>=',$inicio->format('Y-m-d'))
-                        ->select('num AS num')
+                        ->select('id AS num')
                         ->get();
             $ultimaSemana = DB::table('week_cut')
                         ->where('ini','<=',$final[0]->cut)
                         ->where('fin','>=',$final[0]->cut)
-                        ->select('num AS num')
+                        ->select('id AS num')
                         ->get();
             $contadorInicial = $primeraSemana[0]->num;
             $contadorFinal = $ultimaSemana[0]->num;

@@ -4,12 +4,12 @@ Plantilla horarios
 @endsection
 
 @section("scripts")
-<script src="{{asset("assets/pages/scripts/admin/funciones.js")}}" type="text/javascript"></script>
-<script src="{{asset("assets/pages/scripts/admin/datatable/index.js")}}" type="text/javascript"></script>
-<script src="{{ asset("dt/datatables.js") }}" type="text/javascript"></script>
-<script src="{{ asset('dt/dataTables.buttons.min.js') }}"></script>
-<script src="{{ asset("assets/js/moment/moment.js") }}" type="text/javascript"></script>
-<script src="{{ asset("assets/js/moment/datetime-moment.js") }}" type="text/javascript"></script>
+    <script src="{{asset("assets/pages/scripts/admin/funciones.js")}}" type="text/javascript"></script>
+    <script src="{{asset("assets/pages/scripts/admin/datatable/index.js")}}" type="text/javascript"></script>
+    <script src="{{ asset("dt/datatables.js") }}" type="text/javascript"></script>
+    <script src="{{ asset('dt/dataTables.buttons.min.js') }}"></script>
+    <script src="{{ asset("assets/js/moment/moment.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/js/moment/datetime-moment.js") }}" type="text/javascript"></script>
 	<script src="{{ asset('dt/buttons.flash.min.js') }}"></script>
 	<script src="{{ asset('dt/jszip.min.js') }}"></script>
 	<script src="{{ asset('dt/pdfmake.min.js') }}"></script>
@@ -98,7 +98,12 @@ Plantilla horarios
                             @foreach ($assigns as $assign)
                             <tr>
                                 <td>{{$assign->nombreEmpleado}}</td>
-                                <td>{{\App\SUtils\SDateTimeUtils::orderDate($assign->fecha_inicio)}}</td>
+                                <td>@if($assign->fecha_inicio == null)
+                                    N/A
+                                    @else
+                                    {{\App\SUtils\SDateTimeUtils::orderDate($assign->fecha_inicio)}}
+                                    @endif
+                                </td>
                                 <td>@if($assign->fecha_fin == null)
                                         N/A
                                     @else

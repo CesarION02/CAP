@@ -282,7 +282,7 @@ class biostarController extends Controller
 
         }
         DB::commit();
-        $newDate = Carbon::now();
+        $newDate = Carbon::now('UTC');
         \App\SUtils\SConfiguration::setConfiguration('lastEventSyncDateTime', $newDate->toDateTimeString());
         return 1;
     }

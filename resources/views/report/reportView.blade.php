@@ -62,9 +62,9 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php $idEmployee = $lRows[0]->employee_id; $totalextrad = 0; $totaldominical = 0;$totalextrat = 0; ?>
+                                <?php $idEmployee = $lRows[0]->employee_id; $totalextrad = 0; $totaldominical = 0;$totalextrat = 0; if($payWay == 2){$idWeek = $lRows[0]->week;}else{ $idWeek = $lRows[0]->biweek;}?>
                                 @for($i = 0 ; count($lRows) > $i ; $i++)
-                                    @if($idEmployee != $lRows[$i]->employee_id)
+                                    @if($idEmployee != $lRows[$i]->employee_id || ( $lRows[$i]->week != $idWeek && $lRows[$i]->biweek != $idWeek) )
                                         <tr>
                                             <td>{{ $lRows[$i-1]->num_employee  }}</td>
                                             <td>{{ $lRows[$i-1]->name }}</td>
@@ -78,7 +78,9 @@
                                             <td></td>
                                         </tr>
                                         <?php 
-                                            $idEmployee = $lRows[$i]->employee_id; $i--;
+                                            $idEmployee = $lRows[$i]->employee_id; 
+                                            if($payWay == 2){$idWeek = $lRows[$i]->week;}else{ $idWeek = $lRows[$i]->biweek;}
+                                            $i--;
                                             $totaldominical = 0;
                                             $totalextrad = 0;
                                             $totalextrat = 0;

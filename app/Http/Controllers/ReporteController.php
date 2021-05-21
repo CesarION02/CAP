@@ -686,7 +686,12 @@ class ReporteController extends Controller
                             $query->whereBetween('inDate',[$sStartDate,$sEndDate])
                             ->OrwhereBetween('outDate',[$sStartDate,$sEndDate]);
                         })
-                        ->select(['processed_data.*','employees.num_employee','employees.name', 'employees.external_id'])
+                        ->orderBy('employees.num_employee')
+                        ->orderBy('inDate')
+                        ->orderBy('outDate')
+                        ->orderBy('week')
+                        ->orderBy('biweek')
+                        ->select(['employees.num_employee','employees.name', 'employees.external_id','processed_data.week','processed_data.biweek','processed_data.*'])
                         ->get();
         //$lEmployees = $id;
         $incapacidades = DB::table('incidents')
@@ -735,7 +740,8 @@ class ReporteController extends Controller
                     ->with('vacaciones',$vacaciones)
                     ->with('inasistencia',$inasistencia)
                     ->with('reporttype',$request->reportType)
-                    ->with('tipo', $tipoDatos);
+                    ->with('tipo', $tipoDatos)
+                    ->with('payWay',$payWay);
     } 
 
     public function prueba(){

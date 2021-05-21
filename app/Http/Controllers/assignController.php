@@ -34,7 +34,7 @@ class assignController extends Controller
         
         $datas = DB::select("SELECT a.fecha_inicio, a.fecha_fin, b.name AS nombreEmpleado, s.name AS nombreHorario, a.group_assign_id, a.id
         FROM (
-            SELECT MAX(start_date) as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE is_delete = 0 AND schedule_template_id != ".$iTemplateId." GROUP By p.employee_id
+            SELECT start_date as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE is_delete = 0 AND schedule_template_id != ".$iTemplateId." ORDER BY p.employee_id, start_date DESC
         ) a
         INNER JOIN employees b ON a.employee_id = b.id
         INNER JOIN schedule_template s ON a.schedule_template_id = s.id
@@ -42,7 +42,7 @@ class assignController extends Controller
 
         $datasDept = DB::select("SELECT a.fecha_inicio, a.fecha_fin, b.name AS nombreEmpleado, s.name AS nombreHorario, a.group_assign_id, a.id
         FROM (
-            SELECT MAX(start_date) as fecha_inicio, end_date as fecha_fin ,p.department_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE is_delete = 0 AND schedule_template_id != ".$iTemplateId." GROUP By p.department_id
+            SELECT start_date as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE is_delete = 0 AND schedule_template_id != ".$iTemplateId." ORDER BY p.employee_id, start_date DESC
         ) a
         INNER JOIN departments b ON a.department_id = b.id
         INNER JOIN schedule_template s ON a.schedule_template_id = s.id
@@ -750,20 +750,9 @@ class assignController extends Controller
                 ->groupBy('employees.id')
                 ->get(); 
               */  
-                $query = "SELECT a.fecha_inicio, a.fecha_fin, b.name AS nombreEmpleado, s.name AS nombreHorario, a.group_assign_id, a.id
-                FROM (
-                    SELECT MAX(start_date) as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE is_delete = 0 AND schedule_template_id != ".$iTemplateId." GROUP By p.employee_id
-                ) a
-                INNER JOIN employees b ON a.employee_id = b.id
-                INNER JOIN schedule_template s ON a.schedule_template_id = s.id
-                INNER JOIN jobs j ON b.job_id = j.id
-                INNER JOIN departments d ON j.department_id = d.id
-                INNER JOIN department_group g ON d.dept_group_id = g.id
-                WHERE g.id IN (".$adguString. ")
-                 GROUP By a.employee_id";
                 $assigns = DB::select("SELECT a.fecha_inicio, a.fecha_fin, b.name AS nombreEmpleado, s.name AS nombreHorario, a.group_assign_id, a.id
                 FROM (
-                    SELECT MAX(start_date) as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE is_delete = 0 AND schedule_template_id != ".$iTemplateId." GROUP By p.employee_id
+                    SELECT start_date as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE is_delete = 0 AND schedule_template_id != ".$iTemplateId." ORDER BY p.employee_id, start_date DESC
                 ) a
                 INNER JOIN employees b ON a.employee_id = b.id
                 INNER JOIN schedule_template s ON a.schedule_template_id = s.id
@@ -793,7 +782,7 @@ class assignController extends Controller
             */ 
                 $assigns = DB::select("SELECT a.fecha_inicio, a.fecha_fin, b.name AS nombreEmpleado, s.name AS nombreHorario, a.group_assign_id, a.id
                 FROM (
-                    SELECT MAX(start_date) as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE is_delete = 0 AND schedule_template_id != ".$iTemplateId." GROUP By p.employee_id
+                    SELECT start_date as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE is_delete = 0 AND schedule_template_id != ".$iTemplateId." ORDER BY p.employee_id, start_date DESC
                 ) a
                 INNER JOIN employees b ON a.employee_id = b.id
                 INNER JOIN schedule_template s ON a.schedule_template_id = s.id
@@ -856,10 +845,11 @@ class assignController extends Controller
 
         $now = Carbon::now();
         $now->setISODate($year, $week);
-        $fechas = [new DateTime($now->copy()->startOfWeek()->toDateString()), new DateTime($now->copy()->endOfWeek()->toDateString())];
-
         // Devuelve un array con ambas fechas
         // $fechas =  [$fecha, $fecha2];
+        
+        $fechas = [new DateTime($now->copy()->startOfWeek()->toDateString()), new DateTime($now->copy()->endOfWeek()->toDateString())];
+
         //termina determinacion de fechas
         $grupo = '';
         $comparacion = 0;
@@ -867,33 +857,45 @@ class assignController extends Controller
         $id = 0;
         $employees = $request->empleado;
         $data = [];
+        $fechaInicio = $fechas[0]->format('Y-m-d');
+        $fechaFin = $fechas[1]->format('Y-m-d');
         foreach ($employees as $employeeId) {
             $assign = DB::table('schedule_assign')
                 ->join('employees', 'employees.id', '=', 'schedule_assign.employee_id')
                 ->where('employees.id', $employeeId)
                 ->where('schedule_assign.is_delete', 0)
+                ->where('start_date','<=',$fechaInicio)
+                ->Where(function($query) use ($fechaFin) {
+                        $query->where('end_date','>=',$fechaFin)
+                        ->orwhereNull('end_date');
+                })
                 ->select('schedule_assign.start_date AS Start', 'schedule_assign.end_date AS End', 'group_schedules_id AS Grupo', 'schedule_assign.id AS Id')
+                ->orderBy('schedule_assign.updated_at')
                 ->get();
-            for ($x = 0; count($assign) > $x; $x++) {
-                $dia   = substr($assign[$x]->Start, 8, 2);
-                $mes = substr($assign[$x]->Start, 5, 2);
-                $anio = substr($assign[$x]->Start, 0, 4);
-                $numeroSemana = date("W", mktime(0, 0, 0, $mes, $dia, $anio));
-                if ($numeroSemana == $week) {
-                    $id = $assign[$x]->Id;
-                    $diferencia = 0;
-                    $grupo = $assign[$x]->Grupo;
-                } else {
-                    if ($numeroSemana < $week) {
+
+
+            /*
+            if ( $numeroSemana == $week && $anio == $year ) {
+                $diferencia = 0; 
+            } 
+            else {
+                if ($numeroSemana < $week && $year == $anio ) {
                         $comparacion =  $week - $numeroSemana;
                         if ($comparacion < $diferencia) {
                             $diferencia = $comparacion;
-                            $id = $assign[$x]->Id;
-                            $grupo = $assign[$x]->Grupo;
                         }
+                } else if ($anio < $year) {
+                    $difAnios = $year - $anio;
+                    
+                    while ($difAnios >= 0){
+
                     }
                 }
             }
+            */
+            $id = $assign[0]->Id;
+            $grupo = $assign[0]->Grupo;
+            
             if ($grupo != null) {
                 $assign = DB::table('schedule_assign')
                     ->join('employees', 'employees.id', '=', 'schedule_assign.employee_id')
@@ -913,25 +915,21 @@ class assignController extends Controller
             }
 
             if (count($assign) == 1) {
-                $fechaIni = strtotime($assign[0]->Start);
-                $fechaFin = strtotime($assign[0]->End);
+
                 $fechaAux1 = date_format($fechas[0], 'd-m-Y');
                 $fechaAux2 = date_format($fechas[1], 'd-m-Y');
-                $fechaComparacion = strtotime($fechaAux1);
-                $fechaComparacion2 = strtotime($fechaAux2);
-                if (!$fechaFin || $fechaFin <= $fechaComparacion2) {
-                    if ($fechaIni <= $fechaComparacion) {
-                        $calendario = DB::table('schedule_assign')
-                            ->join('employees', 'employees.id', '=', 'schedule_assign.employee_id')
-                            ->join('schedule_template', 'schedule_template.id', '=', 'schedule_assign.schedule_template_id')
-                            ->join('schedule_day', 'schedule_day.schedule_template_id', '=', 'schedule_template.id')
-                            ->where('employees.id', $employeeId)
-                            ->where('schedule_assign.is_delete', 0)
-                            ->select('schedule_day.day_name AS Dia', 'schedule_day.day_num AS Numero', 'schedule_day.entry AS Entrada', 'schedule_day.departure AS Salida', 'employees.id AS Id', 'employees.name AS Nombre')
-                            ->get();
-                        $info = 1;
-                    }
-                } else { }
+
+                $calendario = DB::table('schedule_assign')
+                    ->join('employees', 'employees.id', '=', 'schedule_assign.employee_id')
+                    ->join('schedule_template', 'schedule_template.id', '=', 'schedule_assign.schedule_template_id')
+                    ->join('schedule_day', 'schedule_day.schedule_template_id', '=', 'schedule_template.id')
+                    ->where('employees.id', $employeeId)
+                    ->where('schedule_assign.id', $id)
+                    ->where('schedule_assign.is_delete', 0)
+                    ->select('schedule_day.day_name AS Dia', 'schedule_day.day_num AS Numero', 'schedule_day.entry AS Entrada', 'schedule_day.departure AS Salida', 'employees.id AS Id', 'employees.name AS Nombre')
+                    ->get();
+                $info = 1;
+
             } else {
                 $fechaIni = strtotime($assign[0]->Start);
                 $fechaFin = strtotime($assign[0]->End);
@@ -939,6 +937,7 @@ class assignController extends Controller
                 $fechaAux2 = date_format($fechas[1], 'd-m-Y');
                 $fechaComparacion = strtotime($fechaAux1);
                 $fechaComparacion2 = strtotime($fechaAux2);
+                $diferenciaSemanas = 0;
                 if (!$fechaFin || $fechaFin <= $fechaComparacion2) {
                     if ($fechaIni <= $fechaComparacion) {
                         $numeroHorarios = count($assign);
@@ -947,7 +946,19 @@ class assignController extends Controller
                         $mes = substr($assign[0]->Start, 5, 2);
                         $anio = substr($assign[0]->Start, 0, 4);
                         $numeroSemana = date("W", mktime(0, 0, 0, $mes, $dia, $anio));
-                        for ($numeroSemana; $week > $numeroSemana; $numeroSemana++) {
+                        if($year > $anio){
+                            $diferenciaAnios = $year - $anio;
+                            $diferenciaSemanas = $diferencia - $numeroSemana;
+                            $diferenciaAnios --;
+                            while ($diferenciaAnios > 0){
+                                $diferenciaSemanas += $diferencia;
+                                $diferenciaAnios--;
+                            }
+                            $diferernciaSemanas += $week;
+                        } else {
+                            $diferenciaSemanas = $week - $numeroSemana;
+                        }
+                        for ($i = 0 ; $diferenciaSemanas > $i ; $i++ ) {
                             $horario++;
                             if ($horario > $numeroHorarios) {
                                 $horario = 1;
