@@ -57,6 +57,7 @@
                 <table id="assigns_id" class="display" style="width:100%">
                     <thead>
                         <tr>
+                            <th></th>
                             <th>Fecha</th>
                             <th>Número colaborador</th>
                             <th>Colaborador</th>
@@ -64,7 +65,9 @@
                         </tr>
                     </thead>
                     <tbody>
+                        
                         <tr v-for="schedule in vueServerData.lSchedules">
+                            <td>@{{ schedule.start_date }}</td>
                             <td>@{{ vueGui.formatDate(schedule.start_date) }}</td>
                             <td>@{{ schedule.name }}
                                     <i v-show="schedule.text_description != undefined" 
@@ -186,9 +189,17 @@
                             "sSortDescending": ": Activar para ordenar la columna de manera descendente"
                         }
                     },
+                    "order": [[ 0, 'asc' ]],
                     "colReorder": true,
                     "scrollX": true,
                     "dom": 'Bfrtip',
+                    "columnDefs": [ 
+                            {
+                                "targets": [ 0 ],
+                                "visible": false,
+                                "searchable": false
+                            }
+                    ],
                     "lengthMenu": [
                         [ 10, 25, 50, 100, -1 ],
                         [ 'Mostrar 10', 'Mostrar 25', 'Mostrar 50', 'Mostrar 100', 'Mostrar todo' ]
