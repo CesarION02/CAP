@@ -198,7 +198,7 @@ class biostarController extends Controller
         // Reservada para traer la información del checador nuevo de planta. 
         $body = '{
             "Query": {
-              "limit": 1000000,
+              "limit": 10000000,
               "conditions": [
                 {
                   "column": "event_type_id.code",
@@ -282,7 +282,7 @@ class biostarController extends Controller
 
         }
         DB::commit();
-        $newDate = Carbon::now('UTC');
+        $newDate = Carbon::now();
         \App\SUtils\SConfiguration::setConfiguration('lastEventSyncDateTime', $newDate->toDateTimeString());
         return 1;
     }
