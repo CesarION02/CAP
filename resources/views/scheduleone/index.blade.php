@@ -206,7 +206,7 @@
                     ],
                     "buttons": [
                         'pageLength',
-                        { extend: 'copy', text: 'Copiar'}, 'csv', 'excel', { extend: 'print', text: 'Imprimir'}
+                        { extend: 'copy', text: 'Copiar'}, 'csv', 'excel', { extend: 'print', text: 'Imprimir',exportOptions: {columns: ':visible'}}
                         ]
                 });
 
