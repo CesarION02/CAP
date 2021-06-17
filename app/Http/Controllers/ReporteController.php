@@ -398,11 +398,14 @@ class ReporteController extends Controller
     public function genDelayReport()
     {
         $config = \App\SUtils\SConfiguration::getConfigurations();
+
+        $lEmployees = SGenUtils::toEmployeeIds(0, 0, []);
         
         return view('report.reportsGen')
                     ->with('tReport', \SCons::REP_DELAY)
                     ->with('sTitle', 'Reporte de Retardos')
                     ->with('sRoute', 'reporteRetardos')
+                    ->with('lEmployees', $lEmployees)
                     ->with('startOfWeek', $config->startOfWeek);
     }
 
@@ -430,19 +433,41 @@ class ReporteController extends Controller
     {
         $sStartDate = $request->start_date;
         $sEndDate = $request->end_date;
+        $iEmployee = $request->emp_id;
 
-        /**
-         * 1: quincena
-         * 2: semana
-         * 3: todos
-         */
-        $payWay = $request->pay_way;
-        $filterType = $request->i_filter;
-        $ids = $request->elems;
+        $oStartDate = Carbon::parse($sStartDate);
+        $oEndDate = Carbon::parse($sEndDate);
 
-        $lEmployees = SGenUtils::toEmployeeIds($payWay, $filterType, $ids);
+        if (! $oStartDate->lessThanOrEqualTo($oEndDate)) {
+            return \Redirect::back()->withErrors(['Error', 'La fecha de inicio debe ser previa a la fecha final']);
+        }
 
-        $lRows = SDelayReportUtils::processReport($sStartDate, $sEndDate, $payWay, \SCons::REP_DELAY, $lEmployees);
+        if ($request->optradio == "employee") {
+            if ($iEmployee > 0) {
+                $lEmployees = SGenUtils::toEmployeeIds(0, 0, 0, [$iEmployee]);
+                $payWay = $lEmployees[0]->way_pay_id;
+            }
+            else {
+                return \Redirect::back()->withErrors(['Error', 'Debe seleccionar empleado']);
+            }
+        }
+        else {
+            /**
+             * 1: quincena
+             * 2: semana
+             * 3: todos
+             */
+            $payWay = $request->pay_way == null ? \SCons::PAY_W_S : $request->pay_way;
+
+            $filterType = $request->i_filter;
+            $ids = $request->elems;
+            $lEmployees = SGenUtils::toEmployeeIds($payWay, $filterType, $ids);
+        }
+
+        $lRows = SDataProcess::process($sStartDate, $sEndDate, $payWay, $lEmployees);
+
+        $aEmployees = $lEmployees->pluck('num_employee', 'id');
+        $lEmpWrkdDays = SDelayReportUtils::getTheoreticalDaysOffBasedOnDaysWorked($lRows, $aEmployees, $sStartDate, $sEndDate);
 
         $sPayWay = "";
         switch ($payWay) {
@@ -457,12 +482,33 @@ class ReporteController extends Controller
                 break;
         }
 
-        return view('report.reportDelaysView')
-                    ->with('tReport', \SCons::REP_DELAY)
+        $adjTypes = prepayrollAdjType::get()->toArray();
+
+        $lAdjusts = DB::table('prepayroll_adjusts AS pa')
+                        ->join('prepayroll_adjusts_types AS pat', 'pa.adjust_type_id', '=', 'pat.id')
+                        ->select('pa.employee_id',
+                                    'pa.dt_date',
+                                    'pa.dt_time',
+                                    'pa.minutes',
+                                    'pa.apply_to',
+                                    'pa.adjust_type_id',
+                                    'pat.type_code',
+                                    'pat.type_name',
+                                    'pa.id'
+                                    )
+                        ->whereBetween('dt_date', [$sStartDate, $sEndDate])
+                        ->where('is_delete', false)
+                        ->get();
+
+        return view('report.reportRetardos')
+                    ->with('tReport', \SCons::REP_HR_EX)
                     ->with('sStartDate', $sStartDate)
                     ->with('sEndDate', $sEndDate)
                     ->with('sPayWay', $sPayWay)
                     ->with('sTitle', 'Reporte de retardos')
+                    ->with('adjTypes', $adjTypes)
+                    ->with('lAdjusts', $lAdjusts)
+                    ->with('lEmpWrkdDays', $lEmpWrkdDays)
                     ->with('lRows', $lRows);
     }
 
@@ -678,6 +724,8 @@ class ReporteController extends Controller
             
         }
         $prueba = SInfoWithPolicy::preProcessInfo($sStartDate,$year,$sEndDate,$payWay);
+        SHolidayWork::holidayworked($sStartDate,$sEndDate);
+        
         //$lEmployees[0] = 32; 
         $lRows = DB::table('processed_data')
                         ->join('employees','employees.id','=','processed_data.employee_id')
