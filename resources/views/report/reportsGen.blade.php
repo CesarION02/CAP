@@ -72,6 +72,16 @@
                     </div>
                     <br>
                     <div class="row">
+                        <div class="col-md-3 requerido">
+                            Quitar empleados que no checan:
+                        </div>
+                        <div class="col-md-3 col-md-offset-1">
+                            <input id="cbx1" type="checkbox" name="nochecan" value="nochecan" checked>
+                        </div>
+                    </div>
+                    <br>
+                    <br>
+                    <div class="row">
                         <div class="col-md-3">
                             Fecha inicial:*
                             <br>
@@ -90,11 +100,13 @@
                         <div class="col-md-4">
                             <label>Código de colores:</label>
                             <br>
-                            <span class="label delays">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span> (Retardos)
+                            <span class="label delays">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span> (Con retardos)
                             <br>
-                            <span class="label check">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span> (Necesita revisión)
+                            <span class="label check">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span> (Turno u horario a revisar)
                             <br>
-                            <span class="label absence">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span> (Faltas o sin checadas)
+                            <span class="label absence">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span> (Con faltas o sin checadas)
+                            <br>
+                            <span class="label noprogramming">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span> (Sin checadas y sin horario)
                         </div>
                     </div>
                 </div>
@@ -151,6 +163,7 @@
             let endThisFortnight = null;
             let startLastFortnight = null;
             let endLastFortnight = null;
+        
             if (moment().date() > 15) {
                 startThisFortnight = moment().date(16);
                 endThisFortnight = moment().endOf('month');
@@ -191,5 +204,17 @@
         $('#reportrange').on('apply.daterangepicker', function(ev, picker) {
             app.setDates(picker.startDate.format('YYYY-MM-DD'), picker.endDate.format('YYYY-MM-DD'));
         });
+    </script>
+
+    <script>
+        $(document).ready(function() {
+            $("#cbx1").click(function() {
+                if ($(this).is(":checked")){
+                  doChecked(); // Función si se checkea
+                } else {
+                  doNotChecked(); //Función si no
+                }
+            });
+         });
     </script>
 @endsection

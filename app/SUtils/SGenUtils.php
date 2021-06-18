@@ -11,7 +11,7 @@ class SGenUtils {
      * @param array $keys
      * @return void
      */
-    public static function toEmployeeIds($payWay, $type = 0, $keys = [], $aEmployees = [])
+    public static function toEmployeeIds($payWay, $type = 0, $keys = [], $aEmployees = [], $nocheca = 0)
     {
         $employees = \DB::table('employees AS e')
                             ->leftJoin('jobs AS j', 'j.id', '=', 'e.job_id')
@@ -52,6 +52,15 @@ class SGenUtils {
             
             default:
                 # code...
+                break;
+        }
+
+        switch ($nocheca) {
+            case 1:
+                $employees = $employees->where('e.ben_pol_id','!=',2);
+                break;
+            
+            default:
                 break;
         }
 

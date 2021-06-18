@@ -434,7 +434,12 @@ class ReporteController extends Controller
         $sStartDate = $request->start_date;
         $sEndDate = $request->end_date;
         $iEmployee = $request->emp_id;
-
+        $nochecan = $request->nochecan;
+        if($request->nochecan != null){
+            $nochecan = 1;
+        }else{
+            $nochecan = 0;
+        }
         $oStartDate = Carbon::parse($sStartDate);
         $oEndDate = Carbon::parse($sEndDate);
 
@@ -444,7 +449,7 @@ class ReporteController extends Controller
 
         if ($request->optradio == "employee") {
             if ($iEmployee > 0) {
-                $lEmployees = SGenUtils::toEmployeeIds(0, 0, 0, [$iEmployee]);
+                $lEmployees = SGenUtils::toEmployeeIds(0, 0, 0, [$iEmployee],$nochecan);
                 $payWay = $lEmployees[0]->way_pay_id;
             }
             else {
@@ -461,7 +466,7 @@ class ReporteController extends Controller
 
             $filterType = $request->i_filter;
             $ids = $request->elems;
-            $lEmployees = SGenUtils::toEmployeeIds($payWay, $filterType, $ids);
+            $lEmployees = SGenUtils::toEmployeeIds($payWay, $filterType, $ids, [] , $nochecan);
         }
 
         $lRows = SDataProcess::process($sStartDate, $sEndDate, $payWay, $lEmployees);
