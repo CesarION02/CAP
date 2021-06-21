@@ -15,7 +15,7 @@ var app = new Vue({
             if (oRow.hasAbsence || !oRow.hasCheckOut || !oRow.hasCheckIn) {
                 return 'absence';
             }
-            if (oRow.hasschedule == false) {
+            if (oRow.hasSchedule == false && oRow.hasCheckOut == false && oRow.hasCheckIn == false) {
                 return 'noprogramming';
             }
             if (oRow.isCheckSchedule || (oRow.events.length > 0 && oRow.hasChecks)) {
