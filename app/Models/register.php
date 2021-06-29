@@ -8,7 +8,7 @@ class register extends Model
 {
     protected $table = 'registers';
     protected $primaryKey = 'id';
-    public $timestamps = false;
+    
 
     public function employee(){
         return $this->hasMany('App\employee');
