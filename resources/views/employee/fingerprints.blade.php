@@ -5,6 +5,7 @@ Colaboradores
 
 @section("scripts")
 <script src="{{asset("assets/pages/scripts/admin/datatable/indexFingerActivar.js")}}" type="text/javascript"></script>
+<script src="{{asset("assets/pages/scripts/botoncopiar.js")}}" type="text/javascript"></script>
 <script src="{{asset("assets/pages/scripts/admin/datatable/indexFinger.js")}}" type="text/javascript"></script>
 <script src="{{asset("assets/pages/scripts/admin/datatable/index.js")}}" type="text/javascript"></script>
 <script src="{{asset("assets/pages/scripts/filter.js")}}" type="text/javascript"></script>
@@ -154,11 +155,13 @@ Colaboradores
                         </tr>
                     </thead>
                     <tbody>
+                        <?php $contador = 0; ?>
                         @foreach ($employees as $employee)
+                            <?php $contador = $contador+1;?>
                             @if($iFilterH == 1)
                                 @if($employee->fingerprint != null)
                                     <tr>
-                                        <td>{{$employee->nameEmployee}}</td>
+                                        <td id = <?php echo "nombre".$contador; ?> >{{$employee->nameEmployee}}</td>
                                         <td>{{$employee->num}}</td>
                                         <td>{{$employee->way}}</td>
                                         
@@ -173,6 +176,9 @@ Colaboradores
                                             <td>Inactivo</td>
                                         @endif
                                         <td>
+                                            <button onclick="copiarAlPortapapeles(<?php echo "nombre".$contador;?>)" class="btn-accion-tabla eliminar tooltipsC" >
+                                                <i class="fa fa-fw fa-files-o"></i>    
+                                            </button>
                                             @if($rol == 1 || $rol == 7)
                                                 <a href="{{route('editarhuella', ['id' => $employee->idEmployee])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
                                                     <i class="fa fa-fw fa-pencil"></i>
@@ -215,6 +221,9 @@ Colaboradores
                                             <td>Inactivo</td>
                                         @endif
                                         <td>
+                                            <button onclick="copiarAlPortapapeles(<?php echo "nombre".$contador;?>)" class="btn-accion-tabla eliminar tooltipsC" >
+                                                <i class="fa fa-fw fa-files-o"></i>    
+                                            </button>
                                             @if($rol == 1 || $rol == 7)
                                                 <a href="{{route('editarhuella', ['id' => $employee->idEmployee])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
                                                     <i class="fa fa-fw fa-pencil"></i>
