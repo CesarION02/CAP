@@ -167,7 +167,7 @@ class biostarController extends Controller
         return json_encode("OK");
     }
 
-    public static function getEvents(){
+    public static function getEvents($fecha = 0){
         $rez = biostarController::login();
 
         if ($rez == null) {
@@ -191,9 +191,14 @@ class biostarController extends Controller
             'headers' => $headers,
             'verify' => false
         ]);
+        if($fecha != 0){
+            $fecha_biostar = Carbon::parse($fecha);
+            $fecha_biostar = $fecha_biostar->toISOString();
+        }else{
+            $fecha_biostar = Carbon::parse($config->lastEventSyncDateTime);
+            $fecha_biostar = $fecha_biostar->toISOString();
+        }
         
-        $fecha_biostar = Carbon::parse($config->lastEventSyncDateTime);
-        $fecha_biostar = $fecha_biostar->toISOString();
         //$body = '{"Query": {"limit": 100000,"conditions": [{"column": "event_type_id.code","operator": 0,"values": ["4867"]},{"column": "datetime","operator": 5,"values": ["'.$fecha_biostar.'"]}],"orders": [{"column": "datetime","descending": false}]}}';
         // Reservada para traer la información del checador nuevo de planta. 
         $body = '{
@@ -246,13 +251,16 @@ class biostarController extends Controller
         $lEvents = [];
         if($data->EventCollection->rows == ""){return 1;}
         foreach ($data->EventCollection->rows as $row) {
+            $fecha = Carbon::parse($row->datetime);
+            $fecha->setTimezone('America/Mexico_City');
 
             $checada = (object) [
                 'user_id' => $row->user_id->user_id,
                 //'user_name' => $row->user_id->name,
-                'date' => Carbon::parse($row->server_datetime)->toDateString(),
-                'time' => Carbon::parse($row->server_datetime)->toTimeString(),
-                'tna_key' => $row->tna_key
+                'date' => Carbon::parse($fecha)->toDateString(),
+                'time' => Carbon::parse($fecha)->toTimeString(),
+                'tna_key' => $row->tna_key,
+                'biostar_id'=> $row->id
             ];
 
             $lEvents[] = $checada;
@@ -265,12 +273,17 @@ class biostarController extends Controller
                 if(count($employee_id) == 0){
                     continue;
                 }
+                $repetido = DB::table('registers')->where('biostar_id',$lEvents[$i]->biostar_id)->get();
+                if(count($repetido) != 0){
+                    continue;
+                }
                 $register = new register();
                 $register->employee_id = $employee_id[0]->id;
                 $register->date = $lEvents[$i]->date;
                 $register->time = $lEvents[$i]->time;
                 $register->type_id = $lEvents[$i]->tna_key;
                 $register->form_creation_id = 4;
+                $register->biostar_id = $lEvents[$i]->biostar_id;
                 $register->save();  
 
                 

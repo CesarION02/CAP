@@ -69,4 +69,18 @@ class SyncController extends Controller
             return 0;
         }
     }
+
+    public function dateSyncView(){
+        return view('sync.syncView');
+    }
+
+    public function dateSyncProcess(Request $request){
+        $sincronizado = \App\Http\Controllers\biostarController::insertEvents($request->date);
+        if ($sincronizado != 0) {
+            return redirect()->back()->with('mensaje', 'Sincronizado BioStar');
+        }
+        else {
+            return redirect()->back()->with('mensaje', 'No se pudo sincronizar BioStar');
+        }       
+    }
 }

@@ -729,7 +729,7 @@ class ReporteController extends Controller
             
         }
         $prueba = SInfoWithPolicy::preProcessInfo($sStartDate,$year,$sEndDate,$payWay);
-        SHolidayWork::holidayworked($sStartDate,$sEndDate);
+        //SHolidayWork::holidayworked($sStartDate,$sEndDate);
         
         //$lEmployees[0] = 32; 
         $lRows = DB::table('processed_data')
