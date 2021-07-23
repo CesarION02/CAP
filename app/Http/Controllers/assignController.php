@@ -89,14 +89,14 @@ class assignController extends Controller
                 $asignacion->schedule_template_id = $request->horario;
                 $asignacion->start_date = $start;
                 $asignacion->end_date = $end;
-                $asignacion->created_by = 1;
-                $asignacion->updated_by = 1;
+                $asignacion->created_by = session()->get('user_id');
+                $asignacion->updated_by = session()->get('user_id');
                 $asignacion->save();
     
             }else{
                 $grupo = new group_assign();
-                $grupo->created_by = 1;
-                $grupo->updated_by = 1;
+                $grupo->created_by = session()->get('user_id');
+                $grupo->updated_by = session()->get('user_id');
                 $grupo->save();
     
                 for($y = 0 ; count($empleados) > $y ; $y++){
@@ -118,8 +118,8 @@ class assignController extends Controller
             $asignacion->schedule_template_id = $request->horario;
             $asignacion->start_date = $start;
             $asignacion->end_date = $end;
-            $asignacion->created_by = 1;
-            $asignacion->updated_by = 1;
+            $asignacion->created_by = session()->get('user_id');
+            $asignacion->updated_by = session()->get('user_id');
             $asignacion->save();   
         }
         
@@ -196,13 +196,13 @@ class assignController extends Controller
                     $asignacion->schedule_template_id = $request->horario;
                     $asignacion->start_date = $start;
                     $asignacion->end_date = $end;
-                    $asignacion->created_by = 1;
-                    $asignacion->updated_by = 1;
+                    $asignacion->created_by = session()->get('user_id');
+                    $asignacion->updated_by = session()->get('user_id');
                     $asignacion->save();    
                 }else{
                     $grupo = new group_assign();
-                    $grupo->created_by = 1;
-                    $grupo->updated_by = 1;
+                    $grupo->created_by = session()->get('user_id');
+                    $grupo->updated_by = session()->get('user_id');
                     $grupo->save();
     
                     for($y = 0 ; count($empleados) > $y ; $y++){
@@ -212,8 +212,8 @@ class assignController extends Controller
                         $asignacion->end_date = $end;
                         $asignacion->schedule_template_id = $request->horario;
                         $asignacion->group_assign_id = $grupo->id;
-                        $asignacion->created_by = 1;
-                        $asignacion->updated_by = 1;
+                        $asignacion->created_by = session()->get('user_id');
+                        $asignacion->updated_by = session()->get('user_id');
                         $asignacion->save();
                     }
                 }
@@ -228,8 +228,8 @@ class assignController extends Controller
                     $asignacion->schedule_template_id = $request->horario;
                     $asignacion->start_date = $start;
                     $asignacion->end_date = $end;
-                    $asignacion->created_by = 1;
-                    $asignacion->updated_by = 1;
+                    $asignacion->created_by = session()->get('user_id');
+                    $asignacion->updated_by = session()->get('user_id');
                     $asignacion->save();    
                 }else{
                     for($y = 0 ; count($empleados) > $y ; $y++){
@@ -239,8 +239,8 @@ class assignController extends Controller
                         $asignacion->end_date = $end;
                         $asignacion->schedule_template_id = $request->horario;
                         $asignacion->group_assign_id = $request->group;
-                        $asignacion->created_by = 1;
-                        $asignacion->updated_by = 1;
+                        $asignacion->created_by = session()->get('user_id');
+                        $asignacion->updated_by = session()->get('user_id');
                         $asignacion->save();
                     }      
                 }
@@ -251,8 +251,7 @@ class assignController extends Controller
             $assign->schedule_template_id = $request->horario;
             $assign->start_date = $start;
             $assign->end_date = $end;
-            $assign->created_by = 1;
-            $assign->updated_by = 1;
+            $assign->updated_by = session()->get('user_id');
             $assign->save();       
         } 
         
@@ -382,8 +381,8 @@ class assignController extends Controller
                         $oNew->end_date = $newDate;
                         $oNew->is_delete = false;
                         $oNew->order_gs = 0;
-                        $oNew->created_by = 1;
-                        $oNew->updated_by = 1;
+                        $oNew->created_by = session()->get('user_id');
+                        $oNew->updated_by = session()->get('user_id');
 
                         $oNew->save();
                     }
@@ -416,7 +415,7 @@ class assignController extends Controller
                 $toReplace = json_decode($request->to_change);
                 $oToReplace = assign_schedule::find($toReplace->id);
                 $oToReplace->is_delete = true;
-                $oToReplace->updated_by = 1;
+                $oToReplace->updated_by = session()->get('user_id');
                 $oToReplace->save();
 
             case 0:
@@ -432,8 +431,8 @@ class assignController extends Controller
                 $obj->group_schedules_id = env('GRP_SCHDLS_SATUDY', 0);
                 $obj->order_gs = 0;
                 $obj->is_delete = false;
-                $obj->created_by = 1;
-                $obj->updated_by = 1;
+                $obj->created_by = session()->get('user_id');
+                $obj->updated_by = session()->get('user_id');
 
                 $resp = $obj->save();
                 break;
@@ -458,7 +457,7 @@ class assignController extends Controller
         }
 
         $oAssing->employee_id = $request->emply_id;
-        $oAssing->updated_by = 1;
+        $oAssing->updated_by = session()->get('user_id');
         $oAssing->save();
 
         $lSchedules = $this->getData();
@@ -475,7 +474,7 @@ class assignController extends Controller
         }
 
         $oAssing->is_delete = true;
-        $oAssing->updated_by = 1;
+        $oAssing->updated_by = session()->get('user_id');
         $oAssing->save();
 
         // $lSchedules = $this->getData();
@@ -507,7 +506,7 @@ class assignController extends Controller
                             ->where('schedule_template_id', env('TMPLTE_SATURDAYS', 0))
                             ->where('group_schedules_id', env('GRP_SCHDLS_SATUDY', 0))
                             ->orderBy('start_date', 'ASC')
-                            ->orderBy('order_gs', 'ASC')
+                            //->orderBy('order_gs', 'ASC')
                             ->get();
 
         $holAuxs = DB::table('holidays_aux')
@@ -594,6 +593,40 @@ class assignController extends Controller
         return view('assign.programming')->with('employees',$employee)->with('schedule_template',$schedule_template)->with('idGroup',$id);   
     }
 
+    public function dayProgramming($id){
+        if (session()->get('rol_id') != 1){
+            $dgu = DB::table('group_dept_user')
+                    ->where('user_id',$id)
+                    ->select('groupdept_id AS id')
+                    ->get();
+            $Adgu = [];
+            for($i=0;count($dgu)>$i;$i++){
+                $Adgu[$i]=$dgu[$i]->id;
+            }
+            $employee = DB::table('employees')
+                    ->join('jobs','jobs.id','=','employees.job_id')
+                    ->join('departments','departments.id','=','jobs.department_id')
+                    ->join('department_group','department_group.id','=','departments.dept_group_id')
+                    ->whereIn('departments.dept_group_id',$Adgu)
+                    ->where('employees.is_active',1)
+                    ->select('employees.id AS id','employees.name AS name', 'department_group.name AS nameGroup')
+                    ->get();
+        }else{
+            $employee = DB::table('employees')
+                    ->join('jobs','jobs.id','=','employees.job_id')
+                    ->join('departments','departments.id','=','jobs.department_id')
+                    ->join('department_group','department_group.id','=','departments.dept_group_id')
+                    ->where('employees.is_active',1)
+                    ->orderBy('employees.name')
+                    ->select('employees.id AS id','employees.name AS name', 'department_group.name AS nameGroup')
+                    ->get();    
+        }
+        $iTemplateId = env('TMPLTE_SATURDAYS', 0);
+        $schedule_template = schedule_template::where('is_delete','0')->where('id','=',$iTemplateId)->orderBy('name','ASC')->pluck('id','name');
+
+        return view('assign.dayProgramming')->with('employees',$employee)->with('schedule_template',$schedule_template)->with('idGroup',$id);   
+    }
+
     public function schedule_template(){
         $iTemplateId = env('TMPLTE_SATURDAYS', 0);
         $schedule_template = DB::table('schedule_template')
@@ -620,8 +653,8 @@ class assignController extends Controller
             $group = new groupSchedule();
             $group->name = $request->nameGroup;
             $group->delete = false;
-            $group->created_by = 1;
-            $group->updated_by = 1;
+            $group->created_by = session()->get('user_id');
+            $group->updated_by = session()->get('user_id');
             $group->save();
             $group_num = $group->id;
         }
@@ -636,11 +669,37 @@ class assignController extends Controller
             $asignacion->end_date = $end;
             $asignacion->order_gs = $request->$orden;
             $asignacion->group_schedules_id = $group_num;
-            $asignacion->created_by = 1;
-            $asignacion->updated_by = 1;
+            $asignacion->created_by = session()->get('user_id');
+            $asignacion->updated_by = session()->get('user_id');
             $asignacion->save();
         } 
         $url =  'assigns/viewProgramming';
+        
+        return redirect($url)->with('mensaje','Asignación fue creada con éxito');
+    }
+
+    public function guardarDayprogram(Request $request){
+        $start = null;
+        $end = null;
+        $orden = null;
+        $group_num = null;
+
+        if($request->start_date != ''){
+            $start = $request->start_date;
+            $end = $request->end_date;
+        }
+            
+        $asignacion = new assign_schedule();
+        $asignacion->employee_id = $request->empleado;
+        $asignacion->schedule_template_id = $request->horario;
+        $asignacion->start_date = $start;
+        $asignacion->end_date = $start;
+        $asignacion->order_gs = 1;
+        $asignacion->created_by = session()->get('user_id');
+        $asignacion->updated_by = session()->get('user_id');
+        $asignacion->save();
+         
+        $url =  'assigns/viewDayProgram';
         
         return redirect($url)->with('mensaje','Asignación fue creada con éxito');
     }
@@ -672,6 +731,23 @@ class assignController extends Controller
                 ->get(); 
         }
         
+
+        return view('assign.editprogramming')->with('assigns',$assigns);       
+
+    }
+
+    public function editDayProgramm ($id){
+        $grupo = assign_schedule::find($id);
+        $assigns = DB::table('schedule_assign')
+                ->join('employees','employees.id','=','schedule_assign.employee_id')
+                ->join('schedule_template','schedule_template.id','=','schedule_assign.schedule_template_id')
+                ->join('schedule_day','schedule_day.schedule_template_id','=','schedule_template.id')
+                ->where('schedule_assign.id',$id)
+                ->select('employees.id AS id','employees.name AS name','schedule_assign.start_date AS startDate','schedule_assign.end_date AS endDate','schedule_day.day_name AS dayName','schedule_day.entry AS entry','schedule_day.departure AS departure','schedule_template.name AS templateName','schedule_assign.order_gs AS orden','schedule_assign.id AS idAssign')
+                ->orderBy('employees.id')
+                ->orderBy('schedule_assign.order_gs')
+                ->orderBy('schedule_day.day_num')
+                ->get(); 
 
         return view('assign.editprogramming')->with('assigns',$assigns);       
 
@@ -793,6 +869,55 @@ class assignController extends Controller
                 GROUP By a.employee_id");    
         }
         return view('assign.showprogramming')->with('assigns',$assigns)->with('dgroup',$usuario[0]->id);
+    }
+
+    public function viewDayprogram (){
+
+        $iTemplateId = env('TMPLTE_SATURDAYS', 0);
+        if (session()->get('rol_id') != 1){
+            $numero = session()->get('name');
+            $usuario = DB::table('users')
+                    ->where('name',$numero)
+                    ->get();
+            $dgu = DB::table('group_dept_user')
+                    ->where('user_id',$usuario[0]->id)
+                    ->select('groupdept_id AS id')
+                    ->get();
+            $Adgu = [];
+            $adguString="";
+            for($i=0;count($dgu)>$i;$i++){
+                $Adgu[$i]=$dgu[$i]->id;
+                
+            }
+                $assigns = DB::table('schedule_assign')
+                                ->join('employees','employees.id','=','schedule_assign.employee_id')
+                                ->join('schedule_template', 'schedule_template.id','=','schedule_assign.schedule_template_id')
+                                ->join('departments','departments.id','=','employees.department_id')
+                                ->join('department_group','departments.dept_group_id','=','department_group.id')
+                                ->where('employees.is_active',1)
+                                ->where('schedule_assign.is_delete',0)
+                                ->where('schedule_assign.schedule_template_id',$iTemplateId)
+                                ->whereIn('department_group.id',$Adgu)
+                                ->select('employees.name AS nombreEmpleado','schedule_assign.start_date AS fecha_inicio','schedule_template.name AS nombreHorario','schedule_assign.id AS id')
+                                ->get();
+        }else{
+            $numero = session()->get('name');
+            $usuario = DB::table('users')
+                    ->where('name',$numero)
+                    ->get();
+            
+                    $assigns = DB::table('schedule_assign')
+                    ->join('employees','employees.id','=','schedule_assign.employee_id')
+                    ->join('schedule_template', 'schedule_template.id','=','schedule_assign.schedule_template_id')
+                    ->join('departments','departments.id','=','employees.department_id')
+                    ->join('department_group','departments.dept_group_id','=','department_group.id')
+                    ->where('employees.is_active',1)
+                    ->where('schedule_assign.is_delete',0)
+                    ->where('schedule_assign.schedule_template_id',$iTemplateId)
+                    ->select('employees.name AS nombreEmpleado','schedule_assign.start_date AS fecha_inicio','schedule_template.name AS nombreHorario','schedule_assign.id AS id')
+                    ->get();    
+        }
+        return view('assign.dayprogramm')->with('assigns',$assigns)->with('dgroup',$usuario[0]->id);
     }
 
     public function viewSpecificDate () {

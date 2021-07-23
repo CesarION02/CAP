@@ -136,6 +136,8 @@ Route::delete('company/{id}', 'companyController@destroy')->name('delete_company
 
 /* RUTAS DE SINCRONIZACIÓN */
 Route::get('/syncronize', 'SyncController@toSyncronize')->name('syncErp');
+Route::get('/syncBiostar','SyncController@dateSyncView')->name('fecha_sincronizacion');
+Route::post('/syncBiostar/date','SyncController@dateSyncProcess')->name('sincronizar_biostar');
 
 /* RUTAS DE EMPLEADOS */
 Route::delete('employees/terminarconfiguracion/{id}', 'employeeController@confirmarConfiguracion')->name('terminar_configurar');
@@ -202,14 +204,18 @@ Route::delete('week/{id}', 'weekController@destroy')->name('eliminar_semana');
 /* RUTAS DE ASIGNACION HORARIOS */
 Route::get('assign/programming/schedule_template','assignController@schedule_template')->name('agregar');
 Route::get('assigns/viewProgramming','assignController@viewProgramming')->name('index_programacion');
+Route::get('assigns/viewDayProgram','assignController@viewDayProgram')->name('index_programacion_dia');
 Route::get('assign/showProgramming/{id}','assignController@editProgramming')->name('editar_programacion');
+Route::get('assign/editDayProgramm/{id}','assignController@editDayProgramm')->name('editar_programacion_dia');
 Route::get('assign/specificDate/','assignController@viewSpecificDate')->name('fecha_especifica');
 Route::post('assign/mostrarFecha', 'assignController@mostrarFecha')->name('mostrar_fecha');
 Route::get('assign', 'assignController@index')->name('asignacion');
 Route::get('assign/create/{id}', 'assignController@create')->name('crear_asignacion');
 Route::get('assign/programming/{id}', 'assignController@programming')->name('programar');
+Route::get('assign/dayProgramming/{id}','assignController@dayProgramming')->name('programar_dia');
 Route::post('assign', 'assignController@store')->name('guardar_asignacion');
 Route::post('assign/guardar', 'assignController@guardar')->name('guardar');
+Route::post('assign/guardarDayprogram', 'assignController@guardarDayprogram')->name('guardar_dia_programado');
 Route::get('assign/{id}/edit', 'assignController@edit')->name('editar_asignacion');
 Route::put('assign/actualizar/{id}', 'assignController@actualizar')->name('actulizacion');
 Route::put('assign/{id}', 'assignController@update')->name('actualizar_asignacion');
@@ -282,6 +288,10 @@ Route::get('incidents/{id}/edit', 'incidentController@edit')->name('editar_incid
 Route::put('incidents/{id}', 'incidentController@update')->name('actualizar_incidente');
 Route::delete('incidents/{id}', 'incidentController@destroy')->name('eliminar_incidente');
 
+/* DIAS OTORGADOS */
+Route::get('daygranted', 'daygrantedController@index')->name('diaotorgado');
+Route::get('daygranted/{id}/edit', 'daygrantedController@edit')->name('editar_diaotorgado');
+Route::put('daygranted/{id}', 'daygrantedController@update')->name('actualizar_diaotorgado');
 
 /* RUTAS DIAS FESTIVOS */
 Route::get('holidays', 'holidayController@index')->name('festivo');
