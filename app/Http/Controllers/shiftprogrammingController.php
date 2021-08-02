@@ -521,7 +521,8 @@ class shiftprogrammingController extends Controller
                 $numTurno = count($workshifts);
                 $tamañoCol = 60/$numTurno;
                 for( $y = 0 ; $numTurno > $y ; $y++ ){
-                    PDF::Cell($tamañoCol,6,$workshifts[$y]->nameWork,1,false,'C',0,'',1,false,'M','M');
+
+                    PDF::Cell($tamañoCol,6,$workshifts[$y]->nameWork.' / '.substr($workshifts[$y]->entry, 0, -3).' '.substr($workshifts[$y]->departure, 0, -3),1,false,'C',0,'',1,false,'M','M');
                 }
                 $empleados = DB::table('week')
                                 ->join('week_department','week.id','=','week_department.week_id')
@@ -537,6 +538,7 @@ class shiftprogrammingController extends Controller
                 $renglones = 2;
                 $avance+=6;
                 $auxAvance = $avance;
+                
                 for( $z = 0 ; count($job) > $z ; $z++ ){
                     $ejeXAux = $ejeX;
                     
@@ -546,13 +548,17 @@ class shiftprogrammingController extends Controller
                     PDF::SetFont('helvetica','B',9);
                     PDF::Cell(60,6,$job[$z]->nameJob,1,false,'C',0,'',1,false,'M','M');
                     //PDF::Ln();
+                    
                     $auxAvance+=6;
                     PDF::SetXY($ejeXAux,$auxAvance);
                     $renglones++;
                     $contEmpleados=0;
                     $contadorRenglones=0;
                     $auxContRen = 0;
+                    $numEmpleados = 0;
+                    $numEmpleadosAnterior = 0;
                     for( $j = 0 ; $numTurno > $j ; $j++){
+                        $numEmpleados = 0;
                         if($j!=0){
                         $auxAvance = $auxAvance - ($contEmpleados*6);}
                         $contEmpleados = 0;
@@ -566,17 +572,23 @@ class shiftprogrammingController extends Controller
                                     PDF::Cell($tamañoCol,6,$empleados[$i]->nameEmployee,1,false,'C',0,'',1,false,'M','M');   
                                 }
                                     
-                                $renglones++;
+                                //$renglones++;
                                 $auxAvance+=6;
                                 $contEmpleados++;
                                 $contadorRenglones++;
+                                $numEmpleados++;
                             }
                         }
+                        if($numEmpleados > $numEmpleadosAnterior){ 
+                            $numEmpleadosAnterior = $numEmpleados;
+                        }
+
                         if($contadorRenglones > $auxContRen ){$auxContRen = $contadorRenglones;}
                         $contadorRenglones=0;
                         $ejeXAux+=$tamañoCol;
                         
                     }
+                    $renglones += $numEmpleadosAnterior;
                     $auxAvance = $auxAvance - ($contEmpleados*6);
                     $auxAvance = $auxAvance+($auxContRen*6);
                 }   
@@ -587,7 +599,7 @@ class shiftprogrammingController extends Controller
             }            
             if($ejeX > 200){
 
-                $ejeY = $ejeY + ($auxY*5);
+                $ejeY = $ejeY + ($auxY*6) +6;
                 $auxY = 0;
                 $ejeX = 10;
             }
