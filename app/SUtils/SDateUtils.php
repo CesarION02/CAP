@@ -182,6 +182,7 @@ class SDateUtils {
                 $inicioAux = DB::table('hrs_prepay_cut')
                 //->where('year', $final[0]->year)
                 ->where('num', ($final[0]->num)-1)
+                ->where('year',$final[0]->year)
                 ->select('dt_cut AS cut')
                 ->get(); 
 

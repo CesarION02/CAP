@@ -507,7 +507,7 @@ class SInfoWithPolicy{
                                     }          
                                     */
                                             
-                                    $lRows[$j]->extraTripleMinsNoficial = $horasFueraLimite*60;
+                                    $lRows[$j]->extraDoubleMinsNoficial = $horasFueraLimite*60;
                                 //si no se pasa continua normal
                                 }else{
                                     $sumaHoras = $sumaHorasAuxiliar;
@@ -551,7 +551,7 @@ class SInfoWithPolicy{
                                     $lRows[$j]->extraDoubleMinsNoficial = 0;
                                 } 
                                 */
-                                $lRows[$j]->extraTripleMinsNoficial = $horasCompletas * 60;     
+                                $lRows[$j]->extraDoubleMinsNoficial = $horasCompletas * 60;     
                             }  
                             //si tiene menos de una hora de tiempo extra
                         }else{
@@ -566,11 +566,11 @@ class SInfoWithPolicy{
                                         $sumaHoras = $limitHours;
                                         $lRows[$j]->extraDoubleMins = 30;
                                         $lRows[$j]->extraTripleMins = 0;
-                                        $lRows[$j]->extraTripleMinsNoficial = 30;
+                                        $lRows[$j]->extraDoubleMinsNoficial = 30;
                                     }else{
                                         $lRows[$j]->extraDoubleMins = 60;
                                         $lRows[$j]->extraTripleMins = 0;
-                                        $lRows[$j]->extraTripleMinsNoficial = 0; 
+                                        $lRows[$j]->extraDoubleMinsNoficial = 0; 
                                         $sumaHoras = $sumaHoras + 1;   
                                     }
                                     /*
@@ -596,7 +596,7 @@ class SInfoWithPolicy{
                                         $lRows[$j]->extraDoubleMinsNoficial = 0;
                                     }
                                     */ 
-                                    $lRows[$j]->extraTripleMinsNoficial = 60; 
+                                    $lRows[$j]->extraDoubleMinsNoficial = 60; 
                                 }
                                 //si supera los limites para ser media hora
                             }else if( $minutosExtra >= $initialLimitHalf && $initialLimitHour >= $minutosExtra ){
@@ -651,7 +651,7 @@ class SInfoWithPolicy{
                                 if( $sumaHoras < $limitHours ){
                                     $lRows[$j]->extraDoubleMins = 30;
                                     $lRows[$j]->extraTripleMins = 0;
-                                    $lRows[$j]->extraTripleMinsNoficial = 0; 
+                                    $lRows[$j]->extraDoubleMinsNoficial = 0; 
                                     $sumaHoras = $sumaHoras + 0.5;
                                     if((($sumaHoras*60) % 60) != 0){
                                         $diasConMediaHora[$contadorDias] = $j;
@@ -660,7 +660,7 @@ class SInfoWithPolicy{
                                 }else{
                                     $lRows[$j]->extraDoubleMins = 0;
                                     $lRows[$j]->extraTripleMins = 0;
-                                    $lRows[$j]->extraTripleMinsNoficial = 30;
+                                    $lRows[$j]->extraDoubleMinsNoficial = 30;
                                 }
                             }else{
                                 $lRows[$j]->extraDoubleMins = 0;
@@ -674,7 +674,7 @@ class SInfoWithPolicy{
                                     $lRows[$j]->extraDoubleMinsNoficial = 0;
                                 }
                                 */ 
-                                $lRows[$j]->extraTripleMinsNoficial = 0;
+                                $lRows[$j]->extraDoubleMinsNoficial = 0;
                             }
                         }        
                     /*
@@ -1221,8 +1221,7 @@ class SInfoWithPolicy{
 
       public static function restDayBi($lRows,$inicio,$fin,$semana,$year,$employee,$contador){
         $final = DB::table('week_cut')
-            ->where('num','=',$semana)
-            ->where('year','=',$year)
+            ->where('id','=',$semana)
             ->select('ini AS inicio', 'fin AS final')
             ->get();
         $banderaAjuste = 0;
@@ -1291,6 +1290,7 @@ class SInfoWithPolicy{
                 $auxCorrectos = 0;
                 $contadorAusencia = 0;
                 $contadorSinextra = 0;
+                $contadorHoliday = 0;
                 $i = $contador[0];
                 $inicioContador = $contador[0];
                 $aux = 1;
@@ -1661,7 +1661,7 @@ class SInfoWithPolicy{
                 $empleados = DB::table('employees')
                                 ->where('is_active','=',1)
                                 ->where('way_pay_id','=',2)
-                                //->where('id',1227)
+                                //->where('id',49)
                                 ->orderBy('id')
                                 ->select('id AS id','policy_extratime_id AS extratime')
                                 ->get();
@@ -1701,7 +1701,7 @@ class SInfoWithPolicy{
                 $empleados = DB::table('employees')
                                 ->where('is_active','=',1)
                                 ->where('way_pay_id','=',1)
-                                //->where('id',21)
+                                //->where('id',48)
                                 ->where('department_id','!=',$config->dept_foraneo)
                                 ->where('job_id','!=',$config->job_foraneo)
                                 ->orderBy('id')
@@ -1745,16 +1745,16 @@ class SInfoWithPolicy{
                         $extratime = $empleados[$j]->extratime;
                         $lRows = SInfoWithPolicy::standardization($quincenasInicio[$i],$quincenas[$i]->cut,$sTypePay,$empl);
                         if(count($lRows) != 0){
-                        $lRows = SInfoWithPolicy::handlingHours($lRows,$diferencia,$extratime);
-                        //$lRows = SInfoWithPolicy::restDay($lRows,$diferencia);
-                        $semanas = SDateUtils::separateBiweekly($quincenas[$i]->id);
-                        for ( $x = 0 ; count($semanas) > $x ; $x++ ){
-                            $contador = SInfoWithPolicy::restDayBi($lRows,$quincenasInicio[$i],$quincenas[$i]->cut,$semanas[$x],$iYear,$empl[0],$contador);
-                        }
-                        $contador[0] = 0;
-                        $contador[1] = 0;
-                        $contador[2] = 0;
-                        SInfoWithPolicy::guardarProcesamiento($empleados[$j]->id,$lRows,$quincenas[$i]->id,$iYear,1);
+                            $lRows = SInfoWithPolicy::handlingHours($lRows,$diferencia,$extratime);
+                            //$lRows = SInfoWithPolicy::restDay($lRows,$diferencia);
+                            $semanas = SDateUtils::separateBiweekly($quincenas[$i]->id);
+                            for ( $x = 0 ; count($semanas) > $x ; $x++ ){
+                                $contador = SInfoWithPolicy::restDayBi($lRows,$quincenasInicio[$i],$quincenas[$i]->cut,$semanas[$x],$iYear,$empl[0],$contador);
+                            }
+                            $contador[0] = 0;
+                            $contador[1] = 0;
+                            $contador[2] = 0;
+                            SInfoWithPolicy::guardarProcesamiento($empleados[$j]->id,$lRows,$quincenas[$i]->id,$iYear,1);
                         }
                     }
 
@@ -1774,10 +1774,10 @@ class SInfoWithPolicy{
             $processed = new processed_data();
 
             $processed->employee_id = $lRows[$i]->idEmployee;
-            $processed->inDate = $lRows[$i]->inDate;
+            $processed->inDate = $lRows[$i]->inDateTime;
             $processed->inDateTime = $lRows[$i]->inDateTime;
             $processed->inDateTimeNoficial = $lRows[$i]->inDateTimeNoficial;
-            $processed->outDate = $lRows[$i]->outDate;
+            $processed->outDate = $lRows[$i]->outDateTime;
             $processed->outDateTime = $lRows[$i]->outDateTime;
             $processed->outDateTimeNoficial = $lRows[$i]->outDateTimeNoficial;
             $processed->diffMins = $lRows[$i]->diffMins;

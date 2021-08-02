@@ -116,19 +116,20 @@ class biostarController extends Controller
     {
         $data = $this->getUsers();
 
-        $filterType = $request->filter_users == null ? 1 : $request->filter_users;
+        //$filterType = $request->filter_users == null ? 1 : $request->filter_users;
 
         $usrCollection = collect($data->UserCollection->rows);
 
         $usrCollection = $usrCollection->where('user_id', '!=', 1);
         
-        if ($filterType != 0) {
-            $usrCollection = $usrCollection->filter(function ($value, $key) {
-                return $value->fingerprint_template_count == 0 || $value->face_count == 0;
-            });
-        }
+        //if ($filterType != 0) {
+        //    $usrCollection = $usrCollection->filter(function ($value, $key) {
+        //        return $value->fingerprint_template_count == 0 || $value->face_count == 0;
+        //    });
+        //}
         
         $lUsers = [];
+        $idUsers = [];
         foreach ($usrCollection as $row) {
             $usr = (object) [
                 'id_user' => $row->user_id,
@@ -137,12 +138,27 @@ class biostarController extends Controller
                 'has_face' => $row->face_count > 0,
                 'has_card' => $row->card_count > 0
             ];
+            $idUsers [] = $row->user_id;
 
             $lUsers[] = $usr;
         }
+        $userOutBiostar = DB::table('employees')->where('biostar_id',null)->where('is_active',1)->where('department_id','!=',100)->get();
+        $contador = count($lUsers);
+        foreach ($userOutBiostar AS $row) {
+            $usr = (object) [
+                'id_user' => 'na',
+                'user_name' => $row->name,
+                'has_fingerprint' => 0,
+                'has_face' => 0,
+                'has_card' => 0
+            ];
+            
+            $lUsers[$contador] = $usr;
+            $contador++;
+        }
+
 
         return view('biostar.indexhc')
-                            ->with('filterType', $filterType)
                             ->with('lUsers', $lUsers);
     }
 
@@ -273,7 +289,7 @@ class biostarController extends Controller
                 if(count($employee_id) == 0){
                     continue;
                 }
-                $repetido = DB::table('registers')->where('biostar_id',$lEvents[$i]->biostar_id)->get();
+                $repetido = DB::table('registers')->where('biostar_id',$lEvents[$i]->biostar_id)->where('is_delete',0)->get();
                 if(count($repetido) != 0){
                     continue;
                 }

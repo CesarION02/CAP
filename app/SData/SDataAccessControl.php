@@ -55,7 +55,7 @@ class SDataAccessControl {
     public static function getEvents($id, $dtDate)
     {
         $lEvents = [];
-        $holidays = SDataProcess::getHolidays($id, $dtDate);
+        $holidays = SDataProcess::getHolidays($dtDate);
 
         if ($holidays != null) {
             $num = sizeof($holidays);

@@ -76,7 +76,16 @@ Reporte Entradas/Salidas
                             </select>
                         </div>
                     </div>
+
+                    <br>
+                    <div class="row">
+                        <div class="col-md-5 col-md-offset-1">
+                            <label for="start_date">Checadas sin filtro:</label>
+                            <input id="cbx1" type="checkbox" name="checadasbrutas" value="checadasbrutas">
+                        </div>
+                    </div>
                 </div>
+                
                 <div class="box-footer">
                     <div class="col-lg-3"></div>
                     <div class="col-lg-6">

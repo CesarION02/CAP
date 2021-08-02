@@ -17,11 +17,8 @@
                 <div class="row">
                     <form action="{{ route('biostar_users_index') }}">
                         <div class="col-md-3 col-md-offset-9">
-                            <input type="hidden" name="filter_users" id="filter-users" value="{{ $filterType }}">
-                            <div class="btn-group" role="group" aria-label="...">
-                                <button type="submit" id="btnSin" onclick="setFilterUsers('1')" class="btn btn-default">Faltantes</button>
-                                <button type="submit" id="btnAll" onclick="setFilterUsers('0')" class="btn btn-default">Todos</button>
-                            </div>
+                            
+                           
                         </div>
                     </form>
                 </div>
@@ -105,31 +102,7 @@
         });
     </script>
 
-    <script>
-        function setFilterUsers(filterType) {
-            document.getElementById("filter-users").value = filterType;
-        }
-
-        function setActiveClass(filterType) {
-            let ft = filterType + "";
-            switch (ft) {
-                case "1":
-                    var element = document.getElementById("btnSin");
-                    element.classList.add("active");
-                    break;
-                case "0":
-                    var element = document.getElementById("btnAll");
-                    element.classList.add("active");
-                    break;
-            
-                default:
-                    break;
-            }
-        }
-
-        let filterType = <?php echo json_encode($filterType) ?>;
-        setActiveClass(filterType);
-    </script>
+    
 
     <script>
         function GlobalData () {

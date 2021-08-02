@@ -271,6 +271,7 @@ class SDelayReportUtils {
                                 ->leftJoin('jobs AS j', 'j.id', '=', 'e.job_id')
                                 ->leftJoin('departments AS d', 'd.id', '=', 'j.department_id')
                                 ->whereBetween('r.date', [$startDate, $endDate])
+                                ->where('r.is_delete',0)
                                 // ->select('r.*', 'd.id AS dept_id', 'e.num_employee', 'e.name', 'e.is_overtime')
                                 ->select('r.*', 'd.id AS dept_id', 'e.num_employee', 'e.name', 'e.policy_extratime_id', 'e.external_id')
                                 ->orderBy('employee_id', 'ASC')

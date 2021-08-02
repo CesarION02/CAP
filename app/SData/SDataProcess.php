@@ -772,7 +772,7 @@ class SDataProcess {
                 $sOutDt = Carbon::parse($oRow->outDateTimeSch);
             }
 
-            $holidays = SDataProcess::getHolidays($oRow->idEmployee, $sOutDt->toDateString());
+            $holidays = SDataProcess::getHolidays($sOutDt->toDateString());
 
             if ($holidays == null) {
                 continue;
@@ -853,7 +853,7 @@ class SDataProcess {
         return $oRow;
     }
 
-    public static function getHolidays($idEmployee, $sDt)
+    public static function getHolidays($sDt)
     {
         /**
          * SELECT 
@@ -880,6 +880,8 @@ class SDataProcess {
 
         // \DB::enableQueryLog();
 
+        // Consulta anterior para ingresar días festivos a la prenómina 01-06-2021
+        /*
         $holidays = \DB::table('holiday_assign AS ha')
                         ->join('holidays AS h', 'ha.holiday_id', '=', 'h.id')
                         ->leftJoin('areas AS a', 'ha.area_id', '=', 'a.id')
@@ -897,7 +899,16 @@ class SDataProcess {
                         })
                         ->distinct('h_id')
                         ->get();
+        */
 
+        // Consulta días festivos apartir de la fecha de la tabla holidays
+
+        $holidays = \DB::table('holidays AS h')
+                            ->select('h.id AS h_id', 'h.fecha', 'h.name')
+                            ->where('h.fecha', $sDt)
+                            ->where('h.is_delete', false)
+                            ->distinct('h_id')
+                            ->get();
         // dd(\DB::getQueryLog());
         
         return $holidays;

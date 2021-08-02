@@ -9,6 +9,7 @@ use App\Models\incidentDay;
 use App\SUtils\SDelayReportUtils;
 use App\Models\typeincident;
 use App\Models\employees;
+use App\Models\company;
 use App\Http\Requests\ValidacionTypeincident;
 
 class incidentController extends Controller
@@ -196,34 +197,35 @@ class incidentController extends Controller
                                 '1_9' => '18',
                             ];
         
-        $keys = [];
         foreach ($lAbsences as $jAbs) {
-            $keys[] = "".$jAbs->id_emp."_".$jAbs->id_abs."";
-        }
-        
-        $lCapAbss = incident::select('id', 'external_key')
-                                ->whereIn('external_key', $keys)
-                                ->pluck('id', 'external_key');
-
-        $this->employees = employees::select('id', 'external_id')
+            $this->employees = employees::select('id', 'external_id')
                             ->pluck('id', 'external_id');
-                            
-        foreach ($lAbsences as $jAbs) {
+            $lCapAbss = incident::select('incidents.id AS idincident', 'external_key','companies.id AS idcompany')
+                                ->join('companies','companies.id','=','incidents.company_id')
+                                ->where('external_key', "".$jAbs->id_emp."_".$jAbs->id_abs."")
+                                ->where('companies.db_name',$jAbs->company)
+                                ->get();
             try {
-                if (isset($lCapAbss[$jAbs->id_emp.'_'.$jAbs->id_abs])) {
-                    $id = $lCapAbss[$jAbs->id_emp.'_'.$jAbs->id_abs];
-                    $oIncident = $this->updIncident($jAbs, $id);
+                if(count($lCapAbss) >= 1){
+                        $id = $lCapAbss[0]->idincident;
+                        $company = $lCapAbss[0]->idcompany;
+                        $oIncident = $this->updIncident($jAbs, $id, $company);
+                }else{
+                    $lCapAbss = company::select('companies.id AS idcompany')
+                                ->where('companies.db_name',$jAbs->company)
+                                ->get();
+                    $company = $lCapAbss[0]->idcompany;    
+                    $oIncident = $this->insertIncident($jAbs,$company);
                 }
-                else {
-                    $oIncident = $this->insertIncident($jAbs);
-                }
-            }
-            catch (\Throwable $th) {
+
+                $this->saveDays($oIncident);
+            }catch (\Throwable $th) {
                 $error = $th;
             }
-
-            $this->saveDays($oIncident);
+            
         }
+        
+        
     }
 
     /**
@@ -233,7 +235,7 @@ class incidentController extends Controller
      * @param [type] $id
      * @return void
      */
-    private function updIncident($jAbs, $id)
+    private function updIncident($jAbs, $id, $company)
     {
         incident::where('id', $id)
                     ->update(
@@ -249,6 +251,7 @@ class incidentController extends Controller
                                 'nts' => $jAbs->notes,
                                 'employee_id' => $this->employees[$jAbs->id_emp],
                                 'is_delete' => $jAbs->is_deleted,
+                                'company_id' => $company,
                             ]
                         );
 
@@ -261,7 +264,7 @@ class incidentController extends Controller
      * @param [type] $jAbs
      * @return void
      */
-    private function insertIncident($jAbs)
+    private function insertIncident($jAbs, $company)
     {
         $abs = new incident();
 
@@ -279,6 +282,7 @@ class incidentController extends Controller
         $abs->is_delete = $jAbs->is_deleted;
         $abs->created_by = 1;
         $abs->updated_by = 1;
+        $abs->company_id = $company;
 
         $abs->save();
 
@@ -360,4 +364,5 @@ class incidentController extends Controller
             $oIncident->incidentDays()->saveMany($days);
         }
     }
+
 }

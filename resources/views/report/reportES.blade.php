@@ -31,6 +31,7 @@ Reporte Entradas/Salidas
                         </div>
                     </div>
                     <br>
+                    
                     <div class="row" v-if="oData.reportType == 1">
                         <div class="col-md-10 col-md-offset-1">
                             <label for="cars">Elige área(s):</label>
