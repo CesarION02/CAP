@@ -44,9 +44,10 @@ class assignController extends Controller
         FROM (
             SELECT start_date as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE is_delete = 0 AND schedule_template_id != ".$iTemplateId." ORDER BY p.employee_id, start_date DESC
         ) a
-        INNER JOIN departments b ON a.department_id = b.id
+        INNER JOIN employees b ON a.employee_id = b.id
+        INNER JOIN departments c ON b.department_id = c.id
         INNER JOIN schedule_template s ON a.schedule_template_id = s.id
-        GROUP By a.department_id");
+        GROUP By b.department_id");
 
 
         return view('assign.index', compact('datas'))->with('datasD',$datasDept);    
