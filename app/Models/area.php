@@ -17,4 +17,8 @@ class area extends Model
     public function holiday(){
         return $this->hasMany('App\Models\holidayassign');
     }
+
+    public function boss(){
+        return $this->belongsTo('App\Models\employees','boss_id');
+    }
 }

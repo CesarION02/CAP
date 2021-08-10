@@ -129,6 +129,7 @@
                         <tr>
                             <th>Área</th>
                             <th>Estado</th>
+                            <th>Encargado</th>
                             <th class="width70"></th>
                         </tr>
                     </thead>
@@ -140,6 +141,12 @@
                                 <td>Activo</td>
                             @else
                                 <td>Inactivo</td>
+                            @endif
+
+                            @if($data->boss == null)
+                                <td>No definido</td>
+                            @else
+                                <td>{{$data->boss->name}}</td>
                             @endif
                             <td>
                                 <a href="{{route('editar_area', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">

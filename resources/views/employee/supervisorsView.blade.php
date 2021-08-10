@@ -93,6 +93,9 @@ Mis colaboradores
                             <th>Número colaborador</th>
                             <th>Departamento CAP</th>
                             <th>Puesto</th>
+                            @if($rol == 12)
+                                <th>Politica de checado</th>
+                            @endif
                             <th class="width70"></th>
                         </tr>
                     </thead>
@@ -104,6 +107,9 @@ Mis colaboradores
                             <td>{{$employee->numEmployee}}</td>
                             <td>{{$employee->nameDepartment}}</td>
                             <td>{{$employee->nameJob}}</td>
+                            @if($rol == 12)
+                                <td>{{$employee->politica}}</td>
+                            @endif        
                             <td>
                                 <a href="{{route('editar_nombrecorto', ['id' => $employee->idEmployee])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
                                     <i class="fa fa-fw fa-pencil"></i>

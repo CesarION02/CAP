@@ -37,10 +37,10 @@
               <!-- Menu Footer-->
               <li class="user-footer">
                 <div class="pull-left">
-                  <a target="_blank" href="http://192.168.1.233:8080/dokuwiki/doku.php?id=start" class="btn btn-default btn-flat">Manual usuario</a>
+                  <a target="_blank" href="http://192.168.1.233:8080/dokuwiki/doku.php?id=start" class="btn btn-success btn-flat">Manual usuario</a>
                 </div>
                 <div class="pull-right">
-                  <a href="{{route('logout')}}" class="btn btn-default btn-flat">Salir</a>
+                  <a href="{{route('logout')}}" class="btn btn-success btn-flat">Salir</a>
                 </div>
               </li>
             </ul>

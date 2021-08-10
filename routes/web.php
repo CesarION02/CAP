@@ -292,6 +292,8 @@ Route::delete('incidents/{id}', 'incidentController@destroy')->name('eliminar_in
 Route::get('daygranted', 'daygrantedController@index')->name('diaotorgado');
 Route::get('daygranted/{id}/edit', 'daygrantedController@edit')->name('editar_diaotorgado');
 Route::put('daygranted/{id}', 'daygrantedController@update')->name('actualizar_diaotorgado');
+Route::get('daygranted/fechasholidayworked', 'daygrantedController@fechasholidayworked');
+Route::get('daygranted/generarholiday', 'daygrantedController@generarholiday')->name('generarholiday');
 
 /* RUTAS DIAS FESTIVOS */
 Route::get('holidays', 'holidayController@index')->name('festivo');

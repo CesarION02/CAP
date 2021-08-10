@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\area;
+use App\Models\employees;
 
 class areaController extends Controller
 {
@@ -29,6 +30,10 @@ class areaController extends Controller
                 $datas = area::orderBy('name')->get();
                 break;
         }
+
+        $datas->each(function($datas){
+            $datas->boss;
+        });
         
         return view('area.index', compact('datas'))->with('iFilter',$iFilter);
     }
@@ -40,7 +45,8 @@ class areaController extends Controller
      */
     public function create()
     {
-        return view('area.create');
+        $employees = employees::where('is_active','1')->orderBy('name','ASC')->pluck('id','name');
+        return view('area.create')->with('employees',$employees);
     }
 
     /**
@@ -80,8 +86,8 @@ class areaController extends Controller
     public function edit($id)
     {
         $data = area::findOrFail($id);
-        
-        return view('area.edit', compact('data'));
+        $employees = employees::where('is_active','1')->orderBy('name','ASC')->pluck('id','name');
+        return view('area.edit', compact('data'))->with('employees',$employees);
     }
 
     /**

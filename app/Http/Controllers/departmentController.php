@@ -24,6 +24,7 @@ class departmentController extends Controller
                 $datas->each(function($datas){
                     $datas->area;
                     $datas->rh;
+                    $datas->boss;
                 });
                 break;
             case 2:
@@ -31,6 +32,7 @@ class departmentController extends Controller
                 $datas->each(function($datas){
                     $datas->area;
                     $datas->rh;
+                    $datas->boss;
                 });
                 break;
             
@@ -39,6 +41,7 @@ class departmentController extends Controller
                 $datas->each(function($datas){
                     $datas->area;
                     $datas->rh;
+                    $datas->boss;
                 });
                 break;
         }
@@ -55,7 +58,8 @@ class departmentController extends Controller
     {
         $area = area::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
         $deptrhs = DepartmentRH::where('is_delete',0)->orderBy('name', 'ASC')->pluck('id','name');
-        return view('department.create')->with('areas',$area)->with('deptrhs',$deptrhs);
+        $employees = employees::where('is_active','1')->orderBy('name','ASC')->pluck('id','name');
+        return view('department.create')->with('areas',$area)->with('deptrhs',$deptrhs)->with('employees',$employees);
     }
 
     /**
@@ -96,7 +100,8 @@ class departmentController extends Controller
         $area = area::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
         $data = department::findOrFail($id);
         $deptrhs = DepartmentRH::where('is_delete',0)->orderBy('name', 'ASC')->pluck('id','name');
-        return view('department.edit', compact('data'))->with('areas',$area)->with('deptrhs',$deptrhs);
+        $employees = employees::where('is_active','1')->orderBy('name','ASC')->pluck('id','name');
+        return view('department.edit', compact('data'))->with('areas',$area)->with('deptrhs',$deptrhs)->with('employees',$employees);
     }
 
     /**

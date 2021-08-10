@@ -171,7 +171,7 @@ class ReporteController extends Controller
         $values = $request->vals;
         $startDate = $request->start_date;
         $endDate = $request->end_date;
-
+        
         DB::enableQueryLog();
 
         $register = DB::table('registers AS r')
@@ -196,7 +196,7 @@ class ReporteController extends Controller
                                     ->join('department_group AS dg', 'dg.id', '=', 'd.dept_group_id')
                                     ->whereIn('dg.id', $values)
                                     ->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id','dg.name AS groupname', 'e.external_id')
-                                    ->groupBy('date','type_id','e.name','e.num_employee')
+                                    ->groupBy('e.name','date','type_id','e.num_employee','a.name')
                                     ->orderBy('e.name')
                                     ->orderBy('date')
                                     ->orderBy('time')
@@ -207,7 +207,7 @@ class ReporteController extends Controller
                                     ->join('departments AS d', 'd.id', '=', 'j.department_id')
                                     ->whereIn('d.id', $values)
                                     ->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id','d.name AS depname', 'e.external_id')
-                                    ->groupBy('date','type_id','e.name','e.num_employee')
+                                    ->groupBy('e.name','date','type_id','e.num_employee','a.name')
                                     ->orderBy('e.name')
                                     ->orderBy('date')
                                     ->orderBy('time')
@@ -216,7 +216,7 @@ class ReporteController extends Controller
             case 4:
                 $register = $register->whereIn('e.id', $values)
                                     ->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id', 'e.external_id')
-                                    ->groupBy('date','type_id','e.name','e.num_employee')
+                                    ->groupBy('e.name','date','type_id','e.num_employee','a.name')
                                     ->orderBy('date')
                                     ->orderBy('e.name')
                                     ->orderBy('time');
@@ -224,7 +224,7 @@ class ReporteController extends Controller
             case 5:
                 $register = $register->whereIn('e.id', $values)
                                     ->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id', 'e.external_id')
-                                    ->groupBy('date','type_id','e.name','e.num_employee')
+                                    ->groupBy('e.name','date','type_id','e.num_employee','a.name')
                                     ->orderBy('date')
                                     ->orderBy('e.name')
                                     ->orderBy('time');
@@ -234,8 +234,10 @@ class ReporteController extends Controller
                 # code...
                 break;
         }
+        
 
         $register = $register->whereBetween('r.date', [$startDate, $endDate])
+                             ->where('registers.is_delete',0)
                              ->get();
 
         return view('report.reporteESView')
@@ -330,6 +332,12 @@ class ReporteController extends Controller
         $values = $request->vals;
         $startDate = $request->start_date;
         $endDate = $request->end_date;
+        $checadasbrutas = $request->checadasbrutas;
+        if($request->checadasbrutas != null){
+            $checadasbrutas = 1;
+        }else{
+            $checadasbrutas = 0;
+        }
 
         DB::enableQueryLog();
 
@@ -342,7 +350,6 @@ class ReporteController extends Controller
                                     ->join('departments AS d', 'd.id', '=', 'j.department_id')
                                     ->join('areas AS a', 'a.id', '=', 'd.area_id')
                                     ->whereIn('a.id', $values)
-                                    ->groupBy('e.name','date','type_id','e.num_employee','a.name')
                                     ->orderBy('date')
                                     ->orderBy('e.name')
                                     ->orderBy('time');
@@ -352,7 +359,6 @@ class ReporteController extends Controller
                                     ->join('departments AS d', 'd.id', '=', 'j.department_id')
                                     ->join('department_group AS dg', 'dg.id', '=', 'd.dept_group_id')
                                     ->whereIn('dg.id', $values)
-                                    ->groupBy('e.name','date','type_id','e.num_employee','a.name')
                                     ->orderBy('date')
                                     ->orderBy('e.name')
                                     ->orderBy('time');
@@ -361,14 +367,12 @@ class ReporteController extends Controller
                 $register = $register->join('jobs AS j', 'j.id', '=', 'e.job_id')
                                     ->join('departments AS d', 'd.id', '=', 'j.department_id')
                                     ->whereIn('d.id', $values)
-                                    ->groupBy('e.name','date','type_id','e.num_employee','a.name')
                                     ->orderBy('date')
                                     ->orderBy('e.name')
                                     ->orderBy('time');
                 break;
             case 4:
                 $register = $register->whereIn('e.id', $values)
-                                    ->groupBy('e.name','date','type_id','e.num_employee')
                                     ->orderBy('date')
                                     ->orderBy('e.name')
                                     ->orderBy('time');
@@ -376,7 +380,6 @@ class ReporteController extends Controller
             case 5:
                 $register = $register->whereIn('e.id', $values)
                                     ->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id')
-                                    ->groupBy('date','type_id','e.name','e.num_employee')
                                     ->orderBy('date')
                                     ->orderBy('e.name')
                                     ->orderBy('time');
@@ -385,9 +388,15 @@ class ReporteController extends Controller
                 # code...
                 break;
         }
+        if($checadasbrutas == 1){
+               
+        }else{
+            $register = $register->groupBy('date','type_id','e.name','e.num_employee'); 
+        }
 
         $register = $register->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id', 'e.external_id')
                                 ->whereBetween('r.date', [$startDate, $endDate])
+                                ->where('registers.is_delete',0)
                                 ->get();
 
         return view('report.reportRegsView')
@@ -740,7 +749,8 @@ class ReporteController extends Controller
                             ->OrwhereBetween('outDate',[$sStartDate,$sEndDate]);
                         })
                         ->orderBy('employees.num_employee')
-                        ->orderBy('inDate')
+                        ->orderBy('week')
+                        ->orderBy('biweek')
                         ->orderBy('outDate')
                         ->orderBy('week')
                         ->orderBy('biweek')
@@ -903,6 +913,7 @@ class ReporteController extends Controller
                         ->join('employees','employees.id','=','registers.employee_id')
                         ->where('employee_id',$empleadosSemanal[$x]->id)
                         ->where('type_id',1)
+                        ->where('registers.is_delete',0)
                         ->whereBetween('date',[$sStartDate,$sEndDate])
                         ->groupBy('date')
                         ->select('date AS date','employee_id AS id','employees.name AS name')
@@ -1018,6 +1029,7 @@ class ReporteController extends Controller
                         ->join('employees','employees.id','=','registers.employee_id')
                         ->where('employee_id',$empleadosQuincenal[$x]->id)
                         ->where('type_id',1)
+                        ->where('registers.is_delete',0)
                         ->whereBetween('date',[$sStartDate,$sEndDate])
                         ->groupBy('date')
                         ->select('date AS date','employee_id AS id','employees.name AS name')
@@ -1025,6 +1037,7 @@ class ReporteController extends Controller
             $registrosSalida = DB::table('registers')
                         ->where('employee_id',$empleadosQuincenal[$x]->id)
                         ->where('type_id',2)
+                        ->where('registers.is_delete',0)
                         ->whereBetween('date',[$sStartDate,$sEndDate])
                         ->groupBy('date')
                         ->get();
@@ -1174,6 +1187,7 @@ class ReporteController extends Controller
                         ->join('employees','employees.id','=','registers.employee_id')
                         ->where('employee_id',$empleadosSemanal[$x]->id)
                         ->whereBetween('date',[$sStartDate,$sEndDate])
+                        ->where('registers.is_delete',0)
                         ->groupBy('date')
                         ->select('date AS date','employee_id AS id','employees.name AS name')
                         ->get();
@@ -1419,12 +1433,14 @@ class ReporteController extends Controller
                 $numeroEntrada = DB::table('registers')
                                     ->where('date',$fecha)
                                     ->where('employee_id',$idEmpleado)
+                                    ->where('registers.is_delete',0)
                                     ->where('type_id',1)
                                     ->select(DB::raw('COUNT(id) as numero'))
                                     ->get();
                 $numeroSalida = DB::table('registers')
                                     ->where('date',$fecha)
                                     ->where('employee_id',$idEmpleado)
+                                    ->where('registers.is_delete',0)
                                     ->where('type_id',2)
                                     ->select(DB::raw('COUNT(id) as numero'))
                                     ->get();
@@ -1501,12 +1517,14 @@ class ReporteController extends Controller
                 $numeroEntrada = DB::table('registers')
                                     ->where('date',$fecha)
                                     ->where('employee_id',$idEmpleado)
+                                    ->where('registers.is_delete',0)
                                     ->where('type_id',1)
                                     ->select(DB::raw('COUNT(id) as numero'))
                                     ->get();
                 $numeroSalida = DB::table('registers')
                                     ->where('date',$fecha)
                                     ->where('employee_id',$idEmpleado)
+                                    ->where('registers.is_delete',0)
                                     ->where('type_id',2)
                                     ->select(DB::raw('COUNT(id) as numero'))
                                     ->get();

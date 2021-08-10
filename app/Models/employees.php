@@ -61,4 +61,12 @@ class employees extends Model
         return $this->hasMany('App\Models\specialworkshift');
     }
 
+    public function areaboss(){
+        return $this->hasMany('App\Models\area');
+    }
+
+    public function departmentboss(){
+        return $this->hasMany('App\Models\department');
+    }
+
 }

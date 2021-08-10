@@ -183,26 +183,29 @@ class employeeController extends Controller
                         ->join('jobs','jobs.id','=','employees.job_id')
                         ->join('departments','departments.id','=','employees.department_id')
                         ->join('department_group','department_group.id','=','departments.dept_group_id')
+                        ->join('benefit_policies','benefit_policies.id','=','employees.ben_pol_id')
                         ->orderBy('employees.job_id')
                         ->where('employees.is_delete','0')
                         ->where('employees.is_active','1')
                         ->whereIn('departments.dept_group_id',$Adgu)
                         ->orderBy('employees.name')
-                        ->select('employees.name AS nameEmployee','employees.num_employee AS numEmployee','employees.short_name AS shortName','employees.id AS idEmployee','jobs.name AS nameJob','departments.name AS nameDepartment')
+                        ->select('employees.name AS nameEmployee','employees.num_employee AS numEmployee','employees.short_name AS shortName','employees.id AS idEmployee','jobs.name AS nameJob','departments.name AS nameDepartment','benefit_policies.name AS politica')
                         ->get();
         }else{
             $employees = DB::table('employees')
                         ->join('jobs','jobs.id','=','employees.job_id')
                         ->join('departments','departments.id','=','employees.department_id')
                         ->join('department_group','department_group.id','=','departments.dept_group_id')
+                        ->join('benefit_policies','benefit_policies.id','=','employees.ben_pol_id')
                         ->orderBy('employees.job_id')
                         ->where('employees.is_delete','0')
                         ->where('employees.is_active','1')
                         ->orderBy('employees.name')
-                        ->select('employees.name AS nameEmployee','employees.num_employee AS numEmployee','employees.short_name AS shortName','employees.id AS idEmployee','jobs.name AS nameJob','departments.name AS nameDepartment')
+                        ->select('employees.name AS nameEmployee','employees.num_employee AS numEmployee','employees.short_name AS shortName','employees.id AS idEmployee','jobs.name AS nameJob','departments.name AS nameDepartment','benefit_policies.name AS politica')
                         ->get();   
         }
-        return view('employee.supervisorsView', compact('employees'));
+        $rol = session()->get('rol_id');
+        return view('employee.supervisorsView', compact('employees'))->with('rol',$rol);
     }
 
     public function editShortname ($id) {
@@ -236,17 +239,31 @@ class employeeController extends Controller
                         ->get();  
         }
         $policy = policy_extratime::orderBy('id')->pluck('id','name');
-        return view('employee.editShortname')->with('data',$data)->with('departments',$departments)->with('policy',$policy);    
+        $ben_pol = benefitsPolice::orderBy('id')->pluck('id','name');
+        $rol = session()->get('rol_id');
+        return view('employee.editShortname')->with('data',$data)->with('departments',$departments)->with('policy',$policy)->with('ben_pol',$ben_pol)->with('rol',$rol);    
     }
 
     public function updateShortname (Request $request, $id){
         $employee = employees::findOrFail($id);
-        $employee->short_name = $request->short_name;
-        $employee->department_id = $request->department_id;
-        $employee->job_id = $request->job_id;
-        $employee->policy_extratime_id = $request->policy_id;
-        $employee->updated_by = session()->get('user_id');
-        $employee->update();
+
+        $rol = $request->rol;
+
+        if ($rol != 12){
+            $employee->short_name = $request->short_name;
+            $employee->department_id = $request->department_id;
+            $employee->job_id = $request->job_id;
+            //$employee->policy_extratime_id = $request->policy_id;
+            $employee->updated_by = session()->get('user_id');
+            $employee->update();
+        }else{
+            $employee->department_id = $request->department_id;
+            $employee->job_id = $request->job_id;
+            $employee->ben_pol_id = $request->ben_pol_id;
+            $employee->updated_by = session()->get('user_id');
+            $employee->update();
+        }
+        
         return redirect('supervisorsView')->with('mensaje', 'Empleado actualizado con éxito');    
     }
 
@@ -300,9 +317,9 @@ class employeeController extends Controller
                     ->update(
                             [
                             'num_employee' => $jEmployee->num_employee,
-                            'name' => ucwords(strtolower($jEmployee->lastname.", ".$jEmployee->firstname)),
-                            'names' => ucwords(strtolower($jEmployee->firstname)),
-                            'first_name' => ucwords(strtolower($jEmployee->lastname)),
+                            'name' => ucwords(mb_strtolower($jEmployee->lastname.", ".$jEmployee->firstname)),
+                            'names' => ucwords(mb_strtolower($jEmployee->firstname)),
+                            'first_name' => ucwords(mb_strtolower($jEmployee->lastname)),
                             'admission_date' => $jEmployee->admission_date,
                             'leave_date' => $jEmployee->leave_date,
                             // 'is_overtime' => $jEmployee->extra_time,
@@ -331,9 +348,9 @@ class employeeController extends Controller
         $emp = new employees();
 
         $emp->num_employee = $jEmployee->num_employee;
-        $emp->name = ucwords(strtolower($jEmployee->lastname.", ".$jEmployee->firstname));
-        $emp->names = ucwords(strtolower($jEmployee->firstname));
-        $emp->first_name = ucwords(strtolower($jEmployee->lastname));
+        $emp->name = ucwords(mb_strtolower($jEmployee->lastname.", ".$jEmployee->firstname));
+        $emp->names = ucwords(mb_strtolower($jEmployee->firstname));
+        $emp->first_name = ucwords(mb_strtolower($jEmployee->lastname));
         $emp->admission_date = $jEmployee->admission_date;
         $emp->leave_date = $jEmployee->leave_date;
         $emp->nip = 0;
