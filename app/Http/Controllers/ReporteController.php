@@ -196,7 +196,7 @@ class ReporteController extends Controller
                                     ->join('department_group AS dg', 'dg.id', '=', 'd.dept_group_id')
                                     ->whereIn('dg.id', $values)
                                     ->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id','dg.name AS groupname', 'e.external_id')
-                                    ->groupBy('e.name','date','type_id','e.num_employee','a.name')
+                                    ->groupBy('e.name','date','type_id','e.num_employee')
                                     ->orderBy('e.name')
                                     ->orderBy('date')
                                     ->orderBy('time')
@@ -207,7 +207,7 @@ class ReporteController extends Controller
                                     ->join('departments AS d', 'd.id', '=', 'j.department_id')
                                     ->whereIn('d.id', $values)
                                     ->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id','d.name AS depname', 'e.external_id')
-                                    ->groupBy('e.name','date','type_id','e.num_employee','a.name')
+                                    ->groupBy('e.name','date','type_id','e.num_employee')
                                     ->orderBy('e.name')
                                     ->orderBy('date')
                                     ->orderBy('time')
@@ -216,7 +216,7 @@ class ReporteController extends Controller
             case 4:
                 $register = $register->whereIn('e.id', $values)
                                     ->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id', 'e.external_id')
-                                    ->groupBy('e.name','date','type_id','e.num_employee','a.name')
+                                    ->groupBy('e.name','date','type_id','e.num_employee')
                                     ->orderBy('date')
                                     ->orderBy('e.name')
                                     ->orderBy('time');
@@ -224,7 +224,7 @@ class ReporteController extends Controller
             case 5:
                 $register = $register->whereIn('e.id', $values)
                                     ->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id', 'e.external_id')
-                                    ->groupBy('e.name','date','type_id','e.num_employee','a.name')
+                                    ->groupBy('e.name','date','type_id','e.num_employee')
                                     ->orderBy('date')
                                     ->orderBy('e.name')
                                     ->orderBy('time');
