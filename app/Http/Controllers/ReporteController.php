@@ -396,7 +396,7 @@ class ReporteController extends Controller
 
         $register = $register->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id', 'e.external_id')
                                 ->whereBetween('r.date', [$startDate, $endDate])
-                                ->where('registers.is_delete',0)
+                                ->where('r.is_delete',0)
                                 ->get();
 
         return view('report.reportRegsView')
