@@ -237,7 +237,7 @@ class ReporteController extends Controller
         
 
         $register = $register->whereBetween('r.date', [$startDate, $endDate])
-                             ->where('registers.is_delete',0)
+                             ->where('r.is_delete',0)
                              ->get();
 
         return view('report.reporteESView')
