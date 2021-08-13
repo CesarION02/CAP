@@ -351,7 +351,7 @@ Route::get('permiso-rol', 'permisorolController@index')->name('permiso_rol');
 Route::get('permiso-rol', 'permisorolController@store')->name('guardar_permiso_rol');
 
 /* Fotos de empleados */
-Route::get('empphotos/{id}', 'PhotosController@index')->name('photos.employees');
+Route::get('empphotos/{id?}', 'PhotosController@index')->name('photos.employees');
 
 
 Route::get('/home', 'HomeController@index')->name('home');
