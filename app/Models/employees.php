@@ -69,4 +69,8 @@ class employees extends Model
         return $this->hasMany('App\Models\department');
     }
 
+    public function user(){
+        return $this->hasMany('App\Models\User');
+    }
+
 }

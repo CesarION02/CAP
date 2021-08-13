@@ -65,5 +65,9 @@ class User extends Authenticatable
     public function group_user(){
         return $this->hasMany('App\Models\group_dept_user');
     }
+
+    public function employee(){
+        return $this->belongsTo('App\Models\employees','employee_id');
+    }
     
 }

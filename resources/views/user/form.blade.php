@@ -11,6 +11,30 @@
     </div>
 </div>
 <div class="form-group">
+    <label for="name" class="col-lg-3 control-label requerido">Empleado asociado:</label>
+    <div class="col-lg-8">
+        @if(isset($datas))
+                <select id="employee_id" name="employee_id" class="form-control">
+                    <option value="0">N/A</option>
+                    @foreach($employees as $employee => $index)
+                        @if($datas->employee_id == $index)
+                            <option selected value="{{ $index }}"  > {{$employee}}</option>
+                        @else
+                            <option value="{{ $index }}"  > {{$employee}}</option>
+                        @endif
+                    @endforeach
+                </select>   
+            @else
+                <select id="employee_id" name="employee_id" class="form-control">
+                        <option value="0">N/A</option>
+                    @foreach($employees as $employee => $index)
+                        <option value="{{ $index }}" {{old('boss_id') == $index ? 'selected' : '' }} > {{$employee}}</option>
+                    @endforeach
+                </select>
+            @endif
+    </div>
+</div>
+<div class="form-group">
     <label for="email" class="col-lg-3 control-label requerido">Contraseña:</label>
     <div class="col-lg-8">
         <input type="password" name="password" id="password" class="form-control" value="{{old('password', $data->password ?? '')}}" required>

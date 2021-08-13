@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Admin\rol;
+use App\Models\employees;
 use App\User;
 
 class userController extends Controller
@@ -21,20 +22,20 @@ class userController extends Controller
             case 1:
                 $datas = User::where('is_delete','0')->orderBy('id')->get();
                 $datas->each(function($datas){
-                    $datas->area;
+                    $datas->employee;
                 });
                 break;
             case 2:
                 $datas = User::where('is_delete','1')->orderBy('id')->get();
                 $datas->each(function($datas){
-                    $datas->area;
+                    $datas->employee;
                 });
                 break;
             
             default:
                 $datas = User::orderBy('id')->get();
                 $datas->each(function($datas){
-                    $datas->area;
+                    $datas->employee;
                 });
                 break;
         }
@@ -50,8 +51,8 @@ class userController extends Controller
      */
     public function create()
     {
-        //$datas = rol::orderBy('id','ASC')->pluck('id','name');
-        return view('user.create', compact('datas'));
+        $employees = employees::orderBy('id','ASC')->pluck('id','name');
+        return view('user.create', compact('employees'));
     }
 
     /**
@@ -66,6 +67,9 @@ class userController extends Controller
         $user->name = $request->name;
         $user->email = $request->email;
         $user->password = bcrypt($request->password);
+        if ($request->employee_id != 0){
+            $user->employee_id = $request->employee_id;
+        }
         $user->is_delete = 0;
         $user->updated_by = session()->get('user_id');
         $user->created_by = session()->get('user_id');
@@ -94,7 +98,8 @@ class userController extends Controller
     public function edit($id)
     {
         $data = User::findOrFail($id);
-        return view('user.edit', compact('data'));
+        $employees = employees::orderBy('id','ASC')->pluck('id','name');
+        return view('user.edit', compact('data'))->with('employees',$employees);
     }
 
     /**
@@ -109,6 +114,9 @@ class userController extends Controller
         $user = User::find($id);
         $user->name = $request->name;
         $user->email = $request->email;
+        if ($request->employee_id != 0){
+            $user->employee_id = $request->employee_id;
+        }
         $user->password = bcrypt($request->password);
         $user->is_delete = 0;
         $user->updated_by = session()->get('user_id');

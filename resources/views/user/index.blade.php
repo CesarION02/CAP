@@ -130,6 +130,7 @@ Usuarios
                         <tr>
                             <th>Usuario</th>
                             <th>Correo</th>
+                            <th>Empleado asociado</th>
                             <th>Estado</th>
                             <th class="width70"></th>
                         </tr>
@@ -139,6 +140,11 @@ Usuarios
                         <tr>
                             <td>{{$data->name}}</td>
                             <td>{{$data->email}}</td>
+                            @if($data->employee == null)
+                                <td>No definido</td>
+                            @else
+                                <td>{{$data->employee->name}}</td>
+                            @endif
                             @if($data->is_delete == 0)
                                 <td>Activo</td>
                             @else
