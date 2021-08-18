@@ -572,7 +572,7 @@ class assignController extends Controller
             }
             $employee = DB::table('employees')
                     ->join('jobs','jobs.id','=','employees.job_id')
-                    ->join('departments','departments.id','=','jobs.department_id')
+                    ->join('departments','departments.id','=','employees.department_id')
                     ->join('department_group','department_group.id','=','departments.dept_group_id')
                     ->whereIn('departments.dept_group_id',$Adgu)
                     ->where('employees.is_active',1)
@@ -581,7 +581,7 @@ class assignController extends Controller
         }else{
             $employee = DB::table('employees')
                     ->join('jobs','jobs.id','=','employees.job_id')
-                    ->join('departments','departments.id','=','jobs.department_id')
+                    ->join('departments','departments.id','=','employees.department_id')
                     ->join('department_group','department_group.id','=','departments.dept_group_id')
                     ->where('employees.is_active',1)
                     ->orderBy('employees.name')
@@ -606,7 +606,7 @@ class assignController extends Controller
             }
             $employee = DB::table('employees')
                     ->join('jobs','jobs.id','=','employees.job_id')
-                    ->join('departments','departments.id','=','jobs.department_id')
+                    ->join('departments','departments.id','=','employees.department_id')
                     ->join('department_group','department_group.id','=','departments.dept_group_id')
                     ->whereIn('departments.dept_group_id',$Adgu)
                     ->where('employees.is_active',1)
@@ -615,7 +615,7 @@ class assignController extends Controller
         }else{
             $employee = DB::table('employees')
                     ->join('jobs','jobs.id','=','employees.job_id')
-                    ->join('departments','departments.id','=','jobs.department_id')
+                    ->join('departments','departments.id','=','employees.department_id')
                     ->join('department_group','department_group.id','=','departments.dept_group_id')
                     ->where('employees.is_active',1)
                     ->orderBy('employees.name')
@@ -834,7 +834,7 @@ class assignController extends Controller
                 INNER JOIN employees b ON a.employee_id = b.id
                 INNER JOIN schedule_template s ON a.schedule_template_id = s.id
                 INNER JOIN jobs j ON b.job_id = j.id
-                INNER JOIN departments d ON j.department_id = d.id
+                INNER JOIN departments d ON b.department_id = d.id
                 INNER JOIN department_group g ON d.dept_group_id = g.id
                 WHERE b.is_active = 1
                 AND g.id IN (".$adguString. ")
@@ -864,7 +864,7 @@ class assignController extends Controller
                 INNER JOIN employees b ON a.employee_id = b.id
                 INNER JOIN schedule_template s ON a.schedule_template_id = s.id
                 INNER JOIN jobs j ON b.job_id = j.id
-                INNER JOIN departments d ON j.department_id = d.id
+                INNER JOIN departments d ON b.department_id = d.id
                 INNER JOIN department_group g ON d.dept_group_id = g.id
                 WHERE b.is_active = 1
                 GROUP By a.employee_id");    
