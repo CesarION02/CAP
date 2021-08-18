@@ -12,18 +12,12 @@ class PhotosController extends Controller
 {
     public function index($idEmployee = 0)
     {
-        // $jsonString = file_get_contents(base_path('response_photos_from_siie.json'));
-        $client = new Client([
-            'base_uri' => '192.168.1.233:9001',
-            'timeout' => 10.0,
-        ]);
-
         if ($idEmployee > 0) {
             $employee = employees::find($idEmployee);
         }
         else {
             if (\Auth::user()->employee_id > 0) {
-                $employee = employee::find(\Auth::user()->employee_id);
+                $employee = employees::find(\Auth::user()->employee_id);
             }
             else {
                 return redirect()->back()->withError('No hay asignado un empleado para el usuario actual.');
@@ -37,6 +31,12 @@ class PhotosController extends Controller
         if (! $employee->external_id > 0) {
             return redirect()->back()->withError('No hay asignado un empleado externo.');
         }
+
+        // $jsonString = file_get_contents(base_path('response_photos_from_siie.json'));
+        $client = new Client([
+            'base_uri' => '192.168.1.233:9001',
+            'timeout' => 10.0,
+        ]);
         
         $response = $client->request('GET', 'getPhotoInfo/' . $employee->external_id);
         $jsonString = $response->getBody()->getContents();
