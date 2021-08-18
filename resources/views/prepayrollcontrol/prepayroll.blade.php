@@ -1,25 +1,24 @@
 @extends("theme.$theme.layout")
 @section('title')
-Turno especial
+Registros fuera de tiempo
 @endsection
 
 @section('styles1')
     <link rel="stylesheet" href="{{asset("daterangepicker/daterangepicker.css")}}">
-    
 @endsection
 
 @section("scripts")
     <script src="{{asset("assets/pages/scripts/admin/datatable/index.js")}}" type="text/javascript"></script>
     <script src="{{ asset("dt/datatables.js") }}" type="text/javascript"></script>
     <script src="{{ asset('dt/dataTables.buttons.min.js') }}"></script>
+    <script src="{{ asset("assets/js/moment/moment.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/js/moment/datetime-moment.js") }}" type="text/javascript"></script>
 	<script src="{{ asset('dt/buttons.flash.min.js') }}"></script>
 	<script src="{{ asset('dt/jszip.min.js') }}"></script>
 	<script src="{{ asset('dt/pdfmake.min.js') }}"></script>
 	<script src="{{ asset('dt/vfs_fonts.js') }}"></script>
 	<script src="{{ asset('dt/buttons.html5.min.js') }}"></script>
     <script src="{{ asset('dt/buttons.print.min.js') }}"></script>
-    <script src="{{ asset("assets/js/moment/moment.js") }}" type="text/javascript"></script>
-    <script src="{{ asset("assets/js/moment/datetime-moment.js") }}" type="text/javascript"></script>
     <script src="{{ asset("daterangepicker/daterangepicker.js") }}" type="text/javascript"></script>
 <script>
     $(document).ready( function () {
@@ -49,7 +48,7 @@ Turno especial
                     "sSortDescending": ": Activar para ordenar la columna de manera descendente"
                 }
             },
-            "order": [[ 1, 'desc' ]],
+            "order": [[ 0, 'desc' ], [ 1, 'desc' ], [2, 'asc']],
             "colReorder": true,
             "dom": 'Bfrtip',
             "lengthMenu": [
@@ -57,16 +56,26 @@ Turno especial
                 [ 'Mostrar 10', 'Mostrar 25', 'Mostrar 50', 'Mostrar 100', 'Mostrar todo' ]
             ],
             "buttons": [
-                'pageLength',
-                { extend: 'copy', text: 'Copiar'}, 'csv', 'excel', { extend: 'print', text: 'Imprimir'}
-                ]
+                    'pageLength',
+                    {
+                        extend: 'copy',
+                        text: 'Copiar'
+                    }, 
+                    'csv', 
+                    'excel', 
+                    {
+                        extend: 'print',
+                        text: 'Imprimir'
+                    }
+                ],
         });
+
     });
+
+
 </script>
 <script>
     $(function() {
-        var start = moment(<?php echo json_encode($start_date) ?>);
-        var end = moment(<?php echo json_encode($end_date) ?>);
 
         function cb(start, end) {
             $('#reportrange span').html(start.format('D MMMM YYYY') + ' - ' + end.format('D MMMM YYYY'));
@@ -78,8 +87,6 @@ Turno especial
             startDate: start,
             endDate: end,
             ranges: {
-                'Este mes': [moment().startOf('month'), moment().endOf('month')],
-                'Mes pasado': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
                 'Este año': [moment().startOf('year'), moment().endOf('year')],
                 'Año pasado': [moment().subtract(1, 'year').startOf('year'), moment().subtract(1, 'year').endOf('year')]
             }
@@ -93,7 +100,6 @@ Turno especial
         document.getElementById("end-date").value = picker.endDate.format('YYYY-MM-DD');
     });
 </script>
-
 @endsection
 
 @section('content')
@@ -102,70 +108,61 @@ Turno especial
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Cambio turnos</h3>
-                @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:turnoespecial"])
+                @if ($week == 1)
+                    <h3 class="box-title">Semana {{$binnacle[0]->num}} del {{$binnacle[0]->ini}} al {{$binnacle[0]->fin}}</h3>
+                @else
+                <h3 class="box-title">Quincena {{$binnacle[0]->num}} del {{$binnacle[0]->ini}} al {{$binnacle[0]->fin}}</h3>
+                @endif
                 <div class="box-tools pull-right">
-                    <a href="{{route('crear_turno_especial')}}" class="btn btn-block btn-success btn-sm">
-                        <i class="fa fa-fw fa-plus-circle"></i> Nuevo
+                    @if ($week == 1)
+                    <a href="{{route('bitacora_reg_s')}}" class="btn btn-block btn-info btn-sm">
+                        <i class="fa fa-fw fa-reply-all"></i> Regresar
                     </a>
-                </div>
-                <br>
-                <br>
-                <div class="row">
-                    <div class="col-md-5 col-md-offset-7">
-                        <form action="{{ route('turno_especial') }}">
-                            <input type="hidden" id="start-date" name="start_date">
-                            <input type="hidden" id="end-date" name="end_date">
-                            <div class="input-group">
-                                <div id="reportrange" 
-                                    style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
-                                    <i class="fa fa-calendar"></i>&nbsp;
-                                    <span></span> <i class="fa fa-caret-down"></i>
-                                </div>
-                                <span class="input-group-btn">
-                                    <button class="btn btn-default" type="submit">
-                                        <i class="glyphicon glyphicon-search"></i>
-                                    </button>
-                                </span>
-                            </div>
-                        </form>
-                    </div>
+                    @else
+                    <a href="{{route('bitacora_reg_q')}}" class="btn btn-block btn-info btn-sm">
+                        <i class="fa fa-fw fa-reply-all"></i> Regresar
+                    </a>
+                    @endif
+                    <a href="{{route('bitacora_reg_q')}}" class="btn btn-block btn-info btn-sm">
+                        <i class="fa fa-fw fa-reply-all"></i> Reprocesar
+                    </a>
                 </div>
             </div>
             <div class="box-body">
                 <table class="table table-striped table-bordered table-hover" id="myTable">
                     <thead>
                         <tr>
-                            <th>Empleado</th>
+                            <th>Tipo registro</th>
                             <th>Fecha inicio</th>
                             <th>Fecha fin</th>
-                            <th>Turno</th>
-                            <th>Aprobado</th>
-                            <th class="width70"></th>
+                            <th>Fecha de registro</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($datas as $data)
+                        @foreach ($cambio as $cam)
                         <tr>
-                            <td>{{$data->nameEmp}}</td>
-                            <td>{{\App\SUtils\SDateTimeUtils::orderDate($data->datei)}}</td>
-                            <td>{{\App\SUtils\SDateTimeUtils::orderDate($data->dates)}}</td>
-                            <td>{{$data->nameWork}}</td>
-                            <td>{{$data->is_approved ? "SÍ" : "NO"}}</td>
-                            <td>
-                                <a href="{{route('editar_turno_especial', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
-                                    <i class="fa fa-fw fa-pencil"></i>
-                                </a>
-                                <form action="{{route('eliminar_turno_especial', ['id' => $data->id])}}" class="d-inline form-eliminar" method="POST">
-                                    @csrf @method("delete")
-                                    <button type="submit" class="btn-accion-tabla eliminar tooltipsC" title="Eliminar este registro">
-                                        <i class="fa fa-fw fa-trash text-danger"></i>
-                                    </button>
-                                </form>
-                            </td>
+                            <td>Cambio de turno</td>
+                            <td>{{\App\SUtils\SDateTimeUtils::orderDate($cam->dateI)}}</td>
+                            <td>{{\App\SUtils\SDateTimeUtils::orderDate($cam->dateS)}}</td>
+                            <td>{{\App\SUtils\SDateTimeUtils::orderDate($cam->updated_at)}}</td>
                         </tr>
                         @endforeach
-
+                        @foreach ($incidencias as $inc)
+                        <tr>
+                            <td>Incidencia</td>
+                            <td>{{\App\SUtils\SDateTimeUtils::orderDate($inc->start_date)}}</td>
+                            <td>{{\App\SUtils\SDateTimeUtils::orderDate($inc->end_date)}}</td>
+                            <td>{{\App\SUtils\SDateTimeUtils::orderDate($inc->updated_at)}}</td>
+                        </tr>
+                        @endforeach
+                        @foreach ($checadas as $che)
+                        <tr>
+                            <td>Checadas manuales</td>
+                            <td>{{\App\SUtils\SDateTimeUtils::orderDate($che->date)}}</td>
+                            <td>NA</td>
+                            <td>{{\App\SUtils\SDateTimeUtils::orderDate($che->updated_at)}}</td>
+                        </tr>
+                        @endforeach
                     </tbody>
                 </table>
             </div>

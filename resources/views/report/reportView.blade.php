@@ -50,7 +50,7 @@
                             <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>Colaborador</th>
+                                    <th>Empleado</th>
                                     <th>Fecha entrada</th></th>
                                     <th>Hora entrada</th>
                                     <th>Fecha salida</th>

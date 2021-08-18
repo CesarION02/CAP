@@ -139,7 +139,7 @@ Asignar días festivos
                                     </button>
                                 
                                     <ul class="dropdown-menu" role="menu">
-                                        <li><a href="{{route('crear_asignacion_festivo','1')}}">Por colaborador</a>
+                                        <li><a href="{{route('crear_asignacion_festivo','1')}}">Por empleado</a>
                                         @if($session == 1 || $session == 3)
                                             <li><a href="{{route('crear_asignacion_festivo','2')}}">Por departamento CAP</a>
                                             <li><a href="{{route('crear_asignacion_festivo','3')}}">Por área</a>
@@ -158,7 +158,7 @@ Asignar días festivos
                         <tr>
                             <th>Fecha</th>
                             <th>Día festivo</th>
-                            <th>Colaborador</th>
+                            <th>Empleado</th>
                             
                             
                             

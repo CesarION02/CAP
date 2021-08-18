@@ -87,8 +87,8 @@ Empleados
                 <table class="table table-striped table-bordered table-hover" id="myTable">
                     <thead>
                         <tr>
-                            <th>Nombre colaborador</th>
-                            <th>Número colaborador</th>
+                            <th>Nombre empleado</th>
+                            <th>Número empleado</th>
                             <th>Departamento CAP</th>
                             <th>Puesto</th>
                             <th class="width70"></th>

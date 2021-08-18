@@ -164,7 +164,7 @@ Turno especial
                 <table class="table table-striped table-bordered table-hover" id="myTable">
                     <thead>
                         <tr>
-                            <th>Colaborador</th>
+                            <th>Empleado</th>
                             <th>Fecha inicio</th>
                             <th>Fecha fin</th>
                             <th>Turno</th>

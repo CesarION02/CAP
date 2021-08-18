@@ -3,7 +3,7 @@
     <link rel="stylesheet" href="{{ asset("dt/datatables.css") }}">
 @endsection
 @section('title')
-    {{ 'Colaborador vs Biostar' }}
+    {{ 'Empleado vs Biostar' }}
 @endsection
 
 @section('content')
@@ -12,7 +12,7 @@
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Colaborador vs BioStar</h3>
+                <h3 class="box-title">Empleados vs BioStar</h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php"])
             </div>
             <div class="box-body" id="appEmpVsBiostar">
@@ -29,7 +29,7 @@
                     <thead>
                         <tr>
                             <th>ID CAP</th>
-                            <th>Colaborador CAP</th>
+                            <th>Empleado CAP</th>
                             <th>Num colab.</th>
                             <th>Depto GH</th>
                             <th>ID BioStar</th>

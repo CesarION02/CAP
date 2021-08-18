@@ -6,7 +6,7 @@
     </div>
 </div>
 <div class="form-group">
-        <label for="employee_id" class="col-lg-3 control-label requerido">Colaborador:</label>
+        <label for="employee_id" class="col-lg-3 control-label requerido">Empleado:</label>
         <div class="col-lg-8">
             <input type="text" value="{{ $datas[0]->nameEmp }}" class="form-control" readonly>
         </div>

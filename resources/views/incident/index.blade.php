@@ -173,7 +173,7 @@ Incidencias
                             <th>Tipo incidencia</th>
                             <th>Fecha inicial</th>
                             <th>Fecha final</th>
-                            <th>Colaborador</th>
+                            <th>Empleado</th>
                             {{-- <th class="width70"></th> --}}
                         </tr>
                     </thead>

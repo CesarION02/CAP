@@ -1,10 +1,10 @@
 <div class="form-group">
-    <label for="nombre" class="col-lg-3 control-label requerido">Colaborador:</label>
+    <label for="nombre" class="col-lg-3 control-label requerido">Empleado:</label>
     <div class="col-lg-8">
         
             @if(isset($datas))
                 <select name="employee_id" id="employee_id">
-                    <option value="0">Seleccione colaborador</option>
+                    <option value="0">Seleccione empleado</option>
                     @for($i = 0 ; count($employees) > $i ; $i++)
                         @if($datas->employee_id == $employees[$i]->id)
                             <option selected value="{{$employees[$i]->id}}">{{$employees[$i]->nameEmployee}}</option>
@@ -14,7 +14,7 @@
                     @endfor
             @else
                 <select name="employee_id" id="employee_id">
-                    <option value="0">Seleccione colaborador</option>
+                    <option value="0">Seleccione empleado</option>
                     @for($i = 0 ; count($employees) > $i ; $i++)
                         <option value="{{$employees[$i]->id}}">{{$employees[$i]->nameEmployee}}</option>
                     @endfor

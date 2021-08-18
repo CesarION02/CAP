@@ -80,7 +80,7 @@ Turno
                     <thead>
                         
                         <tr>
-                            <th>Colaborador</th>
+                            <th>Empleado</th>
                             <th>Programado</th>
                             @for($i = 0 ; $diff >= $i ; $i++)
 

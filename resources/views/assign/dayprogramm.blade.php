@@ -87,7 +87,7 @@ Plantilla horarios
                 <table class="table table-striped table-bordered table-hover" id="myTable">
                     <thead>
                         <tr>
-                            <th>Colaborador</th>
+                            <th>Empleado</th>
                             <th>Fecha inicial</th>
                             <th>Horario</th>
                             <th class="width70"></th>
