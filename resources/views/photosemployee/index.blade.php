@@ -25,7 +25,7 @@
                                     <div class="caption">
                                         <h3>Num: <b>{{ $photo->numEmployee }}</b></h3>
                                         <p>{{ $photo->name }}</p>
-                                        <p><a href="#" class="btn btn-primary" role="button">Button</a> <a href="#" class="btn btn-default" role="button">Button</a></p>
+                                        <p></p>
                                     </div>
                                 </div>
                             </div>
