@@ -13,6 +13,7 @@ use App\Models\typeincident;
 use App\Models\departmentsGroup;
 use App\SUtils\SDelayReportUtils;
 use App\SUtils\SInfoWithPolicy;
+use App\SUtils\SHolidayWork;
 use App\SUtils\SGenUtils;
 use App\SData\SDataProcess;
 use DB;
@@ -737,8 +738,8 @@ class ReporteController extends Controller
                 break;
             
         }
-        $prueba = SInfoWithPolicy::preProcessInfo($sStartDate,$year,$sEndDate,$payWay);
-        //SHolidayWork::holidayworked($sStartDate,$sEndDate);
+        $prueba = SInfoWithPolicy::preProcessInfo($sStartDate,$year,$sEndDate,$payWay,0);
+        SHolidayWork::holidayworked($sStartDate,$sEndDate);
         
         //$lEmployees[0] = 32; 
         $lRows = DB::table('processed_data')

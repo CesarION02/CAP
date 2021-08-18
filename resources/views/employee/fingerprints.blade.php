@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-Colaboradores
+Huellas digitales
 @endsection
 
 @section("scripts")

@@ -83,7 +83,7 @@ Asignar plantilla
                     <thead>
                         <tr>
                             <th>Colaborador</th>
-                            <th>Grupo colaboradores</th>
+                            <th>Grupo empleados</th>
                             <th>Departamento CAP</th>
                             <th>Fecha inicial</th>
                             <th>Fecha final</th>
