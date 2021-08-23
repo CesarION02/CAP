@@ -235,6 +235,7 @@ class prePayrollController extends Controller
                      * Obtener festivos
                      */
                     $lColl = clone $lCExtrasDay;
+                    $lColl = $lColl->where('is_granted', false);
                     $withHolidays = $lColl->groupBy('employee_id')->map(function ($row) {
                                                 $registry = (object) [
                                                     'holidays' => $row->sum('is_holiday'),
