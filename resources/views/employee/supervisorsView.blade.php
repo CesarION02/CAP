@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-Mis colaboradores
+Mis empleados
 @endsection
 
 @section("scripts")
@@ -78,7 +78,7 @@ Mis colaboradores
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Mis colaboradores</h3>
+                <h3 class="box-title">Mis empleados</h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:nombrecorto"])
                 <div class="box-tools pull-right">
 
@@ -88,9 +88,9 @@ Mis colaboradores
                 <table class="table table-striped table-bordered table-hover" id="myTable">
                     <thead>
                         <tr>
-                            <th>Nombre colaborador</th>
+                            <th>Nombre empleado</th>
                             <th>Nombre corto</th>
-                            <th>Número colaborador</th>
+                            <th>Número empleado</th>
                             <th>Departamento CAP</th>
                             <th>Puesto</th>
                             @if($rol == 12)

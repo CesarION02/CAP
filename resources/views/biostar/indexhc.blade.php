@@ -28,7 +28,7 @@
                     <thead>
                         <tr>
                             <th>ID BioStar</th>
-                            <th>Colaborador BioStar</th>
+                            <th>Empleado BioStar</th>
                             <th>Huella</th>
                             <th>Rostro</th>
                         </tr>

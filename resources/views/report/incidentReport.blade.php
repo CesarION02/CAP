@@ -52,7 +52,7 @@ Reporte incidencias
                                 
                                 <option value="0">Selecciona opciones..</option>
                                 <option value="1">Por departamento</option>
-                                <option value="2">Por colaborador</option>
+                                <option value="2">Por empleado</option>
                                   
                             </select>
                         </div>
@@ -72,7 +72,7 @@ Reporte incidencias
                     <br>
                     <div class="row">
                         <div class="col-md-10 col-md-offset-1" id='selectemp'>
-                            <label for="cars">Elige colaborador:</label>
+                            <label for="cars">Elige empleado:</label>
                             
                             <select disabled="true" data-placeholder="Selecciona opciones..." style="width: 60%" class="chosen-select" id="employees" name="employees">
                                     <option value="0">Todos</option>

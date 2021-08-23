@@ -9,7 +9,7 @@
     </p>
 </div>
 <div class="form-group">
-    <label for="empleado" class="col-lg-3 control-label requerido">Colaboradores:</label>
+    <label for="empleado" class="col-lg-3 control-label requerido">Empleados:</label>
     <div class="col-lg-8">
         <select multiple style="width: 95%" class="js-example-basic-multiple" name="empleado[]" id="empleado" required>
                 @foreach($employees as $employee )

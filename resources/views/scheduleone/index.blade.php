@@ -59,8 +59,8 @@
                         <tr>
                             <th></th>
                             <th>Fecha</th>
-                            <th>Número colaborador</th>
-                            <th>Colaborador</th>
+                            <th>Número empleado</th>
+                            <th>Empleado</th>
                             <th></th>
                         </tr>
                     </thead>

@@ -22,7 +22,7 @@
         </div>
 </div>
 <div class="form-group">
-        <label for="employee_id" class="col-lg-3 control-label requerido">Colaborador:</label>
+        <label for="employee_id" class="col-lg-3 control-label requerido">Empleado:</label>
         <div class="col-lg-8">
             <select id="employee_id"  name="employee_id" class="form-control">
                 @foreach($employees as $employee => $index)

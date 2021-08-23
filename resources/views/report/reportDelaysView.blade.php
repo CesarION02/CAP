@@ -52,7 +52,7 @@
                             <thead>
                                 <tr>
                                     <th>Num. Col.</th>
-                                    <th>Colaborador</th>
+                                    <th>Empleado</th>
                                     {{-- <th>Fecha entrada</th> --}}
                                     <th><span class="nobr">Fecha-hora</span> entrada</th>
                                     {{-- <th>Fecha salida</th> --}}

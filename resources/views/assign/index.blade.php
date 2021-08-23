@@ -71,7 +71,7 @@ Asignar plantilla
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:asignacionhorario"])
                 <div class="box-tools pull-right">
                     <a href="{{route('crear_asignacion','1')}}" class="btn btn-block btn btn-info btn-sm">
-                        <i class="fa fa-fw fa-plus-circle"></i> Asignar por colaborador
+                        <i class="fa fa-fw fa-plus-circle"></i> Asignar por empleado
                     </a>
                     <a href="{{route('crear_asignacion','2')}}" class="btn btn-block btn btn-info btn-sm">
                             <i class="fa fa-fw fa-plus-circle"></i> Asignar por depto. CAP
@@ -82,8 +82,8 @@ Asignar plantilla
                 <table class="table table-striped table-bordered table-hover" id="myTable">
                     <thead>
                         <tr>
-                            <th>Colaborador</th>
-                            <th>Grupo colaboradores</th>
+                            <th>Empleado</th>
+                            <th>Grupo empleados</th>
                             <th>Departamento CAP</th>
                             <th>Fecha inicial</th>
                             <th>Fecha final</th>

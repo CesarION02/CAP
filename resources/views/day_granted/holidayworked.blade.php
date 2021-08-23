@@ -152,7 +152,7 @@ Días festivos trabajados
                     <thead>
                         <tr>
                             <th>Fecha</th>
-                            <th>Colaborador</th>
+                            <th>Empleado</th>
                             <th>Día festivo</th>
                             <th>Asignaciones realizadas</th>
                         </tr>

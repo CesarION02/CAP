@@ -173,7 +173,7 @@ Incidencias
                     <thead>
                         <tr>
                             <th>Fecha</th>
-                            <th>Colaborador</th>
+                            <th>Empleado</th>
                             <th>Día festivo</th>
                             <th>Comentarios</th>
                             <th></th>
