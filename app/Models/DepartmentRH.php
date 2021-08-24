@@ -16,7 +16,7 @@ class DepartmentRH extends Model
                         ];
     
     public function department(){
-        return $this->hasMany('App\department');
+        return $this->hasMany('App\Models\department');
     }
 
     

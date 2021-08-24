@@ -118,7 +118,7 @@ Reporte de registros
         <div class="box box-danger">
             <div class="box-header with-border row">
                 <div class="col-md-10">
-                    <h3 class="box-title">Reporte ES</h3>
+                    <h3 class="box-title">Reporte entrada/salida [a] 1 línea</h3>
                 </div>
                 <div class="col-md-2">
                     <select class="form-control" name="sel-collaborator" id="sel-collaborator">

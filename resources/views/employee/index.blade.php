@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-    {{ (isset($becarios) && $becarios ? 'Becarios' : 'Empleados') }}
+    {{ (isset($becarios) && $becarios ? 'Practicantes' : 'Empleados') }}
 @endsection
 
 @section("scripts")
@@ -61,7 +61,7 @@
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">{{ (isset($becarios) && $becarios ? 'Becarios' : 'Empleados') }}</h3>
+                <h3 class="box-title">{{ (isset($becarios) && $becarios ? 'Practicantes' : 'Empleados') }}</h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:empleados"])
                 <div class="box-tools pull-right">
                     <a href="{{ route('crear_empleado', (isset($becarios) && $becarios) ? 1 : 0) }}" class="btn btn-block btn-success btn-sm">
@@ -73,9 +73,9 @@
                 <table class="table table-striped table-bordered table-hover" id="myTable">
                     <thead>
                         <tr>
-                            <th>Nombre {{ (isset($becarios) && $becarios ? 'becario' : 'empleado') }}</th>
+                            <th>Nombre {{ (isset($becarios) && $becarios ? 'practicante' : 'empleado') }}</th>
                             <th>Nombre corto</th>
-                            <th>Número {{ (isset($becarios) && $becarios ? 'becario' : 'empleado') }}</th>
+                            <th>Número {{ (isset($becarios) && $becarios ? 'practicante' : 'empleado') }}</th>
                             <th>Política registro</th>
                             <th>Departamento CAP</th>
                             <th>Puesto</th>

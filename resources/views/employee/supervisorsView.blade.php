@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-Mis empleados
+Mis empleados asignados
 @endsection
 
 @section("scripts")
@@ -78,7 +78,7 @@ Mis empleados
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Mis empleados</h3>
+                <h3 class="box-title">Mis empleados asignados</h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:nombrecorto"])
                 <div class="box-tools pull-right">
 

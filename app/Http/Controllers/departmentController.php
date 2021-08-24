@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\department;
 use App\Models\area;
 use App\Models\DepartmentRH;
+use App\Models\employees;
 
 class departmentController extends Controller
 {
@@ -72,6 +73,7 @@ class departmentController extends Controller
     {
         $department = department::create($request->all());
         $department->rh_department_id = $request->rh_department_id;
+        $department->boss_id = $request->boss_id;
         $department->updated_by = session()->get('user_id');
         $department->created_by = session()->get('user_id');
         $department->save();
@@ -114,6 +116,8 @@ class departmentController extends Controller
     public function update(Request $request, $id)
     {
         $department = department::findOrFail($id);
+        $department->rh_department_id = $request->rh_department_id;
+        $department->boss_id = $request->boss_id;
         $department->updated_by = session()->get('user_id');
         $department->update($request->all());
         return redirect('department')->with('mensaje', 'Departamento actualizado con éxito');
