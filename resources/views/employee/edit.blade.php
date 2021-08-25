@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-{{ ($becario ? 'Becarios' : 'Empleados') }}
+{{ ($becario ? 'Practicantes' : 'Empleados') }}
 @endsection
 
 @section("scripts")
@@ -14,7 +14,7 @@
         @include('includes.mensaje')
         <div class="box box-danger">
             <div class="box-header with-border">
-                <h3 class="box-title">Modificar {{ ($becario ? 'becario' : 'empleado') }}</h3>
+                <h3 class="box-title">Modificar {{ ($becario ? 'practicante' : 'empleado') }}</h3>
                 <div class="box-tools pull-right">
                     <a href="{{route('empleado')}}" class="btn btn-block btn-info btn-sm">
                         <i class="fa fa-fw fa-reply-all"></i> Regresar

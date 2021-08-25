@@ -14,13 +14,13 @@ Reporte Entradas/Salidas
         <div class="box box-danger">
             <div class="box-header with-border row">
                 <div class="col-md-10">
-                    <h3 class="box-title">Reporte entrada/salida 2</h3>
+                    <h3 class="box-title">Reporte entrada/salida [a] 2 línea </h3>
                 </div>
                 <div class="col-md-2">
                     <select class="form-control" name="sel-collaborator" id="sel-collaborator">
                         <option value="0" selected>Todos</option>
                         <option value="1">Empleados</option>
-                        <option value="2">Becarios</option>
+                        <option value="2">Practicantes</option>
                     </select>
                 </div>
                 </div>

@@ -34,7 +34,7 @@
                         <select class="form-control" name="sel-collaborator" id="sel-collaborator">
                             <option value="0" selected>Todos</option>
                             <option value="1">Empleados</option>
-                            <option value="2">Becarios</option>
+                            <option value="2">Practicantes</option>
                         </select>
                     </div>
                     <div class="col-md-2">

@@ -1,6 +1,7 @@
 @extends("theme.$theme.layout")
 @section('styles1')
     <link rel="stylesheet" href="{{asset("assets/css/chosen.min.css")}}">
+    <link rel="stylesheet" href="{{asset("assets/css/selectchosen.css")}}">
 @endsection
 @section('title')
 Reporte Entradas/Salidas
@@ -57,7 +58,7 @@ Reporte Entradas/Salidas
                         <div class="col-md-10 col-md-offset-1">
                             <label for="cars">Elige área(s):</label>
                             
-                            <select data-placeholder="Selecciona opciones..." style="width: 60%" class="chosen-select" id="cars" name="vals[]" multiple>
+                            <select data-placeholder="Selecciona opciones..." style="width: 60%" class="chosen-select" id="cars" name="vals[]" multiple required>
                                 <option v-for="area in oData.areas" :value="area.id">@{{ area.name }}</option>
                             </select>
                         </div>
@@ -66,7 +67,7 @@ Reporte Entradas/Salidas
                         <div class="col-md-10 col-md-offset-1">
                             <label for="cars">Elige grupo(s):</label>
                             
-                            <select data-placeholder="Selecciona opciones..." style="width: 60%" class="chosen-select" id="cars" name="vals[]" multiple>
+                            <select data-placeholder="Selecciona opciones..." style="width: 60%" class="chosen-select" id="cars" name="vals[]" multiple required>
                                 <option v-for="group in oData.deptsGroups" :value="group.id">@{{ group.name }}</option>
                             </select>
                         </div>
@@ -75,7 +76,7 @@ Reporte Entradas/Salidas
                         <div class="col-md-10 col-md-offset-1">
                             <label for="cars">Elige departamento(s) nóminas:</label>
                             
-                            <select data-placeholder="Selecciona opciones..." style="width: 60%" class="chosen-select" id="cars" name="vals[]" multiple>
+                            <select data-placeholder="Selecciona opciones..." style="width: 60%" class="chosen-select" id="cars" name="vals[]" multiple required>
                                 <option v-for="dept in oData.departaments" :value="dept.id">@{{ dept.name }}</option>
                             </select>
                         </div>
@@ -84,7 +85,7 @@ Reporte Entradas/Salidas
                         <div class="col-md-10 col-md-offset-1">
                             <label for="cars">Elige empleado(s):</label>
                             
-                            <select data-placeholder="Selecciona opciones..." style="width: 60%" class="chosen-select" id="cars" name="vals[]" multiple>
+                            <select data-placeholder="Selecciona opciones..." style="width: 60%" class="chosen-select" id="cars" name="vals[]" multiple required>
                                 <option v-for="employee in oData.employees" :value="employee.id">@{{ employee.name + ' - ' + employee.num_employee }}</option>
                             </select>
                         </div>
