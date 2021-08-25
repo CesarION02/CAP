@@ -112,10 +112,7 @@ class prePayrollController extends Controller
         $lExtras = \DB::table('processed_data')
                                 ->join('employees','employees.id','=','processed_data.employee_id')
                                 ->whereIn('employees.id', $lCapEmployees)
-                                ->where(function($query) use ($startDate, $endDate) {
-                                    $query->whereBetween('inDate',[$startDate, $endDate])
-                                    ->OrwhereBetween('outDate',[$startDate, $endDate]);
-                                })
+                                ->whereBetween('outDate',[$startDate, $endDate])
                                 ->get();
 
         $prePayroll = new SPrePayroll();
