@@ -56,9 +56,9 @@ class SDataProcess {
 
         // return $lDataWSun;
 
-        // $lAllData = SOverJourneyCore::processOverTimeByOverJourney($lDataWSun, $sStartDate);
+        $lAllData = SOverJourneyCore::processOverTimeByOverJourney($lDataWSun, $sStartDate);
 
-        return $lDataWSun;
+        return $lAllData;
     }
 
     /**
