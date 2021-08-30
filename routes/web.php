@@ -107,11 +107,7 @@ Route::get('report/reporteIncidenciasGenerar', 'ReporteController@incidentReport
 Route::get('prepayrollrowadjusts', 'prepayrollAdjustController@getAdjustsFromRow')->name('ajustes_renglon');
 Route::post('prepayrolladjust', 'prepayrollAdjustController@storeAdjust')->name('guardar_ajuste');
 Route::delete('prepayrolladjust/{id}', 'prepayrollAdjustController@deleteAdjust')->name('eliminar_ajuste');
-Route::get('prepayrollcontrols', 'prePayrollController@indexS')->name('control_semana');
-Route::get('prepayrollcontrolq', 'prePayrollController@indexQ')->name('control_quincena');
-Route::get('prepayrollbinn/{id}', 'prePayrollController@prepayrollBinnacle')->name('bitacora_pre');
-Route::get('prepayrolls', 'prePayrollController@prepayrolls')->name('bitacora_reg_s');
-Route::get('prepayrolls/fuera/{id}', 'prePayrollController@prepayrollFuera')->name('bitacora_fuera');
+
 /* RUTAS DE GRUPO DEPARTAMENTO USUARIO */
 Route::get('deptgroupuser', 'deptgroupuserController@index')->name('dgu');
 Route::get('deptgroupuser/create', 'deptgroupuserController@create')->name('crear_dgu');

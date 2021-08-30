@@ -139,7 +139,6 @@ Usuarios
                         @foreach ($datas as $data)
                         <tr>
                             <td>{{$data->name}}</td>
-                            <td>{{$data->username}}</td>
                             <td>{{$data->email}}</td>
                             @if($data->employee == null)
                                 <td>No definido</td>
