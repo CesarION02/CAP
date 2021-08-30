@@ -47,8 +47,8 @@
             <form action="{{route('login_post')}}" method="POST" autocomplete="off">
                 @csrf
                 <div class="form-group has-feedback">
-                    <input type="text" name="email" class="form-control" value="{{old('email')}}" placeholder="Correo">
-                    <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
+                    <input type="text" name="name" class="form-control" value="{{old('name')}}" placeholder="Correo">
+                    <span class="glyphicon glyphicon-user form-control-feedback"></span>
                 </div>
                 <div class="form-group has-feedback">
                     <input type="password" name="password" class="form-control" placeholder="Contraseña">

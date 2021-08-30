@@ -26,7 +26,13 @@ class shiftprogrammingController extends Controller
      */
     public function index($id)
     {   
-        $typeArea = $id;
+        //$typeArea = $id;
+        $dgu = DB::table('group_dept_user')
+                    ->where('user_id',$id)
+                    ->select('groupdept_id AS id')
+                    ->get();
+        $typeArea = $dgu[0]->id;
+            
         $week = DB::table('pdf_week')
                 ->join('week','week.id','=','pdf_week.week_id')
                 ->select('week.start_date AS start','week.end_date AS end','week.id AS id')
@@ -351,6 +357,7 @@ class shiftprogrammingController extends Controller
         $flagPDF =0;
         $deleteFlag = 0;
         $nombrePdf = 0;
+        $typearea = $request->typeArea;
         if($request->weekFlag == 0){
             $week = new week();
         }else{
@@ -421,7 +428,7 @@ class shiftprogrammingController extends Controller
                                         }
                                     }
                                 }
-                             $flagPDF = 1;      
+                                   
                             }
                         }
 
@@ -431,14 +438,20 @@ class shiftprogrammingController extends Controller
                
                 //$mod_date = strtotime($date."+ 2 days");
             }
+            $flagPDF = 1;
         }
         if($flagPDF == 1){
-            $this->pdf($week->id);
-            $nombrePdf = 'RolTur'.$week->week_number.''.$week->year.'.pdf';
+            $this->pdf($week->id,$typearea);
+            $codigo = DB::table('department_group')
+                            ->where('id',$typearea)
+                            ->get();
+            
+            $nombrePdf = 'RolTur'.$week->week_number.''.$week->year.''.$codigo[0]->code.'.pdf';
             if($request->pdfFlag == 0){
                 $guardarPdf = new pdf_week();
+                $guardarPdf->dept_group_id = $typearea;
             }else{
-                $guardarPdf = pdf_week::where('week_id','=',$week->id)->first();
+                $guardarPdf = pdf_week::where('week_id','=',$week->id)->where('dept_group_id','=',$typearea)->first();
             }
             
             $guardarPdf->week_id = $week->id;
@@ -451,10 +464,13 @@ class shiftprogrammingController extends Controller
 
     }
 
-    public function pdf($id){
+    public function pdf($id,$typearea){
 
         $week = week::findOrFail($id);
-        $nombrePdf = 'RolTur'.$week->week_number.''.$week->year;
+        $codigo = DB::table('department_group')
+                            ->where('id',$typearea)
+                            ->get();
+        $nombrePdf = 'RolTur'.$week->week_number.''.$week->year.''.$codigo[0]->code;
         $formateoIni = explode('-',$week->start_date);
         $fechaInicio = $formateoIni[2].'-'.$formateoIni[1].'-'.$formateoIni[0];
         $dias = array('','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo');
@@ -483,9 +499,20 @@ class shiftprogrammingController extends Controller
 
         $titulo = 'Rol de turnos del '.$fini.' '.$formateoIni[2].' al '.$fin.' '.$formateoFin[2].' de '.$nombreMes.' de '.$formateoFin[0];
         PDF::Cell(170,10, $titulo,0,false,'C',0,'',1,false,'M','M');
+        $grupo = DB::table('departments')
+                    ->where('dept_group_id',$typearea)
+                    ->where('is_delete',0)
+                    ->select('id AS id')
+                    ->get();
+        $Agrupo = [];
+        for($x=0;count($grupo)>$x;$x++){
+            $Agrupo[$x]=$grupo[$x]->id;
+        }
+        
         $departments = DB::table('week_department')
                         ->join('departments','week_department.department_id','=','departments.id')
                         ->where('week_id',$week->id)
+                        ->whereIn('departments.id',$Agrupo)
                         ->select('departments.id AS idDepartment', 'departments.name AS nameDepartment','week_department.status AS status','week_department.group_id AS group')
                         ->get();
         $ejeX = 10;
@@ -764,6 +791,7 @@ class shiftprogrammingController extends Controller
                         ->join('day_workshifts_employee','day_workshifts.id','=','day_workshifts_employee.day_id')
                         ->join('employees','day_workshifts_employee.employee_id','=','employees.id')
                         ->join('jobs','day_workshifts_employee.job_id','=','jobs.id')
+                        ->where('departments.dept_group_id',$request->typearea)
                         ->where('week_id','=',$request->semana)
                         ->select('day_workshifts_employee.job_id AS idJob','employees.id AS idEmployee','day_workshifts.workshift_id AS id','departments.id AS idD')
                         ->groupBy('employees.id','employee_id','day_workshifts_employee.job_id','employees.name','day_workshifts.workshift_id','departments.id')
@@ -772,6 +800,7 @@ class shiftprogrammingController extends Controller
         $departments = DB::table('week')
                         ->join('week_department','week.id','=','week_department.week_id')
                         ->join('departments','week_department.department_id','=','departments.id')
+                        ->where('departments.dept_group_id',$request->typearea)
                         ->where('week_id','=',$request->semana)
                         ->select('departments.id AS idDepart','departments.name AS nameDepart','week_department.group_id AS group','week_department.status AS status')
                         ->get();
@@ -819,6 +848,7 @@ class shiftprogrammingController extends Controller
                         ->join('day_workshifts_employee','day_workshifts.id','=','day_workshifts_employee.day_id')
                         ->join('employees','day_workshifts_employee.employee_id','=','employees.id')
                         ->join('jobs','day_workshifts_employee.job_id','=','jobs.id')
+                        ->where('departments.dept_group_id',$request->typearea)
                         ->where('week_id','=',$request->semana)
                         ->select('day_workshifts_employee.job_id AS idJob','employees.id AS idEmployee','day_workshifts.workshift_id AS id','departments.id AS idD')
                         ->groupBy('employees.id','employee_id','day_workshifts_employee.job_id','employees.name','day_workshifts.workshift_id','departments.id')
@@ -828,6 +858,7 @@ class shiftprogrammingController extends Controller
                         ->join('week_department','week.id','=','week_department.week_id')
                         ->join('departments','week_department.department_id','=','departments.id')
                         ->where('week_id','=',$request->semana)
+                        ->where('departments.dept_group_id',$request->typearea)
                         ->select('departments.id AS idDepart','departments.name AS nameDepart','week_department.group_id AS group','week_department.status AS status')
                         ->get();
         $workshifts = DB::table('group_workshifts')
@@ -876,6 +907,7 @@ class shiftprogrammingController extends Controller
                         ->join('employees','day_workshifts_employee.employee_id','=','employees.id')
                         ->join('jobs','day_workshifts_employee.job_id','=','jobs.id')
                         ->where('week_id','=',$request->semana)
+                        ->where('departments.dept_group_id',$request->typearea)
                         ->select('day_workshifts_employee.job_id AS idJob','employees.id AS idEmployee','day_workshifts.workshift_id AS id','departments.id AS idD')
                         ->groupBy('employees.id','employee_id','day_workshifts_employee.job_id','employees.name','day_workshifts.workshift_id','departments.id')
                         ->orderBy('employee_id')
@@ -884,6 +916,7 @@ class shiftprogrammingController extends Controller
                         ->join('week_department','week.id','=','week_department.week_id')
                         ->join('departments','week_department.department_id','=','departments.id')
                         ->where('week_id','=',$request->semana)
+                        ->where('departments.dept_group_id',$request->typearea)
                         ->select('departments.id AS idDepart','departments.name AS nameDepart','week_department.group_id AS group','week_department.status AS status')
                         ->get();
         $workshifts = DB::table('group_workshifts')
