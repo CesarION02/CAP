@@ -27,8 +27,12 @@ class shiftprogrammingController extends Controller
     public function index($id)
     {   
         //$typeArea = $id;
+        $numero = session()->get('name');
+            $usuario = DB::table('users')
+                    ->where('name',$numero)
+                    ->get();
         $dgu = DB::table('group_dept_user')
-                    ->where('user_id',$id)
+                    ->where('user_id',$usuario[0]->id)
                     ->select('groupdept_id AS id')
                     ->get();
         $typeArea = $dgu[0]->id;
