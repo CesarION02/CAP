@@ -120,13 +120,13 @@ Incidencias
                 <h3 class="box-title">
                     @switch($iFilter)
                         @case(1)
-                            Días otorgados.
+                            Días festivos trabajados otorgados
                             @break
                         @case(2)
-                            Días pendientes de otorgar.
+                            Días festivos trabajados por otorgar
                             @break
                         @default
-                            Días otorgados y pendientes de otorgar.
+                            Días festivos otorgados y pendientes de otorgar
                     @endswitch
                 </h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:nolaborables"])

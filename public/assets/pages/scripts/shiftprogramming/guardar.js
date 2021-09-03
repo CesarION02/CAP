@@ -4,6 +4,7 @@ function guardar() {
     var weekFlag = document.getElementById("weekFlag").value;
     var departFlag = document.getElementById("departFlag").value;
     var pdfFlag = document.getElementById("pdfFlag").value;
+    var typeArea = document.getElementById("typeArea").value;
     var semana = new Date(ini).getWeekNumber();
     var departamento = [];
     var cerrado = [];
@@ -119,7 +120,7 @@ function guardar() {
     $.ajax({
         type: 'post',
         url: 'guardar',
-        data: { 'ini': ini, 'fin': fin, 'semana': semana, 'departamento': departamento, 'turno': turno, 'cerrado': cerrado, 'turnoflag': turnoflag, 'nombreEmpleado': nombreEmpleado, 'Empleado': Empleado, 'arrDept': arrDept, 'arrTurno': arrTurno, 'arrJob': arrJob, 'arrCalendarioEmpleados': arrCalendarioEmpleados, 'arrCalendarioDias': arrCalendarioDias, 'weekFlag': weekFlag, 'departFlag': departFlag, 'pdfFlag': pdfFlag },
+        data: { 'ini': ini, 'fin': fin, 'semana': semana, 'departamento': departamento, 'turno': turno, 'cerrado': cerrado, 'turnoflag': turnoflag, 'nombreEmpleado': nombreEmpleado, 'Empleado': Empleado, 'arrDept': arrDept, 'arrTurno': arrTurno, 'arrJob': arrJob, 'arrCalendarioEmpleados': arrCalendarioEmpleados, 'arrCalendarioDias': arrCalendarioDias, 'weekFlag': weekFlag, 'departFlag': departFlag, 'pdfFlag': pdfFlag, 'typeArea': typeArea },
 
         success: function(data) {
             swal("Guadado", "La programacion se guardo con exito", "sucess");

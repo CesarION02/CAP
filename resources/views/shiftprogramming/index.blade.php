@@ -59,7 +59,7 @@ Programacion de turnos
                       @endif
                     </div>
                     <div class="row">
-                        <input type="hidden" value="{{$typeArea}}" id="typeArea">
+                        
                         <div class="col-md-3" id="listanueva">
   
                         </div>
@@ -71,6 +71,7 @@ Programacion de turnos
                     <div class="row" id="calendario">
                       
                     </div> 
+                    <input type="hidden" value="{{$typeArea}}" id="typeArea" name="typeArea">
                     <input type="hidden" id="weekFlag" name="weekFlag" value=0>
                     <input type="hidden" id="departFlag" name="departFlag" value=0>
                     <input type="hidden" id="pdfFlag" name="departFlag" value=0>
