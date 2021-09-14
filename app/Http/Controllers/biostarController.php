@@ -289,7 +289,7 @@ class biostarController extends Controller
                 if(count($employee_id) == 0){
                     continue;
                 }
-                $repetido = DB::table('registers')->where('biostar_id',$lEvents[$i]->biostar_id)->where('employee_id',$employee_id[0]->id)->where('is_delete',0)->get();
+                $repetido = DB::table('registers')->where('biostar_id',$lEvents[$i]->biostar_id)->where('employee_id',$employee_id[0]->id)->where('date',$lEvents[$i]->date)->where('is_delete',0)->get();
                 if(count($repetido) != 0){
                     continue;
                 }
