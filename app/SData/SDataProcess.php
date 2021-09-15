@@ -741,11 +741,11 @@ class SDataProcess {
             if (! $oRow->workable) {
                 continue;
             }
-            if ($oRow->inDateTimeSch == null) {
-                $sDt = Carbon::parse($oRow->inDateTime);
+            if ($oRow->outDateTimeSch == null) {
+                $sDt = Carbon::parse($oRow->outDateTime);
             }
             else {
-                $sDt = Carbon::parse($oRow->inDateTimeSch);
+                $sDt = Carbon::parse($oRow->outDateTimeSch);
             }
 
             $lAbsences = prePayrollController::searchAbsence($oRow->idEmployee, $sDt->toDateString());
