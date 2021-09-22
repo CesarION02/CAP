@@ -17,4 +17,8 @@ class job extends Model
         return $this->hasMany('App\Models\employees');
     }
 
+    public function policyHoliday(){
+        return $this->belongsTo('App\Models\policyHoliday','policy_holiday_id');
+    }
+
 }

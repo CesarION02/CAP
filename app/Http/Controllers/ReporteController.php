@@ -19,6 +19,7 @@ use App\SData\SDataProcess;
 use DB;
 use Carbon\Carbon;
 use App\SUtils\SReg;
+use GuzzleHttp\Client as GuzzleClient;
 
 class ReporteController extends Controller
 {
@@ -739,7 +740,7 @@ class ReporteController extends Controller
             
         }
         $prueba = SInfoWithPolicy::preProcessInfo($sStartDate,$year,$sEndDate,$payWay,0);
-        SHolidayWork::holidayworked($sStartDate,$sEndDate);
+        //SHolidayWork::holidayWorked($sStartDate,$sEndDate);
         
         //$lEmployees[0] = 32; 
         $lRows = DB::table('processed_data')
@@ -1626,5 +1627,163 @@ class ReporteController extends Controller
         
 
             return view('report.incidentReportGenerar')->with('datas',$datas)->with('tipo',$tipo);
+        }
+
+        public function reporteUsoPuertas(){
+            $rez = biostarController::login();
+
+            if ($rez == null) {
+                return null;
+            }
+
+            $headers = [
+                'Content-Type' => 'application/json',
+                'bs-session-id' => $rez,
+                'Accept-Encoding' => 'gzip, deflate, br'
+            ];
+
+            $config = \App\SUtils\SConfiguration::getConfigurations(); 
+        
+        
+            $client = new GuzzleClient([
+                // Base URI is used with relative requests
+                'base_uri' => $config->urlBiostar."/api/",
+                // You can set any number of default request options.
+                'timeout'  => 5.0,
+                'headers' => $headers,
+                'verify' => false
+            ]);
+            
+            $r = $client->request('GET', 'devices', []);
+            $response = $r;
+            $response = $r->getBody()->getContents();
+            $datas = json_decode($response);
+            $reportType = 1;
+            $lEmployees = employees::where('is_active', 1)->pluck('id','name');
+            $lAreas = area::where('is_delete', 0)->pluck('id','name');
+            return view('report.usopuertasdatos')->with('datas',$datas)->with('lEmployees',$lEmployees)->with('lAreas',$lAreas);
+        }
+
+        public function generarReportePuertas(Request $request){
+            $rez = biostarController::login();
+            $Sempleados = "";
+            $Sdevice = "";
+            $fecha_ini = Carbon::parse($request->start_date);
+            $fecha_ini = $fecha_ini->toISOString();
+            $fecha_fin = Carbon::parse($request->end_date);
+            $fecha_fin->addHours(23);
+            $fecha_fin = $fecha_fin->toISOString();
+            if ($rez == null) {
+                return null;
+            }
+            switch($request->tipo){
+                case 1: 
+                    $employees = DB::table('employees')
+                                        ->join('departments','departments.id','=','employees.department_id')
+                                        ->join('areas','areas.id','=','departments.area_id')
+                                        ->whereIn('departments.area_id',$request->areas)
+                                        ->where('employees.is_active',1)
+                                        ->where('employees.biostar_id','>',0)
+                                        ->select('employees.biostar_id AS biostar')
+                                        ->get();
+                    for($i = 0 ; count($employees) > $i ; $i++){
+                        if($i == 0){
+                            $Sempleados = $Sempleados.$employees[$i]->biostar;
+                        }else{
+                            $Sempleados = $Sempleados . '","' . $employees[$i]->biostar;   
+                        }
+                    }
+                    break;
+                case 2:
+                    $employees = DB::table('employees')
+                                        ->whereIn('employees.id',$request->employees)
+                                        ->select('employees.biostar_id AS biostar')
+                                        ->get();
+                    for($i = 0 ; count($employees) > $i ; $i++){
+                        if($i == 0){
+                            $Sempleados = $Sempleados.$employees[$i]->biostar;
+                        }else{
+                            $Sempleados = $Sempleados . '","' . $employees[$i]->biostar;   
+                        }
+                    }
+                    break;
+            }
+
+            for($i = 0 ; count($request->devices) > $i ; $i++){
+                if($i == 0){
+                    $Sdevice = $Sdevice.$request->devices[$i];
+                }else{
+                    $Sdevice = $Sdevice . '","' . $request->devices[$i];   
+                }
+            }
+
+            $headers = [
+                'Content-Type' => 'application/json',
+                'bs-session-id' => $rez,
+                'Accept-Encoding' => 'gzip, deflate, br'
+            ];
+
+            $config = \App\SUtils\SConfiguration::getConfigurations(); 
+        
+        
+            $client = new GuzzleClient([
+                // Base URI is used with relative requests
+                'base_uri' => $config->urlBiostar."/api/",
+                // You can set any number of default request options.
+                'timeout'  => 5.0,
+                'headers' => $headers,
+                'verify' => false
+            ]);
+            
+            $body = '{
+                "Query": {
+                  "limit": 10000000,
+                  "conditions": [
+                    {
+                      "column": "event_type_id.code",
+                      "operator": 2,
+                      "values": [
+                        "4865"
+                      ]
+                    },
+                    {
+                      "column": "datetime",
+                      "operator": 3,
+                      "values": [
+                        "'.$fecha_ini.'", "'.$fecha_fin.'"
+                      ]
+                    },
+                    {
+                      "column":"device_id.id",
+                      "operator": 2,
+                      "values": [
+                        "'.$Sdevice.'"
+                      ]
+                    },
+                    {
+                        "column":"user_id.user_id",
+                        "operator": 2,
+                        "values": [
+                          "'.$Sempleados.'"
+                        ]
+                    }
+                  ],
+                  "orders": [
+                    {
+                      "column": "datetime",
+                      "descending": false
+                    }
+                  ]
+                }
+              }';
+            
+            $r = $client->request('POST', 'events/search', [
+                'body' => $body
+            ]);
+            $response = $r;
+            $response = $r->getBody()->getContents();
+            $data = json_decode($response);
+
+            return view('report.reportepuerta')->with('data',$data);
         }
 }

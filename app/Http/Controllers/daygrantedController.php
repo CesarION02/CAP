@@ -185,4 +185,8 @@ class daygrantedController extends Controller
 
         return redirect()->back()->with('mensaje', 'Días festivos trabajados ingresados');
     }
+
+    public function cancelholiday($id){
+
+    }
 }

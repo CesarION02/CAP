@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\area;
 use App\Models\employees;
+use App\Models\policyHoliday;
 
 class areaController extends Controller
 {
@@ -33,6 +34,7 @@ class areaController extends Controller
 
         $datas->each(function($datas){
             $datas->boss;
+            $datas->policyHoliday;
         });
         
         return view('area.index', compact('datas'))->with('iFilter',$iFilter);
@@ -46,7 +48,8 @@ class areaController extends Controller
     public function create()
     {
         $employees = employees::where('is_active','1')->orderBy('name','ASC')->pluck('id','name');
-        return view('area.create')->with('employees',$employees);
+        $policyh = policyHoliday::orderBy('id','ASC')->pluck('id','name');
+        return view('area.create')->with('employees',$employees)->with('policyh',$policyh);
     }
 
     /**
@@ -60,6 +63,8 @@ class areaController extends Controller
         $area = area::create($request->all());
         $id = session()->get('user_id');
         $name = session()->get('name');
+        $area->boss_id = $request->boss_id;
+        $area->policy_holiday_id = $request->policy_holiday_id;
         $area->updated_by = session()->get('user_id');
         $area->created_by = session()->get('user_id');
         $area->save();
@@ -87,7 +92,8 @@ class areaController extends Controller
     {
         $data = area::findOrFail($id);
         $employees = employees::where('is_active','1')->orderBy('name','ASC')->pluck('id','name');
-        return view('area.edit', compact('data'))->with('employees',$employees);
+        $policyh = policyHoliday::orderBy('id','ASC')->pluck('id','name');
+        return view('area.edit', compact('data'))->with('employees',$employees)->with('policyh',$policyh);
     }
 
     /**
@@ -101,6 +107,8 @@ class areaController extends Controller
     {
         $area = area::findOrFail($id);
         $area->updated_by = session()->get('user_id');
+        $area->boss_id = $request->boss_id;
+        $area->policy_holiday_id = $request->policy_holiday_id;
         $area->update($request->all());
         return redirect('area')->with('mensaje', 'Área actualizada con éxito');
     }

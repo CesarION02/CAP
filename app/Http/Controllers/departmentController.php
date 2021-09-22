@@ -7,6 +7,7 @@ use App\Models\department;
 use App\Models\area;
 use App\Models\DepartmentRH;
 use App\Models\employees;
+use App\Models\policyHoliday;
 
 class departmentController extends Controller
 {
@@ -26,6 +27,7 @@ class departmentController extends Controller
                     $datas->area;
                     $datas->rh;
                     $datas->boss;
+                    $datas->policyHoliday;
                 });
                 break;
             case 2:
@@ -34,6 +36,7 @@ class departmentController extends Controller
                     $datas->area;
                     $datas->rh;
                     $datas->boss;
+                    $datas->policyHoliday;
                 });
                 break;
             
@@ -43,6 +46,7 @@ class departmentController extends Controller
                     $datas->area;
                     $datas->rh;
                     $datas->boss;
+                    $datas->policyHoliday;
                 });
                 break;
         }
@@ -60,7 +64,8 @@ class departmentController extends Controller
         $area = area::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
         $deptrhs = DepartmentRH::where('is_delete',0)->orderBy('name', 'ASC')->pluck('id','name');
         $employees = employees::where('is_active','1')->orderBy('name','ASC')->pluck('id','name');
-        return view('department.create')->with('areas',$area)->with('deptrhs',$deptrhs)->with('employees',$employees);
+        $policyh = policyHoliday::orderBy('id','ASC')->pluck('id','name');
+        return view('department.create')->with('areas',$area)->with('deptrhs',$deptrhs)->with('employees',$employees)->with('policyh',$policyh);
     }
 
     /**
@@ -74,6 +79,7 @@ class departmentController extends Controller
         $department = department::create($request->all());
         $department->rh_department_id = $request->rh_department_id;
         $department->boss_id = $request->boss_id;
+        $department->policy_holiday_id = $request->policy_holiday_id;
         $department->updated_by = session()->get('user_id');
         $department->created_by = session()->get('user_id');
         $department->save();
@@ -103,7 +109,8 @@ class departmentController extends Controller
         $data = department::findOrFail($id);
         $deptrhs = DepartmentRH::where('is_delete',0)->orderBy('name', 'ASC')->pluck('id','name');
         $employees = employees::where('is_active','1')->orderBy('name','ASC')->pluck('id','name');
-        return view('department.edit', compact('data'))->with('areas',$area)->with('deptrhs',$deptrhs)->with('employees',$employees);
+        $policyh = policyHoliday::orderBy('id','ASC')->pluck('id','name');
+        return view('department.edit', compact('data'))->with('areas',$area)->with('deptrhs',$deptrhs)->with('employees',$employees)->with('policyh',$policyh);
     }
 
     /**
@@ -118,6 +125,7 @@ class departmentController extends Controller
         $department = department::findOrFail($id);
         $department->rh_department_id = $request->rh_department_id;
         $department->boss_id = $request->boss_id;
+        $department->policy_holiday_id = $request->policy_holiday_id;
         $department->updated_by = session()->get('user_id');
         $department->update($request->all());
         return redirect('department')->with('mensaje', 'Departamento actualizado con éxito');

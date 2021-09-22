@@ -100,6 +100,8 @@ Route::get('report/reporteRetardos','ReporteController@genDelayReport')->name('g
 Route::get('report/viewReporteRetardos','ReporteController@delaysReport')->name('reporteRetardos');
 Route::get('report/reportetiemposextra','ReporteController@genHrExReport')->name('generarreportetiemposextra');
 Route::get('report/viewtiemposextra','ReporteController@hrExtReport')->name('reportetiemposextra');
+Route::get('report/usoPuertasDatos', 'ReporteController@reporteUsoPuertas')->name('reporteusopuertasdatos');
+Route::get('report/generarreportepuertas','ReporteController@generarReportePuertas')->name('generarreportepuertas');
 /* Reporte incidencias */
 Route::get('report/reporteIncidencias', 'ReporteController@incidentReportView')->name('reporteIncidencias');
 Route::get('report/reporteIncidenciasGenerar', 'ReporteController@incidentReportGenerar')->name('reporteIncidenciasGenerar');
@@ -349,6 +351,7 @@ Route::get('biostar/login', 'biostarController@login')->name('biostar_login');
 Route::get('biostar/insertevents', 'biostarController@insertEvents')->name('insert_biostar_events');
 Route::get('biostar/colabvsbiostar', 'employeeController@colabVsBiostar')->name('colab_vs_biostar_index');
 Route::put('biostar/updatebiostarid', 'biostarController@updateBiostarId')->name('upd_biostar_id');
+
 
 /* RUTAS PERMISO_ROL */
 Route::get('permiso-rol', 'permisorolController@index')->name('permiso_rol');

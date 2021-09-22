@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\department;
 use App\Models\area;
 use App\Models\job;
+use App\Models\policyHoliday;
 
 class jobController extends Controller
 {
@@ -23,12 +24,14 @@ class jobController extends Controller
                 $datas = job::where('is_delete','0')->orderBy('name')->get();
                 $datas->each(function($datas){
                     $datas->department;
+                    $datas->policyHoliday;
                 });
                 break;
             case 2:
                 $datas = job::where('is_delete','1')->orderBy('name')->get();
                 $datas->each(function($datas){
                     $datas->department;
+                    $datas->policyHoliday;
                 });
                 break;
             
@@ -36,6 +39,7 @@ class jobController extends Controller
                 $datas = job::orderBy('name')->get();
                 $datas->each(function($datas){
                     $datas->department;
+                    $datas->policyHoliday;
                 });
                 break;
         }
@@ -51,7 +55,8 @@ class jobController extends Controller
     public function create()
     {
         $department = department::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
-        return view('job.create')->with('departments',$department);;
+        $policyh = policyHoliday::orderBy('id','ASC')->pluck('id','name');
+        return view('job.create')->with('departments',$department)->with('policyh',$policyh);
     }
 
     /**
@@ -65,6 +70,7 @@ class jobController extends Controller
         $job = job::create($request->all());
         $job->updated_by = session()->get('user_id');
         $job->created_by = session()->get('user_id');
+        $job->policy_holiday_id = $request->policy_holiday_id;
         $job->save();
         return redirect('job')->with('mensaje','Puesto fue creado con éxito');
     }
@@ -89,8 +95,9 @@ class jobController extends Controller
     public function edit($id)
     {
         $department = department::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
+        $policyh = policyHoliday::orderBy('id','ASC')->pluck('id','name');
         $data = job::findOrFail($id);
-        return view('job.edit', compact('data'))->with('departments',$department);
+        return view('job.edit', compact('data'))->with('departments',$department)->with('policyh',$policyh);
     }
 
     /**
@@ -104,6 +111,7 @@ class jobController extends Controller
     {
         $job = job::findOrFail($id);
         $job->updated_by = session()->get('user_id');
+        $job->policy_holiday_id = $request->policy_holiday_id;
         $job->update($request->all());
         return redirect('job')->with('mensaje', 'Puesto actualizado con éxito');
     }

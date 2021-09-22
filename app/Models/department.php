@@ -45,4 +45,8 @@ class department extends Model
         return $this->belongsTo('App\Models\employees','boss_id');
     }
 
+    public function policyHoliday(){
+        return $this->belongsTo('App\Models\policyHoliday','policy_holiday_id');
+    }
+
 }

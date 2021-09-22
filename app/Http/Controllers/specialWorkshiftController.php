@@ -237,6 +237,11 @@ class specialWorkshiftController extends Controller
     {
         $dateI = Carbon::parse($request->datei);
         $dateS = Carbon::parse($request->dates);
+
+        $cerrado = DB::table('prepayroll_control');
+
+
+        //return \Redirect::back()->withErrors(['Error', 'La fecha de inicio debe ser previa a la fecha final']);
         $diferencia = ($dateI->diffInDays($dateS));
 
         $special = new specialworkshift();
@@ -419,6 +424,7 @@ class specialWorkshiftController extends Controller
     {
         $specialworkshift = specialworkshift::findOrFail($id);
         $specialworkshift->is_approved =  $specialworkshift->is_approved ? false : true;
+        $specialworkshift->updated_by = session()->get('user_id');
         $specialworkshift->save();
 
         $week_department_day = DB::table('week_department_day')->where('special','=',$id)->get();
@@ -444,6 +450,7 @@ class specialWorkshiftController extends Controller
     {
         if ($request->ajax()) {
             $special = specialworkshift::findOrFail($id);
+            $special->is_approved = session()->get('user_id');
             $special->is_delete = 1;
             $special->save();
             

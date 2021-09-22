@@ -138,6 +138,7 @@ Departamentos CAP
                             <th>Área</th>
                             <th>Departamento nóminas</th>
                             <th>Encargado</th>
+                            <th>Politica días festivos</th>
                             <th>Estado</th>
                             <th class="width70"></th>
                         </tr>
@@ -152,6 +153,11 @@ Departamentos CAP
                                 <td>No definido</td>
                             @else
                                 <td>{{$data->boss->name}}</td>
+                            @endif
+                            @if($data->policyHoliday == null)
+                                <td>No definido</td>
+                            @else
+                                <td>{{$data->policyHoliday->name}}</td>
                             @endif
                             @if($data->is_delete == 0)
                                 <td>Activo</td>

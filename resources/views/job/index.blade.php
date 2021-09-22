@@ -121,6 +121,7 @@ Puestos
                         <tr>
                             <th>Puesto</th>
                             <th>Departamento CAP</th>
+                            <th>Politica días festivos</th>
                             <th>Estatus</th>
                             <th class="width70"></th>
                         </tr>
@@ -130,6 +131,11 @@ Puestos
                         <tr>
                             <td>{{$data->name}}</td>
                             <td>{{$data->department->name}}</td>
+                            @if($data->policyHoliday == null)
+                                <td>No definido</td>
+                            @else
+                                <td>{{$data->policyHoliday->name}}</td>
+                            @endif
                             @if($data->is_delete == 0)
                                 <td>Activo</td>
                             @else

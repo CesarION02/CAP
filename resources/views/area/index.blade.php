@@ -130,6 +130,7 @@
                             <th>Área</th>
                             <th>Estado</th>
                             <th>Encargado</th>
+                            <th>Politica días festivos</th>
                             <th class="width70"></th>
                         </tr>
                     </thead>
@@ -147,6 +148,11 @@
                                 <td>No definido</td>
                             @else
                                 <td>{{$data->boss->name}}</td>
+                            @endif
+                            @if($data->policyHoliday == null)
+                                <td>No definido</td>
+                            @else
+                                <td>{{$data->policyHoliday->name}}</td>
                             @endif
                             <td>
                                 <a href="{{route('editar_area', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
