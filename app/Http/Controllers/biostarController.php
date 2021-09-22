@@ -298,6 +298,9 @@ class biostarController extends Controller
                 $register->date = $lEvents[$i]->date;
                 $register->time = $lEvents[$i]->time;
                 $register->type_id = $lEvents[$i]->tna_key;
+                $register->date_original = $lEvents[$i]->date;
+                $register->time_original = $lEvents[$i]->time;
+                $register->type_original = $lEvents[$i]->tna_key;
                 $register->form_creation_id = 4;
                 $register->biostar_id = $lEvents[$i]->biostar_id;
                 $register->save();  
