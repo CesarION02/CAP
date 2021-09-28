@@ -27,7 +27,7 @@ class SOverJourneyCore {
                 $idEmployee = $oRow->idEmployee;
             }
 
-            \Log::info($oRow->employee.' '.$oRow->inDateTime);
+            // \Log::info($oRow->employee.' '.$oRow->inDateTime);
             
             again:
             if (($oRow->overtimeCheckPolicy == \SCons::OVERTIME_CHECK_POLICY_OUT && $currentDate == $oRow->outDate) || 
@@ -87,6 +87,9 @@ class SOverJourneyCore {
                             $workedTime->diffMinutes = 480;
                         }
 
+                        $oRow->overMinsTotal -= $oRow->overDefaultMins;
+                        $oRow->overDefaultMins = 0;
+
                         $oRow->overScheduleMins += $workedTime->diffMinutes;
                         $oRow->overMinsTotal += $workedTime->diffMinutes;
                         $oRow->isOverJourney = true;
@@ -102,6 +105,9 @@ class SOverJourneyCore {
                             $oRow->overScheduleMins += $extra;
                             $oRow->overMinsTotal += $extra;
                             $journeyMin = 480;
+
+                            $oRow->overMinsTotal -= $oRow->overDefaultMins;
+                            $oRow->overDefaultMins = 0;
                         }
                         else {
                             // si no, solo se acumulan los minutos trabajados en este rango de tiempo
@@ -125,6 +131,73 @@ class SOverJourneyCore {
                     goto again;
                 }
             }
+        }
+
+        return $lData;
+    }
+
+    /**
+     * Si un empleado trabaja en un día menos de los minutos configurados como rango mínimo se le otorgarán como minutos extra,
+     * Es decir, si un empleado en un día solo trabajo dos horas y el tiempo configurado es 4 horas, esas dos horas trabajas se le darán
+     * como tiempo extra y el día será puesto como descanso
+     *
+     * @param collection $lData
+     * 
+     * @return collection $lData
+     */
+    public static function overtimeByIncompleteJourney($lData)
+    {
+        $idEmployee = 0;
+        $currentDate = null;
+        $previousDate = null;
+        $workedMinutes = 0;
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+        for ($i = 0; $i < count($lData); $i++) {
+            $oRow = $lData[$i];
+            $currentDate = $oRow->outDate;
+
+            if ($idEmployee != $oRow->idEmployee) {
+                $idEmployee = $oRow->idEmployee;
+                $previousDate = null;
+                $workedMinutes = 0;
+            }
+
+            if ($previousDate != $currentDate && $previousDate != null) {
+                $oPrevRow = $lData[$i-1];
+                $workedMinutes += SDelayReportUtils::compareDates($oPrevRow->inDateTime, $oPrevRow->outDateTime)->diffMinutes;
+                
+                if ($workedMinutes <= $config->maxOvertimeJourneyMinutes && $workedMinutes > 0) {
+                    $oPrevRow->overWorkedMins += $workedMinutes;
+                    $oPrevRow->overMinsTotal += $workedMinutes;
+                    $oPrevRow->isDayOff++;
+
+                    $j = $i-2;
+                    $oPrePrevRow = $lData[$j];
+                    while ($oPrePrevRow->outDate == $oPrevRow->outDate) {
+                        $oPrePrevRow->isDayOff++;
+                        
+                        if ($j == 0) {
+                            break;
+                        }
+
+                        $oPrePrevRow = $lData[--$j];
+                    }
+                }
+
+                $workedMinutes = 0;
+            }
+
+            if (! $oRow->hasChecks || ! $oRow->hasCheckIn || ! $oRow->hasCheckOut) {
+                $previousDate = $oRow->outDate;
+                continue;
+            }
+
+            if ($previousDate == $currentDate) {
+                $oPrevRow = $lData[$i-1];
+                $workedMinutes += SDelayReportUtils::compareDates($oPrevRow->inDateTime, $oPrevRow->outDateTime)->diffMinutes;
+            }
+
+            $previousDate = $oRow->outDate;
         }
 
         return $lData;

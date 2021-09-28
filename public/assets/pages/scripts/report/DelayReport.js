@@ -26,6 +26,9 @@ var app = new Vue({
                     return 'delays';
                 }
             }
+            if ((oRow.events.length > 0 || oRow.isDayOff > 0 || oRow.isHoliday > 0 || oRow.dayInhability > 0 || oRow.dayVacations > 0) && oRow.hasChecks) {
+                return 'events'
+            }
         },
         newAdjust() {
             let applyTo = 0;

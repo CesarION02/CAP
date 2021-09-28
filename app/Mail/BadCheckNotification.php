@@ -37,7 +37,7 @@ class BadCheckNotification extends Mailable implements ShouldQueue
      */
     public function build()
     {
-        return $this->from('edwin.carmona@swaplicado.com.mx')
+        return $this->from('cap@swaplicado.com.mx')
                         ->subject('Aviso CAP Control de Acceso')
                         ->view('mails.badcheck')
                         ->with('employeeName', $this->employeeName)

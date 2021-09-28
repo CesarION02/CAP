@@ -14,6 +14,10 @@
     background-color: slategrey;
 }
 
+.events {
+    background-color: #e7c6ff;
+}
+
 #myBtn {
     display: none;
     /* Hidden by default */
