@@ -12,7 +12,7 @@ var app = new Vue({
     },
     methods: {
         getCssClass(oRow, report) {
-            if (oRow.hasAbsence || !oRow.hasCheckOut || !oRow.hasCheckIn) {
+            if ((oRow.hasAbsence || !oRow.hasCheckOut || !oRow.hasCheckIn) && (oRow.events.length == 0)) {
                 return 'absence';
             }
             if (oRow.hasSchedule == false && oRow.hasChecks == false) {
@@ -25,6 +25,13 @@ var app = new Vue({
                 if (oRow.entryDelayMinutes > 0) {
                     return 'delays';
                 }
+            }
+            if (oRow.events.length > 0 && !oRow.hasChecks) {
+                return 'ext-events';
+            }
+            if ((oRow.events.length > 0 || oRow.isDayOff > 0 || oRow.isHoliday > 0 || oRow.dayInhability > 0 || oRow.dayVacations > 0) &&
+                (oRow.hasChecks || oRow.hasCheckOut)) {
+                return 'events'
             }
         },
         newAdjust() {

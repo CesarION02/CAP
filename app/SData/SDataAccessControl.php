@@ -5,14 +5,23 @@ use App\SUtils\SDelayReportUtils;
 use App\SUtils\SAuxEvent;
 use App\SUtils\SAuxSchedule;
 use App\Http\Controllers\prePayrollController;
+use Illuminate\Support\Facades\Mail;
+
+use App\Mail\BadCheckNotification;
 
 class SDataAccessControl {
 
+    const IS_INACTIVE = 1;
+    const INCIDENTS = 2;
+    const OTHERS = 3;
+    const AUTHORIZED = 4;
+
     public static function getEmployee($id)
     {
-        $employee = \DB::table('employees')
-                    ->where('id', $id)
-                    ->select('id', 'name', 'num_employee', 'external_id', 'is_active', 'is_delete')
+        $employee = \DB::table('employees AS e')
+                    ->join('departments AS d', 'd.id', '=', 'e.department_id')
+                    ->select('e.id', 'e.name', 'e.num_employee', 'e.external_id', 'e.is_active', 'e.is_delete', 'd.area_id')
+                    ->where('e.id', $id)
                     ->get();
 
         if (sizeof($employee) > 0) {
@@ -86,7 +95,8 @@ class SDataAccessControl {
             'type_id' => 1
         ];
         
-        $result = SDelayReportUtils::getSchedule($dtDate, $dtDate, $id, $registry, clone $lWorkshifts, \SCons::REP_DELAY);
+        $specialApproved = false;
+        $result = SDelayReportUtils::getSchedule($dtDate, $dtDate, $id, $registry, clone $lWorkshifts, \SCons::REP_DELAY, $specialApproved);
 
         if ($result == null) {
             return null;
@@ -160,7 +170,8 @@ class SDataAccessControl {
      * @param [type] $time
      * @param [type] $inMins
      * @param [type] $outMins
-     * @return boolean
+     * 
+     * @return array [0] true or false, [1] text reason, [2] case to notification
      */
     public static function isAuthorized($oData = null, $id, $dtDate, $time, $inMins, $outMins)
     {
@@ -172,6 +183,7 @@ class SDataAccessControl {
             
             $result[0] = false;
             $result[1] = $reasons;
+            $result[2] = SDataAccessControl::IS_INACTIVE;
             
             return $result;
         }
@@ -187,6 +199,7 @@ class SDataAccessControl {
             
             $result[0] = false;
             $result[1] = $reasons;
+            $result[2] = SDataAccessControl::INCIDENTS;
             
             return $result;
         }
@@ -200,6 +213,7 @@ class SDataAccessControl {
             $reasons = "El empleado tiene programado: " . $reason . " para el día de hoy";
             $result[0] = false;
             $result[1] = $reasons;
+            $result[2] = SDataAccessControl::OTHERS;
             
             return $result;
         }
@@ -210,12 +224,14 @@ class SDataAccessControl {
             if (SDataAccessControl::isOnShift($oData->schedule->inDateTimeSch, $oData->schedule->outDateTimeSch,  $dtDate . ' ' . $time, $inMins, $outMins)) {
                 $result[0] = true;
                 $result[1] = "Autorizado";
+                $result[2] = SDataAccessControl::AUTHORIZED;
             
                 return $result;
             }
             else {
                 $result[0] = false;
                 $result[1] = "Fuera del horario permitido. Revise horario";
+                $result[2] = SDataAccessControl::OTHERS;
             
                 return $result;
             }
@@ -234,12 +250,14 @@ class SDataAccessControl {
                 }
 
                 $result[1] = $reason;
+                $result[2] = SDataAccessControl::AUTHORIZED;
 
                 return $result;
             }
 
             $result[0] = false;
             $result[1] = "El empleado no tiene horario asignado para el día de hoy";
+            $result[2] = SDataAccessControl::OTHERS;
             
             return $result;
         }
@@ -268,6 +286,98 @@ class SDataAccessControl {
         $res = $oDateTime->between($oInDateTimeSch, $oOutDateTimeSch, true);
 
         return $res;
+    }
+
+    public static function evaluateToSend($idEmployee, $dateTime)
+    {
+        $dtDate = Carbon::parse($dateTime)->toDateString();
+        $dtDateTime = $dateTime;
+
+        $oEmployee = SDataAccessControl::getEmployee($idEmployee);
+        $result = SDataAccessControl::checkSimpleAccess($oEmployee, $dtDate);
+
+        if ($result[0]) {
+            return;
+        }
+
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+
+        $rec[] = null;
+        if ($oEmployee->area_id = 1) {
+            $rec = $config->rec_office;
+        }
+        else {
+            $rec = $config->rec_plant;
+        }
+
+        Mail::to($rec)
+                ->send(new BadCheckNotification($oEmployee->name, $dateTime, $result[1]));
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param object $idEmployee
+     * @param string $dateTime
+     * @return void
+     */
+    public static function checkSimpleAccess($oEmployee, string $dateTime)
+    {
+        $oData = (object) ['employee' => null,
+                            'absences' => null,
+                            'events' => null
+                            ];
+
+        $idEmployee = $oEmployee->id;
+        $oData->employee = $oEmployee;
+        $oData->absences = SDataAccessControl::getAbsences($idEmployee, $dateTime);
+        $oData->events = SDataAccessControl::getEvents($idEmployee, $dateTime);
+
+        if (! $oData->employee->is_active || $oData->employee->is_delete) {
+            $reasons = "El empleado está desactivado en el sistema";
+            
+            $result[0] = false;
+            $result[1] = $reasons;
+            $result[2] = SDataAccessControl::IS_INACTIVE;
+
+            return $result;
+        }
+
+        // Si el empleado tiene incidencias programadas
+        if ($oData->absences != null && count($oData->absences) > 0) {
+            $reason = "";
+            foreach ($oData->absences as $abs) {
+                $reason = $reason == "" ? $abs->type_name : ($reason . ", " . $abs->type_name);
+            }
+            
+            $reasons = "El empleado tiene incidencias: " . $reason . " para el día ".Carbon::parse($dateTime)->format('d-m-Y');
+            
+            $result[0] = false;
+            $result[1] = $reasons;
+            $result[2] = SDataAccessControl::INCIDENTS;
+
+            return $result;
+        }
+
+         // Si el empleado tiene eventos programados
+         if ($oData->events != null && count($oData->events) > 0) {
+            foreach ($oData->events as $event) {
+                $reason = $reason == "" ? $event->typeName : ($reason.", ".$event->typeName);
+            }
+
+            $reasons = "El empleado tiene programado: " . $reason . " para el día de hoy";
+            $result[0] = false;
+            $result[1] = $reasons;
+            $result[2] = SDataAccessControl::INCIDENTS;
+
+            return $result;
+        }
+
+        $result[0] = true;
+        $result[1] = 'Autorizado';
+        $result[2] = SDataAccessControl::AUTHORIZED;
+
+        return $result;
     }
 
 }

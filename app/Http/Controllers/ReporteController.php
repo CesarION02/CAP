@@ -12,6 +12,7 @@ use App\Models\DepartmentRH;
 use App\Models\typeincident;
 use App\Models\departmentsGroup;
 use App\SUtils\SDelayReportUtils;
+use App\SUtils\SReportsUtils;
 use App\SUtils\SInfoWithPolicy;
 use App\SUtils\SHolidayWork;
 use App\SUtils\SGenUtils;
@@ -185,7 +186,7 @@ class ReporteController extends Controller
                                     ->join('departments AS d', 'd.id', '=', 'j.department_id')
                                     ->join('areas AS a', 'a.id', '=', 'd.area_id')
                                     ->whereIn('a.id', $values)
-                                    ->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id','a.name AS areaname', 'e.external_id')
+                                    ->select('e.id', 'e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id','a.name AS areaname', 'e.external_id')
                                     ->groupBy('e.name','date','type_id','e.num_employee','a.name')
                                     ->orderBy('e.name')
                                     ->orderBy('date')
@@ -197,7 +198,7 @@ class ReporteController extends Controller
                                     ->join('departments AS d', 'd.id', '=', 'j.department_id')
                                     ->join('department_group AS dg', 'dg.id', '=', 'd.dept_group_id')
                                     ->whereIn('dg.id', $values)
-                                    ->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id','dg.name AS groupname', 'e.external_id')
+                                    ->select('e.id', 'e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id','dg.name AS groupname', 'e.external_id')
                                     ->groupBy('e.name','date','type_id','e.num_employee')
                                     ->orderBy('e.name')
                                     ->orderBy('date')
@@ -208,7 +209,7 @@ class ReporteController extends Controller
                 $register = $register->join('jobs AS j', 'j.id', '=', 'e.job_id')
                                     ->join('departments AS d', 'd.id', '=', 'j.department_id')
                                     ->whereIn('d.id', $values)
-                                    ->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id','d.name AS depname', 'e.external_id')
+                                    ->select('e.id', 'e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id','d.name AS depname', 'e.external_id')
                                     ->groupBy('e.name','date','type_id','e.num_employee')
                                     ->orderBy('e.name')
                                     ->orderBy('date')
@@ -217,7 +218,7 @@ class ReporteController extends Controller
                 break;
             case 4:
                 $register = $register->whereIn('e.id', $values)
-                                    ->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id', 'e.external_id')
+                                    ->select('e.id', 'e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id', 'e.external_id')
                                     ->groupBy('e.name','date','type_id','e.num_employee')
                                     ->orderBy('date')
                                     ->orderBy('e.name')
@@ -225,7 +226,7 @@ class ReporteController extends Controller
                 break;
             case 5:
                 $register = $register->whereIn('e.id', $values)
-                                    ->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id', 'e.external_id')
+                                    ->select('e.id', 'e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id', 'e.external_id')
                                     ->groupBy('e.name','date','type_id','e.num_employee')
                                     ->orderBy('date')
                                     ->orderBy('e.name')
@@ -241,6 +242,12 @@ class ReporteController extends Controller
         $register = $register->whereBetween('r.date', [$startDate, $endDate])
                              ->where('r.is_delete',0)
                              ->get();
+
+        foreach ($register as $reg) {
+            if ($reg->type_id == 2) { // si la checada es de salida
+                $reg = SReportsUtils::setAbsencesAndHolidays($reg->id, $reg->date, $reg);
+            }
+        }
 
         return view('report.reporteESView')
                         ->with('reportType', $reportType)
@@ -381,7 +388,7 @@ class ReporteController extends Controller
                 break;
             case 5:
                 $register = $register->whereIn('e.id', $values)
-                                    ->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id')
+                                    ->select('e.id', 'e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id')
                                     ->orderBy('date')
                                     ->orderBy('e.name')
                                     ->orderBy('time');
@@ -396,10 +403,16 @@ class ReporteController extends Controller
             $register = $register->groupBy('date','type_id','e.name','e.num_employee'); 
         }
 
-        $register = $register->select('e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id', 'e.external_id')
+        $register = $register->select('e.id', 'e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id', 'e.external_id')
                                 ->whereBetween('r.date', [$startDate, $endDate])
                                 ->where('r.is_delete',0)
                                 ->get();
+
+        foreach ($register as $reg) {
+            if ($reg->type_id == 2) { // si la checada es de salida
+                $reg = SReportsUtils::setAbsencesAndHolidays($reg->id, $reg->date, $reg);
+            }
+        }
 
         return view('report.reportRegsView')
                         ->with('reportType', $reportType)

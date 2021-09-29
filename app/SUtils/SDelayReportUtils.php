@@ -702,15 +702,18 @@ class SDelayReportUtils {
      * 
      * @return SDateComparison 
      */
-    public static function checkSchedule($lWorkshifts, $idEmployee, $registry, $mType, $isSpecial = false)
+    public static function checkSchedule($lWorkshifts, $idEmployee, $registry, $mType, $isSpecial = false, $specialApproved = true)
     {
         $lWEmployee = $lWorkshifts->where('e.id', $idEmployee)
                                     ->where('wdd.date', $registry->date)
                                     ->orderBy('wdd.created_at', 'DESC');
 
         if ($isSpecial) {
-            $lWEmployee = $lWEmployee->whereNull('wdd.week_department_id')
-                                        ->where('is_approved', true);
+            $lWEmployee = $lWEmployee->whereNull('wdd.week_department_id');
+
+            if ($specialApproved) {
+                $lWEmployee = $lWEmployee->where('is_approved', $specialApproved);
+            }
         }
                                     
         $lWEmployee = $lWEmployee->get();
@@ -770,12 +773,13 @@ class SDelayReportUtils {
      * @param [type] $registry
      * @param query $lWorkshifts
      * @param int $iRep [\SCons::REP_DELAY, \SCons::REP_HR_EX]
+     * @param boolean $specialApproved
      * @return void
      */
-    public static function getSchedule($startDate, $endDate, $idEmployee, $registry, $lWorkshifts, $iRep) {
+    public static function getSchedule($startDate, $endDate, $idEmployee, $registry, $lWorkshifts, $iRep, $specialApproved = true) {
         // checar horario especial *******************************************************************
         $isSpecialWorkshift = true;
-        $result = SDelayReportUtils::checkSchedule(clone $lWorkshifts, $idEmployee, $registry, $iRep, $isSpecialWorkshift);
+        $result = SDelayReportUtils::checkSchedule(clone $lWorkshifts, $idEmployee, $registry, $iRep, $isSpecialWorkshift, $specialApproved);
 
         if ($result != null) {
             return $result;

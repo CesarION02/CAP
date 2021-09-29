@@ -8,6 +8,10 @@ use App\SUtils\SAccessControlData;
 use App\Models\AccessLog;
 use Validator;
 
+use Carbon\Carbon;
+
+use App\Jobs\ProcessCheckNotification;
+
 class AccessControlController extends Controller
 {
     public function getEmployees(Request $request)
@@ -127,6 +131,8 @@ class AccessControlController extends Controller
         }
 
         $this->saveAccessLog($idEmp, $dtDate.' '.$time, $minsIn, $minsOut, $sSource, $oResData->authorized, $oResData->message, $schIn, $schOut);
+
+        dispatch(new ProcessCheckNotification($idEmp, $dtDate.' '.$time));
 
         return json_encode($oResData);
     }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use GuzzleHttp\Client as GuzzleClient;
+use App\Jobs\ProcessCheckNotification;
 use Illuminate\Http\Request;
 use App\Models\register;
 use App\Models\employees;
@@ -281,6 +282,8 @@ class biostarController extends Controller
 
             $lEvents[] = $checada;
         }
+
+        $lRegisters = [];
         DB::beginTransaction();
         try{
             for( $i = 0 ; count($lEvents) > $i ; $i++){
@@ -305,7 +308,9 @@ class biostarController extends Controller
                 $register->biostar_id = $lEvents[$i]->biostar_id;
                 $register->save();  
 
-                
+                if ($register->type_id == 1) {
+                    $lRegisters[] = $register;
+                }
             }
             
         } catch (\Exception $e) {
@@ -314,8 +319,14 @@ class biostarController extends Controller
 
         }
         DB::commit();
+
         $newDate = Carbon::now();
         \App\SUtils\SConfiguration::setConfiguration('lastEventSyncDateTime', $newDate->toDateTimeString());
+        
+        foreach ($lRegisters as $register) {
+            dispatch(new ProcessCheckNotification($register->employee_id, $register->date.' '.$register->time));
+        }
+        
         return 1;
     }
 }

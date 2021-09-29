@@ -54,9 +54,8 @@ class SDataProcess {
 
         $lDataWSun = SDataProcess::addSundayPay($lData);
 
-        // return $lDataWSun;
-
-        $lAllData = SOverJourneyCore::processOverTimeByOverJourney($lDataWSun, $sStartDate);
+        $lDataJ = SOverJourneyCore::overtimeByIncompleteJourney($lDataWSun);
+        $lAllData = SOverJourneyCore::processOverTimeByOverJourney($lDataJ, $sStartDate);
 
         return $lAllData;
     }
@@ -67,7 +66,7 @@ class SDataProcess {
      * @param string $sStartDate
      * @param string $sEndDate
      * @param int $payWay
-     * @param [stdClass] $lEmployees
+     * @param collection $lEmployees
      * 
      * @return array SRegistryRow
      */
@@ -189,6 +188,8 @@ class SDataProcess {
                     $otherRow = SDataProcess::setDates($result, $otherRow, $sDate);
 
                     $otherRow->hasChecks = false;
+                    $otherRow->hasCheckOut = false;
+                    $otherRow->hasCheckIn = false;
                     if ($otherRow->workable) {
                         $otherRow->comments = $otherRow->comments."Sin checadas. ";
                     }
@@ -1400,6 +1401,7 @@ class SDataProcess {
      */
     public static function addSundayPay($lData)
     {
+        $lPays = [];
         foreach ($lData as $oRow) {
             if (! $oRow->hasChecks || !$oRow->hasCheckOut) {
                 continue;
@@ -1407,7 +1409,10 @@ class SDataProcess {
 
             if ($oRow->outDate != null) {
                 if (SDateTimeUtils::dayOfWeek($oRow->outDate) == Carbon::SUNDAY) {
-                    $oRow->isSunday++;
+                    if (! isset($lPays[$oRow->outDate])) {
+                        $oRow->isSunday++;
+                        $lPays[$oRow->outDate] = 1;
+                    }
                 }
             }
         }
@@ -1447,7 +1452,7 @@ class SDataProcess {
                     $chekDate = $check->date.' '.$check->time;
                     $chekODate = $oCheckIn->date.' '.$oCheckIn->time;
                     $comparison = SDelayReportUtils::compareDates($chekDate, $chekODate);
-                    if (abs($comparison->diffMinutes) >= 360) {
+                    if (abs($comparison->diffMinutes) >= 360 || $check->form_creation_id == 2) {
                         $lNewChecks[] = $oCheckIn;
                         $oCheckIn = $check;
                     }
@@ -1463,7 +1468,7 @@ class SDataProcess {
                     $chekDate = $check->date.' '.$check->time;
                     $chekODate = $oCheckOut->date.' '.$oCheckOut->time;
                     $comparison = SDelayReportUtils::compareDates($chekDate, $chekODate);
-                    if (abs($comparison->diffMinutes) >= 360) {
+                    if (abs($comparison->diffMinutes) >= 360 || $oCheckOut->form_creation_id == 2) {
                         $lNewChecks[] = $oCheckOut;
                     }
                 }
@@ -1541,6 +1546,11 @@ class SDataProcess {
             if (abs($comparisonIn->diffMinutes) > $config->maxGapSchedule && abs($comparisonOut->diffMinutes) > $config->maxGapSchedule) {
                 $lNewChecks = $originalChecks;
                 break;
+            }
+
+            if ($check->form_creation_id == 2) {
+                $lNewChecks[] = $check;
+                continue;
             }
 
             if (abs($comparisonIn->diffMinutes) <= $config->maxGapSchedule) {

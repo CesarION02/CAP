@@ -14,6 +14,14 @@
     background-color: slategrey;
 }
 
+.ext-events {
+    background-color: #e2eafc;
+}
+
+.events {
+    background-color: #e7c6ff;
+}
+
 #myBtn {
     display: none;
     /* Hidden by default */
