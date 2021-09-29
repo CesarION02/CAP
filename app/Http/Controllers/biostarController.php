@@ -316,13 +316,14 @@ class biostarController extends Controller
 
         }
         DB::commit();
+
+        $newDate = Carbon::now();
+        \App\SUtils\SConfiguration::setConfiguration('lastEventSyncDateTime', $newDate->toDateTimeString());
         
         foreach ($lRegisters as $register) {
             dispatch(new ProcessCheckNotification($register->employee_id, $register->date.' '.$register->time));
         }
-
-        $newDate = Carbon::now();
-        \App\SUtils\SConfiguration::setConfiguration('lastEventSyncDateTime', $newDate->toDateTimeString());
+        
         return 1;
     }
 }

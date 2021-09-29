@@ -188,6 +188,8 @@ class SDataProcess {
                     $otherRow = SDataProcess::setDates($result, $otherRow, $sDate);
 
                     $otherRow->hasChecks = false;
+                    $otherRow->hasCheckOut = false;
+                    $otherRow->hasCheckIn = false;
                     if ($otherRow->workable) {
                         $otherRow->comments = $otherRow->comments."Sin checadas. ";
                     }

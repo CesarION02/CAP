@@ -18,9 +18,10 @@ class SDataAccessControl {
 
     public static function getEmployee($id)
     {
-        $employee = \DB::table('employees')
-                    ->where('id', $id)
-                    ->select('id', 'name', 'num_employee', 'external_id', 'is_active', 'is_delete')
+        $employee = \DB::table('employees AS e')
+                    ->join('departments AS d', 'd.id', '=', 'e.department_id')
+                    ->select('e.id', 'e.name', 'e.num_employee', 'e.external_id', 'e.is_active', 'e.is_delete', 'd.area_id')
+                    ->where('e.id', $id)
                     ->get();
 
         if (sizeof($employee) > 0) {
@@ -299,11 +300,15 @@ class SDataAccessControl {
             return;
         }
 
-        $ua = [];
-        $ua['email'] = 'edwin.carmona@swaplicado.com.mx';
-        $ua['name'] = 'Edwin Carmona';
+        $config = \App\SUtils\SConfiguration::getConfigurations();
 
-        $rec[] = (object) $ua;
+        $rec[] = null;
+        if ($oEmployee->area_id = 1) {
+            $rec = $config->rec_office;
+        }
+        else {
+            $rec = $config->rec_plant;
+        }
 
         Mail::to($rec)
                 ->send(new BadCheckNotification($oEmployee->name, $dateTime, $result[1]));
