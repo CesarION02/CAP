@@ -1,6 +1,7 @@
-@extends("theme.$theme.layout")
+@extends("theme.$theme.layoutcustom")
 @section('styles1')
     <link rel="stylesheet" href="{{ asset("dt/datatables.css") }}">
+    <link rel="stylesheet" href="{{ asset("assets/css/reportD.css") }}">
 @endsection
 @section('title')
 Reporte Entradas/Salidas
@@ -28,7 +29,7 @@ Reporte Entradas/Salidas
             <div class="box-body" id="reportApp">
                 <div class="row">
                     <div class="col-md-12">
-                        <table id="myTable" class="display" style="width:100%">
+                        <table id="myTable" class="table stripe table-condensed" style="width:100%">
                             <thead>
                                 <tr>
                                     <th># Empleado</th>
@@ -36,16 +37,18 @@ Reporte Entradas/Salidas
                                     <th>Fecha</th>
                                     <th>Hora</th>
                                     <th>Tipo checada</th>
+                                    <th>Observaciones</th>
                                     <th>external_id</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="registry in oData.lRegistries">
+                                <tr v-for="registry in oData.lRegistries" :class="getCssClass(registry)">
                                     <td>@{{ registry.num_employee }}</td>
                                     <td>@{{ registry.name }}</td>
                                     <td>@{{ vueGui.formatDate(registry.date) }}</td>
                                     <td>@{{ registry.time }}</td>
                                     <td>@{{ registry.type_id == 1 ? "ENTRADA" : "SALIDA" }}</td>
+                                    <td>@{{ registry.others !== 'undefined' ? registry.others : '' }}</td>
                                     <td>@{{ registry.external_id }}</td>
                                 </tr>
                             </tbody>
@@ -111,11 +114,11 @@ Reporte Entradas/Salidas
                             return true;
 
                         case 1:
-                            externalId = parseInt( data[5] );
+                            externalId = parseInt( data[6] );
                             return externalId > 0;
 
                         case 2:
-                            externalId = parseInt( data[5] );
+                            externalId = parseInt( data[6] );
                             return ! (externalId > 0);
 
                         default:
@@ -154,7 +157,7 @@ Reporte Entradas/Salidas
                 "colReorder": true,
                 columnDefs: [
                     {
-                        targets: [ 5 ],
+                        targets: [ 6 ],
                         visible: false
                     }
                 ],

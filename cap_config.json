@@ -13,5 +13,24 @@
     "dept_pre": 99,
     "admin_rol": 1,
     "policy_cut": 1,
-    "urlBiostar": "https://192.168.1.16:444"
+    "urlBiostar": "https://192.168.1.16:444",
+    "maxOvertimeJourneyMinutes": 240,
+    "rec_plant": [
+        { "email": "storres@aeth.mx", "name": "Soraya Torres" },
+        { "email": "nominas@aeth.mx", "name": "Roxana Torres" },
+        { "email": "ebarron@aeth.mx", "name": "Edgar Barrón" },
+        { "email": "vquinonez@aeth.mx", "name": "Victor Quiñonez" },
+        { "email": "jlozano@aeth.mx", "name": "Jesús Lozano" },
+        { "email": "sflores@swaplicado.com.mx", "name": "Sergio Flores" },
+        { "email": "cesar.orozco@swaplicado.com.mx", "name": "Cesar Orozco" },
+        { "email": "edwin.carmona@swaplicado.com.mx", "name": "Edwin Carmona" }
+    ],
+    "rec_office": [
+        { "email": "storres@aeth.mx", "name": "Soraya Torres" },
+        { "email": "nominas@aeth.mx", "name": "Roxana Torres" },
+        { "email": "ajuarez@aeth.mx", "name": "Abraham Juárez" },
+        { "email": "sflores@swaplicado.com.mx", "name": "Sergio Flores" },
+        { "email": "cesar.orozco@swaplicado.com.mx", "name": "Cesar Orozco" },
+        { "email": "edwin.carmona@swaplicado.com.mx", "name": "Edwin Carmona" }
+    ]
 }
