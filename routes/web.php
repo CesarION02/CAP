@@ -15,6 +15,8 @@
 Route::get('seguridad/login', 'seguridad\LoginController@index')->name('login');
 Route::post('seguridad/login', 'seguridad\LoginController@login')->name('login_post');
 Route::get('seguridad/logout', 'seguridad\LoginController@logout')->name('logout');
+Route::get('password/email', 'Auth\PasswordController@getEmail')->name('reset');
+Route::post('password/email', 'Auth\PasswordController@postEmail')->name('mandaremail');
 
 Route::group(['prefix' => 'admin', 'namespace' => 'admin', 'middleware' => ['auth', 'superadmin']], function () {
     Route::get('', 'adminController@index');
@@ -196,6 +198,12 @@ Route::post('register', 'RegisterController@store')->name('guardar_checada');
 Route::get('register/{id}/edit', 'RegisterController@edit')->name('editar_checada');
 Route::put('register/{id}', 'RegisterController@update')->name('actualizar_checada');
 Route::delete('register/{id}', 'RegisterController@destroy')->name('eliminar_checada');
+Route::get('registerEmployee','RegisterController@registersEmployees')->name('empleados_registros');
+Route::get('registerEmployee/{id}/view', 'RegisterController@registers')->name('registros');
+Route::get('registerEmployee/{id}/edit', 'RegisterController@registerEdit')->name('editar_registros');
+Route::put('registerEmployee/{id}', 'RegisterController@registerupdate')->name('actualizar_registros');
+Route::delete('registerEmployee/{id}', 'RegisterController@registerDesactivar')->name('desactivar_registros');
+Route::delete('registerEmployee/disable/{id}', 'RegisterController@activar')->name('activar_registros');
 
 /* CONFIGURACION */
 Route::get('configuration','configController@index')->name('config');
@@ -287,6 +295,8 @@ Route::delete('job/{id}', 'jobController@destroy')->name('eliminar_puesto');
 Route::delete('job/disable/{id}', 'jobController@activar')->name('activar_puesto');
 
 /* RUTAS CAPTURA INCIDENTES */
+Route::get('incidents/massive', 'incidentController@massiveCreate')->name('masiva');
+Route::post('incidents/massive','incidentController@massiveStore')->name('guardar_masivo');
 Route::get('incidents/{type?}', 'incidentController@index')->name('incidentes');
 Route::get('incidents/create/{type?}', 'incidentController@create')->name('crear_incidente');
 Route::post('incidents', 'incidentController@store')->name('guardar_incidente');
@@ -359,6 +369,9 @@ Route::get('permiso-rol', 'permisorolController@store')->name('guardar_permiso_r
 
 /* Fotos de empleados */
 Route::get('empphotos/{id?}', 'PhotosController@index')->name('photos.employees');
+
+/*RUTAS BITACORAS */
+Route::get('bitacora','bitacoraController@index')->name('bitacora');
 
 
 Route::get('/home', 'HomeController@index')->name('home');

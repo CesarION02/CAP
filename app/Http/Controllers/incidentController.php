@@ -11,6 +11,7 @@ use App\Models\typeincident;
 use App\Models\employees;
 use App\Models\company;
 use App\Http\Requests\ValidacionTypeincident;
+use DB;
 
 class incidentController extends Controller
 {
@@ -36,20 +37,17 @@ class incidentController extends Controller
             $end_date = $request->end_date;
         }
 
-        $datas = incident::where('is_delete','0')->orderBy('incidents.id');
+        $datas = incident::orderBy('incidents.id')
+                            ->join('type_incidents','incidents.type_incidents_id',"=",'type_incidents.id');
         if ($incidentType > 0) {
-            $datas = $datas->join('type_incidents','incidents.type_incidents_id',"=",'type_incidents.id')
-                            ->where('is_agreement', 1);
+            $datas = $datas->where('is_agreement', 1);
         }
 
-        $datas = $datas->whereBetween('start_date', [$start_date, $end_date]);
-        
+        $datas = $datas->whereBetween('start_date', [$start_date, $end_date])
+                        ->join('employees','employees.id','=','incidents.employee_id')
+                        ->where('incidents.is_delete','0')
+                        ->select('incidents.id AS id','incidents.start_date AS ini','incidents.end_date AS fin','employees.name AS name','type_incidents.name AS tipo');
         $datas = $datas->get();
-
-        $datas->each(function($datas){
-            $datas->typeincident;
-            $datas->employee;
-        });
 
         $sroute = 'incidentes';
 
@@ -98,8 +96,8 @@ class incidentController extends Controller
         $incident = new incident($request->all());
         $incident->external_key = "0_0";
         $incident->cls_inc_id = 1;
-        $incident->created_by = 1;
-        $incident->updated_by = 1;
+        $incident->created_by = session()->get('user_id');
+        $incident->updated_by = session()->get('user_id');
 
 
         $incident->save();
@@ -133,10 +131,13 @@ class incidentController extends Controller
      */
     public function edit($id)
     {
-        $incidents = typeincident::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
-        $employees = employees::where('is_delete','0')->where('is_active', true)->orderBy('name','ASC')->pluck('id','name');
-        $data = incident::findOrFail($id);
-        return view('incident.edit', compact('data'))->with('incidents',$incidents)->with('employees',$employees);
+        $incidents = typeincident::where('is_agreement', 1)->orderBy('name','ASC')->pluck('id','name');
+        $datas = DB::table('incidents')
+                        ->join('employees','employees.id',"=","incidents.employee_id")
+                        ->where('incidents.id',$id)
+                        ->select('incidents.id AS id','employees.name AS name','incidents.start_date AS ini','incidents.end_date AS fin')
+                        ->get();
+        return view('incident.edit', compact('datas'))->with('incidents',$incidents);
     }
 
     /**
@@ -363,6 +364,72 @@ class incidentController extends Controller
         if (sizeof($days) > 0) {
             $oIncident->incidentDays()->saveMany($days);
         }
+    }
+
+    public function massiveCreate(){
+        $incidents = typeincident::orderBy('name','ASC');
+        $incidents = $incidents->where('is_agreement', 1);
+        $incidents = $incidents->pluck('id','name');
+
+        if (session()->get('rol_id') != 1){
+            $numero = session()->get('name');
+            $usuario = DB::table('users')
+                    ->where('name',$numero)
+                    ->get();
+            $dgu = DB::table('group_dept_user')
+                    ->where('user_id',$usuario[0]->id)
+                    ->select('groupdept_id AS id')
+                    ->get();
+            $Adgu = [];
+            for($i=0;count($dgu)>$i;$i++){
+                $Adgu[$i]=$dgu[$i]->id;
+            }
+            
+            $employees = DB::table('employees')
+                                ->join('departments','departments.id','=','employees.department_id')
+                                ->whereIn('departments.dept_group_id',$Adgu)
+                                ->where('is_active', true)
+                                ->orderBy('name','ASC')
+                                ->select('employees.name AS name','employees.num_employee AS num')
+                                ->get();
+        }else{
+            $employees = DB::table('employees')
+                                ->join('departments','departments.id','=','employees.department_id')
+                                ->where('is_active', true)
+                                ->where('department_id',15)
+                                ->orderBy('name','ASC')
+                                ->select('employees.name AS name','employees.num_employee AS num')
+                                ->get();    
+        }
+
+        return view('incident.massiveindex')
+                        ->with('employees', $employees)->with('incidents',$incidents);    
+    }
+
+    public function massiveStore(Request $request){
+        $empleados = explode(",", $request->empleados);
+
+        for( $i = 0 ; count($empleados) > $i ; $i++ ){
+            $nombre = str_replace(array(";"), ',', $empleados[$i]);
+            $insertar = DB::table('employees')
+                        ->where('name','LIKE','%' .$nombre. '%')
+                        ->get();
+            $incident = new incident();
+            $incident->external_key = "0_0";
+            $incident->cls_inc_id = 1;
+            $incident->company_id = 0;
+            $incident->num = 0;
+            $incident->start_date = $request->start_date;
+            $incident->end_date = $request->end_date;
+            $incident->employee_id = $insertar[0]->id;
+            $incident->type_incidents_id = $request->type_incidents_id;
+            $incident->created_by = session()->get('user_id');
+            $incident->updated_by = session()->get('user_id');
+            $incident->save();
+            $this->daysIncidents($incident->id,$incident->start_date,$incident->end_date,$incident->employee_id);
+        }
+        
+        return redirect()->route('incidentes', [14])->with('mensaje', 'Incidente creado con éxito');  
     }
 
 }

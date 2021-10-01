@@ -21,7 +21,7 @@
                     </a>
                 </div>
             </div>
-            <form action="{{route('actualizar_incidente', ['id' => $data->id])}}" id="form-general" class="form-horizontal" method="POST" autocomplete="off">
+            <form action="{{route('actualizar_incidente', ['id' => $datas[0]->id])}}" id="form-general" class="form-horizontal" method="POST" autocomplete="off">
                 @csrf @method("put")
                 <div class="box-body">
                     @include('incident.form')

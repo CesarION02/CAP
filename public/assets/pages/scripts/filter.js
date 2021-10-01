@@ -22,3 +22,20 @@ function filtroHuella(huella) {
             break;
     }
 }
+
+function filtroregistros(filtro) {
+    switch (filtro) {
+        case 1:
+            document.getElementById("ifilter").value = 1;
+            break;
+        case 2:
+            document.getElementById("ifilter").value = 2;
+            break;
+        case 3:
+            document.getElementById("ifilter").value = 3;
+            break;
+    }
+
+    document.getElementById("start-date1").value = document.getElementById("start-date").value;
+    document.getElementById("end-date1").value = document.getElementById("end-date").value;
+}

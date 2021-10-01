@@ -69,5 +69,9 @@ class User extends Authenticatable
     public function employee(){
         return $this->belongsTo('App\Models\employees','employee_id');
     }
+
+    public function bitacora(){
+        return $this->hasMany('App\Models\Bitacora');
+    }
     
 }

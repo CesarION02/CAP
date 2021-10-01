@@ -138,7 +138,12 @@ Incidencias
                                     <a href="{{ route('crear_incidente', $incidentType) }}" class="btn btn-block btn-success btn-sm">
                                         <i class="fa fa-fw fa-plus-circle"></i> Nuevo
                                     </a>
+                                    <a href="{{route('masiva')}}" class="btn btn-block btn btn-success btn-sm">
+                                        <i class="fa fa-fw fa-plus-circle"></i> Masiva
+                                    </a>
                                 </div>
+                                <br>
+                                
                             </div>
                             <br>
                         @endif
@@ -174,18 +179,18 @@ Incidencias
                             <th>Fecha inicial</th>
                             <th>Fecha final</th>
                             <th>Empleado</th>
-                            {{-- <th class="width70"></th> --}}
+                            <th class="width70"></th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($datas as $data)
                         <tr>
-                            <td>{{$data->typeincident->name}}</td>
-                            <td>{{\App\SUtils\SDateTimeUtils::orderDate($data->start_date)}}</td>
-                            <td>{{\App\SUtils\SDateTimeUtils::orderDate($data->end_date)}}</td>
-                            <td>{{$data->employee->name}}</td>
+                            <td>{{$data->tipo}}</td>
+                            <td>{{\App\SUtils\SDateTimeUtils::orderDate($data->ini)}}</td>
+                            <td>{{\App\SUtils\SDateTimeUtils::orderDate($data->fin)}}</td>
+                            <td>{{$data->name}}</td>
                             
-                            {{-- <td>
+                            <td>
                                 <a href="{{route('editar_incidente', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
                                     <i class="fa fa-fw fa-pencil"></i>
                                 </a>
@@ -195,7 +200,7 @@ Incidencias
                                         <i class="fa fa-fw fa-trash text-danger"></i>
                                     </button>
                                 </form>
-                            </td> --}}
+                            </td>
                         </tr>
                         @endforeach
 

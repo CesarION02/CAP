@@ -17,4 +17,8 @@ class register extends Model
     public function typeregister(){
         return $this->belongsTo('App\typeregister');
     }
+
+    public function bitacora(){
+        return $this->hasMany('App\Models\Bitacora');
+    }
 }
