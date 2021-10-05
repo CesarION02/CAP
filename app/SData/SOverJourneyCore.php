@@ -171,16 +171,18 @@ class SOverJourneyCore {
                     $oPrevRow->overMinsTotal += $workedMinutes;
                     $oPrevRow->isDayOff++;
 
-                    $j = $i-2;
-                    $oPrePrevRow = $lData[$j];
-                    while ($oPrePrevRow->outDate == $oPrevRow->outDate) {
-                        $oPrePrevRow->isDayOff++;
-                        
-                        if ($j == 0) {
-                            break;
+                    if ($i >= 2) {
+                        $j = $i-2;
+                        $oPrePrevRow = $lData[$j];
+                        while ($oPrePrevRow->outDate == $oPrevRow->outDate) {
+                            $oPrePrevRow->isDayOff++;
+                            
+                            if ($j == 0) {
+                                break;
+                            }
+    
+                            $oPrePrevRow = $lData[--$j];
                         }
-
-                        $oPrePrevRow = $lData[--$j];
                     }
                 }
 
