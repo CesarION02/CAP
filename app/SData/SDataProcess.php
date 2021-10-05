@@ -55,9 +55,9 @@ class SDataProcess {
         $lDataWSun = SDataProcess::addSundayPay($lData);
 
         // $lDataJ = SOverJourneyCore::overtimeByIncompleteJourney($lDataWSun);
-        // $lAllData = SOverJourneyCore::processOverTimeByOverJourney($lDataJ, $sStartDate);
+        $lAllData = SOverJourneyCore::processOverTimeByOverJourney($lDataWSun, $sStartDate);
 
-        return $lDataWSun;
+        return $lAllData;
     }
 
     /**
