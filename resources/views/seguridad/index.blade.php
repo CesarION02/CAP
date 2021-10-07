@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="{{asset("assets/$theme/bower_components/Ionicons/css/ionicons.min.css")}}">
     <!-- Theme style -->
     <link rel="stylesheet" href="{{asset("assets/$theme/dist/css/AdminLTE.min.css")}}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/cap_reloj.png') }}">
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -47,7 +48,7 @@
             <form action="{{route('login_post')}}" method="POST" autocomplete="off">
                 @csrf
                 <div class="form-group has-feedback">
-                    <input type="text" name="email" class="form-control" value="{{old('email')}}" placeholder="Correo">
+                    <input type="text" name="name" class="form-control" value="{{old('name')}}" placeholder="Correo">
                     <span class="glyphicon glyphicon-user form-control-feedback"></span>
                 </div>
                 <div class="form-group has-feedback">
@@ -60,6 +61,9 @@
                     <div class="col-xs-4">
                         <button type="submit" class="btn btn-primary btn-block btn-flat">Entrar</button>
                     </div>
+                                    <a class="btn btn-link" href="{{ route('reset') }}">
+                                        {{ __('¿Olvidaste tu contraseña?') }}
+                                    </a>
                     <!-- /.col -->
                 </div>
             </form>
