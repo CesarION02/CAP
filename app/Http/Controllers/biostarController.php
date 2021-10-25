@@ -288,7 +288,7 @@ class biostarController extends Controller
         try{
             for( $i = 0 ; count($lEvents) > $i ; $i++){
                 $revision = $lEvents[$i];
-                $employee_id = DB::table('employees')->where('biostar_id',$lEvents[$i]->user_id)->get();
+                $employee_id = DB::table('employees')->where('biostar_id',$lEvents[$i]->user_id)->where('is_active',1)->get();
                 if(count($employee_id) == 0){
                     continue;
                 }
