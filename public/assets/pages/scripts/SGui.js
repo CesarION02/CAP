@@ -32,7 +32,7 @@ class SGui {
     }
 
     formatDateTime(dateTime) {
-        let dt = moment(dateTime).format('DD/MM/YYYY HH:mm:ss');
+        let dt = moment(dateTime.replace('   ', ' ')).format('DD/MM/YYYY HH:mm:ss');
         return dt;
     }
 

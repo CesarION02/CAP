@@ -271,7 +271,10 @@ class prePayrollController extends Controller
             ->whereRaw("'" . $sDate . "' BETWEEN start_date AND end_date")
             ->select('i.external_key', 'i.nts', 'ti.name AS type_name', 'i.id', 'ti.id AS type_id')
             ->where('i.is_delete', false)
+            ->orderBy('ti.is_agreement', 'ASC')
+            ->orderBy('created_by', 'DESC')
             ->orderBy('i.id', 'ASC')
+            ->take(1)
             ->get();
 
         return $lAbsences;

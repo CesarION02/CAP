@@ -155,7 +155,8 @@ class SDataProcess {
                             'date' => $sDate,
                             'time' => '12:00:00',
                             'type_id' => 1,
-                            'to_close' => true
+                            'to_close' => true,
+                            'is_modified' => false
                         ];
 
                         $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $lWorkshifts, $sStartDate, $sEndDate);
@@ -174,7 +175,8 @@ class SDataProcess {
 
                     $registry = (object) [
                                     'date' => $sDate,
-                                    'time' => '12:00:00'
+                                    'time' => '12:00:00',
+                                    'is_modified' => false
                                 ];
                                 
                     $result = SDelayReportUtils::getSchedule($sDate, $sDate, $idEmployee, $registry, clone $lWorkshifts, \SCons::REP_HR_EX);
@@ -212,7 +214,8 @@ class SDataProcess {
                         'type_id' => \SCons::REG_IN,
                         'time' => '12:00:00',
                         'date' => $newRow->inDate,
-                        'employee_id' => $idEmployee
+                        'employee_id' => $idEmployee,
+                        'is_modified' => false
                     ];
 
                     $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $lWorkshifts, $sStartDate, $sEndDate);
@@ -331,6 +334,7 @@ class SDataProcess {
                             $newRow->sInDate = $oFoundRegistryI->date.' '.$oFoundRegistryI->time;
                             $newRow->inDate = $oFoundRegistryI->date;
                             $newRow->inDateTime = $oFoundRegistryI->date.' '.$oFoundRegistryI->time;
+                            $newRow->isModifiedIn = $oFoundRegistryI->is_modified;
                             
                             $bFound = true;
                         }
@@ -339,6 +343,7 @@ class SDataProcess {
                     if (! $bFound) {
                         $newRow->inDate = $registry->date;
                         $newRow->inDateTime = $registry->date;
+                        $newRow->isModifiedIn = $registry->is_modified;
                         $date = $newRow->inDate;
                         $time = null;
                         $adjs = SPrepayrollAdjustUtils::getAdjustForCase($date, $time, 1, \SCons::PP_TYPES['JE'], $newRow->idEmployee);
@@ -445,6 +450,7 @@ class SDataProcess {
                             $newRow->sInDate = $oFoundRegistryI->date.' '.$oFoundRegistryI->time;
                             $newRow->inDate = $oFoundRegistryI->date;
                             $newRow->inDateTime = $oFoundRegistryI->date.' '.$oFoundRegistryI->time;
+                            $newRow->isModifiedIn = $oFoundRegistryI->is_modified;
     
                             $isNew = false;
                             $again = true;
@@ -456,6 +462,8 @@ class SDataProcess {
                         $newRow->outDate = $result->variableDateTime->toDateString();
                         $newRow->outDateTime = $result->variableDateTime->format('Y-m-d   H:i:s');
                         $newRow->outDateTimeSch = $result->pinnedDateTime->format('Y-m-d   H:i:s');
+                        $newRow->isModifiedOut = isset($result->registry->is_modified) ? $result->registry->is_modified : false;
+
                         $newRow->cutId = SDelayReportUtils::getCutId($result);
                         $newRow->overtimeCheckPolicy = SDelayReportUtils::getOvertimePolicy($result);
 
@@ -487,6 +495,7 @@ class SDataProcess {
                     $newRow->sInDate = $registry->date.' '.$registry->time;
                     $newRow->inDate = $registry->date;
                     $newRow->inDateTime = $registry->date.' '.$registry->time;
+                    $newRow->isModifiedIn = $registry->is_modified;
 
                     $isNew = false;
                 }
@@ -551,6 +560,7 @@ class SDataProcess {
                             $newRow->outDateTimeSch = $result->pinnedDateTime->toDateTimeString();
                             $newRow->outDate = $result->pinnedDateTime->toDateString();
                             $newRow->outDateTime = $result->pinnedDateTime->toDateString();
+                            $newRow->isModifiedOut = $result->registry->is_modified;
 
                             $newRow->isSpecialSchedule = $result->auxIsSpecialSchedule;
                             if ($newRow->isSpecialSchedule) {
@@ -636,6 +646,7 @@ class SDataProcess {
             if ($oRow->scheduleFrom == \SCons::FROM_ASSIGN && ! $result->auxScheduleDay->is_active) {
                 $oRow->outDate = $result->variableDateTime->toDateString();
                 $oRow->outDateTime = $result->variableDateTime->toDateTimeString();
+                $oRow->isModifiedOut = isset($result->registry->is_modified) ? $result->registry->is_modified : false;
                 $oRow->comments = $oRow->comments."No laborable. ";
                 $oRow->workable = false;
 
@@ -654,6 +665,7 @@ class SDataProcess {
             
             $oRow->outDate = $result->variableDateTime->toDateString();
             $oRow->outDateTime = $result->variableDateTime->toDateTimeString();
+            $oRow->isModifiedOut = isset($result->registry->is_modified) ? $result->registry->is_modified : false;
     
             $oRow->cutId = SDelayReportUtils::getCutId($result);
             $oRow->overtimeCheckPolicy = SDelayReportUtils::getOvertimePolicy($result);

@@ -59,6 +59,8 @@ class SRegistryRow {
         $this->scheduleFrom = 0;
         $this->hasCheckOut = true;
         $this->hasCheckIn = true;
+        $this->isModifiedIn = false;
+        $this->isModifiedOut = false;
         $this->isAtypicalIn = false;
         $this->isAtypicalOut = false;
         $this->isCheckSchedule = false;

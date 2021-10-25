@@ -10,7 +10,7 @@ $('.menu_rol').on('change', function() {
         data.estado = 0
     }
     $.ajax({
-        url: 'http://localhost/csv/checador/public/admin/menu-rol',
+        url: '../admin/menu-rol',
         type: 'POST',
         dataType: 'JSON',
         data: data,

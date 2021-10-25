@@ -782,6 +782,8 @@ class SDelayReportUtils {
         $result = SDelayReportUtils::checkSchedule(clone $lWorkshifts, $idEmployee, $registry, $iRep, $isSpecialWorkshift, $specialApproved);
 
         if ($result != null) {
+            $result->registry = $registry;
+
             return $result;
         }
 
@@ -797,6 +799,8 @@ class SDelayReportUtils {
                     // $day->prog_leave = $result->auxScheduleDay->departure;
                     
                     //  $day->is_absence = true;
+                    $result->registry = $registry;
+
                     return $result;
                 // }
             }
@@ -807,6 +811,10 @@ class SDelayReportUtils {
         */
         $isSpecialWorkshift = false;
         $result = SDelayReportUtils::checkSchedule($lWorkshifts, $idEmployee, $registry, $iRep, $isSpecialWorkshift);
+
+        if ($result != null) {
+            $result->registry = $registry;
+        }
         
         return $result;
     }
