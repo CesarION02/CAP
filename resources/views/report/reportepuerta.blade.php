@@ -40,21 +40,23 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($data->EventCollection->rows as $info)
-                                <?php 
-                                    $fecha = \Carbon\Carbon::parse($info->datetime);
-                                    $fecha->setTimezone('America/Mexico_City');
-                                    $date = \Carbon\Carbon::parse($fecha)->toDateString();
-                                    $time = \Carbon\Carbon::parse($fecha)->toTimeString();
-                                ?>
-                                    <tr>
-                                        <td>{{$info->user_id->name}}</td>
-                                        <td>{{$date}}</td>
-                                        <td>{{$time}}</td>
-                                        <td>{{$info->device_id->name}}</td>
-                                        <td>{{$info->device_id->id}}</td>
-                                    </tr>   
-                                @endforeach
+                                @if ($data->EventCollection->rows != "")
+                                    @foreach($data->EventCollection->rows as $info)
+                                    <?php 
+                                        $fecha = \Carbon\Carbon::parse($info->datetime);
+                                        $fecha->setTimezone('America/Mexico_City');
+                                        $date = \Carbon\Carbon::parse($fecha)->toDateString();
+                                        $time = \Carbon\Carbon::parse($fecha)->toTimeString();
+                                    ?>
+                                        <tr>
+                                            <td>{{$info->user_id->name}}</td>
+                                            <td>{{$date}}</td>
+                                            <td>{{$time}}</td>
+                                            <td>{{$info->device_id->name}}</td>
+                                            <td>{{$info->device_id->id}}</td>
+                                        </tr>   
+                                    @endforeach
+                                @endif
                             </tbody>
                         </table>
                     </div>
