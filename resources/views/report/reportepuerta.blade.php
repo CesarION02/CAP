@@ -19,6 +19,7 @@
         @include('includes.form-error')
         @include('includes.mensaje')
         <div class="box box-danger">
+            <input type="hidden" value="{{$orden}}" id="orden" name="orden">
             <div class="box-header with-border row">
                 <div class="col-md-10">
                         <h3 class="box-title">Reporte uso de puertas</h3>
@@ -85,8 +86,9 @@
 
 
     <script>
+         
         $(document).ready(function() {
-            
+            var orden = document.getElementById("orden").value;
 
             var oTable = $('#delays_table').DataTable({
                 "language": {
@@ -116,6 +118,7 @@
                 "colReorder": true,
                 "scrollX": true,
                 "dom": 'Bfrtip',
+                "order": [(orden == 1 ? ([ 0, 'asc' ]) : ([ 1, 'asc' ]))],
                 "lengthMenu": [
                     [ 10, 25, 50, 100, -1 ],
                     [ 'Mostrar 10', 'Mostrar 25', 'Mostrar 50', 'Mostrar 100', 'Mostrar todo' ]
