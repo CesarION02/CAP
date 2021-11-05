@@ -19,6 +19,7 @@
         @include('includes.form-error')
         @include('includes.mensaje')
         <div class="box box-danger">
+            <input type="hidden" value="{{$orden}}" id="orden" name="orden">
             <div class="box-header with-border row">
                 <div class="col-md-10">
                         <h3 class="box-title">Reporte uso de puertas</h3>
@@ -40,21 +41,23 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($data->EventCollection->rows as $info)
-                                <?php 
-                                    $fecha = \Carbon\Carbon::parse($info->datetime);
-                                    $fecha->setTimezone('America/Mexico_City');
-                                    $date = \Carbon\Carbon::parse($fecha)->toDateString();
-                                    $time = \Carbon\Carbon::parse($fecha)->toTimeString();
-                                ?>
-                                    <tr>
-                                        <td>{{$info->user_id->name}}</td>
-                                        <td>{{$date}}</td>
-                                        <td>{{$time}}</td>
-                                        <td>{{$info->device_id->name}}</td>
-                                        <td>{{$info->device_id->id}}</td>
-                                    </tr>   
-                                @endforeach
+                                @if ($data->EventCollection->rows != "")
+                                    @foreach($data->EventCollection->rows as $info)
+                                    <?php 
+                                        $fecha = \Carbon\Carbon::parse($info->datetime);
+                                        $fecha->setTimezone('America/Mexico_City');
+                                        $date = \Carbon\Carbon::parse($fecha)->toDateString();
+                                        $time = \Carbon\Carbon::parse($fecha)->toTimeString();
+                                    ?>
+                                        <tr>
+                                            <td>{{$info->user_id->name}}</td>
+                                            <td>{{$date}}</td>
+                                            <td>{{$time}}</td>
+                                            <td>{{$info->device_id->name}}</td>
+                                            <td>{{$info->device_id->id}}</td>
+                                        </tr>   
+                                    @endforeach
+                                @endif
                             </tbody>
                         </table>
                     </div>
@@ -83,8 +86,9 @@
 
 
     <script>
+         
         $(document).ready(function() {
-            
+            var orden = document.getElementById("orden").value;
 
             var oTable = $('#delays_table').DataTable({
                 "language": {
@@ -114,6 +118,7 @@
                 "colReorder": true,
                 "scrollX": true,
                 "dom": 'Bfrtip',
+                "order": [(orden == 1 ? ([ 0, 'asc' ]) : ([ 1, 'asc' ]))],
                 "lengthMenu": [
                     [ 10, 25, 50, 100, -1 ],
                     [ 'Mostrar 10', 'Mostrar 25', 'Mostrar 50', 'Mostrar 100', 'Mostrar todo' ]
