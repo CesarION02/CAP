@@ -3,6 +3,7 @@
     "lastEventSyncDateTime": "2021-04-06 00:00:35",
     "startOfWeek": 1,
     "policy": "1",
+    "enabledAdjAuths": false,
     "toleranceMinutes": 20,
     "maxGapMinutes": 60,
     "maxGapSchedule": 90,

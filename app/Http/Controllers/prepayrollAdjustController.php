@@ -8,6 +8,7 @@ use Carbon\Carbon;
 
 use App\Models\prepayrollAdjust;
 use App\Models\prepayrollAuthControl;
+use App\Models\employees;
 use App\SUtils\SPrepayrollAdjustUtils;
 
 class prepayrollAdjustController extends Controller
@@ -122,12 +123,17 @@ class prepayrollAdjustController extends Controller
                         ->where('is_delete', false)
                         ->where('pa.employee_id', $request->employee_id)
                         ->get();
+        $config = \App\SUtils\SConfiguration::getConfigurations();
 
-        $lAuthAdjusts = [];
-        foreach ($lAdjusts as $adj) {
-            if (SPrepayrollAdjustUtils::isAdjustAuthorized($adj->id)) {
-                $lAuthAdjusts[] = $adj;
+        if ($config->enabledAdjAuths) {
+            $lAuthAdjusts = [];
+            foreach ($lAdjusts as $adj) {
+                if (SPrepayrollAdjustUtils::isAdjustAuthorized($adj->id)) {
+                    $lAuthAdjusts[] = $adj;
+                }
             }
+    
+            return json_encode($lAuthAdjusts);
         }
 
         return json_encode($lAdjusts);
@@ -147,12 +153,22 @@ class prepayrollAdjustController extends Controller
         $oAdjust->created_by = \Auth::user()->id;
         $oAdjust->updated_by = \Auth::user()->id;
 
+        $oEmployee = employees::find($oAdjust->employee_id);
+
+        if (! PrepayrollReportController::isFreeVobo($oAdjust->dt_date, $oEmployee->way_pay_id)) {
+            return;
+        }
+
         try {
             \DB::beginTransaction();
 
                 $oAdjust->save();
 
-                $this->storeAuthControl($oAdjust->employee_id, $oAdjust->id);
+                $config = \App\SUtils\SConfiguration::getConfigurations();
+
+                if ($config->enabledAdjAuths) {
+                    $this->storeAuthControl($oAdjust->employee_id, $oAdjust->id);
+                }
 
             \DB::commit();
         }
@@ -174,7 +190,11 @@ class prepayrollAdjustController extends Controller
 
         $oAdjust->save();
 
-        $this->deleteAdjustAuthControl($idAjust);
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+
+        if ($config->enabledAdjAuths) {
+            $this->deleteAdjustAuthControl($idAjust);
+        }
 
         SPrepayrollAdjustUtils::verifyProcessedData($oAdjust->employee_id, $oAdjust->dt_date);
 

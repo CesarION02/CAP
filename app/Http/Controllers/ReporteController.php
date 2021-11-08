@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\PrepayrollReportController;
 use Illuminate\Http\Request;
 use App\Models\department;
 use App\Models\employees;
@@ -664,6 +665,10 @@ class ReporteController extends Controller
                         ->get();
 
         $bModify = SPermissions::hasPermission(session()->get('user_id'), 'ajustes_rep_te');
+
+        PrepayrollReportController::prepayrollReportVobos($sStartDate, $sEndDate);
+
+        \Debugbar::disable();
 
         return view('report.reportDelaysView')
                     ->with('tReport', \SCons::REP_HR_EX)

@@ -45,14 +45,20 @@ class SPrepayrollAdjustUtils {
 
         $lAdjusts = $lAdjusts->get();
 
-        $lAuthAdjusts = [];
-        foreach ($lAdjusts as $adj) {
-            if (SPrepayrollAdjustUtils::isAdjustAuthorized($adj->id)) {
-                $lAuthAdjusts[] = $adj;
-            }
-        }
+        $config = \App\SUtils\SConfiguration::getConfigurations();
 
-        return $lAuthAdjusts;
+        if ($config->enabledAdjAuths) {
+            $lAuthAdjusts = [];
+            foreach ($lAdjusts as $adj) {
+                if (SPrepayrollAdjustUtils::isAdjustAuthorized($adj->id)) {
+                    $lAuthAdjusts[] = $adj;
+                }
+            }
+
+            return $lAuthAdjusts;
+        }
+        
+        return $lAdjusts;
     }
 
     /**
@@ -88,15 +94,21 @@ class SPrepayrollAdjustUtils {
                         ->where('pa.adjust_type_id', $type)
                         ->where('pa.employee_id', $idEmployee)
                         ->get();
-        
-        $lAuthAdjusts = [];
-        foreach ($lAdjusts as $adj) {
-            if (SPrepayrollAdjustUtils::isAdjustAuthorized($adj->id)) {
-                $lAuthAdjusts[] = $adj;
+
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+
+        if ($config->enabledAdjAuths) {
+            $lAuthAdjusts = [];
+            foreach ($lAdjusts as $adj) {
+                if (SPrepayrollAdjustUtils::isAdjustAuthorized($adj->id)) {
+                    $lAuthAdjusts[] = $adj;
+                }
             }
+
+            return $lAuthAdjusts;
         }
 
-        return $lAuthAdjusts;
+        return $lAdjusts;
     }
 
     /**

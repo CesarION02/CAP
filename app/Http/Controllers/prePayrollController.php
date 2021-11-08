@@ -12,7 +12,7 @@ use App\Models\cutCalendarQ;
 use App\SPayroll\SPrePayroll;
 use App\SPayroll\SPrePayrollRow;
 use App\SPayroll\SPrePayrollDay;
-
+use App\Http\Controllers\PrepayrollReportController;
 class prePayrollController extends Controller
 {
     /**
@@ -66,6 +66,10 @@ class prePayrollController extends Controller
 
         if (is_string($aEmployeeIds)) {
             $aEmployeeIds = explode(",", $aEmployeeIds);
+        }
+
+        if (! PrepayrollReportController::isFreeVoboPrepayroll($startDate, $payType)) {
+            return response()->json(['error' => "La prenómina no se ha autorizado para la fecha: ".$startDate]);
         }
 
         $oPrepayroll = $this->makePrepayroll($startDate, $endDate, $aEmployeeIds, $payType, $dataType);
@@ -330,5 +334,78 @@ class prePayrollController extends Controller
         $cut->is_delete = $jCut->is_deleted;
 
         $cut->save();
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function indexVobos(Request $request)
+    {
+        $startDate = $request->start_date == null ? Carbon::now()->firstOfMonth()->toDateString() : $request->start_date;
+        $endDate = $request->end_date == null ? Carbon::now()->lastOfMonth()->toDateString() : $request->end_date;
+
+        $lControls = \DB::table('prepayroll_report_auth_controls AS prac')
+                            ->join('users AS u', 'prac.user_vobo_id', '=', 'u.id')
+                            ->leftJoin('week_cut AS wc', function($join)
+                            {
+                                $join->on('prac.num_week', '=', 'wc.num');
+                                $join->on('wc.year','=', 'prac.year');
+                            })
+                            ->leftJoin('hrs_prepay_cut AS hpc', function($join)
+                            {
+                                $join->on('prac.num_biweek', '=', 'hpc.num');
+                                $join->on('hpc.year','=', 'prac.year');
+                            })
+                            ->whereRaw("(wc.ini IS NOT NULL AND (wc.ini BETWEEN '".$startDate."' AND '".$endDate."' OR wc.fin BETWEEN '".$startDate."' AND '".$endDate."')) OR 
+                                        (hpc.dt_cut IS NOT NULL AND (dt_cut BETWEEN '".$startDate."' AND '".$endDate."' OR DATE_SUB(dt_cut,INTERVAL 14 DAY) BETWEEN '".$startDate."' AND '".$endDate."'))")
+                            ->get();
+
+        return view('prepayrollcontrol.vobosindex')->with('start_date', $startDate)
+                                                    ->with('end_date', $endDate)
+                                                    ->with('lControls', $lControls);
+    }
+
+    /**
+     * Dar visto bueno a una prenómina
+     *
+     * @param int $id
+     * 
+     * @return redirect
+     */
+    public function boVo($id)
+    {
+        $res = \DB::table('prepayroll_report_auth_controls')
+                    ->where('id_control', $id)
+                    ->update([
+                        'is_vobo' => true, 
+                        'dt_vobo' => Carbon::now()->toDateTimeString(),
+                        'is_rejected' => false,
+                        'dt_rejected' => null
+                    ]);
+
+        return redirect()->route('vobos');
+    }
+
+    /**
+     * Rechazar visto bueno de prenómina
+     *
+     * @param [type] $id
+     * @return void
+     */
+    public function rejBoVo($id)
+    {
+        $res = \DB::table('prepayroll_report_auth_controls')
+                    ->where('id_control', $id)
+                    ->update([
+                        'is_vobo' => false, 
+                        'dt_vobo' => null,
+                        'is_rejected' => true,
+                        'dt_rejected' => Carbon::now()->toDateTimeString()
+                    ]);
+
+        return redirect()->route('vobos');
     }
 }
