@@ -30,7 +30,7 @@ class SReportsUtils {
     
             if ($num > 0) {
                 $oRow->isHoliday = $num;
-                $oRow->others = $oRow->others.'Festivo. ';
+                $oRow->others = (isset($oRow->others) ? $oRow->others.'Festivo. ' : 'Festivo');
             }
         }
 
