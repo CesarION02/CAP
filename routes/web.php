@@ -107,6 +107,9 @@ Route::get('report/generarreportepuertas','ReporteController@generarReportePuert
 /* Reporte incidencias */
 Route::get('report/reporteIncidencias', 'ReporteController@incidentReportView')->name('reporteIncidencias');
 Route::get('report/reporteIncidenciasGenerar', 'ReporteController@incidentReportGenerar')->name('reporteIncidenciasGenerar');
+/** Reporte consolidado */
+Route::get('report/genconsolidated', 'ConsolidatedReportController@showGenerationView')->name('genReporteConsolidado');
+Route::get('report/consolidated', 'ConsolidatedReportController@showReport')->name('reporteConsolidado');
 /* RUTAS DE AJUSTES DE PRENÓMINA */
 Route::get('prepayrollrowadjusts', 'prepayrollAdjustController@getAdjustsFromRow')->name('ajustes_renglon');
 Route::post('prepayrolladjust', 'prepayrollAdjustController@storeAdjust')->name('guardar_ajuste');
