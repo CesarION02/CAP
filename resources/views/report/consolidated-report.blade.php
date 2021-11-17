@@ -97,7 +97,7 @@
                         </div>
                         {{-- <input :value="startDate" type="hidden" name="start_date">
                         <input :value="endDate" type="hidden" name="end_date"> --}}
-                        <div class="col-md-4">
+                        {{-- <div class="col-md-4">
                             <label>Código de colores:</label>
                             <br>
                             <span class="label delays">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span> (Con retardos)
@@ -107,7 +107,7 @@
                             <span class="label absence">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span> (Con faltas o sin checadas)
                             <br>
                             <span class="label noprogramming">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span> (Sin checadas y sin horario)
-                        </div>
+                        </div> --}}
                     </div>
                 </div>
                 <div class="box-footer">
