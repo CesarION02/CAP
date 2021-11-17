@@ -148,7 +148,11 @@ Departamentos CAP
                         <tr>
                             <td>{{$data->name}}</td>
                             <td>{{$data->area->name}}</td>
-                            <td>{{$data->rh->name}}</td>
+                            @if($data->rh == null)
+                                <td>No definido</td>
+                            @else
+                                <td>{{$data->rh->name}}</td>
+                            @endif
                             @if($data->boss == null)
                                 <td>No definido</td>
                             @else
