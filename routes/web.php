@@ -376,6 +376,8 @@ Route::get('empphotos/{id?}', 'PhotosController@index')->name('photos.employees'
 /*RUTAS BITACORAS */
 Route::get('bitacora','bitacoraController@index')->name('bitacora');
 
+/** Fechas de corte */
+Route::get('cuts','periodController@getCuts')->name('getcuts');
 
 Route::get('/home', 'HomeController@index')->name('home');
 

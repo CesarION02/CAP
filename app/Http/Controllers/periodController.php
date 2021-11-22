@@ -77,4 +77,62 @@ class periodController extends Controller
         $prueba = SInfoWithPolicy::preProcessInfo($sStartDate,$year[0],$sEndDate,$payWay);
         return redirect('periods')->with('mensaje', 'Periodo procesado con exito');
     }
+
+    public function getCuts(Request $request)
+    {
+        $oDate = Carbon::parse($request->dt_date);
+        
+        $weeks = [];
+        $biweeks = [];
+
+        /**
+         * Cortes de semana
+         */
+        $weeksQ = DB::table('week_cut')
+                    ->where(function ($q) use ($oDate) {
+                        $q->whereYear('ini', $oDate->year)
+                            ->orWhereYear('fin', $oDate->year);
+                    })
+                    ->select('year', 'ini', 'fin', 'num')
+                    ->orderBy('ini', 'ASC')
+                    ->get();
+
+        foreach ($weeksQ as $qweek) {
+            $cut = (object) [];
+
+            $cut->dt_start = $qweek->ini;
+            $cut->dt_end = $qweek->fin;
+            $cut->number = $qweek->num;
+
+            $weeks[] = $cut;
+        }
+
+        /**
+         * Cortes de quincena
+         */
+        $biweeksQ = DB::table('hrs_prepay_cut')
+                    ->whereYear('dt_cut', $oDate->year)
+                    ->where('is_delete', 0)
+                    ->select('year', 'dt_cut', 'num')
+                    ->orderBy('dt_cut', 'ASC')
+                    ->get();
+
+        $dtCutPrev = Carbon::parse($biweeksQ[0]->dt_cut)->subDays(15);
+        foreach ($biweeksQ as $biweek) {
+            $cut = (object) [];
+
+            $cut->dt_start = $dtCutPrev->addDays(1)->toDateString();
+            $cut->dt_end = $biweek->dt_cut;
+            $cut->number = $biweek->num;
+            $dtCutPrev = Carbon::parse($biweek->dt_cut);
+
+            $biweeks[] = $cut;
+        }
+
+        $response = (object) [];
+        $response->weeks = $weeks;
+        $response->biweeks = $biweeks;
+
+        return json_encode($response);
+    }
 }
