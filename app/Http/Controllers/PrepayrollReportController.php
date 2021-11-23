@@ -30,6 +30,19 @@ class PrepayrollReportController extends Controller
             PrepayrollReportController::storePrepayReportControls(\SCons::PAY_W_S, $number, $oEDate->year);
         }
 
+        $oDate = (clone $oSDate)->addWeek();
+        while ($oDate->lessThan($oEDate)) {
+            $number = PrepayrollReportController::process($oDate->toDateString(), \SCons::PAY_W_S, 0);
+            if ($number > 0) {
+                PrepayrollReportController::storePrepayReportControls(\SCons::PAY_W_S, $number, $oDate->year);
+            }
+            $number = PrepayrollReportController::process($oDate->toDateString(), \SCons::PAY_W_Q, 0);
+            if ($number > 0) {
+                PrepayrollReportController::storePrepayReportControls(\SCons::PAY_W_Q, $number, $oDate->year);
+            }
+            $oDate->addWeek();
+        }
+
         /**
          * Quincena
          */
