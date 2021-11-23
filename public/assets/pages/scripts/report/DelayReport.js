@@ -4,6 +4,11 @@ var app = new Vue({
         vData: oData,
         vueGui: oGui,
         rowAdjusts: [],
+        adjCategory: 0,
+        inDateTime: "",
+        outDateTime: "",
+        isModifIn: false,
+        isModifOut: false,
         adjType: 1,
         minsEnabled: false,
         overMins: 0,
@@ -32,6 +37,14 @@ var app = new Vue({
             if ((oRow.events.length > 0 || oRow.isDayOff > 0 || oRow.isHoliday > 0 || oRow.dayInhability > 0 || oRow.dayVacations > 0) &&
                 (oRow.hasChecks || oRow.hasCheckOut)) {
                 return 'events'
+            }
+        },
+        getDtCellCss(oRow, typeReg) {
+            if (typeReg == 1 && oRow.isModifiedIn) {
+                return 'dt-modified';
+            }
+            if (typeReg == 2 && oRow.isModifiedOut) {
+                return 'dt-modified';
             }
         },
         newAdjust() {
@@ -140,6 +153,20 @@ var app = new Vue({
             this.minsEnabled = false;
             this.overMins = 0;
             this.comments = "";
+            this.adjCategory = 0;
+            this.inDateTime = "";
+            this.outDateTime = "";
+            this.isModifIn = false;
+            this.isModifOut = false;
+
+            let sIn = this.vRow.inDateTime.length == 10 ? this.vRow.inDateTime + " 00:00" : this.vRow.inDateTime.replace('   ', ' ');
+            let sOut = this.vRow.outDateTime.length == 10 ? this.vRow.outDateTime + " 00:00" : this.vRow.outDateTime.replace('   ', ' ');
+
+            let inD = moment(sIn);
+            let outD = moment(sOut);
+
+            this.inDateTime = inD.format('YYYY-MM-DDTHH:mm');
+            this.outDateTime = outD.format('YYYY-MM-DDTHH:mm');
 
             $('#adjustsModal').modal('show');
         },
@@ -185,8 +212,16 @@ var app = new Vue({
                 }
             }
 
-            if (oRow.labelUpd) {
-                labels += '¡Pendiente de actualizar!';
+            if (oRow.labelUpd || !(oRow.tempLabels === undefined)) {
+                labels += "¡Pendiente de actualizar!";
+            }
+
+            if (oRow.isModifiedIn) {
+                labels += "Entrada modificada. ";
+            }
+
+            if (oRow.isModifiedOut) {
+                labels += "Salida modificada. ";
             }
 
             return labels;
@@ -194,6 +229,30 @@ var app = new Vue({
         onTypeChange() {
             this.minsEnabled = this.adjType == oData.ADJ_CONS.DHE || this.adjType == oData.ADJ_CONS.AHE;
             this.overMins = 0;
+        },
+        adjustTimes() {
+            oGui.showLoading(3000);
+
+            let inDTime = this.inDateTime;
+            let outDTime = this.outDateTime;
+
+            axios.post(this.vData.registriesRoute, {
+                    modif_in: this.isModifIn,
+                    modif_out: this.isModifOut,
+                    in_datetime: inDTime,
+                    out_datetime: outDTime,
+                    row: JSON.stringify(this.vRow)
+                })
+                .then(res => {
+                    console.log(res);
+                    this.vRow.tempLabels = "Entrada y/o salida modificadas.";
+                    this.vData.lRows.push('refresh');
+                    this.vData.lRows.pop();
+                    oGui.showOk();
+                })
+                .catch(function(error) {
+                    console.log(error);
+                });
         }
     },
 })

@@ -78,9 +78,9 @@
                                     <td>@{{ vueGui.pad(row.numEmployee, 6) }}</td>
                                     <td>@{{ row.employee }}</td>
                                     {{-- <td>@{{ row.inDate }}</td> --}}
-                                    <td>@{{ vueGui.formatDateTime(row.inDateTime) }}</td>
+                                    <td :class="getDtCellCss(row, 1)">@{{ vueGui.formatDateTime(row.inDateTime) }}</td>
                                     {{-- <td>@{{ row.outDate }}</td> --}}
-                                    <td>@{{ vueGui.formatDateTime(row.outDateTime) }}</td>
+                                    <td :class="getDtCellCss(row, 2)">@{{ vueGui.formatDateTime(row.outDateTime) }}</td>
                                     <td>@{{ row.scheduleText }}</td>
                                     {{-- <td v-if="vData.tReport == vData.REP_DELAY">@{{ row.delayMins }}</td>
                                     <td v-else>@{{ row.extraHours }}</td> --}}
@@ -94,9 +94,11 @@
                                     <td v-if="vData.tReport == vData.REP_HR_EX">@{{ row.others }}</td>
                                     <td>@{{ row.comments }}</td>
                                     <td>
-                                        <button class="btn btn-primary btn-xs" v-on:click="showModal(row)">
-                                            <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
-                                        </button>
+                                        @if ($bModify)
+                                            <button class="btn btn-primary btn-xs" v-on:click="showModal(row)">
+                                                <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+                                            </button>
+                                        @endif
                                         <p>@{{ getAdjToRow(row) }}</p>
                                     </td>
                                     <td>@{{ row.external_id }}</td>
@@ -145,6 +147,7 @@
             this.adjTypes = <?php echo json_encode($adjTypes) ?>;
             this.lAdjusts = <?php echo json_encode($lAdjusts) ?>;
             this.tReport = <?php echo json_encode($tReport) ?>;
+            this.registriesRoute = <?php echo json_encode($registriesRoute) ?>;
             this.REP_HR_EX = <?php echo json_encode(\SCons::REP_HR_EX) ?>;
             this.REP_DELAY = <?php echo json_encode(\SCons::REP_DELAY) ?>;
             this.ADJ_CONS = <?php echo json_encode(\SCons::PP_TYPES) ?>;

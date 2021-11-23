@@ -5,6 +5,16 @@ use App\Models\employees;
 
 class SPrepayrollAdjustUtils {
 
+    /**
+     * Devuelve los ajustes autorizados para el renglón
+     *
+     * @param string $startDate
+     * @param string $endDate
+     * @param int $employeId
+     * @param string $adjType
+     * 
+     * @return array
+     */
     public static function getAdjustsOfRow($startDate, $endDate, $employeId, $adjType = "")
     {
         $lAdjusts = \DB::table('prepayroll_adjusts AS pa')
@@ -35,9 +45,33 @@ class SPrepayrollAdjustUtils {
 
         $lAdjusts = $lAdjusts->get();
 
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+
+        if ($config->enabledAdjAuths) {
+            $lAuthAdjusts = [];
+            foreach ($lAdjusts as $adj) {
+                if (SPrepayrollAdjustUtils::isAdjustAuthorized($adj->id)) {
+                    $lAuthAdjusts[] = $adj;
+                }
+            }
+
+            return $lAuthAdjusts;
+        }
+        
         return $lAdjusts;
     }
 
+    /**
+     * Devuelve los ajustes autorizados para el caso
+     *
+     * @param string $date
+     * @param string $time
+     * @param int $applyTo
+     * @param int $type
+     * @param int $idEmployee
+     * 
+     * @return array
+     */
     public static function getAdjustForCase($date, $time, $applyTo, $type, $idEmployee)
     {
         $lAdjusts = \DB::table('prepayroll_adjusts AS pa')
@@ -61,9 +95,30 @@ class SPrepayrollAdjustUtils {
                         ->where('pa.employee_id', $idEmployee)
                         ->get();
 
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+
+        if ($config->enabledAdjAuths) {
+            $lAuthAdjusts = [];
+            foreach ($lAdjusts as $adj) {
+                if (SPrepayrollAdjustUtils::isAdjustAuthorized($adj->id)) {
+                    $lAuthAdjusts[] = $adj;
+                }
+            }
+
+            return $lAuthAdjusts;
+        }
+
         return $lAdjusts;
     }
 
+    /**
+     * Undocumented function
+     *
+     * @param [type] $idEmployee
+     * @param [type] $date
+     * 
+     * @return void
+     */
     public static function verifyProcessedData($idEmployee, $date)
     {
         $emp = employees::find($idEmployee);
@@ -127,6 +182,13 @@ class SPrepayrollAdjustUtils {
                         ->delete();
     }
 
+    /**
+     * Undocumented function
+     *
+     * @param [type] $adjsArray
+     * @param [type] $type
+     * @return boolean
+     */
     public static function hasTheAdjustType($adjsArray, $type)
     {
         foreach ($adjsArray as $adj) {
@@ -136,6 +198,31 @@ class SPrepayrollAdjustUtils {
         }
 
         return false;
+    }
+
+    /**
+     * Determina si un ajuste está autorizado totalmente o no.
+     * 
+     * Consulta las autorizaciones que debe tener el ajuste y si todas están autorizadas retorna true,
+     * si al menos una no está autorizada retorna false
+     *
+     * @param int $idAdjust
+     * @return boolean
+     */
+    public static function isAdjustAuthorized($idAdjust)
+    {
+        $lAuths = \DB::table('prepayroll_auth_controls AS pac')
+                        ->where('pac.prepayroll_adjust_id', $idAdjust)
+                        ->where('pac.is_delete', 0)
+                        ->get();
+
+        foreach ($lAuths as $auth) {
+            if (! $auth->is_authorized) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
 

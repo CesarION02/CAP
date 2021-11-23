@@ -22,6 +22,10 @@
     background-color: #e7c6ff;
 }
 
+.dt-modified {
+    background-color: #ffa162;
+}
+
 #myBtn {
     display: none;
     /* Hidden by default */

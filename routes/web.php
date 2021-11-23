@@ -114,8 +114,19 @@ Route::get('report/consolidated', 'ConsolidatedReportController@showReport')->na
 Route::get('prepayrollrowadjusts', 'prepayrollAdjustController@getAdjustsFromRow')->name('ajustes_renglon');
 Route::post('prepayrolladjust', 'prepayrollAdjustController@storeAdjust')->name('guardar_ajuste');
 Route::delete('prepayrolladjust/{id}', 'prepayrollAdjustController@deleteAdjust')->name('eliminar_ajuste');
+Route::get('prepayrolladjusts/auth', 'prepayrollAdjustController@indexAuthorize')->name('ajustes_x_autorizar');
+Route::get('prepayrolladjusts/authorize/{id}', 'prepayrollAdjustController@authorizeAdjust')->name('autorizar_ajuste');
+Route::get('prepayrolladjusts/reject/{id}', 'prepayrollAdjustController@rejectAdjust')->name('rechazar_ajuste');
+Route::get('prepayrolladjusts/log', 'prepayrollAdjustController@indexLog')->name('ajustes_log');
+/** GRUPOS DE PRENÓMINA*/
+Route::get('prepayrollempgroup/index', 'prepayrollGroupsController@employeesVsGroups')->name('gr_emps_index');
+Route::post('prepayrollempgroup/change', 'prepayrollGroupsController@changeGroup')->name('cambiar_grupo');
+/** Prenómina */
 Route::get('prepayrollcontrols', 'prePayrollController@indexS')->name('control_semana');
 Route::get('prepayrollcontrolq', 'prePayrollController@indexQ')->name('control_quincena');
+Route::get('prepayrollcontrolvobos', 'prePayrollController@indexVobos')->name('vobos');
+Route::post('prepayrollcontrolvobos/vobo/{id}', 'prePayrollController@boVo')->name('dar_vobo');
+Route::post('prepayrollcontrolvobos/rejvobo/{id}', 'prePayrollController@rejBoVo')->name('rechazar_vobo');
 Route::get('prepayrollbinn/{id}', 'prePayrollController@prepayrollBinnacle')->name('bitacora_pre');
 Route::get('prepayrolls', 'prePayrollController@prepayrolls')->name('bitacora_reg_s');
 Route::get('prepayrolls/fuera/{id}', 'prePayrollController@prepayrollFuera')->name('bitacora_fuera');
@@ -207,6 +218,7 @@ Route::get('registerEmployee/{id}/edit', 'RegisterController@registerEdit')->nam
 Route::put('registerEmployee/{id}', 'RegisterController@registerupdate')->name('actualizar_registros');
 Route::delete('registerEmployee/{id}', 'RegisterController@registerDesactivar')->name('desactivar_registros');
 Route::delete('registerEmployee/disable/{id}', 'RegisterController@activar')->name('activar_registros');
+Route::post('register/adjust_regs', 'RegisterController@adjustRegistries')->name('registro_ajuste');
 
 /* CONFIGURACION */
 Route::get('configuration','configController@index')->name('config');

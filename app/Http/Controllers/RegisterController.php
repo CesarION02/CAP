@@ -200,6 +200,7 @@ class RegisterController extends Controller
         $register->time = $request->time;
         $register->type_id = $request->type_id;
         $register->form_creation_id = 2;
+        $register->is_modified = true;
         $register->user_id = session()->get('user_id');
         $register->save();
 
@@ -226,6 +227,7 @@ class RegisterController extends Controller
         if ($request->ajax()) {
             $employee = register::find($id);
             $employee->is_delete = 1;
+            $employee->is_modified = true;
             $employee->save();
             $iddateregister = Dateregister::where('register_id','=',$id)->get();
             $dateregister = Dateregister::find($iddateregister[0]->id);
@@ -354,6 +356,7 @@ class RegisterController extends Controller
         $register->date = $request->date;
         $register->time = $request->time;
         $register->type_id = $request->type_id;
+        $register->is_modified = true;
         $register->user_id = session()->get('user_id');
         $register->save();
         
@@ -375,6 +378,7 @@ class RegisterController extends Controller
         if ($request->ajax()) {
             $employee = register::find($id);
             $employee->is_delete = 1;
+            $employee->is_modified = true;
             $employee->save();
 
             $bitacora = new Bitacora();
@@ -395,6 +399,7 @@ class RegisterController extends Controller
         if ($request->ajax()) {
             $job = register::find($id);
             $job->is_delete = 0;
+            $job->is_modified = true;
             $job->save();
 
             $bitacora = new Bitacora();
@@ -409,5 +414,88 @@ class RegisterController extends Controller
         } else {
             abort(404);
         }    
+    }
+
+    public function adjustRegistries(Request $request)
+    {
+        $bMIn = $request->modif_in;
+        $bMOut = $request->modif_out;
+        $oInDateTime = Carbon::parse($request->in_datetime);
+        $oOutDateTime = Carbon::parse($request->out_datetime);
+
+        $oRow = json_decode($request->row);
+
+        $oInRegistry = null;
+        $oOutRegistry = null;
+
+        if ($bMIn) {
+            if ($oRow->hasCheckIn) {
+                $oOrigDate = Carbon::parse($oRow->inDateTime);
+
+                $oInRegistry = register::where('employee_id', $oRow->idEmployee)
+                                        ->where('date', $oOrigDate->toDateString())
+                                        ->where('time', $oOrigDate->toTimeString())
+                                        // ->where('type_id', 1)
+                                        ->first();
+            }
+            else {
+                $oInRegistry = new register();
+                
+                $oInRegistry->employee_id = $oRow->idEmployee;
+                $oInRegistry->type_system = null;
+                $oInRegistry->form_creation_id = null;
+                $oInRegistry->is_delete = 0;
+                $oInRegistry->biostar_id = 0;
+                $oInRegistry->date_original = null;
+                $oInRegistry->time_original = null;
+                $oInRegistry->type_original = 1;
+            }
+
+            if ($oInRegistry != null) {
+                $oInRegistry->date = $oInDateTime->toDateString();
+                $oInRegistry->time = $oInDateTime->toTimeString();
+                $oInRegistry->type_id = 1;
+                $oInRegistry->is_modified = true;
+                $oInRegistry->user_id = session()->get('user_id');
+    
+                $oInRegistry->save();
+            }
+        }
+
+        if ($bMOut) {
+            if ($oRow->hasCheckOut) {
+                $oOrigDate = Carbon::parse($oRow->outDateTime);
+
+                $oOutRegistry = register::where('employee_id', $oRow->idEmployee)
+                                        ->where('date', $oOrigDate->toDateString())
+                                        ->where('time', $oOrigDate->toTimeString())
+                                        // ->where('type_id', 2)
+                                        ->first();
+            }
+            else {
+                $oOutRegistry = new register();
+                
+                $oOutRegistry->employee_id = $oRow->idEmployee;
+                $oOutRegistry->type_system = null;
+                $oOutRegistry->form_creation_id = null;
+                $oOutRegistry->is_delete = 0;
+                $oOutRegistry->biostar_id = 0;
+                $oOutRegistry->date_original = null;
+                $oOutRegistry->time_original = null;
+                $oOutRegistry->type_original = 1;
+            }
+
+            if ($oOutRegistry != null) {
+                $oOutRegistry->date = $oOutDateTime->toDateString();
+                $oOutRegistry->time = $oOutDateTime->toTimeString();
+                $oOutRegistry->type_id = 2;
+                $oOutRegistry->is_modified = true;
+                $oOutRegistry->user_id = session()->get('user_id');
+    
+                $oOutRegistry->save();
+            }
+        }
+
+        return json_encode([$oInRegistry, $oOutRegistry]);
     }
 }

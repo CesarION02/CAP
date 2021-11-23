@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\PrepayrollReportController;
 use Illuminate\Http\Request;
 use App\Models\department;
 use App\Models\employees;
@@ -16,6 +17,7 @@ use App\SUtils\SReportsUtils;
 use App\SUtils\SInfoWithPolicy;
 use App\SUtils\SHolidayWork;
 use App\SUtils\SGenUtils;
+use App\SUtils\SPermissions;
 use App\SData\SDataProcess;
 use DB;
 use Carbon\Carbon;
@@ -437,7 +439,29 @@ class ReporteController extends Controller
     {
         $config = \App\SUtils\SConfiguration::getConfigurations();
 
-        $lEmployees = SGenUtils::toEmployeeIds(0, 0, []);
+        $roles = \Auth::user()->roles;
+
+        $isSupervisor = false;
+        foreach ($roles as $rol) {
+            if ($rol->id == 2) {
+                $isSupervisor = true;
+                break;
+            }
+        }
+
+        if (! $isSupervisor) {
+            $lEmployees = SGenUtils::toEmployeeIds(0, 0, []);
+        }
+        else {
+            $qEmployees = SGenUtils::toEmployeeQuery(0, 0, []);
+
+            $eSubs = \DB::table('prepayroll_groups AS pg')
+                        ->join('prepayroll_group_employees AS pge', 'pg.id_group', '=', 'pge.group_id')
+                        ->where('pg.head_user_id', \Auth::user()->id)
+                        ->pluck('pge.employee_id');
+
+            $lEmployees = $qEmployees->whereIn('e.id', $eSubs)->get();
+        }
 
         return view('report.reportsGen')
                     ->with('tReport', \SCons::REP_HR_EX)
@@ -582,6 +606,28 @@ class ReporteController extends Controller
             $lEmployees = SGenUtils::toEmployeeIds($payWay, $filterType, $ids);
         }
 
+        $roles = \Auth::user()->roles;
+
+        $isSupervisor = false;
+        foreach ($roles as $rol) {
+            if ($rol->id == 2) {
+                $isSupervisor = true;
+                break;
+            }
+        }
+
+        if ($isSupervisor) {
+            $lColEmps = collect($lEmployees);
+
+            $eSubs = \DB::table('prepayroll_groups AS pg')
+                        ->join('prepayroll_group_employees AS pge', 'pg.id_group', '=', 'pge.group_id')
+                        ->where('pg.head_user_id', \Auth::user()->id)
+                        ->pluck('pge.employee_id')
+                        ->toArray();
+
+            $lEmployees = $lColEmps->whereIn('id', $eSubs);
+        }
+
         $lRows = SDataProcess::process($sStartDate, $sEndDate, $payWay, $lEmployees);
 
         $aEmployees = $lEmployees->pluck('num_employee', 'id');
@@ -618,6 +664,12 @@ class ReporteController extends Controller
                         ->where('is_delete', false)
                         ->get();
 
+        $bModify = SPermissions::hasPermission(session()->get('user_id'), 'ajustes_rep_te');
+
+        PrepayrollReportController::prepayrollReportVobos($sStartDate, $sEndDate);
+
+        \Debugbar::disable();
+
         return view('report.reportDelaysView')
                     ->with('tReport', \SCons::REP_HR_EX)
                     ->with('sStartDate', $sStartDate)
@@ -627,6 +679,8 @@ class ReporteController extends Controller
                     ->with('adjTypes', $adjTypes)
                     ->with('lAdjusts', $lAdjusts)
                     ->with('lEmpWrkdDays', $lEmpWrkdDays)
+                    ->with('bModify', $bModify)
+                    ->with('registriesRoute', route('registro_ajuste'))
                     ->with('lRows', $lRows);
     }
 
