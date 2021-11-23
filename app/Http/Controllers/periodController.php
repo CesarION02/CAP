@@ -84,6 +84,7 @@ class periodController extends Controller
         
         $weeks = [];
         $biweeks = [];
+        $biweeksCal = [];
 
         /**
          * Cortes de semana
@@ -129,9 +130,39 @@ class periodController extends Controller
             $biweeks[] = $cut;
         }
 
+        /**
+         * Cortes de quincena calendario
+         */
+        $nextYear = Carbon::parse(($oDate->year + 1) . '-01-01');
+        $start = Carbon::parse($oDate->year . '-01-01');
+        $number = 1;
+        do {
+            $middle = (clone $start)->addDays(14);
+            $last = (clone $middle)->endOfMonth();
+
+            $cut = (object) [];
+
+            $cut->dt_start = $start->toDateString();
+            $cut->dt_end = $middle->toDateString();
+            $cut->number = $number++;
+
+            $biweeksCal[] = $cut;
+
+            $cut = (object) [];
+
+            $cut->dt_start = $middle->addDay()->toDateString();
+            $cut->dt_end = $last->toDateString();
+            $cut->number = $number++;
+
+            $biweeksCal[] = $cut;
+
+            $start->addMonth();
+        } while ($start->lessThan($nextYear));
+
         $response = (object) [];
         $response->weeks = $weeks;
         $response->biweeks = $biweeks;
+        $response->biweekscal = $biweeksCal;
 
         return json_encode($response);
     }

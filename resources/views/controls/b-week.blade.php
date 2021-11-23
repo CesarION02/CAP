@@ -20,6 +20,9 @@ Ejemplo de implementación:
     <label class="btn btn-primary">
         <input type="radio" name="options" id="biweek" value="biweek"> Quincena
     </label>
+    <label class="btn btn-primary">
+        <input type="radio" name="options" id="biweekcal" value="biweekcal"> Quincena Cal.
+    </label>
 </div>
 <input type="hidden" id="start-date" name="{{ $start_date_name }}">
 <input type="hidden" id="end-date" name="{{ $end_date_name }}">
@@ -43,6 +46,7 @@ Ejemplo de implementación:
 
         var weekCuts = {};
         var biweekCuts = {};
+        var biweekCalCuts = {};
 
         setRanges(start, start, end);
 
@@ -62,6 +66,7 @@ Ejemplo de implementación:
             let route = <?php echo json_encode(route('getcuts')) ?>;
             let weeks = [];
             let biweeks = [];
+            let biweeksCal = [];
 
             let pType = $('input[name=options]:checked').val();
    
@@ -73,6 +78,7 @@ Ejemplo de implementación:
             .then(res => {
                 weeks = res.data.weeks;
                 biweeks = res.data.biweeks;
+                biweeksCal = res.data.biweekscal;
 
                 for (const w of weeks) {
                     weekCuts["(" + w.number + ") - " + moment(w.dt_start).format('DD/MM/YYYY') + "-" + moment(w.dt_end).format('DD/MM/YYYY')] = 
@@ -84,10 +90,15 @@ Ejemplo de implementación:
                         [moment(b.dt_start), moment(b.dt_end)];
                 }
 
+                for (const b of biweeksCal) {
+                    biweekCalCuts["(" + b.number + ") - " + moment(b.dt_start).format('DD/MM/YYYY') + "-" + moment(b.dt_end).format('DD/MM/YYYY')] = 
+                        [moment(b.dt_start), moment(b.dt_end)];
+                }
+
                 $('#daterange-b-week').daterangepicker({
                     startDate: start,
                     endDate: end,
-                    ranges: pType == "week" ? weekCuts : biweekCuts,
+                    ranges: pType == "week" ? weekCuts : pType == "biweek" ?  biweekCuts : biweekCalCuts,
                     drops: "auto"
                 }, cb);
             })
@@ -99,7 +110,7 @@ Ejemplo de implementación:
         $('#daterange-b-week').daterangepicker({
                     startDate: start,
                     endDate: end,
-                    ranges: $(this).val() == "week" ? weekCuts : biweekCuts,
+                    ranges: $(this).val() == "week" ? weekCuts : $(this).val() == "biweek" ? biweekCuts : biweekCalCuts,
                     drops: "auto"
                 }, cb);
 
@@ -118,6 +129,14 @@ Ejemplo de implementación:
                             startDate: start,
                             endDate: end,
                             ranges: biweekCuts,
+                            drops: "auto"
+                        }, cb);
+                break;
+                case 'biweekcal':
+                        $('#daterange-b-week').daterangepicker({
+                            startDate: start,
+                            endDate: end,
+                            ranges: biweekCalCuts,
                             drops: "auto"
                         }, cb);
                 break;
