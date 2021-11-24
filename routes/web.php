@@ -130,6 +130,12 @@ Route::post('prepayrollcontrolvobos/rejvobo/{id}', 'prePayrollController@rejBoVo
 Route::get('prepayrollbinn/{id}', 'prePayrollController@prepayrollBinnacle')->name('bitacora_pre');
 Route::get('prepayrolls', 'prePayrollController@prepayrolls')->name('bitacora_reg_s');
 Route::get('prepayrolls/fuera/{id}', 'prePayrollController@prepayrollFuera')->name('bitacora_fuera');
+/** RUTAS DE CONFIGURACIÓN DE PRENÓMINA */
+Route::get('prepayrollcfgvobos', 'PrepayrollReportController@cfgVobos')->name('cfg_vobos');
+Route::get('prepayrollcfgvobos/create', 'PrepayrollReportController@create')->name('cfg_vobos_create');
+Route::post('prepayrollcfgvobos/store', 'PrepayrollReportController@store')->name('save_cfg');
+Route::get('prepayrollcfgvobos/edit/{id}', 'PrepayrollReportController@edit')->name('edit_cfg');
+Route::put('prepayrollcfgvobos/update', 'PrepayrollReportController@update')->name('update_cfg');
 /* RUTAS DE GRUPO DEPARTAMENTO USUARIO */
 Route::get('deptgroupuser', 'deptgroupuserController@index')->name('dgu');
 Route::get('deptgroupuser/create', 'deptgroupuserController@create')->name('crear_dgu');

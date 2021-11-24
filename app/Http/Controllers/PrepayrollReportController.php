@@ -12,6 +12,82 @@ use App\SUtils\SDateUtils;
 
 class PrepayrollReportController extends Controller
 {
+    public function cfgVobos(Request $request)
+    {
+        $configurations = \DB::table('prepayroll_report_configs AS prc')
+                                ->leftJoin('users AS u', 'prc.user_n_id', '=', 'u.id')
+                                ->get();
+
+        return view('prepayrollcontrol.voboscfg', [
+            'configurations' => $configurations
+        ]);
+    }
+
+    public function create(Request $request)
+    {
+        $users = \DB::table('users')
+                        ->select(['id', 'name'])
+                        ->where('is_delete', 0)
+                        ->get();
+
+        return view('prepayrollcontrol.voboscfgcreate', [
+            'users' => $users
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        $oCfg = new PrepayReportConfig();
+
+        $oCfg->since_date = $request->since_date;
+        $oCfg->is_week = $request->type_pay == 1;
+        $oCfg->is_biweek = $request->type_pay == 2;
+        $oCfg->is_required = isset($request->is_required);
+        $oCfg->order_vobo = $request->order_vobo;
+        $oCfg->rol_n_name = $request->rol_n_name;
+        $oCfg->user_n_id = $request->user_n_id;
+        $oCfg->is_delete = 0;
+        $oCfg->created_by = \Auth::user()->id;
+        $oCfg->updated_by = \Auth::user()->id;
+
+        $oCfg->save();
+
+        return redirect()->route('cfg_vobos');
+    }
+
+    public function edit($id)
+    {
+        $oCfg = PrepayReportConfig::find($id);
+
+        $users = \DB::table('users')
+                        ->select(['id', 'name'])
+                        ->where('is_delete', 0)
+                        ->get();
+    
+        return view('prepayrollcontrol.voboscfgedit', [
+            'oCfg' => $oCfg,
+            'users' => $users
+        ]);
+    }
+
+    public function update(Request $request)
+    {
+        $oCfg = PrepayReportConfig::find($request->id_configuration);
+
+        $oCfg->since_date = $request->since_date;
+        $oCfg->is_week = $request->type_pay == 1;
+        $oCfg->is_biweek = $request->type_pay == 2;
+        $oCfg->is_required = isset($request->is_required);
+        $oCfg->order_vobo = $request->order_vobo;
+        $oCfg->rol_n_name = $request->rol_n_name;
+        $oCfg->user_n_id = $request->user_n_id;
+        $oCfg->updated_by = \Auth::user()->id;
+
+        $oCfg->save();
+
+        return redirect()->route('cfg_vobos');
+    }
+    
     public static function prepayrollReportVobos($sStartDate, $sEndDate)
     {
         $oSDate = Carbon::parse($sStartDate);
