@@ -152,9 +152,13 @@ class SOverJourneyCore {
         $previousDate = null;
         $workedMinutes = 0;
         $config = \App\SUtils\SConfiguration::getConfigurations();
+        $maxConfigMinutes = $config->maxOvertimeJourneyMinutes;
         for ($i = 0; $i < count($lData); $i++) {
             $oRow = $lData[$i];
             $currentDate = $oRow->outDate;
+            $minutesToWork = SDelayReportUtils::compareDates($oRow->inDateTimeSch, $oRow->outDateTimeSch)->diffMinutes;
+
+            $minutesDayMinWorked = ($minutesToWork < $maxConfigMinutes) ? $minutesToWork : $maxConfigMinutes;
 
             if ($idEmployee != $oRow->idEmployee) {
                 $idEmployee = $oRow->idEmployee;
@@ -166,7 +170,7 @@ class SOverJourneyCore {
                 $oPrevRow = $lData[$i-1];
                 $workedMinutes += SDelayReportUtils::compareDates($oPrevRow->inDateTime, $oPrevRow->outDateTime)->diffMinutes;
                 
-                if ($workedMinutes <= $config->maxOvertimeJourneyMinutes && $workedMinutes > 0
+                if ($workedMinutes <= $minutesDayMinWorked && $workedMinutes > 0
                     && ($oPrevRow->hasChecks && $oPrevRow->hasCheckIn && $oPrevRow->hasCheckOut)) {
                     $oPrevRow->overWorkedMins += $workedMinutes;
                     $oPrevRow->overMinsTotal += $workedMinutes;
