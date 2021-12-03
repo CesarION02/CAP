@@ -166,7 +166,7 @@ class SOverJourneyCore {
                 $oPrevRow = $lData[$i-1];
                 $workedMinutes += SDelayReportUtils::compareDates($oPrevRow->inDateTime, $oPrevRow->outDateTime)->diffMinutes;
                 
-                if ($workedMinutes <= $config->maxOvertimeJourneyMinutes && $workedMinutes > 0
+                if ($workedMinutes < $config->maxOvertimeJourneyMinutes && $workedMinutes > 0
                     && ($oPrevRow->hasChecks && $oPrevRow->hasCheckIn && $oPrevRow->hasCheckOut)) {
                     $oPrevRow->overWorkedMins += $workedMinutes;
                     $oPrevRow->overMinsTotal += $workedMinutes;
