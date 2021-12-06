@@ -233,6 +233,8 @@ class ReporteController extends Controller
                                     ->orderBy('date')
                                     ->orderBy('e.name')
                                     ->orderBy('time');
+                
+                $reportType = 4;
                 break;
             
             default:
@@ -394,6 +396,7 @@ class ReporteController extends Controller
                                     ->orderBy('date')
                                     ->orderBy('e.name')
                                     ->orderBy('time');
+                $reportType = 4;
                 break;
             default:
                 # code...
@@ -810,9 +813,18 @@ class ReporteController extends Controller
         //SHolidayWork::holidayWorked($sStartDate,$sEndDate);
         
         //$lEmployees[0] = 32; 
+
+        $config = \App\SUtils\SConfiguration::getConfigurations(); 
+        $tipoContrato = $config->tp_rec;
+        $Acontrato = [];
+        for($i = 0 ; $i < count($tipoContrato) ; $i++){
+            $Acontrato[$i] = $tipoContrato[$i]->id;
+        }
+
         $lRows = DB::table('processed_data')
                         ->join('employees','employees.id','=','processed_data.employee_id')
                         ->whereIn('employees.id',$lEmployees)
+                        //->whereIn('employees.tp_rec_id',$Acontrato)
                         ->where(function($query) use ($sStartDate,$sEndDate) {
                             $query->whereBetween('inDate',[$sStartDate,$sEndDate])
                             ->OrwhereBetween('outDate',[$sStartDate,$sEndDate]);
@@ -865,12 +877,25 @@ class ReporteController extends Controller
                         })
                         ->select('employees.id AS idEmp','incidents_day.date as Date','incidents.type_incidents_id as tipo')
                         ->get();
+        $incidencias = DB::table('incidents')
+                        ->join('employees','employees.id','=','incidents.employee_id')
+                        ->join('incidents_day','incidents_day.incidents_id','=','incidents.id')
+                        ->where('employees.is_delete','0')
+                        ->where('employees.is_active','1')
+                        ->whereIn('employees.id',$lEmployees)
+                        ->where(function ($query) use ($sStartDate,$sEndDate) {
+                                return $query->whereBetween('start_date', [$sStartDate,$sEndDate])
+                                ->orwhereBetween('end_date', [$sStartDate,$sEndDate]);
+                        })
+                        ->select('employees.id AS idEmp','incidents_day.date as Date','incidents.type_incidents_id as tipo')
+                        ->get();
         return view('report.reportView')
                     ->with('sTitle', 'Reporte de checadas')
                     ->with('lRows', $lRows)
                     ->with('incapacidades',$incapacidades)
                     ->with('vacaciones',$vacaciones)
                     ->with('inasistencia',$inasistencia)
+                    ->with('incidencias',$incidencias)
                     ->with('reporttype',$request->reportType)
                     ->with('tipo', $tipoDatos)
                     ->with('payWay',$payWay);
@@ -1850,7 +1875,8 @@ class ReporteController extends Controller
             $response = $r;
             $response = $r->getBody()->getContents();
             $data = json_decode($response);
+            $orden = $request->orden;
 
-            return view('report.reportepuerta')->with('data',$data);
+            return view('report.reportepuerta')->with('data',$data)->with('orden',$orden);
         }
 }

@@ -108,10 +108,10 @@
                                                     <td align="center">{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($lRows[$i]->extraDobleMins + $lRows[$i]->extraDobleMinsNoficial) }}</td>
                                                     <td align="center">{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($lRows[$i]->extraTripleMins + $lRows[$i]->extraTripleMinsNoficial) }}</td>
                                                 @elseif($tipo == 2)
-                                                    <td align="center">{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($lRows[$j]->extraDoubleMins) }}</td>
+                                                    <td align="center">{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($lRows[$j]->extraDobleMins) }}</td>
                                                     <td align="center">{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($lRows[$i]->extraTripleMins) }}</td>
                                                 @else
-                                                    <td align="center">{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($lRows[$j]->extraDoubleMins)}}</td>
+                                                    <td align="center">{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($lRows[$j]->extraDobleMins)}}</td>
                                                     <td align="center">{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($lRows[$i]->extraTripleMinsNoficial) }}</td>
                                                 @endif
                                                 <?php $totalextrad = $totalextrad + $lRows[$i]->extraDobleMins; $totalextrat = $totalextrat + $lRows[$i]->extraTripleMins; ?>
@@ -121,7 +121,7 @@
                                                 @else
                                                     <td></td>
                                                 @endif
-                                            @elseif($lRows[$i]->haschecks == 1 && $lRows[$i]->is_dayoff == 0 && $lRows[$i]->is_holiday == 0 )
+                                            @elseif($lRows[$i]->haschecks == 1 && $lRows[$i]->is_dayoff == 0 && $lRows[$i]->is_holiday == 0 && $lRows[$i]->hasabsence == 0 )
                                                 <td>{{ \App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->inDate) }}</td>
                                                 @if($tipo != 2)
                                                     @if($lRows[$i]->inDateTime == '00:20:20')
@@ -215,47 +215,92 @@
                                                 <td></td>
                                                 <td></td>
                                             @else
-                                                @for( $j = 0 ; count($incapacidades) > $j ; $j++)
-                                                    @if ($lRows[$i]->employee_id == $incapacidades[$j]->idEmp && ($lRows[$i]->inDate == $incapacidades[$j]->Date || $lRows[$i]->outDate == $incapacidades[$j]->Date))
+                                            <?php $completo = 0; ?>
+                                                @for( $j = 0 ; count($incidencias) > $j ; $j++)
+                                                    @if ($lRows[$i]->employee_id == $incidencias[$j]->idEmp && ($lRows[$i]->inDate == $incidencias[$j]->Date || $lRows[$i]->outDate == $incidencias[$j]->Date))
+                                                        <?php $completo = 1; ?>
                                                         @if($lRows[$i]->inDate != null)
                                                             <td>{{\App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->inDate)}}</td>
                                                         @else
                                                             <td>{{\App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->outDate)}}</td>
                                                         @endif
-                                                        <td>{{ 'Incapacidad'}}</td>
+                                                        @switch($incidencias[$j]->tipo)
+                                                            @case(1)
+                                                                <td>{{'Inasistencia sin permiso'}}</td>
+                                                                @break
+                                                            @case(2)
+                                                                <td>{{'Inasistencia con permiso sin goce'}}</td>
+                                                                @break
+                                                            @case(3)
+                                                                <td>{{'Inasistencia con permiso con goce'}}</td>
+                                                                @break
+                                                            @case(4)
+                                                                <td>{{'Inasistencia administrativa reloj checador'}}</td>
+                                                                @break
+                                                            @case(5)
+                                                                <td>{{'Inasistencia administrativa suspensión'}}</td>
+                                                                @break
+                                                            @case(6)
+                                                                <td>{{'Inasistencia administrativa otros'}}</td>
+                                                                @break
+                                                            @case(7)
+                                                                <td>{{'Onomástico'}}</td>
+                                                                @break
+                                                            @case(8)
+                                                                <td>{{'Riesgo de trabajo'}}</td>
+                                                                @break
+                                                            @case(9)
+                                                                <td>{{'Enfermedad en general'}}</td>
+                                                                @break
+                                                            @case(10)
+                                                                <td>{{'Maternidad'}}</td>
+                                                                @break
+                                                            @case(11)
+                                                                <td>{{'Licencia por cuidados'}}</td>
+                                                                @break
+                                                            @case(12)
+                                                                <td>{{'Vacaciones'}}</td>
+                                                                @break
+                                                            @case(13)
+                                                                <td>{{'Vacaciones pendientes'}}</td>
+                                                                @break
+                                                            @case(14)
+                                                                <td>{{'Capacitación'}}</td>
+                                                                @break
+                                                            @case(15)
+                                                                <td>{{'Trabajo fuera planta'}}</td>
+                                                                @break
+                                                            @case(16)
+                                                                <td>{{'Paternidad'}}</td>
+                                                                @break
+                                                            @case(17)
+                                                                <td>{{'Día otorgado'}}</td>
+                                                                @break
+                                                            @case(18)
+                                                                <td>{{'Inasistencia prescripción medica'}}</td>
+                                                                @break
+                                                        @endswitch
                                                         <td></td>
                                                         <td></td>
                                                         <td></td>
                                                         <td></td>
                                                         <td></td>
+                                                        @break
                                                     @endif
                                                 @endfor
-                                                @for( $j = 0 ; count($vacaciones) > $j ; $j++)
-                                                    @if ($lRows[$i]->employee_id == $vacaciones[$j]->idEmp && ($lRows[$i]->inDate == $vacaciones[$j]->Date || $lRows[$i]->outDate == $vacaciones[$j]->Date))
-                                                        <td>{{ 'Vacaciones'}}</td>
-                                                        <td></td>
-                                                        <td></td>
-                                                        <td></td>
-                                                        <td></td>
-                                                        <td></td>
-                                                        <td></td>
+                                                @if ($completo == 0)
+                                                    @if($lRows[$i]->inDate != null)
+                                                        <td>{{\App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->inDate)}}</td>
+                                                    @else
+                                                        <td>{{\App\SUtils\SDateTimeUtils::orderDate($lRows[$i]->outDate)}}</td>
                                                     @endif
-                                                @endfor
-                                                @for( $j = 0 ; count($inasistencia) > $j ; $j++)
-                                                    @if ($lRows[$i]->employee_id == $inasistencia[$j]->idEmp && ($lRows[$i]->inDate == $inasistencia[$j]->Date || $lRows[$i]->outDate == $inasistencia[$j]->Date))
-                                                        @if($inasistencia[$j]->tipo == 14)
-                                                            <td>{{'Capacitación'}}</td>   
-                                                        @else
-                                                            <td>{{'Inasistencia'}}</td>
-                                                        @endif
-                                                        <td></td>
-                                                        <td></td>
-                                                        <td></td>
-                                                        <td></td>
-                                                        <td></td>
-                                                        <td></td>
-                                                    @endif
-                                                @endfor
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>  
+                                                @endif
                                             @endif
                                                 
                                             </tr>
@@ -289,14 +334,19 @@
 
 @section("scripts")
 
+    <script src="{{ asset("assets/js/chosen.jquery.min.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/js/axios.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/js/vue.js") }}" type="text/javascript"></script>
     <script src="{{ asset("dt/datatables.js") }}" type="text/javascript"></script>
     <script src="{{ asset('dt/dataTables.buttons.min.js') }}"></script>
-	<script src="{{ asset('dt/buttons.flash.min.js') }}"></script>
-	<script src="{{ asset('dt/jszip.min.js') }}"></script>
-	<script src="{{ asset('dt/pdfmake.min.js') }}"></script>
-	<script src="{{ asset('dt/vfs_fonts.js') }}"></script>
-	<script src="{{ asset('dt/buttons.html5.min.js') }}"></script>
+    <script src="{{ asset('dt/buttons.flash.min.js') }}"></script>
+    <script src="{{ asset('dt/jszip.min.js') }}"></script>
+    <script src="{{ asset('dt/pdfmake.min.js') }}"></script>
+    <script src="{{ asset('dt/vfs_fonts.js') }}"></script>
+    <script src="{{ asset('dt/buttons.html5.min.js') }}"></script>
     <script src="{{ asset('dt/buttons.print.min.js') }}"></script>
+    <script src="{{ asset("js/excel/xlsx.full.min.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("js/excel/FileSaver.min.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/moment/moment.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/moment/datetime-moment.js") }}" type="text/javascript"></script>
 

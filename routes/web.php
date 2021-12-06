@@ -168,6 +168,9 @@ Route::get('/syncBiostar','SyncController@dateSyncView')->name('fecha_sincroniza
 Route::post('/syncBiostar/date','SyncController@dateSyncProcess')->name('sincronizar_biostar');
 
 /* RUTAS DE EMPLEADOS */
+Route::post('employeeWithout/guardar', 'assignController@guardarw')->name('guardar_without');
+Route::get('employeeWithout/create/{id}', 'assignController@withoutcreate')->name('crearsin');
+Route::get('employeeWithout', 'assignController@employeesWithout')->name('sinprogramacion');
 Route::delete('employees/terminarconfiguracion/{id}', 'employeeController@confirmarConfiguracion')->name('terminar_configurar');
 Route::get('employees/foraneos', 'employeeController@foraneos')->name('foraneos');
 Route::delete('employees/enviarForaneos/{id}', 'employeeController@enviarForaneos')->name('enviar_empleado_foraneo');

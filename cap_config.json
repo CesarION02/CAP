@@ -33,5 +33,14 @@
         { "email": "sflores@swaplicado.com.mx", "name": "Sergio Flores" },
         { "email": "cesar.orozco@swaplicado.com.mx", "name": "Cesar Orozco" },
         { "email": "edwin.carmona@swaplicado.com.mx", "name": "Edwin Carmona" }
-    ]
+    ],
+    "days_granted": 2,
+    "policy_holidays": 1,
+    "tp_rec": [
+        { "id": 2 },
+        { "id": 3 },
+        { "id": 4 },
+        { "id": 12 }
+    ],
+    "stps_days": 3
 }
