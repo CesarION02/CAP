@@ -4,6 +4,7 @@
                 <input type="text" name="name" id="name" class="form-control" value="{{old('name', $data->name ?? '')}}" {{ isset($data) ? "readonly" : "" }}>
         </div>
 </div>
+<input type="hidden" name="becario" id="becario" value="{{$becario}}">
 <div class="form-group">
         <label for="num_employee" class="col-lg-3 control-label">Número {{ (isset($becario) && $becario ? 'practicante' : 'empleado') }}:</label>
         <div class="col-lg-8">

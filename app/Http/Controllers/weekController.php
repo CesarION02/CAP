@@ -60,6 +60,14 @@ class weekController extends Controller
             $num++;
             $primerDia->addDays(7);
             $ultimoDia->addDays(7);
+
+            $prepayroll = new prepayroll_control();
+            $prepayroll->status = 1;
+            $prepayroll->num_week = $semana->id;
+            $prepayroll->is_week = 1;
+            $prepayroll->created_by = session()->get('user_id');
+            $prepayroll->updated_by = session()->get('user_id');
+            $prepayroll->save();
         }
 
         return redirect('week')->with('mensaje', 'Semanas creadas con exito');

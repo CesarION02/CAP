@@ -20,7 +20,7 @@
         { "email": "storres@aeth.mx", "name": "Soraya Torres" },
         { "email": "nominas@aeth.mx", "name": "Roxana Torres" },
         { "email": "ebarron@aeth.mx", "name": "Edgar Barrón" },
-        { "email": "vquinonez@aeth.mx", "name": "Victor Quiñonez" },
+        { "email": "dtinoco@aeth.mx", "name": "Darío Tinoco" },
         { "email": "jlozano@aeth.mx", "name": "Jesús Lozano" },
         { "email": "sflores@swaplicado.com.mx", "name": "Sergio Flores" },
         { "email": "cesar.orozco@swaplicado.com.mx", "name": "Cesar Orozco" },
@@ -42,5 +42,6 @@
         { "id": 4 },
         { "id": 12 }
     ],
-    "stps_days": 3
+    "stps_days": 3,
+    "prepayroll_policy": 2
 }

@@ -141,7 +141,7 @@ Prenóminas
                     <thead>
                         <tr>
                             <th>Año</th>
-                            <th>Número quincena</th>
+                            <th>Número semana</th>
                             <th>Fecha inicio</th>
                             <th>Fecha fin</th>
                             <th>Status</th>
@@ -167,9 +167,14 @@ Prenóminas
                             </td>
                             <td>{{$semanas->updated_at}}</td>
                             <td>
-                                <a href="{{route('bitacora_pre', ['id' => $semanas->id])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
-                                     <i class="fa fa-fw fa-pencil"></i>
+                                <a href="{{route('bitacora_pre', ['id' => $semanas->id])}}" class="btn-accion-tabla tooltipsC" title="Bitacora modificaciones">
+                                    <i class="fa fa-fw fa-list"></i>
                                 </a>
+                                @if($semanas->status == 2)
+                                    <a href="{{route('prenomina_abrir', ['id' => $semanas->id])}}" class="btn-accion-tabla tooltipsC" title="Abrir prenómina">
+                                        <i class="fa fa-fw fa-pencil"></i>
+                                    </a>
+                                @endif
                             </td>
                         </tr>
                         @endforeach

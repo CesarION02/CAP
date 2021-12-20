@@ -671,7 +671,6 @@ class ReporteController extends Controller
 
         PrepayrollReportController::prepayrollReportVobos($sStartDate, $sEndDate);
 
-        \Debugbar::disable();
 
         return view('report.reportDelaysView')
                     ->with('tReport', \SCons::REP_HR_EX)

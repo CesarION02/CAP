@@ -2728,18 +2728,6 @@ class SInfoWithPolicy{
             $period_processed->updated_by = session()->get('user_id'); 
             $period_processed->save();
 
-            /*$prepayroll = prepayroll_control::where('num_week',$num_period)->get();
-            $prepayroll->status = 2;
-            $prepayroll->updated_by = session()->get('user_id');
-            $prepayroll->save();
-
-            $change = new prepayrollchange();
-            $change->prepayroll_id = $prepayroll->id;
-            $change->status = 2;
-            $change->created_by = session()->get('user_id');
-            $change->updated_by = session()->get('user_id');
-            $change->save();
-            */
         }else if( $type == 1 ){
             $period_processed = new period_processed();
             $period_processed->num_biweekly = $num_period;
@@ -2749,17 +2737,6 @@ class SInfoWithPolicy{
             $period_processed->updated_by = session()->get('user_id');
             $period_processed->save();
 
-/*            $prepayroll = prepayroll_control::where('num_biweekly',$num_period)->get();
-            $prepayroll->status = 2;
-            $prepayroll->updated_by = session()->get('user_id');
-            $prepayroll->save();
-
-            $change = new prepayrollchange();
-            $change->prepayroll_id = $prepayroll->id;
-            $change->status = 2;
-            $change->created_by = session()->get('user_id');
-            $change->updated_by = session()->get('user_id');
-            $change->save();*/
         }
       }
       public static function initArr(){

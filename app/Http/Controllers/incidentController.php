@@ -93,22 +93,32 @@ class incidentController extends Controller
      */
     public function store(Request $request)
     {
-        $incident = new incident($request->all());
-        $incident->external_key = "0_0";
-        $incident->cls_inc_id = 1;
-        $incident->created_by = session()->get('user_id');
-        $incident->updated_by = session()->get('user_id');
+        
+        DB::table('incidents')
+                ->whereIn('incidents.start_date',[$request->start_date,$request->end_date])
+                ->orWhereIn('incidents.end_date',[$request->start_date,$request->end_date])
+                ->where('employee_id','=',$request->employee_id)
+                ->get();
+        if(count($incidents) == 0){
+            $incident = new incident($request->all());
+            $incident->external_key = "0_0";
+            $incident->cls_inc_id = 1;
+            $incident->created_by = session()->get('user_id');
+            $incident->updated_by = session()->get('user_id');
 
 
-        $incident->save();
+            $incident->save();
 
-        $this->daysIncidents($incident->id,$incident->start_date,$incident->end_date,$incident->employee_id);
+            $this->daysIncidents($incident->id,$incident->start_date,$incident->end_date,$incident->employee_id);
 
-        if ($request->incident_type > 0) {
-            return redirect()->route('incidentes', [$request->incident_type])->with('mensaje', 'Incidente creado con éxito');
-        }
-        else {
-            return redirect('incidents')->with('mensaje', 'Incidente creado con éxito');
+            if ($request->incident_type > 0) {
+                return redirect()->route('incidentes', [$request->incident_type])->with('mensaje', 'Incidente creado con éxito');
+            }
+            else {
+                return redirect('incidents')->with('mensaje', 'Incidente creado con éxito');
+            }
+        }else{
+            return redirect('/incidents/14')->with('mensaje','Ya existe un incidente para esta fecha');
         }
     }
 
