@@ -1121,10 +1121,110 @@ class assignController extends Controller
     }
 
     function get_dates($year = 0, $week = 0)
-{
+    {
        
-}
+    }
 
+    function employeesWithout(){
+        $iTemplateId = env('TMPLTE_SATURDAYS', 0);
+        if (session()->get('rol_id') != 1){
+            $numero = session()->get('name');
+            $usuario = DB::table('users')
+                    ->where('name',$numero)
+                    ->get();
+            $dgu = DB::table('group_dept_user')
+                    ->where('user_id',$usuario[0]->id)
+                    ->select('groupdept_id AS id')
+                    ->get();
+            $Adgu = [];
+            $adguString="";
+            for($i=0;count($dgu)>$i;$i++){
+                $Adgu[$i]=$dgu[$i]->id;
+                if($i == 0){
+                    $adguString = $adguString.$dgu[$i]->id;
+                }else{
+                    $adguString = $adguString.", ".$dgu[$i]->id;
+                }
+                
+            }
+            $assigns = DB::table('schedule_assign')
+                                ->join('employees','employees.id' , '=', 'schedule_assign.employee_id')
+                                ->join('departments','departments.id', '=', 'employees.department_id')
+                                ->join('department_group','department_group.id','=','departments.dept_group_id')
+                                ->where('schedule_assign.is_delete',0)
+                                ->where('schedule_assign.schedule_template_id',"!=",$iTemplateId)
+                                ->whereIn('department_group.id',$Adgu)
+                                ->select('employees.id AS idEmployee')
+                                ->get();
+            $employees = [];
+            for($i = 0 ; count($assigns) > $i ; $i++){
+                $employees[$i] = $assigns[$i]->idEmployee;
+            }
+            $employees = DB::table('employees')
+                                    ->whereNotIn('employees.id',$employees)
+                                    ->join('departments','departments.id', '=', 'employees.department_id')
+                                    ->join('department_group','department_group.id','=','departments.dept_group_id')
+                                    ->whereIn('department_group.id',$Adgu)
+                                    ->select('employees.id AS idEmployee','employees.name AS nameEmployee','departments.name AS nameDept')
+                                    ->groupBy('employees.id')
+                                    ->get();
+        }else{
+            $numero = session()->get('name');
+            $usuario = DB::table('users')
+                    ->where('name',$numero)
+                    ->get();
+            $assigns = DB::table('schedule_assign')
+                    ->join('employees','employees.id' , '=', 'schedule_assign.employee_id')
+                    ->join('departments','departments.id', '=', 'employees.department_id')
+                    ->join('department_group','department_group.id','=','departments.dept_group_id')
+                    ->where('schedule_assign.is_delete',0)
+                    ->where('schedule_assign.schedule_template_id',"!=",$iTemplateId)
+                    ->select('employees.id AS idEmployee')
+                    ->get();
+            $employees = [];
+            for($i = 0 ; count($assigns) > $i ; $i++){
+                $employees[$i] = $assigns[$i]->idEmployee;
+            }
+            $employees = DB::table('employees')
+                        ->whereNotIn('employees.id',$employees)
+                        ->join('departments','departments.id', '=', 'employees.department_id')
+                        ->join('department_group','department_group.id','=','departments.dept_group_id')
+                        ->groupBy('employees.id')
+                        ->select('employees.id AS idEmployee','employees.name AS nameEmployee','departments.name AS nameDept')
+                        ->get();   
+        }
+        return view('assign.employeeswithout')->with('datas',$employees)->with('dgroup',$usuario[0]->id);   
+    }
+
+    public function withoutcreate($id){
+        $iTemplateId = env('TMPLTE_SATURDAYS', 0);
+        $employee = employees::where('is_delete','0')->where('is_active', true)->where('id',$id)->orderBy('name','ASC');
+        $schedule_template = schedule_template::where('is_delete','0')->where('id','!=',$iTemplateId)->orderBy('name','ASC')->pluck('id','name');
+
+        return view('assign.without')->with('employee',$employee)->with('schedule_template',$schedule_template);    
+    }
+
+    public function guardarw(Request $request){
+        $start = null;
+        $end = null;
+        $orden = null;
+        $group_num = null;
+
+        if($request->start_date != ''){
+            $start = $request->start_date;
+            $end = $request->end_date;
+        }
+            
+        $asignacion = new assign_schedule();
+        $asignacion->employee_id = $request->idemp;
+        $asignacion->schedule_template_id = $request->horario;
+        $asignacion->start_date = $start;
+        $asignacion->end_date = $start;
+        $asignacion->order_gs = 1;
+        $asignacion->created_by = session()->get('user_id');
+        $asignacion->updated_by = session()->get('user_id');
+        $asignacion->save();    
+    }
 
 }
 

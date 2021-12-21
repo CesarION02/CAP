@@ -136,6 +136,7 @@ Bitacora cambios prenómina
                             @endif
                             <th>Status</th>
                             <th>Modificación</th>
+                            <th>Usuario</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -160,6 +161,7 @@ Bitacora cambios prenómina
                                 @endif
                             </td>
                             <td>{{$bin->updated_at}}</td>
+                            <td>{{$bin->usuario}}</td>
                         </tr>
                         @endforeach
 

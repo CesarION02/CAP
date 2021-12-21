@@ -772,6 +772,7 @@ class SDataProcess {
                     $abs['id_abs'] = $key[1];
                     $abs['nts'] = $absence->nts;
                     $abs['type_name'] = $absence->type_name;
+                    $abs['type_id'] = $absence->type_id;
                     $oRow->others = $oRow->others."".$absence->type_name.". ";
 
                     $oRow->events[] = $abs;

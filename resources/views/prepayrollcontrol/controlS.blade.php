@@ -176,8 +176,8 @@ Prenóminas
                                 @endif
                             </td>
                             <td>
-                                @if($aFuera[$i] == 0)
-                                <a href="{{route('bitacora_pre', ['id' => $semanas->id])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
+                                @if($aFuera[$i] == 1)
+                                <a href="{{route('bitacora_fuera', ['id' => $semanas->id])}}" class="btn-accion-tabla tooltipsC" title="Ver">
                                     <i class="fa fa-fw fa-pencil"></i>
                                </a>
                                @endif

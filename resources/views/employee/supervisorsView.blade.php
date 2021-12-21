@@ -4,10 +4,11 @@ Mis empleados asignados
 @endsection
 
 @section("scripts")
-<script src="{{asset("assets/pages/scripts/admin/datatable/index.js")}}" type="text/javascript"></script>
-<script src="{{asset("assets/pages/scripts/admin/datatable/index.js")}}" type="text/javascript"></script>
-<script src="{{ asset("dt/datatables.js") }}" type="text/javascript"></script>
-<script src="{{ asset('dt/dataTables.buttons.min.js') }}"></script>
+    <script src="{{asset("assets/pages/scripts/admin/datatable/index.js")}}" type="text/javascript"></script>
+    <script src="{{asset("assets/pages/scripts/admin/datatable/index.js")}}" type="text/javascript"></script>
+    <script src="{{ asset("dt/datatables.js") }}" type="text/javascript"></script>
+    <script src="{{asset("assets/pages/scripts/filter.js")}}" type="text/javascript"></script>
+    <script src="{{ asset('dt/dataTables.buttons.min.js') }}"></script>
 	<script src="{{ asset('dt/buttons.flash.min.js') }}"></script>
 	<script src="{{ asset('dt/jszip.min.js') }}"></script>
 	<script src="{{ asset('dt/pdfmake.min.js') }}"></script>
@@ -80,8 +81,30 @@ Mis empleados asignados
             <div class="box-header with-border">
                 <h3 class="box-title">Mis empleados asignados</h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:nombrecorto"])
-                <div class="box-tools pull-right">
-
+                <div class="row">
+                    <div class="col-md-3 col-md-offset-9">
+                        <br>
+                        <div class="row">
+                            <form action="{{ route('supervisores') }}">
+                                <input type="hidden" id="ifilter" name="ifilter">
+                                <div class="col-md-16">
+                                    <div class="btn-group" role="group" aria-label="Basic example">
+                                        @switch($iFilter)
+                                            @case(1)
+                                                <button onclick="filter(1)" type="submit" class="btn btn-secondary active">Dept. pendiente</button>
+                                                <button onclick="filter(2)" type="submit" class="btn btn-secondary">Todos</button>
+                                            @break
+                                            @case(2)
+                                                <button onclick="filter(1)" type="submit" class="btn btn-secondary">Dept. pendiente</button>
+                                                <button onclick="filter(2)" type="submit" class="btn btn-secondary active">Todos</button>
+                                            @break
+                                        @endswitch
+                                    </div>
+                                </div>
+                            </form>
+                
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="box-body">

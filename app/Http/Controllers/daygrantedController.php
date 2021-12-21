@@ -139,7 +139,7 @@ class daygrantedController extends Controller
         $incident->comment = $request->comment;
 
         $incident->save();
-
+        incidentsController::daysIncidents($incident->id,$incident->start_date,$incident->end_date,$incident->employee_id);
         $holidayworked = holidayworked::findOrFail($incident->holiday_worked_id);
         if( $config->days_granted > $holidayworked->number_assignments && $nuevo_otorgamiento = 1 ){
 

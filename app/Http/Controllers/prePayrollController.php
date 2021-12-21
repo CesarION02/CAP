@@ -3,15 +3,18 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use DB;
 use Validator;
 use Carbon\Carbon;
 use App\SUtils\SInfoWithPolicy;
 use App\Models\employees;
 use App\Models\incident;
+use App\Models\prepayroll_control;
 use App\Models\cutCalendarQ;
 use App\SPayroll\SPrePayroll;
 use App\SPayroll\SPrePayrollRow;
 use App\SPayroll\SPrePayrollDay;
+use App\Models\prepayrollchange;
 use App\Http\Controllers\PrepayrollReportController;
 class prePayrollController extends Controller
 {
@@ -334,7 +337,195 @@ class prePayrollController extends Controller
         $cut->is_delete = $jCut->is_deleted;
 
         $cut->save();
+        $prepayroll = new prepayroll_control();
+        $prepayroll->status = 1;
+        $prepayroll->num_biweekly = $cut->id;
+        $prepayroll->is_biweekly = 1;
+        $prepayroll->created_by = session()->get('user_id');
+        $prepayroll->updated_by = session()->get('user_id');
+        $prepayroll->save();
     }
+
+    public function indexQ(){
+
+        $start_date = null;
+        $end_date = null;
+        if ($request->start_date == null) {
+            $now = Carbon::now();
+            $start_date = $now->startOfMonth()->toDateString();
+            $end_date = $now->endOfMonth()->toDateString();
+        }else {
+            $start_date = $request->start_date;
+            $end_date = $request->end_date;
+        }
+        
+        $quincena = DB::table('prepayroll_control')
+                            ->join('hrs_prepay_cut','prepayroll_control.num_biweekly','=','hrs_prepay_cut.id')
+                            ->where('prepayroll_control.is_biweekly',1)
+                            ->orderBy('hrs_prepay_cut.dt_cut')
+                            ->get();  
+
+        return view('prepayroll.indexQ', compact('quincena'));
+    }
+
+    public function indexS(Request $request){
+        $start_date = null;
+        $end_date = null;
+        if ($request->start_date == null) {
+            $now = Carbon::now();
+            $start_date = $now->startOfMonth()->toDateString();
+            $end_date = $now->endOfMonth()->toDateString();
+        }else {
+            $start_date = $request->start_date;
+            $end_date = $request->end_date;
+        }
+
+        $semana = DB::table('prepayroll_control')
+                            ->join('week_cut','prepayroll_control.num_week','=','week_cut.id')
+                            ->where('prepayroll_control.is_week',1)
+                            ->where(function($query) use ($start_date, $end_date){
+                                $query->whereBetween('week_cut.ini', [$start_date,$end_date])
+                                      ->orWhereBetween('week_cut.fin', [$start_date,$end_date]);
+                              })
+                            ->orderBy('week_cut.ini')
+                            ->select('week_cut.year AS year','week_cut.num AS num','prepayroll_control.status AS status','prepayroll_control.updated_at AS updated_at','prepayroll_control.id AS id','week_cut.ini AS ini','week_cut.fin AS fin')
+                            ->get();
+        
+        return view('prepayrollcontrol.indexS', compact('semana'))->with('start_date',$start_date)->with('end_date',$end_date);
+    }
+
+    public function prepayrollBinnacle($id){
+        $weekorbi = DB::table('prepayroll_control')->where('prepayroll_control.id',$id)->get();
+        
+        if($weekorbi[0]->is_week == 1){
+            $binnacle = DB::table('prepayrollchanges')
+                            ->join('prepayroll_control','prepayroll_control.id','=','prepayrollchanges.prepayroll_id')
+                            ->join('users','users.id','=','prepayrollchanges.updated_by')
+                            ->join('week_cut','week_cut.id','=','prepayroll_control.num_week')
+                            ->where('prepayrollchanges.prepayroll_id',$id)
+                            ->orderBy('prepayrollchanges.updated_at','desc')
+                            ->select('week_cut.year AS year','week_cut.num AS num','prepayrollchanges.status AS status','prepayrollchanges.updated_at AS updated_at','prepayroll_control.id AS id','week_cut.ini AS ini','week_cut.fin AS fin','users.name AS usuario')
+                            ->get();
+            $week = 1;
+        }else{
+            $binnacle = DB::table('prepayrollchanges')
+                            ->join('prepayroll_control','prepayroll_control.id','=','prepayrollchanges.prepayroll_id')
+                            ->join('users','users.id','=','prepayrollchanges.created_by')
+                            ->join('hrs_prepay_cut','hrs_prepay_cut.id','=','prepayroll_control.num_biweekly')
+                            ->where('prepayrollchanges.prepayroll_id',$id)
+                            ->orderBy('prepayrollchanges.updated_at','desc')
+                            ->get();
+            $week = 0;
+        }
+        return view('prepayrollcontrol.binnacle',compact('binnacle'))->with('week',$week);                    
+    } 
+    
+    public function prepayrollS(Request $request){
+
+        $start_date = null;
+        $end_date = null;
+        if ($request->start_date == null) {
+            $now = Carbon::now();
+            $start_date = $now->startOfMonth()->toDateString();
+            $end_date = $now->endOfMonth()->toDateString();
+        }
+        else {
+            $start_date = $request->start_date;
+            $end_date = $request->end_date;
+        }
+
+
+
+        $semana = DB::table('prepayroll_control')
+                            ->join('week_cut','prepayroll_control.num_week','=','week_cut.id')
+                            ->where('prepayroll_control.is_week',1)
+                            ->where(function($query) use ($start_date, $end_date){
+                                $query->whereBetween('week_cut.ini', [$start_date,$end_date])
+                                      ->orWhereBetween('week_cut.fin', [$start_date,$end_date]);
+                              })
+                            ->select('week_cut.year AS year','week_cut.num AS num','prepayroll_control.status AS status','prepayroll_control.updated_at AS updated_at','prepayroll_control.id AS id','week_cut.ini AS ini','week_cut.fin AS fin')
+                            ->orderBy('week_cut.ini')
+                            ->get();
+        $aFuera = [];
+        for($i = 0 ; count($semana) > $i ; $i++){
+            $cambio = DB::table('specialworkshift')->whereBetween('dateI',[$semana[$i]->ini,$semana[$i]->fin])->whereBetween('dateS',[$semana[$i]->ini,$semana[$i]->fin])->where('updated_at','>',$semana[$i]->updated_at)->get();
+            $incidencias =  DB::table('incidents')->whereBetween('end_date',[$semana[$i]->ini,$semana[$i]->fin])->whereBetween('start_date',[$semana[$i]->ini,$semana[$i]->fin])->where('updated_at','>',$semana[$i]->updated_at)->get();
+            $checadas = DB::table('registers')->whereBetween('date',[$semana[$i]->ini,$semana[$i]->fin])->where('user_id','>',1)->where('updated_at','>',$semana[$i]->updated_at)->get(); 
+            
+            if((count($cambio) > 0 || count($incidencias) > 0 || count($checadas) > 0) && $semana[$i]->status == 2){
+                $aFuera[$i] = 1;   
+            }else{
+                $aFuera[$i] = 0;
+            }
+        }
+
+        return view('prepayrollcontrol.controlS',compact('semana'))->with('aFuera',$aFuera)->with('start_date',$start_date)->with('end_date',$end_date); 
+    }
+
+    public function prepayrollQ(){
+        $start_date = null;
+        $end_date = null;
+        if ($request->start_date == null) {
+            $now = Carbon::now();
+            $start_date = $now->startOfMonth()->toDateString();
+            $end_date = $now->endOfMonth()->toDateString();
+        }else {
+            $start_date = $request->start_date;
+            $end_date = $request->end_date;
+        }
+
+        $quincena = DB::table('prepayroll_control')
+                            ->join('hrs_prepay_cut','prepayroll_control.num_biweekly','=','hrs_prepay_cut.id')
+                            ->where('prepayroll_control.is_biweekly',1)
+                            ->where(function($query) use ($start_date, $end_date){
+                                $query->whereBetween('week_cut.ini', [$start_date,$end_date])
+                                      ->orWhereBetween('week_cut.fin', [$start_date,$end_date]);
+                              })
+                            ->orderBy('hrs_prepay_cut.dt_cut')
+                            ->get();
+                 
+        for($i = 0 ; count($semana) > $i ; $i++){
+            $cambio = DB::table('specialworkshift')->whereBetween('dateI',[$semana->ini,$semana->fin])->whereBetween('dateS',[$semana->ini,$semana->fin])->where('updated_at','>',$end_date)->get();
+            $incidencias =  DB::table('incidents')->whereBetween('end_date',[$semana->ini,$semana->fin])->whereBetween('start_date',[$semana->ini,$semana->fin])->where('updated_at','>',$end_date)->get();
+            $checadas = DB::table('registers')->whereBetween('date',[$semana->ini,$semana->fin])->where('user_id','>',1)->where('updated_at','>',$end_date)->get(); 
+            $aFuera = [];
+            if(count($cambio) > 0 || count($incidencias) > 0 || count($checadas) > 0){
+                $aFuera[$i] = 1;   
+            }else{
+                $aFuera[$i] = 0;
+            }
+        }
+                    
+        return view('prepayroll.controlS',compact('semana'))->with('aFuera',$aFuera)->with('start_date',$start_date)->with('end_date',$end_date);
+    }
+
+    public function bitacorafuera($id){
+        $weekorbi = DB::table('prepayroll_control')->where('prepayroll_control.id',$id)->get();
+        $week = 0;
+        if($weekorbi[0]->is_week == 1){
+            $binnacle = DB::table('prepayroll_control')
+                            ->join('week_cut','week_cut.id','=','prepayroll_control.num_week')
+                            ->where('prepayroll_control.id',$id)
+                            ->select('week_cut.year AS year','week_cut.num AS num','prepayroll_control.status AS status','prepayroll_control.updated_at AS updated_at','prepayroll_control.id AS id','week_cut.ini AS ini','week_cut.fin AS fin')
+                            ->get();
+            $cambio = DB::table('specialworkshift')->whereBetween('dateI',[$binnacle[0]->ini,$binnacle[0]->fin])->whereBetween('dateS',[$binnacle[0]->ini,$binnacle[0]->fin])->where('updated_at','>',$binnacle[0]->updated_at)->get();
+            $incidencias =  DB::table('incidents')->whereBetween('end_date',[$binnacle[0]->ini,$binnacle[0]->fin])->whereBetween('start_date',[$binnacle[0]->ini,$binnacle[0]->fin])->where('updated_at',$binnacle[0]->updated_at)->get();
+            $checadas = DB::table('registers')->whereBetween('date',[$binnacle[0]->ini,$binnacle[0]->fin])->where('user_id','>',1)->where('updated_at','>',$binnacle[0]->updated_at)->get();
+            $week = 1;
+        }else{
+            $binnacle = DB::table('prepayrollchanges')
+                            ->join('prepayroll_control','prepayroll_control.id','=','prepayrollchanges.prepayroll_id')
+                            ->join('users','users.id','=','prepayrollchanges.created_by')
+                            ->join('hrs_prepay_cut','hrs_prepay_cut.id','=','prepayroll_control.num_biweekly')
+                            ->where('prepayrollchanges.prepayroll_id',$id)
+                            ->orderBy('prepayrollchanges.updated_at','desc')
+                            ->get();
+            $week = 0;
+        }
+        return view('prepayrollcontrol.prepayroll',compact('binnacle'))->with('cambio',$cambio)->with('incidencias',$incidencias)->with('checadas',$checadas)->with('week',$week);    
+
+    }
+
 
     /**
      * Undocumented function
@@ -385,6 +576,115 @@ class prePayrollController extends Controller
                         'is_rejected' => false,
                         'dt_rejected' => null
                     ]);
+        
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+        if($config->prepayroll_policy == 2){
+            $nivelAprobado = DB::table('prepayroll_report_auth_controls')
+                                ->where('id_control',$id)
+                                ->select('is_week AS isWeek','is_biweek AS isBiweek','num_week AS numWeek','num_biweek AS numBiweek','user_vobo_id AS usuario','year AS anio')
+                                ->get();
+            
+            if($nivelAprobado[0]->isWeek == 1){
+                $tipo = 1;
+                $numfecha = DB::table('week_cut')
+                                    ->where('num',$nivelAprobado[0]->numWeek)
+                                    ->where('year',$nivelAprobado[0]->anio)
+                                    ->select('id AS semana')
+                                    ->get();
+                $fecha = $numfecha[0]->semana;
+
+                $nivelMaximo = DB::table('prepayroll_report_configs')
+                            ->where('is_required', 1)
+                            ->where('is_week',1)
+                            ->orderBy('order_vobo','desc')
+                            ->take(1)
+                            ->select('user_n_id  AS usuario')
+                            ->get();
+
+            }else{
+                $tipo = 2;
+
+                $numfecha = DB::table('hrs_prepay_cut')
+                                    ->where('num',$nivelAprobado[0]->numBiweek)
+                                    ->where('year',$nivelAprobado[0]->anio)
+                                    ->select('id AS quincena')
+                                    ->get();
+                $fecha = $numfecha[0]->quincena;
+                
+                $nivelMaximo = DB::table('prepayroll_report_configs')
+                            ->select('user_n_id  AS usurio')       
+                            ->where('is_required', 1)
+                            ->where('is_biweek',1)
+                            ->orderBy('order_vobo','desc')
+                            ->take(1)
+                            ->select('user_vobo_id  AS usuario')
+                            ->get();
+
+            }
+            
+            
+            if( $nivelMaximo[0]->usuario == $nivelAprobado[0]->usuario ){
+                if( $tipo == 1){
+                    $prepayrollAUX = prepayroll_control::where('num_week',$fecha)->get();
+
+                    $prepayroll = prepayroll_control::find($prepayrollAUX[0]->id);
+                    $prepayroll->status = 2;
+                    $prepayroll->updated_by = session()->get('user_id');
+                    $prepayroll->save();
+        
+                    $change = new prepayrollchange();
+                    $change->prepayroll_id = $prepayroll->id;
+                    $change->status = 2;
+                    $change->created_by = session()->get('user_id');
+                    $change->updated_by = session()->get('user_id');
+                    $change->save();   
+                }else{
+                    $prepayrollAUX  = prepayroll_control::where('num_biweekly',$fecha)->get();
+
+                    $prepayroll = prepayroll_control::find($prepayrollAUX[0]->id);
+                    $prepayroll->status = 2;
+                    $prepayroll->updated_by = session()->get('user_id');
+                    $prepayroll->save();
+
+                    $change = new prepayrollchange();
+                    $change->prepayroll_id = $prepayroll->id;
+                    $change->status = 2;
+                    $change->created_by = session()->get('user_id');
+                    $change->updated_by = session()->get('user_id');
+                    $change->save();
+                }
+            }else{
+                if( $tipo == 1){
+                    $prepayrollAUX = prepayroll_control::where('num_week',$fecha)->get();
+
+                    $prepayroll = prepayroll_control::find($prepayrollAUX[0]->id);
+                    $prepayroll->status = 1;
+                    $prepayroll->updated_by = session()->get('user_id');
+                    $prepayroll->save();
+        
+                    $change = new prepayrollchange();
+                    $change->prepayroll_id = $prepayroll->id;
+                    $change->status = 1;
+                    $change->created_by = session()->get('user_id');
+                    $change->updated_by = session()->get('user_id');
+                    $change->save();   
+                }else{
+                    $prepayrollAUX = prepayroll_control::where('num_biweekly',$fecha)->get();
+
+                    $prepayroll = prepayroll_control::find($prepayrollAUX[0]->id);
+                    $prepayroll->status = 1;
+                    $prepayroll->updated_by = session()->get('user_id');
+                    $prepayroll->save();
+
+                    $change = new prepayrollchange();
+                    $change->prepayroll_id = $prepayroll->id;
+                    $change->status = 1;
+                    $change->created_by = session()->get('user_id');
+                    $change->updated_by = session()->get('user_id');
+                    $change->save();
+                }   
+            }
+        }
 
         return redirect()->route('vobos');
     }
@@ -407,5 +707,53 @@ class prePayrollController extends Controller
                     ]);
 
         return redirect()->route('vobos');
+    }
+    public function prepayrollAbrir($id){
+        $control = prepayroll_control::find($id);
+
+        $control->status = 0;
+        $control->updated_by = session()->get('user_id');
+        $control->save();
+    
+        $change = new prepayrollchange();
+        $change->prepayroll_id = $control->id;
+        $change->status = 0;
+        $change->created_by = session()->get('user_id');
+        $change->updated_by = session()->get('user_id');
+        $change->save();
+
+        if($control->is_week == 1){
+            // si el que llega es una semana
+            $fecha = DB::table('week_cut')
+                            ->where('id',$control->num_week)
+                            ->get();
+            $res = \DB::table('prepayroll_report_auth_controls')
+                            ->where('num_week', $fecha[0]->num)
+                            ->where('year', $fecha[0]->year)
+                            ->update([
+                                'is_vobo' => false, 
+                                'dt_vobo' => null,
+                                'is_rejected' => false,
+                                'dt_rejected' => null
+                            ]);
+            return redirect()->route('control_semana');
+        }else{
+            // si el que llega es una quincena
+            $fecha = DB::table('hrs_prepay_cut')
+                            ->where('id',$control->num_biweekly)
+                            ->get();
+            
+            $res = \DB::table('prepayroll_report_auth_controls')
+                            ->where('num_biweek', $fecha[0]->num)
+                            ->where('year', $fecha[0]->year)
+                            ->update([
+                                'is_vobo' => false, 
+                                'dt_vobo' => null,
+                                'is_rejected' => false,
+                                'dt_rejected' => null
+                            ]);
+            return redirect()->route('control_quincena');
+        }
+
     }
 }

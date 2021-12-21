@@ -59,6 +59,8 @@
                                     @endforeach
                                 @endif
                             </tbody>
+                            <button onclick="topFunction()" id="myBtn" title="Ir arriba">Ir arriba</button>
+                            <a href="{{ 'report/usoPuertasDatos' }}"  id="newButton" title="Nuevo reporte">Nuevo reporte</a>
                         </table>
                     </div>
                 </div>
