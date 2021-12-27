@@ -568,6 +568,44 @@ class ReporteController extends Controller
                     ->with('lRows', $lRows);
     }
 
+    function timesTotal($lRows, $lEmployees)
+    {
+        $delayTot;
+        $extraHoursTot;
+        $prematureOutTot;
+        $absences;
+        $sundays;
+        $daysOff;
+
+        for($i = 0; $i<sizeof($lEmployees); $i++){
+            $delayTot = 0;
+            $prematureOutTot = 0;
+            $extraHoursTot = 0;
+            $absences = 0;
+            $sundays = 0;
+            $daysOff = 0;
+            for($j = 0; $j<sizeof($lRows); $j++){
+                if($lEmployees[$i]->id === $lRows[$j]->idEmployee){
+                    $delayTot = $delayTot + $lRows[$j]->entryDelayMinutes;
+                    $extraHoursTot = $extraHoursTot + $lRows[$j]->overMinsTotal;
+                    $prematureOutTot = $prematureOutTot + $lRows[$j]->prematureOut;
+                    $sundays = $sundays + $lRows[$j]->isSunday;
+                    $daysOff = $daysOff + $lRows[$j]->isDayOff;
+                    if($lRows[$j]->hasAbsence){
+                        $absences++;
+                    }
+                }
+            }
+            $lEmployees[$i]->entryDelayMinutes = $delayTot;
+            $lEmployees[$i]->extraHours = $extraHoursTot;
+            $lEmployees[$i]->prematureOut = $prematureOutTot;
+            $lEmployees[$i]->isSunday = $sundays;
+            $lEmployees[$i]->isDayOff = $daysOff;
+            $lEmployees[$i]->hasAbsence = $absences;
+        }
+        return $lEmployees;
+    }
+
     /**
      * Muestra reporte de tiempos extra
      *
@@ -579,6 +617,7 @@ class ReporteController extends Controller
         $sStartDate = $request->start_date;
         $sEndDate = $request->end_date;
         $iEmployee = $request->emp_id;
+        $reportMode = $request->report_mode;
 
         $oStartDate = Carbon::parse($sStartDate);
         $oEndDate = Carbon::parse($sEndDate);
@@ -672,7 +711,10 @@ class ReporteController extends Controller
         PrepayrollReportController::prepayrollReportVobos($sStartDate, $sEndDate);
 
 
-        return view('report.reportDelaysView')
+        $lEmployees = $this->timesTotal($lRows, $lEmployees);
+        
+        if ($reportMode == \SCons::REP_HR_EX) {
+            return view('report.reportDelaysView')
                     ->with('tReport', \SCons::REP_HR_EX)
                     ->with('sStartDate', $sStartDate)
                     ->with('sEndDate', $sEndDate)
@@ -684,6 +726,23 @@ class ReporteController extends Controller
                     ->with('bModify', $bModify)
                     ->with('registriesRoute', route('registro_ajuste'))
                     ->with('lRows', $lRows);
+        }
+        else {
+            return view('report.reportDelaysTotView')
+                    ->with('tReport', \SCons::REP_HR_EX_TOT)
+                    ->with('sStartDate', $sStartDate)
+                    ->with('sEndDate', $sEndDate)
+                    ->with('sPayWay', $sPayWay)
+                    ->with('sTitle', 'Reporte de tiempos extra')
+                    ->with('adjTypes', $adjTypes)
+                    ->with('lAdjusts', $lAdjusts)
+                    ->with('lEmpWrkdDays', $lEmpWrkdDays)
+                    ->with('bModify', $bModify)
+                    ->with('registriesRoute', route('registro_ajuste'))
+                    ->with('lRows', $lRows)
+                    ->with('lEmployees', $lEmployees);
+        }
+        
     }
 
     public function hrReport(Request $request)
