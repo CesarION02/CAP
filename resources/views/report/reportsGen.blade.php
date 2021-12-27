@@ -109,6 +109,19 @@
                             <span class="label noprogramming">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span> (Sin checadas y sin horario)
                         </div>
                     </div>
+                    <br>
+                    <div class="row">
+                        <div class="col-md-3">
+                            Tipo de reporte:*
+                        </div>
+                        <div class="col-md-7 col-md-offset-1">
+                        <select name="report_mode" id="report_mode" class="form-control">
+                            <option value="2">Detalle</option>
+                            <option value="3">Resumen</option>
+                        </select>
+                        </div>
+                    </div>
+                    <br>
                 </div>
                 <div class="box-footer">
                     <div class="col-lg-4 col-lg-offset-4">
@@ -118,6 +131,7 @@
                         <button class="btn btn-warning" id="generar" name="generar" type="submit">Generar</button>
                     </div>
                 </div>
+                <br>
             </form>
         </div>
     </div>
