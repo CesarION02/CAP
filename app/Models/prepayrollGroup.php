@@ -11,6 +11,7 @@ class prepayrollGroup extends Model
     protected $fillable = ['group_code',
                             'group_name',
                             'head_user_id',
+                            'father_group_n_id',
                             'is_delete',
                             'created_by',
                             'updated_by'];
