@@ -94,7 +94,7 @@ class incidentController extends Controller
     public function store(Request $request)
     {
         
-        DB::table('incidents')
+        $incidents = DB::table('incidents')
                 ->whereIn('incidents.start_date',[$request->start_date,$request->end_date])
                 ->orWhereIn('incidents.end_date',[$request->start_date,$request->end_date])
                 ->where('employee_id','=',$request->employee_id)
