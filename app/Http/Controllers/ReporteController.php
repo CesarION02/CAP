@@ -18,6 +18,7 @@ use App\SUtils\SInfoWithPolicy;
 use App\SUtils\SHolidayWork;
 use App\SUtils\SGenUtils;
 use App\SUtils\SPermissions;
+use App\SUtils\SPrepayrollUtils;
 use App\SData\SDataProcess;
 use DB;
 use Carbon\Carbon;
@@ -650,24 +651,19 @@ class ReporteController extends Controller
 
         $roles = \Auth::user()->roles;
 
-        $isSupervisor = false;
+        $seeAll = false;
         foreach ($roles as $rol) {
-            if ($rol->id == 2) {
-                $isSupervisor = true;
+            if ($rol->id == 1 || $rol->id == 3 || $rol->id == 8) {
+                $seeAll = true;
                 break;
             }
         }
 
-        if ($isSupervisor) {
+        if (! $seeAll) {
+            $subEmployees = SPrepayrollUtils::getEmployeesByUser(\Auth::user()->id);
             $lColEmps = collect($lEmployees);
-
-            $eSubs = \DB::table('prepayroll_groups AS pg')
-                        ->join('prepayroll_group_employees AS pge', 'pg.id_group', '=', 'pge.group_id')
-                        ->where('pg.head_user_id', \Auth::user()->id)
-                        ->pluck('pge.employee_id')
-                        ->toArray();
-
-            $lEmployees = $lColEmps->whereIn('id', $eSubs);
+    
+            $lEmployees = $lColEmps->whereIn('id', $subEmployees);
         }
 
         $lRows = SDataProcess::process($sStartDate, $sEndDate, $payWay, $lEmployees);
@@ -706,10 +702,9 @@ class ReporteController extends Controller
                         ->where('is_delete', false)
                         ->get();
 
-        $bModify = SPermissions::hasPermission(session()->get('user_id'), 'ajustes_rep_te');
+        $bModify = SPermissions::hasPermission(\Auth::user()->id, 'ajustes_rep_te');
 
         PrepayrollReportController::prepayrollReportVobos($sStartDate, $sEndDate);
-
 
         $lEmployees = $this->timesTotal($lRows, $lEmployees);
         
