@@ -238,7 +238,7 @@ class SDateUtils {
         if ($payTypeId == \SCons::PAY_W_Q) {
             $quin = \DB::table('hrs_prepay_cut AS hpc')
                         ->where('dt_cut', '>=', $dtDate)
-                        ->where('year', $oDate->year)
+                        // ->where('year', $oDate->year)
                         ->where('is_delete', false)
                         ->orderBy('dt_cut', 'ASC')
                         ->take(1)
@@ -249,7 +249,7 @@ class SDateUtils {
         else {
             $week = \DB::table('week_cut AS wc')
                         ->whereRaw("'".$oDate->toDateString()."' BETWEEN ini AND fin")
-                        ->where('year', $oDate->year)
+                        // ->where('year', $oDate->year)
                         ->get();
 
             $oNumber = $week[0];
