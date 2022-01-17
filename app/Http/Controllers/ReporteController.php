@@ -577,33 +577,33 @@ class ReporteController extends Controller
         $absences;
         $sundays;
         $daysOff;
-
-        for($i = 0; $i<sizeof($lEmployees); $i++){
+        foreach($lEmployees as $lEmployee){
             $delayTot = 0;
             $prematureOutTot = 0;
             $extraHoursTot = 0;
             $absences = 0;
             $sundays = 0;
             $daysOff = 0;
-            for($j = 0; $j<sizeof($lRows); $j++){
-                if($lEmployees[$i]->id === $lRows[$j]->idEmployee){
-                    $delayTot = $delayTot + $lRows[$j]->entryDelayMinutes;
-                    $extraHoursTot = $extraHoursTot + $lRows[$j]->overMinsTotal;
-                    $prematureOutTot = $prematureOutTot + $lRows[$j]->prematureOut;
-                    $sundays = $sundays + $lRows[$j]->isSunday;
-                    $daysOff = $daysOff + $lRows[$j]->isDayOff;
-                    if($lRows[$j]->hasAbsence){
+            foreach($lRows as $lRow){
+                if($lEmployee->id === $lRow->idEmployee){
+                    $delayTot = $delayTot + $lRow->entryDelayMinutes;
+                    $extraHoursTot = $extraHoursTot + $lRow->overMinsTotal;
+                    $prematureOutTot = $prematureOutTot + $lRow->prematureOut;
+                    $sundays = $sundays + $lRow->isSunday;
+                    $daysOff = $daysOff + $lRow->isDayOff;
+                    if($lRow->hasAbsence){
                         $absences++;
                     }
                 }
             }
-            $lEmployees[$i]->entryDelayMinutes = $delayTot;
-            $lEmployees[$i]->extraHours = $extraHoursTot;
-            $lEmployees[$i]->prematureOut = $prematureOutTot;
-            $lEmployees[$i]->isSunday = $sundays;
-            $lEmployees[$i]->isDayOff = $daysOff;
-            $lEmployees[$i]->hasAbsence = $absences;
+            $lEmployee->entryDelayMinutes = $delayTot;
+            $lEmployee->extraHours = $extraHoursTot;
+            $lEmployee->prematureOut = $prematureOutTot;
+            $lEmployee->isSunday = $sundays;
+            $lEmployee->isDayOff = $daysOff;
+            $lEmployee->hasAbsence = $absences;
         }
+
         return $lEmployees;
     }
 
@@ -723,9 +723,8 @@ class ReporteController extends Controller
                     ->with('lRows', $lRows);
         }
         else {
-
             $lEmployees = $this->timesTotal($lRows, $lEmployees);
-
+            
             return view('report.reportDelaysTotView')
                     ->with('tReport', \SCons::REP_HR_EX_TOT)
                     ->with('sStartDate', $sStartDate)
