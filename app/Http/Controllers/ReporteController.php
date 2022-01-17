@@ -706,7 +706,7 @@ class ReporteController extends Controller
 
         PrepayrollReportController::prepayrollReportVobos($sStartDate, $sEndDate);
 
-        $lEmployees = $this->timesTotal($lRows, $lEmployees);
+        
         
         if ($reportMode == \SCons::REP_HR_EX) {
             return view('report.reportDelaysView')
@@ -723,6 +723,9 @@ class ReporteController extends Controller
                     ->with('lRows', $lRows);
         }
         else {
+
+            $lEmployees = $this->timesTotal($lRows, $lEmployees);
+
             return view('report.reportDelaysTotView')
                     ->with('tReport', \SCons::REP_HR_EX_TOT)
                     ->with('sStartDate', $sStartDate)
