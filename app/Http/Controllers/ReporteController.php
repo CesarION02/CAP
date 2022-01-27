@@ -18,6 +18,7 @@ use App\SUtils\SInfoWithPolicy;
 use App\SUtils\SHolidayWork;
 use App\SUtils\SGenUtils;
 use App\SUtils\SPermissions;
+use App\SUtils\SPrepayrollUtils;
 use App\SData\SDataProcess;
 use DB;
 use Carbon\Carbon;
@@ -576,33 +577,33 @@ class ReporteController extends Controller
         $absences;
         $sundays;
         $daysOff;
-
-        for($i = 0; $i<sizeof($lEmployees); $i++){
+        foreach($lEmployees as $lEmployee){
             $delayTot = 0;
             $prematureOutTot = 0;
             $extraHoursTot = 0;
             $absences = 0;
             $sundays = 0;
             $daysOff = 0;
-            for($j = 0; $j<sizeof($lRows); $j++){
-                if($lEmployees[$i]->id === $lRows[$j]->idEmployee){
-                    $delayTot = $delayTot + $lRows[$j]->entryDelayMinutes;
-                    $extraHoursTot = $extraHoursTot + $lRows[$j]->overMinsTotal;
-                    $prematureOutTot = $prematureOutTot + $lRows[$j]->prematureOut;
-                    $sundays = $sundays + $lRows[$j]->isSunday;
-                    $daysOff = $daysOff + $lRows[$j]->isDayOff;
-                    if($lRows[$j]->hasAbsence){
+            foreach($lRows as $lRow){
+                if($lEmployee->id === $lRow->idEmployee){
+                    $delayTot = $delayTot + $lRow->entryDelayMinutes;
+                    $extraHoursTot = $extraHoursTot + $lRow->overMinsTotal;
+                    $prematureOutTot = $prematureOutTot + $lRow->prematureOut;
+                    $sundays = $sundays + $lRow->isSunday;
+                    $daysOff = $daysOff + $lRow->isDayOff;
+                    if($lRow->hasAbsence){
                         $absences++;
                     }
                 }
             }
-            $lEmployees[$i]->entryDelayMinutes = $delayTot;
-            $lEmployees[$i]->extraHours = $extraHoursTot;
-            $lEmployees[$i]->prematureOut = $prematureOutTot;
-            $lEmployees[$i]->isSunday = $sundays;
-            $lEmployees[$i]->isDayOff = $daysOff;
-            $lEmployees[$i]->hasAbsence = $absences;
+            $lEmployee->entryDelayMinutes = $delayTot;
+            $lEmployee->extraHours = $extraHoursTot;
+            $lEmployee->prematureOut = $prematureOutTot;
+            $lEmployee->isSunday = $sundays;
+            $lEmployee->isDayOff = $daysOff;
+            $lEmployee->hasAbsence = $absences;
         }
+
         return $lEmployees;
     }
 
@@ -650,24 +651,19 @@ class ReporteController extends Controller
 
         $roles = \Auth::user()->roles;
 
-        $isSupervisor = false;
+        $seeAll = false;
         foreach ($roles as $rol) {
-            if ($rol->id == 2) {
-                $isSupervisor = true;
+            if ($rol->id == 1 || $rol->id == 3 || $rol->id == 8) {
+                $seeAll = true;
                 break;
             }
         }
 
-        if ($isSupervisor) {
+        if (! $seeAll) {
+            $subEmployees = SPrepayrollUtils::getEmployeesByUser(\Auth::user()->id);
             $lColEmps = collect($lEmployees);
-
-            $eSubs = \DB::table('prepayroll_groups AS pg')
-                        ->join('prepayroll_group_employees AS pge', 'pg.id_group', '=', 'pge.group_id')
-                        ->where('pg.head_user_id', \Auth::user()->id)
-                        ->pluck('pge.employee_id')
-                        ->toArray();
-
-            $lEmployees = $lColEmps->whereIn('id', $eSubs);
+    
+            $lEmployees = $lColEmps->whereIn('id', $subEmployees);
         }
 
         $lRows = SDataProcess::process($sStartDate, $sEndDate, $payWay, $lEmployees);
@@ -706,12 +702,11 @@ class ReporteController extends Controller
                         ->where('is_delete', false)
                         ->get();
 
-        $bModify = SPermissions::hasPermission(session()->get('user_id'), 'ajustes_rep_te');
+        $bModify = SPermissions::hasPermission(\Auth::user()->id, 'ajustes_rep_te');
 
         PrepayrollReportController::prepayrollReportVobos($sStartDate, $sEndDate);
 
-
-        $lEmployees = $this->timesTotal($lRows, $lEmployees);
+        
         
         if ($reportMode == \SCons::REP_HR_EX) {
             return view('report.reportDelaysView')
@@ -728,6 +723,8 @@ class ReporteController extends Controller
                     ->with('lRows', $lRows);
         }
         else {
+            $lEmployees = $this->timesTotal($lRows, $lEmployees);
+            
             return view('report.reportDelaysTotView')
                     ->with('tReport', \SCons::REP_HR_EX_TOT)
                     ->with('sStartDate', $sStartDate)

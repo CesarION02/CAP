@@ -604,114 +604,114 @@ class prePayrollController extends Controller
                         'dt_rejected' => null
                     ]);
         
-        $config = \App\SUtils\SConfiguration::getConfigurations();
-        if($config->prepayroll_policy == 2){
-            $nivelAprobado = DB::table('prepayroll_report_auth_controls')
-                                ->where('id_control',$id)
-                                ->select('is_week AS isWeek','is_biweek AS isBiweek','num_week AS numWeek','num_biweek AS numBiweek','user_vobo_id AS usuario','year AS anio')
-                                ->get();
+        // $config = \App\SUtils\SConfiguration::getConfigurations();
+        // if($config->prepayroll_policy == 2){
+        //     $nivelAprobado = DB::table('prepayroll_report_auth_controls')
+        //                         ->where('id_control',$id)
+        //                         ->select('is_week AS isWeek','is_biweek AS isBiweek','num_week AS numWeek','num_biweek AS numBiweek','user_vobo_id AS usuario','year AS anio')
+        //                         ->get();
             
-            if($nivelAprobado[0]->isWeek == 1){
-                $tipo = 1;
-                $numfecha = DB::table('week_cut')
-                                    ->where('num',$nivelAprobado[0]->numWeek)
-                                    ->where('year',$nivelAprobado[0]->anio)
-                                    ->select('id AS semana')
-                                    ->get();
-                $fecha = $numfecha[0]->semana;
+        //     if($nivelAprobado[0]->isWeek == 1){
+        //         $tipo = 1;
+        //         $numfecha = DB::table('week_cut')
+        //                             ->where('num',$nivelAprobado[0]->numWeek)
+        //                             ->where('year',$nivelAprobado[0]->anio)
+        //                             ->select('id AS semana')
+        //                             ->get();
+        //         $fecha = $numfecha[0]->semana;
 
-                $nivelMaximo = DB::table('prepayroll_report_configs')
-                            ->where('is_required', 1)
-                            ->where('is_week',1)
-                            ->orderBy('order_vobo','desc')
-                            ->take(1)
-                            ->select('user_n_id  AS usuario')
-                            ->get();
+        //         $nivelMaximo = DB::table('prepayroll_report_configs')
+        //                     ->where('is_required', 1)
+        //                     ->where('is_week',1)
+        //                     ->orderBy('order_vobo','desc')
+        //                     ->take(1)
+        //                     ->select('user_n_id  AS usuario')
+        //                     ->get();
 
-            }else{
-                $tipo = 2;
+        //     }else{
+        //         $tipo = 2;
 
-                $numfecha = DB::table('hrs_prepay_cut')
-                                    ->where('num',$nivelAprobado[0]->numBiweek)
-                                    ->where('year',$nivelAprobado[0]->anio)
-                                    ->select('id AS quincena')
-                                    ->get();
-                $fecha = $numfecha[0]->quincena;
+        //         $numfecha = DB::table('hrs_prepay_cut')
+        //                             ->where('num',$nivelAprobado[0]->numBiweek)
+        //                             ->where('year',$nivelAprobado[0]->anio)
+        //                             ->select('id AS quincena')
+        //                             ->get();
+        //         $fecha = $numfecha[0]->quincena;
                 
-                $nivelMaximo = DB::table('prepayroll_report_configs')
-                            ->select('user_n_id  AS usurio')       
-                            ->where('is_required', 1)
-                            ->where('is_biweek',1)
-                            ->orderBy('order_vobo','desc')
-                            ->take(1)
-                            ->select('user_vobo_id  AS usuario')
-                            ->get();
+        //         $nivelMaximo = DB::table('prepayroll_report_configs')
+        //                     ->select('user_n_id  AS usurio')       
+        //                     ->where('is_required', 1)
+        //                     ->where('is_biweek',1)
+        //                     ->orderBy('order_vobo','desc')
+        //                     ->take(1)
+        //                     ->select('user_vobo_id  AS usuario')
+        //                     ->get();
 
-            }
+        //     }
             
             
-            if( $nivelMaximo[0]->usuario == $nivelAprobado[0]->usuario ){
-                if( $tipo == 1){
-                    $prepayrollAUX = prepayroll_control::where('num_week',$fecha)->get();
+        //     if( $nivelMaximo[0]->usuario == $nivelAprobado[0]->usuario ){
+        //         if( $tipo == 1){
+        //             $prepayrollAUX = prepayroll_control::where('num_week',$fecha)->get();
 
-                    $prepayroll = prepayroll_control::find($prepayrollAUX[0]->id);
-                    $prepayroll->status = 2;
-                    $prepayroll->updated_by = session()->get('user_id');
-                    $prepayroll->save();
+        //             $prepayroll = prepayroll_control::find($prepayrollAUX[0]->id);
+        //             $prepayroll->status = 2;
+        //             $prepayroll->updated_by = session()->get('user_id');
+        //             $prepayroll->save();
         
-                    $change = new prepayrollchange();
-                    $change->prepayroll_id = $prepayroll->id;
-                    $change->status = 2;
-                    $change->created_by = session()->get('user_id');
-                    $change->updated_by = session()->get('user_id');
-                    $change->save();   
-                }else{
-                    $prepayrollAUX  = prepayroll_control::where('num_biweekly',$fecha)->get();
+        //             $change = new prepayrollchange();
+        //             $change->prepayroll_id = $prepayroll->id;
+        //             $change->status = 2;
+        //             $change->created_by = session()->get('user_id');
+        //             $change->updated_by = session()->get('user_id');
+        //             $change->save();   
+        //         }else{
+        //             $prepayrollAUX  = prepayroll_control::where('num_biweekly',$fecha)->get();
 
-                    $prepayroll = prepayroll_control::find($prepayrollAUX[0]->id);
-                    $prepayroll->status = 2;
-                    $prepayroll->updated_by = session()->get('user_id');
-                    $prepayroll->save();
+        //             $prepayroll = prepayroll_control::find($prepayrollAUX[0]->id);
+        //             $prepayroll->status = 2;
+        //             $prepayroll->updated_by = session()->get('user_id');
+        //             $prepayroll->save();
 
-                    $change = new prepayrollchange();
-                    $change->prepayroll_id = $prepayroll->id;
-                    $change->status = 2;
-                    $change->created_by = session()->get('user_id');
-                    $change->updated_by = session()->get('user_id');
-                    $change->save();
-                }
-            }else{
-                if( $tipo == 1){
-                    $prepayrollAUX = prepayroll_control::where('num_week',$fecha)->get();
+        //             $change = new prepayrollchange();
+        //             $change->prepayroll_id = $prepayroll->id;
+        //             $change->status = 2;
+        //             $change->created_by = session()->get('user_id');
+        //             $change->updated_by = session()->get('user_id');
+        //             $change->save();
+        //         }
+        //     }else{
+        //         if( $tipo == 1){
+        //             $prepayrollAUX = prepayroll_control::where('num_week',$fecha)->get();
 
-                    $prepayroll = prepayroll_control::find($prepayrollAUX[0]->id);
-                    $prepayroll->status = 1;
-                    $prepayroll->updated_by = session()->get('user_id');
-                    $prepayroll->save();
+        //             $prepayroll = prepayroll_control::find($prepayrollAUX[0]->id);
+        //             $prepayroll->status = 1;
+        //             $prepayroll->updated_by = session()->get('user_id');
+        //             $prepayroll->save();
         
-                    $change = new prepayrollchange();
-                    $change->prepayroll_id = $prepayroll->id;
-                    $change->status = 1;
-                    $change->created_by = session()->get('user_id');
-                    $change->updated_by = session()->get('user_id');
-                    $change->save();   
-                }else{
-                    $prepayrollAUX = prepayroll_control::where('num_biweekly',$fecha)->get();
+        //             $change = new prepayrollchange();
+        //             $change->prepayroll_id = $prepayroll->id;
+        //             $change->status = 1;
+        //             $change->created_by = session()->get('user_id');
+        //             $change->updated_by = session()->get('user_id');
+        //             $change->save();   
+        //         }else{
+        //             $prepayrollAUX = prepayroll_control::where('num_biweekly',$fecha)->get();
 
-                    $prepayroll = prepayroll_control::find($prepayrollAUX[0]->id);
-                    $prepayroll->status = 1;
-                    $prepayroll->updated_by = session()->get('user_id');
-                    $prepayroll->save();
+        //             $prepayroll = prepayroll_control::find($prepayrollAUX[0]->id);
+        //             $prepayroll->status = 1;
+        //             $prepayroll->updated_by = session()->get('user_id');
+        //             $prepayroll->save();
 
-                    $change = new prepayrollchange();
-                    $change->prepayroll_id = $prepayroll->id;
-                    $change->status = 1;
-                    $change->created_by = session()->get('user_id');
-                    $change->updated_by = session()->get('user_id');
-                    $change->save();
-                }   
-            }
-        }
+        //             $change = new prepayrollchange();
+        //             $change->prepayroll_id = $prepayroll->id;
+        //             $change->status = 1;
+        //             $change->created_by = session()->get('user_id');
+        //             $change->updated_by = session()->get('user_id');
+        //             $change->save();
+        //         }   
+        //     }
+        // }
 
         return redirect()->route('vobos');
     }
