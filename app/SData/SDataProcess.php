@@ -1422,9 +1422,9 @@ class SDataProcess {
 
             if ($oRow->outDate != null) {
                 if (SDateTimeUtils::dayOfWeek($oRow->outDate) == Carbon::SUNDAY) {
-                    if (! isset($lPays[$oRow->outDate])) {
+                    if (! isset($lPays[$oRow->outDate."_".$oRow->idEmployee])) {
                         $oRow->isSunday++;
-                        $lPays[$oRow->outDate] = 1;
+                        $lPays[$oRow->outDate."_".$oRow->idEmployee] = 1;
                     }
                 }
             }
