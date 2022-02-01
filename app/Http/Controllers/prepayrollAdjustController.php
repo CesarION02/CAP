@@ -174,6 +174,7 @@ class prepayrollAdjustController extends Controller
         }
         catch (\Throwable $th) {
             \DB::rollBack();
+            return json_encode(['success' => false, 'msg' => $e->getMessage()]);
         }
 
         SPrepayrollAdjustUtils::verifyProcessedData($oAdjust->employee_id, $oAdjust->dt_date);
