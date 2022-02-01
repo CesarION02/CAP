@@ -155,14 +155,13 @@ class SPrepayrollAdjustUtils {
         $periodProcessed = \DB::table('period_processed AS pp');
 
         if ($payTypeId == \SCons::PAY_W_Q) {
-            $periodProcessed = $periodProcessed->join('hrs_prepay_cut AS hpc','hpc.id','=','pp.num_biweekly');
+            $periodProcessed = $periodProcessed->join('hrs_prepay_cut AS hpc','hpc.id','=','pp.num_biweekly')->where('hpc.year', $year);
         }
         else {
-            $periodProcessed = $periodProcessed->join('week_cut AS wc','wc.id', '=', 'pp.num_week');
+            $periodProcessed = $periodProcessed->join('week_cut AS wc','wc.id', '=', 'pp.num_week')->where('wc.year', $year);
         }
 
-        $periodProcessed->where('wc.year', $year)
-                        ->where('num', $number)
+        $periodProcessed->where('num', $number)
                         ->delete();
 
         /**
@@ -171,14 +170,13 @@ class SPrepayrollAdjustUtils {
         $processedData = \DB::table('processed_data AS pd');
 
         if ($payTypeId == \SCons::PAY_W_Q) {
-            $processedData = $processedData->join('hrs_prepay_cut AS hpc', 'hpc.id', '=', 'pd.biweek');
+            $processedData = $processedData->join('hrs_prepay_cut AS hpc', 'hpc.id', '=', 'pd.biweek')->where('hpc.year', $year);
         }
         else {
-            $processedData = $processedData->join('week_cut AS wc', 'wc.id', '=', 'pd.week');;
+            $processedData = $processedData->join('week_cut AS wc', 'wc.id', '=', 'pd.week')->where('wc.year', $year);
         }
 
-        $processedData->where('wc.year', $year)
-                        ->where('num', $number)
+        $processedData->where('num', $number)
                         ->delete();
     }
 
