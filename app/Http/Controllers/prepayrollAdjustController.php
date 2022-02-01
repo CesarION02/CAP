@@ -156,7 +156,7 @@ class prepayrollAdjustController extends Controller
         $oEmployee = employees::find($oAdjust->employee_id);
 
         if (! PrepayrollReportController::isFreeVobo($oAdjust->dt_date, $oEmployee->way_pay_id)) {
-            return;
+            return json_encode(['success' => false, 'msg' => 'No se puede aplicar el ajuste, la prenómina tiene Vobo.']);
         }
 
         try {
@@ -178,7 +178,7 @@ class prepayrollAdjustController extends Controller
 
         SPrepayrollAdjustUtils::verifyProcessedData($oAdjust->employee_id, $oAdjust->dt_date);
 
-        return json_encode($oAdjust);
+        return json_encode(['success' => true, 'msg' => 'Ajuste aplicado correctamente.', 'data' => $oAdjust]);
     }
 
     public function deleteAdjust($idAjust)

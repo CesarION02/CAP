@@ -92,9 +92,15 @@ var app = new Vue({
                 })
                 .then(res => {
                     console.log(res);
-                    this.vRow.labelUpd = true;
-                    this.setRowAdjusts();
-                    oGui.showOk();
+                    let oRes = res.data;
+
+                    if (oRes.success) {
+                        this.vRow.labelUpd = true;
+                        this.setRowAdjusts();
+                        oGui.showOk();
+                    } else {
+                        oGui.showError(oRes.msg);
+                    }
                 })
                 .catch(function(error) {
                     console.log(error);
