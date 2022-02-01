@@ -13,13 +13,6 @@ use App\SUtils\SGenUtils;
 
 class externalSrcsController extends Controller
 {
-    public function __construct() {
-        // Códigos de respuesta:
-        $this->OK = "200";
-        $this->ERROR = "500"; //  Error del servidor
-        $this->NOT_VOBO = "550"; // Nómina no autorizada
-    }
-
     public function getAbsDelays(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -34,33 +27,18 @@ class externalSrcsController extends Controller
             return response()->json(['error' => $validator->errors()->all()]);
         }
 
-        try {
-            $startDate = $request->start_date;
-            $endDate = $request->end_date;
-            $aEmployeeIds = $request->employees;
-            $payType = $request->pay_type == "1" ? \SCons::PAY_W_S : \SCons::PAY_W_Q;
+        $startDate = $request->start_date;
+        $endDate = $request->end_date;
+        $aEmployeeIds = $request->employees;
+        $payType = $request->pay_type == "1" ? \SCons::PAY_W_S : \SCons::PAY_W_Q;
 
-            if (is_string($aEmployeeIds)) {
-                $aEmployeeIds = explode(",", $aEmployeeIds);
-            }
-
-            $oJAbsDelays = $this->getInfo($startDate, $endDate, $aEmployeeIds, $payType);
-        }
-        catch (\Throwable $e) {
-            $response = (object) [
-                "code" => $this->ERROR,
-                "data" => $e->getMessage()
-            ];
-
-            return json_encode($response, JSON_PRETTY_PRINT);
+        if (is_string($aEmployeeIds)) {
+            $aEmployeeIds = explode(",", $aEmployeeIds);
         }
 
-        $response = (object) [
-            "code" => $this->OK,
-            "data" => $oJAbsDelays
-        ];
+        $oJAbsDelays = $this->getInfo($startDate, $endDate, $aEmployeeIds, $payType);
 
-        return json_encode($response, JSON_PRETTY_PRINT);
+        return json_encode($oJAbsDelays, JSON_PRETTY_PRINT);
     }
 
     public function getInfo($startDate, $endDate, $aEmployeeIds, $payType) {

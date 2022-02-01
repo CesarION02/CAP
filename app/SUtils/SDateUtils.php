@@ -189,7 +189,7 @@ class SDateUtils {
                 $inicio = Carbon::parse($inicioAux[0]->cut);
                 $inicio->addDay();
             }else{
-                $inicioAux = DB::table('hrs_prepay_cut')
+                $inicioAux = DB::table('hrs_prepay-cut')
                 ->where('year',($final[0]->year)-1)
                 ->orderBy('num','DESC')
                 ->select('dt_cut AS cut')
