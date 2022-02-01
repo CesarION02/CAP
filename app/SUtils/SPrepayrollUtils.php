@@ -47,6 +47,22 @@ class SPrepayrollUtils {
     }
 
     /**
+     * Obtiene los grupos de los que usuario recibido es encargado.
+     */
+    public static function getUserGroups($idUser = 0)
+    {
+        if ($idUser == 0) {
+            $idUser = \Auth::user()->id;
+        }
+
+        $lGroups = \DB::table('prepayroll_groups AS pg')
+                        ->where('pg.head_user_id', $idUser)
+                        ->pluck('pg.id_group');
+
+        return $lGroups;
+    }
+
+    /**
      * Obtiene los grupos dependientes del grupo recibido.
      *
      * @param int $group
@@ -59,6 +75,41 @@ class SPrepayrollUtils {
                         ->toArray();
 
         return $children;
+    }
+
+    /**
+     * Obtiene los grupos dependientes de los grupos recibidos.
+     *
+     * @param array $groups
+     * @return void
+     */
+    public static function getAncestryOfGroups($groups) {
+        $lGroups = [];
+        $lGroups = array_merge($lGroups, $groups);
+        foreach ($groups as $group) {
+            $ancestries = SPrepayrollUtils::getAncestryGroups($group);
+            if (count($ancestries) > 0) {
+                $ancestryGroups = SPrepayrollUtils::getAncestryOfGroups($ancestries);
+                $lGroups = array_merge($lGroups, $ancestryGroups);
+            }
+        }
+
+        return array_unique($lGroups);
+    }
+
+    /**
+     * Obtiene los grupos superiores del grupo recibido.
+     *
+     * @param int $group
+     * @return void
+     */
+    private static function getAncestryGroups($idGroup) {
+        $father = \DB::table('prepayroll_groups AS pg')
+                        ->where('pg.id_group', $idGroup)
+                        ->pluck('pg.father_group_n_id')
+                        ->toArray();
+
+        return $father;
     }
 }
         
