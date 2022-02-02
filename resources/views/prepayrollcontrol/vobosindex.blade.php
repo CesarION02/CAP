@@ -24,7 +24,35 @@
 <script>
     $(document).ready( function () {
         $.fn.dataTable.moment('DD/MM/YYYY');
-        $('#myTable').DataTable({
+
+        $.fn.dataTable.ext.search.push(
+            function( settings, data, dataIndex ) {
+                // var min = parseInt( $('#min').val(), 10 );
+                let payTypeVal = parseInt( $('#pay-type').val(), 10 );
+                let sem = 0;
+                let qui = 0;
+
+                switch (payTypeVal) {
+                    case 3:
+                        return true;
+
+                    case 1:
+                        sem = parseInt( data[0] );
+                        return sem > 0;
+
+                    case 2:
+                        qui = parseInt( data[1] );
+                        return qui > 0;
+
+                    default:
+                        break;
+                }
+
+                return false;
+            }
+        );
+
+        var vobosTable = $('#myTable').DataTable({
             "language": {
                 "sProcessing":     "Procesando...",
                 "sLengthMenu":     "Mostrar _MENU_ registros",
@@ -72,6 +100,9 @@
                 ],
         });
 
+        $('#pay-type').change( function() {
+            vobosTable.draw();
+        });
     });
 
 
