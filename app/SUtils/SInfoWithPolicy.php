@@ -1307,6 +1307,7 @@ class SInfoWithPolicy{
                     }
                 }
                 if($days < 7){ return $lRows;};
+                $diasTrabajados = 0;
                 for($i = 0 ; count($lRows) > $i ; $i++){
                     $banderaAjuste = 0;
                     if($lRows[$i]->workable == 1){
@@ -1362,6 +1363,7 @@ class SInfoWithPolicy{
                                 }
                             //caso con checadas o con ajuste
                             }elseif( $lRows[$i]->hasChecks == true || $banderaAjuste == 1 || $lRows[$i]->isDayOff == 0 || $lRows[$i]->hasAbsence == 0 ){
+                                $diasTrabajados++;
                                 if( $lRows[$i]->extraDoubleMins == 0 && $lRows[$i]->extraTripleMins == 0 && $lRows[$i]->isSunday == 0){
                                     $aWithoutExtra[$contadorSinextra] = $i;
                                     $contadorSinextra++;
@@ -1392,6 +1394,9 @@ class SInfoWithPolicy{
                             $lRows[$i]->work_dayoff = 1;
                         }
                     }
+                }
+                if($diasTrabajados == 7){
+                    $lRows[0]->work_dayoff = 1;   
                 }
                 $diaSumar = 0;
                 $posicionTransformar = 0;

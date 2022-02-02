@@ -249,6 +249,7 @@ class specialWorkshiftController extends Controller
         $special->dateI = $request->datei;
         $special->dateS = $request->dates;
         $special->workshift_id = $request->workshift_id;
+        $special->is_approved = 1;
         $special->updated_by = session()->get('user_id');
         $special->created_by = session()->get('user_id');
         $special->is_delete = 0;

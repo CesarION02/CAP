@@ -95,9 +95,8 @@ class incidentController extends Controller
     {
         
         $incidents = DB::table('incidents')
-                ->whereIn('incidents.start_date',[$request->start_date,$request->end_date])
-                ->orWhereIn('incidents.end_date',[$request->start_date,$request->end_date])
                 ->where('employee_id','=',$request->employee_id)
+                ->whereIn('incidents.start_date',[$request->start_date,$request->end_date])
                 ->get();
         if(count($incidents) == 0){
             $incident = new incident($request->all());
