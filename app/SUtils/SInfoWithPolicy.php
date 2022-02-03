@@ -1467,35 +1467,44 @@ class SInfoWithPolicy{
                                     }
                                 }
                             }
-                            
-                            $lRows[ $diasCorrectos[$diaSumar] ]->extraDoubleMins = $lRows[ $diasCorrectos[$diaSumar] ]->extraDoubleMins + $lRows[$posicionTransformar ]->extraDoubleMins;
-                            $lRows[ $diasCorrectos[$diaSumar] ]->extraTripleMins = $lRows[ $diasCorrectos[$diaSumar] ]->extraTripleMins + $lRows[$posicionTransformar ]->extraTripleMins;
-                            
-                            if($lRows[$posicionTransformar ]->extraDoubleMins > 0){
-                                if( $lRows[ $diasCorrectos[$diaSumar] ]->outDateTimeNoficial != null ){
-                                    $salidaMaquillada = Carbon::parse($lRows[ $diasCorrectos[$diaSumar] ]->outDateTimeNoficial);
-                                    $horas = intdiv($lRows[$posicionTransformar ]->extraDoubleMins,60);
-                                    $minutos = $lRows[$posicionTransformar ]->extraDoubleMins % 60;
-
-                                    $salidaMaquillada->addMinutes($minutos);
-                                    $salidaMaquillada->addHours($horas);
-
-                                    $lRows[ $diasCorrectos[$diaSumar] ]->outDateTimeNoficial = $salidaMaquillada->toDateTimeString();
-                                    
-                                }else{
-                                    $salidaMaquillada = Carbon::parse($lRows[ $diasCorrectos[$diaSumar] ]->outDateTime );
-                                    $horas = intdiv($lRows[$posicionTransformar]->extraDoubleMins,60);
-                                    $minutos = $lRows[$posicionTransformar ]->extraDoubleMins % 60;
-
-                                    $salidaMaquillada->addMinutes($minutos);
-                                    $salidaMaquillada->addHours($horas);
-
-                                    $lRows[$diasCorrectos[$diaSumar]]->outDateTimeNoficial = $salidaMaquillada->toDateTimeString();
+                            $realizar = 0;
+                            if($diaSumar == 1){
+                                if(count($diasCorrectos) > 1 ){
+                                    $realizar = 1;
                                 }
-                                
+                            }else{
+                                $realizar = 1;   
                             }
-                            $lRows[$posicionTransformar ]->extraDoubleMins = 0;
-                            $lRows[$posicionTransformar]->extraTripleMins = 0;    
+                            if($realizar == 1){
+                                $lRows[ $diasCorrectos[$diaSumar] ]->extraDoubleMins = $lRows[ $diasCorrectos[$diaSumar] ]->extraDoubleMins + $lRows[$posicionTransformar ]->extraDoubleMins;
+                                $lRows[ $diasCorrectos[$diaSumar] ]->extraTripleMins = $lRows[ $diasCorrectos[$diaSumar] ]->extraTripleMins + $lRows[$posicionTransformar ]->extraTripleMins;
+                                
+                                if($lRows[$posicionTransformar ]->extraDoubleMins > 0){
+                                    if( $lRows[ $diasCorrectos[$diaSumar] ]->outDateTimeNoficial != null ){
+                                        $salidaMaquillada = Carbon::parse($lRows[ $diasCorrectos[$diaSumar] ]->outDateTimeNoficial);
+                                        $horas = intdiv($lRows[$posicionTransformar ]->extraDoubleMins,60);
+                                        $minutos = $lRows[$posicionTransformar ]->extraDoubleMins % 60;
+
+                                        $salidaMaquillada->addMinutes($minutos);
+                                        $salidaMaquillada->addHours($horas);
+
+                                        $lRows[ $diasCorrectos[$diaSumar] ]->outDateTimeNoficial = $salidaMaquillada->toDateTimeString();
+                                        
+                                    }else{
+                                        $salidaMaquillada = Carbon::parse($lRows[ $diasCorrectos[$diaSumar] ]->outDateTime );
+                                        $horas = intdiv($lRows[$posicionTransformar]->extraDoubleMins,60);
+                                        $minutos = $lRows[$posicionTransformar ]->extraDoubleMins % 60;
+
+                                        $salidaMaquillada->addMinutes($minutos);
+                                        $salidaMaquillada->addHours($horas);
+
+                                        $lRows[$diasCorrectos[$diaSumar]]->outDateTimeNoficial = $salidaMaquillada->toDateTimeString();
+                                    }
+                                    
+                                }
+                                $lRows[$posicionTransformar ]->extraDoubleMins = 0;
+                                $lRows[$posicionTransformar]->extraTripleMins = 0;    
+                            }
                         }
                     }
                     // si falta día de ausencia
@@ -2560,7 +2569,7 @@ class SInfoWithPolicy{
                 $empleados = DB::table('employees')
                                 ->where('is_active','=',1)
                                 ->where('way_pay_id','=',2)
-                                //->where('id',1178)
+                                //->where('id',1424)
                                 ->orderBy('id')
                                 ->select('id AS id','policy_extratime_id AS extratime')
                                 ->get();
