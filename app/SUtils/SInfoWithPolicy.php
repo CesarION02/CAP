@@ -1307,7 +1307,7 @@ class SInfoWithPolicy{
                     }
                 }
                 if($days < 7){ return $lRows;};
-                $diasTrabajados = 0;
+                $domingo = 0;
                 for($i = 0 ; count($lRows) > $i ; $i++){
                     $banderaAjuste = 0;
                     if($lRows[$i]->workable == 1){
@@ -1340,6 +1340,9 @@ class SInfoWithPolicy{
                                         $aHoliday[$contadorHoliday] = $i;
                                         $contadorHoliday++;
                                     }
+                                    if(SDateTimeUtils::dayOfWeek($lRows[$i]->outDate) == Carbon::SUNDAY){
+                                        $domingo = 1;
+                                    }
                                 //si es descanso
                                 }elseif( $lRows[$i]->isDayOff == 1){
                                     $haveDayoff = 1;
@@ -1358,12 +1361,18 @@ class SInfoWithPolicy{
                                         if($lRows[$i]->events[0]['type_id'] == 19){
                                             $lRows[$i]->isDayOff = 1; 
                                             $haveDayoff = 1;       
+                                        }else{
+                                            if(SDateTimeUtils::dayOfWeek($lRows[$i]->outDate) == Carbon::SUNDAY){
+                                                $domingo = 1;
+                                            }   
                                         }
                                     }
                                 }
                             //caso con checadas o con ajuste
                             }elseif( $lRows[$i]->hasChecks == true || $banderaAjuste == 1 || $lRows[$i]->isDayOff == 0 || $lRows[$i]->hasAbsence == 0 ){
-                                $diasTrabajados++;
+                                if(SDateTimeUtils::dayOfWeek($lRows[$i]->outDate) == Carbon::SUNDAY){
+                                    $domingo = 1;
+                                }
                                 if( $lRows[$i]->extraDoubleMins == 0 && $lRows[$i]->extraTripleMins == 0 && $lRows[$i]->isSunday == 0){
                                     $aWithoutExtra[$contadorSinextra] = $i;
                                     $contadorSinextra++;
@@ -1395,14 +1404,12 @@ class SInfoWithPolicy{
                         }
                     }
                 }
-                if($diasTrabajados == 7){
-                    $lRows[0]->work_dayoff = 1;   
-                }
                 $diaSumar = 0;
                 $posicionTransformar = 0;
                 if(isset($diasCorrectos)){
                     // si falta día de descanso
                     if($haveDayoff == 0){
+                        if($domingo == 1){ $lRows[0]->work_dayoff = 1;  }
                         $concluir = 0;
                         if(isset($aWithoutExtra)){
                             for($i = 0 ; count($aWithoutExtra) > $i ; $i++){
@@ -1669,6 +1676,7 @@ class SInfoWithPolicy{
                         $i = $contador[0];
                         $inicioContador = $contador[0];
                         $aux = 1;
+                        $domingo = 0;
                         while( $aux == 1 ){
                             if($lRows[ $inicioContador ]->outDate != null){
                                 $verificarFinsemana = Carbon::parse($lRows[ $inicioContador ]->outDate);
@@ -1687,46 +1695,46 @@ class SInfoWithPolicy{
                         if($diferencia != 0){ 
                         for($i ; $diferencia >= $i ; $i++){
                             if($lRows[$i]->workable == 1){
-                            if($lRows[$i]->isDayRepeated == false){
-                                if(count($lRows[$i]->adjusts) != 0){
-                                    for($x = 0 ; count($lRows[$i]->adjusts) > $x ; $x++){
-                                        if($lRows[$i]->adjusts[$x]->adjust_type_id == 4){
-                                            $baderaAjuste = 1;
-                                            $lRows[$i]->hasAdjust = true;
-                                        }    
+                                if($lRows[$i]->isDayRepeated == false){
+                                    if(count($lRows[$i]->adjusts) != 0){
+                                        for($x = 0 ; count($lRows[$i]->adjusts) > $x ; $x++){
+                                            if($lRows[$i]->adjusts[$x]->adjust_type_id == 4){
+                                                $baderaAjuste = 1;
+                                                $lRows[$i]->hasAdjust = true;
+                                            }    
+                                        }
+                                    }
+                                    if( $lRows[$i]->hasChecks == false && $banderaAjuste == 0 ){
+                                        if( $lRows[$i]->hasAbsence == true ){
+                                            $aAbsence[$contadorAusencia] = $i;
+                                            $contadorAusencia++;
+                                        }else{
+                                            $semanaNoCompleta = true;
+                                        }
+                                        
+                                    }elseif( $lRows[$i]->hasChecks == true || $banderaAjuste == 1){
+                                        if( $lRows[$i]->extraDoubleMins == 0 && $lRows[$i]->extraTripleMins == 0 && $lRows[$i]->isSunday == 0){
+                                            $aWithoutExtra[$contadorSinextra] = $i;
+                                            $contadorSinextra++;
+                                        }else{
+                                            $extraTotales = $lRows[$i]->extraDoubleMins +  $lRows[$i]->extraTripleMins;
+                                            if( ( $horaExtraMenor > $extraTotales || $horaExtraMenor == 0 ) && $lRows[$i]->isSunday == 0 ){
+                                                $horaExtraMenor = $extraTotales;
+                                                $extraMenorPosicion = $i;
+                                            }
+                                        }
+                                        if( $lRows[$i]->isHoliday == true ){
+                                            if($lRows[$i]->extraDoubleMins > 0){
+                                                $aHoliday[$contadorHoliday] = $i;
+                                                $contadorHoliday++;
+                                            }
+                                        }else{
+                                            $diasCorrectos[$auxCorrectos] = $i;
+                                            $auxCorrectos++;
+                                        }
+                                        
                                     }
                                 }
-                            if( $lRows[$i]->hasChecks == false && $banderaAjuste == 0 ){
-                                if( $lRows[$i]->hasAbsence == true ){
-                                    $aAbsence[$contadorAusencia] = $i;
-                                    $contadorAusencia++;
-                                }else{
-                                    $semanaNoCompleta = true;
-                                }
-                                
-                            }elseif( $lRows[$i]->hasChecks == true || $banderaAjuste == 1){
-                                if( $lRows[$i]->extraDoubleMins == 0 && $lRows[$i]->extraTripleMins == 0 && $lRows[$i]->isSunday == 0){
-                                    $aWithoutExtra[$contadorSinextra] = $i;
-                                    $contadorSinextra++;
-                                }else{
-                                    $extraTotales = $lRows[$i]->extraDoubleMins +  $lRows[$i]->extraTripleMins;
-                                    if( ( $horaExtraMenor > $extraTotales || $horaExtraMenor == 0 ) && $lRows[$i]->isSunday == 0 ){
-                                        $horaExtraMenor = $extraTotales;
-                                        $extraMenorPosicion = $i;
-                                    }
-                                }
-                                if( $lRows[$i]->isHoliday == true ){
-                                    if($lRows[$i]->extraDoubleMins > 0){
-                                        $aHoliday[$contadorHoliday] = $i;
-                                        $contadorHoliday++;
-                                    }
-                                }else{
-                                    $diasCorrectos[$auxCorrectos] = $i;
-                                    $auxCorrectos++;
-                                }
-                                
-                            }
-                            }
                             }else{
                                 $lRows[$i]->isDayOff = 1;
                                 if($lRows[$i]->hasChecks == 0){
@@ -2078,6 +2086,7 @@ class SInfoWithPolicy{
                     $i = $contador[0];
                     $inicioContador = $contador[0];
                     $aux = 1;
+                    $domingo = 0;
                     while( $aux == 1 ){
                         if($lRows[ $inicioContador ]->outDate != null){
                             $verificarFinsemana = Carbon::parse($lRows[ $inicioContador ]->outDate);
@@ -2112,7 +2121,7 @@ class SInfoWithPolicy{
                                             $aAbsence[$contadorAusencia] = $i;
                                             $contadorAusencia++;
                                             //si es domingo y tiene ausencia se pone descanso y se prende bandera de que falta una ausencia en la semana
-                                            if($lRow[$i]->isSunday){
+                                            if(SDateTimeUtils::dayOfWeek($lRows[$i]->outDate) == Carbon::SUNDAY){
                                                 $lRows[$i]->isDayOff = 1; 
                                                 $haveDayoff = 1;  
                                                 $missingAbsence = 1; 
@@ -2123,6 +2132,9 @@ class SInfoWithPolicy{
                                                 $aHoliday[$contadorHoliday] = $i;
                                                 $contadorHoliday++;
                                             }
+                                            if(SDateTimeUtils::dayOfWeek($lRows[$i]->outDate) == Carbon::SUNDAY){
+                                                $domingo = 1;
+                                            }
                                         //si es descanso
                                         }elseif( $lRows[$i]->isDayOff == 1){
                                             $haveDayoff = 1;
@@ -2131,7 +2143,7 @@ class SInfoWithPolicy{
                                         else{
                                             if(sizeof($lRows[$i]->events)<1){
                                                 $lRows[$i]->hasAbsence = true;
-                                                if($lRow[$i]->isSunday){
+                                                if(SDateTimeUtils::dayOfWeek($lRows[$i]->outDate) == Carbon::SUNDAY){
                                                     $lRows[$i]->isDayOff = 1; 
                                                     $haveDayoff = 1;  
                                                     $missingAbsence = 1; 
@@ -2140,11 +2152,18 @@ class SInfoWithPolicy{
                                                 if($lRows[$i]->events['type_id'] == 19){
                                                     $lRows[$i]->isDayOff = 1; 
                                                     $haveDayoff = 1;       
+                                                }else{
+                                                    if(SDateTimeUtils::dayOfWeek($lRows[$i]->outDate) == Carbon::SUNDAY){
+                                                        $domingo = 1;
+                                                    }   
                                                 }
                                             }
                                         }
                                     //caso con checadas o con ajuste
                                     }elseif( $lRows[$i]->hasChecks == true || $banderaAjuste == 1){
+                                        if(SDateTimeUtils::dayOfWeek($lRows[$i]->outDate) == Carbon::SUNDAY){
+                                            $domingo = 1;
+                                        }
                                         if( $lRows[$i]->extraDoubleMins == 0 && $lRows[$i]->extraTripleMins == 0 && $lRows[$i]->isSunday == 0){
                                             $aWithoutExtra[$contadorSinextra] = $i;
                                             $contadorSinextra++;
@@ -2179,7 +2198,7 @@ class SInfoWithPolicy{
                         }
                         $contador[0] = $i;
                         if($haveDayOff == 0){
-
+                            if($domingo == 1){ $lRows[$i-1]->work_dayoff = 1;  }
                             if(isset($aWithoutExtra)){
                                 $lRows[$aWithoutExtra[0]]->isDayOff = 1;
                                 if( $aWithoutExtra[0] == $diasCorrectos[0] ){ $diaSumar = 1;}
@@ -2304,6 +2323,7 @@ class SInfoWithPolicy{
                         $aux = 1;
                         $finSemanaPrematura = 0;
                         $numeroRegistros = count($lRows);
+                        $domingo = 0;
                         while( $aux == 1 ){
                             if($inicioContador < count($lRows)){
                                 if($lRows[ $inicioContador ]->outDate != null){
@@ -2345,7 +2365,7 @@ class SInfoWithPolicy{
                                                     $aAbsence[$contadorAusencia] = $i;
                                                     $contadorAusencia++;
                                                     //si es domingo y tiene ausencia se pone descanso y se prende bandera de que falta una ausencia en la semana
-                                                    if($lRow[$i]->isSunday){
+                                                    if(SDateTimeUtils::dayOfWeek($lRows[$i]->outDate) == Carbon::SUNDAY){
                                                         $lRows[$i]->isDayOff = 1; 
                                                         $haveDayoff = 1;  
                                                         $missingAbsence = 1; 
@@ -2355,6 +2375,9 @@ class SInfoWithPolicy{
                                                     if($lRows[$i]->extraDoubleMins > 0){
                                                         $aHoliday[$contadorHoliday] = $i;
                                                         $contadorHoliday++;
+                                                    }
+                                                    if(SDateTimeUtils::dayOfWeek($lRows[$i]->outDate) == Carbon::SUNDAY){
+                                                        $domingo = 1;
                                                     }
                                                 //si es descanso
                                                 }elseif( $lRows[$i]->isDayOff == 1){
@@ -2373,11 +2396,18 @@ class SInfoWithPolicy{
                                                         if($lRows[$i]->events['type_id'] == 19){
                                                             $lRows[$i]->isDayOff = 1; 
                                                             $haveDayoff = 1;       
+                                                        }else{
+                                                            if(SDateTimeUtils::dayOfWeek($lRows[$i]->outDate) == Carbon::SUNDAY){
+                                                                $domingo = 1;
+                                                            }
                                                         }
                                                     }
                                                 }
                                             //caso con checadas o con ajuste
                                             }elseif( $lRows[$i]->hasChecks == true || $banderaAjuste == 1){
+                                                if(SDateTimeUtils::dayOfWeek($lRows[$i]->outDate) == Carbon::SUNDAY){
+                                                    $domingo = 1;
+                                                }
                                                 if( $lRows[$i]->extraDoubleMins == 0 && $lRows[$i]->extraTripleMins == 0 && $lRows[$i]->isSunday == 0){
                                                     $aWithoutExtra[$contadorSinextra] = $i;
                                                     $contadorSinextra++;
@@ -2412,7 +2442,7 @@ class SInfoWithPolicy{
                                 }
                                 $contador[0] = $i;
                                 if($haveDayOff == 0){
-        
+                                    if($domingo == 1){ $lRows[$i-1]->work_dayoff = 1;  }
                                     if(isset($aWithoutExtra)){
                                         $lRows[$aWithoutExtra[0]]->isDayOff = 1;
                                         if( $aWithoutExtra[0] == $diasCorrectos[0] ){ $diaSumar = 1;}
