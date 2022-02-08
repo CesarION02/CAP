@@ -145,7 +145,7 @@ class shiftprogrammingController extends Controller
         ->join('week','week.id','=','pdf_week.week_id')
         ->where('week.year',$request->anio)
         ->orderBy('week.week_number','DESC')
-        ->select('week.start_date AS start','week.end_date AS end','week.id AS id')
+        ->select('week.start_date AS start','week.end_date AS end','week.id AS id','pdf_week.url AS nombre')
         ->get();
 
         return response()->json($weeks);
