@@ -2663,7 +2663,7 @@ class SInfoWithPolicy{
                         $inicio->addDay();
                         $quincenasInicio[$j] = $inicio->format('Y-m-d');
                     }else{
-                        $inicioAux = DB::table('hrs_prepay-cut')
+                        $inicioAux = DB::table('hrs_prepay_cut')
                         ->where('year',($quincenas[$j]->year)-1)
                         ->orderBy('num','DESC')
                         ->select('dt_cut AS cut')

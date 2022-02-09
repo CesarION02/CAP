@@ -18,6 +18,13 @@ use App\Models\prepayrollchange;
 use App\Http\Controllers\PrepayrollReportController;
 class prePayrollController extends Controller
 {
+    public function __construct() {
+        // Códigos de respuesta:
+        $this->OK = "200";
+        $this->ERROR = "500"; //  Error del servidor
+        $this->NOT_VOBO = "550"; // Nómina no autorizada
+    }
+    
     /**
      * Retorna un JSON con la información de la prenómina
      *
@@ -61,23 +68,43 @@ class prePayrollController extends Controller
             return response()->json(['error' => $validator->errors()->all()]);
         }
 
-        $startDate = $request->start_date;
-        $endDate = $request->end_date;
-        $aEmployeeIds = $request->employees;
-        $payType = $request->pay_type == "1" ? \SCons::PAY_W_S : \SCons::PAY_W_Q;
-        $dataType = $request->data_type;
+        try {
+            $startDate = $request->start_date;
+            $endDate = $request->end_date;
+            $aEmployeeIds = $request->employees;
+            $payType = $request->pay_type == "1" ? \SCons::PAY_W_S : \SCons::PAY_W_Q;
+            $dataType = $request->data_type;
 
-        if (is_string($aEmployeeIds)) {
-            $aEmployeeIds = explode(",", $aEmployeeIds);
+            if (is_string($aEmployeeIds)) {
+                $aEmployeeIds = explode(",", $aEmployeeIds);
+            }
+
+            if (! PrepayrollReportController::isFreeVoboPrepayroll($startDate, $payType)) {
+                $response = (object) [
+                                "code" => $this->NOT_VOBO,
+                                "data" => "La prenómina no se ha autorizado para la fecha: ".$startDate
+                            ];
+
+                return response()->json(json_encode($response, JSON_PRETTY_PRINT));
+            }
+        
+            $oPrepayroll = $this->makePrepayroll($startDate, $endDate, $aEmployeeIds, $payType, $dataType);
+        }
+        catch (\Throwable $e) {
+            $response = (object) [
+                "code" => $this->ERROR,
+                "data" => $e->getMessage()
+            ];
+
+            return json_encode($response, JSON_PRETTY_PRINT);
         }
 
-        if (! PrepayrollReportController::isFreeVoboPrepayroll($startDate, $payType)) {
-            return response()->json(['error' => "La prenómina no se ha autorizado para la fecha: ".$startDate]);
-        }
+        $response = (object) [
+                        "code" => $this->OK,
+                        "data" => $oPrepayroll
+                    ];
 
-        $oPrepayroll = $this->makePrepayroll($startDate, $endDate, $aEmployeeIds, $payType, $dataType);
-
-        return json_encode($oPrepayroll, JSON_PRETTY_PRINT);
+        return json_encode($response, JSON_PRETTY_PRINT);
     }
 
     /**
