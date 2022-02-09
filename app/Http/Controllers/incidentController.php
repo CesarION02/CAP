@@ -74,10 +74,36 @@ class incidentController extends Controller
 
         $incidents = $incidents->pluck('id','name');
 
-        $employees = employees::where('is_delete','0')
+        if (session()->get('rol_id') != 1){
+            $numero = session()->get('name');
+            $usuario = DB::table('users')
+                    ->where('name',$numero)
+                    ->get();
+            $dgu = DB::table('group_dept_user')
+                    ->where('user_id',$usuario[0]->id)
+                    ->select('groupdept_id AS id')
+                    ->get();
+            $Adgu = [];
+            for($i=0;count($dgu)>$i;$i++){
+                $Adgu[$i]=$dgu[$i]->id;
+            }
+            
+            $employees = DB::table('employees')
+                                ->join('departments','departments.id','=','employees.department_id')
+                                ->whereIn('departments.dept_group_id',$Adgu)
                                 ->where('is_active', true)
                                 ->orderBy('name','ASC')
-                                ->pluck('id','name');
+                                ->select('employees.name AS name','employees.num_employee AS num')
+                                ->get();
+        }else{
+            $employees = DB::table('employees')
+                                ->join('departments','departments.id','=','employees.department_id')
+                                ->where('is_active', true)
+                                ->where('department_id',15)
+                                ->orderBy('name','ASC')
+                                ->select('employees.name AS name','employees.num_employee AS num')
+                                ->get();    
+        }
 
         return view('incident.create')
                         ->with('incidentType', $incidentType)
