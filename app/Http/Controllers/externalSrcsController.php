@@ -49,7 +49,7 @@ class externalSrcsController extends Controller
         catch (\Throwable $e) {
             $response = (object) [
                 "code" => $this->ERROR,
-                "data" => $e->getMessage()
+                "message" => $e->getMessage()
             ];
 
             return json_encode($response);
@@ -57,7 +57,8 @@ class externalSrcsController extends Controller
 
         $response = (object) [
             "code" => $this->OK,
-            "data" => $oJAbsDelays
+            "message" => "OK",
+            "absData" => $oJAbsDelays
         ];
 
         return json_encode($response);
