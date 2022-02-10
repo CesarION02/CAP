@@ -85,7 +85,7 @@ class prePayrollController extends Controller
                                 "data" => "La prenómina no se ha autorizado para la fecha: ".$startDate
                             ];
 
-                return response()->json(json_encode($response, JSON_PRETTY_PRINT));
+                return response()->json(json_encode($response));
             }
         
             $oPrepayroll = $this->makePrepayroll($startDate, $endDate, $aEmployeeIds, $payType, $dataType);
