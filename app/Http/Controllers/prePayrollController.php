@@ -95,7 +95,7 @@ class prePayrollController extends Controller
                 "data" => $e->getMessage()
             ];
 
-            return json_encode($response);
+            return json_encode($response, JSON_PRETTY_PRINT);
         }
 
         $response = (object) [
@@ -103,7 +103,7 @@ class prePayrollController extends Controller
                         "data" => $oPrepayroll
                     ];
 
-        return json_encode($response);
+        return json_encode($response, JSON_PRETTY_PRINT);
     }
 
     /**
