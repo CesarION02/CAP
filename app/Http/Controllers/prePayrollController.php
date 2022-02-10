@@ -223,10 +223,10 @@ class prePayrollController extends Controller
                      * Obtener descansos
                      */
                     $lColl = clone $lCExtrasDay;
-                    $lColl = $lColl->where('work_dayoff', true);
+                    // $lColl = $lColl->where('work_dayoff', true);
                     $withDaysOff = $lColl->groupBy('employee_id')->map(function ($row) {
                                                 $registry = (object) [
-                                                    'daysOff' => $row->sum('is_dayoff'),
+                                                    'daysOff' => $row->sum('work_dayoff'),
                                                 ];
     
                                                 return $registry;

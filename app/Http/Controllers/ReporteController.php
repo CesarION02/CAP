@@ -705,8 +705,6 @@ class ReporteController extends Controller
         $bModify = SPermissions::hasPermission(\Auth::user()->id, 'ajustes_rep_te');
 
         PrepayrollReportController::prepayrollReportVobos($sStartDate, $sEndDate);
-
-        
         
         if ($reportMode == \SCons::REP_HR_EX) {
             return view('report.reportDelaysView')
