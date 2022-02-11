@@ -80,12 +80,11 @@ class prePayrollController extends Controller
             }
 
             if (! PrepayrollReportController::isFreeVoboPrepayroll($startDate, $payType)) {
-                $response = (object) [
-                                "code" => $this->NOT_VOBO,
-                                "data" => "La prenómina no se ha autorizado para la fecha: ".$startDate
-                            ];
+                $response = new \stdClass();
+                $response->code = $this->NOT_VOBO;
+                $response->message = "La prenómina no se ha autorizado para la fecha: ".$startDate;
 
-                return response()->json(json_encode($response, JSON_PRETTY_PRINT));
+                return response()->json($response);
             }
         
             $oPrepayroll = $this->makePrepayroll($startDate, $endDate, $aEmployeeIds, $payType, $dataType);
@@ -93,7 +92,7 @@ class prePayrollController extends Controller
         catch (\Throwable $e) {
             $response = (object) [
                 "code" => $this->ERROR,
-                "data" => $e->getMessage()
+                "message" => $e->getMessage()
             ];
 
             return json_encode($response, JSON_PRETTY_PRINT);
@@ -101,7 +100,8 @@ class prePayrollController extends Controller
 
         $response = (object) [
                         "code" => $this->OK,
-                        "data" => $oPrepayroll
+                        "message" => "OK",
+                        "prepayrollData" => $oPrepayroll
                     ];
 
         return json_encode($response, JSON_PRETTY_PRINT);

@@ -49,18 +49,19 @@ class externalSrcsController extends Controller
         catch (\Throwable $e) {
             $response = (object) [
                 "code" => $this->ERROR,
-                "data" => $e->getMessage()
+                "message" => $e->getMessage()
             ];
 
-            return json_encode($response, JSON_PRETTY_PRINT);
+            return json_encode($response);
         }
 
         $response = (object) [
             "code" => $this->OK,
-            "data" => $oJAbsDelays
+            "message" => "OK",
+            "absData" => $oJAbsDelays
         ];
 
-        return json_encode($response, JSON_PRETTY_PRINT);
+        return json_encode($response);
     }
 
     public function getInfo($startDate, $endDate, $aEmployeeIds, $payType) {
@@ -152,10 +153,15 @@ class externalSrcsController extends Controller
                     if (sizeof($lAbsences) > 0) {
                         $lAbs = collect($lAbsences);
                         // Revisa si la incidencia es permitida, si no, pierde el bono
-                        $lAbs = $lAbs->whereNotIn('type_id', [3, 7, 12, 14, 15, 16]);
+                        $lAbs = $lAbs->whereIn('type_id', \DB::table('type_incidents')->where('is_allowed', false)->pluck('id')->toArray());
 
                         if (sizeof($lAbs) > 0) {
                             $oRow->lostBonus = true;
+
+                            foreach ($lAbs as $abs) {
+                                $oRow->incidents[] = $abs->type_name."-".$abs->nts;
+                            }
+
                             // $oRow->hasAbss = true;
                             break;
                         }
