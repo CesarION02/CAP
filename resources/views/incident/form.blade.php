@@ -37,8 +37,8 @@
                <input type="text" class="form-control" value="{{$datas[0]->name}}" readonly>
             @else
                 <select id="employee_id"  name="employee_id" class="form-control">
-                    @foreach($employees as $employee => $index)
-                    <option value="{{ $index }}" {{old('employee_id') == $index ? 'selected' : '' }}> {{$employee}}</option>
+                    @foreach($employees as $employee)
+                    <option value="{{ $employee->num }}" {{old('employee_id') == $index ? 'selected' : '' }}> {{$employee->name}}</option>
                     @endforeach
                 </select>
             @endif
