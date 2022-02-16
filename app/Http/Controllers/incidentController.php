@@ -101,7 +101,7 @@ class incidentController extends Controller
                                 ->where('is_active', true)
                                 ->where('department_id',15)
                                 ->orderBy('name','ASC')
-                                ->select('employees.name AS name','employees.num_employee AS num')
+                                ->select('employees.name AS name','employees.id AS num')
                                 ->get();    
         }
 
