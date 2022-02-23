@@ -263,6 +263,7 @@ class specialWorkshiftController extends Controller
             $week_department_day->week_department_id = null;
             $week_department_day->status = 1;
             $week_department_day->special = $special->id;
+            $week_department_day->is_approved = 1;
             $week_department_day->save();
 
             $day_workshifts = new day_workshifts();
