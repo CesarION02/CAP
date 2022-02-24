@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
 use DB;
-use App\user;
+use App\Models\User;
 use App\Models\admin\rol;
 use App\Models\admin\roluser;
 
