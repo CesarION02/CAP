@@ -314,8 +314,8 @@ class assignController extends Controller
                                 ->orderBy('num_employee', 'ASC')
                                 ->get();
 
-        $iTemplateId = env('TMPLTE_SATURDAYS', 0);
-        $iGrpSchId = env('GRP_SCHDLS_SATUDY', 0);
+        $iTemplateId = env('TMPLTE_SATURDAYS', 1);
+        $iGrpSchId = env('GRP_SCHDLS_SATUDY', 1);
 
         $holidays = holiday::select('id',
                                 'name',
@@ -357,8 +357,8 @@ class assignController extends Controller
             case 2: 
                 $toReplace = json_decode($request->to_change);
                 $oAssign = json_decode($request->ass_objs);
-                $lAssigns = assign_schedule::where('schedule_template_id', env('TMPLTE_SATURDAYS', 0))
-                                ->where('group_schedules_id', env('GRP_SCHDLS_SATUDY', 0))
+                $lAssigns = assign_schedule::where('schedule_template_id', env('TMPLTE_SATURDAYS', 1))
+                                ->where('group_schedules_id', env('GRP_SCHDLS_SATUDY', 1))
                                 ->where('is_delete', false)
                                 ->where('start_date', '>=', $toReplace->start_date)
                                 ->orderBy('start_date', 'ASC')
@@ -376,8 +376,8 @@ class assignController extends Controller
 
                         $oNew->employee_id = $oPrevious->employee_id;
                         $oNew->group_assign_id = null;
-                        $oNew->schedule_template_id = env('TMPLTE_SATURDAYS', 0);
-                        $oNew->group_schedules_id = env('GRP_SCHDLS_SATUDY', 0);
+                        $oNew->schedule_template_id = env('TMPLTE_SATURDAYS', 1);
+                        $oNew->group_schedules_id = env('GRP_SCHDLS_SATUDY', 1);
                         $oNew->start_date = $newDate;
                         $oNew->end_date = $newDate;
                         $oNew->is_delete = false;
@@ -426,10 +426,10 @@ class assignController extends Controller
 
                 $obj->employee_id = $oAssign->employee_id;
                 $obj->group_assign_id = null;
-                $obj->schedule_template_id = env('TMPLTE_SATURDAYS', 0);
+                $obj->schedule_template_id = env('TMPLTE_SATURDAYS', 1);
                 $obj->start_date = $oAssign->start_date;
                 $obj->end_date = $oAssign->start_date;
-                $obj->group_schedules_id = env('GRP_SCHDLS_SATUDY', 0);
+                $obj->group_schedules_id = env('GRP_SCHDLS_SATUDY', 1);
                 $obj->order_gs = 0;
                 $obj->is_delete = false;
                 $obj->created_by = session()->get('user_id');
@@ -489,7 +489,7 @@ class assignController extends Controller
     {
         $data = DB::table('schedule_assign AS sa')
                             ->join('employees AS e', 'e.id', '=', 'sa.employee_id')
-                            ->join('group_schedule AS gs', 'gs.id', '=', 'sa.group_schedules_id')
+                            ->leftjoin('group_schedule AS gs', 'gs.id', '=', 'sa.group_schedules_id')
                             ->select('e.name', 
                                         'e.num_employee', 
                                         'sa.start_date', 
@@ -504,8 +504,8 @@ class assignController extends Controller
         }
 
         $data = $data->where('sa.is_delete', false)
-                            ->where('schedule_template_id', env('TMPLTE_SATURDAYS', 0))
-                            ->where('group_schedules_id', env('GRP_SCHDLS_SATUDY', 0))
+                            ->where('schedule_template_id', env('TMPLTE_SATURDAYS', 1))
+                            ->where('group_schedules_id', env('GRP_SCHDLS_SATUDY', 1))
                             ->orderBy('start_date', 'ASC')
                             //->orderBy('order_gs', 'ASC')
                             ->get();

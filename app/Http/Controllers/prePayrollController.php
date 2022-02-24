@@ -178,19 +178,19 @@ class prePayrollController extends Controller
             if (sizeof($lGrouped) > 0) {
                 switch ($dataType) {
                     case \SCons::LIMITED_DATA:
-                        $row->double_overtime = $lGrouped{$idEmployee}->minsExtraDouble / 60;
-                        $row->triple_overtime = $lGrouped{$idEmployee}->minsExtraTriple / 60;
+                        $row->double_overtime = $lGrouped->$idEmployee->minsExtraDouble / 60;
+                        $row->triple_overtime = $lGrouped->$idEmployee->minsExtraTriple / 60;
                         break;
                     case \SCons::OTHER_DATA:
-                        $row->double_overtime = $lGrouped{$idEmployee}->minsExtraDoubleNoOficial / 60;
-                        $row->triple_overtime = $lGrouped{$idEmployee}->minsExtraTripleNoOficial / 60;
+                        $row->double_overtime = $lGrouped->$idEmployee->minsExtraDoubleNoOficial / 60;
+                        $row->triple_overtime = $lGrouped->$idEmployee->minsExtraTripleNoOficial / 60;
                         break;
     
                     case \SCons::ALL_DATA:
-                        $row->double_overtime = ($lGrouped{$idEmployee}->minsExtraDouble + 
-                                                    $lGrouped{$idEmployee}->minsExtraDoubleNoOficial) / 60;
-                        $row->triple_overtime = ($lGrouped{$idEmployee}->minsExtraTriple +
-                                                    $lGrouped{$idEmployee}->minsExtraTripleNoOficial) / 60;
+                        $row->double_overtime = ($lGrouped->$idEmployee->minsExtraDouble + 
+                                                    $lGrouped->$idEmployee->minsExtraDoubleNoOficial) / 60;
+                        $row->triple_overtime = ($lGrouped->$idEmployee->minsExtraTriple +
+                                                    $lGrouped->$idEmployee->minsExtraTripleNoOficial) / 60;
                         break;
                     
                     default:
@@ -259,7 +259,7 @@ class prePayrollController extends Controller
                                                 return $registry;
                                             });
                     if (sizeof($withDaysOff) > 0) {
-                        $day->n_days_off = $withDaysOff{$idEmployee}->daysOff;
+                        $day->n_days_off = $withDaysOff->$idEmployee->daysOff;
                     }
 
                      /**
@@ -275,7 +275,7 @@ class prePayrollController extends Controller
                                                 return $registry;
                                             });
                     if (sizeof($withHolidays) > 0) {
-                        $day->holiday_id = $withHolidays{$idEmployee}->holidays;
+                        $day->holiday_id = $withHolidays->idEmployee->holidays;
                     }
                 }
 
