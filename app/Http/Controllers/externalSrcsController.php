@@ -110,8 +110,8 @@ class externalSrcsController extends Controller
             }
 
             if (sizeof($lGrouped) > 0) {
-                if (isset($lGrouped{$oEmployee->id})) {
-                    $oRow->delayMins = $lGrouped{$oEmployee->id}->totalDelayMins;
+                if (isset($lGrouped[$oEmployee->id])) {
+                    $oRow->delayMins = $lGrouped[$oEmployee->id]->totalDelayMins;
                 }
             }
 
