@@ -353,8 +353,8 @@ class RegisterController extends Controller
 
     public function registerUpdate(Request $request, $id){
         $register = register::findOrFail($id);
-        $register->date = $request->date;
-        $register->time = $request->time;
+        //$register->date = $request->date;
+        //$register->time = $request->time;
         $register->type_id = $request->type_id;
         $register->is_modified = true;
         $register->user_id = session()->get('user_id');

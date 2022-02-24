@@ -34,13 +34,13 @@
                     <div class="form-group">
                         <label for="nombre" class="col-lg-3 control-label requerido" for="start_date">Fecha:</label>
                         <div class="col-lg-8">
-                            <input type="date" name="date" id="date" value="{{$registros[0]->fecha}}">
+                            <input type="date" name="date" id="date" value="{{$registros[0]->fecha}}" readonly>
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="nombre" class="col-lg-3 control-label requerido" for="start_date">Hora:</label>
                         <div class="col-lg-8">
-                            <input type="time" name="time" id="time" value="{{$registros[0]->hora}}">
+                            <input type="time" name="time" id="time" value="{{$registros[0]->hora}}" readonly>
                         </div>
                     </div>
                     <div class="form-group">
