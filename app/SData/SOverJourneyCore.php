@@ -93,6 +93,9 @@ class SOverJourneyCore {
                         $oRow->overScheduleMins += $workedTime->diffMinutes;
                         $oRow->overMinsTotal += $workedTime->diffMinutes;
                         $oRow->isOverJourney = true;
+                        // quitar retardos en segundo turno
+                        $oRow->entryDelayMinutes = 0;
+                        $oRow->comments = str_replace("Retardo.", "", $oRow->comments);
                     }
                     else {
                         /**
@@ -108,6 +111,9 @@ class SOverJourneyCore {
 
                             $oRow->overMinsTotal -= $oRow->overDefaultMins;
                             $oRow->overDefaultMins = 0;
+                            // quitar retardos en segundo turno
+                            $oRow->entryDelayMinutes = 0;
+                            $oRow->comments = str_replace("Retardo.", "", $oRow->comments);
                         }
                         else {
                             // si no, solo se acumulan los minutos trabajados en este rango de tiempo
