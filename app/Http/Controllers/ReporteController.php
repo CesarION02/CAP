@@ -653,7 +653,7 @@ class ReporteController extends Controller
 
         $seeAll = false;
         foreach ($roles as $rol) {
-            if ($rol->id == 1 || $rol->id == 3 || $rol->id == 8) {
+            if ($rol->id == 1 || $rol->id == 3 || $rol->id == 8 || $rol->id == 11) {
                 $seeAll = true;
                 break;
             }
