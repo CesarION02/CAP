@@ -294,6 +294,11 @@ class SDataAccessControl {
         $dtDateTime = $dateTime;
 
         $oEmployee = SDataAccessControl::getEmployee($idEmployee);
+        
+        if ($oEmployee == null) {
+            return;
+        }
+
         $result = SDataAccessControl::checkSimpleAccess($oEmployee, $dtDate);
 
         if ($result[0]) {
