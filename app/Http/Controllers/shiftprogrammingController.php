@@ -469,6 +469,199 @@ class shiftprogrammingController extends Controller
     }
 
     public function pdf($id,$typearea){
+        $week = week::findOrFail($id);
+        $codigo = DB::table('department_group')
+                            ->where('id',$typearea)
+                            ->get();
+        $nombrePdf = 'RolTur'.$week->week_number.''.$week->year.''.$codigo[0]->code;
+        $formateoIni = explode('-',$week->start_date);
+        $fechaInicio = $formateoIni[2].'-'.$formateoIni[1].'-'.$formateoIni[0];
+        $dias = array('','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo');
+        $diasTitulo = array('','lun.','mar.','miér.','jue.','vier.','sáb.','dom.');
+        $meses = array('','ene.','feb.','mar.','abr.','may.','jun.','jul.','ago.','sep.','oct.','nov.','dic.');
+        $fini = $diasTitulo[date('N', strtotime($fechaInicio))];
+        $formateoFin = explode('-',$week->end_date);
+        $fechaFin = $formateoFin[2].'-'.$formateoFin[1].'-'.$formateoFin[0];
+        $fin = $diasTitulo[date('N', strtotime($fechaFin))];
+        $nombreMes = $meses[date('n', strtotime($fechaFin))];
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+        
+        /*Encabezado del pdf */
+        $header = 
+        '
+            <table class = "container">
+                <tbody>
+                    <tr>
+                        <th style  = "text-align: center; font-size: 0.4cm;">
+                            '.$config->company.'
+                        </th>
+                    </tr>
+                    <tr>
+                        <th style  = "text-align: center; font-size: 0.4cm;">
+                        Rol de turnos semanales del '.$fini.' '.$formateoIni[2]
+                        .($formateoIni[1] != $formateoFin[1] ? ' de '.$meses[(int)$formateoIni[1]] : '')
+                        .($formateoIni[0] != $formateoFin[0] ? ' del '.$formateoIni[0] : '')
+                        .' al '.$fin.' '.$formateoFin[2].
+                        ' de '.$nombreMes.' de '.$formateoFin[0].'
+                        </th>
+                    </tr>
+                </tbody>
+            </table>
+        ';
+
+        /*Pie de pagina del pdf */
+        $footer = 
+        '
+            <table class = "container" style = "border-top: 0.03cm solid #000000;">
+                <tbody>
+                    <tr>
+                        <td style = "width: 33%;">
+                        </td>
+                        <td class = "th3" style = "width: 33%; text-align: center;">
+                            Página {PAGENO} de {nb}
+                        </td>
+                        <td class = "th3" style = "width: 33%; text-align: right;">
+                            '.auth()->user()->name.'  '.date("d-m-Y h:i:sa").'
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        ';
+
+        /*Cuerpo del pdf */
+        $html = '';
+
+        $grupo = DB::table('departments')
+                    ->where('dept_group_id',$typearea)
+                    ->where('is_delete',0)
+                    ->select('id AS id')
+                    ->get();
+                    
+        $Agrupo = [];
+        for($x=0;count($grupo)>$x;$x++){
+            $Agrupo[$x]=$grupo[$x]->id;
+        }
+        
+        $departments = DB::table('week_department')
+                        ->join('departments','week_department.department_id','=','departments.id')
+                        ->where('week_id',$week->id)
+                        ->whereIn('departments.id',$Agrupo)
+                        ->select('departments.id AS idDepartment', 'departments.name AS nameDepartment','week_department.status AS status','week_department.group_id AS group')
+                        ->get();
+        for( $x = 0 ;count($departments)>$x;$x++){
+            $table = 
+            '
+            <div class = "inLine-left" style = "padding-right: 0.2cm;">
+                <table class = "border" style = "width: 100%;">
+                    <tbody>
+            ';
+            $tdworkshifts = '';
+            $tdworkshiftName = '';
+            $th = '';
+            if($departments[$x]->status == 2){
+                $th = $th.'<th>'.$departments[$x]->nameDepartment.'</th>';
+                $td = '<td class = "border">Cerrado</td>';
+                $table = $table.'<tr>'.$th.'</tr><tr>'.$td.'</tr></tbody></table></div>';
+            }else{
+                $workshifts = DB::table('group_workshifts_lines')
+                                ->join('workshifts','workshifts.id','=','group_workshifts_lines.workshifts_id')
+                                ->where('group_workshifts_id',$departments[$x]->group)
+                                ->where('is_delete','=','0')
+                                ->orderBy('workshifts.order')
+                                ->select('workshifts.id AS idWork', 'workshifts.name AS nameWork', 'workshifts.entry AS entry','workshifts.departure AS departure')
+                                ->get();
+                $job = DB::table('jobs')
+                        ->where('jobs.department_id',$departments[$x]->idDepartment)
+                        ->where('is_delete','=','0')
+                        ->select('jobs.id AS idJob', 'jobs.name AS nameJob')
+                        ->get();
+                $numTurno = count($workshifts);
+                $tamañoCol = 60/$numTurno;
+                $th = $th.'<th colspan = "'.$numTurno.'" class = "border">'.$departments[$x]->nameDepartment.'</th>';
+                for( $y = 0 ; $numTurno > $y ; $y++ ){
+                    $tdworkshiftName = $tdworkshiftName.'<td class = "border">'.$workshifts[$y]->nameWork.'</td>';
+                    $tdworkshifts = $tdworkshifts.'<td class = "border"><p style = "font-size: 0.3cm;">'.substr($workshifts[$y]->entry, 0, -3).' - '.substr($workshifts[$y]->departure, 0, -3).'</p></td>';
+                }
+                
+                $empleados = DB::table('week')
+                                ->join('week_department','week.id','=','week_department.week_id')
+                                ->join('departments','week_department.department_id','=','departments.id')
+                                ->join('week_department_day','week_department.id','=','week_department_day.week_department_id')
+                                ->join('day_workshifts','week_department_day.id','=','day_workshifts.day_id')
+                                ->join('day_workshifts_employee','day_workshifts.id','=','day_workshifts_employee.day_id')
+                                ->join('employees','day_workshifts_employee.employee_id','=','employees.id')
+                                ->where('week_id','=',$week->id)
+                                ->select('day_workshifts_employee.job_id AS idJob','employees.name AS nameEmployee','employees.short_name AS shortName','day_workshifts.workshift_id AS id')
+                                ->groupBy('employee_id','day_workshifts_employee.job_id','employees.name','day_workshifts.workshift_id')
+                                ->orderBy('id', 'DESC')
+                                ->get();
+                                $tdbody = '';  
+                for( $z = 0 ; count($job) > $z ; $z++ ){
+                    $tdJob = '<tr><td colspan = "'.$numTurno.'" class = "border th2">'.$job[$z]->nameJob.'</td></tr>';
+                    $tdbody = $tdbody.$tdJob;
+                    $tdemploy = '';
+                    for( $y = 0 ; count($empleados) > $y ; $y++){
+                        $tdemploy = $tdemploy.'<tr>';
+                        for( $j = 0 ; $numTurno > $j ; $j++){
+                            $turnoEmpleado = true;
+                            for( $i = 0 ; count($empleados) > $i ; $i++){
+                                if($job[$z]->idJob == $empleados[$i]->idJob){
+                                    if($workshifts[$j]->idWork == $empleados[$i]->id){
+                                        $turnoEmpleado = true;
+                                        if($empleados[$i]->shortName != ''){
+                                            $tdemploy = $tdemploy.'<td class = "border"><p style = "font-size: 0.25cm">'.$empleados[$i]->shortName.'</p></td>';
+                                            $empleados[$i]->id = 0;
+                                            break;
+                                        }else{
+                                            $tdemploy = $tdemploy.'<td class = "border"><p style = "font-size: 0.25cm">'.$empleados[$i]->nameEmployee.'</p></td>';
+                                            $empleados[$i]->id = 0;
+                                            break;
+                                        }
+                                    }else if ($empleados[$i]->id != 0){
+                                        $turnoEmpleado = false;
+                                    }
+                                }
+                            }
+                            if(!$turnoEmpleado && $j < $numTurno){
+                                $tdemploy = $tdemploy.'<td class = "border"> </td>';
+                            }
+                        }
+                        $tdemploy = $tdemploy.'</tr>';
+                    }
+                    $tdbody = $tdbody.$tdemploy;
+                }   
+                
+                $table = $table.'<tr>'.$th.'</tr>'.'<tr>'.$tdworkshiftName.'</tr>'.'<tr>'.$tdworkshifts.'</tr>'.
+                $tdbody.'</tbody></table></div>';
+            }
+            $html = $html.$table;
+        }
+        $html = '<div class = "container">'.$html.'</div>';
+        $mpdf = new \Mpdf\Mpdf([
+            'mode' => 'c',
+            'margin_left' => 10,
+            'margin_right' => 10,
+            'margin_top' => 25,
+            'margin_bottom' => 30,
+            'margin_header' => 10,
+            'margin_footer' => 10
+        ]);
+
+        $mpdf->SetDisplayMode('fullpage');
+        $mpdf->list_indent_first_level = 0;
+        $mpdf->use_kwt = true;
+
+        $stylesheet = file_get_contents('./mpdf/mpdfMycss.css');
+        
+        $mpdf->SetTitle($nombrePdf);
+        $mpdf->SetHTMLHeader($header);
+        $mpdf->SetHTMLfooter($footer);
+        $mpdf->WriteHTML($stylesheet, 1);
+        $mpdf->WriteHTML($html,2);
+        $mpdf->Output(storage_path('app/public/').$nombrePdf.'.pdf', \Mpdf\Output\Destination::FILE);
+    }
+
+    public function pdfOld($id,$typearea){
 
         $week = week::findOrFail($id);
         $codigo = DB::table('department_group')

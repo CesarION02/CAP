@@ -1,5 +1,6 @@
 {
-    "lastSyncDateTime": "2021-04-08 00:01:00",
+    "company" : "AETH",
+    "lastSyncDateTime": "2022-03-08 08:19:02",
     "lastEventSyncDateTime": "2021-04-06 00:00:35",
     "startOfWeek": 1,
     "policy": "1",
@@ -17,30 +18,80 @@
     "urlBiostar": "https://192.168.1.16:444",
     "maxOvertimeJourneyMinutes": 240,
     "rec_plant": [
-        { "email": "storres@aeth.mx", "name": "Soraya Torres" },
-        { "email": "nominas@aeth.mx", "name": "Roxana Torres" },
-        { "email": "ebarron@aeth.mx", "name": "Edgar Barrón" },
-        { "email": "dtinoco@aeth.mx", "name": "Darío Tinoco" },
-        { "email": "jlozano@aeth.mx", "name": "Jesús Lozano" },
-        { "email": "sflores@swaplicado.com.mx", "name": "Sergio Flores" },
-        { "email": "cesar.orozco@swaplicado.com.mx", "name": "Cesar Orozco" },
-        { "email": "edwin.carmona@swaplicado.com.mx", "name": "Edwin Carmona" }
+        {
+            "email": "storres@aeth.mx",
+            "name": "Soraya Torres"
+        },
+        {
+            "email": "nominas@aeth.mx",
+            "name": "Roxana Torres"
+        },
+        {
+            "email": "ebarron@aeth.mx",
+            "name": "Edgar Barru00f3n"
+        },
+        {
+            "email": "dtinoco@aeth.mx",
+            "name": "Daru00edo Tinoco"
+        },
+        {
+            "email": "jlozano@aeth.mx",
+            "name": "Jesu00fas Lozano"
+        },
+        {
+            "email": "sflores@swaplicado.com.mx",
+            "name": "Sergio Flores"
+        },
+        {
+            "email": "cesar.orozco@swaplicado.com.mx",
+            "name": "Cesar Orozco"
+        },
+        {
+            "email": "edwin.carmona@swaplicado.com.mx",
+            "name": "Edwin Carmona"
+        }
     ],
     "rec_office": [
-        { "email": "storres@aeth.mx", "name": "Soraya Torres" },
-        { "email": "nominas@aeth.mx", "name": "Roxana Torres" },
-        { "email": "ajuarez@aeth.mx", "name": "Abraham Juárez" },
-        { "email": "sflores@swaplicado.com.mx", "name": "Sergio Flores" },
-        { "email": "cesar.orozco@swaplicado.com.mx", "name": "Cesar Orozco" },
-        { "email": "edwin.carmona@swaplicado.com.mx", "name": "Edwin Carmona" }
+        {
+            "email": "storres@aeth.mx",
+            "name": "Soraya Torres"
+        },
+        {
+            "email": "nominas@aeth.mx",
+            "name": "Roxana Torres"
+        },
+        {
+            "email": "ajuarez@aeth.mx",
+            "name": "Abraham Juu00e1rez"
+        },
+        {
+            "email": "sflores@swaplicado.com.mx",
+            "name": "Sergio Flores"
+        },
+        {
+            "email": "cesar.orozco@swaplicado.com.mx",
+            "name": "Cesar Orozco"
+        },
+        {
+            "email": "edwin.carmona@swaplicado.com.mx",
+            "name": "Edwin Carmona"
+        }
     ],
     "days_granted": 2,
     "policy_holidays": 1,
     "tp_rec": [
-        { "id": 2 },
-        { "id": 3 },
-        { "id": 4 },
-        { "id": 12 }
+        {
+            "id": 2
+        },
+        {
+            "id": 3
+        },
+        {
+            "id": 4
+        },
+        {
+            "id": 12
+        }
     ],
     "stps_days": 3,
     "prepayroll_policy": 2
