@@ -124,7 +124,7 @@ Route::post('prepayrollempgroup/change', 'prepayrollGroupsController@changeGroup
 /** Prenómina */
 Route::get('prepayrollcontrols', 'prePayrollController@indexS')->name('control_semana');
 Route::get('prepayrollcontrolq', 'prePayrollController@indexQ')->name('control_quincena');
-Route::get('prepayrollcontrolvobos', 'prePayrollController@indexVobos')->name('vobos');
+Route::get('prepayrollcontrolvobos/{id}', 'prePayrollController@indexVobos')->name('vobos');
 Route::post('prepayrollcontrolvobos/vobo/{id}', 'prePayrollController@boVo')->name('dar_vobo');
 Route::post('prepayrollcontrolvobos/rejvobo/{id}', 'prePayrollController@rejBoVo')->name('rechazar_vobo');
 Route::get('prepayrollbinn/{id}', 'prePayrollController@prepayrollBinnacle')->name('bitacora_pre');

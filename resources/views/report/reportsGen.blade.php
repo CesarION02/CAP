@@ -87,13 +87,13 @@
                             <br>
                             Fecha final:*
                         </div>
-                        <div class="col-md-3 col-md-offset-1">
-                            {{-- <div id="reportrange" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
-                                <i class="fa fa-calendar"></i>&nbsp;
-                                <span></span> <i class="fa fa-caret-down"></i>
-                            </div> --}}
-                            <input type="date" name="start_date" class="form-control" required>
-                            <input type="date" name="end_date" class="form-control" required>
+                        <div class="col-md-4 col-md-offset-1">
+                            {{-- <input type="hidden" id="start-date" name="start_date">
+                            <input type="hidden" id="end-date" name="end_date"> --}}
+                            <div class="input-group">
+                                @include('controls.b-week', ['start_date_v' => null, 'end_date_v' => null,
+                                                        'start_date_name' => 'start_date', 'end_date_name' => 'end_date'])
+                            </div>
                         </div>
                         {{-- <input :value="startDate" type="hidden" name="start_date">
                         <input :value="endDate" type="hidden" name="end_date"> --}}
@@ -139,6 +139,7 @@
 @endsection
 
 @section("scripts")
+    <script src="{{ asset("assets/js/axios.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/chosen.jquery.min.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/vue.js") }}" type="text/javascript"></script>
     
