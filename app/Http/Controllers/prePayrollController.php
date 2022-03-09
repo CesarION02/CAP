@@ -560,11 +560,12 @@ class prePayrollController extends Controller
      * @param Request $request
      * @return void
      */
-    public function indexVobos(Request $request)
+    public function indexVobos(Request $request, $idPreNomina = 3)
     {
         $startDate = $request->start_date == null ? Carbon::now()->firstOfMonth()->toDateString() : $request->start_date;
         $endDate = $request->end_date == null ? Carbon::now()->lastOfMonth()->toDateString() : $request->end_date;
-
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+        
         $lControls = \DB::table('prepayroll_report_auth_controls AS prac')
                             ->join('users AS u', 'prac.user_vobo_id', '=', 'u.id')
                             ->leftJoin('week_cut AS wc', function($join)
@@ -583,7 +584,9 @@ class prePayrollController extends Controller
 
         return view('prepayrollcontrol.vobosindex')->with('start_date', $startDate)
                                                     ->with('end_date', $endDate)
-                                                    ->with('lControls', $lControls);
+                                                    ->with('lControls', $lControls)
+                                                    ->with('idPreNomina', $idPreNomina)
+                                                    ->with('startOfWeek', $config->startOfWeek);
     }
 
     /**

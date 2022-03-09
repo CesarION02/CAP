@@ -8,6 +8,7 @@
 @endsection
 
 @section("scripts")
+    <script src="{{ asset("assets/js/axios.js") }}" type="text/javascript"></script>
     <script src="{{asset("assets/pages/scripts/admin/datatable/index.js")}}" type="text/javascript"></script>
     <script src="{{ asset("dt/datatables.js") }}" type="text/javascript"></script>
     <script src="{{ asset('dt/dataTables.buttons.min.js') }}"></script>
@@ -23,6 +24,19 @@
     <script src="{{ asset("daterangepicker/daterangepicker.js") }}" type="text/javascript"></script>
 <script>
     $(document).ready( function () {
+        var select = document.getElementById("pay-type");
+        var value = '<?php echo $idPreNomina; ?>';
+        
+        var columns = [];
+        if(value == "week"){
+            select.value = 1;
+            columns = [1];
+        }else if(value == "biweek"){
+            select.value = 2;
+            columns = [0];
+        }
+
+
         $.fn.dataTable.moment('DD/MM/YYYY');
 
         $.fn.dataTable.ext.search.push(
@@ -77,6 +91,13 @@
                     "sSortDescending": ": Activar para ordenar la columna de manera descendente"
                 }
             },
+            "columnDefs": [
+                {
+                    "targets": columns,
+                    "visible": false,
+                    "searchable": true
+                }
+            ],
             "order": [[ 2, 'asc' ]],
             "scrollX": true,
             "colReorder": true,
@@ -108,34 +129,7 @@
 
 </script>
 <script>
-    moment.locale('es');
-
-    $(function() {
-        var start = moment(<?php echo json_encode($start_date) ?>);
-        var end = moment(<?php echo json_encode($end_date) ?>);
-
-        function cb(start, end) {
-            $('#reportrange span').html(start.format('D MMMM YYYY') + ' - ' + end.format('D MMMM YYYY'));
-            document.getElementById("start-date").value = start.format('YYYY-MM-DD');
-            document.getElementById("end-date").value = end.format('YYYY-MM-DD');
-        }
-
-        $('#reportrange').daterangepicker({
-            startDate: start,
-            endDate: end,
-            ranges: {
-                'Este año': [moment().startOf('year'), moment().endOf('year')],
-                'Año pasado': [moment().subtract(1, 'year').startOf('year'), moment().subtract(1, 'year').endOf('year')]
-            }
-        }, cb);
-
-        cb(start, end);
-    });
-
-    $('#reportrange').on('apply.daterangepicker', function(ev, picker) {
-        document.getElementById("start-date").value = picker.startDate.format('YYYY-MM-DD');
-        document.getElementById("end-date").value = picker.endDate.format('YYYY-MM-DD');
-    });
+    
 </script>
 @endsection
 
@@ -150,30 +144,27 @@
                 <div class="row">
                     <div class="col-md-8 col-md-offset-4">
                         <div class="row">
-                            <div class="col-md-3 col-md-offset-1">
+                            <div class="col-md-7 col-md-offset-1">
+                            {{-- <input type="date" name="start_date" class="form-control" required>
+                            <input type="date" name="end_date" class="form-control" required> --}}
+                            <form action="{{ route('vobos', ['id' => $idPreNomina])}}">
+                                <div class="input-group">
+                                    @include('controls.calendar', ['start_date' => $start_date, 'end_date' => $end_date,
+                                                        'start_date_name' => 'start_date', 'end_date_name' => 'end_date']) 
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default" type="submit">
+                                            <i class="glyphicon glyphicon-search"></i>
+                                        </button>
+                                    </span>
+                                </div>
+                            </form>
+                            </div>
+                            <div class="col-md-3 col-md-offset-1" hidden>
                                 <select name="pay-type" id="pay-type" class="form-control">
                                     <option value="1">Semana</option>
                                     <option value="2">Quincena</option>
-                                    <option value="3" selected>Todos</option>
+                                    <option value="3">Todos</option>
                                 </select>
-                            </div>
-                            <div class="col-md-8">
-                                <form action="{{ route('vobos') }}">
-                                    <input type="hidden" id="start-date" name="start_date">
-                                    <input type="hidden" id="end-date" name="end_date">
-                                    <div class="input-group">
-                                        <div id="reportrange" 
-                                            style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
-                                            <i class="fa fa-calendar"></i>&nbsp;
-                                            <span></span> <i class="fa fa-caret-down"></i>
-                                        </div>
-                                        <span class="input-group-btn">
-                                            <button class="btn btn-default" type="submit">
-                                                <i class="glyphicon glyphicon-search"></i>
-                                            </button>
-                                        </span>
-                                    </div>
-                                </form>
                             </div>
                         </div>
                     </div>
