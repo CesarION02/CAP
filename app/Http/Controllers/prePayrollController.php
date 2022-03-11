@@ -16,6 +16,9 @@ use App\SPayroll\SPrePayrollRow;
 use App\SPayroll\SPrePayrollDay;
 use App\Models\prepayrollchange;
 use App\Http\Controllers\PrepayrollReportController;
+use App\SUtils\SPrepayrollUtils;
+use Illuminate\Database\QueryException;
+
 class prePayrollController extends Controller
 {
     public function __construct() {
@@ -590,22 +593,112 @@ class prePayrollController extends Controller
     }
 
     /**
+     * Comprueba si la semana/quincena anterior tiene visto bueno
+     */
+    public function checkBoVoPrevius(Request $request){
+        if($request->idprenomina == "week"){
+
+            $num = \DB::table('prepayroll_report_auth_controls')
+                        ->where('id_control', $request->id)->select('num_week','year')->first();
+
+            $anterior = \DB::table('prepayroll_report_auth_controls')
+                            ->where([['year', $num->year],['num_week', $num->num_week - 1],
+                                        ['user_vobo_id',auth()->user()->id]])->value('is_vobo');
+
+        }else if($request->idprenomina == "biweek"){
+
+            $num = \DB::table('prepayroll_report_auth_controls')
+                        ->where('id_control', $request->id)->select('num_biweek','year')->first();
+
+            $anterior = \DB::table('prepayroll_report_auth_controls')
+                            ->where([['year', $num->year],['num_biweek', $num->num_biweek - 1]])->value('is_vobo');
+        
+        }
+
+        return response()->json(array('previus'=> $anterior), 200);
+    }
+
+    /**
+     * Comprueba si los grupos hijos ya han dado el visto bueno a una semana/quincena
+     */
+    public function checkBoVoChildrens(Request $request){
+        $usersNotVobo = [];
+        $sectNum = "";
+
+        $num = \DB::table('prepayroll_report_auth_controls')
+                    ->where('id_control', $request->id)->select('num_'.$request->idprenomina,'year')->first();
+        
+        if($request->idprenomina == "week"){
+            $sectNum = $num->num_week;
+        }else if($request->idprenomina == "biweek"){
+            $sectNum = $num->num_biweek;
+        }
+
+        $groups = \DB::table('prepayroll_groups AS pg')
+                        ->where('pg.head_user_id', auth()->user()->id)
+                        ->pluck('pg.id_group')->toArray();
+        
+        foreach($groups as $group){
+            $childrens = \DB::table('prepayroll_groups AS pg')
+                            ->where('pg.father_group_n_id', $group)
+                            ->select('pg.id_group','head_user_id', 'group_name')->get();
+    
+            foreach($childrens as $child){
+                $is_vobo = \DB::table('prepayroll_report_auth_controls')
+                                ->where([['year', $num->year],['num_'.$request->idprenomina, $sectNum],['user_vobo_id',$child->head_user_id]])
+                                ->value('is_vobo');
+                
+                $nameUser = $child->group_name;
+
+                if(!$is_vobo){
+                    array_push($usersNotVobo, $nameUser);
+                }
+            }
+        }
+
+        return response()->json(array('users'=> $usersNotVobo), 200);
+    }
+
+    /**
      * Dar visto bueno a una prenómina
      *
      * @param int $id
      * 
      * @return redirect
      */
-    public function boVo($id)
+    public function boVo($id, $idPreNomina = 1)
     {
-        $res = \DB::table('prepayroll_report_auth_controls')
-                    ->where('id_control', $id)
-                    ->update([
-                        'is_vobo' => true, 
-                        'dt_vobo' => Carbon::now()->toDateTimeString(),
-                        'is_rejected' => false,
-                        'dt_rejected' => null
-                    ]);
+        $success = true;
+
+        try{
+            $res = \DB::table('prepayroll_report_auth_controls')
+                        ->where([['id_control', $id],['user_vobo_id',auth()->user()->id]])
+                        ->update([
+                            'is_vobo' => true, 
+                            'dt_vobo' => Carbon::now()->toDateTimeString(),
+                            'is_rejected' => false,
+                            'dt_rejected' => null
+                        ]);
+        }catch (QueryException $e) {
+            $success = false;
+        }
+
+        if ($success) {
+            $msg = "Se dió el visto bueno correctamente";
+            $icon = "success";
+        } else {
+            $msg = "Error al dar el visto bueno";
+            $icon = "error";
+        }
+
+        // $res = \DB::table('prepayroll_report_auth_controls')
+        //             ->where('id_control', $id)
+        //             ->update([
+        //                 'is_vobo' => true, 
+        //                 'dt_vobo' => Carbon::now()->toDateTimeString(),
+        //                 'is_rejected' => false,
+        //                 'dt_rejected' => null
+        //             ]);
         
         // $config = \App\SUtils\SConfiguration::getConfigurations();
         // if($config->prepayroll_policy == 2){
@@ -716,7 +809,7 @@ class prePayrollController extends Controller
         //     }
         // }
 
-        return redirect()->route('vobos');
+        return redirect()->route('vobos',['idPreNomina' => $idPreNomina])->with(['mensaje' => $msg, 'icon' => $icon]);
     }
 
     /**
@@ -725,7 +818,7 @@ class prePayrollController extends Controller
      * @param [type] $id
      * @return void
      */
-    public function rejBoVo($id)
+    public function rejBoVo($id, $idPreNomina = 1)
     {
         $res = \DB::table('prepayroll_report_auth_controls')
                     ->where('id_control', $id)
@@ -736,7 +829,7 @@ class prePayrollController extends Controller
                         'dt_rejected' => Carbon::now()->toDateTimeString()
                     ]);
 
-        return redirect()->route('vobos');
+        return redirect()->route('vobos', ['idPreNomina' => $idPreNomina]);
     }
     public function prepayrollAbrir($id){
         $control = prepayroll_control::find($id);

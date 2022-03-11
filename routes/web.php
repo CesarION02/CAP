@@ -125,8 +125,10 @@ Route::post('prepayrollempgroup/change', 'prepayrollGroupsController@changeGroup
 Route::get('prepayrollcontrols', 'prePayrollController@indexS')->name('control_semana');
 Route::get('prepayrollcontrolq', 'prePayrollController@indexQ')->name('control_quincena');
 Route::get('prepayrollcontrolvobos/{id}', 'prePayrollController@indexVobos')->name('vobos');
-Route::post('prepayrollcontrolvobos/vobo/{id}', 'prePayrollController@boVo')->name('dar_vobo');
-Route::post('prepayrollcontrolvobos/rejvobo/{id}', 'prePayrollController@rejBoVo')->name('rechazar_vobo');
+Route::post('prepayrollcontrolvobos/checkPrevius','prePayrollController@checkBoVoPrevius')->name('checkPrevius_vobos');
+Route::post('prepayrollcontrolvobos/checkChildrens','prePayrollController@checkBoVoChildrens')->name('checkChildrens_vobos');
+Route::post('prepayrollcontrolvobos/vobo/{id}/{idPreNomina}', 'prePayrollController@boVo')->name('dar_vobo');
+Route::post('prepayrollcontrolvobos/rejvobo/{id}/{idPreNomina}', 'prePayrollController@rejBoVo')->name('rechazar_vobo');
 Route::get('prepayrollbinn/{id}', 'prePayrollController@prepayrollBinnacle')->name('bitacora_pre');
 Route::get('prepayrolls', 'prePayrollController@prepayrolls')->name('bitacora_reg_s');
 Route::get('prepayrolls/fuera/{id}', 'prePayrollController@bitacorafuera')->name('bitacora_fuera');
