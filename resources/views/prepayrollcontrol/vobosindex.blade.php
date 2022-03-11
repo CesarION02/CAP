@@ -1,6 +1,8 @@
 @extends("theme.$theme.layout")
 @section('title')
     VoBo de prenóminas
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script src = "https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 @endsection
 
 @section('styles1')
@@ -22,6 +24,82 @@
 	<script src="{{ asset('dt/buttons.html5.min.js') }}"></script>
     <script src="{{ asset('dt/buttons.print.min.js') }}"></script>
     <script src="{{ asset("daterangepicker/daterangepicker.js") }}" type="text/javascript"></script>
+    
+<script>
+    function checkGroup(id) {
+        var value = '<?php echo $idPreNomina; ?>';
+        var text = '';
+        $.ajax({
+            type:'POST',
+            url:'/prepayrollcontrolvobos/checkChildrens',
+            data:{ idprenomina: value, id: id, _token: '{{csrf_token()}}' },
+            success:function(data) {
+                if(data.users.length != 0){
+                    for(var i = 0; i<data.users.length; i++){
+                        text = text + data.users[i] + ', ';
+                    }
+                    swal({
+                        title: "Continuar con el visto bueno?",
+                        text: "los usuarios: " + text + " no han dado el visto bueno",
+                        icon: "warning",
+                        buttons: {
+                            confirm : {text:'Continuar', className:'sweet-warning'},
+                            cancel : 'Cancelar'
+                        },
+                        // dangerMode: true,
+                    })
+                    .then((acepted) => {
+                        if (acepted) {
+                            document.getElementById('form_vobo').submit();
+                        } else {
+                            swal("No se ha dado el visto bueno");
+                        }
+                    });
+                }else{
+                    document.getElementById('form_vobo').submit();
+                }
+            }
+        });
+    }
+
+    function checkPrevius(id) {
+        var value = '<?php echo $idPreNomina; ?>';
+        var section = '';
+        if(value == "week"){
+            section = "semana";
+        }else if(value = "biweek"){
+            section = "quincena";
+        }
+        $.ajax({
+            type:'POST',
+            url:'/prepayrollcontrolvobos/checkPrevius',
+            data:{ idprenomina: value, id: id, _token: '{{csrf_token()}}' },
+            success:function(data) {
+                if(data.previus == 0){
+                    swal({
+                        title: "Continuar con visto bueno?",
+                        text: "La "+section+" anterior no tiene visto bueno",
+                        icon: "warning",
+                        buttons: {
+                            confirm : {text:'Continuar', className:'sweet-warning'},
+                            cancel : 'Cancelar'
+                        },
+                        // dangerMode: true,
+                    })
+                    .then((acepted) => {
+                        if (acepted) {
+                            checkGroup(id);
+                        } else {
+                            swal("No se ha dado el visto bueno");
+                        }
+                    });
+                }else{
+                    checkGroup(id);
+                }
+            }
+        });
+    }
+</script>
 <script>
     $(document).ready( function () {
         var select = document.getElementById("pay-type");
@@ -203,13 +281,13 @@
                                 <td>
                                     @if(\Auth::user()->id == $oCtrl->user_vobo_id)
                                         @if(! $oCtrl->is_vobo)
-                                            <form action="{{ route('dar_vobo', $oCtrl->id_control) }}" method="POST">
+                                            <form id="form_vobo" action="{{ route('dar_vobo', [$oCtrl->id_control, $idPreNomina]) }}" method="POST">
                                                 @csrf
-                                                <button title="Visto bueno" type="submit"><i class="fa fa-check" aria-hidden="true"></i></button>
+                                                <button onclick="checkPrevius({{$oCtrl->id_control}})" title="Visto bueno" type="button" id="btnSubmit"><i class="fa fa-check" aria-hidden="true"></i></button>
                                             </form>
                                         @endif
                                         @if(! $oCtrl->is_rejected)
-                                            <form action="{{ route('rechazar_vobo', $oCtrl->id_control) }}" method="POST">
+                                            <form action="{{ route('rechazar_vobo', [$oCtrl->id_control, $idPreNomina]) }}" method="POST">
                                                 @csrf
                                                 <button title="Rechazar" type="submit"><i class="fa fa-ban" aria-hidden="true"></i></button>
                                             </form>
