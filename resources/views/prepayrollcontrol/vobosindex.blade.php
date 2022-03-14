@@ -31,7 +31,7 @@
         var text = '';
         $.ajax({
             type:'POST',
-            url:'/prepayrollcontrolvobos/checkChildrens',
+            url:'{{ $routeChildren }}',
             data:{ idprenomina: value, id: id, _token: '{{csrf_token()}}' },
             success:function(data) {
                 if(data.users.length != 0){
@@ -72,7 +72,7 @@
         }
         $.ajax({
             type:'POST',
-            url:'/prepayrollcontrolvobos/checkPrevius',
+            url:'{{ $routePrev }}',
             data:{ idprenomina: value, id: id, _token: '{{csrf_token()}}' },
             success:function(data) {
                 if(data.previus == 0){

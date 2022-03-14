@@ -584,11 +584,15 @@ class prePayrollController extends Controller
                             ->whereRaw("(wc.ini IS NOT NULL AND (wc.ini BETWEEN '".$startDate."' AND '".$endDate."' OR wc.fin BETWEEN '".$startDate."' AND '".$endDate."')) OR 
                                         (hpc.dt_cut IS NOT NULL AND (dt_cut BETWEEN '".$startDate."' AND '".$endDate."' OR DATE_SUB(dt_cut,INTERVAL 14 DAY) BETWEEN '".$startDate."' AND '".$endDate."'))")
                             ->get();
+        $routePrev = route('checkPrevius_vobos');
+        $routeChildren = route('checkChildrens_vobos');
 
         return view('prepayrollcontrol.vobosindex')->with('start_date', $startDate)
                                                     ->with('end_date', $endDate)
                                                     ->with('lControls', $lControls)
                                                     ->with('idPreNomina', $idPreNomina)
+                                                    ->with('routePrev', $routePrev)
+                                                    ->with('routeChildren', $routeChildren)
                                                     ->with('startOfWeek', $config->startOfWeek);
     }
 
