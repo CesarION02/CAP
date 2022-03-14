@@ -24,6 +24,7 @@
 	<script src="{{ asset('dt/buttons.html5.min.js') }}"></script>
     <script src="{{ asset('dt/buttons.print.min.js') }}"></script>
     <script src="{{ asset("daterangepicker/daterangepicker.js") }}" type="text/javascript"></script>
+    <script src="{{asset("assets/pages/scripts/SGui.js")}}" type="text/javascript"></script>
     
 <script>
     function checkGroup(id) {
@@ -63,6 +64,8 @@
     }
 
     function checkPrevius(id) {
+        let ogui = new SGui();
+        ogui.showLoading(5000);
         var value = '<?php echo $idPreNomina; ?>';
         var section = '';
         if(value == "week"){
