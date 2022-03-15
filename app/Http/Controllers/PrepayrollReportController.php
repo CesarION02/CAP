@@ -171,7 +171,7 @@ class PrepayrollReportController extends Controller
 
         $dates = SDateUtils::getDatesOfPayrollNumber($number, $year, $payTypeId);
         if (count($dates) > 0) {
-            $cfgs = $cfgs->where('since_date', '>=', $dates[0]);
+            $cfgs = $cfgs->where('since_date', '<=', $dates[0]);
         }
 
         if ($payTypeId == \SCons::PAY_W_Q) {
