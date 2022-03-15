@@ -257,5 +257,44 @@ class SDateUtils {
 
         return $oNumber->num;
     }
+
+    public static function getDatesOfPayrollNumber($num, $year, $payTypeId)
+    {
+        if ($payTypeId == \SCons::PAY_W_Q) {
+            if ($num == 1) {
+                $yearIni = $year - 1;
+                $numIni = \DB::table('hrs_prepay_cut AS hpc')
+                            ->where([['year', $year - 1], ['is_delete', false]])
+                            ->orderBy('num', 'desc')
+                            ->value('num');
+            }
+            else {
+                $yearIni = $year;
+                $numIni = $num - 1;
+            }
+
+            $ini = \DB::table('hrs_prepay_cut AS hpc')
+                        ->where([['year', $yearIni], ['num', $numIni], ['is_delete', false]])
+                        ->value('dt_cut');
+
+            $fin = \DB::table('hrs_prepay_cut AS hpc')
+                        ->where([['year', $year], ['num', $num], ['is_delete', false]])
+                        ->value('dt_cut');
+
+            $fin = date('Y-m-d', (strtotime('-1 day', strtotime($fin))));
+
+            $data = [$ini, $fin];
+        }
+        else {
+            $week = \DB::table('week_cut AS wc')
+                        ->where([['year', $year], ['num', $num]])
+                        ->select('ini', 'fin')
+                        ->first();
+
+            $data = [$week->ini, $week->fin];
+        }
+
+        return $data;
+    }
 }
 

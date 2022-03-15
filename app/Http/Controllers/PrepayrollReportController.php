@@ -169,6 +169,11 @@ class PrepayrollReportController extends Controller
         $cfgs = \DB::table('prepayroll_report_configs AS prc')
                     ->where('is_delete', false);
 
+        $dates = SDateUtils::getDatesOfPayrollNumber($number, $year, $payTypeId);
+        if (count($dates) > 0) {
+            $cfgs = $cfgs->where('since_date', '>=', $dates[0]);
+        }
+
         if ($payTypeId == \SCons::PAY_W_Q) {
             $cfgs = $cfgs->where('is_biweek', true);
         }
