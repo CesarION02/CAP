@@ -1126,7 +1126,7 @@ class shiftprogrammingController extends Controller
                         ->where('group_workshifts.is_delete','0')
                         ->select('group_workshifts.id AS idShift','group_workshifts.name AS nameShift','workshifts.name AS nameWork','workshifts.id AS idWork')
                         ->orderBy('group_workshifts.id','desc')
-                        ->orderBy('workshifts.id','desc')
+                        ->orderBy('workshifts.order_view','asc')
                         ->get();
         $jobs = DB::table('jobs')
                         ->join('departments','departments.id','=','jobs.department_id')

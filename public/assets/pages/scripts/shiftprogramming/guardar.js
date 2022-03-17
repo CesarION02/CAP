@@ -1,4 +1,5 @@
 function guardar() {
+    document.getElementById("botonGuardar").disabled = true;
     var ini = document.getElementById("fechaini").value;
     var fin = document.getElementById("fechafin").value;
     var weekFlag = document.getElementById("weekFlag").value;
