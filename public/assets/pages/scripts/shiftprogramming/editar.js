@@ -54,7 +54,7 @@ function editShift() {
                 }
                 contadorJob = 0;
                 if (data[2][i].status == 2) {
-                    listaDepartamentos += '<div type="row" ><div class="col-md-4" style="margin:10px"><select disabled name="turno' + data[2][i].idDepart + '" id="turno' + data[2][i].idDepart + '" class="turno"><option value="0">Seleccione horarios</option>';
+                    listaDepartamentos += '<div type="row" ><div class="col-md-6" style="margin:10px"><select disabled name="turno' + data[2][i].idDepart + '" id="turno' + data[2][i].idDepart + '" class="turno"><option value="0">Seleccione horarios</option>';
                     for (var j = 0; data[3].length > j; j++) {
                         listaDepartamentos += '<option value="' + data[3][j].idShift + '" >' + data[3][j].nameShift + '</option>';
                     }
@@ -66,15 +66,78 @@ function editShift() {
                     listaDepartamentos += crear_workshifts(data[2][i].idDepart, data, i)
                     listaDepartamentos += '<input type="hidden" id="hid' + data[2][i].idDepart + '" value="' + data[2][i].nameDepart + '">'
                     listaDepartamentos += '<div type="row" id="tabla' + data[2][i].idDepart + '"><table id="t' + data[2][i].idDepart + '" class="customers"><tr><th COLSPAN="' + (colspanD + 1) + '">' + data[2][i].nameDepart + '</th></tr>';
+                    var con = 0;
                     for (var j = 0; data[4].length > j; j++) {
                         if (data[2][i].group == data[4][j].idShift) {
-                            listaDepartamentos += '<th>' + data[4][j].nameWork + '</th>'
+                            con = con + 1;
+                        }
+                    }
+                    for (var j = 0; data[4].length > j; j++) {
+                        if (data[2][i].group == data[4][j].idShift) {
+                            listaDepartamentos += '<th style = "width: '+ 90/con +'%">' + data[4][j].nameWork + '</th>' //Modificar nombre turno//////////////////
                             auxWork[contadorWork] = data[4][j].idWork;
                             contadorWork++;
                         }
                     }
                     contadorWork = 0;
                     listaDepartamentos += '<th></th></tr></table>';
+
+                    var myEmployees = [];
+                    myEmployees.push.apply(myEmployees, data[1]);
+                    for (var z = 0; auxIdJob.length > z; z++) {
+                        var r = 0;
+                        renglon[r] = "";
+                        listaDepartamentos += '<table class="customers" id="tj' + auxIdJob[z] + '"><tr><th COLSPAN="' + (colspanD) + '">' + auxNameJob[z] + '</th><th><button type="button" class="btn btn-primary" onclick="agregarFila(' + data[2][i].idDepart + ',' + auxIdJob[z] + ')"><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span></button></th></tr><tr>';
+                        var numRenglones = new Array(auxWork.length);
+                        for(var k = 0; data[1].length > k; k++){
+                            var sameDep = false;
+                            var sameJob = false;
+                            renglon[r] = "";
+                            for (var x = 0; auxWork.length > x; x++) {
+                                var turnHaveEmpl = false;
+                                for (var y = 0; myEmployees.length > y; y++) {
+                                    if(myEmployees[y].idJob == auxIdJob[z] && myEmployees[y].id == auxWork[x] && myEmployees[y].idD == data[2][i].idDepart){
+                                        turnHaveEmpl = true;
+                                        renglon[r] = renglon[r] + '<td style = "width: '+ 90/con +'%;">' + crear_empleados(data[2][i].idDepart, auxWork[x], r + 1, auxIdJob[z], data[0], myEmployees[y].idEmployee) + '</td>';
+                                        if (typeof renglon[r] !== 'undefined') {
+
+                                        } else {
+                                            renglon[r] = "";
+                                        }
+                                        myEmployees.splice(y, 1);
+                                        break;
+                                    }
+                                    if(myEmployees[y].idD == data[2][i].idDepart){
+                                        sameDep = true;
+                                        if(myEmployees[y].idJob == auxIdJob[z]){
+                                            sameJob = true;
+                                        }
+                                    }
+                                }
+                                if(!turnHaveEmpl && sameDep && sameJob){
+                                    renglon[r] = renglon[r] + '<td></td>';
+                                }else if(renglon[r].length > 0 && x<auxWork.length && (!turnHaveEmpl && !sameDep && !sameJob)){
+                                    renglon[r] = renglon[r] + '<td></td>';
+                                }
+                            }
+                            if(!sameDep || !sameJob){
+                                break;
+                            }
+                            r++;
+                            if(myEmployees.length == 0){
+                                break;
+                            }
+                        }
+                        for (var h = 0; renglon.length > h; h++) {
+                            if(renglon[h].length != 0){
+                                listaDepartamentos += renglon[h] + '<td class="boton" style = "width: 10%;"><button type="button" class="btn btn-danger" onclick="eliminarFila(' + h + ',' + auxIdJob[z] + ')"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button></td></tr>'
+                            }
+                        }
+                        renglon = [];
+                        listaDepartamentos += '</table></div>';
+                    }
+
+/* Bloque de respaldo de la version anterior de llenado de la tabla de asignacion de turnos 17/03/2022 Adrián Avilés                   
                     for (var z = 0; auxIdJob.length > z; z++) {
                         renglon[contadorEmpleados] = "";
                         listaDepartamentos += '<table class="customers" id="tj' + auxIdJob[z] + '"><tr><th COLSPAN="' + (colspanD) + '">' + auxNameJob[z] + '</th><th><button type="button" class="btn btn-primary" onclick="agregarFila(' + data[2][i].idDepart + ',' + auxIdJob[z] + ')"><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span></button></th></tr><tr>';
@@ -106,7 +169,7 @@ function editShift() {
                         renglon = [];
                         listaDepartamentos += '</table></div>';
                     }
-
+*/
 
                 }
                 auxIdJob = [];
@@ -128,7 +191,7 @@ function editShift() {
             $("#guardar").empty("")
             $("#listanueva").append(listaEmpleados);
             $("#turnonuevo").append(listaDepartamentos);
-            $("#guardar").append('<button class="btn btn-warning" id="guardar" name="guardar" onclick="guardar();">Guardar</button>');
+            $("#guardar").append('<button id="botonGuardar" class="btn btn-warning" id="guardar" name="guardar" onclick="guardar();">Guardar</button>');
         },
         error: function() {
             console.log('falle');
@@ -159,7 +222,22 @@ function crear_empleados(departamento, turno, renglon, job, data, empleado) {
     selectEmpleados += '</select>';
     return selectEmpleados;
 }
+/*Bloque de codigo para generar select empleado nuevo 17/03/2022 Adrián Avilés
+function crear_select_empleados(departamento, turno, renglon, job, data) {
+    var selectEmpleados = '<select style="width: 80%" class="sel" name="sel' + ',d' + departamento + ',t' + turno + ',r' + renglon + ',p' + job + '" id="select' + 'd' + departamento + 't' + turno + 'r' + renglon + 'p' + job + '"><option value="0">Seleccione empleado</option>';
 
+    for (var j = 0; data.length > j; j++) {
+        if (data[j].shortName != '') {
+            selectEmpleados += '<option value="' + data[j].idEmployee + '" >' + data[j].shortName + '</option>';
+        } else {
+            selectEmpleados += '<option value="' + data[j].idEmployee + '" >' + data[j].nameEmployee + '</option>';
+        }
+
+    }
+    selectEmpleados += '</select>';
+    return selectEmpleados;
+}
+*/
 function crear_workshifts(department, data, i) {
     var selectShift = '<div type="row" ><div class="col-md-6" style="margin:10px"><select name="turno' + department + '" id="turno' + department + '" class="turno"><option value="0">Seleccione horarios</option>';
 
