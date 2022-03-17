@@ -306,12 +306,39 @@ class prePayrollController extends Controller
             ->join('type_incidents AS ti', 'i.type_incidents_id', '=', 'ti.id')
             ->where('employee_id', $idEmployee)
             ->whereRaw("'" . $sDate . "' BETWEEN start_date AND end_date")
-            ->select('i.external_key', 'i.nts', 'ti.name AS type_name', 'i.id', 'ti.id AS type_id')
+            ->select('i.external_key', 'i.nts', 'ti.name AS type_name', 'i.id', 'ti.id AS type_id', 'ti.is_allowed')
             ->where('i.is_delete', false)
             ->orderBy('ti.is_agreement', 'ASC')
             ->orderBy('created_by', 'DESC')
             ->orderBy('i.id', 'ASC')
+            // Se determinó en algún momento que solo podría haber una incidencia por día
             ->take(1)
+            ->get();
+
+        return $lAbsences;
+    }
+
+    /**
+     * Determina en base a las incidencias por día si el empleado tiene alguna para el día en cuestión,
+     * regresa un arreglo con las incidencias correspondientes
+     *
+     * @param int $idEmployee
+     * @param String $sDate
+     * 
+     * @return incident array
+     */
+    public static function searchAbsenceByDay($idEmployee, $sDate)
+    {
+        $lAbsences = \DB::table('incidents AS i')
+            ->join('incidents_day AS iday', 'i.id', '=', 'iday.incidents_id')
+            ->join('type_incidents AS ti', 'i.type_incidents_id', '=', 'ti.id')
+            ->where('employee_id', $idEmployee)
+            ->where('iday.date', $sDate)
+            ->select('i.external_key', 'i.nts', 'ti.name AS type_name', 'i.id', 'ti.id AS type_id', 'ti.is_allowed')
+            ->where('i.is_delete', false)
+            ->orderBy('ti.is_agreement', 'ASC')
+            ->orderBy('created_by', 'DESC')
+            ->orderBy('i.id', 'ASC')
             ->get();
 
         return $lAbsences;

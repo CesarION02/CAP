@@ -2,6 +2,7 @@
 use DataTime;
 use Carbon\Carbon;
 use DB;
+use App\Controllers\prePayrollController;
 use App\SUtils\SDateTimeUtils;
 use App\SUtils\SRegistryRow;
 use App\SData\SDataProcess;
@@ -1357,14 +1358,30 @@ class SInfoWithPolicy{
                                             $lRows[$i]->hasAbsence = false;  
                                             $missingAbsence = 1; 
                                         }
-                                    }else{
+                                    }
+                                    else {
                                         if($lRows[$i]->events[0]['type_id'] == 19){
                                             $lRows[$i]->isDayOff = 1; 
                                             $haveDayoff = 1;       
-                                        }else{
-                                            if(SDateTimeUtils::dayOfWeek($lRows[$i]->outDate) == Carbon::SUNDAY){
-                                                $domingo = 1;
-                                            }   
+                                        }
+                                        else {
+                                            // Si el día de la incidencia es día domingo
+                                            if (SDateTimeUtils::dayOfWeek($lRows[$i]->outDate) == Carbon::SUNDAY) {
+                                                $lEventsOfThisDay = prePayrollController::searchAbsenceByDay($lRows[$i]->idEmployee, $lRows[$i]->outDate);
+                                                $isAllowed = true;
+                                                // Si en las incidencias que tiene el día es una incidencia de tipo "No pagable"
+                                                foreach($lEventsOfThisDay as $event) {
+                                                    if (! $event['is_allowed']) {
+                                                        $isAllowed = false;
+                                                        break;
+                                                    }
+                                                }
+
+                                                // Si es "pagable" se agrega el descanso
+                                                if ($isAllowed) {
+                                                    $domingo = 1;
+                                                }
+                                            }
                                         }
                                     }
                                 }
