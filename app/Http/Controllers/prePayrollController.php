@@ -608,9 +608,10 @@ class prePayrollController extends Controller
                                 $join->on('prac.num_biweek', '=', 'hpc.num');
                                 $join->on('hpc.year','=', 'prac.year');
                             })
-                            ->whereRaw("(wc.ini IS NOT NULL AND (wc.ini BETWEEN '".$startDate."' AND '".$endDate."' OR wc.fin BETWEEN '".$startDate."' AND '".$endDate."')) OR 
-                                        (hpc.dt_cut IS NOT NULL AND (dt_cut BETWEEN '".$startDate."' AND '".$endDate."' OR DATE_SUB(dt_cut,INTERVAL 14 DAY) BETWEEN '".$startDate."' AND '".$endDate."'))")
-                            ->get();
+                            ->whereRaw("((wc.ini IS NOT NULL AND (wc.ini BETWEEN '".$startDate."' AND '".$endDate."' OR wc.fin BETWEEN '".$startDate."' AND '".$endDate."')) OR 
+                                        (hpc.dt_cut IS NOT NULL AND (dt_cut BETWEEN '".$startDate."' AND '".$endDate."' OR DATE_SUB(dt_cut,INTERVAL 14 DAY) BETWEEN '".$startDate."' AND '".$endDate."')))")
+                            ->where('prac.is_delete',0)
+							->get();
         $routePrev = route('checkPrevius_vobos');
         $routeChildren = route('checkChildrens_vobos');
 
