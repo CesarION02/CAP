@@ -191,7 +191,7 @@ function editShift() {
             $("#guardar").empty("")
             $("#listanueva").append(listaEmpleados);
             $("#turnonuevo").append(listaDepartamentos);
-            $("#guardar").append('<button id="botonGuardar" class="btn btn-warning" id="guardar" name="guardar" onclick="guardar();">Guardar</button>');
+            $("#guardar").append('<button class="btn btn-warning" id="botonGuardar" name="guardar" onclick="guardar();">Guardar</button>');
         },
         error: function() {
             console.log('falle');
