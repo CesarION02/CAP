@@ -2,7 +2,7 @@
 use DataTime;
 use Carbon\Carbon;
 use DB;
-use App\Controllers\prePayrollController;
+use App\Http\Controllers\prePayrollController;
 use App\SUtils\SDateTimeUtils;
 use App\SUtils\SRegistryRow;
 use App\SData\SDataProcess;
@@ -1371,7 +1371,7 @@ class SInfoWithPolicy{
                                                 $isAllowed = true;
                                                 // Si en las incidencias que tiene el día es una incidencia de tipo "No pagable"
                                                 foreach($lEventsOfThisDay as $event) {
-                                                    if (! $event['is_allowed']) {
+                                                    if (! $event->is_allowed) {
                                                         $isAllowed = false;
                                                         break;
                                                     }

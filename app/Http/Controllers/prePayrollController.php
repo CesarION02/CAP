@@ -16,6 +16,7 @@ use App\SPayroll\SPrePayrollRow;
 use App\SPayroll\SPrePayrollDay;
 use App\Models\prepayrollchange;
 use App\Http\Controllers\PrepayrollReportController;
+use App\Http\Controllers\SyncController;
 use App\SUtils\SPrepayrollUtils;
 use Illuminate\Database\QueryException;
 
@@ -142,6 +143,10 @@ class prePayrollController extends Controller
 
         $lCapEmployees = employees::whereIn('external_id', $aEmployeeIds)
                                     ->pluck('id');
+
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+
+        $correcto = SyncController::syncronizeWithERP($config->lastSyncDateTime);
         /**
          * Obtiene el reporte de horas extra, que contiene también domingos y festivos.
          */

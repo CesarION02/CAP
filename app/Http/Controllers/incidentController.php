@@ -11,6 +11,7 @@ use App\Models\typeincident;
 use App\Models\employees;
 use App\Models\company;
 use App\Http\Requests\ValidacionTypeincident;
+use App\SUtils\SPrepayrollAdjustUtils;
 use DB;
 
 class incidentController extends Controller
@@ -393,6 +394,7 @@ class incidentController extends Controller
                     break;
             }
 
+            SPrepayrollAdjustUtils::verifyProcessedData($oIncident->employee_id, $sDate);
             $oDate->addDay();
         }
 
