@@ -443,28 +443,14 @@ class ReporteController extends Controller
     {
         $config = \App\SUtils\SConfiguration::getConfigurations();
 
-        $roles = \Auth::user()->roles;
-
-        $isSupervisor = false;
-        foreach ($roles as $rol) {
-            if ($rol->id == 2) {
-                $isSupervisor = true;
-                break;
-            }
-        }
-
-        if (! $isSupervisor) {
+        $subEmployees = SPrepayrollUtils::getEmployeesByUser(\Auth::user()->id);
+        if ($subEmployees == null) {
             $lEmployees = SGenUtils::toEmployeeIds(0, 0, []);
         }
         else {
             $qEmployees = SGenUtils::toEmployeeQuery(0, 0, []);
 
-            $eSubs = \DB::table('prepayroll_groups AS pg')
-                        ->join('prepayroll_group_employees AS pge', 'pg.id_group', '=', 'pge.group_id')
-                        ->where('pg.head_user_id', \Auth::user()->id)
-                        ->pluck('pge.employee_id');
-
-            $lEmployees = $qEmployees->whereIn('e.id', $eSubs)->get();
+            $lEmployees = $qEmployees->whereIn('e.id', $subEmployees)->get();
         }
 
         return view('report.reportsGen')
@@ -648,19 +634,9 @@ class ReporteController extends Controller
             $ids = $request->elems;
             $lEmployees = SGenUtils::toEmployeeIds($payWay, $filterType, $ids);
         }
-
-        $roles = \Auth::user()->roles;
-
-        $seeAll = false;
-        foreach ($roles as $rol) {
-            if ($rol->id == 1 || $rol->id == 3 || $rol->id == 8 || $rol->id == 11) {
-                $seeAll = true;
-                break;
-            }
-        }
-
-        if (! $seeAll) {
-            $subEmployees = SPrepayrollUtils::getEmployeesByUser(\Auth::user()->id);
+        
+        $subEmployees = SPrepayrollUtils::getEmployeesByUser(\Auth::user()->id);
+        if ($subEmployees != null) {
             $lColEmps = collect($lEmployees);
     
             $lEmployees = $lColEmps->whereIn('id', $subEmployees);

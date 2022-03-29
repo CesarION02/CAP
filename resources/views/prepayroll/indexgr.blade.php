@@ -128,7 +128,7 @@
                             >
                                 <td>{{ str_pad($emp->num_employee, 6, "0", STR_PAD_LEFT) }}</td>
                                 <td>{{ $emp->name }}</td>
-                                <td>{{ $emp->group_code.'-'.$emp->group_name }}</td>
+                                <td>{{ $emp->group_name }}</td>
                                 <td>{{ $emp->gr_titular }}</td>
                                 <td>
                                     <form action="{{ route('cambiar_grupo') }}" method="post">
@@ -138,7 +138,7 @@
                                                 <option value="0" {{ $emp->id_group == null ? "selected" : "" }}>NINGUNO</option>
                                                 @foreach ($groups as $group)
                                                     <option value="{{ $group->id_group }}" {{ $group->id_group == $emp->id_group ? "selected" : "" }}>
-                                                        {{ $group->group_code.'-'.$group->group_name }}
+                                                        {{ $group->group_name }}
                                                     </option>
                                                 @endforeach
                                             </select>

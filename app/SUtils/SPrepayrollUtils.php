@@ -10,20 +10,63 @@ class SPrepayrollUtils {
      * @return void
      */
     public static function getEmployeesByUser($idUser) {
-        $groups = \DB::table('prepayroll_groups AS pg')
-                            ->where('pg.head_user_id', $idUser)
-                            ->pluck('pg.id_group')
+        $roles = \Auth::user()->roles;
+        $config = \App\SUtils\SConfiguration::getConfigurations(); // Obtengo las configuraciones del sistema
+
+        $seeAll = false;
+        foreach ($roles as $rol) {
+            if (in_array($rol->id, $config->rolesCanSeeAll)) {
+                $seeAll = true;
+                break;
+            }
+        }
+
+        if ($seeAll) {
+            return null;
+        }
+
+        // Obtiene los grupos de prenómina que el usuario puede ver
+        $groups = \DB::table('prepayroll_groups_users AS pgu')
+                            ->where('pgu.head_user_id', $idUser)
+                            ->pluck('pgu.group_id')
                             ->toArray();
 
+        // Obtiene los sub-grupos de los grupos directos
         $lGroups = SPrepayrollUtils::getChildrenOfGroups($groups);
 
-        $eSubs = \DB::table('prepayroll_groups AS pg')
+        // Obtiene los empleados pertenecientes a todos los grupos que el usuario puede ver
+        $aEmployees = \DB::table('prepayroll_groups AS pg')
                         ->join('prepayroll_group_employees AS pge', 'pg.id_group', '=', 'pge.group_id')
                         ->whereIn('pg.id_group', $lGroups)
                         ->pluck('pge.employee_id')
                         ->toArray();
 
-        return $eSubs;
+        // Obtiene los empleados pertenecientes a los grupos que el usuario no puede ver
+        $aEmployeesOthers = \DB::table('prepayroll_groups AS pg')
+                            ->join('prepayroll_group_employees AS pge', 'pg.id_group', '=', 'pge.group_id')
+                            ->whereNotIn('pg.id_group', $lGroups)
+                            ->pluck('pge.employee_id')
+                            ->toArray();
+
+        // Obtiene los departamentos asignados a los grupos que el usuario puede ver
+        $deptsOfPPGroups = \DB::table('prepayroll_group_deptos AS pgd')
+                                ->whereIn('pgd.group_id', $lGroups)
+                                ->pluck('pgd.department_id')
+                                ->toArray();
+
+        // Obtiene los empleados asignados por departamento que no estén asignados ya directamente a otros grupos
+        $deptEmployees = \DB::table('employees AS e')
+                                ->join('departments AS d', 'e.department_id', '=', 'd.id')
+                                ->whereIn('d.id', $deptsOfPPGroups)
+                                ->whereNotIn('e.id', $aEmployeesOthers)
+                                ->pluck('e.id')
+                                ->toArray();
+
+        // Unifica los empleados de los grupos y los empleados asignados por departamento
+        $aEmployeesAll = array_merge($deptEmployees, $aEmployees);
+
+        // Elimina los empleados repetidos
+        return array_unique($aEmployeesAll);
     }
 
     /**
@@ -110,6 +153,32 @@ class SPrepayrollUtils {
                         ->toArray();
 
         return $father;
+    }
+
+    public static function isValidGroupHeredity($idGroup, $fatherGroupId)
+    {
+        if ($fatherGroupId > 0) {
+            $fathers = SPrepayrollUtils::getAncestryOfGroups([(int) $fatherGroupId]);
+        }
+        else {
+            $fathers = [];
+        }
+
+        if ($idGroup > 0) {
+            $children = SPrepayrollUtils::getChildrenOfGroups([(int) $idGroup]);
+        }
+        else {
+            $children = [];
+        }
+
+        $groups = array_merge($fathers, $children);
+        $lGroups = collect($groups);
+        $lDuplicates = $lGroups->duplicates();
+        if (count($lDuplicates) > 0) {
+            return false;
+        }
+
+        return true;
     }
 }
         

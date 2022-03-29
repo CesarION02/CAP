@@ -119,8 +119,16 @@ Route::get('prepayrolladjusts/authorize/{id}', 'prepayrollAdjustController@autho
 Route::get('prepayrolladjusts/reject/{id}', 'prepayrollAdjustController@rejectAdjust')->name('rechazar_ajuste');
 Route::get('prepayrolladjusts/log', 'prepayrollAdjustController@indexLog')->name('ajustes_log');
 /** GRUPOS DE PRENÓMINA*/
+Route::get('prepayrollgroups/index', 'prepayrollGroupsController@index')->name('prepayroll_groups');
+Route::get('prepayrollgroups/create', 'prepayrollGroupsController@create')->name('create_prepayroll_group');
+Route::post('prepayrollgroups/store', 'prepayrollGroupsController@store')->name('store_prepayroll_group');
+Route::get('prepayrollgroups/edit/{id}', 'prepayrollGroupsController@edit')->name('edit_prepayroll_group');
+Route::put('prepayrollgroups/update/{id}', 'prepayrollGroupsController@update')->name('update_prepayroll_group');
+Route::delete('prepayrollgroups/{id}', 'prepayrollGroupsController@destroy')->name('destroy_prepayroll_group');
 Route::get('prepayrollempgroup/index', 'prepayrollGroupsController@employeesVsGroups')->name('gr_emps_index');
+Route::get('prepayrollgroupdept/index', 'prepayrollGroupsController@departmentsVsGroups')->name('gr_depts_index');
 Route::post('prepayrollempgroup/change', 'prepayrollGroupsController@changeGroup')->name('cambiar_grupo');
+Route::post('prepayrollempgroupdept/change', 'prepayrollGroupsController@changeGroupDept')->name('cambiar_grupo_dept');
 /** Prenómina */
 Route::get('prepayrollcontrols', 'prePayrollController@indexS')->name('control_semana');
 Route::get('prepayrollcontrolq', 'prePayrollController@indexQ')->name('control_quincena');
