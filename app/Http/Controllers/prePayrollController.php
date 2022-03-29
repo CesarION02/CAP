@@ -672,13 +672,15 @@ class prePayrollController extends Controller
         }
 
         $groups = \DB::table('prepayroll_groups AS pg')
-                        ->where('pg.head_user_id', auth()->user()->id)
+                        ->join('prepayroll_groups_users AS pgu', 'pg.id_group', '=', 'pgu.group_id')
+                        ->where('pgu.head_user_id', auth()->user()->id)
                         ->pluck('pg.id_group')->toArray();
         
         foreach($groups as $group){
             $childrens = \DB::table('prepayroll_groups AS pg')
+                            ->join('prepayroll_groups_users AS pgu', 'pg.id_group', '=', 'pgu.group_id')
                             ->where('pg.father_group_n_id', $group)
-                            ->select('pg.id_group','head_user_id', 'group_name')->get();
+                            ->select('pg.id_group','pgu.head_user_id', 'group_name')->get();
     
             foreach($childrens as $child){
                 $is_vobo = \DB::table('prepayroll_report_auth_controls')
