@@ -151,7 +151,7 @@ class SOverJourneyCore {
      * 
      * @return collection $lData
      */
-    public static function overtimeByIncompleteJourney($lData)
+    public static function overtimeByIncompleteJourney($lData, $aEmployeeOverTime)
     {
         $idEmployee = 0;
         $currentDate = null;
@@ -161,6 +161,10 @@ class SOverJourneyCore {
         for ($i = 0; $i < count($lData); $i++) {
             $oRow = $lData[$i];
             $currentDate = $oRow->outDate;
+
+            if ($aEmployeeOverTime[$oRow->idEmployee] == 1) {
+                continue;
+            }
 
             if ($idEmployee != $oRow->idEmployee) {
                 $idEmployee = $oRow->idEmployee;
