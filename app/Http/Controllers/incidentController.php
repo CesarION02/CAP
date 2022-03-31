@@ -232,6 +232,7 @@ class incidentController extends Controller
                                 '3_2' => '13',
                                 '1_8' => '16',
                                 '1_9' => '18',
+                                '1_10' => '20',
                             ];
         
         foreach ($lAbsences as $jAbs) {
