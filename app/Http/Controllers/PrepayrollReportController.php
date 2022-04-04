@@ -326,8 +326,9 @@ class PrepayrollReportController extends Controller
                 $lGroups = SPrepayrollUtils::getAncestryOfGroups($aux);
 
                 $users = \DB::table('prepayroll_groups AS pg')
+                            ->join('prepayroll_groups_users AS pgu', 'pg.id_group', '=', 'pgu.group_id')
                             ->whereIn('id_group', $lGroups)
-                            ->pluck('head_user_id')
+                            ->pluck('pgu.head_user_id')
                             ->toArray();
 
                 $lUsersBosses = array_merge($lUsersBosses, $users);
