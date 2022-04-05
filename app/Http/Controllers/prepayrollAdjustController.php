@@ -154,9 +154,9 @@ class prepayrollAdjustController extends Controller
         $oAdjust->updated_by = \Auth::user()->id;
 
         $oEmployee = employees::find($oAdjust->employee_id);
-
-        if (! PrepayrollReportController::canMakeAdjust($oAdjust->dt_date, $oEmployee->way_pay_id)) {
-            return json_encode(['success' => false, 'msg' => 'No se puede aplicar el ajuste, la prenómina tiene Vobo.']);
+        $canMakeAdjust = PrepayrollReportController::canMakeAdjust($oAdjust->dt_date, $oEmployee->way_pay_id);
+        if (is_string($canMakeAdjust)) {
+            return json_encode(['success' => false, 'msg' => 'No se puede aplicar el ajuste, la prenómina tiene Vobo.'.$canMakeAdjust]);
         }
 
         try {
