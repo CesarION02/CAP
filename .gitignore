@@ -12,3 +12,5 @@ yarn-error.log
 config/debugbar.php
 composer.json
 composer.lock
+cap_config.json
+.vscode/launch.json
