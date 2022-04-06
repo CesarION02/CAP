@@ -12,15 +12,15 @@
         <div class="row">
           <div class="col-xs-offset-1 col-xs-11">
             <div class="form-check">
-              <input class="form-check-input" type="radio" v-model="adjCategory" v-on:change="onAdjustChange()" value="0">
+              <input class="form-check-input" type="radio" v-model="adjCategory" v-on:change="onAdjustChange()" value="2">
               <label class="form-check-label">
-                Ajuste prenómina
+                Crear comentario
               </label>
             </div>
             <div class="form-check">
-              <input class="form-check-input" type="radio" v-model="adjCategory" v-on:change="onAdjustChange()" value="2">
+              <input class="form-check-input" type="radio" v-model="adjCategory" v-on:change="onAdjustChange()" value="0">
               <label class="form-check-label">
-                Comentario
+                Ajustar prenómina
               </label>
             </div>
             <div class="form-check">

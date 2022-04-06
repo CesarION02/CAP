@@ -19,6 +19,7 @@ use App\SUtils\SHolidayWork;
 use App\SUtils\SGenUtils;
 use App\SUtils\SPermissions;
 use App\SUtils\SPrepayrollUtils;
+use App\SUtils\SDateUtils;
 use App\SData\SDataProcess;
 use DB;
 use Carbon\Carbon;
@@ -450,7 +451,9 @@ class ReporteController extends Controller
         else {
             $qEmployees = SGenUtils::toEmployeeQuery(0, 0, []);
 
-            $lEmployees = $qEmployees->whereIn('e.id', $subEmployees)->get();
+            $lEmployees = $qEmployees->whereIn('e.id', $subEmployees)
+                            ->orderBy('e.name', 'ASC')
+                            ->get();
         }
 
         return view('report.reportsGen')
@@ -685,6 +688,38 @@ class ReporteController extends Controller
         PrepayrollReportController::prepayrollReportVobos($sStartDate, $sEndDate);
         
         if ($reportMode == \SCons::REP_HR_EX) {
+            /**
+             * Obtención de vobos de empleados
+             */
+            $isPrepayrollInspection = false;
+            $lEmpVobos = [];
+            if (($payWay == \SCons::PAY_W_Q || $payWay == \SCons::PAY_W_S) && env('VOBO_BY_EMP_ENABLED')) {
+                $number = SDateUtils::getNumberOfDate($sStartDate, $payWay);
+                $dates = SDateUtils::getDatesOfPayrollNumber($number, $oStartDate->year, $payWay);
+                
+                if ($dates[0] == $sStartDate && $dates[1] == $sEndDate) {
+                    $lEmpVobos = DB::table('prepayroll_report_emp_vobos AS evb')
+                                        ->join('users AS u', 'evb.vobo_by_id', '=', 'u.id')
+                                        ->join('employees AS e', 'evb.employee_id', '=', 'e.id')
+                                        ->where('evb.is_delete', 0)
+                                        ->where('year', $oStartDate->year)
+                                        ->select('u.name AS user_name', 'evb.employee_id', 'evb.vobo_by_id', 'e.num_employee');
+
+                    if ($payWay == \SCons::PAY_W_Q) {
+                        $lEmpVobos = $lEmpVobos->where('evb.is_biweek', true)
+                                                ->where('evb.num_biweek', $number);
+                    }
+                    else {
+                        $lEmpVobos = $lEmpVobos->where('evb.is_week', true)
+                                                ->where('evb.num_week', $number);
+                    }
+
+                    $lEmpVobos = $lEmpVobos->get()->keyBy('num_employee')->toArray();
+
+                    $isPrepayrollInspection = true;
+                }
+            }
+
             return view('report.reportDelaysView')
                     ->with('tReport', \SCons::REP_HR_EX)
                     ->with('sStartDate', $sStartDate)
@@ -693,6 +728,8 @@ class ReporteController extends Controller
                     ->with('sTitle', 'Reporte de tiempos extra')
                     ->with('adjTypes', $adjTypes)
                     ->with('lAdjusts', $lAdjusts)
+                    ->with('lEmpVobos', $lEmpVobos)
+                    ->with('isPrepayrollInspection', $isPrepayrollInspection)
                     ->with('lEmpWrkdDays', $lEmpWrkdDays)
                     ->with('bModify', $bModify)
                     ->with('registriesRoute', route('registro_ajuste'))

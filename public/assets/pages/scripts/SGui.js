@@ -14,6 +14,10 @@ class SGui {
         swal("¡Error!", sMessage, "error");
     }
 
+    showMessage(title, sMessage, icon) {
+        swal(title, sMessage, icon);
+    }
+
     pad(num, size) {
 
         if (num.length == 0) {

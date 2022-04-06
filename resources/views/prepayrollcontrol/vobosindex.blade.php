@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-    VoBo de prenóminas
+    V.º B.º de prenóminas
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src = "https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 @endsection
@@ -220,7 +220,7 @@
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Prenóminas VoBos</h3>
+                <h3 class="box-title">Prenóminas V.º B.º</h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php"])
                 <div class="row">
                     <div class="col-md-8 col-md-offset-4">
@@ -259,9 +259,9 @@
                             <th title="Número de quincena"># Qui</th>
                             <th>Inicio</th>
                             <th>Fin</th>
-                            <th title="Usuario visto bueno">Usr VoBo</th>
+                            <th title="Usuario visto bueno">Usr V.º B.º</th>
                             <th title="Requerido">Req</th>
-                            <th title="Visto bueno">VoBo</th>
+                            <th title="Visto bueno">V.º B.º</th>
                             <th title="Fecha visto bueno">Fecha</th>
                             <th>Rechazado</th>
                             <th title="Fecha rechazo">Fecha Rech.</th>

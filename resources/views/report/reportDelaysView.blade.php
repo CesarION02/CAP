@@ -146,6 +146,8 @@
             this.lEmpWrkdDays = <?php echo json_encode($lEmpWrkdDays) ?>;
             this.adjTypes = <?php echo json_encode($adjTypes) ?>;
             this.lAdjusts = <?php echo json_encode($lAdjusts) ?>;
+            this.lEmpVobos = <?php echo json_encode($lEmpVobos) ?>;
+            this.isPrepayrollInspection = <?php echo json_encode($isPrepayrollInspection) ?>;
             this.tReport = <?php echo json_encode($tReport) ?>;
             this.registriesRoute = <?php echo json_encode($registriesRoute) ?>;
             this.REP_HR_EX = <?php echo json_encode(\SCons::REP_HR_EX) ?>;
@@ -360,8 +362,20 @@
                                                 " / primas dominicales: " + suns + 
                                                 " / descansos: " + daysoff + " [" + (dayOffTheo == undefined ? 0 : dayOffTheo) + "]";
                         }
+
+                        let oVobo = oData.isPrepayrollInspection ? oData.lEmpVobos[parseInt(group, 10)] : undefined;
+
+                        let isVobo = oVobo != undefined;
                         
-                        return value_to_return;
+                        // return value_to_return + (oData.isPrepayrollInspection ? '     <label class="switch">' + 
+                        //                                 '<input onchange="handleChangeCheck(event, ' + parseInt(group, 10) + ')" type="checkbox" ' + (isVobo ? 'checked' : '') + '>' + 
+                        //                             '<span class="slider round"></span></label> ' + 
+                        //                             (isVobo ? '(Revisado por : ' + oVobo.user_name + ')' : '') : '');
+                        return value_to_return + (oData.isPrepayrollInspection ? '   <label class="container">' + 
+                                                        '<input id="cb1" onchange="handleChangeCheck(event, ' + parseInt(group, 10) + ')" type="checkbox" ' + (isVobo ? 'checked' : '') + '>' + 
+                                                    ' <span class="checkmark"></span>' +
+                                                    '</label>' +
+                                                    (isVobo ? '(Revisado por : ' + oVobo.user_name + ')' : 'Dar OK') : '');
                     },
                     dataSrc: 0
                 },
@@ -433,6 +447,34 @@
         function topFunction() {
             document.body.scrollTop = 0; // For Safari
             document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+        }
+
+        /**
+         * 
+         * 
+         * @param {*} event 
+         * @param {*} id 
+         */
+        function handleChangeCheck(event, numEmployee) {
+            oGui.showLoading(3000);
+            let checked = event.target;
+            let url = "{{ route('employee_vobo') }}";
+            let vobo = checked.checked ? 1 : 0;
+
+            axios.post(url, {
+                _token: "{{ csrf_token() }}",
+                num_employee: numEmployee,
+                is_vobo: vobo,
+                start_date: "{{ $sStartDate }}",
+                end_date: "{{ $sEndDate }}"
+            })
+            .then(res => {
+                console.log(res);
+                oGui.showOk();
+            })
+            .catch(function(error) {
+                oGui.showError(error);
+            });
         }
     </script>
 
