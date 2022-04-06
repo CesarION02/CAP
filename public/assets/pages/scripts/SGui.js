@@ -46,12 +46,22 @@ class SGui {
      * @param {integer} mins 
      */
     formatMinsToHHmm(mins) {
+        if (mins == 0 || mins == null || mins == undefined) {
+            return "00:00";
+        }
+
+        let isNegative = false;
+        if (mins < 0) {
+            isNegative = true;
+            mins = Math.abs(mins);
+        }
+
         let hours = Math.floor(mins / 60);
         let minutes = mins % 60;
 
         hours = hours < 10 ? ('0' + hours) : hours;
         minutes = minutes < 10 ? ('0' + minutes) : minutes;
 
-        return hours + ":" + minutes;
+        return (isNegative ? "-" : "") + hours + ":" + minutes;
     }
 }

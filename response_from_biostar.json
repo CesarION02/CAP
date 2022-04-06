@@ -1,0 +1,170 @@
+{
+    "EventCollection": {
+        "rows": [{
+                "id": "6569",
+                "server_datetime": "2022-04-04T08:23:49.00Z",
+                "datetime": "2022-04-04T13:23:52.00Z",
+                "index": "25701",
+                "user_id_name": "14(OROZCO NATIVIDAD CESAR IVAN)",
+                "user_id": {
+                    "user_id": "14",
+                    "name": "OROZCO NATIVIDAD CESAR IVAN",
+                    "photo_exists": "false"
+                },
+                "user_group_id": {
+                    "id": "1106",
+                    "name": "Brigadistas oficina"
+                },
+                "device_id": {
+                    "id": "542390428",
+                    "name": "FaceLite 542390428 (192.168.1.2)"
+                },
+                "event_type_id": {
+                    "code": "4867"
+                },
+                "tna_key": "1",
+                "is_dst": "0",
+                "timezone": {
+                    "half": "0",
+                    "hour": "6",
+                    "negative": "1"
+                },
+                "user_update_by_device": "false",
+                "hint": "164907863205423904280000025701"
+            },
+            {
+                "id": "10099",
+                "server_datetime": "2022-04-04T17:40:09.00Z",
+                "datetime": "2022-04-04T22:40:12.00Z",
+                "index": "25738",
+                "user_id_name": "14(OROZCO NATIVIDAD CESAR IVAN)",
+                "user_id": {
+                    "user_id": "14",
+                    "name": "OROZCO NATIVIDAD CESAR IVAN",
+                    "photo_exists": "false"
+                },
+                "user_group_id": {
+                    "id": "1106",
+                    "name": "Brigadistas oficina"
+                },
+                "device_id": {
+                    "id": "542390428",
+                    "name": "FaceLite 542390428 (192.168.1.2)"
+                },
+                "event_type_id": {
+                    "code": "4867"
+                },
+                "tna_key": "2",
+                "is_dst": "1",
+                "timezone": {
+                    "half": "0",
+                    "hour": "6",
+                    "negative": "1"
+                },
+                "user_update_by_device": "false",
+                "hint": "164911201205423904280000025738"
+            },
+            {
+                "id": "11238",
+                "server_datetime": "2022-04-05T08:23:59.00Z",
+                "datetime": "2022-04-05T13:23:59.00Z",
+                "index": "25813",
+                "user_id_name": "14(OROZCO NATIVIDAD CESAR IVAN)",
+                "user_id": {
+                    "user_id": "14",
+                    "name": "OROZCO NATIVIDAD CESAR IVAN",
+                    "photo_exists": "false"
+                },
+                "user_group_id": {
+                    "id": "1106",
+                    "name": "Brigadistas oficina"
+                },
+                "device_id": {
+                    "id": "542390428",
+                    "name": "FaceLite 542390428 (192.168.1.2)"
+                },
+                "event_type_id": {
+                    "code": "4867"
+                },
+                "tna_key": "1",
+                "is_dst": "1",
+                "timezone": {
+                    "half": "0",
+                    "hour": "6",
+                    "negative": "1"
+                },
+                "user_update_by_device": "false",
+                "hint": "164916503905423904280000025813"
+            },
+            {
+                "id": "14868",
+                "server_datetime": "2022-04-05T17:47:44.00Z",
+                "datetime": "2022-04-05T22:47:45.00Z",
+                "index": "25870",
+                "user_id_name": "14(OROZCO NATIVIDAD CESAR IVAN)",
+                "user_id": {
+                    "user_id": "14",
+                    "name": "OROZCO NATIVIDAD CESAR IVAN",
+                    "photo_exists": "false"
+                },
+                "user_group_id": {
+                    "id": "1106",
+                    "name": "Brigadistas oficina"
+                },
+                "device_id": {
+                    "id": "542390428",
+                    "name": "FaceLite 542390428 (192.168.1.2)"
+                },
+                "event_type_id": {
+                    "code": "4867"
+                },
+                "tna_key": "2",
+                "is_dst": "1",
+                "timezone": {
+                    "half": "0",
+                    "hour": "6",
+                    "negative": "1"
+                },
+                "user_update_by_device": "false",
+                "hint": "164919886505423904280000025870"
+            },
+            {
+                "id": "16177",
+                "server_datetime": "2022-04-06T08:26:09.00Z",
+                "datetime": "2022-04-06T13:26:14.00Z",
+                "index": "25938",
+                "user_id_name": "14(OROZCO NATIVIDAD CESAR IVAN)",
+                "user_id": {
+                    "user_id": "14",
+                    "name": "OROZCO NATIVIDAD CESAR IVAN",
+                    "photo_exists": "false"
+                },
+                "user_group_id": {
+                    "id": "1106",
+                    "name": "Brigadistas oficina"
+                },
+                "device_id": {
+                    "id": "542390428",
+                    "name": "FaceLite 542390428 (192.168.1.2)"
+                },
+                "event_type_id": {
+                    "code": "4867"
+                },
+                "tna_key": "1",
+                "is_dst": "1",
+                "timezone": {
+                    "half": "0",
+                    "hour": "6",
+                    "negative": "1"
+                },
+                "user_update_by_device": "false",
+                "hint": "164925157405423904280000025938"
+            }
+        ]
+    },
+    "Response": {
+        "code": "0",
+        "link": "https://support.supremainc.com/en/support/home",
+        "message": "Success"
+    }
+}
