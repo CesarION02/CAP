@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Admin\rol;
 use App\Models\employees;
-use App\User;
+use App\Models\User;
 
 class userController extends Controller
 {

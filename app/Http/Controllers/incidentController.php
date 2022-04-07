@@ -38,17 +38,50 @@ class incidentController extends Controller
             $end_date = $request->end_date;
         }
 
-        $datas = incident::orderBy('incidents.id')
+        if (session()->get('rol_id') != 1){
+            $numero = session()->get('name');
+            $usuario = DB::table('users')
+                    ->where('name',$numero)
+                    ->get();
+            $dgu = DB::table('group_dept_user')
+                    ->where('user_id',$usuario[0]->id)
+                    ->select('groupdept_id AS id')
+                    ->get();
+            $Adgu = [];
+            for($i=0;count($dgu)>$i;$i++){
+                $Adgu[$i]=$dgu[$i]->id;
+            }
+            
+            $datas = incident::orderBy('incidents.id')
                             ->join('type_incidents','incidents.type_incidents_id',"=",'type_incidents.id');
-        if ($incidentType > 0) {
-            $datas = $datas->where('is_agreement', 1);
-        }
+            if ($incidentType > 0) {
+                $datas = $datas->where('is_agreement', 1);
+            }
 
-        $datas = $datas->whereBetween('start_date', [$start_date, $end_date])
+            $datas = $datas->whereBetween('start_date', [$start_date, $end_date])
                         ->join('employees','employees.id','=','incidents.employee_id')
+                        ->join('departments','departments.id','=','employees.department_id')
+                        ->whereIn('departments.dept_group_id',$Adgu)
+                        ->where('is_active', true)
                         ->where('incidents.is_delete','0')
                         ->select('incidents.id AS id','incidents.start_date AS ini','incidents.end_date AS fin','employees.name AS name','type_incidents.name AS tipo');
-        $datas = $datas->get();
+            $datas = $datas->get();
+
+        }else{
+            $datas = incident::orderBy('incidents.id')
+                            ->join('type_incidents','incidents.type_incidents_id',"=",'type_incidents.id');
+            if ($incidentType > 0) {
+                $datas = $datas->where('is_agreement', 1);
+            }
+
+            $datas = $datas->whereBetween('start_date', [$start_date, $end_date])
+                        ->join('employees','employees.id','=','incidents.employee_id')
+                        ->join('departments','departments.id','=','employees.department_id')
+                        ->where('is_active', true)
+                        ->where('incidents.is_delete','0')
+                        ->select('incidents.id AS id','incidents.start_date AS ini','incidents.end_date AS fin','employees.name AS name','type_incidents.name AS tipo');
+            $datas = $datas->get();        
+        }
 
         $sroute = 'incidentes';
 
