@@ -1,10 +1,10 @@
 /**
-* @version: 3.0.5
-* @author: Dan Grossman http://www.dangrossman.info/
-* @copyright: Copyright (c) 2012-2019 Dan Grossman. All rights reserved.
-* @license: Licensed under the MIT license. See http://www.opensource.org/licenses/mit-license.php
-* @website: http://www.daterangepicker.com/
-*/
+ * @version: 3.0.5
+ * @author: Dan Grossman http://www.dangrossman.info/
+ * @copyright: Copyright (c) 2012-2019 Dan Grossman. All rights reserved.
+ * @license: Licensed under the MIT license. See http://www.opensource.org/licenses/mit-license.php
+ * @website: http://www.daterangepicker.com/
+ */
 // Following the UMD template https://github.com/umdjs/umd/blob/master/templates/returnExportsGlobal.js
 (function(root, factory) {
     if (typeof define === 'function' && define.amd) {
@@ -351,10 +351,10 @@
 
             var list = '<ul style="width: 100%; height: 300px; overflow: auto">';
             for (range in this.ranges) {
-                list += '<li data-range-key="' + range + '">' + range + '</li>';
+                list += '<li style="color: blue;" data-range-key="' + range + '">' + range + '</li>';
             }
             if (this.showCustomRangeLabel) {
-                list += '<li data-range-key="' + this.locale.customRangeLabel + '">' + this.locale.customRangeLabel + '</li>';
+                list += '<li style="color: blue;" data-range-key="' + this.locale.customRangeLabel + '">' + this.locale.customRangeLabel + '</li>';
             }
             list += '</ul>';
             this.container.find('.ranges').prepend(list);
