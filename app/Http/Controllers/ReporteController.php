@@ -686,6 +686,12 @@ class ReporteController extends Controller
         $bModify = SPermissions::hasPermission(\Auth::user()->id, 'ajustes_rep_te');
 
         PrepayrollReportController::prepayrollReportVobos($sStartDate, $sEndDate);
+
+        $lDeptJobs = DB::table('employees AS e')
+                        ->join('departments AS d', 'e.department_id', '=', 'd.id')
+                        ->join('jobs AS j', 'e.job_id', '=', 'j.id')
+                        ->selectRaw('e.num_employee, CONCAT("DEPTO.: ", d.name, ", PUESTO: ", j.name) AS dept_job')
+                        ->pluck('dept_job', 'num_employee');
         
         if ($reportMode == \SCons::REP_HR_EX) {
             /**
@@ -729,6 +735,7 @@ class ReporteController extends Controller
                     ->with('adjTypes', $adjTypes)
                     ->with('lAdjusts', $lAdjusts)
                     ->with('lEmpVobos', $lEmpVobos)
+                    ->with('lDeptJobs', $lDeptJobs)
                     ->with('isPrepayrollInspection', $isPrepayrollInspection)
                     ->with('lEmpWrkdDays', $lEmpWrkdDays)
                     ->with('bModify', $bModify)
