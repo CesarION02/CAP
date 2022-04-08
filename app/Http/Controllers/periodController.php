@@ -80,7 +80,7 @@ class periodController extends Controller
 
     public function getCuts(Request $request)
     {
-        $oDate = Carbon::parse($request->dt_date);
+        $iYear = $request->year;
         
         $weeks = [];
         $biweeks = [];
@@ -90,9 +90,9 @@ class periodController extends Controller
          * Cortes de semana
          */
         $weeksQ = DB::table('week_cut')
-                    ->where(function ($q) use ($oDate) {
-                        $q->whereYear('ini', $oDate->year)
-                            ->orWhereYear('fin', $oDate->year);
+                    ->where(function ($q) use ($iYear) {
+                        $q->whereYear('ini', $iYear)
+                            ->orWhereYear('fin', $iYear);
                     })
                     ->select('year', 'ini', 'fin', 'num')
                     ->orderBy('ini', 'ASC')
@@ -112,29 +112,31 @@ class periodController extends Controller
          * Cortes de quincena
          */
         $biweeksQ = DB::table('hrs_prepay_cut')
-                    ->whereYear('dt_cut', $oDate->year)
+                    ->whereYear('dt_cut', $iYear)
                     ->where('is_delete', 0)
                     ->select('year', 'dt_cut', 'num')
                     ->orderBy('dt_cut', 'ASC')
                     ->get();
 
-        $dtCutPrev = Carbon::parse($biweeksQ[0]->dt_cut)->subDays(15);
-        foreach ($biweeksQ as $biweek) {
-            $cut = (object) [];
+        if (count($biweeksQ) > 0) {
+            $dtCutPrev = Carbon::parse($biweeksQ[0]->dt_cut)->subDays(15);
+            foreach ($biweeksQ as $biweek) {
+                $cut = (object) [];
 
-            $cut->dt_start = $dtCutPrev->addDays(1)->toDateString();
-            $cut->dt_end = $biweek->dt_cut;
-            $cut->number = $biweek->num;
-            $dtCutPrev = Carbon::parse($biweek->dt_cut);
+                $cut->dt_start = $dtCutPrev->addDays(1)->toDateString();
+                $cut->dt_end = $biweek->dt_cut;
+                $cut->number = $biweek->num;
+                $dtCutPrev = Carbon::parse($biweek->dt_cut);
 
-            $biweeks[] = $cut;
+                $biweeks[] = $cut;
+            }
         }
 
         /**
          * Cortes de quincena calendario
          */
-        $nextYear = Carbon::parse(($oDate->year + 1) . '-01-01');
-        $start = Carbon::parse($oDate->year . '-01-01');
+        $nextYear = Carbon::parse(($iYear + 1) . '-01-01');
+        $start = Carbon::parse($iYear . '-01-01');
         $number = 1;
         do {
             $middle = (clone $start)->addDays(14);

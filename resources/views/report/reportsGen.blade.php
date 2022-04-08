@@ -23,7 +23,7 @@
             <form action="{{ route(''.$sRoute.'') }}" id="theForm">
                 <div class="box-body" id="reportApp">
                     <div class="row">
-                        <div class="col-md-3 requerido">
+                        <div class="col-md-2 requerido">
                             Filtrar por:*
                         </div>
                         <div class="col-md-3 col-md-offset-1">
@@ -36,7 +36,7 @@
                     <br>
                     <div>
                         <div class="row">
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 Periodicidad de pago:*
                             </div>
                             <div class="col-md-4 col-md-offset-1">
@@ -51,7 +51,7 @@
                     </div>
                     <div>
                         <div class="row">
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 Empleado:*
                             </div>
                             <div class="col-md-7 col-md-offset-1">
@@ -63,7 +63,7 @@
                         <br>
                     </div>
                     <div class="row">
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             Filtrar:*
                         </div>
                         <div class="col-md-7 col-md-offset-1">
@@ -72,7 +72,7 @@
                     </div>
                     <br>
                     <div class="row">
-                        <div class="col-md-3 requerido">
+                        <div class="col-md-2 requerido">
                             Quitar empleados que no checan:
                         </div>
                         <div class="col-md-3 col-md-offset-1">
@@ -82,7 +82,7 @@
                     <br>
                     <br>
                     <div class="row">
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             Fecha inicial:*
                             <br>
                             Fecha final:*
@@ -111,7 +111,7 @@
                     </div>
                     <br>
                     <div class="row">
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             Tipo de reporte:*
                         </div>
                         <div class="col-md-7 col-md-offset-1">
@@ -124,7 +124,7 @@
                     <br>
                 </div>
                 <div class="box-footer">
-                    <div class="col-lg-4 col-lg-offset-4">
+                    <div class="col-lg-4 col-lg-offset-3">
                         <p style="color:red">Nota: Este proceso podría demorar algunos minutos</p>
                     </div>
                     <div class="col-lg-2">
