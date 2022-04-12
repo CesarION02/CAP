@@ -632,27 +632,38 @@ class prePayrollController extends Controller
     /**
      * Comprueba si la semana/quincena anterior tiene visto bueno
      */
-    public function checkBoVoPrevius(Request $request){
-        if($request->idprenomina == "week"){
+    public function checkBoVoPrevius(Request $request) {
+        if ($request->idprenomina == "week") {
 
             $num = \DB::table('prepayroll_report_auth_controls')
-                        ->where('id_control', $request->id)->select('num_week','year')->first();
+                        ->where('id_control', $request->id)
+                        ->select('num_week', 'year')
+                        ->first();
 
             $anterior = \DB::table('prepayroll_report_auth_controls')
-                            ->where([['year', $num->year],['num_week', $num->num_week - 1],
-                                        ['user_vobo_id',auth()->user()->id]])->value('is_vobo');
+                                ->where('year', $num->year)
+                                ->where('is_delete', 0)
+                                ->where('num_week', $num->num_week - 1)
+                                ->where('user_vobo_id', auth()->user()->id)
+                                ->value('is_vobo');
 
-        }else if($request->idprenomina == "biweek"){
+        }
+        else if ($request->idprenomina == "biweek") {
 
             $num = \DB::table('prepayroll_report_auth_controls')
-                        ->where('id_control', $request->id)->select('num_biweek','year')->first();
+                        ->where('id_control', $request->id)
+                        ->select('num_biweek', 'year')
+                        ->first();
 
             $anterior = \DB::table('prepayroll_report_auth_controls')
-                            ->where([['year', $num->year],['num_biweek', $num->num_biweek - 1]])->value('is_vobo');
-        
+                            ->where('is_delete', 0)
+                            ->where('year', $num->year)
+                            ->where('num_biweek', $num->num_biweek - 1)
+                            ->where('user_vobo_id', auth()->user()->id)
+                            ->value('is_vobo');
         }
 
-        return response()->json(array('previus'=> $anterior), 200);
+        return response()->json(array('previus' => $anterior), 200);
     }
 
     /**
@@ -663,7 +674,9 @@ class prePayrollController extends Controller
         $sectNum = "";
 
         $num = \DB::table('prepayroll_report_auth_controls')
-                    ->where('id_control', $request->id)->select('num_'.$request->idprenomina,'year')->first();
+                    ->where('id_control', $request->id)
+                    ->select('num_'.$request->idprenomina,'year')
+                    ->first();
         
         if($request->idprenomina == "week"){
             $sectNum = $num->num_week;
@@ -674,22 +687,33 @@ class prePayrollController extends Controller
         $groups = \DB::table('prepayroll_groups AS pg')
                         ->join('prepayroll_groups_users AS pgu', 'pg.id_group', '=', 'pgu.group_id')
                         ->where('pgu.head_user_id', auth()->user()->id)
-                        ->pluck('pg.id_group')->toArray();
+                        ->pluck('pg.id_group')
+                        ->toArray();
         
         foreach($groups as $group){
             $childrens = \DB::table('prepayroll_groups AS pg')
                             ->join('prepayroll_groups_users AS pgu', 'pg.id_group', '=', 'pgu.group_id')
+                            ->join('users AS u', 'pgu.head_user_id', '=', 'u.id')
                             ->where('pg.father_group_n_id', $group)
-                            ->select('pg.id_group','pgu.head_user_id', 'group_name')->get();
+                            ->select('pg.id_group','pgu.head_user_id', 'group_name', 'u.name AS user_name')->get();
     
-            foreach($childrens as $child){
+            foreach ($childrens as $child) {
                 $is_vobo = \DB::table('prepayroll_report_auth_controls')
-                                ->where([['year', $num->year],['num_'.$request->idprenomina, $sectNum],['user_vobo_id',$child->head_user_id]])
-                                ->value('is_vobo');
-                
-                $nameUser = $child->group_name;
+                                ->where('year', $num->year)
+                                ->where('num_'.$request->idprenomina, $sectNum)
+                                ->where('user_vobo_id', $child->head_user_id);
 
-                if(!$is_vobo){
+                $aux = clone $is_vobo;
+                $aux = $aux->get();
+
+                // si el usuario no está en los vobos
+                if ($aux->count() == 0) {
+                    continue;
+                }
+
+                $is_vobo = $is_vobo->value('is_vobo');
+                if (! $is_vobo) {
+                    $nameUser = $child->user_name;
                     array_push($usersNotVobo, $nameUser);
                 }
             }
@@ -709,26 +733,34 @@ class prePayrollController extends Controller
     {
         $success = true;
 
-        try{
+        try {
+            /**
+             * Determinar si ya se ha dado Vobo a los empleados directos del usuario en sesión
+             */
+            $isAllOk = SPrepayrollUtils::isAllEmployeesOk(auth()->user()->id, $id);
+
+            if (! $isAllOk) {
+                $success = false;
+                throw new \Exception('No se puede dar Vobo, no se han dado visto bueno a todos los empleados directos del usuario en sesión.');
+            }
+
             $res = \DB::table('prepayroll_report_auth_controls')
-                        ->where([['id_control', $id],['user_vobo_id',auth()->user()->id]])
+                        ->where('id_control', $id)
+                        ->where('user_vobo_id', auth()->user()->id)
                         ->update([
                             'is_vobo' => true, 
                             'dt_vobo' => Carbon::now()->toDateTimeString(),
                             'is_rejected' => false,
                             'dt_rejected' => null
                         ]);
-        }catch (QueryException $e) {
-            $success = false;
+        }
+        catch (\Exception $e) {
+            return redirect()->route('vobos', $idPreNomina)->with(['mensaje' => $e->getMessage(), 'icon' => 'error']);
         }
 
-        if ($success) {
-            $msg = "Se dió el visto bueno correctamente";
-            $icon = "success";
-        } else {
-            $msg = "Error al dar el visto bueno";
-            $icon = "error";
-        }
+        $msg = "Se dió el visto bueno correctamente";
+        $icon = "success";
+        
 
         // $res = \DB::table('prepayroll_report_auth_controls')
         //             ->where('id_control', $id)

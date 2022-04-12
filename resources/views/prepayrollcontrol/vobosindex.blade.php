@@ -35,28 +35,34 @@
             url:'{{ $routeChildren }}',
             data:{ idprenomina: value, id: id, _token: '{{csrf_token()}}' },
             success:function(data) {
-                if(data.users.length != 0){
-                    for(var i = 0; i<data.users.length; i++){
+                if (data.users.length != 0) {
+                    for (var i = 0; i < data.users.length; i++) {
                         text = text + data.users[i] + ', ';
                     }
-                    swal({
-                        title: "Continuar con el visto bueno?",
-                        text: "los usuarios: " + text + " no han dado el visto bueno",
-                        icon: "warning",
-                        buttons: {
-                            confirm : {text:'Continuar', className:'sweet-warning'},
-                            cancel : 'Cancelar'
-                        },
-                        // dangerMode: true,
-                    })
-                    .then((acepted) => {
-                        if (acepted) {
-                            document.getElementById('form_vobo').submit();
-                        } else {
-                            swal("No se ha dado el visto bueno");
-                        }
-                    });
-                }else{
+
+                    swal("¡Error!", "Los usuarios: " + text + " no han dado el visto bueno.", "error");
+
+                    // Se comenta confirmación por solicitud de Sergio Flores: no se puede dar Vobo si los
+                    // usuarios que dependen de ti no han dado vobo.
+                    // swal({
+                    //     title: "Continuar con el visto bueno?",
+                    //     text: "los usuarios: " + text + " no han dado el visto bueno",
+                    //     icon: "warning",
+                    //     buttons: {
+                    //         confirm : {text:'Continuar', className:'sweet-warning'},
+                    //         cancel : 'Cancelar'
+                    //     },
+                    //     // dangerMode: true,
+                    // })
+                    // .then((acepted) => {
+                    //     if (acepted) {
+                    //         document.getElementById('form_vobo').submit();
+                    //     } else {
+                    //         swal("No se ha dado el visto bueno");
+                    //     }
+                    // });
+                }
+                else {
                     document.getElementById('form_vobo').submit();
                 }
             }
