@@ -54,7 +54,7 @@ class SDataProcess {
 
         $lDataWSun = SDataProcess::addSundayPay($lData);
 
-        $lDataJ = SOverJourneyCore::overtimeByIncompleteJourney($lDataWSun, $aEmployeeOverTime);
+        $lDataJ = SOverJourneyCore::overtimeByIncompleteJourney($sStartDate, $sEndDate, $lDataWSun, $aEmployeeOverTime);
         $lAllData = SOverJourneyCore::processOverTimeByOverJourney($lDataJ, $sStartDate);
 
         return $lAllData;
