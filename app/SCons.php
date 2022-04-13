@@ -43,7 +43,8 @@ class SCons {
                      'OR' => 3,
                      'OF' => 4,
                      'DHE' => 5,
-                     'AHE' => 6
+                     'AHE' => 6,
+                     'COM' => 7
                   ];
 
    const FROM_ASSIGN = 2;
