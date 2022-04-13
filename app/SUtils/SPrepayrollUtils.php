@@ -7,9 +7,11 @@ class SPrepayrollUtils {
      * dependientes del mismo.
      *
      * @param int $idUser
+     * @param bool $bDirect
+     * 
      * @return void
      */
-    public static function getEmployeesByUser($idUser) {
+    public static function getEmployeesByUser($idUser, $payType = 0, $bDirect = false) {
         $roles = \Auth::user()->roles;
         $config = \App\SUtils\SConfiguration::getConfigurations(); // Obtengo las configuraciones del sistema
 
@@ -31,22 +33,43 @@ class SPrepayrollUtils {
                             ->pluck('pgu.group_id')
                             ->toArray();
 
-        // Obtiene los sub-grupos de los grupos directos
-        $lGroups = SPrepayrollUtils::getChildrenOfGroups($groups);
+        if (! $bDirect) {
+            // Obtiene los sub-grupos de los grupos directos
+            $lGroups = SPrepayrollUtils::getChildrenOfGroups($groups);
+        }
+        else {
+            $lGroups = $groups;
+        }
 
         // Obtiene los empleados pertenecientes a todos los grupos que el usuario puede ver
         $aEmployees = \DB::table('prepayroll_groups AS pg')
                         ->join('prepayroll_group_employees AS pge', 'pg.id_group', '=', 'pge.group_id')
-                        ->whereIn('pg.id_group', $lGroups)
-                        ->pluck('pge.employee_id')
-                        ->toArray();
+                        ->join('employees AS e', 'pge.employee_id', '=', 'e.id')
+                        ->where('e.is_active', true);
+
+        if ($payType > 0) {
+            $aEmployees = $aEmployees->where('e.way_pay_id', $payType);
+        }
+
+        $aEmployees = $aEmployees->where('e.is_delete', false)
+                                ->whereIn('pg.id_group', $lGroups)
+                                ->pluck('pge.employee_id')
+                                ->toArray();
 
         // Obtiene los empleados pertenecientes a los grupos que el usuario no puede ver
         $aEmployeesOthers = \DB::table('prepayroll_groups AS pg')
                             ->join('prepayroll_group_employees AS pge', 'pg.id_group', '=', 'pge.group_id')
-                            ->whereNotIn('pg.id_group', $lGroups)
-                            ->pluck('pge.employee_id')
-                            ->toArray();
+                            ->join('employees AS e', 'pge.employee_id', '=', 'e.id')
+                            ->where('e.is_active', true)
+                            ->where('e.is_delete', false);
+                        
+        if ($payType > 0) {
+            $aEmployeesOthers = $aEmployeesOthers->where('e.way_pay_id', $payType);
+        }
+
+        $aEmployeesOthers = $aEmployeesOthers->whereNotIn('pg.id_group', $lGroups)
+                                            ->pluck('pge.employee_id')
+                                            ->toArray();
 
         // Obtiene los departamentos asignados a los grupos que el usuario puede ver
         $deptsOfPPGroups = \DB::table('prepayroll_group_deptos AS pgd')
@@ -57,10 +80,17 @@ class SPrepayrollUtils {
         // Obtiene los empleados asignados por departamento que no estén asignados ya directamente a otros grupos
         $deptEmployees = \DB::table('employees AS e')
                                 ->join('departments AS d', 'e.department_id', '=', 'd.id')
-                                ->whereIn('d.id', $deptsOfPPGroups)
-                                ->whereNotIn('e.id', $aEmployeesOthers)
-                                ->pluck('e.id')
-                                ->toArray();
+                                ->where('e.is_active', true)
+                                ->where('e.is_delete', false);
+                        
+        if ($payType > 0) {
+            $deptEmployees = $deptEmployees->where('e.way_pay_id', $payType);
+        }
+
+        $deptEmployees = $deptEmployees->whereIn('d.id', $deptsOfPPGroups)
+                                        ->whereNotIn('e.id', $aEmployeesOthers)
+                                        ->pluck('e.id')
+                                        ->toArray();
 
         // Unifica los empleados de los grupos y los empleados asignados por departamento
         $aEmployeesAll = array_merge($deptEmployees, $aEmployees);
@@ -176,6 +206,48 @@ class SPrepayrollUtils {
         $lGroups = collect($groups);
         $lDuplicates = $lGroups->duplicates();
         if (count($lDuplicates) > 0) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public static function isAllEmployeesOk($idUser, $idVobo)
+    {
+        $bDirectEmployees = true;
+        $prepayroll = \DB::table('prepayroll_report_auth_controls AS prac')
+                            ->where('prac.user_vobo_id', $idUser)
+                            ->where('prac.id_control', $idVobo)
+                            ->first();
+
+        if ($prepayroll == null) {
+            return false;
+        }
+
+        
+        $payType = $prepayroll->is_week ? \SCons::PAY_W_S : \SCons::PAY_W_Q;
+        $number = $prepayroll->is_week ? $prepayroll->num_week : $prepayroll->num_biweek;
+        
+        $aEmployees = SPrepayrollUtils::getEmployeesByUser($idUser, $payType, $bDirectEmployees);
+
+        $aEmployeesOk = \DB::table('prepayroll_report_emp_vobos AS empvb')
+                            ->whereIn('empvb.employee_id', $aEmployees)
+                            ->where('empvb.year', $prepayroll->year);
+        
+        if ($payType == \SCons::PAY_W_S) {
+            $aEmployeesOk = $aEmployeesOk->where('empvb.num_week', $number);
+        }
+        else {
+            $aEmployeesOk = $aEmployeesOk->where('empvb.num_biweek', $number);
+        }
+
+        $aEmployeesOk = $aEmployeesOk->where('empvb.is_delete', false)
+                                    ->pluck('empvb.employee_id')
+                                    ->toArray();
+
+        $aEmployeesNotOk = array_diff($aEmployees, $aEmployeesOk);
+
+        if (count($aEmployeesNotOk) > 0) {
             return false;
         }
 

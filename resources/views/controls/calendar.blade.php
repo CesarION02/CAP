@@ -51,7 +51,7 @@
    
             axios.get(route, {
                 params: {
-                    "dt_date" : dtDate.format('D-M-YYYY')
+                    "year" : dtDate.format('YYYY')
                 }
             })
             .then(res => {
