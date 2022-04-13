@@ -184,6 +184,7 @@ class SDataProcess {
                     $otherRow = new SRegistryRow();
                     $otherRow->idEmployee = $idEmployee;
                     $otherRow->numEmployee = $oEmployee->num_employee;
+                    $otherRow->employeeAreaId = $oEmployee->employee_area_id;
                     $otherRow->employee = $oEmployee->name;
                     $otherRow->external_id = $oEmployee->external_id;
 
@@ -280,6 +281,7 @@ class SDataProcess {
             $newRow = new SRegistryRow();
             $newRow->idEmployee = $idEmployee;
             $newRow->numEmployee = $registry->num_employee;
+            $newRow->employeeAreaId = $registry->employee_area_id;
             $newRow->employee = $registry->name;
             $newRow->external_id = $registry->external_id;
         }
@@ -1011,6 +1013,9 @@ class SDataProcess {
                 if ($oRow->hasCheckOut) {
                     $oRow->prematureOut = SDataProcess::getPrematureTime($oRow->outDateTime, $oRow->outDateTimeSch);
                 }
+                else {
+                    $oRow->prematureOut = null; 
+                }
 
                 $bWork8hr = true;
                 $oRow->hasWorkedJourney8hr = SDataProcess::journeyCompleted($oRow->inDateTime, $oRow->inDateTimeSch, $oRow->outDateTime, $oRow->outDateTimeSch, $bWork8hr);
@@ -1345,6 +1350,7 @@ class SDataProcess {
         $consumAdjs = [];
         foreach ($lData as $oRow) {
             $hasAbs = false;
+            $absenceByOmission = false;
             switch ($aEmployeeBen[$oRow->idEmployee]) {
                 case \SCons::BEN_POL_FREE:
                     # code...
@@ -1361,7 +1367,36 @@ class SDataProcess {
                                         $hasAbs = true;
                             }
                         }
+
+                        if (! $hasAbs) {
+                            $config = \App\SUtils\SConfiguration::getConfigurations();
+                            if ($config->absenceWithOmissionOfChecks) {
+                                if (in_array($oRow->employeeAreaId, $config->absenceWithOmissionOfChecksAreas)) {
+                                    if (! $oRow->hasCheckOut && $oRow->hasCheckIn) {
+                                        $date = $oRow->outDate;
+                                        $time = null;
+                                        $adjs = SPrepayrollAdjustUtils::getAdjustForCase($date, $time, 2, \SCons::PP_TYPES['JS'], $oRow->idEmployee);
+                                
+                                        if (count($adjs) == 0) {
+                                            $hasAbs = true;
+                                            $absenceByOmission = true;
+                                        }
+                                    }
+                                    if (! $hasAbs && $oRow->hasCheckOut && ! $oRow->hasCheckIn) {
+                                        $date = $oRow->inDate;
+                                        $time = null;
+                                        $adjs = SPrepayrollAdjustUtils::getAdjustForCase($date, $time, 1, \SCons::PP_TYPES['JE'], $oRow->idEmployee);
+                                
+                                        if (count($adjs) == 0) {
+                                            $hasAbs = true;
+                                            $absenceByOmission = true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
+
                     break;
                 
                 default:
@@ -1395,7 +1430,7 @@ class SDataProcess {
 
                 if ($withAbs) {
                     $oRow->hasAbsence = true;
-                    $oRow->comments = $oRow->comments."Falta. ";
+                    $oRow->comments = $oRow->comments . ($absenceByOmission ? "Falta por omitir checar. " : "Falta. ");
                 }
                 else {
                     $oRow->hasAbsence = false;
