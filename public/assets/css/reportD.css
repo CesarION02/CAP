@@ -26,6 +26,10 @@
     background-color: #ffa162;
 }
 
+.incomplete-te-journey {
+    background-color: #eb9ffa;
+}
+
 #myBtn {
     display: none;
     /* Hidden by default */
