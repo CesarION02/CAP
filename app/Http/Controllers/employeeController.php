@@ -370,7 +370,32 @@ class employeeController extends Controller
         }else{
             $dept = $config->dept_pre;
         }
-        employees::where('id', $id)
+
+        $oldEmp = employees::where('id',$id);
+
+        if( $oldEmp->dept_rh_id == $jEmployee->dept_rh_id ){
+            employees::where('id', $id)
+                    ->update(
+                            [
+                            'num_employee' => $jEmployee->num_employee,
+                            'name' => ucwords(mb_strtolower($jEmployee->lastname.", ".$jEmployee->firstname)),
+                            'names' => ucwords(mb_strtolower($jEmployee->firstname)),
+                            'first_name' => ucwords(mb_strtolower($jEmployee->lastname)),
+                            'admission_date' => $jEmployee->admission_date,
+                            'leave_date' => $jEmployee->leave_date,
+                            // 'is_overtime' => $jEmployee->extra_time,
+                            'ben_pol_id' => $jEmployee->checker_policy,
+                            'policy_extratime_id' => $jEmployee->overtime_policy + 1,
+                            'company_id' => $this->companies[$jEmployee->company_id],
+                            'dept_rh_id' => $this->rhdepartments[$jEmployee->dept_rh_id],
+                            'way_pay_id' => $jEmployee->way_pay == 1 ? 2 : 1,
+                            'is_active' => $jEmployee->is_active,
+                            'is_delete' => $jEmployee->is_deleted,
+                            'updated_by' => session()->get('user_id'),
+                            ]
+                        );
+        }else{
+            employees::where('id', $id)
                     ->update(
                             [
                             'num_employee' => $jEmployee->num_employee,
@@ -390,7 +415,9 @@ class employeeController extends Controller
                             'is_delete' => $jEmployee->is_deleted,
                             'updated_by' => session()->get('user_id'),
                             ]
-                        );
+                        );    
+        }
+        
     }
 
     /**

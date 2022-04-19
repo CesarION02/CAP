@@ -1085,7 +1085,7 @@ class SInfoWithPolicy{
                                 }
                                 else{
                                     if(sizeof($lRows[$i]->events)<1){
-                                        $lRows[$i]->hasAbsence = true;
+                                        //$lRows[$i]->hasAbsence = true;
                                     }
                                     $semanaNoCompleta = true;
                                 }
@@ -1351,7 +1351,7 @@ class SInfoWithPolicy{
                                 //si es un incidencia
                                 else{
                                     if(sizeof($lRows[$i]->events)<1){
-                                        $lRows[$i]->hasAbsence = true;
+                                        //$lRows[$i]->hasAbsence = true;
                                         if(SDateTimeUtils::dayOfWeek($lRows[$i]->outDate) == Carbon::SUNDAY){
                                             $lRows[$i]->isDayOff = 1; 
                                             $haveDayoff = 1; 
@@ -2160,7 +2160,7 @@ class SInfoWithPolicy{
                                         //si es un incidencia
                                         else{
                                             if(sizeof($lRows[$i]->events)<1){
-                                                $lRows[$i]->hasAbsence = true;
+                                                //$lRows[$i]->hasAbsence = true;
                                                 if(SDateTimeUtils::dayOfWeek($lRows[$i]->outDate) == Carbon::SUNDAY){
                                                     $lRows[$i]->isDayOff = 1; 
                                                     $haveDayoff = 1;  
@@ -2420,7 +2420,7 @@ class SInfoWithPolicy{
                                                 //si es un incidencia
                                                 else{
                                                     if(sizeof($lRows[$i]->events)<1){
-                                                        $lRows[$i]->hasAbsence = true;
+                                                        //$lRows[$i]->hasAbsence = true;
                                                         if(SDateTimeUtils::dayOfWeek($lRows[$i]->outDate) == Carbon::SUNDAY){
                                                             $lRows[$i]->isDayOff = 1; 
                                                             $haveDayoff = 1;  
@@ -2677,7 +2677,7 @@ class SInfoWithPolicy{
                 $empleados = DB::table('employees')
                                 ->where('is_active','=',1)
                                 ->where('way_pay_id','=',1)
-                                //->where('id',89)
+                                //->where('id',78)
                                 ->where('department_id','!=',$config->dept_foraneo)
                                 ->where('job_id','!=',$config->job_foraneo)
                                 ->orderBy('id')

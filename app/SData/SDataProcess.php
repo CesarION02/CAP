@@ -1501,18 +1501,10 @@ class SDataProcess {
                     $chekDate = $check->date.' '.$check->time;
                     $chekODate = $oCheckIn->date.' '.$oCheckIn->time;
                     $comparison = SDelayReportUtils::compareDates($chekDate, $chekODate);
-                    if (abs($comparison->diffMinutes) >= 360 || ($oCheckIn->form_creation_id != 2 && $check->form_creation_id != 2)) {
+                    if (abs($comparison->diffMinutes) >= 360) {
                         $lNewChecks[] = $oCheckIn;
-                        $oCheckIn = $check;
                     }
-                    else {
-                        if ($oCheckIn->form_creation_id == 2) {
-                            $lNewChecks[] = $oCheckIn;
-                        }
-                        if ($check->form_creation_id == 2) {
-                            $oCheckIn = $check;
-                        }
-                    }
+                    $oCheckIn = $check;
                 }
             }
             else {
@@ -1525,18 +1517,12 @@ class SDataProcess {
                     $chekDate = $check->date.' '.$check->time;
                     $chekODate = $oCheckOut->date.' '.$oCheckOut->time;
                     $comparison = SDelayReportUtils::compareDates($chekDate, $chekODate);
-                    if (abs($comparison->diffMinutes) >= 360 || ($oCheckOut->form_creation_id == 2 && $check->form_creation_id == 2)) {
+                    if (abs($comparison->diffMinutes) >= 360) {
                         $lNewChecks[] = $oCheckOut;
                         $oCheckOut = $check;
                     }
                     else {
-                        if ($oCheckOut->form_creation_id == 2) {
-                            $lNewChecks[] = $oCheckOut;
-                            $oCheckOut = null;
-                        }
-                        if ($check->form_creation_id == 2) {
-                            $oCheckOut = $check;
-                        }
+                        $oCheckOut = $check;
                     }
                 }
                 else {
@@ -1614,11 +1600,6 @@ class SDataProcess {
             if (abs($comparisonIn->diffMinutes) > $config->maxGapSchedule && abs($comparisonOut->diffMinutes) > $config->maxGapSchedule) {
                 $lNewChecks = $originalChecks;
                 break;
-            }
-
-            if ($check->form_creation_id == 2) {
-                $lNewChecks[] = $check;
-                continue;
             }
 
             if (abs($comparisonIn->diffMinutes) <= $config->maxGapSchedule) {
