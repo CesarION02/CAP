@@ -39,6 +39,9 @@ var app = new Vue({
                 (oRow.hasChecks || oRow.hasCheckOut)) {
                 return 'events'
             }
+            if (oRow.isIncompleteTeJourney) {
+                return 'incomplete-te-journey';
+            }
         },
         getDtCellCss(oRow, typeReg) {
             if (typeReg == 1 && oRow.isModifiedIn) {
