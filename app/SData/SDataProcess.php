@@ -1038,7 +1038,12 @@ class SDataProcess {
                                 }
                             }
 
-                            $oRow->overWorkedMins = $oRow->overWorkedMins >= $discountMins ? ($oRow->overWorkedMins - $discountMins) : 0;
+                            if ($oRow->overWorkedMins >= $discountMins) {
+                                $oRow->overMinsByAdjs = - $discountMins;
+                            }
+                            else {
+                                $oRow->overMinsByAdjs = - $oRow->overWorkedMins;
+                            }
                         }
                     }
                 }
@@ -1068,7 +1073,7 @@ class SDataProcess {
                     $oRow->adjusts[] = $adj;
                 }
 
-                $oRow->overMinsByAdjs = $minsExtraByAdj;
+                $oRow->overMinsByAdjs = $oRow->overMinsByAdjs + $minsExtraByAdj;
             }
 
             if ($oRow->hasChecks) {

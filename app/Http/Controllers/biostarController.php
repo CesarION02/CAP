@@ -264,6 +264,8 @@ class biostarController extends Controller
     
     public static function insertEvents(){
         $data = biostarController::getEvents();
+        // $jsonString = file_get_contents(base_path('response_from_biostar.json'));
+        // $data = json_decode($jsonString);
         
         $lEvents = [];
         if($data->EventCollection->rows == ""){return 1;}

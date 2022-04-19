@@ -141,6 +141,8 @@ Route::get('prepayrollbinn/{id}', 'prePayrollController@prepayrollBinnacle')->na
 Route::get('prepayrolls', 'prePayrollController@prepayrolls')->name('bitacora_reg_s');
 Route::get('prepayrolls/fuera/{id}', 'prePayrollController@bitacorafuera')->name('bitacora_fuera');
 Route::get('prepayrolls/abrir/{id}', 'prePayrollController@prepayrollAbrir')->name('prenomina_abrir');
+// Vobo por empleado
+Route::post('prepayrollempvobo', 'EmployeeVobosController@processEmpVobo')->name('employee_vobo');
 /** RUTAS DE CONFIGURACIÓN DE PRENÓMINA */
 Route::get('prepayrollcfgvobos', 'PrepayrollReportController@cfgVobos')->name('cfg_vobos');
 Route::get('prepayrollcfgvobos/create', 'PrepayrollReportController@create')->name('cfg_vobos_create');
