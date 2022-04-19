@@ -362,6 +362,14 @@ class employeeController extends Controller
         //}else{
             //$dept = $config->dept_pre;
         //}
+
+        $department = DepartmentRH::where('id',$jEmployee->dept_rh_id)->get();
+        $dept = 0;
+        if($department[0]->default_dept_id != null){
+            $dept = $department[0]->default_dept_id;
+        }else{
+            $dept = $config->dept_pre;
+        }
         employees::where('id', $id)
                     ->update(
                             [
@@ -376,7 +384,7 @@ class employeeController extends Controller
                             'policy_extratime_id' => $jEmployee->overtime_policy + 1,
                             'company_id' => $this->companies[$jEmployee->company_id],
                             'dept_rh_id' => $this->rhdepartments[$jEmployee->dept_rh_id],
-                            //'department_id' => $dept,
+                            'department_id' => $dept,
                             'way_pay_id' => $jEmployee->way_pay == 1 ? 2 : 1,
                             'is_active' => $jEmployee->is_active,
                             'is_delete' => $jEmployee->is_deleted,

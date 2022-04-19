@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
+use App\SData\SCutoffDates;
 
 class SyncController extends Controller
 {
@@ -15,6 +16,7 @@ class SyncController extends Controller
         $config = \App\SUtils\SConfiguration::getConfigurations();
 
         $correcto = SyncController::syncronizeWithERP($config->lastSyncDateTime);
+        $resp = SCutoffDates::processCutoffDates($config->lastSyncDateTime);
 
         $sincronizado = \App\Http\Controllers\biostarController::insertEvents();
 

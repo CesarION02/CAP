@@ -99,7 +99,8 @@ class SPrepayrollUtils {
         }
 
         $lGroups = \DB::table('prepayroll_groups AS pg')
-                        ->where('pg.head_user_id', $idUser)
+                        ->join('prepayroll_groups_users AS pgu', 'pg.id_group', '=', 'pgu.group_id')
+                        ->where('pgu.head_user_id', $idUser)
                         ->pluck('pg.id_group');
 
         return $lGroups;

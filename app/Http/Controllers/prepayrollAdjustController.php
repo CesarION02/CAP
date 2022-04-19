@@ -106,6 +106,16 @@ class prepayrollAdjustController extends Controller
 
     public function getAdjustsFromRow(Request $request)
     {
+        $start = Carbon::parse($request->start_date);
+        $end = Carbon::parse($request->end_date);
+
+        $start_date = $request->start_date;
+        $end_date = $request->end_date;
+        if ($start->greaterThan($end)) {
+            $start_date = $request->end_date;
+            $end_date = $request->start_date;
+        }
+
         $lAdjusts = \DB::table('prepayroll_adjusts AS pa')
                         ->join('prepayroll_adjusts_types AS pat', 'pa.adjust_type_id', '=', 'pat.id')
                         ->select('pa.employee_id',
@@ -119,10 +129,11 @@ class prepayrollAdjustController extends Controller
                                     'pat.type_name',
                                     'pa.id'
                                     )
-                        ->whereBetween('dt_date', [$request->start_date, $request->end_date])
+                        ->whereBetween('dt_date', [$start_date, $end_date])
                         ->where('is_delete', false)
                         ->where('pa.employee_id', $request->employee_id)
                         ->get();
+
         $config = \App\SUtils\SConfiguration::getConfigurations();
 
         if ($config->enabledAdjAuths) {
@@ -154,9 +165,9 @@ class prepayrollAdjustController extends Controller
         $oAdjust->updated_by = \Auth::user()->id;
 
         $oEmployee = employees::find($oAdjust->employee_id);
-
-        if (! PrepayrollReportController::canMakeAdjust($oAdjust->dt_date, $oEmployee->way_pay_id)) {
-            return json_encode(['success' => false, 'msg' => 'No se puede aplicar el ajuste, la prenómina tiene Vobo.']);
+        $canMakeAdjust = PrepayrollReportController::canMakeAdjust($oAdjust->dt_date, $oEmployee->way_pay_id);
+        if (is_string($canMakeAdjust)) {
+            return json_encode(['success' => false, 'msg' => 'No se puede aplicar el ajuste, la prenómina tiene Vobo.'.$canMakeAdjust]);
         }
 
         try {

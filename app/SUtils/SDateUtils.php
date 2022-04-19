@@ -258,6 +258,14 @@ class SDateUtils {
         return $oNumber->num;
     }
 
+    /**
+     * Retorna un array con las fechas de inicio y fin de la semana o quincena
+     *
+     * @param [type] $num
+     * @param [type] $year
+     * @param [type] $payTypeId
+     * @return void
+     */
     public static function getDatesOfPayrollNumber($num, $year, $payTypeId)
     {
         if ($payTypeId == \SCons::PAY_W_Q) {
@@ -281,7 +289,7 @@ class SDateUtils {
                         ->where([['year', $year], ['num', $num], ['is_delete', false]])
                         ->value('dt_cut');
 
-            $fin = date('Y-m-d', (strtotime('-1 day', strtotime($fin))));
+            $ini = date('Y-m-d', (strtotime('+1 day', strtotime($ini))));
 
             $data = [$ini, $fin];
         }

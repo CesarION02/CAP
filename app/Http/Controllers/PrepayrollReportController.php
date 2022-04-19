@@ -283,20 +283,21 @@ class PrepayrollReportController extends Controller
         $number = SDateUtils::getNumberOfDate($dtDate, $payTypeId);
         $oDate = Carbon::parse($dtDate);
 
-        $lVobos = \DB::table('prepayroll_report_auth_controls AS prac');
+        $lVobos = \DB::table('prepayroll_report_auth_controls AS prac')
+                        ->join('users AS u', 'u.id', '=', 'prac.user_vobo_id');
 
         if ($payTypeId == \SCons::PAY_W_Q) {
-            $lVobos = $lVobos->where('is_biweek', true)
-                            ->where('num_biweek', $number);
+            $lVobos = $lVobos->where('prac.is_biweek', true)
+                            ->where('prac.num_biweek', $number);
         }
         else {
-            $lVobos = $lVobos->where('is_week', true)
-                            ->where('num_week', $number);
+            $lVobos = $lVobos->where('prac.is_week', true)
+                            ->where('prac.num_week', $number);
         }
 
-        $lVobos = $lVobos->where('is_delete', false)
-                            ->where('year', $oDate->year)
-                            ->orderBy('order_vobo', 'ASC');
+        $lVobos = $lVobos->where('prac.is_delete', false)
+                            ->where('prac.year', $oDate->year)
+                            ->orderBy('prac.order_vobo', 'ASC');
 
         $lVobosEmpty = clone $lVobos;
 
@@ -309,13 +310,13 @@ class PrepayrollReportController extends Controller
         }
 
         $lVoboUsr = clone $lVobos;
-        $oVoboUsr = $lVoboUsr->where('user_vobo_id', \Auth::user()->id)->first();
+        $oVoboUsr = $lVoboUsr->where('prac.user_vobo_id', \Auth::user()->id)->first();
 
         if ($oVoboUsr != null) {
             $lVobosMaj = clone $lVobos;
-            $lVobosMaj = $lVobosMaj->where('order_vobo', '>', $oVoboUsr->order_vobo)
-                            ->where('is_vobo', true)
-                            ->where('user_vobo_id', '!=', \Auth::user()->id);
+            $lVobosMaj = $lVobosMaj->where('prac.order_vobo', '>', $oVoboUsr->order_vobo)
+                            ->where('prac.is_vobo', true)
+                            ->where('prac.user_vobo_id', '!=', \Auth::user()->id);
 
             $userGroups = SPrepayrollUtils::getUserGroups(\Auth::user()->id);
 
@@ -326,28 +327,34 @@ class PrepayrollReportController extends Controller
                 $lGroups = SPrepayrollUtils::getAncestryOfGroups($aux);
 
                 $users = \DB::table('prepayroll_groups AS pg')
+                            ->join('prepayroll_groups_users AS pgu', 'pg.id_group', '=', 'pgu.group_id')
                             ->whereIn('id_group', $lGroups)
-                            ->pluck('head_user_id')
+                            ->pluck('pgu.head_user_id')
                             ->toArray();
 
                 $lUsersBosses = array_merge($lUsersBosses, $users);
             }
 
-            $lVobosMaj = $lVobosMaj->whereIn('user_vobo_id', $lUsersBosses)
+            $lVobosMaj = $lVobosMaj->whereIn('prac.user_vobo_id', $lUsersBosses)
                                     ->get();
             
             if (count($lVobosMaj) > 0) {
-                return false;
+                $usersMaj = "";
+                foreach ($lVobosMaj as $vobo) {
+                    $usersMaj .= $vobo->name . ",";
+                }
+
+                return "Los usuarios ".$usersMaj." ya han aprobado esta prenómina.";
             }
         }
 
         $myVoBo = clone $lVobos;
-        $myVoBo = $myVoBo->where('is_vobo', true)
-                                    ->where('user_vobo_id', \Auth::user()->id)
-                                    ->get();
+        $myVoBo = $myVoBo->where('prac.is_vobo', true)
+                        ->where('prac.user_vobo_id', \Auth::user()->id)
+                        ->get();
 
         if (count($myVoBo) > 0) {
-            return false;
+            return "Ya diste tu vobo de esta prenómina.";
         }
         
         return true;
