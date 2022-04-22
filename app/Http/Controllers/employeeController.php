@@ -371,7 +371,7 @@ class employeeController extends Controller
             $dept = $config->dept_pre;
         }
 
-        $oldEmp = employees::where('id',$id);
+        $oldEmp = employees::find($id);
 
         if( $oldEmp->dept_rh_id == $jEmployee->dept_rh_id ){
             employees::where('id', $id)
