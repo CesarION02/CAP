@@ -150,8 +150,6 @@ class PrepayrollReportController extends Controller
         }
 
         $number = SDateUtils::getNumberOfDate($dtDate, $payTypeId);
-
-        $oDate = Carbon::parse($dtDate);
         
         //Si aún no hay vobos, se crean los registros de autorización
         return $number;
@@ -171,18 +169,19 @@ class PrepayrollReportController extends Controller
 
         $dates = SDateUtils::getDatesOfPayrollNumber($number, $year, $payTypeId);
         if (count($dates) > 0) {
-            $cfgs = $cfgs->where('since_date', '<=', $dates[0]);
+            $cfgs = $cfgs->where('since_date', '<=', $dates[0])
+                        ->where(function ($query) use ($dates) {
+                            $query->whereNull('until_date')
+                                    ->orWhere(function ($query) use ($dates) {
+                                        $query->whereNotNull('until_date')
+                                                ->where('until_date', '>=', $dates[0]);
+                            });
+                        });
         }
 
-        if ($payTypeId == \SCons::PAY_W_Q) {
-            $cfgs = $cfgs->where('is_biweek', true);
-        }
-        else {
-            $cfgs = $cfgs->where('is_week', true);
-        }
-
-        $cfgs = $cfgs->orderBy('order_vobo', 'ASC')
-                    ->get();
+        $cfgs = $cfgs->where($payTypeId == \SCons::PAY_W_Q ? 'is_biweek' : 'is_week', true)
+                        ->orderBy('order_vobo', 'ASC')
+                        ->get();
 
          /**
          * Consultar si ya hay vobos para la semana o quincena recibida
@@ -212,12 +211,25 @@ class PrepayrollReportController extends Controller
                         $lVobo = $lVobo->where('num_week', $number);
                     }
 
+                    $oDelegation = \DB::table('prepayroll_report_delegations AS d')
+                                    ->where('d.user_delegation_id', $cfg->user_n_id)
+                                    ->where('d.is_delete', false)
+                                    ->where('pay_way_id', $payTypeId)
+                                    ->where('number_prepayroll', $number)
+                                    ->first();
+
                     $oVobo = $lVobo->first();
 
-                    if ($oVobo != null) continue;
+                    if ($oVobo != null) {
+                        if ($oDelegation != null) {
+                            $oVobo->is_required = false;
+                            $oVobo->save();
+                        }
+                        continue;
+                    } 
                     
                     $prac->year = $year;
-                    $prac->is_required = $cfg->is_required;
+                    $prac->is_required = $oDelegation != null ? false : $cfg->is_required;
                     $prac->is_vobo = false;
                     $prac->dt_vobo = null;
                     $prac->is_rejected = false;

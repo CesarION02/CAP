@@ -101,6 +101,7 @@ Route::get('report/reporteRegistros','ReporteController@reporteRegistrosView')->
 Route::get('report/reporteRetardos','ReporteController@genDelayReport')->name('generarreporteRetardos');
 Route::get('report/viewReporteRetardos','ReporteController@delaysReport')->name('reporteRetardos');
 Route::get('report/reportetiemposextra','ReporteController@genHrExReport')->name('generarreportetiemposextra');
+Route::get('report/reportetiemposextradelegados','ReporteController@genHrExReportDelegations')->name('generarreportetiemposextradel');
 Route::get('report/viewtiemposextra','ReporteController@hrExtReport')->name('reportetiemposextra');
 Route::get('report/usoPuertasDatos', 'ReporteController@reporteUsoPuertas')->name('reporteusopuertasdatos');
 Route::get('report/generarreportepuertas','ReporteController@generarReportePuertas')->name('generarreportepuertas');
@@ -149,6 +150,11 @@ Route::get('prepayrollcfgvobos/create', 'PrepayrollReportController@create')->na
 Route::post('prepayrollcfgvobos/store', 'PrepayrollReportController@store')->name('save_cfg');
 Route::get('prepayrollcfgvobos/edit/{id}', 'PrepayrollReportController@edit')->name('edit_cfg');
 Route::put('prepayrollcfgvobos/update', 'PrepayrollReportController@update')->name('update_cfg');
+/** RUTAS DE DELEGACIÓN DE PRENÓMINA */
+Route::get('prepayrolldelegation', 'PrepayrollDelegationsController@index')->name('prepayrolldelegation.index');
+Route::get('prepayrolldelegation/create', 'PrepayrollDelegationsController@create')->name('prepayrolldelegation.create');
+Route::post('prepayrolldelegation/validate', 'PrepayrollDelegationsController@isDelegationValid')->name('prepayrolldelegation.validate');
+Route::post('prepayrolldelegation/store', 'PrepayrollDelegationsController@store')->name('prepayrolldelegation.store');
 /* RUTAS DE GRUPO DEPARTAMENTO USUARIO */
 Route::get('deptgroupuser', 'deptgroupuserController@index')->name('dgu');
 Route::get('deptgroupuser/create', 'deptgroupuserController@create')->name('crear_dgu');

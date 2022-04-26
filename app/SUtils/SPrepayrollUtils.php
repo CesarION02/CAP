@@ -1,5 +1,6 @@
 <?php namespace App\SUtils;
 
+use App\SUtils\SPayrollDelegationUtils;
 class SPrepayrollUtils {
 
     /**
@@ -7,11 +8,15 @@ class SPrepayrollUtils {
      * dependientes del mismo.
      *
      * @param int $idUser
+     * @param int $payType
      * @param bool $bDirect
+     * @param int $iDelegations si es null no se consideran delegaciones, 
+     *                          si es 0 se consideran todas las delegaciones del usuario, 
+     *                          si es mayor que 0 se considera como el id de la delegacion
      * 
-     * @return void
+     * @return array
      */
-    public static function getEmployeesByUser($idUser, $payType = 0, $bDirect = false) {
+    public static function getEmployeesByUser($idUser, $payType, $bDirect, $iDelegation = null) {
         $roles = \Auth::user()->roles;
         $config = \App\SUtils\SConfiguration::getConfigurations(); // Obtengo las configuraciones del sistema
 
@@ -28,11 +33,38 @@ class SPrepayrollUtils {
         }
 
         // Obtiene los grupos de prenómina que el usuario puede ver
-        $groups = \DB::table('prepayroll_groups_users AS pgu')
-                            ->where('pgu.head_user_id', $idUser)
-                            ->pluck('pgu.group_id')
-                            ->toArray();
+        if ($iDelegation == null) {
+            $groups = \DB::table('prepayroll_groups_users AS pgu')
+                                ->where('pgu.head_user_id', $idUser)
+                                ->pluck('pgu.group_id')
+                                ->toArray();
+        }
+        else {
+            if ($iDelegation == 0) {
+                // obtiene los grupos de todas las delegaciones de prenómina
+                $groups = SPayrollDelegationUtils::getGroupsAllDelegations($idUser);
+            }
+            else if ($iDelegation > 0) {
+                // obtiene los grupos de la delegación de prenómina indicada
+                $groups = SPayrollDelegationUtils::getGroupsOfDelegation($idUser, $iDelegation);
+            }
+        }
 
+        // Obtiene los empleados que pertenecen a los grupos de prenómina
+        return SPrepayrollUtils::getEmployeesOfGroups($groups, $payType, $bDirect);
+    }
+
+    /**
+     * Obtiene los empleados correspondientes a los grupos de prenómina recibidos.
+     *
+     * @param array $groups
+     * @param int $payType
+     * @param boolean $bDirect
+     * 
+     * @return void
+     */
+    public static function getEmployeesOfGroups($groups, $payType, $bDirect)
+    {
         if (! $bDirect) {
             // Obtiene los sub-grupos de los grupos directos
             $lGroups = SPrepayrollUtils::getChildrenOfGroups($groups);
