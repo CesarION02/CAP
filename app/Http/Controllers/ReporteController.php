@@ -476,19 +476,11 @@ class ReporteController extends Controller
         $payType = 0;
         $bDirect = 0;
         $iDelegations = 0;
-        // $subEmployees = SPrepayrollUtils::getEmployeesByUser(\Auth::user()->id, $payType, $bDirect, $iDelegations);
-        // if ($subEmployees == null) {
-        //     $lEmployees = SGenUtils::toEmployeeIds(0, 0, []);
-        // }
-        // else {
-        //     $qEmployees = SGenUtils::toEmployeeQuery(0, 0, []);
-
-        //     $lEmployees = $qEmployees->whereIn('e.id', $subEmployees)
-        //                     ->orderBy('e.name', 'ASC')
-        //                     ->get();
-        // }
-
         $oPayrolls = SPayrollDelegationUtils::getDelegationsPayrolls(\Auth::user()->id);
+
+        if (count($oPayrolls->weeks) == 0 && count($oPayrolls->biweeks) == 0) {
+            return redirect()->back()->withErrors(['No hay semanas o quincenas delegadas para ti.']);
+        }
 
         return view('report.reportsGenDelegation')
                     ->with('tReport', \SCons::REP_HR_EX)
@@ -703,8 +695,10 @@ class ReporteController extends Controller
             }
 
             $dates = SDateUtils::getDatesOfPayrollNumber($iPayrollNumber, $iPayrollYear, $payWay);
-            $oStartDate = Carbon::parse($dates[0]);
-            $oEndDate = Carbon::parse($dates[1]);
+            $sStartDate = $dates[0];
+            $sEndDate = $dates[1];
+            $oStartDate = Carbon::parse($sStartDate);
+            $oEndDate = Carbon::parse($sEndDate);
             $iDelegation = $oDelegation->id_delegation;
         }
         

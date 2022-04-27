@@ -86,6 +86,14 @@ class SPermissions {
         return $users;
     }
 
+    public static function userHasRole($idUser, $idRole)
+    {
+        return \DB::table('user_rol')
+                    ->where('user_id', $idUser)
+                    ->where('rol_id', $idRole)
+                    ->exists();
+    }
+
     public static function assignMenuByDefaultRol($idUser, $idMenu)
     {
         $oUser = User::find($idUser);

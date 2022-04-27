@@ -155,6 +155,7 @@ Route::get('prepayrolldelegation', 'PrepayrollDelegationsController@index')->nam
 Route::get('prepayrolldelegation/create', 'PrepayrollDelegationsController@create')->name('prepayrolldelegation.create');
 Route::post('prepayrolldelegation/validate', 'PrepayrollDelegationsController@isDelegationValid')->name('prepayrolldelegation.validate');
 Route::post('prepayrolldelegation/store', 'PrepayrollDelegationsController@store')->name('prepayrolldelegation.store');
+Route::delete('prepayrolldelegation/{id}/delete', 'PrepayrollDelegationsController@delete')->name('prepayrolldelegation.delete');
 /* RUTAS DE GRUPO DEPARTAMENTO USUARIO */
 Route::get('deptgroupuser', 'deptgroupuserController@index')->name('dgu');
 Route::get('deptgroupuser/create', 'deptgroupuserController@create')->name('crear_dgu');

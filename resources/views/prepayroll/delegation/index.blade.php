@@ -17,6 +17,7 @@
 @section('content')
     <div class="row">
         <div class="col-lg-12">
+            @include('includes.form-error')
             @include('includes.mensaje')
             <div class="box">
                 <div class="box-header with-border">
@@ -26,9 +27,11 @@
                         <div class="col-md-5 col-md-offset-7">
                             <div class="row">
                                 <div style="text-align: right" class="col-md-12">
-                                    <a href="{{ route('prepayrolldelegation.create') }}" class="btn btn-success btn-sm" id="btn_create">
-                                        <i class="fa fa-plus-circle"></i> Nuevo
-                                    </a>
+                                    @if (! \App\SUtils\SPermissions::userHasRole(\Auth::user()->id, 15))
+                                        <a href="{{ route('prepayrolldelegation.create') }}" class="btn btn-success btn-sm" id="btn_create">
+                                            <i class="fa fa-plus-circle"></i> Nuevo
+                                        </a>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -55,10 +58,7 @@
                                     <td>{{ $oDel->user_delegation_name }}</td>
                                     <td>{{ $oDel->user_delegated_name }}</td>
                                     <td>
-                                        <a href="#" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
-                                            <i class="fa fa-fw fa-pencil"></i>
-                                        </a>
-                                        <form action="#" class="d-inline form-eliminar" method="POST">
+                                        <form action="{{ route('prepayrolldelegation.delete', $oDel->id_delegation) }}" class="d-inline form-eliminar" method="POST">
                                             @csrf @method("delete")
                                             <button type="submit" class="btn-accion-tabla eliminar tooltipsC" title="Eliminar este registro">
                                                 <i class="fa fa-fw fa-trash text-danger"></i>

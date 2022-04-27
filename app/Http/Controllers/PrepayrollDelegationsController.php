@@ -8,6 +8,7 @@ use App\Models\UserPermission;
 use App\Models\PrepayrollDelegation;
 use App\Models\User;
 use App\Models\PrepayReportConfig;
+use App\Models\PrepayReportControl;
 
 use App\SUtils\SDateUtils;
 use App\SUtils\SPermissions;
@@ -33,6 +34,7 @@ class PrepayrollDelegationsController extends Controller
                                     'ud.name AS user_delegated_name', 
                                     'uc.name AS user_insert_name', 
                                     'uu.name AS user_update_name')
+                            ->where('prd.is_delete', false)
                             ->get();
 
         return view('prepayroll.delegation.index', [
@@ -149,8 +151,8 @@ class PrepayrollDelegationsController extends Controller
 
             $oCfg->since_date = $dates[0];
             $oCfg->until_date = $dates[1];
-            $oCfg->is_week = $request->type_pay == \SCons::PAY_W_S;
-            $oCfg->is_biweek = $request->type_pay == \SCons::PAY_W_Q;
+            $oCfg->is_week = $oDelegation->pay_way_id == \SCons::PAY_W_S;
+            $oCfg->is_biweek = $oDelegation->pay_way_id == \SCons::PAY_W_Q;
             $oCfg->is_required = $reportConfig->is_required;
             $oCfg->order_vobo = $reportConfig->order_vobo;
             $oCfg->rol_n_name = null;
@@ -229,5 +231,60 @@ class PrepayrollDelegationsController extends Controller
         }
 
         return redirect()->route('prepayrolldelegation.index')->with('success', 'Delegación de V.º B.º de prenómina creada correctamente');
+    }
+
+    /**
+     * 
+     */
+    public function delete(Request $request, $idDelegation)
+    {
+        $oDelegation = PrepayrollDelegation::find($idDelegation);
+
+        if ($oDelegation == null) {
+            return redirect()->back()->withErrors(['Error' => 'No se encontró la delegación de V.º B.º de prenómina.']);
+        }
+
+        try {
+            \DB::beginTransaction();
+
+            $oObjInsertions = json_decode($oDelegation->json_insertions);
+    
+            $oReportCfg = PrepayReportConfig::find($oObjInsertions->prepay_report_config);
+            if ($oReportCfg == null) {
+                throw new \Exception('No se encontró la configuración de reporte de V.º B.º de prenómina.');
+            }
+            $oReportCfg->is_delete = true;
+            $oReportCfg->save();
+
+            $lVobos = PrepayReportControl::where('cfg_id', $oObjInsertions->prepay_report_config)
+                                            ->where('is_delete', false)
+                                            ->get();
+
+            foreach ($lVobos as $oVobo) {
+                $oVobo->is_delete = true;
+                $oVobo->save();
+            }
+
+            if ($oObjInsertions->role > 0) {
+                \DB::table('user_rol')->where('rol_id', $oObjInsertions->role)->delete();
+            }
+            if ($oObjInsertions->user_permission_id > 0) {
+                \DB::table('user_permission')->where('id', $oObjInsertions->user_permission_id)->delete();
+            }
+    
+            $oDelegation->is_active = false;
+            $oDelegation->is_delete = true;
+            $oDelegation->user_update_id = \Auth::user()->id;
+    
+            $oDelegation->save();
+
+            \DB::commit();
+        }
+        catch (\Exception $e) {
+            \DB::rollBack();
+            return redirect()->back()->withErrors(['Error' => $e->getMessage()])->withInput();
+        }
+
+        return redirect()->route('prepayrolldelegation.index')->with('success', 'Delegación de V.º B.º de prenómina eliminada correctamente');
     }
 }

@@ -32,6 +32,8 @@ class AddRolDefault extends Migration
         ]);
 
         DB::table('menu_rol')->insert([
+        	['rol_id' => '15', 'menu_id' => '5'],
+        	['rol_id' => '15', 'menu_id' => '90'],
         	['rol_id' => '15', 'menu_id' => '92'],
         	['rol_id' => '15', 'menu_id' => '94'],
         	['rol_id' => '15', 'menu_id' => '95']

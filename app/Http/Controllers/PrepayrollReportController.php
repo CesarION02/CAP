@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use App\Models\PrepayReportConfig;
 use App\Models\PrepayReportControl;
 use App\Models\employees;
+use App\Models\PrepayrollDelegation;
 use App\SUtils\SDateUtils;
 use App\SUtils\SPrepayrollUtils;
 
@@ -211,9 +212,8 @@ class PrepayrollReportController extends Controller
                         $lVobo = $lVobo->where('num_week', $number);
                     }
 
-                    $oDelegation = \DB::table('prepayroll_report_delegations AS d')
-                                    ->where('d.user_delegation_id', $cfg->user_n_id)
-                                    ->where('d.is_delete', false)
+                    $oDelegation = PrepayrollDelegation::where('user_delegation_id', $cfg->user_n_id)
+                                    ->where('is_delete', false)
                                     ->where('pay_way_id', $payTypeId)
                                     ->where('number_prepayroll', $number)
                                     ->first();
@@ -222,6 +222,7 @@ class PrepayrollReportController extends Controller
 
                     if ($oVobo != null) {
                         if ($oDelegation != null) {
+                            $oVobo = PrepayReportControl::find($oVobo->id_control);
                             $oVobo->is_required = false;
                             $oVobo->save();
                         }
@@ -236,6 +237,7 @@ class PrepayrollReportController extends Controller
                     $prac->dt_rejected = null;
                     $prac->order_vobo = $orderBovo++;
                     $prac->is_delete = false;
+                    $prac->cfg_id = $cfg->id_configuration;
                     $prac->user_vobo_id = $cfg->user_n_id;
                     $prac->created_by = \Auth::user()->id;
                     $prac->updated_by = \Auth::user()->id;
@@ -265,6 +267,7 @@ class PrepayrollReportController extends Controller
                         $prac->dt_rejected = null;
                         $prac->order_vobo = $orderBovo;
                         $prac->is_delete = false;
+                        $prac->cfg_id = $cfg->id_configuration;
                         $prac->user_vobo_id = $user->id;
                         $prac->created_by = \Auth::user()->id;
                         $prac->updated_by = \Auth::user()->id;
