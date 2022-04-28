@@ -20,15 +20,23 @@ class AddRolDefault extends Migration
             'updated_at' => now()],
         ]);
 
-        DB::table('menu')->insert([
-        	['id' => '95',
-            'menu_id' => '5',
-            'name' => 'Reporte tiempo extra delegados',
-            'url' => 'report/reportetiemposextradelegados',
-            'order' => '5',
-            'icono' => null,
-            'created_at' => now(), 
-            'updated_at' => now()],
+       DB::table('menu')->insert([
+            ['id' => '95',
+                'menu_id' => '5',
+                'name' => 'Reporte tiempo extra delegados',
+                'url' => 'report/reportetiemposextradelegados',
+                'order' => '5',
+                'icono' => null,
+                'created_at' => now(),
+                'updated_at' => now()],
+            ['id' => '96',
+                'menu_id' => '90',
+                'name' => 'Delegación visto bueno',
+                'url' => 'prepayrolldelegation',
+                'order' => '4',
+                'icono' => null,
+                'created_at' => now(),
+                'updated_at' => now()],
         ]);
 
         DB::table('menu_rol')->insert([
