@@ -24,18 +24,22 @@
                 </div>
             
             </div>
-            <div class="col-md-3" style="float: left;">
-                <select class="form-select" name="isActive" id="isActive">
+            <div class="col-md-2" style="float: left; width: 150px;">
+                <a class="btn btn-success" href="{{route('reporteFaltas')}}">Nuevo reporte</a>
+            </div>
+            <div class="col-md-2" style="float: left;">
+                <select class="form-select" name="isActive" id="isActive" style="width: 126px; height: 34px;">
                     <option value="0" selected>Activos</option>
                     <option value="1">Inactivos</option>
                     <option value="2">Todos</option>
                 </select>
             </div>
             <br>
+            <br>
             <div class="box-body" >
                 <div class="row">
                     <div class="col-md-12">
-                        <table id="delays_table" class="table table-condensed" style="width:100%;">
+                        <table id="faltas_table" class="table table-condensed" style="width:100%;">
                             <thead>
                                 <tr>
                                     <th>Empleado</th>
@@ -45,6 +49,7 @@
                                     <th>Departamento</th>
                                     @foreach ($range as $r)
                                         <th>{{$r->nombre}}</th>
+                                        <th></th>
                                     @endforeach
                                 </tr>
                             </thead>
@@ -54,10 +59,10 @@
                                         <td>{{$d->empleado}}</td>
                                         <td>{{$d->num}}</td>
                                         <td>{{$d->admission}}</td>
-                                        <td>{{$d->active}}</td>
+                                        <td style="text-align: center;">{{$d->active}}</td>
                                         <td>{{$d->departamento}}</td>
                                         @foreach ($range as $r)
-                                            <td>
+                                            <td style="text-align: center;">
                                                 {{
                                                 $data->where('empleado_id', $d->empleado_id)
                                                     ->whereBetween('fechaI', [
@@ -69,6 +74,43 @@
                                                         ])
                                                     ->count()
                                                 }}
+                                            </td>
+                                            <td style="text-align: left;">
+                                                <!-- Trigger the modal with a button -->
+                                                <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#{{$d->num.$r->mes}}" style="border-radius: 25%;"><span class="fa fa-calendar-o fa-1"></span></button>
+
+                                                <!-- Modal -->
+                                                <div id="{{$d->num.$r->mes}}" class="modal fade" role="dialog">
+                                                    <div class="modal-dialog">
+
+                                                    <!-- Modal content-->
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                                        <h4 class="modal-title">{{$r->nombre.': '.$d->empleado}}</h4>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                        <ol>
+                                                            @foreach ($data->where('empleado_id', $d->empleado_id)
+                                                                ->whereBetween('fechaI', [
+                                                                    $calendarStart['year'].'-'.
+                                                                    $r->mes.'-01', 
+                                                                    $calendarStart['year'].'-'.
+                                                                    $r->mes.'-'.
+                                                                    cal_days_in_month(CAL_GREGORIAN,$r->mes,$calendarStart['year'])
+                                                                    ]) as $item)
+                                                                    <li>
+                                                                        {{$item->fechaI}}
+                                                                    </li>
+                                                            @endforeach
+                                                        </ol>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                                        </div>
+                                                    </div>
+                                                    </div>
+                                                </div>
                                             </td>
                                         @endforeach
                                     </tr>
@@ -87,7 +129,6 @@
 @endsection
 
 @section("scripts")
-
     <script src="{{ asset("dt/datatables.js") }}" type="text/javascript"></script>
     <script src="{{ asset('dt/dataTables.buttons.min.js') }}"></script>
 	<script src="{{ asset('dt/buttons.flash.min.js') }}"></script>
@@ -100,6 +141,15 @@
     <script src="{{ asset("assets/js/moment/datetime-moment.js") }}" type="text/javascript"></script>
     <script>
         $(document).ready(function() {
+            var range = <?php echo json_encode($range); ?>;
+
+            var exportColumns = [0,1,2,3,4];
+            var j = 4;
+            for (let i = 4; i < (range.length + 4); i++) {
+                j = j+1;
+                exportColumns.push(j);
+                j++;
+            }
 
             $.fn.dataTable.ext.search.push(
                 function( settings, data, dataIndex ) {
@@ -127,7 +177,7 @@
             );
 
             $.fn.dataTable.moment('DD/MM/YYYY');
-            table = $('#delays_table').DataTable({
+            table = $('#faltas_table').DataTable({
                 "language": {
                     "sProcessing":     "Procesando...",
                     "sLengthMenu":     "Mostrar _MENU_ registros",
@@ -165,19 +215,31 @@
                 "buttons": [
                         'pageLength',
                         {
-                            extend: 'excel', 
+                            extend: 'excel',
+                            exportOptions: {
+                                columns: exportColumns
+                            }
                             
                         },
                         {
-                            extend: 'copy', text: 'copiar'
+                            extend: 'copy', text: 'copiar',
+                            exportOptions: {
+                                columns: exportColumns
+                            }
                             
                         },
                         {
                             extend: 'csv',
+                            exportOptions: {
+                                columns: exportColumns
+                            }
                             
                         },
                         {
-                            extend: 'print', text: 'imprimir'
+                            extend: 'print', text: 'imprimir',
+                            exportOptions: {
+                                columns: exportColumns
+                            }
                             
                         }
                     ]

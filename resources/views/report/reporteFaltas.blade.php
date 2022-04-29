@@ -87,7 +87,7 @@ Reporte faltas
                 </div>
                 <div class="box-footer">
                     <div class="" style="float: right;">
-                        <button class="btn btn-warning" type="submit">Generar</button>
+                        <button id="generar" class="btn btn-warning" type="submit">Generar</button>
                     </div>
                 </div>
             </form>
@@ -134,6 +134,7 @@ Reporte faltas
             fm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                document.getElementById('generar').setAttribute('disabled', 'disabled');
                 if(document.getElementById('calendarStart').value != "" && document.getElementById('calendarEnd').value != ""){
                     $(this).off('submit').submit();
                     fm.submit();
@@ -142,6 +143,7 @@ Reporte faltas
                         title: "Debe seleccionar un rango de fecha.",
                         icon: "warning"
                     })
+                    document.getElementById('generar').removeAttribute('disabled');
                 }
             });
         });
