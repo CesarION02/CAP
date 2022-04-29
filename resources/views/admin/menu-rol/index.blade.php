@@ -1,11 +1,18 @@
 @extends("theme.$theme.layout")
+@section('styles1')
+    <link rel="stylesheet" href="{{ asset("dt/datatables.css") }}">
+    <link rel="stylesheet" href="{{ asset("assets/css/reportD.css") }}">
+    <style>
+        tr {
+            font-size: 70%;
+        }
+        span.nobr { white-space: nowrap; }
+    </style>
+@endsection
 @section("title")
 Menú - Rol
 @endsection
 
-@section("scripts")
-<script src="{{asset("assets/pages/scripts/admin/menu-rol/index.js")}}" type="text/javascript"></script>
-@endsection
 
 @section('content')
 <div class="row">
@@ -96,4 +103,48 @@ Menú - Rol
         </div>
     </div>
 </div> 
+@endsection
+
+@section('scripts')
+    <script src="{{asset("assets/pages/scripts/admin/menu-rol/index.js")}}" type="text/javascript"></script>
+    <script src="{{ asset("dt/datatables.js") }}" type="text/javascript"></script>
+    <script>
+        $(document).ready(function() {
+            table = $('#tabla-data').DataTable({
+                "paging":   false,
+                "ordering": false,
+                "info":     false,
+                "language": {
+                    "sProcessing":     "Procesando...",
+                    "sLengthMenu":     "Mostrar _MENU_ registros",
+                    "sZeroRecords":    "No se encontraron resultados",
+                    "sEmptyTable":     "Ningún dato disponible en esta tabla",
+                    "sInfo":           "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+                    "sInfoEmpty":      "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered":   "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix":    "",
+                    "sSearch":         "Buscar:",
+                    "sUrl":            "",
+                    "sInfoThousands":  ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst":    "Primero",
+                        "sLast":     "Último",
+                        "sNext":     "Siguiente",
+                        "sPrevious": "Anterior"
+                    },
+                    "oAria": {
+                        "sSortAscending":  ": Activar para ordenar la columna de manera ascendente",
+                        "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                    }
+                },
+                
+                "fixedHeader": {
+                    header: true
+                },
+                "colReorder": true,
+                "scrollX": true
+            });
+        });
+    </script>
 @endsection
