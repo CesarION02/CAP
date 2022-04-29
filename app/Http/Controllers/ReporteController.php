@@ -1949,6 +1949,17 @@ class ReporteController extends Controller
             switch($request->tipo){
                 //Caso de departamentos
                 case 1:
+                    $employees = \DB::table('employees')
+                            ->leftJoin('dept_rh','dept_rh.id','=','employees.dept_rh_id')
+                            ->where('employees.department_id', '!=', 100)
+                            ->where('employees.admission_date', '<=', $end)
+                            ->where('dept_rh.id',$request->dept)
+                            ->select('employees.name AS empleado','employees.id AS empleado_id',
+                                    'dept_rh.name AS departamento','employees.num_employee as num',
+                                    'employees.is_active as active', 'employees.admission_date as admission',
+                                    'employees.leave_date as leave')
+                            ->get();
+
                     $data = \DB::table('incidents_day')
                                 ->join('incidents','incidents.id', '=', 'incidents_day.incidents_id')
                                 ->join('employees','incidents.employee_id','=','employees.id')
@@ -1984,6 +1995,17 @@ class ReporteController extends Controller
                 //Caso de empleados
                 case 2:
                     if($request->employees != 0){
+                        $employees = \DB::table('employees')
+                        ->leftJoin('dept_rh','dept_rh.id','=','employees.dept_rh_id')
+                        ->where('employees.department_id', '!=', 100)
+                        ->where('employees.admission_date', '<=', $end)
+                        ->where('employees.id',$request->employees)
+                        ->select('employees.name AS empleado','employees.id AS empleado_id',
+                                'dept_rh.name AS departamento','employees.num_employee as num',
+                                'employees.is_active as active', 'employees.admission_date as admission',
+                                'employees.leave_date as leave')
+                        ->get();
+
                         $data = \DB::table('incidents_day')
                                     ->join('incidents','incidents.id', '=', 'incidents_day.incidents_id')
                                     ->join('employees','incidents.employee_id','=','employees.id')
@@ -2015,6 +2037,16 @@ class ReporteController extends Controller
                                                 'employees.num_employee as num', 'employees.is_active as active', 
                                                 'employees.admission_date as admission');
                     }else{
+                        $employees = \DB::table('employees')
+                        ->leftJoin('dept_rh','dept_rh.id','=','employees.dept_rh_id')
+                        ->where('employees.department_id', '!=', 100)
+                        ->where('employees.admission_date', '<=', $end)
+                        ->select('employees.name AS empleado','employees.id AS empleado_id',
+                                'dept_rh.name AS departamento','employees.num_employee as num',
+                                'employees.is_active as active', 'employees.admission_date as admission',
+                                'employees.leave_date as leave')
+                        ->get();
+
                         $data = \DB::table('incidents_day')
                                     ->join('incidents','incidents.id', '=', 'incidents_day.incidents_id')
                                     ->join('employees','incidents.employee_id','=','employees.id')
@@ -2046,15 +2078,6 @@ class ReporteController extends Controller
                     }
                     break;
             }
-            $employees = \DB::table('employees')
-                            ->leftJoin('dept_rh','dept_rh.id','=','employees.dept_rh_id')
-                            ->where('employees.department_id', '!=', 100)
-                            ->where('employees.admission_date', '<=', $end)
-                            ->select('employees.name AS empleado','employees.id AS empleado_id',
-                                    'dept_rh.name AS departamento','employees.num_employee as num',
-                                    'employees.is_active as active', 'employees.admission_date as admission',
-                                    'employees.leave_date as leave')
-                            ->get();
             
             $actualEmployees = $employees->where('leave', null);
             $leaveEmployees = $employees->where('leave', '!=', null);

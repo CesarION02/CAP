@@ -24,13 +24,17 @@
                 </div>
             
             </div>
-            <div class="col-md-3" style="float: left;">
-                <select class="form-select" name="isActive" id="isActive">
+            <div class="col-md-2" style="float: left; width: 150px;">
+                <a class="btn btn-success" href="{{route('reporteFaltas')}}">Nuevo reporte</a>
+            </div>
+            <div class="col-md-2" style="float: left;">
+                <select class="form-select" name="isActive" id="isActive" style="width: 126px; height: 34px;">
                     <option value="0" selected>Activos</option>
                     <option value="1">Inactivos</option>
                     <option value="2">Todos</option>
                 </select>
             </div>
+            <br>
             <br>
             <div class="box-body" >
                 <div class="row">
