@@ -20,6 +20,7 @@ use App\SUtils\SGenUtils;
 use App\SUtils\SPermissions;
 use App\SUtils\SPrepayrollUtils;
 use App\SData\SDataProcess;
+use Illuminate\Support\Collection;
 use DB;
 use Carbon\Carbon;
 use App\SUtils\SReg;
@@ -1907,5 +1908,171 @@ class ReporteController extends Controller
             $orden = $request->orden;
 
             return view('report.reportepuerta')->with('data',$data)->with('orden',$orden);
+        }
+
+        public function indexFaltasReport(){
+            $deptos = DepartmentRH::select('id','name')->where('is_delete',0)->get();
+            $employees = employees::select('id','name')->where('is_delete',0)->get();
+
+            return view('report.reporteFaltas', ['deptos' => $deptos, 'employees' => $employees]);
+        }
+
+        public function FaltasReportGenerar(Request $request){
+            $calendarStart = getDate(strtotime($request->calendarStart));
+            $calendarEnd = getDate(strtotime($request->calendarEnd));
+            $date = date_create($calendarStart['year'] . '-' . $calendarStart['mon'] . '-' . $calendarStart['mday']);
+            $start = date_format($date,"Y-m-d");
+            $date = date_create($calendarEnd['year'] . '-' . $calendarEnd['mon'] . '-' . cal_days_in_month(CAL_GREGORIAN,$calendarEnd['mon'],$calendarEnd['year']));
+            $end = date_format($date,"Y-m-d");
+            $datetime1 = date_create($start);
+            $datetime2 = date_create($end);
+            
+            $interval = (Integer)date_diff($datetime1, $datetime2)->format('%m');
+            
+            $meses = [['nombre'=>'Enero','mes'=>'01'],['nombre'=>'Febrero','mes'=>'02'],['nombre'=>'Marzo','mes'=>'03'],
+                        ['nombre'=>'Abril','mes'=>'04'],['nombre'=>'Mayo','mes'=>'05'],['nombre'=>'Junio','mes'=>'06'],
+                        ['nombre'=>'Julio','mes'=>'07'],['nombre'=>'Agosto','mes'=>'08'],['nombre'=>'Septiembre','mes'=>'09'],
+                        ['nombre'=>'Octubre','mes'=>'10'],['nombre'=>'Noviembre','mes'=>'11'],['nombre'=>'Diciembre','mes'=>'12']];
+
+            $range = [];
+
+            if($interval != 0){
+                $interval = $interval + ((Integer)$calendarStart['mon'] - 1);
+                for ($i=(Integer)$calendarStart['mon'] - 1; $i <= $interval ; $i++) { 
+                    array_push($range, (object)$meses[$i]);
+                }
+                
+            }else{
+                array_push($range, (object)$meses[(Integer)$calendarStart['mon'] - 1]);
+            }
+
+            switch($request->tipo){
+                //Caso de departamentos
+                case 1:
+                    $data = \DB::table('incidents_day')
+                                ->join('incidents','incidents.id', '=', 'incidents_day.incidents_id')
+                                ->join('employees','incidents.employee_id','=','employees.id')
+                                ->join('dept_rh','dept_rh.id','=','employees.dept_rh_id')
+                                ->join('class_incident','class_incident.id','=','incidents.cls_inc_id')
+                                ->join('type_incidents','type_incidents.id', '=', 'incidents.type_incidents_id')
+                                ->whereBetween('incidents.start_date', [$start,$end])
+                                ->whereBetween('incidents.end_date',[$start,$end])
+                                ->where('dept_rh.id',$request->dept)
+                                ->whereIn('incidents.type_incidents_id', [1, 4, 5, 6])
+                                ->where('incidents.is_delete', false)
+                                ->where('employees.is_delete', false)
+                                ->orderBy('incidents.start_date')
+                                ->select('incidents_day.date AS fechaI',
+                                        'dept_rh.name AS departamento', 'employees.name AS empleado','employees.id AS empleado_id',
+                                        'employees.num_employee as num', 'employees.is_active as active', 'employees.admission_date as admission');
+                    
+                    $processed = \DB::table('processed_data')
+                                    ->join('employees','processed_data.employee_id','=','employees.id')
+                                    ->join('dept_rh','dept_rh.id','=','employees.dept_rh_id')
+                                    ->whereBetween('processed_data.outDate', [$start,$end])
+                                    ->where('dept_rh.id',$request->dept)
+                                    ->where('processed_data.hasabsence', 1)
+                                    ->where('employees.is_delete', false)
+                                    ->orderBy('processed_data.outDate')
+                                    ->select('processed_data.outDate AS fechaI','processed_data.outDate AS fechaF',
+                                            'dept_rh.name AS departamento', 
+                                            'employees.name AS empleado','employees.id AS empleado_id',
+                                            'employees.num_employee as num', 'employees.is_active as active', 
+                                            'employees.admission_date as admission');
+                                    
+                    break;
+                //Caso de empleados
+                case 2:
+                    if($request->employees != 0){
+                        $data = \DB::table('incidents_day')
+                                    ->join('incidents','incidents.id', '=', 'incidents_day.incidents_id')
+                                    ->join('employees','incidents.employee_id','=','employees.id')
+                                    ->join('dept_rh','dept_rh.id','=','employees.dept_rh_id')
+                                    ->join('class_incident','class_incident.id','=','incidents.cls_inc_id')
+                                    ->join('type_incidents','type_incidents.id', '=', 'incidents.type_incidents_id')
+                                    ->whereBetween('incidents.start_date', [$start,$end])
+                                    ->whereBetween('incidents.end_date',[$start,$end])
+                                    ->where('employees.id',$request->employees)
+                                    ->whereIn('incidents.type_incidents_id', [1, 4, 5, 6])
+                                    ->where('incidents.is_delete', false)
+                                    ->where('employees.is_delete', false)
+                                    ->orderBy('incidents.start_date')
+                                    ->select('incidents_day.date AS fechaI',
+                                            'dept_rh.name AS departamento', 'employees.name AS empleado','employees.id AS empleado_id',
+                                            'employees.num_employee as num', 'employees.is_active as active', 'employees.admission_date as admission');
+
+                        $processed = \DB::table('processed_data')
+                                        ->join('employees','processed_data.employee_id','=','employees.id')
+                                        ->join('dept_rh','dept_rh.id','=','employees.dept_rh_id')
+                                        ->whereBetween('processed_data.outDate', [$start,$end])
+                                        ->where('employees.id',$request->employees)
+                                        ->where('processed_data.hasabsence', 1)
+                                        ->where('employees.is_delete', false)
+                                        ->orderBy('processed_data.outDate')
+                                        ->select('processed_data.outDate AS fechaI','processed_data.outDate AS fechaF',
+                                                'dept_rh.name AS departamento', 
+                                                'employees.name AS empleado','employees.id AS empleado_id',
+                                                'employees.num_employee as num', 'employees.is_active as active', 
+                                                'employees.admission_date as admission');
+                    }else{
+                        $data = \DB::table('incidents_day')
+                                    ->join('incidents','incidents.id', '=', 'incidents_day.incidents_id')
+                                    ->join('employees','incidents.employee_id','=','employees.id')
+                                    ->join('dept_rh','dept_rh.id','=','employees.dept_rh_id')
+                                    ->join('class_incident','class_incident.id','=','incidents.cls_inc_id')
+                                    ->join('type_incidents','type_incidents.id', '=', 'incidents.type_incidents_id')
+                                    ->whereBetween('incidents.start_date', [$start,$end])
+                                    ->whereBetween('incidents.end_date',[$start,$end])
+                                    ->whereIn('incidents.type_incidents_id', [1, 4, 5, 6])
+                                    ->where('incidents.is_delete', false)
+                                    ->where('employees.is_delete', false)
+                                    ->orderBy('incidents.start_date')
+                                    ->select('incidents_day.date AS fechaI',
+                                            'dept_rh.name AS departamento', 'employees.name AS empleado','employees.id AS empleado_id',
+                                            'employees.num_employee as num', 'employees.is_active as active', 'employees.admission_date as admission');
+
+                        $processed = \DB::table('processed_data')
+                                        ->join('employees','processed_data.employee_id','=','employees.id')
+                                        ->join('dept_rh','dept_rh.id','=','employees.dept_rh_id')
+                                        ->whereBetween('processed_data.outDate', [$start,$end])
+                                        ->where('processed_data.hasabsence', 1)
+                                        ->where('employees.is_delete', false)
+                                        ->orderBy('processed_data.outDate')
+                                        ->select('processed_data.outDate AS fechaI','processed_data.outDate AS fechaF',
+                                                'dept_rh.name AS departamento', 
+                                                'employees.name AS empleado','employees.id AS empleado_id',
+                                                'employees.num_employee as num', 'employees.is_active as active', 
+                                                'employees.admission_date as admission');
+                    }
+                    break;
+            }
+            $employees = \DB::table('employees')
+                            ->leftJoin('dept_rh','dept_rh.id','=','employees.dept_rh_id')
+                            ->where('employees.department_id', '!=', 100)
+                            ->where('employees.admission_date', '<=', $end)
+                            ->select('employees.name AS empleado','employees.id AS empleado_id',
+                                    'dept_rh.name AS departamento','employees.num_employee as num',
+                                    'employees.is_active as active', 'employees.admission_date as admission',
+                                    'employees.leave_date as leave')
+                            ->get();
+            
+            $actualEmployees = $employees->where('leave', null);
+            $leaveEmployees = $employees->where('leave', '!=', null);
+
+            $ReturnEmployees = $leaveEmployees->filter(function ($item) {
+                return (data_get($item, 'leave') < data_get($item, 'admission'));
+            });
+
+            $actualLeaveEmployees = $leaveEmployees->filter(function ($item) use($start) {
+                return (data_get($item, 'leave') > data_get($item, 'admission')) && (data_get($item, 'leave') > $start);
+            });
+
+            $totEmployees = $actualEmployees->merge($ReturnEmployees);
+            $totEmployees = $totEmployees->merge($actualLeaveEmployees);
+            $data = $data->get();
+            $processed = $processed->get();
+            $merged = $data->merge($processed);
+            
+            return view('report.reporteFaltasView',  ['data' => $merged, 'range' => $range, 'totEmployees' => $totEmployees, 'calendarStart' => $calendarStart]);
         }
 }
