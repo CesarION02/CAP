@@ -28,10 +28,10 @@ class CreatePrepayrollReportDelegationsTable extends Migration
             $table->timestamps();
 
             $table->foreign('pay_way_id')->references('id')->on('way_pay');
-            $table->foreign('user_delegation_id')->references('id_user')->on('users');
-            $table->foreign('user_delegated_id')->references('id_user')->on('users');
-            $table->foreign('user_insert_id')->references('id_user')->on('users');
-            $table->foreign('user_update_id')->references('id_user')->on('users');
+            $table->foreign('user_delegation_id')->references('id')->on('users');
+            $table->foreign('user_delegated_id')->references('id')->on('users');
+            $table->foreign('user_insert_id')->references('id')->on('users');
+            $table->foreign('user_update_id')->references('id')->on('users');
         });
     }
 
