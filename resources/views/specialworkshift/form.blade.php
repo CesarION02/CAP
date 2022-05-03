@@ -13,10 +13,10 @@
                         @endif
                     @endfor
             @else
-                <select name="employee_id" id="employee_id">
+                <select name="employee_id" id="employee_id" class="chosen-select">
                     <option value="0">Seleccione empleado</option>
                     @for($i = 0 ; count($employees) > $i ; $i++)
-                        <option value="{{$employees[$i]->idEmployee}}">{{$employees[$i]->nameEmployee}}</option>
+                        <option value="{{$employees[$i]->idEmployee}}">{{$employees[$i]->nameEmployee.' - '.$employees[$i]->numEmployee}}</option>
                     @endfor
             @endif
         </select>

@@ -1687,7 +1687,7 @@ class ReporteController extends Controller
         public function incidentReportView(){
             $incidents = typeincident::select('id','name')->get();
             $deptos = DepartmentRH::select('id','name')->where('is_delete',0)->get();
-            $employees = employees::select('id','name')->where('is_delete',0)->get();
+            $employees = employees::select('id','name','num_employee')->where('is_delete',0)->get();
 
             return view('report.incidentReport')->with('incidents',$incidents)->with('deptos',$deptos)->with('employees',$employees);
         }
@@ -1781,7 +1781,7 @@ class ReporteController extends Controller
             $response = $r->getBody()->getContents();
             $datas = json_decode($response);
             $reportType = 1;
-            $lEmployees = employees::where('is_active', 1)->pluck('id','name');
+            $lEmployees = employees::selectRaw('CONCAT(name, " - ", num_employee) AS name, id')->where('is_active', 1)->pluck('id', 'name');
             $lAreas = area::where('is_delete', 0)->pluck('id','name');
             return view('report.usopuertasdatos')->with('datas',$datas)->with('lEmployees',$lEmployees)->with('lAreas',$lAreas);
         }
@@ -1912,7 +1912,7 @@ class ReporteController extends Controller
 
         public function indexFaltasReport(){
             $deptos = DepartmentRH::select('id','name')->where('is_delete',0)->get();
-            $employees = employees::select('id','name')->where('is_delete',0)->get();
+            $employees = employees::select('id','name', 'num_employee')->where('is_delete',0)->get();
 
             return view('report.reporteFaltas', ['deptos' => $deptos, 'employees' => $employees]);
         }

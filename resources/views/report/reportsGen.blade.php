@@ -3,6 +3,8 @@
 @section('styles1')
     <link rel="stylesheet" href="{{asset("daterangepicker/daterangepicker.css")}}">
     <link rel="stylesheet" href="{{ asset("assets/css/reportD.css") }}">
+    <link rel="stylesheet" href="{{asset("assets/css/chosen.min.css")}}">
+    <link rel="stylesheet" href="{{asset("assets/css/selectchosen.css")}}">
 @endsection
 
 @section('title')
@@ -27,10 +29,10 @@
                             Filtrar por:*
                         </div>
                         <div class="col-md-3 col-md-offset-1">
-                            <label><input v-model="picked" v-on:change="onFilterTypeChange()" type="radio" name="optradio" value="period">Periodicidad de pago</label>
+                            <label><input v-model="picked" v-on:change="onFilterTypeChange()" type="radio" name="optradio" value="period" onclick="chosDisable();">Periodicidad de pago</label>
                         </div>
                         <div class="col-md-3">
-                            <label><input v-model="picked" v-on:change="onFilterTypeChange()" type="radio" name="optradio" value="employee">Empleado</label>
+                            <label><input v-model="picked" v-on:change="onFilterTypeChange()" type="radio" name="optradio" value="employee" onclick="chosEnable();">Empleado</label>
                         </div>
                     </div>
                     <br>
@@ -55,8 +57,8 @@
                                 Empleado:*
                             </div>
                             <div class="col-md-7 col-md-offset-1">
-                                <select :disabled="picked == 'period'" v-model='idEmployee' name="emp_id" form="theForm" id="emp_id" class="form-control" placeholder="Selecciona empleado...">
-                                    <option v-for="employee in lEmps" :value="employee.id">@{{ employee.name }}</option>
+                                <select :disabled="picked == 'period'" v-model='idEmployee' name="emp_id" form="theForm" id="emp_id" class="form-control chosen-select" data-placeholder="Selecciona empleado...">
+                                    <option v-for="employee in lEmps" :value="employee.id">@{{ employee.name }} - @{{ employee.num_employee }}</option>
                                 </select>
                             </div>
                         </div>
@@ -139,6 +141,15 @@
 @endsection
 
 @section("scripts")
+    <script>
+        function chosEnable(){
+            $('.chosen-select').prop('disabled', false).trigger("chosen:updated");
+        }
+        function chosDisable(){
+            $('.chosen-select').prop('disabled', true).trigger("chosen:updated");
+        }
+    </script>
+
     <script src="{{ asset("assets/js/axios.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/chosen.jquery.min.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/vue.js") }}" type="text/javascript"></script>
@@ -231,5 +242,8 @@
                 }
             });
          });
+    </script>
+    <script>
+        $(".chosen-select").chosen();
     </script>
 @endsection

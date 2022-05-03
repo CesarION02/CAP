@@ -127,7 +127,7 @@ class incidentController extends Controller
                                 ->whereIn('departments.dept_group_id',$Adgu)
                                 ->where('is_active', true)
                                 ->orderBy('name','ASC')
-                                ->select('employees.name AS name','employees.id AS num')
+                                ->select('employees.name AS name','employees.id AS num', 'employees.num_employee')
                                 ->get();
         }else{
             $employees = DB::table('employees')
@@ -135,7 +135,7 @@ class incidentController extends Controller
                                 ->where('is_active', true)
                                 ->where('department_id',15)
                                 ->orderBy('name','ASC')
-                                ->select('employees.name AS name','employees.id AS num')
+                                ->select('employees.name AS name','employees.id AS num', 'employees.num_employee')
                                 ->get();    
         }
 

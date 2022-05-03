@@ -36,9 +36,9 @@
             @if(isset($datas))
                <input type="text" class="form-control" value="{{$datas[0]->name}}" readonly>
             @else
-                <select id="employee_id"  name="employee_id" class="form-control">
+                <select id="employee_id"  name="employee_id" class="form-control chosen-select">
                     @foreach($employees as $employee)
-                    <option value="{{ $employee->num }}" {{old('employee_id') == $index ? 'selected' : '' }}> {{$employee->name}}</option>
+                    <option value="{{ $employee->num }}" {{old('employee_id') == $index ? 'selected' : '' }}> {{$employee->name.' - '.$employee->num_employee}}</option>
                     @endforeach
                 </select>
             @endif

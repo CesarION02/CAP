@@ -77,7 +77,7 @@ Reporte faltas
                             <select disabled="true" data-placeholder="Selecciona opciones..." style="width: 60%" class="chosen-select" id="employees" name="employees" required>
                                     <option value="0">Todos</option>
                                 @for($i = 0 ; count($employees) > $i ; $i++)
-                                    <option value="{{$employees[$i]->id}}">{{$employees[$i]->name}}</option>
+                                    <option value="{{$employees[$i]->id}}">{{$employees[$i]->name.' - '.$employees[$i]->num_employee}}</option>
                                 @endfor   
                             </select>
                         </div>
