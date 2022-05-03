@@ -12,7 +12,30 @@
 
 
 @section('content')
-<div class="row">
+<div class="row" id="faltasReport">
+
+<!-- Modal -->
+<div id="fmodal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+        <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">@{{Employee}}</h4>
+        </div>
+        <div class="modal-body">
+        <ol id="recipient">
+            <li v-for="falta in lfaltas">@{{falta.fechaI}}</li>
+        </ol>
+        </div>
+        <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+    </div>
+    </div>
+</div>
+
     <div class="col-lg-12">
         @include('includes.form-error')
         @include('includes.mensaje')
@@ -49,7 +72,6 @@
                                     <th>Departamento</th>
                                     @foreach ($range as $r)
                                         <th>{{$r->nombre}}</th>
-                                        <th></th>
                                     @endforeach
                                 </tr>
                             </thead>
@@ -62,7 +84,7 @@
                                         <td style="text-align: center;">{{$d->active}}</td>
                                         <td>{{$d->departamento}}</td>
                                         @foreach ($range as $r)
-                                            <td style="text-align: center;">
+                                            <td>
                                                 {{
                                                 $data->where('empleado_id', $d->empleado_id)
                                                     ->whereBetween('fechaI', [
@@ -74,43 +96,21 @@
                                                         ])
                                                     ->count()
                                                 }}
-                                            </td>
-                                            <td style="text-align: left;">
                                                 <!-- Trigger the modal with a button -->
-                                                <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#{{$d->num.$r->mes}}" style="border-radius: 25%;"><span class="fa fa-calendar-o fa-1"></span></button>
+                                                <a href="#" data-toggle="modal" data-target="#fmodal" 
+                                                    v-on:click="setEmpl('{{$d->empleado}}',
+                                                    {{$data->where('empleado_id', $d->empleado_id)
+                                                        ->whereBetween('fechaI', [
+                                                            $calendarStart['year'].'-'.
+                                                            $r->mes.'-01', 
+                                                            $calendarStart['year'].'-'.
+                                                            $r->mes.'-'.
+                                                            cal_days_in_month(CAL_GREGORIAN,$r->mes,$calendarStart['year'])
+                                                            ])}})">
+                                                    <span class="fa fa-calendar-o fa-1"></span>
+                                                </a>
 
-                                                <!-- Modal -->
-                                                <div id="{{$d->num.$r->mes}}" class="modal fade" role="dialog">
-                                                    <div class="modal-dialog">
-
-                                                    <!-- Modal content-->
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                                        <h4 class="modal-title">{{$r->nombre.': '.$d->empleado}}</h4>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                        <ol>
-                                                            @foreach ($data->where('empleado_id', $d->empleado_id)
-                                                                ->whereBetween('fechaI', [
-                                                                    $calendarStart['year'].'-'.
-                                                                    $r->mes.'-01', 
-                                                                    $calendarStart['year'].'-'.
-                                                                    $r->mes.'-'.
-                                                                    cal_days_in_month(CAL_GREGORIAN,$r->mes,$calendarStart['year'])
-                                                                    ]) as $item)
-                                                                    <li>
-                                                                        {{$item->fechaI}}
-                                                                    </li>
-                                                            @endforeach
-                                                        </ol>
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                                                        </div>
-                                                    </div>
-                                                    </div>
-                                                </div>
+                                                
                                             </td>
                                         @endforeach
                                     </tr>
@@ -129,6 +129,10 @@
 @endsection
 
 @section("scripts")
+    <script src="{{ asset("assets/js/chosen.jquery.min.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/js/axios.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/js/vue.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/pages/scripts/report/SFaltasReport.js")}}"></script>
     <script src="{{ asset("dt/datatables.js") }}" type="text/javascript"></script>
     <script src="{{ asset('dt/dataTables.buttons.min.js') }}"></script>
 	<script src="{{ asset('dt/buttons.flash.min.js') }}"></script>
@@ -141,16 +145,6 @@
     <script src="{{ asset("assets/js/moment/datetime-moment.js") }}" type="text/javascript"></script>
     <script>
         $(document).ready(function() {
-            var range = <?php echo json_encode($range); ?>;
-
-            var exportColumns = [0,1,2,3,4];
-            var j = 4;
-            for (let i = 4; i < (range.length + 4); i++) {
-                j = j+1;
-                exportColumns.push(j);
-                j++;
-            }
-
             $.fn.dataTable.ext.search.push(
                 function( settings, data, dataIndex ) {
                     let registerVal = parseInt( $('#isActive').val(), 10 );
@@ -216,31 +210,15 @@
                         'pageLength',
                         {
                             extend: 'excel',
-                            exportOptions: {
-                                columns: exportColumns
-                            }
-                            
                         },
                         {
                             extend: 'copy', text: 'copiar',
-                            exportOptions: {
-                                columns: exportColumns
-                            }
-                            
                         },
                         {
                             extend: 'csv',
-                            exportOptions: {
-                                columns: exportColumns
-                            }
-                            
                         },
                         {
                             extend: 'print', text: 'imprimir',
-                            exportOptions: {
-                                columns: exportColumns
-                            }
-                            
                         }
                     ]
             });
