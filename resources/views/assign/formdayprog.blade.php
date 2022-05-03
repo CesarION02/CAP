@@ -14,7 +14,7 @@
     <div class="col-lg-8">
         <select style="width: 95%" class="js-example-basic-multiple" name="empleado" id="empleado">
             @foreach($employees as $employee)
-                <option value="{{$employee->id}}">{{$employee->name}}</option>
+                <option value="{{$employee->id}}">{{$employee->name.' - '.$employee->num_employee}}</option>
             @endforeach
         </select>    
     </div>

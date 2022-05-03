@@ -576,7 +576,7 @@ class assignController extends Controller
                     ->join('department_group','department_group.id','=','departments.dept_group_id')
                     ->whereIn('departments.dept_group_id',$Adgu)
                     ->where('employees.is_active',1)
-                    ->select('employees.id AS id','employees.name AS name', 'department_group.name AS nameGroup')
+                    ->select('employees.id AS id','employees.name AS name','employees.num_employee','department_group.name AS nameGroup')
                     ->get();
         }else{
             $employee = DB::table('employees')
@@ -585,7 +585,7 @@ class assignController extends Controller
                     ->join('department_group','department_group.id','=','departments.dept_group_id')
                     ->where('employees.is_active',1)
                     ->orderBy('employees.name')
-                    ->select('employees.id AS id','employees.name AS name', 'department_group.name AS nameGroup')
+                    ->select('employees.id AS id','employees.name AS name','employees.num_employee','department_group.name AS nameGroup')
                     ->get();    
         }
         $iTemplateId = env('TMPLTE_SATURDAYS', 0);
@@ -610,7 +610,7 @@ class assignController extends Controller
                     ->join('department_group','department_group.id','=','departments.dept_group_id')
                     ->whereIn('departments.dept_group_id',$Adgu)
                     ->where('employees.is_active',1)
-                    ->select('employees.id AS id','employees.name AS name', 'department_group.name AS nameGroup')
+                    ->select('employees.id AS id','employees.name AS name','employees.num_employee', 'department_group.name AS nameGroup')
                     ->get();
         }else{
             $employee = DB::table('employees')
@@ -619,7 +619,7 @@ class assignController extends Controller
                     ->join('department_group','department_group.id','=','departments.dept_group_id')
                     ->where('employees.is_active',1)
                     ->orderBy('employees.name')
-                    ->select('employees.id AS id','employees.name AS name', 'department_group.name AS nameGroup')
+                    ->select('employees.id AS id','employees.name AS name','employees.num_employee', 'department_group.name AS nameGroup')
                     ->get();    
         }
         $iTemplateId = env('TMPLTE_SATURDAYS', 0);

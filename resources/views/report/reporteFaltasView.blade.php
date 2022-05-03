@@ -12,7 +12,28 @@
 
 
 @section('content')
-<div class="row">
+<div class="row" id="faltasReport">
+<!-- Modal -->
+<div id="fmodal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">@{{Employee}}</h4>
+            </div>
+            <div class="modal-body">
+                <ol id="recipient">
+                    <li v-for="falta in lfaltas">@{{falta.fechaI}}</li>
+                </ol>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
     <div class="col-lg-12">
         @include('includes.form-error')
         @include('includes.mensaje')
@@ -24,18 +45,22 @@
                 </div>
             
             </div>
-            <div class="col-md-3" style="float: left;">
-                <select class="form-select" name="isActive" id="isActive">
+            <div class="col-md-2" style="float: left; width: 150px;">
+                <a class="btn btn-success" href="{{route('reporteFaltas')}}">Nuevo reporte</a>
+            </div>
+            <div class="col-md-2" style="float: left;">
+                <select class="form-select" name="isActive" id="isActive" style="width: 126px; height: 34px;">
                     <option value="0" selected>Activos</option>
                     <option value="1">Inactivos</option>
                     <option value="2">Todos</option>
                 </select>
             </div>
             <br>
+            <br>
             <div class="box-body" >
                 <div class="row">
                     <div class="col-md-12">
-                        <table id="delays_table" class="table table-condensed" style="width:100%;">
+                        <table id="faltas_table" class="table table-condensed" style="width:100%;">
                             <thead>
                                 <tr>
                                     <th>Empleado</th>
@@ -54,7 +79,7 @@
                                         <td>{{$d->empleado}}</td>
                                         <td>{{$d->num}}</td>
                                         <td>{{$d->admission}}</td>
-                                        <td>{{$d->active}}</td>
+                                        <td style="text-align: center;">{{$d->active}}</td>
                                         <td>{{$d->departamento}}</td>
                                         @foreach ($range as $r)
                                             <td>
@@ -66,9 +91,21 @@
                                                         $calendarStart['year'].'-'.
                                                         $r->mes.'-'.
                                                         cal_days_in_month(CAL_GREGORIAN,$r->mes,$calendarStart['year'])
-                                                        ])
-                                                    ->count()
+                                                        ])->sortBy('fechaI')->unique('fechaI')->count()
                                                 }}
+                                                <!-- Trigger the modal with a button -->
+                                                <a href="#" data-toggle="modal" data-target="#fmodal" 
+                                                    v-on:click="setEmpl('{{$d->empleado}}',
+                                                    {{$data->where('empleado_id', $d->empleado_id)
+                                                        ->whereBetween('fechaI', [
+                                                            $calendarStart['year'].'-'.
+                                                            $r->mes.'-01', 
+                                                            $calendarStart['year'].'-'.
+                                                            $r->mes.'-'.
+                                                            cal_days_in_month(CAL_GREGORIAN,$r->mes,$calendarStart['year'])
+                                                            ])->sortBy('fechaI')->unique('fechaI')}})">
+                                                    <span class="fa fa-calendar-o fa-1"></span>
+                                                </a>
                                             </td>
                                         @endforeach
                                     </tr>
@@ -87,7 +124,10 @@
 @endsection
 
 @section("scripts")
-
+    <script src="{{ asset("assets/js/chosen.jquery.min.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/js/axios.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/js/vue.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/pages/scripts/report/SFaltasReport.js")}}"></script>
     <script src="{{ asset("dt/datatables.js") }}" type="text/javascript"></script>
     <script src="{{ asset('dt/dataTables.buttons.min.js') }}"></script>
 	<script src="{{ asset('dt/buttons.flash.min.js') }}"></script>
@@ -100,7 +140,6 @@
     <script src="{{ asset("assets/js/moment/datetime-moment.js") }}" type="text/javascript"></script>
     <script>
         $(document).ready(function() {
-
             $.fn.dataTable.ext.search.push(
                 function( settings, data, dataIndex ) {
                     let registerVal = parseInt( $('#isActive').val(), 10 );
@@ -127,7 +166,7 @@
             );
 
             $.fn.dataTable.moment('DD/MM/YYYY');
-            table = $('#delays_table').DataTable({
+            table = $('#faltas_table').DataTable({
                 "language": {
                     "sProcessing":     "Procesando...",
                     "sLengthMenu":     "Mostrar _MENU_ registros",
@@ -165,20 +204,16 @@
                 "buttons": [
                         'pageLength',
                         {
-                            extend: 'excel', 
-                            
+                            extend: 'excel',
                         },
                         {
-                            extend: 'copy', text: 'copiar'
-                            
+                            extend: 'copy', text: 'copiar',
                         },
                         {
                             extend: 'csv',
-                            
                         },
                         {
-                            extend: 'print', text: 'imprimir'
-                            
+                            extend: 'print', text: 'imprimir',
                         }
                     ]
             });

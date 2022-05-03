@@ -77,17 +77,15 @@ Reporte faltas
                             <select disabled="true" data-placeholder="Selecciona opciones..." style="width: 60%" class="chosen-select" id="employees" name="employees" required>
                                     <option value="0">Todos</option>
                                 @for($i = 0 ; count($employees) > $i ; $i++)
-                                    <option value="{{$employees[$i]->id}}">{{$employees[$i]->name}}</option>
+                                    <option value="{{$employees[$i]->id}}">{{$employees[$i]->name.' - '.$employees[$i]->num_employee}}</option>
                                 @endfor   
                             </select>
                         </div>
                     </div>
-                    
-                    
                 </div>
                 <div class="box-footer">
                     <div class="" style="float: right;">
-                        <button class="btn btn-warning" type="submit">Generar</button>
+                        <button id="generar" class="btn btn-warning" type="submit">Generar</button>
                     </div>
                 </div>
             </form>
@@ -97,6 +95,7 @@ Reporte faltas
 @endsection
 
 @section("scripts")
+    <script src="{{ asset("assets/pages/scripts/SGui.js") }}" type="text/javascript"></script>
     <script src={{ asset("myMonthPicker/pickerMonth.js") }}></script>
     <script>
         function addLeadingZeros(n) {
@@ -111,6 +110,7 @@ Reporte faltas
                         onchange: function(instance, value) {
                             var d1 = Date.parse(value);
                             var mIni = new Date(d1);
+                            ce.reset();
                             ce.options.validRange = [ mIni.getFullYear() + "-" + addLeadingZeros(mIni.getMonth() + 1) + "-" + addLeadingZeros(mIni.getDate()), '2099-12-31' ];
                         }
                     });
@@ -134,7 +134,10 @@ Reporte faltas
             fm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                document.getElementById('generar').setAttribute('disabled', 'disabled');
                 if(document.getElementById('calendarStart').value != "" && document.getElementById('calendarEnd').value != ""){
+                    var oGui = new SGui();
+                    oGui.showLoading(5000);
                     $(this).off('submit').submit();
                     fm.submit();
                 }else{
@@ -142,6 +145,7 @@ Reporte faltas
                         title: "Debe seleccionar un rango de fecha.",
                         icon: "warning"
                     })
+                    document.getElementById('generar').removeAttribute('disabled');
                 }
             });
         });
