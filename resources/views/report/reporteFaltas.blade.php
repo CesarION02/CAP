@@ -82,8 +82,6 @@ Reporte faltas
                             </select>
                         </div>
                     </div>
-                    
-                    
                 </div>
                 <div class="box-footer">
                     <div class="" style="float: right;">
@@ -97,6 +95,7 @@ Reporte faltas
 @endsection
 
 @section("scripts")
+    <script src="{{ asset("assets/pages/scripts/SGui.js") }}" type="text/javascript"></script>
     <script src={{ asset("myMonthPicker/pickerMonth.js") }}></script>
     <script>
         function addLeadingZeros(n) {
@@ -111,6 +110,7 @@ Reporte faltas
                         onchange: function(instance, value) {
                             var d1 = Date.parse(value);
                             var mIni = new Date(d1);
+                            ce.reset();
                             ce.options.validRange = [ mIni.getFullYear() + "-" + addLeadingZeros(mIni.getMonth() + 1) + "-" + addLeadingZeros(mIni.getDate()), '2099-12-31' ];
                         }
                     });
@@ -136,6 +136,8 @@ Reporte faltas
                 e.stopPropagation();
                 document.getElementById('generar').setAttribute('disabled', 'disabled');
                 if(document.getElementById('calendarStart').value != "" && document.getElementById('calendarEnd').value != ""){
+                    var oGui = new SGui();
+                    oGui.showLoading(5000);
                     $(this).off('submit').submit();
                     fm.submit();
                 }else{

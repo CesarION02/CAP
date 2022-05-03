@@ -1985,7 +1985,7 @@ class ReporteController extends Controller
                                     ->where('processed_data.hasabsence', 1)
                                     ->where('employees.is_delete', false)
                                     ->orderBy('processed_data.outDate')
-                                    ->select('processed_data.outDate AS fechaI','processed_data.outDate AS fechaF',
+                                    ->select('processed_data.outDate AS fechaI',
                                             'dept_rh.name AS departamento', 
                                             'employees.name AS empleado','employees.id AS empleado_id',
                                             'employees.num_employee as num', 'employees.is_active as active', 
@@ -2031,7 +2031,7 @@ class ReporteController extends Controller
                                         ->where('processed_data.hasabsence', 1)
                                         ->where('employees.is_delete', false)
                                         ->orderBy('processed_data.outDate')
-                                        ->select('processed_data.outDate AS fechaI','processed_data.outDate AS fechaF',
+                                        ->select('processed_data.outDate AS fechaI',
                                                 'dept_rh.name AS departamento', 
                                                 'employees.name AS empleado','employees.id AS empleado_id',
                                                 'employees.num_employee as num', 'employees.is_active as active', 
@@ -2070,7 +2070,7 @@ class ReporteController extends Controller
                                         ->where('processed_data.hasabsence', 1)
                                         ->where('employees.is_delete', false)
                                         ->orderBy('processed_data.outDate')
-                                        ->select('processed_data.outDate AS fechaI','processed_data.outDate AS fechaF',
+                                        ->select('processed_data.outDate AS fechaI',
                                                 'dept_rh.name AS departamento', 
                                                 'employees.name AS empleado','employees.id AS empleado_id',
                                                 'employees.num_employee as num', 'employees.is_active as active', 

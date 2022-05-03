@@ -13,26 +13,24 @@
 
 @section('content')
 <div class="row" id="faltasReport">
-
 <!-- Modal -->
 <div id="fmodal" class="modal fade" role="dialog">
     <div class="modal-dialog">
-
-    <!-- Modal content-->
-    <div class="modal-content">
-        <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title">@{{Employee}}</h4>
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">@{{Employee}}</h4>
+            </div>
+            <div class="modal-body">
+                <ol id="recipient">
+                    <li v-for="falta in lfaltas">@{{falta.fechaI}}</li>
+                </ol>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+            </div>
         </div>
-        <div class="modal-body">
-        <ol id="recipient">
-            <li v-for="falta in lfaltas">@{{falta.fechaI}}</li>
-        </ol>
-        </div>
-        <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        </div>
-    </div>
     </div>
 </div>
 
@@ -93,8 +91,7 @@
                                                         $calendarStart['year'].'-'.
                                                         $r->mes.'-'.
                                                         cal_days_in_month(CAL_GREGORIAN,$r->mes,$calendarStart['year'])
-                                                        ])
-                                                    ->count()
+                                                        ])->sortBy('fechaI')->unique('fechaI')->count()
                                                 }}
                                                 <!-- Trigger the modal with a button -->
                                                 <a href="#" data-toggle="modal" data-target="#fmodal" 
@@ -106,11 +103,9 @@
                                                             $calendarStart['year'].'-'.
                                                             $r->mes.'-'.
                                                             cal_days_in_month(CAL_GREGORIAN,$r->mes,$calendarStart['year'])
-                                                            ])}})">
+                                                            ])->sortBy('fechaI')->unique('fechaI')}})">
                                                     <span class="fa fa-calendar-o fa-1"></span>
                                                 </a>
-
-                                                
                                             </td>
                                         @endforeach
                                     </tr>
