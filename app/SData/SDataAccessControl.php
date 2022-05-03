@@ -19,7 +19,7 @@ class SDataAccessControl {
     public static function getEmployee($id)
     {
         $employee = \DB::table('employees AS e')
-                    ->join('departments AS d', 'd.id', '=', 'e.department_id')
+                    ->leftJoin('departments AS d', 'd.id', '=', 'e.department_id')
                     ->select('e.id', 'e.name', 'e.num_employee', 'e.external_id', 'e.is_active', 'e.is_delete', 'd.area_id')
                     ->where('e.id', $id)
                     ->get();

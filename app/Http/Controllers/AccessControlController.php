@@ -54,6 +54,11 @@ class AccessControlController extends Controller
         $oData = new SAccessControlData();
 
         $oData->employee = SDataAccessControl::getEmployee($idEmp);
+
+        if ($oData->employee == null) {
+            return $oData;
+        }
+
         $oData->absences = SDataAccessControl::getAbsences($idEmp, $dtDate);
         $oData->events = SDataAccessControl::getEvents($idEmp, $dtDate);
         $oData->schedule = SDataAccessControl::getSchedule($idEmp, $dtDate, $time);
@@ -113,6 +118,17 @@ class AccessControlController extends Controller
     private function processInfo($idEmp, $dtDate, $time, $nextDays, $minsIn, $minsOut, $sSource)
     {
         $oData = $this->getInfo($idEmp, $dtDate, $time, $nextDays);
+
+        if ($oData->employee == null) {
+            $oResData = clone $oData;
+
+            $oResData->absences = null;
+            $oResData->events = null;
+            $oResData->authorized = false;
+            $oResData->message = "No se encontró el empleado";
+            
+            return json_encode($oResData);
+        }
 
         $res = SDataAccessControl::isAuthorized($oData, $idEmp, $dtDate, $time, $minsIn, $minsOut);
 

@@ -108,6 +108,9 @@ Route::get('report/generarreportepuertas','ReporteController@generarReportePuert
 /* Reporte incidencias */
 Route::get('report/reporteIncidencias', 'ReporteController@incidentReportView')->name('reporteIncidencias');
 Route::get('report/reporteIncidenciasGenerar', 'ReporteController@incidentReportGenerar')->name('reporteIncidenciasGenerar');
+/* Reporte faltas */
+Route::get('report/reporteFaltas', 'ReporteController@indexFaltasReport')->name('reporteFaltas');
+Route::get('report/reporteFaltasGenerar', 'ReporteController@FaltasReportGenerar')->name('reporteFaltasGenerar');
 /** Reporte consolidado */
 Route::get('report/genconsolidated', 'ConsolidatedReportController@showGenerationView')->name('genReporteConsolidado');
 Route::get('report/consolidated', 'ConsolidatedReportController@showReport')->name('reporteConsolidado');
