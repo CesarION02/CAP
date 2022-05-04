@@ -23,6 +23,7 @@ class employees extends Model
                             'way_register_id',
                             'way_pay_id',
                             'ben_pol_id',
+                            'job_rh_id',
                             'job_id',
                             'external_id',
                             'is_active',

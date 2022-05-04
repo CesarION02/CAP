@@ -189,7 +189,7 @@ Route::delete('employees/terminarconfiguracion/{id}', 'employeeController@confir
 Route::get('employees/foraneos', 'employeeController@foraneos')->name('foraneos');
 Route::delete('employees/enviarForaneos/{id}', 'employeeController@enviarForaneos')->name('enviar_empleado_foraneo');
 Route::put('employee/outstanding/{id}', 'employeeController@updateoutstanding')->name('actualizar_empleado_faltante');
-Route::get('employee/puesto','employeeController@jobs')->name('puesto');
+Route::get('employee/{id}/puesto','employeeController@jobs')->name('puesto');
 Route::get('outstanding', 'employeeController@outstandingemployees')->name('empleados_pendientes');
 Route::get('employees/becarios', 'employeeController@becarios')->name('becarios');
 Route::get('employee/{id}/editoutstanding', 'employeeController@editoutstanding')->name('editar_empleado_faltante');
@@ -331,6 +331,8 @@ Route::get('job/{id}/edit', 'jobController@edit')->name('editar_puesto');
 Route::put('job/{id}', 'jobController@update')->name('actualizar_puesto');
 Route::delete('job/{id}', 'jobController@destroy')->name('eliminar_puesto');
 Route::delete('job/disable/{id}', 'jobController@activar')->name('activar_puesto');
+/* RUTAS PUESTOS NOMINAS*/
+Route::get('jobRH', 'jobRHController@index')->name('puesto_rh');
 
 /* RUTAS CAPTURA INCIDENTES */
 Route::get('incidents/massive', 'incidentController@massiveCreate')->name('masiva');

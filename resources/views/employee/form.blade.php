@@ -66,9 +66,21 @@
         </div>
 </div>
 <div class="form-group">
-        <label for="job_id" class="col-lg-3 control-label requerido">Puesto:</label>
+        <label for="job_id" class="col-lg-3 control-label requerido">Puesto CAP:</label>
         <div class="col-lg-8" id="job" name="job">
                 
+        </div>
+</div>
+<div class="form-group">
+        <label for="dept_rh_id" class="col-lg-3 control-label">Departamento nominas:</label>
+        <div class="col-lg-8">
+                <input type="text" name="dept_rh_id" id="dept_rh_id" class="form-control" value="{{$dept_rh}}" readonly>
+        </div>
+</div>
+<div class="form-group">
+        <label for="job_rh_id" class="col-lg-3 control-label">Puesto nominas:</label>
+        <div class="col-lg-8">
+                <input type="text" name="job_rh_id" id="job_rh_id" class="form-control" value="{{$job_rh}}" readonly>
         </div>
 </div>
 <div class="form-group">

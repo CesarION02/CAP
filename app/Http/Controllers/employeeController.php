@@ -10,6 +10,7 @@ use App\Models\department;
 use App\Models\benefitsPolice;
 use App\Models\company;
 use App\Models\DepartmentRH;
+use App\Models\JobRH;
 use App\Models\policy_extratime;
 use DB;
 
@@ -125,11 +126,20 @@ class employeeController extends Controller
         $benPols = benefitsPolice::orderBy('name','ASC')->pluck('id','name');
         $data = employees::findOrFail($id);
         $policy = policy_extratime::orderBy('id')->pluck('id','name');
+        if(isset($data)){
+            $dept_rh = DepartmentRH::where([['is_delete','0'],['id',$data->dept_rh_id]])->value('name');
+            $job_rh = JobRH::where([['is_deleted','0'],['id',$data->job_rh_id]])->value('job');
+        }else{
+            $dept_rh = null;
+            $job_rh = null;
+        }
 
         return view('employee.edit', compact('data'))
                                         ->with('way',$way)
                                         ->with('becario', $becario)
                                         ->with('department',$department)
+                                        ->with('dept_rh',$dept_rh)
+                                        ->with('job_rh',$job_rh)
                                         ->with('benPols',$benPols)
                                         ->with('policy',$policy);
     }
@@ -331,6 +341,8 @@ class employeeController extends Controller
                                 ->pluck('id', 'external_id');
         $this->rhdepartments = DepartmentRH::select('id', 'external_id')
                                 ->pluck('id', 'external_id');
+        $this->rhjobs = JobRH::select('id', 'external_id')
+                                ->pluck('id', 'external_id');
 
         foreach ($lEmployees as $jEmployee) {
             try {
@@ -385,6 +397,7 @@ class employeeController extends Controller
                             'leave_date' => $jEmployee->leave_date,
                             // 'is_overtime' => $jEmployee->extra_time,
                             'ben_pol_id' => $jEmployee->checker_policy,
+                            'job_rh_id' => $this->rhjobs[$jEmployee->siie_job_id],
                             'policy_extratime_id' => $jEmployee->overtime_policy + 1,
                             'company_id' => $this->companies[$jEmployee->company_id],
                             'dept_rh_id' => $this->rhdepartments[$jEmployee->dept_rh_id],
@@ -406,6 +419,7 @@ class employeeController extends Controller
                             'leave_date' => $jEmployee->leave_date,
                             // 'is_overtime' => $jEmployee->extra_time,
                             'ben_pol_id' => $jEmployee->checker_policy,
+                            'job_rh_id' => $this->rhjobs[$jEmployee->siie_job_id],
                             'policy_extratime_id' => $jEmployee->overtime_policy + 1,
                             'company_id' => $this->companies[$jEmployee->company_id],
                             'dept_rh_id' => $this->rhdepartments[$jEmployee->dept_rh_id],
@@ -447,6 +461,7 @@ class employeeController extends Controller
         $emp->external_id = $jEmployee->id_employee;
         $emp->company_id = $this->companies[$jEmployee->company_id];
         $emp->dept_rh_id = $this->rhdepartments[$jEmployee->dept_rh_id];
+        $emp->job_rh_id = $this->rhjobs[$jEmployee->siie_job_id];
         $department = DepartmentRH::where('id',$jEmployee->dept_rh_id)->get();
         if($department[0]->default_dept_id != null){
             $emp->department_id = $department[0]->default_dept_id;
