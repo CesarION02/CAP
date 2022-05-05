@@ -59,7 +59,17 @@
                             <tbody>
                                 <tr v-for="row in vData.lEmployees">
                                 <td>@{{ vueGui.pad(row.num_employee, 6) }}</td>
-                                    <td>@{{ row.name }}</td>
+                                    <td>
+                                        <form action="{{route('reportetiemposextra')}}" target="_blank">
+                                            <a href='#' onclick='this.parentNode.submit(); return false;'>@{{ row.name }}</a>
+                                            <input type="hidden" name="start_date" value="{{$sStartDate}}">
+                                            <input type="hidden" name="end_date" value="{{$sEndDate}}">
+                                            <input type="hidden" name="emp_id" :value="row.id">
+                                            <input type="hidden" name="report_mode" value="2">
+                                            <input type="hidden" name="optradio" value="employee">
+                                            <input type="hidden" name="pay_way" value="{{$sPayWay}}">
+                                        </form>
+                                    </td>
                                     <td>@{{ row.entryDelayMinutes }}</td>
                                     <td>@{{ row.prematureOut }}</td>
                                     <td>@{{ row.extraHours }}</td>
