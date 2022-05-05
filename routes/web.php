@@ -136,6 +136,8 @@ Route::post('prepayrollempgroupdept/change', 'prepayrollGroupsController@changeG
 Route::get('prepayrollcontrols', 'prePayrollController@indexS')->name('control_semana');
 Route::get('prepayrollcontrolq', 'prePayrollController@indexQ')->name('control_quincena');
 Route::get('prepayrollcontrolvobos/{id}', 'prePayrollController@indexVobos')->name('vobos');
+Route::get('prepayrollcontrolvobos/{id}/edit/require', 'prePayrollController@indexEditRequireVobos')->name('vobos_edit_require');
+Route::post('prepayrollcontrolvobos/require/save', 'prePayrollController@saveRequire')->name('vobos_save_require');
 Route::post('prepayrollcontrolvobos/checkPrevius','prePayrollController@checkBoVoPrevius')->name('checkPrevius_vobos');
 Route::post('prepayrollcontrolvobos/checkChildrens','prePayrollController@checkBoVoChildrens')->name('checkChildrens_vobos');
 Route::post('prepayrollcontrolvobos/vobo/{id}/{idPreNomina}', 'prePayrollController@boVo')->name('dar_vobo');
