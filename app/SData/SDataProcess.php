@@ -40,10 +40,12 @@ class SDataProcess {
     public static function process($sStartDate, $sEndDate, $payWay, $lEmployees)
     {
         $data53 = SDataProcess::getSchedulesAndChecks($sStartDate, $sEndDate, $payWay, $lEmployees);
-        
+
         $aEmployees = $lEmployees->pluck('id');
         $lWorkshifts = SDelayReportUtils::getWorkshifts($sStartDate, $sEndDate, $payWay, $aEmployees);
-        $lData53_2 = SDataProcess::addEventsDaysOffAndHolidays($data53, $lWorkshifts);
+        // Rutina para verificación de renglones completos
+        $lDataComplete = SDataProcess::completeDays($sStartDate, $sEndDate, $data53, $aEmployees, $lWorkshifts);
+        $lData53_2 = SDataProcess::addEventsDaysOffAndHolidays($lDataComplete, $lWorkshifts);
         
         $aEmployeeBen = $lEmployees->pluck('ben_pol_id', 'id');
         $lDataWithAbs = SDataProcess::addAbsences($lData53_2, $aEmployeeBen);
@@ -1624,6 +1626,106 @@ class SDataProcess {
         }
 
         return 0;
+    }
+
+    /**
+     * Verifica si se han reportado todos los días consultados en el rango de fechas por empleado.
+     * Si un día no se ha reportado, se agrega este renglón a la colección.
+     * 
+     * @param string $sStartDate
+     * @param string $sEndDate
+     * @param array $lData
+     * @param array $aEmployees
+     * 
+     * @return array
+     */
+    public static function completeDays($sStartDate, $sEndDate, $lData, $aEmployees, $qWorkshifts)
+    {
+        $aDates = [];
+        $oStartDate = Carbon::parse($sStartDate);
+        $oEndDate = Carbon::parse($sEndDate);
+        $oDate = clone $oStartDate;
+
+        /**
+         * crea un arreglo con los días a consultar
+         */
+        while ($oDate->lessThanOrEqualTo($oEndDate)) {
+            $aDates[] = $oDate->toDateString();
+            $oDate->addDay();
+        }
+
+        $lRowsToAdd = [];
+        foreach ($aEmployees as $idEmployee) {
+            $employeeRows = collect($lData);
+            $employeeRows = $employeeRows->where('idEmployee', $idEmployee);
+            
+            // Si no hay renglones del empleado nos pasamos al siguiente
+            if (count($employeeRows) == 0) {
+                continue;
+            }
+            foreach ($aDates as $sDate) {
+                $lEmployeeRows = clone $employeeRows;
+                // Consulta los renglones del empleado con salida del día actual
+                $dayRows = $lEmployeeRows->where('outDate', $sDate);
+
+                // Si no hay renglones con salida del día actual
+                if ($dayRows->count() == 0) {
+                    $lEmployeeRows = clone $employeeRows;
+                    // Consulta si existen renglones con entrada que pudieran cubrir el día actual
+                    $dayRows = $lEmployeeRows->whereBetween('inDateTime', [$sDate.' 00:00:00', $sDate.' 17:30:00']);
+
+                    // Si hay renglones que pudieran cubrir el día actual no se agrega el renglón
+                    if ($dayRows->count() > 0) {
+                        continue;
+                    }
+
+                    // Se obtiene el primer elemento del arreglo
+                    foreach ($lEmployeeRows as $refRow) { break; }
+
+                    $oNewRow = new SRegistryRow();
+
+                    $oNewRow->idEmployee = $idEmployee;
+                    $oNewRow->numEmployee = $refRow->numEmployee;
+                    $oNewRow->employee = $refRow->employee;
+                    $oNewRow->external_id = $refRow->external_id;
+                    $oNewRow->inDate = $sDate;
+                    $oNewRow->outDate = $sDate;
+                    $oNewRow->inDateTime = $sDate;
+                    $oNewRow->outDateTime = $sDate;
+                    $oNewRow->hasChecks = false;
+                    $oNewRow->hasCheckIn = false;
+                    $oNewRow->hasCheckOut = false;
+                    $oNewRow->comments = $oNewRow->comments."Sin checadas. ";
+
+                    $registry = (object) [
+                                    'type_id' => \SCons::REG_OUT,
+                                    'time' => '18:00:00',
+                                    'date' => $sDate,
+                                    'employee_id' => $idEmployee,
+                                    'is_modified' => false
+                                ];
+
+                    $result = SDelayReportUtils::getSchedule($sStartDate, $sEndDate, $idEmployee, $registry, clone $qWorkshifts, \SCons::REP_HR_EX);
+
+                    $oNewRow = SDataProcess::setDates($result, $oNewRow, $sDate);
+                    
+                    // Se agrega el renglón creado a la colección de renglones por arreglar
+                    $lRowsToAdd[] = $oNewRow;
+                }
+            }
+        }
+
+        // Se agregan los renglones al arreglo
+        $lData = collect(array_merge($lData, $lRowsToAdd));
+
+        // Se ordenan los renglones por empleado y fecha de entrada
+        $lData = $lData->sortBy('idEmployee')
+                        ->sortBy('inDate')
+                        ->sortBy('inDateTime')
+                        ->sortBy('outDate')
+                        ->sortBy('outDateTime');
+
+        return $lData;
     }
 }
 
