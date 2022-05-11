@@ -14,3 +14,4 @@ composer.json
 composer.lock
 cap_config.json
 .vscode/launch.json
+.tmp.driveupload/

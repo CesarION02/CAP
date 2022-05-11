@@ -22,6 +22,10 @@ class SCons {
    const BEN_POL_FREE = 2;
    const BEN_POL_EVENT = 3;
 
+   const ET_POL_NEVER = 1;	// Nunca genera
+   const ET_POL_ALWAYS = 2; // Siempre genera
+   const ET_POL_SOMETIMES = 3; //En ocasiones genera
+
    const T_DAY_NORMAL = 1;
    const T_DAY_INHABILITY = 2;
    const T_DAY_VACATION = 3;
@@ -39,7 +43,8 @@ class SCons {
                      'OR' => 3,
                      'OF' => 4,
                      'DHE' => 5,
-                     'AHE' => 6
+                     'AHE' => 6,
+                     'COM' => 7
                   ];
 
    const FROM_ASSIGN = 2;

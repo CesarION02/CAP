@@ -13,7 +13,8 @@ var app = new Vue({
         minsEnabled: false,
         overMins: 0,
         comments: "",
-        vRow: null
+        vRow: null,
+        adjTypeEnabled: true,
     },
     methods: {
         getCssClass(oRow, report) {
@@ -37,6 +38,9 @@ var app = new Vue({
             if ((oRow.events.length > 0 || oRow.isDayOff > 0 || oRow.isHoliday > 0 || oRow.dayInhability > 0 || oRow.dayVacations > 0) &&
                 (oRow.hasChecks || oRow.hasCheckOut)) {
                 return 'events'
+            }
+            if (oRow.isIncompleteTeJourney) {
+                return 'incomplete-te-journey';
             }
         },
         getDtCellCss(oRow, typeReg) {
@@ -66,6 +70,7 @@ var app = new Vue({
                 case oData.ADJ_CONS.JS:
                 case oData.ADJ_CONS.DHE:
                 case oData.ADJ_CONS.AHE:
+                case oData.ADJ_CONS.COM:
                     dtDate = this.vRow.outDate == null ? this.vRow.outDateTime : this.vRow.outDate;
                     dtTime = this.vRow.outDateTime.length > 10 ? this.vRow.outDateTime.substring(10) : "";
                     applyTo = 2;
@@ -133,6 +138,13 @@ var app = new Vue({
                 }
             }
 
+            if (this.adjType == oData.ADJ_CONS.COM) {
+                if (this.comments.length == 0) {
+                    oGui.showError("Debe ingresar un comentario");
+                    return false;
+                }
+            }
+
             return true;
         },
         deleteAdjust(oAdj) {
@@ -174,6 +186,8 @@ var app = new Vue({
             this.inDateTime = inD.format('YYYY-MM-DDTHH:mm');
             this.outDateTime = outD.format('YYYY-MM-DDTHH:mm');
 
+            this.onAdjustChange();
+
             $('#adjustsModal').modal('show');
         },
         setRowAdjusts() {
@@ -208,7 +222,11 @@ var app = new Vue({
                     } else {
                         let tiime = adj.dt_time != null ? (' ' + adj.dt_time) : '';
                         if ((adj.dt_date + tiime) == oRow.outDateTime) {
-                            labels += adj.type_code + ' ';
+                            if (adj.adjust_type_id == oData.ADJ_CONS.COM) {
+                                labels += adj.comments + ' ';
+                            } else {
+                                labels += adj.type_code + ' ';
+                            }
                             if (adj.adjust_type_id == oData.ADJ_CONS.AHE ||
                                 adj.adjust_type_id == oData.ADJ_CONS.DHE) {
                                 labels += adj.minutes + 'min ';
@@ -231,6 +249,23 @@ var app = new Vue({
             }
 
             return labels;
+        },
+        onAdjustChange() {
+            if (this.adjCategory == "2") {
+                this.comments = "";
+                this.adjType = oData.ADJ_CONS.COM;
+                this.adjTypeEnabled = false;
+            } else {
+                this.adjType = oData.ADJ_CONS.JE;
+                this.adjTypeEnabled = true;
+                this.comments = "";
+            }
+
+            if (this.adjType == oData.ADJ_CONS.DHE || this.adjType == oData.ADJ_CONS.AHE) {
+                this.minsEnabled = true;
+            } else {
+                this.minsEnabled = false;
+            }
         },
         onTypeChange() {
             this.minsEnabled = this.adjType == oData.ADJ_CONS.DHE || this.adjType == oData.ADJ_CONS.AHE;

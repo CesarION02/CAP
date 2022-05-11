@@ -304,5 +304,94 @@ class SDateUtils {
 
         return $data;
     }
+
+    public static function getCutoffDatesOfYear($iYear)
+    {
+        $weeks = [];
+        $biweeks = [];
+        $biweeksCal = [];
+
+        /**
+         * Cortes de semana
+         */
+        $weeksQ = DB::table('week_cut')
+                    ->where(function ($q) use ($iYear) {
+                        $q->whereYear('ini', $iYear)
+                            ->orWhereYear('fin', $iYear);
+                    })
+                    ->select('year', 'ini', 'fin', 'num')
+                    ->orderBy('ini', 'ASC')
+                    ->get();
+
+        foreach ($weeksQ as $qweek) {
+            $cut = (object) [];
+
+            $cut->dt_start = $qweek->ini;
+            $cut->dt_end = $qweek->fin;
+            $cut->number = $qweek->num;
+
+            $weeks[] = $cut;
+        }
+
+        /**
+         * Cortes de quincena
+         */
+        $biweeksQ = DB::table('hrs_prepay_cut')
+                    ->whereYear('dt_cut', $iYear)
+                    ->where('is_delete', 0)
+                    ->select('year', 'dt_cut', 'num')
+                    ->orderBy('dt_cut', 'ASC')
+                    ->get();
+
+        if (count($biweeksQ) > 0) {
+            $dtCutPrev = Carbon::parse($biweeksQ[0]->dt_cut)->subDays(15);
+            foreach ($biweeksQ as $biweek) {
+                $cut = (object) [];
+
+                $cut->dt_start = $dtCutPrev->addDays(1)->toDateString();
+                $cut->dt_end = $biweek->dt_cut;
+                $cut->number = $biweek->num;
+                $dtCutPrev = Carbon::parse($biweek->dt_cut);
+
+                $biweeks[] = $cut;
+            }
+        }
+
+        /**
+         * Cortes de quincena calendario
+         */
+        $nextYear = Carbon::parse(($iYear + 1) . '-01-01');
+        $start = Carbon::parse($iYear . '-01-01');
+        $number = 1;
+        do {
+            $middle = (clone $start)->addDays(14);
+            $last = (clone $middle)->endOfMonth();
+
+            $cut = (object) [];
+
+            $cut->dt_start = $start->toDateString();
+            $cut->dt_end = $middle->toDateString();
+            $cut->number = $number++;
+
+            $biweeksCal[] = $cut;
+
+            $cut = (object) [];
+
+            $cut->dt_start = $middle->addDay()->toDateString();
+            $cut->dt_end = $last->toDateString();
+            $cut->number = $number++;
+
+            $biweeksCal[] = $cut;
+
+            $start->addMonth();
+        } while ($start->lessThan($nextYear));
+
+        $response = (object) [];
+        $response->weeks = $weeks;
+        $response->biweeks = $biweeks;
+        $response->biweekscal = $biweeksCal;
+
+        return $response;
+    }
 }
 

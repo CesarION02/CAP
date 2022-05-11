@@ -12,6 +12,7 @@ use App\Models\prepayrollAdjust;
 use App\Models\DepartmentRH;
 use App\Models\typeincident;
 use App\Models\departmentsGroup;
+use App\Models\PrepayrollDelegation;
 use App\SUtils\SDelayReportUtils;
 use App\SUtils\SReportsUtils;
 use App\SUtils\SInfoWithPolicy;
@@ -19,6 +20,8 @@ use App\SUtils\SHolidayWork;
 use App\SUtils\SGenUtils;
 use App\SUtils\SPermissions;
 use App\SUtils\SPrepayrollUtils;
+use App\SUtils\SDateUtils;
+use App\SUtils\SPayrollDelegationUtils;
 use App\SData\SDataProcess;
 use Illuminate\Support\Collection;
 use DB;
@@ -444,14 +447,19 @@ class ReporteController extends Controller
     {
         $config = \App\SUtils\SConfiguration::getConfigurations();
 
-        $subEmployees = SPrepayrollUtils::getEmployeesByUser(\Auth::user()->id);
+        $bDirect = false;
+        $payType = 0;
+        $bDelegation = null;
+        $subEmployees = SPrepayrollUtils::getEmployeesByUser(\Auth::user()->id, $bDirect, $payType, $bDelegation);
         if ($subEmployees == null) {
             $lEmployees = SGenUtils::toEmployeeIds(0, 0, []);
         }
         else {
             $qEmployees = SGenUtils::toEmployeeQuery(0, 0, []);
 
-            $lEmployees = $qEmployees->whereIn('e.id', $subEmployees)->get();
+            $lEmployees = $qEmployees->whereIn('e.id', $subEmployees)
+                            ->orderBy('e.name', 'ASC')
+                            ->get();
         }
 
         return view('report.reportsGen')
@@ -459,6 +467,28 @@ class ReporteController extends Controller
                     ->with('sTitle', 'Reporte de tiempos extra')
                     ->with('sRoute', 'reportetiemposextra')
                     ->with('lEmployees', $lEmployees)
+                    ->with('startOfWeek', $config->startOfWeek);
+    }
+
+    public function genHrExReportDelegations()
+    {
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+
+        $payType = 0;
+        $bDirect = 0;
+        $iDelegations = 0;
+        $oPayrolls = SPayrollDelegationUtils::getDelegationsPayrolls(\Auth::user()->id);
+
+        if (count($oPayrolls->weeks) == 0 && count($oPayrolls->biweeks) == 0) {
+            return redirect()->back()->withErrors(['No hay semanas o quincenas delegadas para ti.']);
+        }
+
+        return view('report.reportsGenDelegation')
+                    ->with('tReport', \SCons::REP_HR_EX)
+                    ->with('sTitle', 'Reporte de tiempo extra delegado')
+                    ->with('sRoute', 'reportetiemposextra')
+                    // ->with('lEmployees', $lEmployees)
+                    ->with('oPayrolls', $oPayrolls)
                     ->with('startOfWeek', $config->startOfWeek);
     }
 
@@ -534,6 +564,7 @@ class ReporteController extends Controller
                                     'pa.dt_date',
                                     'pa.dt_time',
                                     'pa.minutes',
+                                    'pa.comments',
                                     'pa.apply_to',
                                     'pa.adjust_type_id',
                                     'pat.type_code',
@@ -606,6 +637,9 @@ class ReporteController extends Controller
         $sEndDate = $request->end_date;
         $iEmployee = $request->emp_id;
         $reportMode = $request->report_mode;
+        $bDelegation = $request->delegation;
+        $iPayrollYear = $request->year;
+        $iPayrollNumber = $request->payroll_number;
 
         $oStartDate = Carbon::parse($sStartDate);
         $oEndDate = Carbon::parse($sEndDate);
@@ -635,9 +669,43 @@ class ReporteController extends Controller
             $ids = $request->elems;
             $lEmployees = SGenUtils::toEmployeeIds($payWay, $filterType, $ids);
         }
+
+        $iDelegation = null;
+        if ($bDelegation) {
+            $oDelegation = PrepayrollDelegation::where('number_prepayroll', $iPayrollNumber)
+                                                ->where('year', $iPayrollYear)
+                                                ->where('is_delete', false)
+                                                ->where('pay_way_id', $payWay)
+                                                ->where('user_delegated_id', \Auth::user()->id)
+                                                ->first();
+            if ($oDelegation == null) {
+                $roles = \Auth::user()->roles;
+                $config = \App\SUtils\SConfiguration::getConfigurations(); // Obtengo las configuraciones del sistema
+
+                $seeAll = false;
+                foreach ($roles as $rol) {
+                    if (in_array($rol->id, $config->rolesCanSeeAll)) {
+                        $seeAll = true;
+                        break;
+                    }
+                }
+
+                if (! $seeAll) {
+                    return \Redirect::back()->withErrors(['Error', 'No tiene delegación para el número de prenómina seleccionado']);
+                }
+            }
+
+            $dates = SDateUtils::getDatesOfPayrollNumber($iPayrollNumber, $iPayrollYear, $payWay);
+            $sStartDate = $dates[0];
+            $sEndDate = $dates[1];
+            $oStartDate = Carbon::parse($sStartDate);
+            $oEndDate = Carbon::parse($sEndDate);
+            $iDelegation = $oDelegation->id_delegation;
+        }
         
-        $subEmployees = SPrepayrollUtils::getEmployeesByUser(\Auth::user()->id);
-        if ($subEmployees != null) {
+        $bDirect = false;
+        $subEmployees = SPrepayrollUtils::getEmployeesByUser(\Auth::user()->id, $payWay, $bDirect, $iDelegation);
+        if ($subEmployees != null && count($subEmployees) >= 0) {
             $lColEmps = collect($lEmployees);
     
             $lEmployees = $lColEmps->whereIn('id', $subEmployees);
@@ -669,6 +737,7 @@ class ReporteController extends Controller
                                     'pa.dt_date',
                                     'pa.dt_time',
                                     'pa.minutes',
+                                    'pa.comments',
                                     'pa.apply_to',
                                     'pa.adjust_type_id',
                                     'pat.type_code',
@@ -682,8 +751,46 @@ class ReporteController extends Controller
         $bModify = SPermissions::hasPermission(\Auth::user()->id, 'ajustes_rep_te');
 
         PrepayrollReportController::prepayrollReportVobos($sStartDate, $sEndDate);
+
+        $lDeptJobs = DB::table('employees AS e')
+                        ->join('departments AS d', 'e.department_id', '=', 'd.id')
+                        ->join('jobs AS j', 'e.job_id', '=', 'j.id')
+                        ->selectRaw('e.num_employee, CONCAT("DEPTO.: ", d.name, ", PUESTO: ", j.name) AS dept_job')
+                        ->pluck('dept_job', 'num_employee');
         
         if ($reportMode == \SCons::REP_HR_EX) {
+            /**
+             * Obtención de vobos de empleados
+             */
+            $isPrepayrollInspection = false;
+            $lEmpVobos = [];
+            if (($payWay == \SCons::PAY_W_Q || $payWay == \SCons::PAY_W_S) && env('VOBO_BY_EMP_ENABLED')) {
+                $number = SDateUtils::getNumberOfDate($sStartDate, $payWay);
+                $dates = SDateUtils::getDatesOfPayrollNumber($number, $oStartDate->year, $payWay);
+                
+                if ($dates[0] == $sStartDate && $dates[1] == $sEndDate) {
+                    $lEmpVobos = DB::table('prepayroll_report_emp_vobos AS evb')
+                                        ->join('users AS u', 'evb.vobo_by_id', '=', 'u.id')
+                                        ->join('employees AS e', 'evb.employee_id', '=', 'e.id')
+                                        ->where('evb.is_delete', 0)
+                                        ->where('year', $oStartDate->year)
+                                        ->select('u.name AS user_name', 'evb.employee_id', 'evb.vobo_by_id', 'e.num_employee');
+
+                    if ($payWay == \SCons::PAY_W_Q) {
+                        $lEmpVobos = $lEmpVobos->where('evb.is_biweek', true)
+                                                ->where('evb.num_biweek', $number);
+                    }
+                    else {
+                        $lEmpVobos = $lEmpVobos->where('evb.is_week', true)
+                                                ->where('evb.num_week', $number);
+                    }
+
+                    $lEmpVobos = $lEmpVobos->get()->keyBy('num_employee')->toArray();
+
+                    $isPrepayrollInspection = true;
+                }
+            }
+
             return view('report.reportDelaysView')
                     ->with('tReport', \SCons::REP_HR_EX)
                     ->with('sStartDate', $sStartDate)
@@ -692,6 +799,9 @@ class ReporteController extends Controller
                     ->with('sTitle', 'Reporte de tiempos extra')
                     ->with('adjTypes', $adjTypes)
                     ->with('lAdjusts', $lAdjusts)
+                    ->with('lEmpVobos', $lEmpVobos)
+                    ->with('lDeptJobs', $lDeptJobs)
+                    ->with('isPrepayrollInspection', $isPrepayrollInspection)
                     ->with('lEmpWrkdDays', $lEmpWrkdDays)
                     ->with('bModify', $bModify)
                     ->with('registriesRoute', route('registro_ajuste'))
