@@ -756,9 +756,12 @@ class SDataProcess {
     public static function addEventsDaysOffAndHolidays($lData53, $qWorkshifts)
     {
         foreach ($lData53 as $oRow) {
-            if (! $oRow->workable) {
-                continue;
-            }
+            /**
+             * Se comenta esta condición para que aunque el día no sea laborable, busque incidencias, eventos y festivos
+             */
+            // if (! $oRow->workable) {
+            //     continue;
+            // }
             if ($oRow->outDateTimeSch == null) {
                 $sDt = Carbon::parse($oRow->outDateTime);
             }
