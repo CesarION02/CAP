@@ -2,6 +2,7 @@
 
 use Carbon\Carbon;
 use App\SUtils\SDelayReportUtils;
+use App\SUtils\SDateTimeUtils;
 
 class SOverJourneyCore {
 
@@ -146,71 +147,74 @@ class SOverJourneyCore {
      * Si un empleado trabaja en un día menos de los minutos configurados como rango mínimo se le otorgarán como minutos extra,
      * Es decir, si un empleado en un día solo trabajo dos horas y el tiempo configurado es 4 horas, esas dos horas trabajas se le darán
      * como tiempo extra y el día será puesto como descanso
+     * Implementar funcionalidad para que el revisor opte por pagar como tiempo extra o como día de descanso trabajado las jornadas 
+     * registradas en días no laborable; funcionalidad configurable mediante parámetro de forma general. 
+     * Ante la ausencia de configuración general, 
+     * el sistema deberá funcionar como hasta ahora: pagará tiempo extra si, y solo si, al empleado en cuestión se le paga siempre el tiempo extra (sflores).
      *
      * @param collection $lData
      * 
      * @return collection $lData
      */
-    public static function overtimeByIncompleteJourney($lData, $aEmployeeOverTime)
+    public static function overtimeByIncompleteJourney($sStartDate, $sEndDate, $lData, $aEmployeeOverTime)
     {
         $idEmployee = 0;
         $currentDate = null;
         $previousDate = null;
         $workedMinutes = 0;
         $config = \App\SUtils\SConfiguration::getConfigurations();
-        for ($i = 0; $i < count($lData); $i++) {
-            $oRow = $lData[$i];
-            $currentDate = $oRow->outDate;
+        // Obtiene los empleados contenidos en $lData
+        $employees = array_unique(collect($lData)->pluck('idEmployee')->toArray());
+        $aDates = [];
+        $oStartDate = Carbon::parse($sStartDate);
+        $oEndDate = Carbon::parse($sEndDate);
+        $oDate = clone $oStartDate;
 
-            if ($aEmployeeOverTime[$oRow->idEmployee] == 1) {
+        /**
+         * crea un arreglo con los días a consultar
+         */
+        while ($oDate->lessThanOrEqualTo($oEndDate)) {
+            $aDates[] = $oDate->toDateString();
+            $oDate->addDay();
+        }
+
+        // recorre los empleados contenidos en $lData
+        foreach ($employees as $idEmp) {
+            if ($aEmployeeOverTime[$idEmp] == \SCons::ET_POL_NEVER || 
+                $aEmployeeOverTime[$idEmp] == \SCons::ET_POL_SOMETIMES) {
                 continue;
             }
 
-            if ($idEmployee != $oRow->idEmployee) {
-                $idEmployee = $oRow->idEmployee;
-                $previousDate = null;
-                $workedMinutes = 0;
-            }
-
-            if ($previousDate != $currentDate && $previousDate != null) {
-                $oPrevRow = $lData[$i-1];
-                $workedMinutes += SDelayReportUtils::compareDates($oPrevRow->inDateTime, $oPrevRow->outDateTime)->diffMinutes;
+            // recorre día a día para obtener los minutos trabajados
+            foreach ($aDates as $sDate) {
+                $rows = collect($lData)->where('idEmployee', $idEmp)
+                                        ->where('outDate', $sDate)
+                                        ->where('workable', false)
+                                        ->where('hasChecks', true)
+                                        ->where('hasCheckIn', true)
+                                        ->where('hasCheckOut', true)
+                                        ->toArray();
                 
-                if ($workedMinutes < $config->maxOvertimeJourneyMinutes && $workedMinutes > 0
-                    && ($oPrevRow->hasChecks && $oPrevRow->hasCheckIn && $oPrevRow->hasCheckOut)) {
-                    $oPrevRow->overWorkedMins += $workedMinutes;
-                    $oPrevRow->overMinsTotal += $workedMinutes;
-                    $oPrevRow->isDayOff++;
+                if (count($rows) > 0) {
+                    // suma del tiempo trabajado en minutos
+                    $workedMins = 0;
+                    foreach ($rows as $idx => $row) {
+                        $workedTime = SDelayReportUtils::compareDates($row->inDateTime, $row->outDateTime);
+                        $workedMins += $workedTime->diffMinutes;
+                    }
 
-                    if ($i >= 2) {
-                        $j = $i-2;
-                        $oPrePrevRow = $lData[$j];
-                        while ($oPrePrevRow->outDate == $oPrevRow->outDate) {
-                            $oPrePrevRow->isDayOff++;
-                            
-                            if ($j == 0) {
-                                break;
-                            }
-    
-                            $oPrePrevRow = $lData[--$j];
+                    // si el tiempo trabajado es menor al máximo de tiempo configurado
+                    if ($workedMins < $config->maxOvertimeJourneyMinutes && $workedMins > 0) {
+                        $lData[$idx]->overWorkedMins += $workedMins;
+                        $lData[$idx]->overMinsTotal += $workedMins;
+
+                        // si el día es domingo quita la prima
+                        if (SDateTimeUtils::dayOfWeek($lData[$idx]->outDate) == Carbon::SUNDAY) {
+                            $lData[$idx]->isSunday = 0;
                         }
                     }
                 }
-
-                $workedMinutes = 0;
             }
-
-            if (! $oRow->hasChecks || ! $oRow->hasCheckIn || ! $oRow->hasCheckOut) {
-                $previousDate = $oRow->outDate;
-                continue;
-            }
-
-            if ($previousDate == $currentDate) {
-                $oPrevRow = $lData[$i-1];
-                $workedMinutes += SDelayReportUtils::compareDates($oPrevRow->inDateTime, $oPrevRow->outDateTime)->diffMinutes;
-            }
-
-            $previousDate = $oRow->outDate;
         }
 
         return $lData;

@@ -428,7 +428,7 @@ class incidentController extends Controller
                     break;
             }
 
-            SPrepayrollAdjustUtils::verifyProcessedData($oIncident->employee_id, $sDate);
+            // SPrepayrollAdjustUtils::verifyProcessedData($oIncident->employee_id, $sDate);
             $oDate->addDay();
         }
 

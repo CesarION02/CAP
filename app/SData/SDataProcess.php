@@ -40,9 +40,11 @@ class SDataProcess {
     public static function process($sStartDate, $sEndDate, $payWay, $lEmployees)
     {
         $data53 = SDataProcess::getSchedulesAndChecks($sStartDate, $sEndDate, $payWay, $lEmployees);
-        
+
         $aEmployees = $lEmployees->pluck('id');
         $lWorkshifts = SDelayReportUtils::getWorkshifts($sStartDate, $sEndDate, $payWay, $aEmployees);
+        // Rutina para verificación de renglones completos
+        // $lDataComplete = SDataProcess::completeDays($sStartDate, $sEndDate, $data53, $aEmployees, $lWorkshifts);
         $lData53_2 = SDataProcess::addEventsDaysOffAndHolidays($data53, $lWorkshifts);
         
         $aEmployeeBen = $lEmployees->pluck('ben_pol_id', 'id');
@@ -54,8 +56,9 @@ class SDataProcess {
 
         $lDataWSun = SDataProcess::addSundayPay($lData);
 
-        $lDataJ = SOverJourneyCore::overtimeByIncompleteJourney($lDataWSun, $aEmployeeOverTime);
-        $lAllData = SOverJourneyCore::processOverTimeByOverJourney($lDataJ, $sStartDate);
+        // Se comenta este método ya que se cambió el procesamiento para poder hacer ajustes
+        // $lDataJ = SOverJourneyCore::overtimeByIncompleteJourney($sStartDate, $sEndDate, $lDataWSun, $aEmployeeOverTime);
+        $lAllData = SOverJourneyCore::processOverTimeByOverJourney($lDataWSun, $sStartDate);
 
         return $lAllData;
     }
@@ -184,6 +187,7 @@ class SDataProcess {
                     $otherRow = new SRegistryRow();
                     $otherRow->idEmployee = $idEmployee;
                     $otherRow->numEmployee = $oEmployee->num_employee;
+                    $otherRow->employeeAreaId = $oEmployee->employee_area_id;
                     $otherRow->employee = $oEmployee->name;
                     $otherRow->external_id = $oEmployee->external_id;
 
@@ -280,6 +284,7 @@ class SDataProcess {
             $newRow = new SRegistryRow();
             $newRow->idEmployee = $idEmployee;
             $newRow->numEmployee = $registry->num_employee;
+            $newRow->employeeAreaId = $registry->employee_area_id;
             $newRow->employee = $registry->name;
             $newRow->external_id = $registry->external_id;
         }
@@ -751,9 +756,12 @@ class SDataProcess {
     public static function addEventsDaysOffAndHolidays($lData53, $qWorkshifts)
     {
         foreach ($lData53 as $oRow) {
-            if (! $oRow->workable) {
-                continue;
-            }
+            /**
+             * Se comenta esta condición para que aunque el día no sea laborable, busque incidencias, eventos y festivos
+             */
+            // if (! $oRow->workable) {
+            //     continue;
+            // }
             if ($oRow->outDateTimeSch == null) {
                 $sDt = Carbon::parse($oRow->outDateTime);
             }
@@ -940,15 +948,17 @@ class SDataProcess {
      */
     public static function addDelaysAndOverTime($lData, $aEmployeeOverTime, $sEndDate)
     {
+        $config = \App\SUtils\SConfiguration::getConfigurations();
         $consumAdjs = [];
         foreach ($lData as $oRow) {
-            if (! $oRow->workable) {
+            if (! $oRow->workable &&
+                    ($aEmployeeOverTime[$oRow->idEmployee] == \SCons::ET_POL_NEVER || 
+                    $aEmployeeOverTime[$oRow->idEmployee] == \SCons::ET_POL_SOMETIMES)) {
                 $oRow->overWorkedMins = 0;
                 $oRow->overDefaultMins = 0;
                 $oRow->overScheduleMins = 0;
 
                 $oRow->overMinsTotal = 0;
-                // $oRow->extraHours = SDelayReportUtils::convertToHoursMins($oRow->overMinsTotal);
 
                 continue;
             }
@@ -1011,6 +1021,9 @@ class SDataProcess {
                 if ($oRow->hasCheckOut) {
                     $oRow->prematureOut = SDataProcess::getPrematureTime($oRow->outDateTime, $oRow->outDateTimeSch);
                 }
+                else {
+                    $oRow->prematureOut = null; 
+                }
 
                 $bWork8hr = true;
                 $oRow->hasWorkedJourney8hr = SDataProcess::journeyCompleted($oRow->inDateTime, $oRow->inDateTimeSch, $oRow->outDateTime, $oRow->outDateTimeSch, $bWork8hr);
@@ -1033,14 +1046,63 @@ class SDataProcess {
                                 }
                             }
 
-                            $oRow->overWorkedMins = $oRow->overWorkedMins >= $discountMins ? ($oRow->overWorkedMins - $discountMins) : 0;
+                            if ($oRow->overWorkedMins >= $discountMins) {
+                                $oRow->overMinsByAdjs = - $discountMins;
+                            }
+                            else {
+                                $oRow->overMinsByAdjs = - $oRow->overWorkedMins;
+                            }
                         }
                     }
                 }
                 else {
-                    $oRow->overWorkedMins = 0;
-                    $oRow->overDefaultMins = 0;
-                    $oRow->overScheduleMins = 0;
+                    if (! $oRow->workable && $oRow->hasCheckIn && $oRow->hasCheckOut && $aEmployeeOverTime[$oRow->idEmployee] == \SCons::ET_POL_ALWAYS) {
+                        $workedTime = SDelayReportUtils::compareDates($oRow->inDateTime, $oRow->outDateTime);
+                        $workedMins = $workedTime->diffMinutes;
+
+                        // si el tiempo trabajado es menor al máximo de tiempo configurado
+                        if ($workedMins < $config->maxOvertimeJourneyMinutes && $workedMins > 0) {
+                            $oRow->overWorkedMins += $workedMins;
+                            $oRow->overDefaultMins = 0;
+                            $oRow->overScheduleMins = 0;
+
+                            $oRow->comments = $oRow->comments."Jornada TE. ";
+                            $oRow->isIncompleteTeJourney = true;
+
+                            $date = $oRow->outDate == null ? $oRow->outDateTime : $oRow->outDate;
+                            $time = strlen($oRow->outDateTime) > 10 ? substr($oRow->outDateTime, -8) : null;
+                            $adjs = SPrepayrollAdjustUtils::getAdjustForCase($date, $time, 2, \SCons::PP_TYPES['DHE'], $oRow->idEmployee);
+                            $discountMins = 0;
+                            if (count($adjs) > 0) {
+                                foreach ($adjs as $adj) {
+                                    $discountMins += $adj->minutes;
+                                    $oRow->adjusts[] = $adj;
+                                }
+                            }
+
+                            if ($oRow->overWorkedMins >= $discountMins) {
+                                $oRow->overMinsByAdjs = - $discountMins;
+                            }
+                            else {
+                                $oRow->overMinsByAdjs = - $oRow->overWorkedMins;
+                            }
+
+                            // si el día es domingo quita la prima
+                            if (SDateTimeUtils::dayOfWeek($oRow->outDate) == Carbon::SUNDAY) {
+                                $oRow->removeSunday = true;
+                            }
+                        }
+                        else {
+                            $oRow->overWorkedMins = 0;
+                            $oRow->overDefaultMins = 0;
+                            $oRow->overScheduleMins = 0;
+                        }
+                    }
+                    else {
+                        $oRow->overWorkedMins = 0;
+                        $oRow->overDefaultMins = 0;
+                        $oRow->overScheduleMins = 0;
+                    }
                 }
             }
             else {
@@ -1063,7 +1125,7 @@ class SDataProcess {
                     $oRow->adjusts[] = $adj;
                 }
 
-                $oRow->overMinsByAdjs = $minsExtraByAdj;
+                $oRow->overMinsByAdjs = $oRow->overMinsByAdjs + $minsExtraByAdj;
             }
 
             if ($oRow->hasChecks) {
@@ -1100,7 +1162,6 @@ class SDataProcess {
 
             // suma de minutos extra totales.
             $oRow->overMinsTotal = $oRow->overWorkedMins + $oRow->overDefaultMins + $oRow->overScheduleMins + $oRow->overMinsByAdjs;
-            // $oRow->extraHours = SDelayReportUtils::convertToHoursMins($oRow->overMinsTotal);
         }
 
         return $lData;
@@ -1345,6 +1406,7 @@ class SDataProcess {
         $consumAdjs = [];
         foreach ($lData as $oRow) {
             $hasAbs = false;
+            $absenceByOmission = false;
             switch ($aEmployeeBen[$oRow->idEmployee]) {
                 case \SCons::BEN_POL_FREE:
                     # code...
@@ -1361,7 +1423,36 @@ class SDataProcess {
                                         $hasAbs = true;
                             }
                         }
+
+                        if (! $hasAbs) {
+                            $config = \App\SUtils\SConfiguration::getConfigurations();
+                            if ($config->absenceWithOmissionOfChecks) {
+                                if (in_array($oRow->employeeAreaId, $config->absenceWithOmissionOfChecksAreas)) {
+                                    if (! $oRow->hasCheckOut && $oRow->hasCheckIn) {
+                                        $date = $oRow->outDate;
+                                        $time = null;
+                                        $adjs = SPrepayrollAdjustUtils::getAdjustForCase($date, $time, 2, \SCons::PP_TYPES['JS'], $oRow->idEmployee);
+                                
+                                        if (count($adjs) == 0) {
+                                            $hasAbs = true;
+                                            $absenceByOmission = true;
+                                        }
+                                    }
+                                    if (! $hasAbs && $oRow->hasCheckOut && ! $oRow->hasCheckIn) {
+                                        $date = $oRow->inDate;
+                                        $time = null;
+                                        $adjs = SPrepayrollAdjustUtils::getAdjustForCase($date, $time, 1, \SCons::PP_TYPES['JE'], $oRow->idEmployee);
+                                
+                                        if (count($adjs) == 0) {
+                                            $hasAbs = true;
+                                            $absenceByOmission = true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
+
                     break;
                 
                 default:
@@ -1395,7 +1486,7 @@ class SDataProcess {
 
                 if ($withAbs) {
                     $oRow->hasAbsence = true;
-                    $oRow->comments = $oRow->comments."Falta. ";
+                    $oRow->comments = $oRow->comments . ($absenceByOmission ? "Falta por omitir checar. " : "Falta. ");
                 }
                 else {
                     $oRow->hasAbsence = false;
@@ -1422,7 +1513,8 @@ class SDataProcess {
             }
 
             if ($oRow->outDate != null) {
-                if (SDateTimeUtils::dayOfWeek($oRow->outDate) == Carbon::SUNDAY) {
+                // En caso de que el día solo se haya trabajado horas extra, no se da la prima dominical
+                if (SDateTimeUtils::dayOfWeek($oRow->outDate) == Carbon::SUNDAY && ! $oRow->removeSunday) {
                     if (! isset($lPays[$oRow->outDate."_".$oRow->idEmployee])) {
                         $oRow->isSunday++;
                         $lPays[$oRow->outDate."_".$oRow->idEmployee] = 1;
@@ -1624,6 +1716,106 @@ class SDataProcess {
         }
 
         return 0;
+    }
+
+    /**
+     * Verifica si se han reportado todos los días consultados en el rango de fechas por empleado.
+     * Si un día no se ha reportado, se agrega este renglón a la colección.
+     * 
+     * @param string $sStartDate
+     * @param string $sEndDate
+     * @param array $lData
+     * @param array $aEmployees
+     * 
+     * @return array
+     */
+    public static function completeDays($sStartDate, $sEndDate, $lData, $aEmployees, $qWorkshifts)
+    {
+        $aDates = [];
+        $oStartDate = Carbon::parse($sStartDate);
+        $oEndDate = Carbon::parse($sEndDate);
+        $oDate = clone $oStartDate;
+
+        /**
+         * crea un arreglo con los días a consultar
+         */
+        while ($oDate->lessThanOrEqualTo($oEndDate)) {
+            $aDates[] = $oDate->toDateString();
+            $oDate->addDay();
+        }
+
+        $lRowsToAdd = [];
+        foreach ($aEmployees as $idEmployee) {
+            $employeeRows = collect($lData);
+            $employeeRows = $employeeRows->where('idEmployee', $idEmployee);
+            
+            // Si no hay renglones del empleado nos pasamos al siguiente
+            if (count($employeeRows) == 0) {
+                continue;
+            }
+            foreach ($aDates as $sDate) {
+                $lEmployeeRows = clone $employeeRows;
+                // Consulta los renglones del empleado con salida del día actual
+                $dayRows = $lEmployeeRows->where('outDate', $sDate);
+
+                // Si no hay renglones con salida del día actual
+                if ($dayRows->count() == 0) {
+                    $lEmployeeRows = clone $employeeRows;
+                    // Consulta si existen renglones con entrada que pudieran cubrir el día actual
+                    $dayRows = $lEmployeeRows->whereBetween('inDateTime', [$sDate.' 00:00:00', $sDate.' 17:30:00']);
+
+                    // Si hay renglones que pudieran cubrir el día actual no se agrega el renglón
+                    if ($dayRows->count() > 0) {
+                        continue;
+                    }
+
+                    // Se obtiene el primer elemento del arreglo
+                    foreach ($lEmployeeRows as $refRow) { break; }
+
+                    $oNewRow = new SRegistryRow();
+
+                    $oNewRow->idEmployee = $idEmployee;
+                    $oNewRow->numEmployee = $refRow->numEmployee;
+                    $oNewRow->employee = $refRow->employee;
+                    $oNewRow->external_id = $refRow->external_id;
+                    $oNewRow->inDate = $sDate;
+                    $oNewRow->outDate = $sDate;
+                    $oNewRow->inDateTime = $sDate;
+                    $oNewRow->outDateTime = $sDate;
+                    $oNewRow->hasChecks = false;
+                    $oNewRow->hasCheckIn = false;
+                    $oNewRow->hasCheckOut = false;
+                    $oNewRow->comments = $oNewRow->comments."Sin checadas. ";
+
+                    $registry = (object) [
+                                    'type_id' => \SCons::REG_OUT,
+                                    'time' => '18:00:00',
+                                    'date' => $sDate,
+                                    'employee_id' => $idEmployee,
+                                    'is_modified' => false
+                                ];
+
+                    $result = SDelayReportUtils::getSchedule($sStartDate, $sEndDate, $idEmployee, $registry, clone $qWorkshifts, \SCons::REP_HR_EX);
+
+                    $oNewRow = SDataProcess::setDates($result, $oNewRow, $sDate);
+                    
+                    // Se agrega el renglón creado a la colección de renglones por arreglar
+                    $lRowsToAdd[] = $oNewRow;
+                }
+            }
+        }
+
+        // Se agregan los renglones al arreglo
+        $lData = collect(array_merge($lData, $lRowsToAdd));
+
+        // Se ordenan los renglones por empleado y fecha de entrada
+        $lData = $lData->sortBy('idEmployee')
+                        ->sortBy('inDate')
+                        ->sortBy('inDateTime')
+                        ->sortBy('outDate')
+                        ->sortBy('outDateTime');
+
+        return $lData;
     }
 }
 

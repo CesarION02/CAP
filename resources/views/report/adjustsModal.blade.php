@@ -12,14 +12,20 @@
         <div class="row">
           <div class="col-xs-offset-1 col-xs-11">
             <div class="form-check">
-              <input class="form-check-input" type="radio" v-model="adjCategory" value="0">
-              <label class="form-check-label" for="flexRadioDefault1">
-                Ajuste prenómina
+              <input class="form-check-input" type="radio" v-model="adjCategory" v-on:change="onAdjustChange()" value="2">
+              <label class="form-check-label">
+                Crear comentario
               </label>
             </div>
             <div class="form-check">
-              <input class="form-check-input" type="radio" v-model="adjCategory" value="1">
-              <label class="form-check-label" for="flexRadioDefault2">
+              <input class="form-check-input" type="radio" v-model="adjCategory" v-on:change="onAdjustChange()" value="0">
+              <label class="form-check-label">
+                Ajustar prenómina
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" v-model="adjCategory" v-on:change="onAdjustChange()" value="1">
+              <label class="form-check-label">
                 Ajustar entrada y/o salida
               </label>
             </div>
@@ -27,13 +33,13 @@
         </div>
         <br>
         <br>
-        <div v-if="adjCategory == 0" class="row">
+        <div v-if="adjCategory == 0 || adjCategory == 2" class="row">
           <div class="row">
             <div class="col-md-offset-1 col-md-10">
               <div class="row">
                 <div class="col-md-4"><label for="">Tipo de ajuste:*</label></div>
                 <div class="col-md-8">
-                  <select v-model="adjType" class="form-control" v-on:change="onTypeChange()">
+                  <select :disabled="!adjTypeEnabled" v-model="adjType" class="form-control" v-on:change="onTypeChange()">
                     <option v-for="adjT in vData.adjTypes" :value="adjT.id">@{{ adjT.type_code + '-' + adjT.type_name }}</option>
                   </select>
                 </div>

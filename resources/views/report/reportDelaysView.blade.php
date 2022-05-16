@@ -6,6 +6,9 @@
         tr {
             font-size: 70%;
         }
+        .tc {
+            text-align: center;
+        }
         span.nobr { white-space: nowrap; }
     </style>
 @endsection
@@ -60,13 +63,16 @@
                                     {{-- <th v-if="vData.tReport == vData.REP_DELAY">Retardo (min)</th>
                                     <th v-else>Horas Extra</th> --}}
                                     <th>Horario</th>
-                                    <th>Tiempo retardo (min)</th>
-                                    <th>Tiempo extra (hr)</th>
+                                    <th>retardo (min entero) [oculta]</th>
+                                    <th class="tc">TE jornada (hr)</th>
+                                    <th class="tc">TE trabajado (hr)</th>
+                                    <th class="tc">TE ajustado (hr)</th>
+                                    <th class="tc">TE total (hr)</th>
                                     {{-- <th v-if="vData.tReport == vData.REP_HR_EX">Hr_progr_Sal</th> --}}
-                                    <th v-if="vData.tReport == vData.REP_HR_EX">Tiempo retardo (min)</th>
-                                    <th v-if="vData.tReport == vData.REP_HR_EX">Salida anticipada (min)</th>
-                                    <th v-if="vData.tReport == vData.REP_HR_EX">Prima Dominical</th>
-                                    <th v-if="vData.tReport == vData.REP_HR_EX">Descanso</th>
+                                    <th class="tc" v-if="vData.tReport == vData.REP_HR_EX">Tiempo retardo (min)</th>
+                                    <th class="tc" v-if="vData.tReport == vData.REP_HR_EX">Salida anticipada (min)</th>
+                                    <th class="tc" v-if="vData.tReport == vData.REP_HR_EX">Prima Dominical</th>
+                                    <th class="tc" v-if="vData.tReport == vData.REP_HR_EX">Descanso</th>
                                     <th v-if="vData.tReport == vData.REP_HR_EX">Observaciones</th>
                                     <th>Incidencias</th>
                                     <th>Ajustes</th>
@@ -84,13 +90,16 @@
                                     <td>@{{ row.scheduleText }}</td>
                                     {{-- <td v-if="vData.tReport == vData.REP_DELAY">@{{ row.delayMins }}</td>
                                     <td v-else>@{{ row.extraHours }}</td> --}}
-                                    <td>@{{ row.overMinsTotal < 0 ? null : row.overMinsTotal }}</td>
-                                    <td>@{{ vueGui.formatMinsToHHmm(row.overMinsTotal < 0 ? 0 : row.overMinsTotal) }}</td>
+                                    <td>@{{ row.overMinsTotal < 0 ? null : row.overMinsTotal }}</td>{{-- oculta --}}
+                                    <td class="tc">@{{ vueGui.formatMinsToHHmm(row.overDefaultMins < 0 || row.overDefaultMins == null ? 0 : row.overDefaultMins) }}</td>
+                                    <td class="tc">@{{ vueGui.formatMinsToHHmm(row.overScheduleMins + row.overWorkedMins < 0 || row.overScheduleMins + row.overWorkedMins == null ? 0 : row.overScheduleMins + row.overWorkedMins) }}</td>
+                                    <td class="tc">@{{ vueGui.formatMinsToHHmm(row.overMinsByAdjs == null ? 0 : row.overMinsByAdjs) }}</td>
+                                    <td class="tc">@{{ vueGui.formatMinsToHHmm(row.overMinsTotal < 0 ? 0 : row.overMinsTotal) }}</td>
                                     {{-- <td v-if="vData.tReport == vData.REP_HR_EX">@{{ row.outDateTimeSch }}</td> --}}
-                                    <td v-if="vData.tReport == vData.REP_HR_EX">@{{ row.entryDelayMinutes }}</td>
-                                    <td v-if="vData.tReport == vData.REP_HR_EX">@{{ row.prematureOut }}</td>
-                                    <td v-if="vData.tReport == vData.REP_HR_EX">@{{ row.isSunday > 0 ? row.isSunday : "" }}</td>
-                                    <td v-if="vData.tReport == vData.REP_HR_EX">@{{ row.isDayOff > 0 ? row.isDayOff : "" }}</td>
+                                    <td class="tc" v-if="vData.tReport == vData.REP_HR_EX">@{{ row.entryDelayMinutes }}</td>
+                                    <td class="tc" v-if="vData.tReport == vData.REP_HR_EX">@{{ row.prematureOut }}</td>
+                                    <td class="tc" v-if="vData.tReport == vData.REP_HR_EX">@{{ row.isSunday > 0 ? row.isSunday : "" }}</td>
+                                    <td class="tc" v-if="vData.tReport == vData.REP_HR_EX">@{{ row.isDayOff > 0 ? row.isDayOff : "" }}</td>
                                     <td v-if="vData.tReport == vData.REP_HR_EX">@{{ row.others }}</td>
                                     <td>@{{ row.comments }}</td>
                                     <td>
@@ -146,6 +155,9 @@
             this.lEmpWrkdDays = <?php echo json_encode($lEmpWrkdDays) ?>;
             this.adjTypes = <?php echo json_encode($adjTypes) ?>;
             this.lAdjusts = <?php echo json_encode($lAdjusts) ?>;
+            this.lEmpVobos = <?php echo json_encode($lEmpVobos) ?>;
+            this.lDeptJobs = <?php echo json_encode($lDeptJobs) ?>;
+            this.isPrepayrollInspection = <?php echo json_encode($isPrepayrollInspection) ?>;
             this.tReport = <?php echo json_encode($tReport) ?>;
             this.registriesRoute = <?php echo json_encode($registriesRoute) ?>;
             this.REP_HR_EX = <?php echo json_encode(\SCons::REP_HR_EX) ?>;
@@ -154,11 +166,11 @@
 
             // this.minsCol = this.tReport == this.REP_DELAY ? 4 : 4;
             this.minsCol = 5;
-            this.minsBeforeCol = 8;
-            this.minsDelayCol = this.tReport == this.REP_DELAY ? 4 : 7;
-            this.sunCol = 9;
-            this.dayoffCol = 10;
-            this.hiddenColExId = 14;
+            this.minsBeforeCol = 11;
+            this.minsDelayCol = this.tReport == this.REP_DELAY ? 4 : 10;
+            this.sunCol = 12;
+            this.dayoffCol = 13;
+            this.hiddenColExId = 17;
             this.hiddenCol = this.tReport == this.REP_DELAY ? 5 : 5;
             this.toExport = this.tReport == this.REP_DELAY ? [0, 1, 2, 3, 4, 6] : [0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12];
         }
@@ -207,11 +219,11 @@
                         return true;
 
                     case 1:
-                        externalId = parseInt( data[14] );
+                        externalId = parseInt( data[17] );
                         return externalId > 0;
 
                     case 2:
-                        externalId = parseInt( data[14] );
+                        externalId = parseInt( data[17] );
                         return ! (externalId > 0);
 
                     default:
@@ -360,8 +372,23 @@
                                                 " / primas dominicales: " + suns + 
                                                 " / descansos: " + daysoff + " [" + (dayOffTheo == undefined ? 0 : dayOffTheo) + "]";
                         }
+
+                        let oVobo = oData.isPrepayrollInspection ? oData.lEmpVobos[parseInt(group, 10)] : undefined;
+
+                        let isVobo = oVobo != undefined;
                         
-                        return value_to_return;
+                        // return value_to_return + (oData.isPrepayrollInspection ? '     <label class="switch">' + 
+                        //                                 '<input onchange="handleChangeCheck(event, ' + parseInt(group, 10) + ')" type="checkbox" ' + (isVobo ? 'checked' : '') + '>' + 
+                        //                             '<span class="slider round"></span></label> ' + 
+                        //                             (isVobo ? '(Revisado por : ' + oVobo.user_name + ')' : '') : '');
+                        return value_to_return + 
+                                (oData.isPrepayrollInspection ? '   <label class="container">' + 
+                                    '<input id="cb1" onchange="handleChangeCheck(event, ' + parseInt(group, 10) + ')" type="checkbox" ' + (isVobo ? 'checked' : '') + '>' + 
+                                ' <span class="checkmark"></span>' +
+                                '</label>' +
+                                (isVobo ? '(Revisado por : ' + oVobo.user_name + ')' : 'Dar OK') : '')
+                                + '<br>' +
+                                ('<label>' + oData.lDeptJobs[parseInt(group, 10)] + '</label>');
                     },
                     dataSrc: 0
                 },
@@ -433,6 +460,34 @@
         function topFunction() {
             document.body.scrollTop = 0; // For Safari
             document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+        }
+
+        /**
+         * 
+         * 
+         * @param {*} event 
+         * @param {*} id 
+         */
+        function handleChangeCheck(event, numEmployee) {
+            oGui.showLoading(3000);
+            let checked = event.target;
+            let url = "{{ route('employee_vobo') }}";
+            let vobo = checked.checked ? 1 : 0;
+
+            axios.post(url, {
+                _token: "{{ csrf_token() }}",
+                num_employee: numEmployee,
+                is_vobo: vobo,
+                start_date: "{{ $sStartDate }}",
+                end_date: "{{ $sEndDate }}"
+            })
+            .then(res => {
+                console.log(res);
+                oGui.showOk();
+            })
+            .catch(function(error) {
+                oGui.showError(error);
+            });
         }
     </script>
 
