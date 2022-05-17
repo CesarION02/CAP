@@ -246,10 +246,6 @@ class SPrepayrollUtils {
 
     public static function isAllEmployeesOk($idUser, $idVobo)
     {
-        if (! env('VOBO_BY_EMP_ENABLED')) {
-            return true;
-        }
-
         $bDirectEmployees = true;
         $prepayroll = \DB::table('prepayroll_report_auth_controls AS prac')
                             ->where('prac.user_vobo_id', $idUser)
@@ -260,6 +256,9 @@ class SPrepayrollUtils {
             return false;
         }
 
+        if (! env('VOBO_BY_EMP_ENABLED')) {
+            return true;
+        }
         
         $payType = $prepayroll->is_week ? \SCons::PAY_W_S : \SCons::PAY_W_Q;
         $number = $prepayroll->is_week ? $prepayroll->num_week : $prepayroll->num_biweek;
