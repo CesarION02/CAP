@@ -498,4 +498,165 @@ class RegisterController extends Controller
 
         return json_encode([$oInRegistry, $oOutRegistry]);
     }
+
+    public function indexGenRegisters(){
+        $startDate = Carbon::now()->startOfWeek()->toDateString();
+        $endDate = Carbon::now()->endOfWeek()->toDateString();
+
+        $employees = \DB::table('employees')
+                            ->where('is_active', 1)
+                            ->where('is_delete', 0)
+                            ->select('id', DB::raw("CONCAT(name,' - ',num_employee) AS name"))
+                            ->get();
+
+        $workships = \DB::table('workshifts')
+                            ->where('is_delete',0)
+                            ->select('id','name')
+                            ->get();
+
+        return view('genTurnos.index', ['employees' => $employees, 'start_date' => $startDate, 'end_date' => $endDate, 'workships' => $workships]);
+    }
+
+    public function registersGenerate(Request $request){
+        $employee = \DB::table('employees')->where('id', $request->employee)->select('id','name','num_employee')->first();
+
+        $registers = new \stdClass;
+        $startDate = Carbon::parse($request->initDate);
+        $endDate = Carbon::parse($request->finDate);
+        $diff = $startDate->diffInDays($endDate);
+        $diffWeeks = ($diff + 1)/7;
+        $dias = [];
+        $semanas = [];
+        $numTurno = 0;
+        $horaExtra = 0;
+        $minutoExtra = 0;
+        $extraHours = $request->has('extraHours');
+
+        // $incidents = \DB::table('incidents_day as ind')
+        //                 ->join('incidents as in', 'ind.incidents_id','=','in.id')
+        //                 ->where([
+        //                     ['in.employee_id',$employee->id],
+        //                     ['in.start_date','>=',$startDate->format('Y-m-d')],
+        //                     ['in.is_delete',0]
+        //                 ])
+        //                 ->get();
+
+        $incidents = \DB::table('incidents')
+                        ->where([
+                            ['employee_id',$employee->id],
+                            ['start_date','>=',$startDate->format('Y-m-d')],
+                            ['is_delete',0]
+                            ])
+                        ->get();
+
+        $holidays = \DB::table('holidays')
+                        ->where([
+                            ['fecha', '>=',$startDate->format('Y-m-d')],
+                            ['is_delete',0]
+                        ])
+                        ->get();
+
+        $registers->startDate = Carbon::parse($request->initDate)->format('Y-m-d');
+        $registers->endDate = $endDate->format('Y-m-d');
+
+        for ($k=0; $k < $diffWeeks; $k++) {
+            $numTurno = $numTurno < sizeof($request->workships) ? $numTurno : $numTurno = 0;
+            $horarios = \DB::table('workshifts')->where([['id',$request->workships[$numTurno]],['is_delete',0]])->first();
+            $horaEntrada = Carbon::createFromFormat('H:i:s', $horarios->entry);
+            $horaSalida = Carbon::createFromFormat('H:i:s', $horarios->departure);
+            
+            if((!$extraHours) && ($horarios->name == 'Tarde' || $horarios->name == 'Noche')){
+                $horaExtra = floor($horarios->overtimepershift);
+                $minutoExtra = ($horarios->overtimepershift - $horaExtra) > 0 ? (60/(1/($horarios->overtimepershift - $horaExtra))) : 0;
+                $horaSalida->subHour((Integer)$horaExtra);
+                $horaSalida->subMinute((Integer)$minutoExtra);
+            }
+            
+            for ($i=0; $i < 7 ; $i++) { 
+                $entrada = Carbon::create($startDate->year, $startDate->month, $startDate->day, (Integer)$horaEntrada->format('H'), (Integer)$horaEntrada->format('i'), 00);
+                $salida = Carbon::create($startDate->year, $startDate->month, $startDate->day, (Integer)$horaSalida->format('H'), (Integer)$horaSalida->format('i'), 00);
+                $entrada = $entrada->subMinutes(random_int(1, 15))->subSecond(random_int(-59, 0))->format('H:i:s');
+                $salida = $salida->subMinutes(random_int(-11, -1))->subSecond(random_int(-59, 0))->format('H:i:s');
+                $hasIncident = $incidents->where('start_date','<=',$startDate->format('Y-m-d'))->where('end_date','>=',$startDate->format('Y-m-d'));
+                $hasHoliday = $holidays->where('fecha',$startDate->format('Y-m-d'));
+                if(($startDate->dayOfWeek != $request->descanso) && $hasIncident->isEmpty() && $hasHoliday->isEmpty()){
+                    if($horarios->is_night == 0){
+                        array_push($dias, array('turno' => $horarios->name, 'horario' => $horarios->entry.' / '.$horarios->departure, 'fecha_entrada' => $startDate->format('d-m-Y'), 'entrada' => $entrada, 'fecha_salida' => $startDate->format('d-m-Y'), 'salida' => $salida));
+                    }else{
+                        array_push($dias, array('turno' => $horarios->name, 'horario' => $horarios->entry.' / '.$horarios->departure, 'fecha_entrada' => $startDate->subDay()->format('d-m-Y'), 'entrada' => $entrada, 'fecha_salida' => $startDate->addDay()->format('d-m-Y'), 'salida' => $salida));
+                    }
+                }else{
+                    array_push($dias, array('turno' => $horarios->name, 'horario' => $horarios->entry.' / '.$horarios->departure, 'fecha_entrada' => $startDate->format('d-m-Y'), 'entrada' => '', 'fecha_salida' => $startDate->format('d-m-Y'), 'salida' => ''));
+                }
+                $startDate->addDay();
+            }
+            array_push($semanas,$dias);
+            $dias = [];
+            $numTurno = $numTurno + 1;
+        }
+
+        $registers->employee = $employee;
+        $registers->data = $semanas;
+        // dd($registers);
+        return view('genTurnos.viewGenerated', ['register' => $registers, 'ruta' => route('registro_generate_save')]);
+    }
+
+    public function registersGenerateSave(Request $request){
+        $actualRegisters = \DB::table('registers')->where('employee_id',$request->register['employee']['id'])->whereBetween('date',[$request->register['startDate'], $request->register['endDate']])->get();
+        $Inserts = [];
+        
+        foreach ($request->register['data'] as $data) {
+            foreach($data as $day){
+                $fecha_entrada = Carbon::parse($day['fecha_entrada'])->format('Y-m-d');
+                $fecha_salida = Carbon::parse($day['fecha_salida'])->format('Y-m-d');
+                $entryExist = $actualRegisters->where('date', $fecha_entrada)->where('type_id',1)->first();
+                $departureExist = $actualRegisters->where('date', $fecha_salida)->where('type_id',2)->first();
+                if(is_null($entryExist) && is_null($departureExist) && ($day['entrada'] != null) && ($day['salida'] != null)){
+                    array_push($Inserts, array(
+                        'employee_id' => $request->register['employee']['id'],
+                        'date' => $fecha_entrada,
+                        'time' => $day['entrada'],
+                        'type_id' => 1,
+                        'type_system' => null,
+                        'form_creation_id' => 2,
+                        'user_id' => auth()->user()->id,
+                        'is_delete' => 0,
+                        'is_modified' => 0,
+                        'created_at' => Carbon::now(),
+                        'updated_at' => Carbon::now(),
+                        'biostar_id' => null,
+                        'date_original' => $fecha_entrada,
+                        'time_original' => $day['entrada'],
+                        'type_original' => 1
+                        )
+                    );
+
+                    array_push($Inserts, array(
+                        'employee_id' => $request->register['employee']['id'],
+                        'date' => $fecha_salida,
+                        'time' => $day['salida'],
+                        'type_id' => 2,
+                        'type_system' => null,
+                        'form_creation_id' => 2,
+                        'user_id' => auth()->user()->id,
+                        'is_delete' => 0,
+                        'is_modified' => 0,
+                        'created_at' => Carbon::now(),
+                        'updated_at' => Carbon::now(),
+                        'biostar_id' => null,
+                        'date_original' => $fecha_salida,
+                        'time_original' => $day['salida'],
+                        'type_original' => 2
+                        )
+                    );
+                }
+            }
+        }
+
+        DB::transaction(function () use ($Inserts) {
+            DB::table('registers')->insert($Inserts);
+        });
+
+        return response()->json(array('result' => true, 'redirectRoute' => route('registro_index_generate')), 200);
+    }
 }
