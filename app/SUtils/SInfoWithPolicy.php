@@ -1307,7 +1307,10 @@ class SInfoWithPolicy{
                         $days++; 
                     }
                 }
-                if($days < 7){ return $lRows;};
+                
+                // se quita porque no es necesario que sean 7 días.
+                //if($days < 7){ return $lRows;};
+                
                 $descansoImpl = 0;
                 for($i = 0 ; count($lRows) > $i ; $i++){
                     $banderaAjuste = 0;
@@ -1416,7 +1419,9 @@ class SInfoWithPolicy{
                                     if($lRows[$i]->events[0]['type_id'] == 19){
                                         $lRows[$i]->isDayOff = 1; 
                                         $haveDayoff = 1;
-                                        $lRows[$i]->work_dayoff = 1;       
+                                        if($lRows[$i]->overtimeCheckPolicy != 1){
+                                            $lRows[$i]->work_dayoff = 1;
+                                        }       
                                     }
                                 }
                             }
@@ -1427,7 +1432,10 @@ class SInfoWithPolicy{
                         if($lRows[$i]->hasChecks == 0){
                             $lRows[$i]->work_dayoff = 0;
                         }else{
-                            $lRows[$i]->work_dayoff = 1;
+
+                            if($lRows[$i]->overtimeCheckPolicy != 1){
+                                $lRows[$i]->work_dayoff = 1;
+                            } 
                         }
                     }
                 }
@@ -1436,7 +1444,11 @@ class SInfoWithPolicy{
                 if(isset($diasCorrectos)){
                     // si falta día de descanso
                     if($haveDayoff == 0){
-                        if($descansoImpl == 1){ $lRows[0]->work_dayoff = 1;  }
+                        if($descansoImpl == 1){ 
+                            if($lRows[0]->overtimeCheckPolicy != 1){
+                                $lRows[$i]->work_dayoff = 1;
+                            }    
+                        }
                         $concluir = 0;
                         if(isset($aWithoutExtra)){
                             for($i = 0 ; count($aWithoutExtra) > $i ; $i++){
@@ -2100,7 +2112,7 @@ class SInfoWithPolicy{
                             if( $diasTrabajados[$i]->descanso == 1){
                                 $haveDayoff = 1;
                                 if ($diasTrabajados[$i]->checadas == 1){
-                                    $lRows[$i]->work_dayoff = 1;
+                                    //$lRows[$i]->work_dayoff = 1;
                                 }
                             }   
                         }
@@ -2234,7 +2246,9 @@ class SInfoWithPolicy{
                                 if($lRows[$i]->hasChecks == 0){
                                     $lRows[$i]->work_dayoff = 0;
                                 }else{
-                                    $lRows[$i]->work_dayoff = 1;
+                                    if($lRows[$i]->overtimeCheckPolicy != 1){
+                                            $lRows[$i]->work_dayoff = 1;
+                                        } 
                                 }
                             }
                 
@@ -2243,7 +2257,11 @@ class SInfoWithPolicy{
                         $diaSumar = 0;
                         if(isset($diasCorrectos)){
                             if($haveDayoff == 0){
-                                if($descansoImpl== 1){ $lRows[$i-1]->work_dayoff = 1;  }
+                                if($descansoImpl== 1){ 
+                                    if($lRows[$i]->overtimeCheckPolicy != 1){
+                                        $lRows[$i]->work_dayoff = 1;
+                                    }   
+                                }
                                 if(isset($aWithoutExtra)){
                                     $lRows[$aWithoutExtra[0]]->isDayOff = 1;
                                     if( $aWithoutExtra[0] == $diasCorrectos[0] ){ $diaSumar = 1;}
@@ -2495,7 +2513,9 @@ class SInfoWithPolicy{
                                                     if($lRows[$i]->events[0]['type_id'] == 19){
                                                         $lRows[$i]->isDayOff = 1; 
                                                         $haveDayoff = 1;
-                                                        $lRows[$i]->work_dayoff = 1;       
+                                                        if($lRows[$i]->overtimeCheckPolicy != 1){
+                                                            $lRows[$i]->work_dayoff = 1;
+                                                        }         
                                                     }
                                                 }
                                                 
@@ -2507,7 +2527,9 @@ class SInfoWithPolicy{
                                         if($lRows[$i]->hasChecks == 0){
                                             $lRows[$i]->work_dayoff = 0;
                                         }else{
-                                            $lRows[$i]->work_dayoff = 1;
+                                            if($lRows[$i]->overtimeCheckPolicy != 1){
+                                                $lRows[$i]->work_dayoff = 1;
+                                            }  
                                         }
                                     }
                         
@@ -2516,7 +2538,10 @@ class SInfoWithPolicy{
                                 $diaSumar = 0;
                                 if(isset($diasCorrectos)){
                                     if($haveDayoff == 0){
-                                        if($descansoImpl == 1){ $lRows[$i-1]->work_dayoff = 1;  }
+                                        if($descansoImpl == 1){ if($lRows[$i-1]->overtimeCheckPolicy != 1){
+                                            $lRows[$i]->work_dayoff = 1;
+                                            }   
+                                        }
                                         if(isset($aWithoutExtra)){
                                             $lRows[$aWithoutExtra[0]]->isDayOff = 1;
                                             if( $aWithoutExtra[0] == $diasCorrectos[0] ){ $diaSumar = 1;}
@@ -2657,7 +2682,9 @@ class SInfoWithPolicy{
                                     if($lRows[$i]->events[0]['type_id'] == 19){
                                         $lRows[$i]->isDayOff = 1; 
                                         $haveDayoff = 1;
-                                        $lRows[$i]->work_dayoff = 1;       
+                                        if($lRows[$i]->overtimeCheckPolicy != 1){
+                                            $lRows[$i]->work_dayoff = 1;
+                                        }        
                                     }
                                 }
                             
