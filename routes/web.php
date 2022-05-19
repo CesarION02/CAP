@@ -251,6 +251,9 @@ Route::put('registerEmployee/{id}', 'RegisterController@registerupdate')->name('
 Route::delete('registerEmployee/{id}', 'RegisterController@registerDesactivar')->name('desactivar_registros');
 Route::delete('registerEmployee/disable/{id}', 'RegisterController@activar')->name('activar_registros');
 Route::post('register/adjust_regs', 'RegisterController@adjustRegistries')->name('registro_ajuste');
+Route::get('register/generate','RegisterController@indexGenRegisters')->name('registro_index_generate');
+Route::post('register/generate','RegisterController@registersGenerate')->name('registro_generate_generate');
+Route::post('register/generate/save','RegisterController@registersGenerateSave')->name('registro_generate_save');
 
 /* CONFIGURACION */
 Route::get('configuration','configController@index')->name('config');
