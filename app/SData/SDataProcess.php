@@ -198,6 +198,7 @@ class SDataProcess {
                     $otherRow->hasCheckIn = false;
                     if ($otherRow->workable) {
                         $otherRow->comments = $otherRow->comments."Sin checadas. ";
+                        $otherRow->isDayChecked = true;
                     }
 
                     $otherRow->inDateTime = $sDate;
@@ -300,6 +301,7 @@ class SDataProcess {
                     $newRow->outDate = $newRow->inDate;
                     $newRow->outDateTime = $newRow->inDate;
                     $newRow->comments = $newRow->comments."Sin salida. ";
+                    $newRow->isDayChecked = true;
                     $newRow->hasCheckOut = false;
 
                     $response = array();
@@ -356,6 +358,7 @@ class SDataProcess {
                         if (count($adjs) == 0) {
                             $newRow->hasCheckIn = false;
                             $newRow->comments = $newRow->comments."Sin entrada. ";
+                            $newRow->isDayChecked = true;
                         }
                         else {
                             foreach ($adjs as $adj) {
@@ -396,6 +399,7 @@ class SDataProcess {
                         $newRow->outDate = $registry->date;
                         $newRow->outDateTime = $registry->date.' '.$registry->time;
                         $newRow->comments = $newRow->comments."Sin horario. ";
+                        $newRow->isDayChecked = true;
                         $newRow->hasSchedule = false;
                     }
                 }
@@ -414,6 +418,7 @@ class SDataProcess {
                     
                             if (count($adjs) == 0) {
                                 $newRow->comments = $newRow->comments."Sin salida. ";
+                                $newRow->isDayChecked = true;
                                 $newRow->hasCheckOut = false;
                             }
                             else {
@@ -483,6 +488,7 @@ class SDataProcess {
                         if (count($adjs) == 0) {
                             $newRow->hasCheckIn = false;
                             $newRow->comments = $newRow->comments."Sin entrada. ";
+                            $newRow->isDayChecked = true;
                         }
                         else {
                             foreach ($adjs as $adj) {
@@ -583,6 +589,7 @@ class SDataProcess {
                 
                         if (count($adjs) == 0) {
                             $newRow->comments = $newRow->comments."Sin salida. ";
+                            $newRow->isDayChecked = true;
                             $newRow->hasCheckOut = false;
                         }
                         else {
@@ -631,6 +638,7 @@ class SDataProcess {
             $oRow->outDateTime = $sDate;
 
             $oRow->comments = $oRow->comments."Sin horario. ";
+            $oRow->isDayChecked = true;
             $oRow->hasSchedule = false;
         }
         else {
@@ -1138,6 +1146,7 @@ class SDataProcess {
                     $cIn = SDataProcess::isCheckSchedule($oRow->inDateTime, $oRow->inDateTimeSch, $mayBeOverTime);
                     if ($cIn && !$adjIn) {
                         $oRow->comments = $oRow->comments."Entrada atípica. ";
+                        $oRow->isDayChecked = true;
                         $oRow->isAtypicalIn = true;
                     }
                 }
@@ -1147,11 +1156,13 @@ class SDataProcess {
                     $cOut = SDataProcess::isCheckSchedule($oRow->outDateTime, $oRow->outDateTimeSch, $mayBeOverTime);
                     if ($cOut && !$adjOut) {
                         $oRow->comments = $oRow->comments."Salida atípica. ";
+                        $oRow->isDayChecked = true;
                         $oRow->isAtypicalOut = true;
                     }
                 }
                 if (($cIn || $cOut) && (! $adjIn && ! $adjOut)) {
                     $oRow->comments = $oRow->comments."Revisar horario. ";
+                    $oRow->isDayChecked = true;
                     $oRow->isCheckSchedule = true;
                 }
 
@@ -1487,6 +1498,7 @@ class SDataProcess {
                 if ($withAbs) {
                     $oRow->hasAbsence = true;
                     $oRow->comments = $oRow->comments . ($absenceByOmission ? "Falta por omitir checar. " : "Falta. ");
+                    $oRow->isDayChecked = true;
                 }
                 else {
                     $oRow->hasAbsence = false;
@@ -1786,6 +1798,7 @@ class SDataProcess {
                     $oNewRow->hasCheckIn = false;
                     $oNewRow->hasCheckOut = false;
                     $oNewRow->comments = $oNewRow->comments."Sin checadas. ";
+                    $oNewRow->isDayChecked = true;
 
                     $registry = (object) [
                                     'type_id' => \SCons::REG_OUT,
