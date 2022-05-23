@@ -84,9 +84,7 @@ var app = new Vue({
             this.lDepartments = [];
             
             for (const dept of this.vueData.lDepts) {
-                if (dept.dept_group_id == this.oGroup.id || dept.dept_group_id == null) {
-                    this.lDepartments.push(this.copyDepartment(dept));
-                }
+                this.lDepartments.push(this.copyDepartment(dept));
             }
         },
 
@@ -98,8 +96,17 @@ var app = new Vue({
         addDepartment() {
             for (const dept of this.lDepartments) {
                 if (dept.id == this.iDept) {
-                    dept.dept_group_id = this.oGroup.id;
-                    break;
+                    if(dept.dept_group_id != null){
+                        (async () => {
+                            if (await oGui.confirm(dept.name + ' está asignado.','Desea actualizar la asignación del departamento?','warning')) {
+                                dept.dept_group_id = this.oGroup.id;
+                            }
+                        })();
+                        break;
+                    }else{
+                        dept.dept_group_id = this.oGroup.id;
+                        break;
+                    }
                 }
             }
         },

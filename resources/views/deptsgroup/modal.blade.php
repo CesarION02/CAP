@@ -11,7 +11,7 @@
                 <div class="row">
                     <div class="col-md-9 col-md-offset-1">
                         <select class="form-control" name="" id="" v-model="iDept">
-                            <option v-if="dept.dept_group_id == null" v-for="dept in lDepartments" :value="dept.id">@{{ dept.name }}</option>
+                            <option v-if="dept.dept_group_id != oGroup.id" v-for="dept in lDepartments" :value="dept.id">@{{ dept.name }}</option>
                         </select>
                     </div>
                     <div class="col-md-1">
