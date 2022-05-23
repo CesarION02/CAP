@@ -2257,7 +2257,7 @@ class SInfoWithPolicy{
                         $diaSumar = 0;
                         if(isset($diasCorrectos)){
                             if($haveDayoff == 0){
-                                if($descansoImpl== 1){ 
+                                if($descansoImpl == 1){ 
                                     if($lRows[$i]->overtimeCheckPolicy != 1){
                                         $lRows[$i]->work_dayoff = 1;
                                     }   
@@ -2351,7 +2351,10 @@ class SInfoWithPolicy{
                     }else{
                         if( $haveDayoff == 0){
                             $lRows[0]->isDayOff = 1 ;
-                            $lRows[0]->work_dayoff = 1;
+                            if($lRows[0]->overtimeCheckPolicy != 1){
+                                $lRows[0]->work_dayoff = 1;
+                            } 
+                            
                             $contador[0] = 1;
                             $contador[1] = $lRows[0]->extraDoubleMins;
                             $contador[2] = $lRows[0]->extraTripleMins;
@@ -2754,7 +2757,7 @@ class SInfoWithPolicy{
                 $empleados = DB::table('employees')
                                 ->where('is_active','=',1)
                                 ->where('way_pay_id','=',1)
-                                //->where('id',78)
+                                //->where('id',1245)
                                 ->where('department_id','!=',$config->dept_foraneo)
                                 ->where('job_id','!=',$config->job_foraneo)
                                 ->orderBy('id')
