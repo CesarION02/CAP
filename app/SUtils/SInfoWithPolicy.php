@@ -2247,8 +2247,10 @@ class SInfoWithPolicy{
                                     $lRows[$i]->work_dayoff = 0;
                                 }else{
                                     if($lRows[$i]->overtimeCheckPolicy != 1){
-                                            $lRows[$i]->work_dayoff = 1;
-                                        } 
+                                        $lRows[$i]->work_dayoff = 1;
+                                    }else{
+                                        $lRows[$i]->work_dayoff = 0;   
+                                    } 
                                 }
                             }
                 
@@ -2260,7 +2262,9 @@ class SInfoWithPolicy{
                                 if($descansoImpl == 1){ 
                                     if($lRows[$i]->overtimeCheckPolicy != 1){
                                         $lRows[$i]->work_dayoff = 1;
-                                    }   
+                                    }else{
+                                        $lRows[$i]->work_dayoff = 0;   
+                                    }    
                                 }
                                 if(isset($aWithoutExtra)){
                                     $lRows[$aWithoutExtra[0]]->isDayOff = 1;
@@ -2353,7 +2357,9 @@ class SInfoWithPolicy{
                             $lRows[0]->isDayOff = 1 ;
                             if($lRows[0]->overtimeCheckPolicy != 1){
                                 $lRows[0]->work_dayoff = 1;
-                            } 
+                            }else{
+                                $lRows[$i]->work_dayoff = 0;   
+                            }  
                             
                             $contador[0] = 1;
                             $contador[1] = $lRows[0]->extraDoubleMins;
@@ -2518,7 +2524,9 @@ class SInfoWithPolicy{
                                                         $haveDayoff = 1;
                                                         if($lRows[$i]->overtimeCheckPolicy != 1){
                                                             $lRows[$i]->work_dayoff = 1;
-                                                        }         
+                                                        }else{
+                                                            $lRows[$i]->work_dayoff = 0;   
+                                                        }          
                                                     }
                                                 }
                                                 
@@ -2532,7 +2540,9 @@ class SInfoWithPolicy{
                                         }else{
                                             if($lRows[$i]->overtimeCheckPolicy != 1){
                                                 $lRows[$i]->work_dayoff = 1;
-                                            }  
+                                            }else{
+                                                $lRows[$i]->work_dayoff = 0;   
+                                            }   
                                         }
                                     }
                         
@@ -2543,7 +2553,9 @@ class SInfoWithPolicy{
                                     if($haveDayoff == 0){
                                         if($descansoImpl == 1){ if($lRows[$i-1]->overtimeCheckPolicy != 1){
                                             $lRows[$i]->work_dayoff = 1;
-                                            }   
+                                            }else{
+                                                $lRows[$i]->work_dayoff = 0;   
+                                            }    
                                         }
                                         if(isset($aWithoutExtra)){
                                             $lRows[$aWithoutExtra[0]]->isDayOff = 1;
@@ -2687,7 +2699,9 @@ class SInfoWithPolicy{
                                         $haveDayoff = 1;
                                         if($lRows[$i]->overtimeCheckPolicy != 1){
                                             $lRows[$i]->work_dayoff = 1;
-                                        }        
+                                        }else{
+                                            $lRows[$i]->work_dayoff = 0;   
+                                        }         
                                     }
                                 }
                             
