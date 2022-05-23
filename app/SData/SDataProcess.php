@@ -190,6 +190,7 @@ class SDataProcess {
                     $otherRow->employeeAreaId = $oEmployee->employee_area_id;
                     $otherRow->employee = $oEmployee->name;
                     $otherRow->external_id = $oEmployee->external_id;
+                    $otherRow->overtimeCheckPolicy = $oEmployee->policy_extratime_id;
 
                     $otherRow = SDataProcess::setDates($result, $otherRow, $sDate);
 
@@ -287,6 +288,7 @@ class SDataProcess {
             $newRow->employeeAreaId = $registry->employee_area_id;
             $newRow->employee = $registry->name;
             $newRow->external_id = $registry->external_id;
+            $newRow->overtimeCheckPolicy = $registry->policy_extratime_id;
         }
         
         $again = false;
