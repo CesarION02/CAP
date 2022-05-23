@@ -18,6 +18,33 @@ class SGui {
         swal(title, sMessage, icon);
     }
 
+    confirm(title, sMessage, icon, danger = false) {
+        return swal({
+            title: title,
+            text: sMessage,
+            icon: icon,
+            buttons: ["Cancelar", "Aceptar"],
+            dangerMode: danger,
+        })
+    }
+
+    showConfirm(title, sMessage, icon, danger = false){
+        swal({
+                title: title,
+                text: sMessage,
+                icon: icon,
+                buttons: true,
+                dangerMode: danger,
+            })
+            .then((value) => {
+                if (value) {
+                    return true;
+                } else {
+                    return false;
+                }
+            });
+    }
+
     pad(num, size) {
 
         if (num.length == 0) {
