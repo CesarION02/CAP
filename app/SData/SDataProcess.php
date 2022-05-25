@@ -7,6 +7,7 @@ use App\SUtils\SRegistryRow;
 use App\SUtils\SPrepayrollAdjustUtils;
 use App\SData\SOverJourneyCore;
 use App\Http\Controllers\prePayrollController;
+use App\Models\commentsControl;
 
 class SDataProcess {
 
@@ -25,6 +26,24 @@ class SDataProcess {
      * "maxGapCheckSchedule": (minutos), minutos tomados en cuenta para poner la leyenda "revisar horario".
      */
 
+    public static function checkEvents(){
+        $comments = commentsControl::select('key_code','value')->get();
+        $events = \DB::table('type_incidents')->get();
+        $newEvents = [];
+
+        foreach($events as $ev){
+            if(is_null($comments->where('key_code',$ev->id)->first())){
+                array_push($newEvents, ['key_code' => $ev->id, 'Comment' => $ev->name, 'value' => false, 'created_by' => 1, 'updated_by' => 1, 'is_delete' => 0, 'created_at' => now(), 'updated_at' => now()]);
+            }
+        }
+
+        if(!is_null($newEvents)){
+            \DB::table('comments_control')->insert($newEvents);
+        }
+
+        return $events;
+    }
+
      /**
       * Realiza el proceso de empatar checadas vs horarios programados y regresa una
       * lista de SRegistryRow con los datos correspondientes
@@ -39,26 +58,29 @@ class SDataProcess {
       */
     public static function process($sStartDate, $sEndDate, $payWay, $lEmployees)
     {
-        $data53 = SDataProcess::getSchedulesAndChecks($sStartDate, $sEndDate, $payWay, $lEmployees);
+        $events = SDataProcess::checkEvents();
+        $comments = commentsControl::where('is_delete',0)->select('key_code','value')->get();
+
+        $data53 = SDataProcess::getSchedulesAndChecks($sStartDate, $sEndDate, $payWay, $lEmployees, $comments);
 
         $aEmployees = $lEmployees->pluck('id');
         $lWorkshifts = SDelayReportUtils::getWorkshifts($sStartDate, $sEndDate, $payWay, $aEmployees);
         // Rutina para verificación de renglones completos
         // $lDataComplete = SDataProcess::completeDays($sStartDate, $sEndDate, $data53, $aEmployees, $lWorkshifts);
-        $lData53_2 = SDataProcess::addEventsDaysOffAndHolidays($data53, $lWorkshifts);
+        $lData53_2 = SDataProcess::addEventsDaysOffAndHolidays($data53, $lWorkshifts, $comments);
         
         $aEmployeeBen = $lEmployees->pluck('ben_pol_id', 'id');
-        $lDataWithAbs = SDataProcess::addAbsences($lData53_2, $aEmployeeBen);
+        $lDataWithAbs = SDataProcess::addAbsences($lData53_2, $aEmployeeBen, $comments);
 
         // $aEmployeeOverTime = $lEmployees->pluck('is_overtime', 'id');
         $aEmployeeOverTime = $lEmployees->pluck('policy_extratime_id', 'id');
-        $lData = SDataProcess::addDelaysAndOverTime($lDataWithAbs, $aEmployeeOverTime, $sEndDate);
+        $lData = SDataProcess::addDelaysAndOverTime($lDataWithAbs, $aEmployeeOverTime, $sEndDate, $comments);
 
         $lDataWSun = SDataProcess::addSundayPay($lData);
 
         // Se comenta este método ya que se cambió el procesamiento para poder hacer ajustes
         // $lDataJ = SOverJourneyCore::overtimeByIncompleteJourney($sStartDate, $sEndDate, $lDataWSun, $aEmployeeOverTime);
-        $lAllData = SOverJourneyCore::processOverTimeByOverJourney($lDataWSun, $sStartDate);
+        $lAllData = SOverJourneyCore::processOverTimeByOverJourney($lDataWSun, $sStartDate, $comments);
 
         return $lAllData;
     }
@@ -73,7 +95,7 @@ class SDataProcess {
      * 
      * @return array SRegistryRow
      */
-    public static function getSchedulesAndChecks($sStartDate, $sEndDate, $payWay, $lEmployees)
+    public static function getSchedulesAndChecks($sStartDate, $sEndDate, $payWay, $lEmployees, $comments = null)
     {
         $aEmployees = $lEmployees->pluck('id');
         $aRegistries = SDelayReportUtils::getRegistries($sStartDate, $sEndDate, $payWay, $aEmployees, true);
@@ -124,7 +146,7 @@ class SDataProcess {
                 if (sizeof($registries) > 0) {
                     foreach ($registries as $registry) {
                         $qWorkshifts = clone $lWorkshifts;
-                        $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $qWorkshifts, $sStartDate, $sEndDate);
+                        $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $qWorkshifts, $sStartDate, $sEndDate, $comments);
         
                         $isNew = $theRow[0];
                         $newRow = $theRow[1];
@@ -137,10 +159,10 @@ class SDataProcess {
 
                         if ($again) {
                             if ($fRegistry != null) {
-                                $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $fRegistry, clone $lWorkshifts, $sStartDate, $sEndDate);
+                                $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $fRegistry, clone $lWorkshifts, $sStartDate, $sEndDate, $comments);
                             }
                             else {
-                                $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $lWorkshifts, $sStartDate, $sEndDate);
+                                $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $lWorkshifts, $sStartDate, $sEndDate, $comments);
                             }
                             $isNew = $theRow[0];
                             $newRow = $theRow[1];
@@ -162,7 +184,7 @@ class SDataProcess {
                             'is_modified' => false
                         ];
 
-                        $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $lWorkshifts, $sStartDate, $sEndDate);
+                        $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $lWorkshifts, $sStartDate, $sEndDate, $comments);
 
                         $isNew = $theRow[0];
                         $newRow = $theRow[1];
@@ -191,14 +213,21 @@ class SDataProcess {
                     $otherRow->employee = $oEmployee->name;
                     $otherRow->external_id = $oEmployee->external_id;
 
-                    $otherRow = SDataProcess::setDates($result, $otherRow, $sDate);
+                    $otherRow = SDataProcess::setDates($result, $otherRow, $sDate, $comments);
 
                     $otherRow->hasChecks = false;
                     $otherRow->hasCheckOut = false;
                     $otherRow->hasCheckIn = false;
                     if ($otherRow->workable) {
                         $otherRow->comments = $otherRow->comments."Sin checadas. ";
-                        $otherRow->isDayChecked = true;
+                        if($comments != null){
+                            if($comments->where('key_code','hasChecks')->first()['value'] ||
+                                $comments->where('key_code','hasCheckIn')->first()['value'] ||
+                                $comments->where('key_code','hasCheckOut')->first()['value']
+                            ){
+                                $otherRow->isDayChecked = true;
+                            }
+                        }
                     }
 
                     $otherRow->inDateTime = $sDate;
@@ -223,7 +252,7 @@ class SDataProcess {
                         'is_modified' => false
                     ];
 
-                    $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $lWorkshifts, $sStartDate, $sEndDate);
+                    $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $lWorkshifts, $sStartDate, $sEndDate, $comments);
                     $newRow = $theRow[1];
                     $again = $theRow[2];
                     $fRegistry = $theRow[3];
@@ -241,10 +270,10 @@ class SDataProcess {
 
                     if ($again) {
                         if ($fRegistry != null) {
-                            $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $fRegistry, clone $lWorkshifts, $sStartDate, $sEndDate);
+                            $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $fRegistry, clone $lWorkshifts, $sStartDate, $sEndDate, $comments);
                         }
                         else {
-                            $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $lWorkshifts, $sStartDate, $sEndDate);
+                            $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $lWorkshifts, $sStartDate, $sEndDate, $comments);
                         }
 
                         $isNew = $theRow[0];
@@ -279,7 +308,7 @@ class SDataProcess {
      *               $response[1] = SRegistryRow que puede ser procesado de nuevo o estar completo
      *               $response[2] = boolean que determina si el renglón será reprocesado, esto cuando falta un registro de entrada o salida
      */
-    private static function manageRow($newRow, $isNew, $idEmployee, $registry, $qWorkshifts, $sStartDate, $sEndDate)
+    private static function manageRow($newRow, $isNew, $idEmployee, $registry, $qWorkshifts, $sStartDate, $sEndDate, $comments = null)
     {
         if ($isNew) {
             $newRow = new SRegistryRow();
@@ -301,7 +330,11 @@ class SDataProcess {
                     $newRow->outDate = $newRow->inDate;
                     $newRow->outDateTime = $newRow->inDate;
                     $newRow->comments = $newRow->comments."Sin salida. ";
-                    $newRow->isDayChecked = true;
+                    if($comments != null){
+                        if($comments->where('key_code','hasCheckOut')->first()['value']){
+                            $newRow->isDayChecked = true;
+                        }
+                    }
                     $newRow->hasCheckOut = false;
 
                     $response = array();
@@ -358,7 +391,11 @@ class SDataProcess {
                         if (count($adjs) == 0) {
                             $newRow->hasCheckIn = false;
                             $newRow->comments = $newRow->comments."Sin entrada. ";
-                            $newRow->isDayChecked = true;
+                            if($comments != null){
+                                if($comments->where('key_code','hasCheckIn')->first()['value']){
+                                    $newRow->isDayChecked = true;
+                                }
+                            }
                         }
                         else {
                             foreach ($adjs as $adj) {
@@ -393,13 +430,17 @@ class SDataProcess {
                             }
                         }
 
-                        $newRow = SDataProcess::setDates($otherResult, $newRow);
+                        $newRow = SDataProcess::setDates($otherResult, $newRow, null, $comments);
                     }
                     else {
                         $newRow->outDate = $registry->date;
                         $newRow->outDateTime = $registry->date.' '.$registry->time;
                         $newRow->comments = $newRow->comments."Sin horario. ";
-                        $newRow->isDayChecked = true;
+                        if($comments != null){
+                            if($comments->where('key_code','hasSchedule')->first()['value']){
+                                $newRow->isDayChecked = true;
+                            }
+                        }
                         $newRow->hasSchedule = false;
                     }
                 }
@@ -407,7 +448,7 @@ class SDataProcess {
             else {
                 if ($newRow->inDate != null) {
                     if ($newRow->outDate == null) {
-                        $newRow = SDataProcess::setDates($result, $newRow);
+                        $newRow = SDataProcess::setDates($result, $newRow, null, $comments);
 
                         if (isset($registry->to_close) && $registry->to_close) {
                             $newRow->outDate = $newRow->inDate;
@@ -418,7 +459,11 @@ class SDataProcess {
                     
                             if (count($adjs) == 0) {
                                 $newRow->comments = $newRow->comments."Sin salida. ";
-                                $newRow->isDayChecked = true;
+                                if($comments != null){
+                                    if($comments->where('key_code','hasCheckOut')->first()['value']){
+                                        $newRow->isDayChecked = true;
+                                    }
+                                }
                                 $newRow->hasCheckOut = false;
                             }
                             else {
@@ -488,7 +533,11 @@ class SDataProcess {
                         if (count($adjs) == 0) {
                             $newRow->hasCheckIn = false;
                             $newRow->comments = $newRow->comments."Sin entrada. ";
-                            $newRow->isDayChecked = true;
+                            if($comments != null){
+                                if($comments->where('key_code','hasCheckIn')->first()['value']){
+                                    $newRow->isDayChecked = true;
+                                }
+                            }
                         }
                         else {
                             foreach ($adjs as $adj) {
@@ -576,6 +625,11 @@ class SDataProcess {
                             $newRow->isSpecialSchedule = $result->auxIsSpecialSchedule;
                             if ($newRow->isSpecialSchedule) {
                                 $newRow->others = $newRow->others."Turno especial (".$result->auxWorkshift->name."). ";
+                                if($comments != null){
+                                    if($comments->where('key_code','isSpecialSchedule')->first()['value']){
+                                        $newRow->isDayChecked = true;
+                                    }
+                                }
                             }
                         }
                         else {
@@ -589,7 +643,11 @@ class SDataProcess {
                 
                         if (count($adjs) == 0) {
                             $newRow->comments = $newRow->comments."Sin salida. ";
-                            $newRow->isDayChecked = true;
+                            if($comments != null){
+                                if($comments->where('key_code','hasCheckOut')->first()['value']){
+                                    $newRow->isDayChecked = true;
+                                }
+                            }
                             $newRow->hasCheckOut = false;
                         }
                         else {
@@ -627,7 +685,7 @@ class SDataProcess {
      * 
      * @return Object $oRow
      */
-    private static function setDates($result, $oRow, $sDate = null)
+    private static function setDates($result, $oRow, $sDate = null, $comments=null)
     {
         if ($result == null) {
             $oRow->outDate = $sDate;
@@ -638,13 +696,22 @@ class SDataProcess {
             $oRow->outDateTime = $sDate;
 
             $oRow->comments = $oRow->comments."Sin horario. ";
-            $oRow->isDayChecked = true;
+            if($comments != null){
+                if($comments->where('key_code','hasSchedule')->first()['value']){
+                    $oRow->isDayChecked = true;
+                }
+            }
             $oRow->hasSchedule = false;
         }
         else {
             $oRow->isSpecialSchedule = $result->auxIsSpecialSchedule;
             if ($oRow->isSpecialSchedule) {
                 $oRow->others = $oRow->others."Turno especial (".$result->auxWorkshift->name."). ";
+                if($comments != null){
+                    if($comments->where('key_code','isSpecialSchedule')->first()['value']){
+                        $oRow->isDayChecked = true;
+                    }
+                }
             }
 
             $oRow->scheduleFrom = SDataProcess::getOrigin($result);
@@ -661,6 +728,11 @@ class SDataProcess {
                 $oRow->outDateTime = $result->variableDateTime->toDateTimeString();
                 $oRow->isModifiedOut = isset($result->registry->is_modified) ? $result->registry->is_modified : false;
                 $oRow->comments = $oRow->comments."No laborable. ";
+                if($comments != null){
+                    if($comments->where('key_code','workable')->first()['value']){
+                        $oRow->isDayChecked = true;
+                    }
+                }
                 $oRow->workable = false;
 
                 return $oRow;
@@ -761,7 +833,7 @@ class SDataProcess {
      * 
      * @return array App\SUtils\SRegistryRow
      */
-    public static function addEventsDaysOffAndHolidays($lData53, $qWorkshifts)
+    public static function addEventsDaysOffAndHolidays($lData53, $qWorkshifts, $comments = null)
     {
         foreach ($lData53 as $oRow) {
             /**
@@ -780,6 +852,7 @@ class SDataProcess {
             $lAbsences = prePayrollController::searchAbsence($oRow->idEmployee, $sDt->toDateString());
                     
             if (sizeof($lAbsences) > 0) {
+                // $incidentsType = \DB::table('type_incidents')->get();
                 foreach ($lAbsences as $absence) {
                     $key = explode("_", $absence->external_key);
 
@@ -791,6 +864,16 @@ class SDataProcess {
                     $abs['type_id'] = $absence->type_id;
                     $abs['is_allowed'] = $absence->is_allowed;
                     $oRow->others = $oRow->others."".$absence->type_name.". ";
+
+                    // $incident = $incidentsType->where('id',$absence->type_id)->first();
+
+                    if($comments != null){
+                        if($comments->where('key_code',$absence->type_id)->first()['value']){
+                            $oRow->isDayChecked = true;
+                        }else if($comments->where('key_code',$absence->type_id)->first()['value'] == 0){
+                            $oRow->isDayChecked = false;
+                        }
+                    }
 
                     $oRow->events[] = $abs;
                 }
@@ -954,7 +1037,7 @@ class SDataProcess {
      * 
      * @return array[App\SUtils\SRegistryRow] $lData
      */
-    public static function addDelaysAndOverTime($lData, $aEmployeeOverTime, $sEndDate)
+    public static function addDelaysAndOverTime($lData, $aEmployeeOverTime, $sEndDate, $comments = null)
     {
         $config = \App\SUtils\SConfiguration::getConfigurations();
         $consumAdjs = [];
@@ -1019,6 +1102,11 @@ class SDataProcess {
                     if ($hasDelay) {
                         $oRow->entryDelayMinutes = $mins;
                         $oRow->comments = $oRow->comments."Retardo. ";
+                        if($comments != null){
+                            if($comments->where('key_code','entryDelayMinutes')->first()['value']){
+                                $oRow->isDayChecked = true;
+                            }
+                        }
                     }
                 }
                 else {
@@ -1056,6 +1144,13 @@ class SDataProcess {
 
                             if ($oRow->overWorkedMins >= $discountMins) {
                                 $oRow->overMinsByAdjs = - $discountMins;
+                                if(($oRow->overWorkedMins - $discountMins) >= 20){
+                                    if($comments != null){
+                                        if($comments->where('key_code','overWorkedMins')->first()['value']){
+                                            $oRow->isDayChecked = true;
+                                        }
+                                    }
+                                }
                             }
                             else {
                                 $oRow->overMinsByAdjs = - $oRow->overWorkedMins;
@@ -1075,6 +1170,11 @@ class SDataProcess {
                             $oRow->overScheduleMins = 0;
 
                             $oRow->comments = $oRow->comments."Jornada TE. ";
+                            if($comments != null){
+                                if($comments->where('key_code','isIncompleteTeJourney')->first()['value']){
+                                    $oRow->isDayChecked = true;
+                                }
+                            }
                             $oRow->isIncompleteTeJourney = true;
 
                             $date = $oRow->outDate == null ? $oRow->outDateTime : $oRow->outDate;
@@ -1090,6 +1190,13 @@ class SDataProcess {
 
                             if ($oRow->overWorkedMins >= $discountMins) {
                                 $oRow->overMinsByAdjs = - $discountMins;
+                                if(($oRow->overWorkedMins - $discountMins) >= 20){
+                                    if($comments != null){
+                                        if($comments->where('key_code','overWorkedMins')->first()['value']){
+                                            $oRow->isDayChecked = true;
+                                        }
+                                    }
+                                }
                             }
                             else {
                                 $oRow->overMinsByAdjs = - $oRow->overWorkedMins;
@@ -1146,7 +1253,11 @@ class SDataProcess {
                     $cIn = SDataProcess::isCheckSchedule($oRow->inDateTime, $oRow->inDateTimeSch, $mayBeOverTime);
                     if ($cIn && !$adjIn) {
                         $oRow->comments = $oRow->comments."Entrada atípica. ";
-                        $oRow->isDayChecked = true;
+                        if($comments != null){
+                            if($comments->where('key_code','isAtypicalIn')->first()['value']){
+                                $oRow->isDayChecked = true;
+                            }
+                        }
                         $oRow->isAtypicalIn = true;
                     }
                 }
@@ -1156,18 +1267,36 @@ class SDataProcess {
                     $cOut = SDataProcess::isCheckSchedule($oRow->outDateTime, $oRow->outDateTimeSch, $mayBeOverTime);
                     if ($cOut && !$adjOut) {
                         $oRow->comments = $oRow->comments."Salida atípica. ";
-                        $oRow->isDayChecked = true;
+                        if($comments != null){
+                            if($comments->where('key_code','isAtypicalOut')->first()['value']){
+                                $oRow->isDayChecked = true;
+                            }
+                        }
                         $oRow->isAtypicalOut = true;
                     }
                 }
                 if (($cIn || $cOut) && (! $adjIn && ! $adjOut)) {
                     $oRow->comments = $oRow->comments."Revisar horario. ";
-                    $oRow->isDayChecked = true;
+                    if($comments != null){
+                        if($comments->where('key_code','isCheckSchedule')->first()['value']){
+                            $oRow->isDayChecked = true;
+                        }
+                    }
                     $oRow->isCheckSchedule = true;
                 }
 
                 if ($oRow->isAtypicalOut && $oRow->isAtypicalIn) {
                     $oRow->overDefaultMins = 0;
+                }
+            }
+
+            if($oRow->scheduleText == "NOCHE 12" || $oRow->scheduleText == "MAñANA 12"){
+                if(($oRow->overScheduleMins - $oRow->overMinsByAdjs) > $oRow->overDefaultMins){
+                    if($comments != null){
+                        if($comments->where('key_code','overWorkedMins')->first()['value']){
+                            $oRow->isDayChecked = true;
+                        }
+                    }
                 }
             }
 
@@ -1412,7 +1541,7 @@ class SDataProcess {
      * @param array[id_employee, beneficios] $aEmployeeBen
      * @return void
      */
-    public static function addAbsences($lData, $aEmployeeBen)
+    public static function addAbsences($lData, $aEmployeeBen, $comments = null)
     {
         $consumAdjs = [];
         foreach ($lData as $oRow) {
@@ -1498,7 +1627,11 @@ class SDataProcess {
                 if ($withAbs) {
                     $oRow->hasAbsence = true;
                     $oRow->comments = $oRow->comments . ($absenceByOmission ? "Falta por omitir checar. " : "Falta. ");
-                    $oRow->isDayChecked = true;
+                    if($comments != null){
+                        if($comments->where('key_code','hasAbsence')->first()['value']){
+                            $oRow->isDayChecked = true;
+                        }
+                    }
                 }
                 else {
                     $oRow->hasAbsence = false;
@@ -1798,7 +1931,14 @@ class SDataProcess {
                     $oNewRow->hasCheckIn = false;
                     $oNewRow->hasCheckOut = false;
                     $oNewRow->comments = $oNewRow->comments."Sin checadas. ";
-                    $oNewRow->isDayChecked = true;
+                    if($comments != null){
+                        if($comments->where('key_code','hasChecks')->first()['value'] ||
+                            $comments->where('key_code','hasCheckIn')->first()['value'] ||
+                            $comments->where('key_code','hasCheckOut')->first()['value']
+                        ){
+                            $oNewRow->isDayChecked = true;
+                        }
+                    }
 
                     $registry = (object) [
                                     'type_id' => \SCons::REG_OUT,
@@ -1810,7 +1950,7 @@ class SDataProcess {
 
                     $result = SDelayReportUtils::getSchedule($sStartDate, $sEndDate, $idEmployee, $registry, clone $qWorkshifts, \SCons::REP_HR_EX);
 
-                    $oNewRow = SDataProcess::setDates($result, $oNewRow, $sDate);
+                    $oNewRow = SDataProcess::setDates($result, $oNewRow, $sDate, $comments);
                     
                     // Se agrega el renglón creado a la colección de renglones por arreglar
                     $lRowsToAdd[] = $oNewRow;

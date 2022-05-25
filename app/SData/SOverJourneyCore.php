@@ -15,7 +15,7 @@ class SOverJourneyCore {
      * 
      * @return array $lData
      */
-    public static function processOverTimeByOverJourney($lData, $sStartDate)
+    public static function processOverTimeByOverJourney($lData, $sStartDate, $comments = null)
     {
         $idEmployee = 0;
         $currentDate = null;
@@ -123,6 +123,13 @@ class SOverJourneyCore {
                     }
 
                     $oRow->isDayRepeated = true;
+                    if($oRow->isDayRepeated){
+                        if($comments != null){
+                            if($comments->where('key_code','isDayRepeated')->first()['value']){
+                                $oRow->isDayChecked = true;
+                            }
+                        }
+                    }
                 }
             }
             else {
