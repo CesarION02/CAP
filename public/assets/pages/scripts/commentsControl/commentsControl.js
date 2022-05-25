@@ -9,6 +9,7 @@ var app = new Vue({
     },
     methods: {
         updateComment(event, id, ruta){
+            oGui.showLoading(3000);
             var check = event.target;
             var route = ruta.replace(':id', id);
             axios.post(route, {
