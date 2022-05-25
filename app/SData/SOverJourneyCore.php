@@ -131,10 +131,9 @@ class SOverJourneyCore {
                     }
 
                     $oRow->isDayRepeated = !$isPreviousDay;
-                    $oRow->isDayRepeated = true;
-                    if($oRow->isDayRepeated){
-                        if($comments != null){
-                            if($comments->where('key_code','isDayRepeated')->first()['value']){
+                    if ($oRow->isDayRepeated) {
+                        if ($comments != null) {
+                            if ($comments->where('key_code', 'isDayRepeated')->first()['value']) {
                                 $oRow->isDayChecked = true;
                             }
                         }
