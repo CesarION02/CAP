@@ -498,7 +498,6 @@
             var result = vobo == 1 ? checkAdjust(dataEmployee) : new Array(true);
             if(result[0]){
                 oGui.showLoading(3000);
-                oGui.showOk();
                 axios.post(url, {
                     _token: "{{ csrf_token() }}",
                     num_employee: numEmployee,

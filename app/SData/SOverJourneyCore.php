@@ -154,6 +154,13 @@ class SOverJourneyCore {
                     goto again;
                 }
             }
+            if((($oRow->overWorkedMins + $oRow->overMinsByAdjs) >= 20) || (($oRow->overScheduleMins + $oRow->overMinsByAdjs) >= 60)){
+                if($comments != null){
+                    if($comments->where('key_code','overWorkedMins')->first()['value']){
+                        $oRow->isDayChecked = true;
+                    }
+                }
+            }
         }
 
         return $lData;

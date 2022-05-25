@@ -115,9 +115,9 @@
     }
 
     function selAll(ruta){
+        oGui.showLoading(3000);
         var table = $('#commentsControlTable').DataTable();
         table.$("input[type=checkbox]").prop("checked", true);
-
         var route = ruta.replace(':id', 'trueAll');
         axios.post(route, {
             value: true,
@@ -132,9 +132,9 @@
     }
 
     function desSelAll(ruta){
+        oGui.showLoading(3000);
         var table = $('#commentsControlTable').DataTable();
         table.$("input[type=checkbox]").prop("checked", false);
-
         var route = ruta.replace(':id', 'falseAll');
         axios.post(route, {
             value: true,

@@ -762,6 +762,14 @@ class SDataProcess {
             $oRow->overScheduleMins = SDelayReportUtils::getExtraTimeBySchedule($result, $oRow->inDateTime, $oRow->inDateTimeSch,
                                                                                         $oRow->outDateTime, $oRow->outDateTimeSch);
 
+            if((($oRow->overWorkedMins + $oRow->overMinsByAdjs) >= 20) || (($oRow->overScheduleMins + $oRow->overMinsByAdjs) >= 60)){
+                if($comments != null){
+                    if($comments->where('key_code','overWorkedMins')->first()['value']){
+                        $oRow->isDayChecked = true;
+                    }
+                }
+            }
+
             $oRow = SDataProcess::checkTypeDay($result, $oRow);
         }
 
@@ -1146,13 +1154,6 @@ class SDataProcess {
 
                             if ($oRow->overWorkedMins >= $discountMins) {
                                 $oRow->overMinsByAdjs = - $discountMins;
-                                if(($oRow->overWorkedMins - $discountMins) >= 20){
-                                    if($comments != null){
-                                        if($comments->where('key_code','overWorkedMins')->first()['value']){
-                                            $oRow->isDayChecked = true;
-                                        }
-                                    }
-                                }
                             }
                             else {
                                 $oRow->overMinsByAdjs = - $oRow->overWorkedMins;
@@ -1192,13 +1193,6 @@ class SDataProcess {
 
                             if ($oRow->overWorkedMins >= $discountMins) {
                                 $oRow->overMinsByAdjs = - $discountMins;
-                                if(($oRow->overWorkedMins - $discountMins) >= 20){
-                                    if($comments != null){
-                                        if($comments->where('key_code','overWorkedMins')->first()['value']){
-                                            $oRow->isDayChecked = true;
-                                        }
-                                    }
-                                }
                             }
                             else {
                                 $oRow->overMinsByAdjs = - $oRow->overWorkedMins;
@@ -1292,12 +1286,10 @@ class SDataProcess {
                 }
             }
 
-            if($oRow->scheduleText == "NOCHE 12" || $oRow->scheduleText == "MAñANA 12"){
-                if(($oRow->overScheduleMins - $oRow->overMinsByAdjs) > $oRow->overDefaultMins){
-                    if($comments != null){
-                        if($comments->where('key_code','overWorkedMins')->first()['value']){
-                            $oRow->isDayChecked = true;
-                        }
+            if((($oRow->overWorkedMins + $oRow->overMinsByAdjs) >= 20) || (($oRow->overScheduleMins + $oRow->overMinsByAdjs) >= 60)){
+                if($comments != null){
+                    if($comments->where('key_code','overWorkedMins')->first()['value']){
+                        $oRow->isDayChecked = true;
                     }
                 }
             }
