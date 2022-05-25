@@ -210,13 +210,15 @@ var app = new Vue({
                     console.log(error);
                 });
         },
-        getAdjToRow(oRow) {
+        getAdjToRow(oRow, index) {
             let labels = "";
+            var arrAdjust = [];
             for (const adj of this.vData.lAdjusts) {
                 if (adj.employee_id == oRow.idEmployee) {
                     if (adj.apply_to == 1) {
                         let tiime = adj.dt_time != null ? (' ' + adj.dt_time) : '';
                         if ((adj.dt_date + tiime) == oRow.inDateTime) {
+                            arrAdjust.push(adj);
                             labels += adj.type_code + ' ';
                         }
                     } else {
@@ -224,8 +226,10 @@ var app = new Vue({
                         if ((adj.dt_date + tiime) == oRow.outDateTime) {
                             if (adj.adjust_type_id == oData.ADJ_CONS.COM) {
                                 labels += adj.comments + ' ';
+                                arrAdjust.push(adj);
                             } else {
                                 labels += adj.type_code + ' ';
+                                arrAdjust.push(adj);
                             }
                             if (adj.adjust_type_id == oData.ADJ_CONS.AHE ||
                                 adj.adjust_type_id == oData.ADJ_CONS.DHE) {
@@ -235,6 +239,8 @@ var app = new Vue({
                     }
                 }
             }
+            
+            this.vData.lRows[index].adjusts = arrAdjust;
 
             if (oRow.labelUpd || !(oRow.tempLabels === undefined)) {
                 labels += "¡Pendiente de actualizar!";

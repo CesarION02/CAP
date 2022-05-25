@@ -84,6 +84,10 @@ Route::get('specialworkshift/{id}/edit', 'specialWorkshiftController@edit')->nam
 Route::put('specialworkshift/{id}', 'specialWorkshiftController@update')->name('actualizar_turno_especial');
 Route::delete('specialworkshift/{id}', 'specialWorkshiftController@destroy')->name('eliminar_turno_especial');
 
+/* RUTAS DE CONTROL DE COMENTARIOS */
+Route::get('commentsControl', 'commentsControlController@index')->name('commentsControl');
+Route::post('commentsControl/update', 'commentsControlController@update')->name('commentsControl_update');
+
 /* RUTAS DE REPORTES */
 Route::get('report/reporteNumRegisterDatos', 'ReporteController@reporteNumRegisterView')->name('reporte_numero_registros');
 Route::get('report/reporteNumRegister', 'ReporteController@generarReporteNumRegister')->name('generar_numero');
