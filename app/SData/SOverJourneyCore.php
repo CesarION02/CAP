@@ -26,6 +26,7 @@ class SOverJourneyCore {
                 $journeyMin = 0;
                 $currentDate = $sStartDate;
                 $idEmployee = $oRow->idEmployee;
+                $isPreviousDay = false;
             }
 
             // \Log::info($oRow->employee.' '.$oRow->inDateTime);
@@ -70,6 +71,9 @@ class SOverJourneyCore {
                     // si ya completó la jornada se ponen las 8 horas
                     if ($oRow->hasWorkedJourney8hr) {
                         $journeyMin = 480;
+                        if ($workedTime->diffMinutes >= $config->minMinsDayRepeated) {
+                            $isPreviousDay = true;
+                        }
                     }
                     else {
                         // si no, solo se acumulan los minutos trabajados en este rango de tiempo
@@ -79,6 +83,10 @@ class SOverJourneyCore {
                     $firstTime = false;
                 }
                 else {
+                    if ($isPreviousDay) {
+                        continue;
+                    }
+                    
                     if ($journeyMin == 480) {
                         /**
                          * Si ya se completó la jornada se agregan todos los minutos trabajados como horas extra
@@ -122,7 +130,7 @@ class SOverJourneyCore {
                         }
                     }
 
-                    $oRow->isDayRepeated = true;
+                    $oRow->isDayRepeated = !$isPreviousDay;
                     if($oRow->isDayRepeated){
                         if($comments != null){
                             if($comments->where('key_code','isDayRepeated')->first()['value']){
@@ -130,6 +138,7 @@ class SOverJourneyCore {
                             }
                         }
                     }
+                    
                 }
             }
             else {

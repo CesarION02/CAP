@@ -212,6 +212,7 @@ class SDataProcess {
                     $otherRow->employeeAreaId = $oEmployee->employee_area_id;
                     $otherRow->employee = $oEmployee->name;
                     $otherRow->external_id = $oEmployee->external_id;
+                    $otherRow->overtimeCheckPolicy = $oEmployee->policy_extratime_id;
 
                     $otherRow = SDataProcess::setDates($result, $otherRow, $sDate, $comments);
 
@@ -317,6 +318,7 @@ class SDataProcess {
             $newRow->employeeAreaId = $registry->employee_area_id;
             $newRow->employee = $registry->name;
             $newRow->external_id = $registry->external_id;
+            $newRow->overtimeCheckPolicy = $registry->policy_extratime_id;
         }
         
         $again = false;
@@ -1474,7 +1476,7 @@ class SDataProcess {
         if (abs($comparisonIn->diffMinutes) <= $config->maxGapSchedule && abs($comparisonOut->diffMinutes) <= $config->maxGapSchedule) {
             $oRow->inDateTimeSch = $inDate.' 18:30:00';
             $oRow->outDateTimeSch = $outDate.' 06:30:00';
-            $oRow->overDefaultMins = 300;
+            $oRow->overDefaultMins = 60;
             return $oRow;
         }
 
@@ -1496,7 +1498,7 @@ class SDataProcess {
         if (abs($comparisonIn->diffMinutes) <= $config->maxGapSchedule && abs($comparisonOut->diffMinutes) <= $config->maxGapSchedule) {
             $oRow->inDateTimeSch = $inDate.' 06:30:00';
             $oRow->outDateTimeSch = $outDate.' 18:30:00';
-            $oRow->overDefaultMins = 240;
+            $oRow->overDefaultMins = 0;
             return $oRow;
         }
 

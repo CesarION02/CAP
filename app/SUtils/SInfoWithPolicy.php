@@ -1445,8 +1445,9 @@ class SInfoWithPolicy{
                     // si falta día de descanso
                     if($haveDayoff == 0){
                         if($descansoImpl == 1){ 
+                            // se pone en el Row 0 porque el conjunto debe ser igual.
                             if($lRows[0]->overtimeCheckPolicy != 1){
-                                $lRows[$i]->work_dayoff = 1;
+                                $lRows[0]->work_dayoff = 1;
                             }    
                         }
                         $concluir = 0;
@@ -2247,8 +2248,10 @@ class SInfoWithPolicy{
                                     $lRows[$i]->work_dayoff = 0;
                                 }else{
                                     if($lRows[$i]->overtimeCheckPolicy != 1){
-                                            $lRows[$i]->work_dayoff = 1;
-                                        } 
+                                        $lRows[$i]->work_dayoff = 1;
+                                    }else{
+                                        $lRows[$i]->work_dayoff = 0;   
+                                    } 
                                 }
                             }
                 
@@ -2257,10 +2260,12 @@ class SInfoWithPolicy{
                         $diaSumar = 0;
                         if(isset($diasCorrectos)){
                             if($haveDayoff == 0){
-                                if($descansoImpl== 1){ 
+                                if($descansoImpl == 1){ 
                                     if($lRows[$i]->overtimeCheckPolicy != 1){
                                         $lRows[$i]->work_dayoff = 1;
-                                    }   
+                                    }else{
+                                        $lRows[$i]->work_dayoff = 0;   
+                                    }    
                                 }
                                 if(isset($aWithoutExtra)){
                                     $lRows[$aWithoutExtra[0]]->isDayOff = 1;
@@ -2351,7 +2356,12 @@ class SInfoWithPolicy{
                     }else{
                         if( $haveDayoff == 0){
                             $lRows[0]->isDayOff = 1 ;
-                            $lRows[0]->work_dayoff = 1;
+                            if($lRows[0]->overtimeCheckPolicy != 1){
+                                $lRows[0]->work_dayoff = 1;
+                            }else{
+                                $lRows[$i]->work_dayoff = 0;   
+                            }  
+                            
                             $contador[0] = 1;
                             $contador[1] = $lRows[0]->extraDoubleMins;
                             $contador[2] = $lRows[0]->extraTripleMins;
@@ -2515,7 +2525,9 @@ class SInfoWithPolicy{
                                                         $haveDayoff = 1;
                                                         if($lRows[$i]->overtimeCheckPolicy != 1){
                                                             $lRows[$i]->work_dayoff = 1;
-                                                        }         
+                                                        }else{
+                                                            $lRows[$i]->work_dayoff = 0;   
+                                                        }          
                                                     }
                                                 }
                                                 
@@ -2529,7 +2541,9 @@ class SInfoWithPolicy{
                                         }else{
                                             if($lRows[$i]->overtimeCheckPolicy != 1){
                                                 $lRows[$i]->work_dayoff = 1;
-                                            }  
+                                            }else{
+                                                $lRows[$i]->work_dayoff = 0;   
+                                            }   
                                         }
                                     }
                         
@@ -2540,7 +2554,9 @@ class SInfoWithPolicy{
                                     if($haveDayoff == 0){
                                         if($descansoImpl == 1){ if($lRows[$i-1]->overtimeCheckPolicy != 1){
                                             $lRows[$i]->work_dayoff = 1;
-                                            }   
+                                            }else{
+                                                $lRows[$i]->work_dayoff = 0;   
+                                            }    
                                         }
                                         if(isset($aWithoutExtra)){
                                             $lRows[$aWithoutExtra[0]]->isDayOff = 1;
@@ -2684,7 +2700,9 @@ class SInfoWithPolicy{
                                         $haveDayoff = 1;
                                         if($lRows[$i]->overtimeCheckPolicy != 1){
                                             $lRows[$i]->work_dayoff = 1;
-                                        }        
+                                        }else{
+                                            $lRows[$i]->work_dayoff = 0;   
+                                        }         
                                     }
                                 }
                             
@@ -2754,7 +2772,7 @@ class SInfoWithPolicy{
                 $empleados = DB::table('employees')
                                 ->where('is_active','=',1)
                                 ->where('way_pay_id','=',1)
-                                //->where('id',78)
+                                //->where('id',1245)
                                 ->where('department_id','!=',$config->dept_foraneo)
                                 ->where('job_id','!=',$config->job_foraneo)
                                 ->orderBy('id')

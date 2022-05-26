@@ -701,7 +701,8 @@ class prePayrollController extends Controller
                 $is_vobo = \DB::table('prepayroll_report_auth_controls')
                                 ->where('year', $num->year)
                                 ->where('num_'.$request->idprenomina, $sectNum)
-                                ->where('user_vobo_id', $child->head_user_id);
+                                ->where('user_vobo_id', $child->head_user_id)
+                                ->where('is_required', true);
 
                 $aux = clone $is_vobo;
                 $aux = $aux->get();
