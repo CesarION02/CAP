@@ -1445,8 +1445,9 @@ class SInfoWithPolicy{
                     // si falta día de descanso
                     if($haveDayoff == 0){
                         if($descansoImpl == 1){ 
+                            // se pone en el Row 0 porque el conjunto debe ser igual.
                             if($lRows[0]->overtimeCheckPolicy != 1){
-                                $lRows[$i]->work_dayoff = 1;
+                                $lRows[0]->work_dayoff = 1;
                             }    
                         }
                         $concluir = 0;
