@@ -1344,7 +1344,7 @@ class SDataProcess {
         if (abs($comparisonIn->diffMinutes) <= $config->maxGapSchedule && abs($comparisonOut->diffMinutes) <= $config->maxGapSchedule) {
             $oRow->inDateTimeSch = $inDate.' 18:30:00';
             $oRow->outDateTimeSch = $outDate.' 06:30:00';
-            $oRow->overDefaultMins = 300;
+            $oRow->overDefaultMins = 60;
             return $oRow;
         }
 
@@ -1366,7 +1366,7 @@ class SDataProcess {
         if (abs($comparisonIn->diffMinutes) <= $config->maxGapSchedule && abs($comparisonOut->diffMinutes) <= $config->maxGapSchedule) {
             $oRow->inDateTimeSch = $inDate.' 06:30:00';
             $oRow->outDateTimeSch = $outDate.' 18:30:00';
-            $oRow->overDefaultMins = 240;
+            $oRow->overDefaultMins = 0;
             return $oRow;
         }
 
