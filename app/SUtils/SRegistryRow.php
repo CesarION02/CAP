@@ -72,7 +72,7 @@ class SRegistryRow {
         $this->work_dayoff = 0;
         $this->others = "";
         $this->comments = "";
-        
+        $this->isDayChecked = false;
     }
 }
 
