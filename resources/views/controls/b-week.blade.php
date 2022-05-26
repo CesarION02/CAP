@@ -47,9 +47,8 @@ Ejemplo de implementación:
 
         let dateStart = <?php echo json_encode($start_date_v) ?>;
         let dateEnd = <?php echo json_encode($end_date_v) ?>;
-
-        let start = dateStart == null ? moment().subtract(7, 'days') : moment(dateStart);
-        let end = dateEnd == null ? moment() : moment(dateEnd);
+        let start = dateStart == null ? moment().startOf('week') : moment(dateStart);
+        let end = dateEnd == null ? moment().endOf('week') : moment(dateEnd);
 
         var weekCuts = {};
         var biweekCuts = {};
@@ -107,9 +106,9 @@ Ejemplo de implementación:
                 }
             })
             .then(res => {
-                weeks = res.data.weeks;
-                biweeks = res.data.biweeks;
-                biweeksCal = res.data.biweekscal;
+                weeks = res.data.weeks.reverse();
+                biweeks = res.data.biweeks.reverse();
+                biweeksCal = res.data.biweekscal.reverse();
 
                 weekCuts = {};
                 biweekCuts = {};
