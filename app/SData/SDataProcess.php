@@ -224,6 +224,7 @@ class SDataProcess {
                     ];
 
                     $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $lWorkshifts, $sStartDate, $sEndDate);
+                    $isNew = [0];
                     $newRow = $theRow[1];
                     $again = $theRow[2];
                     $fRegistry = $theRow[3];
@@ -237,6 +238,7 @@ class SDataProcess {
                     }
                     if ($isNew) {
                         $lRows[] = $newRow;
+                        $isNew = false;
                     }
 
                     if ($again) {
@@ -509,6 +511,7 @@ class SDataProcess {
                 else {
                     // Sin salida
                     $bFound = false;
+                    $bAfterDay = false;
                     if ($newRow->inDate == $sEndDate) {
                         // buscar salida un día después
                         $oDateAux = Carbon::parse($registry->date);
@@ -516,6 +519,7 @@ class SDataProcess {
                         $oFoundRegistry = SDelayReportUtils::getRegistry($oDateAux->toDateString(), $idEmployee, \SCons::REG_OUT);
                         
                         if ($oFoundRegistry != null) {
+                            $bAfterDay = true;
                             if ($oFoundRegistry->date == $oDateAux->toDateString()) {
                                 // $config = \App\SUtils\SConfiguration::getConfigurations();
 
@@ -560,7 +564,7 @@ class SDataProcess {
                                     return 0;
                                 }
                             }
-                            if (! $night) {
+                            if (! $night && $bAfterDay) {
                                 $result->pinnedDateTime->subDay();
                             }
 
