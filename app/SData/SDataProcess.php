@@ -26,24 +26,6 @@ class SDataProcess {
      * "maxGapCheckSchedule": (minutos), minutos tomados en cuenta para poner la leyenda "revisar horario".
      */
 
-    public static function checkEvents(){
-        $comments = commentsControl::select('key_code','value')->get();
-        $events = \DB::table('type_incidents')->get();
-        $newEvents = [];
-
-        foreach($events as $ev){
-            if(is_null($comments->where('key_code',$ev->id)->first())){
-                array_push($newEvents, ['key_code' => $ev->id, 'Comment' => $ev->name, 'value' => false, 'created_by' => 1, 'updated_by' => 1, 'is_delete' => 0, 'created_at' => now(), 'updated_at' => now()]);
-            }
-        }
-
-        if(!is_null($newEvents)){
-            \DB::table('comments_control')->insert($newEvents);
-        }
-
-        return $events;
-    }
-
      /**
       * Realiza el proceso de empatar checadas vs horarios programados y regresa una
       * lista de SRegistryRow con los datos correspondientes
@@ -1915,23 +1897,29 @@ class SDataProcess {
         return $lData;
     }
 
-    public static function checkEvents(){
+    public static function checkEvents() {
         $comments = commentsControl::select('key_code','value')->get();
         $events = \DB::table('type_incidents')->get();
         $newEvents = [];
 
         foreach($events as $ev){
-            if(is_null($comments->where('key_code',$ev->id)->first())){
-                array_push($newEvents, ['key_code' => $ev->id, 'Comment' => $ev->name, 'value' => false, 'created_by' => 1, 'updated_by' => 1, 'is_delete' => 0, 'created_at' => now(), 'updated_at' => now()]);
+            if(is_null($comments->where('key_code', $ev->id)->first())){
+                array_push($newEvents, ['key_code' => $ev->id, 
+                                        'Comment' => $ev->name, 
+                                        'value' => false, 
+                                        'created_by' => 1, 
+                                        'updated_by' => 1, 
+                                        'is_delete' => 0, 
+                                        'created_at' => now(), 
+                                        'updated_at' => now()
+                                    ]);
             }
         }
 
-        if(!is_null($newEvents)){
+        if(! is_null($newEvents)){
             \DB::table('comments_control')->insert($newEvents);
         }
 
         return $events;
     }
 }
-
-?>
