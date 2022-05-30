@@ -163,6 +163,7 @@
             this.REP_HR_EX = <?php echo json_encode(\SCons::REP_HR_EX) ?>;
             this.REP_DELAY = <?php echo json_encode(\SCons::REP_DELAY) ?>;
             this.ADJ_CONS = <?php echo json_encode(\SCons::PP_TYPES) ?>;
+            this.lComments = <?php echo json_encode($lComments) ?>;
 
             // this.minsCol = this.tReport == this.REP_DELAY ? 4 : 4;
             this.minsCol = 5;

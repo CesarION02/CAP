@@ -13,8 +13,10 @@ var app = new Vue({
         minsEnabled: false,
         overMins: 0,
         comments: "",
+        selComment: "",
         vRow: null,
         adjTypeEnabled: true,
+        lComments: oData.lComments,
     },
     methods: {
         getCssClass(oRow, report) {
@@ -171,6 +173,7 @@ var app = new Vue({
             this.minsEnabled = false;
             this.overMins = 0;
             this.comments = "";
+            this.selComment = "";
             this.adjCategory = 0;
             this.inDateTime = "";
             this.outDateTime = "";
@@ -300,6 +303,9 @@ var app = new Vue({
                 .catch(function(error) {
                     console.log(error);
                 });
+        },
+        addComment(){
+            this.comments = this.comments.length > 0 ? this.comments + ' ' + this.selComment : this.comments + this.selComment;
         }
     },
 })

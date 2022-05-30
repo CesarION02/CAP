@@ -92,6 +92,12 @@ Route::delete('specialworkshift/{id}', 'specialWorkshiftController@destroy')->na
 /* RUTAS DE CONTROL DE COMENTARIOS */
 Route::get('commentsControl', 'commentsControlController@index')->name('commentsControl');
 Route::post('commentsControl/update', 'commentsControlController@update')->name('commentsControl_update');
+/* RUTAS DE COMENTARIOS */
+Route::get('comments', 'commentsController@index')->name('comments');
+Route::post('comments/store', 'commentsController@store')->name('comments_store');
+Route::post('comments/update/{id}', 'commentsController@update')->name('comments_update');
+Route::delete('comments/destroy/{id}', 'commentsController@destroy')->name('comments_destroy');
+Route::put('comments/recover/{id}', 'commentsController@recover')->name('comments_recover');
 
 /* RUTAS DE REPORTES */
 Route::get('report/reporteNumRegisterDatos', 'ReporteController@reporteNumRegisterView')->name('reporte_numero_registros');

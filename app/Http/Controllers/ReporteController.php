@@ -640,6 +640,7 @@ class ReporteController extends Controller
         $bDelegation = $request->delegation;
         $iPayrollYear = $request->year;
         $iPayrollNumber = $request->payroll_number;
+        $lComments = \DB::table('comments')->where('is_delete', 0)->get();
 
         $oStartDate = Carbon::parse($sStartDate);
         $oEndDate = Carbon::parse($sEndDate);
@@ -805,7 +806,8 @@ class ReporteController extends Controller
                     ->with('lEmpWrkdDays', $lEmpWrkdDays)
                     ->with('bModify', $bModify)
                     ->with('registriesRoute', route('registro_ajuste'))
-                    ->with('lRows', $lRows);
+                    ->with('lRows', $lRows)
+                    ->with('lComments', $lComments);
         }
         else {
             $lEmployees = $this->timesTotal($lRows, $lEmployees);
