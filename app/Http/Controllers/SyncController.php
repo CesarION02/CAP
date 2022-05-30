@@ -45,6 +45,9 @@ class SyncController extends Controller
             $deptRhCont = new DeptsRhController();
             $deptRhCont->saveRhDeptsFromJSON($data->departments);
 
+            $jobCont = new JobRhController();
+            $jobCont->saveJobsFromJSON($data->positions);
+
             $empCont = new employeeController();
             $empCont->saveEmployeesFromJSON($data->employees);
 

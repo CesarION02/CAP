@@ -15,6 +15,7 @@ use App\SPayroll\SPrePayroll;
 use App\SPayroll\SPrePayrollRow;
 use App\SPayroll\SPrePayrollDay;
 use App\Models\prepayrollchange;
+use App\Models\prepayrollAuthControl;
 use App\Http\Controllers\PrepayrollReportController;
 use App\Http\Controllers\SyncController;
 use App\SUtils\SPrepayrollUtils;
@@ -627,6 +628,67 @@ class prePayrollController extends Controller
                                                     ->with('routePrev', $routePrev)
                                                     ->with('routeChildren', $routeChildren)
                                                     ->with('startOfWeek', $config->startOfWeek);
+    }
+
+    public function indexEditRequireVobos(Request $request, $idPreNomina = 3)
+    {
+        $startDate = $request->start_date == null ? Carbon::now() : $request->start_date;
+        $endDate = $request->end_date == null ? Carbon::now()->lastOfMonth()->toDateString() : $request->end_date;
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+        
+        $lControls = \DB::table('prepayroll_report_auth_controls AS prac')
+                            ->join('users AS u', 'prac.user_vobo_id', '=', 'u.id')
+                            ->leftJoin('week_cut AS wc', function($join)
+                            {
+                                $join->on('prac.num_week', '=', 'wc.num');
+                                $join->on('wc.year','=', 'prac.year');
+                            })
+                            ->leftJoin('hrs_prepay_cut AS hpc', function($join)
+                            {
+                                $join->on('prac.num_biweek', '=', 'hpc.num');
+                                $join->on('hpc.year','=', 'prac.year');
+                            })
+                            ->whereRaw("((wc.ini IS NOT NULL AND (wc.ini BETWEEN '".$startDate."' AND '".$endDate."' OR wc.fin BETWEEN '".$startDate."' AND '".$endDate."')) OR 
+                                        (hpc.dt_cut IS NOT NULL AND (dt_cut BETWEEN '".$startDate."' AND '".$endDate."' OR DATE_SUB(dt_cut,INTERVAL 14 DAY) BETWEEN '".$startDate."' AND '".$endDate."')))")
+                            ->where('prac.is_delete',0)
+                            ->orderBy('prac.is_week')
+                            ->orderBy('prac.num_week')
+                            ->orderBy('prac.num_biweek')
+							->get();
+        $routeSave = route('vobos_save_require');
+        
+        foreach($lControls as $oCtrl){
+            $oCtrl->ini = $oCtrl->num_week > 0 ? $oCtrl->ini : \Carbon\Carbon::parse($oCtrl->dt_cut)->subDays(14)->toDateString();
+            $oCtrl->fin = $oCtrl->num_week > 0 ? $oCtrl->fin : $oCtrl->dt_cut;
+        }
+
+        return view('prepayrollcontrol.voboxEditRequireIndex')->with('start_date', $startDate)
+                                                    ->with('end_date', $endDate)
+                                                    ->with('lControls', $lControls)
+                                                    ->with('idPreNomina', $idPreNomina)
+                                                    ->with('routeSave', $routeSave)
+                                                    ->with('startOfWeek', $config->startOfWeek);
+    }
+
+    public function saveRequire(Request $request){
+        $result = 0;
+        try{
+                $result = \DB::table('prepayroll_report_auth_controls')
+                            ->where('id_control', $request->idControl)
+                            ->where('user_vobo_id', $request->user_id)
+                            ->update([
+                                'is_required' => $request->require
+                            ]);
+                
+                $value = \DB::table('prepayroll_report_auth_controls')
+                            ->where('id_control', $request->idControl)
+                            ->where('user_vobo_id', $request->user_id)
+                            ->value('is_required');
+        }catch (QueryException $e) {
+            $result = 0;
+        }
+        
+        return response()->json(array('result'=> $result, 'value' => $value), 200);
     }
 
     /**

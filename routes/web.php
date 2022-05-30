@@ -141,6 +141,8 @@ Route::post('prepayrollempgroupdept/change', 'prepayrollGroupsController@changeG
 Route::get('prepayrollcontrols', 'prePayrollController@indexS')->name('control_semana');
 Route::get('prepayrollcontrolq', 'prePayrollController@indexQ')->name('control_quincena');
 Route::get('prepayrollcontrolvobos/{id}', 'prePayrollController@indexVobos')->name('vobos');
+Route::get('prepayrollcontrolvobos/{id}/edit/require', 'prePayrollController@indexEditRequireVobos')->name('vobos_edit_require');
+Route::post('prepayrollcontrolvobos/require/save', 'prePayrollController@saveRequire')->name('vobos_save_require');
 Route::post('prepayrollcontrolvobos/checkPrevius','prePayrollController@checkBoVoPrevius')->name('checkPrevius_vobos');
 Route::post('prepayrollcontrolvobos/checkChildrens','prePayrollController@checkBoVoChildrens')->name('checkChildrens_vobos');
 Route::post('prepayrollcontrolvobos/vobo/{id}/{idPreNomina}', 'prePayrollController@boVo')->name('dar_vobo');
@@ -202,7 +204,7 @@ Route::delete('employees/terminarconfiguracion/{id}', 'employeeController@confir
 Route::get('employees/foraneos', 'employeeController@foraneos')->name('foraneos');
 Route::delete('employees/enviarForaneos/{id}', 'employeeController@enviarForaneos')->name('enviar_empleado_foraneo');
 Route::put('employee/outstanding/{id}', 'employeeController@updateoutstanding')->name('actualizar_empleado_faltante');
-Route::get('employee/puesto','employeeController@jobs')->name('puesto');
+Route::get('employee/{id}/puesto','employeeController@jobs')->name('puesto');
 Route::get('outstanding', 'employeeController@outstandingemployees')->name('empleados_pendientes');
 Route::get('employees/becarios', 'employeeController@becarios')->name('becarios');
 Route::get('employee/{id}/editoutstanding', 'employeeController@editoutstanding')->name('editar_empleado_faltante');
@@ -347,6 +349,8 @@ Route::get('job/{id}/edit', 'jobController@edit')->name('editar_puesto');
 Route::put('job/{id}', 'jobController@update')->name('actualizar_puesto');
 Route::delete('job/{id}', 'jobController@destroy')->name('eliminar_puesto');
 Route::delete('job/disable/{id}', 'jobController@activar')->name('activar_puesto');
+/* RUTAS PUESTOS NOMINAS*/
+Route::get('jobRH', 'jobRHController@index')->name('puesto_rh');
 
 /* RUTAS CAPTURA INCIDENTES */
 Route::get('incidents/massive', 'incidentController@massiveCreate')->name('masiva');
