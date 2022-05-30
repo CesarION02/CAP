@@ -1050,6 +1050,7 @@ class SDataProcess {
     public static function addDelaysAndOverTime($lData, $aEmployeeOverTime, $sEndDate, $comments = null)
     {
         $config = \App\SUtils\SConfiguration::getConfigurations();
+        $workships = \DB::table('workshifts')->where('is_delete',0)->get();
         $consumAdjs = [];
         foreach ($lData as $oRow) {
             if (! $oRow->workable &&
@@ -1079,7 +1080,7 @@ class SDataProcess {
                         $cOut = SDataProcess::isCheckSchedule($oRow->outDateTime, $oRow->outDateTimeSch, $mayBeOverTime);
                     }
                     if (($cIn && $cOut) || ! $oRow->hasSchedule) {
-                        $oRow = SDataProcess::determineSchedule($oRow, $sEndDate);
+                        $oRow = SDataProcess::determineSchedule($oRow, $sEndDate, $workships);
                     }
                 }
 
@@ -1452,74 +1453,23 @@ class SDataProcess {
      * 
      * @return App\SUtils\SRegistryRow
      */
-    public static function determineSchedule($oRow, $sEndDate)
+    public static function determineSchedule($oRow, $sEndDate, $workships)
     {
         $config = \App\SUtils\SConfiguration::getConfigurations();
 
         $inDate = Carbon::parse($oRow->inDateTime)->toDateString();
         $outDate = Carbon::parse($oRow->outDateTime)->toDateString();
-        $comparisonIn = SDelayReportUtils::compareDates($oRow->inDateTime, $inDate.' 14:30:00');
-        $comparisonOut = SDelayReportUtils::compareDates($oRow->outDateTime, $outDate.' 22:30:00');
-
         $oRow->isOnSchedule = true;
-        
-        if (abs($comparisonIn->diffMinutes) <= $config->maxGapSchedule && abs($comparisonOut->diffMinutes) <= $config->maxGapSchedule) {
-            $oRow->inDateTimeSch = $inDate.' 14:30:00';
-            $oRow->outDateTimeSch = $outDate.' 22:30:00';
-            $oRow->overDefaultMins = 30;
-            return $oRow;
-        }
-
-        $comparisonIn = SDelayReportUtils::compareDates($oRow->inDateTime, $inDate.' 18:30:00');
-        $comparisonOut = SDelayReportUtils::compareDates($oRow->outDateTime, $outDate.' 06:30:00');
-        
-        if (abs($comparisonIn->diffMinutes) <= $config->maxGapSchedule && abs($comparisonOut->diffMinutes) <= $config->maxGapSchedule) {
-            $oRow->inDateTimeSch = $inDate.' 18:30:00';
-            $oRow->outDateTimeSch = $outDate.' 06:30:00';
-            $oRow->overDefaultMins = 60;
-            return $oRow;
-        }
-
-        $comparisonIn = SDelayReportUtils::compareDates($oRow->inDateTime, $inDate.' 22:30:00');
-        $comparisonOut = SDelayReportUtils::compareDates($oRow->outDateTime, $outDate.' 06:30:00');
-        
-        if (abs($comparisonIn->diffMinutes) <= $config->maxGapSchedule && abs($comparisonOut->diffMinutes) <= $config->maxGapSchedule) {
-            $oRow->inDateTimeSch = $inDate.' 22:30:00';
-            $oRow->outDateTimeSch = $outDate.' 06:30:00';
-            if ($oRow->outDateTime <= $sEndDate.' 23:59:59') {
-                $oRow->overDefaultMins = 60;
+        foreach ($workships as $workship) {
+            $comparisonIn = SDelayReportUtils::compareDates($oRow->inDateTime, $inDate.$workship->entry);
+            $comparisonOut = SDelayReportUtils::compareDates($oRow->outDateTime, $outDate.$workship->departure);
+            
+            if (abs($comparisonIn->diffMinutes) <= $config->maxGapSchedule && abs($comparisonOut->diffMinutes) <= $config->maxGapSchedule) {
+                $oRow->inDateTimeSch = $inDate.$workship->entry;
+                $oRow->outDateTimeSch = $outDate.$workship->departure;
+                $oRow->overDefaultMins = $workship->overtimepershift > 0 ? 60/(1/$workship->overtimepershift) : 0;
+                return $oRow;
             }
-            return $oRow;
-        }
-
-        $comparisonIn = SDelayReportUtils::compareDates($oRow->inDateTime, $inDate.' 06:30:00');
-        $comparisonOut = SDelayReportUtils::compareDates($oRow->outDateTime, $outDate.' 18:30:00');
-        
-        if (abs($comparisonIn->diffMinutes) <= $config->maxGapSchedule && abs($comparisonOut->diffMinutes) <= $config->maxGapSchedule) {
-            $oRow->inDateTimeSch = $inDate.' 06:30:00';
-            $oRow->outDateTimeSch = $outDate.' 18:30:00';
-            $oRow->overDefaultMins = 0;
-            return $oRow;
-        }
-
-        $comparisonIn = SDelayReportUtils::compareDates($oRow->inDateTime, $inDate.' 06:30:00');
-        $comparisonOut = SDelayReportUtils::compareDates($oRow->outDateTime, $outDate.' 14:30:00');
-        
-        if (abs($comparisonIn->diffMinutes) <= $config->maxGapSchedule && abs($comparisonOut->diffMinutes) <= $config->maxGapSchedule) {
-            $oRow->inDateTimeSch = $inDate.' 06:30:00';
-            $oRow->outDateTimeSch = $outDate.' 14:30:00';
-            $oRow->overDefaultMins = 0;
-            return $oRow;
-        }
-
-        $comparisonIn = SDelayReportUtils::compareDates($oRow->inDateTime, $inDate.' 08:30:00');
-        $comparisonOut = SDelayReportUtils::compareDates($oRow->outDateTime, $outDate.' 16:30:00');
-        
-        if (abs($comparisonIn->diffMinutes) <= $config->maxGapSchedule && abs($comparisonOut->diffMinutes) <= $config->maxGapSchedule) {
-            $oRow->inDateTimeSch = $inDate.' 08:30:00';
-            $oRow->outDateTimeSch = $outDate.' 16:30:00';
-            $oRow->overDefaultMins = 0;
-            return $oRow;
         }
 
         $oRow->isOnSchedule = false;
@@ -1963,6 +1913,24 @@ class SDataProcess {
                         ->sortBy('outDateTime');
 
         return $lData;
+    }
+
+    public static function checkEvents(){
+        $comments = commentsControl::select('key_code','value')->get();
+        $events = \DB::table('type_incidents')->get();
+        $newEvents = [];
+
+        foreach($events as $ev){
+            if(is_null($comments->where('key_code',$ev->id)->first())){
+                array_push($newEvents, ['key_code' => $ev->id, 'Comment' => $ev->name, 'value' => false, 'created_by' => 1, 'updated_by' => 1, 'is_delete' => 0, 'created_at' => now(), 'updated_at' => now()]);
+            }
+        }
+
+        if(!is_null($newEvents)){
+            \DB::table('comments_control')->insert($newEvents);
+        }
+
+        return $events;
     }
 }
 

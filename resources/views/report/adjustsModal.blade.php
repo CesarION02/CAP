@@ -53,9 +53,21 @@
               </div>
               <br>
               <div class="row">
+                <div class="col-md-4"><label for="">Comentarios frecuentes:</label></div>
+                <div class="col-md-7">
+                  <select class="form-control" v-model="selComment">
+                    <option v-for="comment in lComments">@{{comment.comment}}</option>
+                  </select>
+                </div>
+                <div class="col-md-1">
+                  <button class="btn btn-success" style="border-radius: 50%; padding: 3px 6px; font-size: 10px;" v-on:click="addComment()"><span class="glyphicon glyphicon-plus"></span></button>
+                </div>
+              </div>
+              <br>
+              <div class="row">
                 <div class="col-md-4"><label for="">Comentarios:</label></div>
                 <div class="col-md-8">
-                  <input v-model="comments" type="text" class="form-control">
+                  <textarea v-model="comments" class="form-control" style="resize: none; width: 350px; height: 115px;">@{{comments}}</textarea>
                 </div>
               </div>
               <br>

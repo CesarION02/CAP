@@ -9,6 +9,9 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use App\Models\admin\rol;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Contracts\Auth\CanResetPassword;
+use App\Notifications\VerifyEmail;
+use App\Notifications\PasswordReset;
 
 class User extends Authenticatable
 {
@@ -72,6 +75,11 @@ class User extends Authenticatable
 
     public function bitacora(){
         return $this->hasMany('App\Models\Bitacora');
+    }
+
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new PasswordReset($token));
     }
     
 }

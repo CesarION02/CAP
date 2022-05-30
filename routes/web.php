@@ -15,8 +15,13 @@
 Route::get('seguridad/login', 'seguridad\LoginController@index')->name('login');
 Route::post('seguridad/login', 'seguridad\LoginController@login')->name('login_post');
 Route::get('seguridad/logout', 'seguridad\LoginController@logout')->name('logout');
-Route::get('password/email', 'Auth\PasswordController@getEmail')->name('reset');
-Route::post('password/email', 'Auth\PasswordController@postEmail')->name('mandaremail');
+// Route::get('password/email', 'Auth\PasswordController@getEmail')->name('reset');
+// Route::post('password/email', 'Auth\PasswordController@postEmail')->name('mandaremail');
+
+Route::post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail')->name('password.email');
+Route::post('password/reset', 'Auth\ResetPasswordController@reset')->name('password.update');
+Route::get('password/reset', 'Auth\ForgotPasswordController@showLinkRequestForm')->name('password.request');
+Route::get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm')->name('password.reset');
 
 Route::group(['prefix' => 'admin', 'namespace' => 'admin', 'middleware' => ['auth', 'superadmin']], function () {
     Route::get('', 'adminController@index');
@@ -87,6 +92,12 @@ Route::delete('specialworkshift/{id}', 'specialWorkshiftController@destroy')->na
 /* RUTAS DE CONTROL DE COMENTARIOS */
 Route::get('commentsControl', 'commentsControlController@index')->name('commentsControl');
 Route::post('commentsControl/update', 'commentsControlController@update')->name('commentsControl_update');
+/* RUTAS DE COMENTARIOS */
+Route::get('comments', 'commentsController@index')->name('comments');
+Route::post('comments/store', 'commentsController@store')->name('comments_store');
+Route::post('comments/update/{id}', 'commentsController@update')->name('comments_update');
+Route::delete('comments/destroy/{id}', 'commentsController@destroy')->name('comments_destroy');
+Route::put('comments/recover/{id}', 'commentsController@recover')->name('comments_recover');
 
 /* RUTAS DE REPORTES */
 Route::get('report/reporteNumRegisterDatos', 'ReporteController@reporteNumRegisterView')->name('reporte_numero_registros');
