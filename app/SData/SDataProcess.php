@@ -1033,7 +1033,8 @@ class SDataProcess {
 
                 $bWork8hr = true;
                 $oRow->hasWorkedJourney8hr = SDataProcess::journeyCompleted($oRow->inDateTime, $oRow->inDateTimeSch, $oRow->outDateTime, $oRow->outDateTimeSch, $bWork8hr);
-                if (SDataProcess::journeyCompleted($oRow->inDateTime, $oRow->inDateTimeSch, $oRow->outDateTime, $oRow->outDateTimeSch)) {
+                $bJorneyCompleted = SDataProcess::journeyCompleted($oRow->inDateTime, $oRow->inDateTimeSch, $oRow->outDateTime, $oRow->outDateTimeSch);
+                if ($bJorneyCompleted) {
                     $extendJourney = SDelayReportUtils::compareDates($oRow->inDateTimeSch, $oRow->outDateTimeSch);
                     if ($aEmployeeOverTime[$oRow->idEmployee] == 2 || ($aEmployeeOverTime[$oRow->idEmployee] == 3 && $extendJourney->diffMinutes > 480)) {
                         // minutos extra trabajados y filtrados por bandera de "genera horas extra"
@@ -1102,12 +1103,18 @@ class SDataProcess {
                             $oRow->overWorkedMins = 0;
                             $oRow->overDefaultMins = 0;
                             $oRow->overScheduleMins = 0;
+
+                            $oRow->comments = $oRow->comments."Jornada incompleta. ";
+                            $oRow->isOverJourney = false;
                         }
                     }
                     else {
                         $oRow->overWorkedMins = 0;
                         $oRow->overDefaultMins = 0;
                         $oRow->overScheduleMins = 0;
+                        
+                        $oRow->comments = $oRow->comments."Jornada incompleta. ";
+                        $oRow->isOverJourney = false;
                     }
                 }
             }
