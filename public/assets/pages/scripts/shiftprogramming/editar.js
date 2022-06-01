@@ -67,14 +67,16 @@ function editShift() {
                     listaDepartamentos += '<input type="hidden" id="hid' + data[2][i].idDepart + '" value="' + data[2][i].nameDepart + '">'
                     listaDepartamentos += '<div type="row" id="tabla' + data[2][i].idDepart + '"><table id="t' + data[2][i].idDepart + '" class="customers"><tr><th COLSPAN="' + (colspanD + 1) + '">' + data[2][i].nameDepart + '</th></tr>';
                     var con = 0;
+                    // numero de horarios del renglon
                     for (var j = 0; data[4].length > j; j++) {
                         if (data[2][i].group == data[4][j].idShift) {
                             con = con + 1;
                         }
                     }
+
                     for (var j = 0; data[4].length > j; j++) {
                         if (data[2][i].group == data[4][j].idShift) {
-                            listaDepartamentos += '<th style = "width: '+ 90/con +'%">' + data[4][j].nameWork + '</th>' //Modificar nombre turno//////////////////
+                            listaDepartamentos += '<th style = "width: ' + 90 / con + '%">' + data[4][j].nameWork + '</th>' //Modificar nombre turno//////////////////
                             auxWork[contadorWork] = data[4][j].idWork;
                             contadorWork++;
                         }
@@ -89,16 +91,16 @@ function editShift() {
                         renglon[r] = "";
                         listaDepartamentos += '<table class="customers" id="tj' + auxIdJob[z] + '"><tr><th COLSPAN="' + (colspanD) + '">' + auxNameJob[z] + '</th><th><button type="button" class="btn btn-primary" onclick="agregarFila(' + data[2][i].idDepart + ',' + auxIdJob[z] + ')"><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span></button></th></tr><tr>';
                         var numRenglones = new Array(auxWork.length);
-                        for(var k = 0; data[1].length > k; k++){
+                        for (var k = 0; data[1].length > k; k++) {
                             var sameDep = false;
                             var sameJob = false;
                             renglon[r] = "";
                             for (var x = 0; auxWork.length > x; x++) {
                                 var turnHaveEmpl = false;
                                 for (var y = 0; myEmployees.length > y; y++) {
-                                    if(myEmployees[y].idJob == auxIdJob[z] && myEmployees[y].id == auxWork[x] && myEmployees[y].idD == data[2][i].idDepart){
+                                    if (myEmployees[y].idJob == auxIdJob[z] && myEmployees[y].id == auxWork[x] && myEmployees[y].idD == data[2][i].idDepart) {
                                         turnHaveEmpl = true;
-                                        renglon[r] = renglon[r] + '<td style = "width: '+ 90/con +'%;">' + crear_empleados(data[2][i].idDepart, auxWork[x], r + 1, auxIdJob[z], data[0], myEmployees[y].idEmployee) + '</td>';
+                                        renglon[r] = renglon[r] + '<td style = "width: ' + 90 / con + '%;">' + crear_empleados(data[2][i].idDepart, auxWork[x], r + 1, auxIdJob[z], data[0], myEmployees[y].idEmployee) + '</td>';
                                         if (typeof renglon[r] !== 'undefined') {
 
                                         } else {
@@ -107,29 +109,29 @@ function editShift() {
                                         myEmployees.splice(y, 1);
                                         break;
                                     }
-                                    if(myEmployees[y].idD == data[2][i].idDepart){
+                                    if (myEmployees[y].idD == data[2][i].idDepart) {
                                         sameDep = true;
-                                        if(myEmployees[y].idJob == auxIdJob[z]){
+                                        if (myEmployees[y].idJob == auxIdJob[z]) {
                                             sameJob = true;
                                         }
                                     }
                                 }
-                                if(!turnHaveEmpl && sameDep && sameJob){
+                                if (!turnHaveEmpl && sameDep && sameJob) {
                                     renglon[r] = renglon[r] + '<td></td>';
-                                }else if(renglon[r].length > 0 && x<auxWork.length && (!turnHaveEmpl && !sameDep && !sameJob)){
+                                } else if (renglon[r].length > 0 && x < auxWork.length && (!turnHaveEmpl && !sameDep && !sameJob)) {
                                     renglon[r] = renglon[r] + '<td></td>';
                                 }
                             }
-                            if(!sameDep || !sameJob){
+                            if (!sameDep || !sameJob) {
                                 break;
                             }
                             r++;
-                            if(myEmployees.length == 0){
+                            if (myEmployees.length == 0) {
                                 break;
                             }
                         }
                         for (var h = 0; renglon.length > h; h++) {
-                            if(renglon[h].length != 0){
+                            if (renglon[h].length != 0) {
                                 listaDepartamentos += renglon[h] + '<td class="boton" style = "width: 10%;"><button type="button" class="btn btn-danger" onclick="eliminarFila(' + h + ',' + auxIdJob[z] + ')"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button></td></tr>'
                             }
                         }
@@ -137,39 +139,39 @@ function editShift() {
                         listaDepartamentos += '</table></div>';
                     }
 
-/* Bloque de respaldo de la version anterior de llenado de la tabla de asignacion de turnos 17/03/2022 Adrián Avilés                   
-                    for (var z = 0; auxIdJob.length > z; z++) {
-                        renglon[contadorEmpleados] = "";
-                        listaDepartamentos += '<table class="customers" id="tj' + auxIdJob[z] + '"><tr><th COLSPAN="' + (colspanD) + '">' + auxNameJob[z] + '</th><th><button type="button" class="btn btn-primary" onclick="agregarFila(' + data[2][i].idDepart + ',' + auxIdJob[z] + ')"><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span></button></th></tr><tr>';
-                        var numRenglones = new Array(auxWork.length);
-                        for (var x = 0; auxWork.length > x; x++) {
+                    /* Bloque de respaldo de la version anterior de llenado de la tabla de asignacion de turnos 17/03/2022 Adrián Avilés                   
+                                        for (var z = 0; auxIdJob.length > z; z++) {
+                                            renglon[contadorEmpleados] = "";
+                                            listaDepartamentos += '<table class="customers" id="tj' + auxIdJob[z] + '"><tr><th COLSPAN="' + (colspanD) + '">' + auxNameJob[z] + '</th><th><button type="button" class="btn btn-primary" onclick="agregarFila(' + data[2][i].idDepart + ',' + auxIdJob[z] + ')"><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span></button></th></tr><tr>';
+                                            var numRenglones = new Array(auxWork.length);
+                                            for (var x = 0; auxWork.length > x; x++) {
 
 
-                            for (var y = 0; data[1].length > y; y++) {
-                                if (data[1][y].idJob == auxIdJob[z] && data[1][y].id == auxWork[x] && data[1][y].idD == data[2][i].idDepart) {
+                                                for (var y = 0; data[1].length > y; y++) {
+                                                    if (data[1][y].idJob == auxIdJob[z] && data[1][y].id == auxWork[x] && data[1][y].idD == data[2][i].idDepart) {
 
-                                    renglon[contadorEmpleados] += '<td>' + crear_empleados(data[2][i].idDepart, auxWork[x], contadorEmpleados + 1, auxIdJob[z], data[0], data[1][y].idEmployee) + '</td>'
-                                    contadorEmpleados++;
-                                    if (typeof renglon[contadorEmpleados] !== 'undefined') {
+                                                        renglon[contadorEmpleados] += '<td>' + crear_empleados(data[2][i].idDepart, auxWork[x], contadorEmpleados + 1, auxIdJob[z], data[0], data[1][y].idEmployee) + '</td>'
+                                                        contadorEmpleados++;
+                                                        if (typeof renglon[contadorEmpleados] !== 'undefined') {
 
-                                    } else {
-                                        renglon[contadorEmpleados] = "";
-                                    }
+                                                        } else {
+                                                            renglon[contadorEmpleados] = "";
+                                                        }
 
 
-                                }
-                            }
-                            numRenglones[x] = contadorEmpleados;
-                            contadorEmpleados = 0;
+                                                    }
+                                                }
+                                                numRenglones[x] = contadorEmpleados;
+                                                contadorEmpleados = 0;
 
-                        }
-                        for (var h = 1; renglon.length > h; h++) {
-                            listaDepartamentos += renglon[h - 1] + '<td class="boton"><button type="button" class="btn btn-danger" onclick="eliminarFila(' + h + ',' + auxIdJob[z] + ')"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button></td></tr>'
-                        }
-                        renglon = [];
-                        listaDepartamentos += '</table></div>';
-                    }
-*/
+                                            }
+                                            for (var h = 1; renglon.length > h; h++) {
+                                                listaDepartamentos += renglon[h - 1] + '<td class="boton"><button type="button" class="btn btn-danger" onclick="eliminarFila(' + h + ',' + auxIdJob[z] + ')"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button></td></tr>'
+                                            }
+                                            renglon = [];
+                                            listaDepartamentos += '</table></div>';
+                                        }
+                    */
 
                 }
                 auxIdJob = [];
