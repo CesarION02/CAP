@@ -80,7 +80,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="row in vData.lRows" :class="getCssClass(row, vData.tReport)">
+                                <tr v-for="(row, index) in vData.lRows" :class="getCssClass(row, vData.tReport)">
                                     <td>@{{ vueGui.pad(row.numEmployee, 6) }}</td>
                                     <td>@{{ row.employee }}</td>
                                     {{-- <td>@{{ row.inDate }}</td> --}}
@@ -108,7 +108,7 @@
                                                 <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
                                             </button>
                                         @endif
-                                        <p>@{{ getAdjToRow(row) }}</p>
+                                        <p>@{{ getAdjToRow(row, index) }}</p>
                                     </td>
                                     <td>@{{ row.external_id }}</td>
                                 </tr>
@@ -462,6 +462,28 @@
             document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
         }
 
+        function getRowsInNumEmployee(numEmployee){
+            var data = app.vData.lRows;
+            var dataEmployee = [];
+
+            for (let i = 0; i < data.length; i++) {
+                if(data[i]['numEmployee'] == numEmployee){
+                    dataEmployee.push(data[i]);
+                }
+            }
+
+            return dataEmployee;
+        }
+
+        function checkAdjust(dataEmployee){
+            for (let i = 0; i < dataEmployee.length; i++) {
+                if(dataEmployee[i]['isDayChecked'] == true && dataEmployee[i]['adjusts'].length < 1){
+                    return [false, dataEmployee[i]['inDateTime'], dataEmployee[i]['outDateTime']];
+                }
+            }
+            return [true,null,null];
+        }
+
         /**
          * 
          * 
@@ -469,25 +491,31 @@
          * @param {*} id 
          */
         function handleChangeCheck(event, numEmployee) {
-            oGui.showLoading(3000);
+            var dataEmployee = getRowsInNumEmployee(numEmployee);
             let checked = event.target;
             let url = "{{ route('employee_vobo') }}";
             let vobo = checked.checked ? 1 : 0;
-
-            axios.post(url, {
-                _token: "{{ csrf_token() }}",
-                num_employee: numEmployee,
-                is_vobo: vobo,
-                start_date: "{{ $sStartDate }}",
-                end_date: "{{ $sEndDate }}"
-            })
-            .then(res => {
-                console.log(res);
-                oGui.showOk();
-            })
-            .catch(function(error) {
-                oGui.showError(error);
-            });
+            var result = vobo == 1 ? checkAdjust(dataEmployee) : new Array(true);
+            if(result[0]){
+                oGui.showLoading(3000);
+                axios.post(url, {
+                    _token: "{{ csrf_token() }}",
+                    num_employee: numEmployee,
+                    is_vobo: vobo,
+                    start_date: "{{ $sStartDate }}",
+                    end_date: "{{ $sEndDate }}"
+                })
+                .then(res => {
+                    console.log(res);
+                    oGui.showOk();
+                })
+                .catch(function(error) {
+                    oGui.showError(error);
+                });
+            }else{
+                checked.checked = false;
+                oGui.showError('Falta comentario para la fecha:\n' + 'Entrada: ' + app.vueGui.formatDate(result[1]) + ' Salida: ' +app.vueGui.formatDate(result[2]));
+            }
         }
     </script>
 
