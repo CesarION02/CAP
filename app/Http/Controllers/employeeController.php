@@ -93,6 +93,8 @@ class employeeController extends Controller
 
         $employee->save();
 
+        $becario = $request->becario;
+
         if($becario == 0){
             return redirect('employee')->with('mensaje','Empleado fue creado con éxito');
         }else{
@@ -728,9 +730,11 @@ class employeeController extends Controller
             $datas->way_register;
         });
 
+        $iFilter = 0;
+
         $becarios = true;
 
-        return view('employee.index', compact('datas'))->with('becarios', $becarios); 
+        return view('employee.index', compact('datas'))->with('becarios', $becarios)->with('iFilter',$iFilter); 
     }
 
     public function colabVsBiostar()
