@@ -105,13 +105,11 @@ class DeptsGroupController extends Controller
 
         if ($dg->is_delete) {
             departmentsGroup::where('id', $id)
-                            ->update(['is_delete' => false,
-                            'updated_by' => session()->get('user_id')]);
+                            ->update(['is_delete' => false ]);
         }
         else {
             departmentsGroup::where('id', $id)
-                            ->update(['is_delete' => true,
-                            'updated_by' => session()->get('user_id')]);
+                            ->update(['is_delete' => true ]);
         }
 
         return $id;

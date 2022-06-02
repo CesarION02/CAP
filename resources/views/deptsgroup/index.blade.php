@@ -87,11 +87,11 @@
                                 </a>
                                 <button v-show="! group.is_delete" v-on:click="prevDeleteGroup(group)" 
                                     class="btn-accion-tabla tooltipsC" title="Borrar este registro">
-                                    <i class="glyphicon glyphicon-trash"></i>
+                                    <i class="glyphicon glyphicon-trash text-danger"></i>
                                 </button>
                                 <button v-show="group.is_delete" v-on:click="prevDeleteGroup(group)" 
                                     class="btn-accion-tabla tooltipsC" title="Activar este registro">
-                                    <i class="glyphicon glyphicon-ok"></i>
+                                    <i class="glyphicon glyphicon-ok "></i>
                                 </button>
                             </td>
                         </tr>
