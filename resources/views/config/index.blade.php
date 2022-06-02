@@ -19,15 +19,15 @@
                    
                 </div>
             </div>
-            <form  id="form-general" class="form-horizontal" method="POST" autocomplete="off">
-                @csrf
+            <form action="{{route('actualizar_departamento')}}" id="form-general" class="form-horizontal" method="POST" autocomplete="off">
+                @csrf @method("put")
                 <div class="box-body">
                     @include('config.form')
                 </div>
                 <div class="box-footer">
                     <div class="col-lg-3"></div>
                     <div class="col-lg-6">
-                        
+                        @include('includes.button-form-edit')
                     </div>
                 </div>
             </form>

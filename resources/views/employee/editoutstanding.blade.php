@@ -4,7 +4,7 @@
 @endsection
 
 @section("scripts")
-<script src="{{asset("assets/pages/scripts/employee/puesto.js")}}" type="text/javascript"></script>
+<script src="{{asset("assets/pages/scripts/employee/puestoC.js")}}" type="text/javascript"></script>
 @endsection
 
 @section('content')
@@ -24,7 +24,7 @@
             <form action="{{route('actualizar_empleado_faltante', ['id' => $data->id])}}" id="form-general" class="form-horizontal" method="POST" autocomplete="off">
                 @csrf @method("put")
                 <div class="box-body">
-                    @include('employee.form')
+                    @include('employee.formoutstanding')
                 </div>
                 <div class="box-footer">
                     <div class="col-lg-3"></div>
