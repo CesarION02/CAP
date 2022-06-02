@@ -51,6 +51,7 @@ Reporte uso de puertas
                             <label for="cars">Elige area(s):</label>
                             
                             <select disabled="true" data-placeholder="Selecciona opciones..." style="width: 60%" class="chosen-select" id="areas" name="areas[]" multiple required>
+                                <option value="0">Todas las áreas</option>
                                 @foreach($lAreas as $area => $index)
                                     <option value="{{ $index }}" > {{$area}}</option>
                                 @endforeach
@@ -63,6 +64,7 @@ Reporte uso de puertas
                             <label for="cars">Elige empleado(s):</label>
                             
                             <select disabled="true" data-placeholder="Selecciona opciones..." style="width: 60%" class="chosen-select" id="employees" name="employees[]" multiple required>
+                                <option value="0">Todos los empleados</option>
                                 @foreach($lEmployees as $employee => $index)
                                     <option value="{{ $index }}"  > {{$employee}}</option>
                                 @endforeach

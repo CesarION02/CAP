@@ -1909,8 +1909,26 @@ class ReporteController extends Controller
                 return null;
             }
             switch($request->tipo){
-                case 1: 
-                    $employees = DB::table('employees')
+                case 1:
+
+                    for( $i = 0 ; count($request->areas) > $i ; $i++){
+                        if( $request->areas[$i] == 0 ){
+                            $areas = 0;
+                        }else{
+                            $areas = 1;
+                        }
+                    }
+
+                    if($areas == 0){
+                        $employees = DB::table('employees')
+                                        ->join('departments','departments.id','=','employees.department_id')
+                                        ->join('areas','areas.id','=','departments.area_id')
+                                        ->where('employees.is_active',1)
+                                        ->where('employees.biostar_id','>',0)
+                                        ->select('employees.biostar_id AS biostar')
+                                        ->get();
+                    }else{
+                        $employees = DB::table('employees')
                                         ->join('departments','departments.id','=','employees.department_id')
                                         ->join('areas','areas.id','=','departments.area_id')
                                         ->whereIn('departments.area_id',$request->areas)
@@ -1918,6 +1936,8 @@ class ReporteController extends Controller
                                         ->where('employees.biostar_id','>',0)
                                         ->select('employees.biostar_id AS biostar')
                                         ->get();
+                    }
+                    
                     for($i = 0 ; count($employees) > $i ; $i++){
                         if($i == 0){
                             $Sempleados = $Sempleados.$employees[$i]->biostar;
@@ -1927,10 +1947,28 @@ class ReporteController extends Controller
                     }
                     break;
                 case 2:
-                    $employees = DB::table('employees')
+
+                    for( $i = 0 ; count($request->employees) > $i ; $i++){
+                        if( $request->employees[$i] == 0 ){
+                            $employees = 0;
+                        }else{
+                            $employees = 1;
+                        }
+                    }
+
+                    if($employees == 0){
+                        $employees = DB::table('employees')
+                                        ->where('employees.is_active',1)
+                                        ->where('employees.biostar_id','>',0)
+                                        ->select('employees.biostar_id AS biostar')
+                                        ->get();
+                    }else{
+                        $employees = DB::table('employees')
                                         ->whereIn('employees.id',$request->employees)
                                         ->select('employees.biostar_id AS biostar')
                                         ->get();
+                    }
+                    
                     for($i = 0 ; count($employees) > $i ; $i++){
                         if($i == 0){
                             $Sempleados = $Sempleados.$employees[$i]->biostar;
