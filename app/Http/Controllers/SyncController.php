@@ -19,7 +19,7 @@ class SyncController extends Controller
         $resp = SCutoffDates::processCutoffDates($config->lastSyncDateTime);
 
         $sincronizado = \App\Http\Controllers\biostarController::insertEvents();
-
+        // $sincronizado = 1;
         if ($sincronizado != 0) {
             return redirect()->back()->with('mensaje', 'Sincronizado BioStar');
         }
@@ -44,6 +44,9 @@ class SyncController extends Controller
             // dd($data);
             $deptRhCont = new DeptsRhController();
             $deptRhCont->saveRhDeptsFromJSON($data->departments);
+
+            $jobCont = new JobRhController();
+            $jobCont->saveJobsFromJSON($data->positions);
 
             $empCont = new employeeController();
             $empCont->saveEmployeesFromJSON($data->employees);

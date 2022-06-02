@@ -61,7 +61,7 @@
                     <div class="col-xs-4">
                         <button type="submit" class="btn btn-primary btn-block btn-flat">Entrar</button>
                     </div>
-                                    <a class="btn btn-link" href="{{ route('reset') }}">
+                                    <a class="btn btn-link" href="{{ route('password.request') }}">
                                         {{ __('¿Olvidaste tu contraseña?') }}
                                     </a>
                     <!-- /.col -->

@@ -55,9 +55,9 @@
                 }
             })
             .then(res => {
-                weeks = res.data.weeks;
-                biweeks = res.data.biweeks;
-                biweeksCal = res.data.biweekscal;
+                weeks = res.data.weeks.reverse();
+                biweeks = res.data.biweeks.reverse();
+                biweeksCal = res.data.biweekscal.reverse();
 
                 for (const w of weeks) {
                     weekCuts["(" + w.number + ") - " + moment(w.dt_start).format('DD/MM/YYYY') + "-" + moment(w.dt_end).format('DD/MM/YYYY')] = 
@@ -77,6 +77,7 @@
                 $('#daterange-b-week').daterangepicker({
                     startDate: start,
                     endDate: end,
+                    maxDate: moment().add(1, 'days'),
                     ranges: pType == "week" ? weekCuts : pType == "biweek" ?  biweekCuts : biweekCalCuts,
                     drops: "auto"
                 }, cb);
@@ -89,6 +90,7 @@
         $('#daterange-b-week').daterangepicker({
                     startDate: start,
                     endDate: end,
+                    maxDate: moment().add(1, 'days'),
                     ranges: $(this).val() == "week" ? weekCuts : $(this).val() == "biweek" ? biweekCuts : biweekCalCuts,
                     drops: "auto"
                 }, cb);
@@ -99,6 +101,7 @@
                         $('#daterange-b-week').daterangepicker({
                             startDate: start,
                             endDate: end,
+                            maxDate: moment().add(1, 'days'),
                             ranges: weekCuts,
                             drops: "auto"
                         }, cb);
@@ -107,6 +110,7 @@
                         $('#daterange-b-week').daterangepicker({
                             startDate: start,
                             endDate: end,
+                            maxDate: moment().add(1, 'days'),
                             ranges: biweekCuts,
                             drops: "auto"
                         }, cb);
@@ -115,6 +119,7 @@
                         $('#daterange-b-week').daterangepicker({
                             startDate: start,
                             endDate: end,
+                            maxDate: moment().add(1, 'days'),
                             ranges: biweekCalCuts,
                             drops: "auto"
                         }, cb);
