@@ -1,7 +1,13 @@
 @extends("theme.$theme.layoutcustom")
 @section('styles1')
-    <link rel="stylesheet" href="{{ asset("dt/datatables.css") }}">
-    <link rel="stylesheet" href="{{ asset("assets/css/reportD.css") }}">
+<link rel="stylesheet" href="{{ asset("dt/datatables.css") }}">
+<link rel="stylesheet" href="{{ asset("assets/css/reportD.css") }}">
+<style>
+    tr {
+        font-size: 70%;
+    }
+    span.nobr { white-space: nowrap; }
+</style>
 @endsection
 @section('title')
 Reporte Entradas/Salidas
@@ -15,7 +21,15 @@ Reporte Entradas/Salidas
         <div class="box box-danger">
             <div class="box-header with-border row">
                 <div class="col-md-10">
-                    <h3 class="box-title">Reporte entrada/salida [a] 2 línea </h3>
+                    @if ($reportType == 1)
+                        <h3 class="box-title">Reporte entrada/salida a 2 línea por área</h3>
+                    @elseif($reportType == 2)
+                        <h3 class="box-title">Reporte entrada/salida a 2 línea por grupo depto.</h3>
+                    @elseif($reportType == 3)
+                        <h3 class="box-title">Reporte entrada/salida a 2 línea por depto. CAP</h3>
+                    @else
+                        <h3 class="box-title">Reporte entrada/salida a 2 línea por empleado</h3>
+                    @endif
                 </div>
                 <div class="col-md-2">
                     <select class="form-control" name="sel-collaborator" id="sel-collaborator">
@@ -23,7 +37,6 @@ Reporte Entradas/Salidas
                         <option value="1">Empleados</option>
                         <option value="2">Practicantes</option>
                     </select>
-                </div>
                 </div>
             </div>
             <div class="box-body" id="reportApp">
@@ -53,6 +66,8 @@ Reporte Entradas/Salidas
                                 </tr>
                             </tbody>
                         </table>
+                        <button onclick="topFunction()" id="myBtn" title="Ir arriba">Ir arriba</button>
+                        <a href="{{route('generarreporteRegs', ['id' => $reportType])}}" target="_blank" id="newButton" title="Nuevo reporte">Nuevo reporte</a>
                     </div>
                 </div>
             </div>
@@ -99,6 +114,30 @@ Reporte Entradas/Salidas
     <script src="{{ asset("assets/js/moment/moment.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/moment/datetime-moment.js") }}" type="text/javascript"></script>
 
+    <script>
+        //Get the button:
+        mybutton = document.getElementById("myBtn");
+        theNewButton = document.getElementById("newButton");
+
+        // When the user scrolls down 20px from the top of the document, show the button
+        window.onscroll = function() {scrollFunction()};
+
+        function scrollFunction() {
+            if (document.body.scrollTop > 10 || document.documentElement.scrollTop > 10) {
+                mybutton.style.display = "block";
+                theNewButton.style.display = "block";
+            } else {
+                mybutton.style.display = "none";
+                theNewButton.style.display = "none";
+            }
+        }
+
+        // When the user clicks on the button, scroll to the top of the document
+        function topFunction() {
+            document.body.scrollTop = 0; // For Safari
+            document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+        }
+    </script>
     <script>
         $(document).ready( function () {
             $.fn.dataTable.moment('DD/MM/YYYY');

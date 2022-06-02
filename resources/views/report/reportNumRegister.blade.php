@@ -1,6 +1,17 @@
 @extends("theme.$theme.layout")
+
+@section('styles1')
+<link rel="stylesheet" href="{{ asset("dt/datatables.css") }}">
+<link rel="stylesheet" href="{{ asset("assets/css/reportD.css") }}">
+<style>
+    tr {
+        font-size: 70%;
+    }
+    span.nobr { white-space: nowrap; }
+</style>
+@endsection
 @section('title')
-Turno
+    Turno
 @endsection
 
 @section("scripts")
@@ -14,6 +25,32 @@ Turno
 	<script src="{{ asset('dt/vfs_fonts.js') }}"></script>
 	<script src="{{ asset('dt/buttons.html5.min.js') }}"></script>
 	<script src="{{ asset('dt/buttons.print.min.js') }}"></script>
+    <script src="{{ asset("assets/pages/scripts/SGui.js") }}" type="text/javascript"></script>
+
+    <script>
+        //Get the button:
+        mybutton = document.getElementById("myBtn");
+        theNewButton = document.getElementById("newButton");
+
+        // When the user scrolls down 20px from the top of the document, show the button
+        window.onscroll = function() {scrollFunction()};
+
+        function scrollFunction() {
+            if (document.body.scrollTop > 10 || document.documentElement.scrollTop > 10) {
+                mybutton.style.display = "block";
+                theNewButton.style.display = "block";
+            } else {
+                mybutton.style.display = "none";
+                theNewButton.style.display = "none";
+            }
+        }
+
+        // When the user clicks on the button, scroll to the top of the document
+        function topFunction() {
+            document.body.scrollTop = 0; // For Safari
+            document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+        }
+    </script>
 <script>
     $(document).ready( function () {
         $('#myTable').DataTable({
@@ -71,7 +108,7 @@ Turno
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title"></h3>
+                <h3 class="box-title">Reporte número de registros</h3>
                 <div class="box-tools pull-right">
                 </div>
             </div>
@@ -135,6 +172,8 @@ Turno
                        @endfor
                     </tbody>
                 </table>
+                <button onclick="topFunction()" id="myBtn" title="Ir arriba">Ir arriba</button>
+                <a href="{{ route('reporte_numero_registros') }}" target="_blank" id="newButton" title="Nuevo reporte">Nuevo reporte</a>
             </div>
         </div>
     </div>

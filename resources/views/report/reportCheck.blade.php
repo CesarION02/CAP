@@ -3,6 +3,17 @@
 Reporte revisión
 @endsection
 
+@section('styles1')
+<link rel="stylesheet" href="{{ asset("dt/datatables.css") }}">
+<link rel="stylesheet" href="{{ asset("assets/css/reportD.css") }}">
+<style>
+    tr {
+        font-size: 70%;
+    }
+    span.nobr { white-space: nowrap; }
+</style>
+@endsection
+
 @section("scripts")
 <script src="{{asset("assets/pages/scripts/admin/funciones.js")}}" type="text/javascript"></script>
 <script src="{{asset("assets/pages/scripts/admin/datatable/index.js")}}" type="text/javascript"></script>
@@ -63,6 +74,30 @@ Reporte revisión
         });
     });
 </script>
+<script>
+    //Get the button:
+    mybutton = document.getElementById("myBtn");
+    theNewButton = document.getElementById("newButton");
+
+    // When the user scrolls down 20px from the top of the document, show the button
+    window.onscroll = function() {scrollFunction()};
+
+    function scrollFunction() {
+        if (document.body.scrollTop > 5 || document.documentElement.scrollTop > 5) {
+            mybutton.style.display = "block";
+            theNewButton.style.display = "block";
+        } else {
+            mybutton.style.display = "none";
+            theNewButton.style.display = "none";
+        }
+    }
+
+    // When the user clicks on the button, scroll to the top of the document
+    function topFunction() {
+        document.body.scrollTop = 0; // For Safari
+        document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+    }
+</script>
 @endsection
 
 @section('content')
@@ -71,7 +106,7 @@ Reporte revisión
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title"></h3>
+                <h3 class="box-title">Reporte número de checadas</h3>
                 <div class="box-tools pull-right">
                 </div>
             </div>
@@ -133,6 +168,8 @@ Reporte revisión
                        @endfor
                     </tbody>
                 </table>
+                <button onclick="topFunction()" id="myBtn" title="Ir arriba">Ir arriba</button>
+                <a href="{{ route('reporte_chequeo') }}" target="_blank" id="newButton" title="Nuevo reporte">Nuevo reporte</a>
             </div>
         </div>
     </div>
