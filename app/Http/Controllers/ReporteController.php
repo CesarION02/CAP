@@ -811,6 +811,14 @@ class ReporteController extends Controller
         }
         else {
             $lEmployees = $this->timesTotal($lRows, $lEmployees);
+            foreach($lEmployees as $emp){
+                $oCom = $lAdjusts->where('employee_id',$emp->id)->all();
+                $arr = [];
+                foreach($oCom as $com){
+                    array_push($arr, $com->dt_date.", ".$com->comments);
+                }
+                $emp->comments = $arr;
+            }
             
             return view('report.reportDelaysTotView')
                     ->with('tReport', \SCons::REP_HR_EX_TOT)

@@ -17,6 +17,12 @@ var app = new Vue({
         vRow: null,
         adjTypeEnabled: true,
         lComments: oData.lComments,
+        haveComments: false,
+        resumeComments: [],
+        nameEmployee: "",
+    },
+    mounted() {
+        this.haveComments = this.lComments.length > 0;
     },
     methods: {
         getCssClass(oRow, report) {
@@ -304,6 +310,18 @@ var app = new Vue({
         },
         addComment(){
             this.comments = this.comments.length > 0 ? this.comments + ' ' + this.selComment : this.comments + this.selComment;
+        },
+        getResumeComments(idEmployee){
+            this.resumeComments = [];
+            for (let index = 0; index < this.vData.lEmployees.length; index++) {
+                if(this.vData.lEmployees[index].id == idEmployee){
+                    this.resumeComments = this.vData.lEmployees[index].comments;
+                    this.nameEmployee = this.vData.lEmployees[index].name;
+                    break;
+                }
+            }
+            
+            $('#commentsModal').modal('show');
         }
     },
 })

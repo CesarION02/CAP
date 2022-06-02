@@ -55,12 +55,12 @@
               <div class="row">
                 <div class="col-md-4"><label for="">Comentarios frecuentes:</label></div>
                 <div class="col-md-7">
-                  <select class="form-control" v-model="selComment">
+                  <select class="form-control" v-model="selComment" :disabled="!haveComments">
                     <option v-for="comment in lComments">@{{comment.comment}}</option>
                   </select>
                 </div>
                 <div class="col-md-1">
-                  <button class="btn btn-success" style="border-radius: 50%; padding: 3px 6px; font-size: 10px;" v-on:click="addComment()"><span class="glyphicon glyphicon-plus"></span></button>
+                  <button class="btn btn-success" style="border-radius: 50%; padding: 3px 6px; font-size: 10px;" v-on:click="addComment()" :disabled="!haveComments"><span class="glyphicon glyphicon-plus"></span></button>
                 </div>
               </div>
               <br>
