@@ -128,7 +128,7 @@ Usuarios
                 <table class="table table-striped table-bordered table-hover" id="myTable">
                     <thead>
                         <tr>
-                            <th>Usuario</th>
+                            <th>Nombre</th>
                             <th>Correo</th>
                             <th>Empleado asociado</th>
                             <th>Estado</th>
@@ -139,7 +139,6 @@ Usuarios
                         @foreach ($datas as $data)
                         <tr>
                             <td>{{$data->name}}</td>
-                            <td>{{$data->username}}</td>
                             <td>{{$data->email}}</td>
                             @if($data->employee == null)
                                 <td>No definido</td>

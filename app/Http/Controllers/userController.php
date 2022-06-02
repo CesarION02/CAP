@@ -51,8 +51,9 @@ class userController extends Controller
      */
     public function create()
     {
-        $employees = employees::orderBy('id','ASC')->pluck('id','name');
-        return view('user.create', compact('employees'));
+        $employees = employees::orderBy('name','ASC')->where('is_delete', 0)->pluck('id','name');
+        $type = 1;
+        return view('user.create', compact('employees'))->with('type',$type);
     }
 
     /**
@@ -63,6 +64,9 @@ class userController extends Controller
      */
     public function store(Request $request)
     {
+        if( $request->passwordnu != $request->password ){
+            return \Redirect::back()->withErrors(['Error', 'Las contraseña no es igual']);
+        }
         $user = new User();
         $user->name = $request->name;
         $user->email = $request->email;
@@ -99,7 +103,8 @@ class userController extends Controller
     {
         $data = User::findOrFail($id);
         $employees = employees::orderBy('id','ASC')->pluck('id','name');
-        return view('user.edit', compact('data'))->with('employees',$employees);
+        $type = 2;
+        return view('user.edit', compact('data'))->with('employees',$employees)->with('type',$type);
     }
 
     /**
@@ -111,16 +116,36 @@ class userController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $user = User::find($id);
-        $user->name = $request->name;
-        $user->email = $request->email;
-        if ($request->employee_id != 0){
-            $user->employee_id = $request->employee_id;
+        if( $request->con == 1){
+            if( $request->passwordnu != $request->password ){
+                return \Redirect::back()->withErrors(['Error', 'Las contraseña no es igual']);
+            }
+    
+            $user = User::find($id);
+            $user->name = $request->name;
+            $user->email = $request->email;
+            if ($request->employee_id != 0){
+                $user->employee_id = $request->employee_id;
+            }
+            $user->password = bcrypt($request->password);
+            $user->is_delete = 0;
+            $user->updated_by = session()->get('user_id');
+            $user->save();
+
+        }else{
+            
+            $user = User::find($id);
+            $user->name = $request->name;
+            $user->email = $request->email;
+            if ($request->employee_id != 0){
+                $user->employee_id = $request->employee_id;
+            }
+            $user->is_delete = 0;
+            $user->updated_by = session()->get('user_id');
+            $user->save();    
         }
-        $user->password = bcrypt($request->password);
-        $user->is_delete = 0;
-        $user->updated_by = session()->get('user_id');
-        $user->save();
+        
+        
 
         return redirect('user')->with('mensaje', 'Usuario actualizado con exito');
     }
@@ -165,6 +190,11 @@ class userController extends Controller
     }
 
     public function updatePassword(Request $request, $id){
+        
+        if( $request->passwordnu != $request->password ){
+            return \Redirect::back()->withErrors(['Error', 'Las contraseñas no son iguales']);
+        }
+        
         $data = User::find($id);
         $data->password = bcrypt($request->password);
         $data->updated_by = session()->get('user_id');

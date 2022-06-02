@@ -20,5 +20,6 @@ class VerifyCsrfToken extends Middleware
      */
     protected $except = [
         'shiftprogramming/guardar',
+        'register/recover'
     ];
 }

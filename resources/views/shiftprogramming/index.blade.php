@@ -97,7 +97,7 @@ Programacion de turnos
                           @endfor
                         </select>
                       </div>
-                      <div class="col-md-3" style="margin:5px" id="selectsemana">
+                      <div class="col-md-5" style="margin:5px" id="selectsemana">
                         <select id="semana" name="semana">
                           <option value="0">Seleccione semana</option>
                         </select>
@@ -105,8 +105,8 @@ Programacion de turnos
                       <div class="col-md-2">
                           <button class="btn btn-block btn-warning btn-sm" id="copiar" name="copiar" disabled onclick="copyShift()"><i class="fa fa-fw fa-files-o"></i> Crear copia</span></button>
                       </div>
-                      <div class="col-md-3">
-                          <button class="btn btn-block btn-warning btn-sm" id="rotar" name="rotar" disabled onclick="rotateShift()"><i class="fa fa-fw fa-repeat"></i> Crear copia y rotar</span></button>
+                      <div class="col-md-2">
+                          <button class="btn btn-block btn-warning btn-sm" id="rotar" name="rotar" disabled onclick="rotateShift()"><i class="fa fa-fw fa-repeat"></i> Crear rotar</span></button>
                       </div>
                     </div>
                     <input type="hidden" value="0" id="pastWeek">
