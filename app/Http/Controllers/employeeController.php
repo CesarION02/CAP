@@ -370,7 +370,7 @@ class employeeController extends Controller
         }else{
             $dept = $config->dept_pre;
         }
-
+        $grupoPrenomina = DB::table('prepayroll_group_deptos')->where('department_id',$dept)->get();
         $oldEmp = employees::find($id);
 
         if( $oldEmp->dept_rh_id == $jEmployee->dept_rh_id ){
@@ -394,6 +394,7 @@ class employeeController extends Controller
                             'updated_by' => session()->get('user_id'),
                             ]
                         );
+
         }else{
             employees::where('id', $id)
                     ->update(
@@ -415,7 +416,13 @@ class employeeController extends Controller
                             'is_delete' => $jEmployee->is_deleted,
                             'updated_by' => session()->get('user_id'),
                             ]
-                        );    
+                        ); 
+                        
+            
+            DB::table('prepayroll_group_employees')
+                ->where('id', $id)
+                ->update(['group_id' => $grupoPrenomina[0]->group_id]);
+            
         }
         
     }
@@ -429,6 +436,10 @@ class employeeController extends Controller
     private function insertEmployee($jEmployee)
     {
         $config = \App\SUtils\SConfiguration::getConfigurations();
+
+        $department = DepartmentRH::where('id',$jEmployee->dept_rh_id)->get();
+        
+        $grupoPrenomina = DB::table('prepayroll_group_deptos')->where('department_id',$deparment[0]->id)->get();
 
         $emp = new employees();
 
@@ -447,7 +458,6 @@ class employeeController extends Controller
         $emp->external_id = $jEmployee->id_employee;
         $emp->company_id = $this->companies[$jEmployee->company_id];
         $emp->dept_rh_id = $this->rhdepartments[$jEmployee->dept_rh_id];
-        $department = DepartmentRH::where('id',$jEmployee->dept_rh_id)->get();
         if($department[0]->default_dept_id != null){
             $emp->department_id = $department[0]->default_dept_id;
         }else{
@@ -460,6 +470,12 @@ class employeeController extends Controller
         $emp->created_by = session()->get('user_id');
         $emp->updated_by = session()->get('user_id');
         $emp->save();
+
+        if($grupoPrenomina != null ){
+            DB::table('prepayroll_group_employees')->insert(
+                ['group_id' => $grupoPrenomina[0]->group_id, 'employee_id' => $emp->id, 'is_delete' => 0, 'created_by' => session()->get('user_id'), 'updated_by' => session()->get('user_id')]
+            );    
+        }
     }
 
     public function fingerprints(Request $request){
