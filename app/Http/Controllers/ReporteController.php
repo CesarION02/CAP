@@ -2210,4 +2210,135 @@ class ReporteController extends Controller
             
             return view('report.reporteFaltasView',  ['data' => $merged, 'range' => $range, 'totEmployees' => $totEmployees, 'calendarStart' => $calendarStart]);
         }
+
+        public function reportIncidentsEmployees(){
+            $config = \App\SUtils\SConfiguration::getConfigurations();
+
+            $bDirect = false;
+            $payType = 0;
+            $bDelegation = null;
+            $subEmployees = SPrepayrollUtils::getEmployeesByUser(\Auth::user()->id, $bDirect, $payType, $bDelegation);
+            if ($subEmployees == null) {
+                $lEmployees = SGenUtils::toEmployeeIds(0, 0, []);
+            }
+            else {
+                $qEmployees = SGenUtils::toEmployeeQuery(0, 0, []);
+
+                $lEmployees = $qEmployees->whereIn('e.id', $subEmployees)
+                                ->orderBy('e.name', 'ASC')
+                                ->get();
+            }
+
+            return view('report.reportIncidentsEmployees')
+                        ->with('tReport', \SCons::REP_HR_EX)
+                        ->with('sRoute', 'reporteIncidenciasEmpleadosGenerar')
+                        ->with('lEmployees', $lEmployees)
+                        ->with('startOfWeek', $config->startOfWeek);
+        }
+
+        public function reportIncidentsEmployeesGenerar(Request $request)
+        {
+            $sStartDate = $request->start_date;
+            $sEndDate = $request->end_date;
+            $iEmployee = $request->emp_id;
+
+            $oStartDate = Carbon::parse($sStartDate);
+            $oEndDate = Carbon::parse($sEndDate);
+
+            $diff_days = $oStartDate->diffInDays($oEndDate);
+
+            if (! $oStartDate->lessThanOrEqualTo($oEndDate)) {
+                return \Redirect::back()->withErrors(['Error', 'La fecha de inicio debe ser previa a la fecha final']);
+            }
+
+            if ($request->optradio == "employee") {
+                if ($iEmployee > 0) {
+                    $lEmployees = SGenUtils::toEmployeeIds(0, 0, 0, [$iEmployee]);
+                    $payWay = $lEmployees[0]->way_pay_id;
+                }
+                else {
+                    return \Redirect::back()->withErrors(['Error', 'Debe seleccionar empleado']);
+                }
+            }
+            else {
+                if (session()->get('rol_id') != 1){
+                    $dgu = DB::table('group_dept_user')
+                            ->where('user_id',auth()->user()->id)
+                            ->select('groupdept_id AS id')
+                            ->get();
+                    $Adgu = [];
+                    for($i=0;count($dgu)>$i;$i++){
+                        $Adgu[$i]=$dgu[$i]->id;
+                    }
+                    
+                    $employee = DB::table('employees')
+                            ->join('jobs','jobs.id','=','employees.job_id')
+                            ->join('departments','departments.id','=','employees.department_id')
+                            ->join('department_group','department_group.id','=','departments.dept_group_id')
+                            ->whereIn('departments.dept_group_id',$Adgu)
+                            ->where('employees.is_active',1)
+                            ->select('employees.id AS id')
+                            ->get();
+                }else{
+                    $employee = DB::table('employees')
+                            ->join('jobs','jobs.id','=','employees.job_id')
+                            ->join('departments','departments.id','=','employees.department_id')
+                            ->join('department_group','department_group.id','=','departments.dept_group_id')
+                            ->where('employees.is_active',1)
+                            ->orderBy('employees.name')
+                            ->select('employees.id AS id')
+                            ->get();
+                }
+                /**
+                 * 1: quincena
+                 * 2: semana
+                 * 3: todos
+                 */
+                $payWay = $request->pay_way == null ? \SCons::PAY_W_S : $request->pay_way;
+
+                $filterType = $request->i_filter;
+                $ids = $request->elems;
+                $aEmpl = [];
+                foreach($employee as $emp){
+                    array_push($aEmpl, $emp->id);
+                }
+                $lEmployees = SGenUtils::toEmployeeIds($payWay, $filterType, $ids, $aEmpl);
+            }
+
+            $emplIds = $lEmployees->pluck('id');
+
+            $incidents = \DB::table('incidents as in')
+                            ->leftJoin('incidents_day as in_d', 'in_d.incidents_id','=','in.id')
+                            ->leftJoin('type_incidents as tp', 'tp.id','=','in.type_incidents_id')
+                            ->where('in.is_delete',0)
+                            ->whereBetween('in.start_date',[$sStartDate,$sEndDate])
+                            ->whereIn('in.employee_id',$emplIds)
+                            ->select(
+                                'in.id','in.type_incidents_id','in.cls_inc_id','start_date','end_date',
+                                'in.nts','in.employee_id','in.is_delete','in_d.date','tp.name'
+                            )
+                            ->get();
+
+            $lRows = [];
+            
+            foreach ($lEmployees as $emp) {
+                $oDate = Carbon::parse($sStartDate);
+                $date = $oDate->format('Y-m-d');
+                for ($i=0; $i <= $diff_days; $i++) {
+                    array_push($lRows, (object)[
+                        'employee' => $emp->name,
+                        'num_employee' => substr((string)($emp->num_employee + 1000000), 1),
+                        'employee_id' => $emp->id,
+                        'date' => $date,
+                        'incident' => collect($incidents->where('employee_id', $emp->id)->where('date',$date)->first())->get('name'),
+                        'incident_type' => collect($incidents->where('employee_id', $emp->id)->where('date',$date)->first())->get('type_incidents_id')
+                    ]);
+                    $date = $oDate->addDay()->format('Y-m-d');
+                }
+            }
+            
+            $route = route('reporteIncidenciasEmpleados');
+
+            return view('report.reportIncidentsEmployeesView', ['lRows' => $lRows, 'sStartDate' => $sStartDate, 'sEndDate' => $sEndDate, 'route' => $route]);
+        }
 }

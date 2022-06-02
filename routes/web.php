@@ -123,6 +123,9 @@ Route::get('report/generarreportepuertas','ReporteController@generarReportePuert
 /* Reporte incidencias */
 Route::get('report/reporteIncidencias', 'ReporteController@incidentReportView')->name('reporteIncidencias');
 Route::get('report/reporteIncidenciasGenerar', 'ReporteController@incidentReportGenerar')->name('reporteIncidenciasGenerar');
+/* Reporte incidencias empleados*/
+Route::get('report/reporteIncidenciasEmpleados', 'ReporteController@reportIncidentsEmployees')->name('reporteIncidenciasEmpleados');
+Route::get('report/reporteIncidenciasEmpleadosGenerar', 'ReporteController@reportIncidentsEmployeesGenerar')->name('reporteIncidenciasEmpleadosGenerar');
 /* Reporte faltas */
 Route::get('report/reporteFaltas', 'ReporteController@indexFaltasReport')->name('reporteFaltas');
 Route::get('report/reporteFaltasGenerar', 'ReporteController@FaltasReportGenerar')->name('reporteFaltasGenerar');
@@ -183,7 +186,9 @@ Route::post('deptgroupuser', 'deptgroupuserController@store')->name('guardar_dgu
 Route::get('deptgroupuser/{id}/edit', 'deptgroupuserController@edit')->name('editar_dgu');
 Route::put('deptgroupuser/{id}', 'deptgroupuserController@update')->name('actualizar_dgu');
 Route::delete('deptgroupuser/{id}', 'deptgroupuserController@destroy')->name('eliminar_dgu');
-
+/* RUTAS DE empleados asignados a grupo departamento */
+Route::get('emplDeptGroup', 'employeesAssignsController@index')->name('empl_group_assign');
+Route::get('emplDeptGroup/generate', 'employeesAssignsController@generateEmployeesAssigns')->name('empl_group_assign_generate');
 /* RUTAS DE USUARIO */
 Route::get('user/change', 'userController@change')->name('cambio_usuario');
 Route::put('user/{id}/cambio', 'userController@updatePassword')->name('actualizar_contraseña');

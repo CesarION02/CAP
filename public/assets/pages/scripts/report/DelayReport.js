@@ -140,11 +140,9 @@ var app = new Vue({
                 }
             }
 
-            if (this.adjType == oData.ADJ_CONS.COM) {
-                if (this.comments.length == 0) {
-                    oGui.showError("Debe ingresar un comentario");
-                    return false;
-                }
+            if (this.comments.length == 0) {
+                oGui.showError("Debe ingresar un comentario");
+                return false;
             }
 
             return true;
