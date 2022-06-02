@@ -94,6 +94,8 @@ class employeeController extends Controller
 
         $employee->save();
 
+        $becario = $request->becario;
+
         if($becario == 0){
             return redirect('employee')->with('mensaje','Empleado fue creado con éxito');
         }else{
@@ -382,7 +384,7 @@ class employeeController extends Controller
         }else{
             $dept = $config->dept_pre;
         }
-
+        $grupoPrenomina = DB::table('prepayroll_group_deptos')->where('department_id',$dept)->get();
         $oldEmp = employees::find($id);
 
         if( $oldEmp->dept_rh_id == $jEmployee->dept_rh_id ){
@@ -407,6 +409,7 @@ class employeeController extends Controller
                             'updated_by' => session()->get('user_id'),
                             ]
                         );
+
         }else{
             employees::where('id', $id)
                     ->update(
@@ -429,7 +432,13 @@ class employeeController extends Controller
                             'is_delete' => $jEmployee->is_deleted,
                             'updated_by' => session()->get('user_id'),
                             ]
-                        );    
+                        ); 
+                        
+            
+            DB::table('prepayroll_group_employees')
+                ->where('id', $id)
+                ->update(['group_id' => $grupoPrenomina[0]->group_id]);
+            
         }
         
     }
@@ -443,6 +452,10 @@ class employeeController extends Controller
     private function insertEmployee($jEmployee)
     {
         $config = \App\SUtils\SConfiguration::getConfigurations();
+
+        $department = DepartmentRH::where('id',$jEmployee->dept_rh_id)->get();
+        
+        $grupoPrenomina = DB::table('prepayroll_group_deptos')->where('department_id',$deparment[0]->id)->get();
 
         $emp = new employees();
 
@@ -475,6 +488,12 @@ class employeeController extends Controller
         $emp->created_by = session()->get('user_id');
         $emp->updated_by = session()->get('user_id');
         $emp->save();
+
+        if($grupoPrenomina != null ){
+            DB::table('prepayroll_group_employees')->insert(
+                ['group_id' => $grupoPrenomina[0]->group_id, 'employee_id' => $emp->id, 'is_delete' => 0, 'created_by' => session()->get('user_id'), 'updated_by' => session()->get('user_id')]
+            );    
+        }
     }
 
     public function fingerprints(Request $request){
@@ -727,9 +746,11 @@ class employeeController extends Controller
             $datas->way_register;
         });
 
+        $iFilter = 0;
+
         $becarios = true;
 
-        return view('employee.index', compact('datas'))->with('becarios', $becarios); 
+        return view('employee.index', compact('datas'))->with('becarios', $becarios)->with('iFilter',$iFilter); 
     }
 
     public function colabVsBiostar()

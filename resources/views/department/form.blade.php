@@ -92,3 +92,19 @@
             @endif
     </div>
 </div>
+<div class="form-group">
+    <center><h4>Agregar puesto(s)</h4> <button type="button" class="btn btn-primary" onclick="agregar()"><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span></button></center>
+</div>
+
+<input type="hidden" name="grupo" id="grupo" value="{{$grupo}}"
+<div class="form-group">
+    <label for="name" class="col-lg-3 control-label requerido">Nombre puesto:</label>
+    <div class="col-lg-8">
+        <input type="text" class="form-control" name="puesto1" id="puesto1" required>    
+    </div>
+    
+    <div class="col-lg-1">
+        <button type="button" class="btn btn-primary" onclick="eliminar()"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+    </div>
+</div>
+<input type="hidden" name="contador" id="contador" value="1">

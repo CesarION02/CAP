@@ -7,7 +7,9 @@ use App\Models\department;
 use App\Models\area;
 use App\Models\DepartmentRH;
 use App\Models\employees;
+use App\Models\job;
 use App\Models\policyHoliday;
+use DB;
 
 class departmentController extends Controller
 {
@@ -19,37 +21,79 @@ class departmentController extends Controller
     public function index(Request $request)
     {
         $iFilter = $request->ifilter == 0 ? 1 : $request->ifilter;
-
-        switch ($iFilter) {
-            case 1:
-                $datas = department::where('is_delete','0')->orderBy('name', 'ASC')->get();
-                $datas->each(function($datas){
-                    $datas->area;
-                    $datas->rh;
-                    $datas->boss;
-                    $datas->policyHoliday;
-                });
-                break;
-            case 2:
-                $datas = department::where('is_delete','1')->orderBy('name', 'ASC')->get();
-                $datas->each(function($datas){
-                    $datas->area;
-                    $datas->rh;
-                    $datas->boss;
-                    $datas->policyHoliday;
-                });
-                break;
-            
-            default:
-                $datas = department::orderBy('name')->get();
-                $datas->each(function($datas){
-                    $datas->area;
-                    $datas->rh;
-                    $datas->boss;
-                    $datas->policyHoliday;
-                });
-                break;
+        $id = session()->get('user_id');
+        if (session()->get('rol_id') != 1){
+            $dgu = DB::table('group_dept_user')
+                    ->where('user_id',$id)
+                    ->select('groupdept_id AS id')
+                    ->get();
+            $Adgu = [];
+            for($i=0;count($dgu)>$i;$i++){
+                $Adgu[$i]=$dgu[$i]->id;
+            }
+            switch ($iFilter) {
+                case 1:
+                    $datas = department::where('is_delete','0')->whereIn('departments.dept_group_id',$Adgu)->orderBy('name', 'ASC')->get();
+                    $datas->each(function($datas){
+                        $datas->area;
+                        $datas->rh;
+                        $datas->boss;
+                        $datas->policyHoliday;
+                    });
+                    break;
+                case 2:
+                    $datas = department::where('is_delete','1')->whereIn('departments.dept_group_id',$Adgu)->orderBy('name', 'ASC')->get();
+                    $datas->each(function($datas){
+                        $datas->area;
+                        $datas->rh;
+                        $datas->boss;
+                        $datas->policyHoliday;
+                    });
+                    break;
+                
+                default:
+                    $datas = department::orderBy('name')->whereIn('departments.dept_group_id',$Adgu)->get();
+                    $datas->each(function($datas){
+                        $datas->area;
+                        $datas->rh;
+                        $datas->boss;
+                        $datas->policyHoliday;
+                    });
+                    break;
+            }
+        }else{
+            switch ($iFilter) {
+                case 1:
+                    $datas = department::where('is_delete','0')->orderBy('name', 'ASC')->get();
+                    $datas->each(function($datas){
+                        $datas->area;
+                        $datas->rh;
+                        $datas->boss;
+                        $datas->policyHoliday;
+                    });
+                    break;
+                case 2:
+                    $datas = department::where('is_delete','1')->orderBy('name', 'ASC')->get();
+                    $datas->each(function($datas){
+                        $datas->area;
+                        $datas->rh;
+                        $datas->boss;
+                        $datas->policyHoliday;
+                    });
+                    break;
+                
+                default:
+                    $datas = department::orderBy('name')->get();
+                    $datas->each(function($datas){
+                        $datas->area;
+                        $datas->rh;
+                        $datas->boss;
+                        $datas->policyHoliday;
+                    });
+                    break;
+            }   
         }
+
         
         return view('department.index', compact('datas'))->with('iFilter',$iFilter);
     }
@@ -65,7 +109,24 @@ class departmentController extends Controller
         $deptrhs = DepartmentRH::where('is_delete',0)->orderBy('name', 'ASC')->pluck('id','name');
         $employees = employees::where('is_active','1')->orderBy('name','ASC')->pluck('id','name');
         $policyh = policyHoliday::orderBy('id','ASC')->pluck('id','name');
-        return view('department.create')->with('areas',$area)->with('deptrhs',$deptrhs)->with('employees',$employees)->with('policyh',$policyh);
+        
+        $id = session()->get('user_id');
+        
+        if (session()->get('rol_id') != 1){
+            $dgu = DB::table('group_dept_user')
+                    ->where('user_id',$id)
+                    ->select('groupdept_id AS id')
+                    ->get();
+            $Adgu = [];
+            for($i=0;count($dgu)>$i;$i++){
+                $Adgu[$i]=$dgu[$i]->id;
+            }
+            $grupo = $Adgu[0];
+        }else{
+            $grupo = 0;
+        }
+
+        return view('department.create')->with('areas',$area)->with('deptrhs',$deptrhs)->with('employees',$employees)->with('policyh',$policyh)->with('grupo',$grupo);
     }
 
     /**
@@ -80,9 +141,28 @@ class departmentController extends Controller
         $department->rh_department_id = $request->rh_department_id;
         $department->boss_id = $request->boss_id;
         $department->policy_holiday_id = $request->policy_holiday_id;
+        $department->dept_group_id = $request->grupo;
         $department->updated_by = session()->get('user_id');
         $department->created_by = session()->get('user_id');
         $department->save();
+
+
+        for( $i = 1 ; $request->contador >= $i ; $i++ ){
+            $job = new job();
+            
+            $puesto = 'puesto'.$i;
+            
+            $job->name  = $request->$puesto;
+            $job->department_id = $department->id;
+            $job->is_delete = 0;
+            $job->created_by = session()->get('user_id');
+            $job->updated_by = session()->get('user_id');
+            
+            $job->save();
+        }
+        
+        
+
         return redirect('department')->with('mensaje','Departamento fue creado con éxito');
     }
 

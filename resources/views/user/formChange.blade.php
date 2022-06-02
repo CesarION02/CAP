@@ -1,9 +1,12 @@
 <div class="form-group">
     <label for="email" class="col-lg-3 control-label requerido">Contraseña:</label>
     <div class="col-lg-8">
-        <input type="password" name="password" id="password" class="form-control" value="" required>
+        <input type="text" name="password" id="password" class="form-control" required disabled>
     </div>
-    <div class="col">
-        <button class="btn btn-primary" type="button" onclick="mostrarContrasena()"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></button>
+</div>
+<div class="form-group">
+    <label for="email" class="col-lg-3 control-label requerido">Contraseña nuevamente:</label>
+    <div class="col-lg-8">
+        <input type="text" name="passwordnu" id="passwordnu" class="form-control" required disabled>
     </div>
 </div>

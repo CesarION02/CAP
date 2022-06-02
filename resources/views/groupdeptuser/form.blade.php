@@ -3,7 +3,7 @@
     <label for="horario" class="col-lg-3 control-label">Usuarios:</label>
     <div class="col-lg-3">
         @if(isset($empleados))
-            <input type="text" name="usuario" id="usuario" value="{{$empleados[0]->nombre}}">
+            <input type="text" name="usuario" id="usuario" value="{{$empleados[0]->nombre}}" disabled>
         @else
             <select name="usuario" id="usuario">
                 @foreach($users as $user => $index)
