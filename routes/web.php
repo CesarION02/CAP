@@ -126,6 +126,7 @@ Route::get('report/reporteIncidenciasGenerar', 'ReporteController@incidentReport
 /* Reporte incidencias empleados*/
 Route::get('report/reporteIncidenciasEmpleados', 'ReporteController@reportIncidentsEmployees')->name('reporteIncidenciasEmpleados');
 Route::get('report/reporteIncidenciasEmpleadosGenerar', 'ReporteController@reportIncidentsEmployeesGenerar')->name('reporteIncidenciasEmpleadosGenerar');
+Route::post('report/reporteIncidenciasEmpleadosStore', 'ReporteController@reportIncidentsEmployeesStore')->name('reporteIncidenciasEmpleadosStore');
 /* Reporte faltas */
 Route::get('report/reporteFaltas', 'ReporteController@indexFaltasReport')->name('reporteFaltas');
 Route::get('report/reporteFaltasGenerar', 'ReporteController@FaltasReportGenerar')->name('reporteFaltasGenerar');
