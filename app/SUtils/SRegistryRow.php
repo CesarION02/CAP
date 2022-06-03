@@ -55,6 +55,7 @@ class SRegistryRow {
         $this->hasSchedule = true;
         $this->isSpecialSchedule = false;
         $this->isOnSchedule = true;
+        $this->workJourneyMins = 0;
         $this->hasWorkedJourney8hr = false;
         $this->isOverJourney = false;
         $this->overtimeCheckPolicy = 2;

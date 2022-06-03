@@ -203,11 +203,11 @@ class SDataProcess {
                     $otherRow->hasCheckIn = false;
                     if ($otherRow->workable) {
                         $otherRow->comments = $otherRow->comments."Sin checadas. ";
-                        if($comments != null){
-                            if($comments->where('key_code','hasChecks')->first()['value'] ||
+                        if ($comments != null) {
+                            if ($comments->where('key_code','hasChecks')->first()['value'] ||
                                 $comments->where('key_code','hasCheckIn')->first()['value'] ||
                                 $comments->where('key_code','hasCheckOut')->first()['value']
-                            ){
+                            ) {
                                 $otherRow->isDayChecked = true;
                             }
                         }
@@ -316,8 +316,8 @@ class SDataProcess {
                     $newRow->outDate = $newRow->inDate;
                     $newRow->outDateTime = $newRow->inDate;
                     $newRow->comments = $newRow->comments."Sin salida. ";
-                    if($comments != null){
-                        if($comments->where('key_code','hasCheckOut')->first()['value']){
+                    if ($comments != null) {
+                        if ($comments->where('key_code','hasCheckOut')->first()['value']) {
                             $newRow->isDayChecked = true;
                         }
                     }
@@ -377,8 +377,8 @@ class SDataProcess {
                         if (count($adjs) == 0) {
                             $newRow->hasCheckIn = false;
                             $newRow->comments = $newRow->comments."Sin entrada. ";
-                            if($comments != null){
-                                if($comments->where('key_code','hasCheckIn')->first()['value']){
+                            if ($comments != null) {
+                                if ($comments->where('key_code','hasCheckIn')->first()['value']) {
                                     $newRow->isDayChecked = true;
                                 }
                             }
@@ -422,8 +422,8 @@ class SDataProcess {
                         $newRow->outDate = $registry->date;
                         $newRow->outDateTime = $registry->date.' '.$registry->time;
                         $newRow->comments = $newRow->comments."Sin horario. ";
-                        if($comments != null){
-                            if($comments->where('key_code','hasSchedule')->first()['value']){
+                        if ($comments != null) {
+                            if ($comments->where('key_code','hasSchedule')->first()['value']) {
                                 $newRow->isDayChecked = true;
                             }
                         }
@@ -445,8 +445,8 @@ class SDataProcess {
                     
                             if (count($adjs) == 0) {
                                 $newRow->comments = $newRow->comments."Sin salida. ";
-                                if($comments != null){
-                                    if($comments->where('key_code','hasCheckOut')->first()['value']){
+                                if($comments != null) {
+                                    if($comments->where('key_code','hasCheckOut')->first()['value']) {
                                         $newRow->isDayChecked = true;
                                     }
                                 }
@@ -519,8 +519,8 @@ class SDataProcess {
                         if (count($adjs) == 0) {
                             $newRow->hasCheckIn = false;
                             $newRow->comments = $newRow->comments."Sin entrada. ";
-                            if($comments != null){
-                                if($comments->where('key_code','hasCheckIn')->first()['value']){
+                            if($comments != null) {
+                                if($comments->where('key_code','hasCheckIn')->first()['value']) {
                                     $newRow->isDayChecked = true;
                                 }
                             }
@@ -613,8 +613,8 @@ class SDataProcess {
                             $newRow->isSpecialSchedule = $result->auxIsSpecialSchedule;
                             if ($newRow->isSpecialSchedule) {
                                 $newRow->others = $newRow->others."Turno especial (".$result->auxWorkshift->name."). ";
-                                if($comments != null){
-                                    if($comments->where('key_code','isSpecialSchedule')->first()['value']){
+                                if($comments != null) {
+                                    if($comments->where('key_code','isSpecialSchedule')->first()['value']) {
                                         $newRow->isDayChecked = true;
                                     }
                                 }
@@ -631,8 +631,8 @@ class SDataProcess {
                 
                         if (count($adjs) == 0) {
                             $newRow->comments = $newRow->comments."Sin salida. ";
-                            if($comments != null){
-                                if($comments->where('key_code','hasCheckOut')->first()['value']){
+                            if($comments != null) {
+                                if($comments->where('key_code','hasCheckOut')->first()['value']) {
                                     $newRow->isDayChecked = true;
                                 }
                             }
@@ -673,7 +673,7 @@ class SDataProcess {
      * 
      * @return Object $oRow
      */
-    private static function setDates($result, $oRow, $sDate = null, $comments=null)
+    private static function setDates($result, $oRow, $sDate = null, $comments = null)
     {
         if ($result == null) {
             $oRow->outDate = $sDate;
@@ -684,8 +684,8 @@ class SDataProcess {
             $oRow->outDateTime = $sDate;
 
             $oRow->comments = $oRow->comments."Sin horario. ";
-            if($comments != null){
-                if($comments->where('key_code','hasSchedule')->first()['value']){
+            if ($comments != null) {
+                if ($comments->where('key_code','hasSchedule')->first()['value']) {
                     $oRow->isDayChecked = true;
                 }
             }
@@ -695,8 +695,8 @@ class SDataProcess {
             $oRow->isSpecialSchedule = $result->auxIsSpecialSchedule;
             if ($oRow->isSpecialSchedule) {
                 $oRow->others = $oRow->others."Turno especial (".$result->auxWorkshift->name."). ";
-                if($comments != null){
-                    if($comments->where('key_code','isSpecialSchedule')->first()['value']){
+                if ($comments != null) {
+                    if ($comments->where('key_code','isSpecialSchedule')->first()['value']) {
                         $oRow->isDayChecked = true;
                     }
                 }
@@ -709,6 +709,7 @@ class SDataProcess {
             }
             else {
                 $oRow->scheduleText = strtoupper($result->auxWorkshift->name);
+                $oRow->workJourneyMins = $result->auxWorkshift->work_time * 60;
             }
 
             if ($oRow->scheduleFrom == \SCons::FROM_ASSIGN && ! $result->auxScheduleDay->is_active) {
@@ -716,8 +717,8 @@ class SDataProcess {
                 $oRow->outDateTime = $result->variableDateTime->toDateTimeString();
                 $oRow->isModifiedOut = isset($result->registry->is_modified) ? $result->registry->is_modified : false;
                 $oRow->comments = $oRow->comments."No laborable. ";
-                if($comments != null){
-                    if($comments->where('key_code','workable')->first()['value']){
+                if ($comments != null) {
+                    if ($comments->where('key_code','workable')->first()['value']) {
                         $oRow->isDayChecked = true;
                     }
                 }
@@ -748,9 +749,9 @@ class SDataProcess {
             $oRow->overScheduleMins = SDelayReportUtils::getExtraTimeBySchedule($result, $oRow->inDateTime, $oRow->inDateTimeSch,
                                                                                         $oRow->outDateTime, $oRow->outDateTimeSch);
 
-            if((($oRow->overWorkedMins + $oRow->overMinsByAdjs) >= 20) || (($oRow->overScheduleMins + $oRow->overMinsByAdjs) >= 60)){
-                if($comments != null){
-                    if($comments->where('key_code','overWorkedMins')->first()['value']){
+            if ((($oRow->overWorkedMins + $oRow->overMinsByAdjs) >= 20) || (($oRow->overScheduleMins + $oRow->overMinsByAdjs) >= 60)) {
+                if ($comments != null) {
+                    if ($comments->where('key_code','overWorkedMins')->first()['value']) {
                         $oRow->isDayChecked = true;
                     }
                 }
@@ -863,10 +864,10 @@ class SDataProcess {
 
                     // $incident = $incidentsType->where('id',$absence->type_id)->first();
 
-                    if($comments != null){
-                        if($comments->where('key_code',$absence->type_id)->first()['value']){
+                    if ($comments != null) {
+                        if ($comments->where('key_code',$absence->type_id)->first()['value']) {
                             $oRow->isDayChecked = true;
-                        }else if($comments->where('key_code',$absence->type_id)->first()['value'] == 0){
+                        } else if ($comments->where('key_code',$absence->type_id)->first()['value'] == 0) {
                             $oRow->isDayChecked = false;
                         }
                     }
@@ -1036,7 +1037,7 @@ class SDataProcess {
     public static function addDelaysAndOverTime($lData, $aEmployeeOverTime, $sEndDate, $comments = null)
     {
         $config = \App\SUtils\SConfiguration::getConfigurations();
-        $workships = \DB::table('workshifts')->where('is_delete',0)->get();
+        $workshifts = \DB::table('workshifts')->where('is_delete',0)->get();
         $consumAdjs = [];
         foreach ($lData as $oRow) {
             if (! $oRow->workable &&
@@ -1066,7 +1067,7 @@ class SDataProcess {
                         $cOut = SDataProcess::isCheckSchedule($oRow->outDateTime, $oRow->outDateTimeSch, $mayBeOverTime);
                     }
                     if (($cIn && $cOut) || ! $oRow->hasSchedule) {
-                        $oRow = SDataProcess::determineSchedule($oRow, $sEndDate, $workships);
+                        $oRow = SDataProcess::determineSchedule($oRow, $sEndDate, $workshifts);
                     }
                 }
 
@@ -1099,8 +1100,8 @@ class SDataProcess {
                     if ($hasDelay) {
                         $oRow->entryDelayMinutes = $mins;
                         $oRow->comments = $oRow->comments."Retardo. ";
-                        if($comments != null){
-                            if($comments->where('key_code','entryDelayMinutes')->first()['value']){
+                        if ($comments != null) {
+                            if ($comments->where('key_code','entryDelayMinutes')->first()['value']) {
                                 $oRow->isDayChecked = true;
                             }
                         }
@@ -1119,8 +1120,9 @@ class SDataProcess {
                 }
 
                 $bWork8hr = true;
-                $oRow->hasWorkedJourney8hr = SDataProcess::journeyCompleted($oRow->inDateTime, $oRow->inDateTimeSch, $oRow->outDateTime, $oRow->outDateTimeSch, $bWork8hr);
-                $bJorneyCompleted = SDataProcess::journeyCompleted($oRow->inDateTime, $oRow->inDateTimeSch, $oRow->outDateTime, $oRow->outDateTimeSch);
+                $oRow->hasWorkedJourney8hr = SDataProcess::journeyCompleted($oRow->inDateTime, $oRow->inDateTimeSch, $oRow->outDateTime, $oRow->outDateTimeSch, $bWork8hr, $oRow->workJourneyMins);
+                $bWork8hr = false;
+                $bJorneyCompleted = SDataProcess::journeyCompleted($oRow->inDateTime, $oRow->inDateTimeSch, $oRow->outDateTime, $oRow->outDateTimeSch, $bWork8hr, $oRow->workJourneyMins);
                 if ($bJorneyCompleted) {
                     $extendJourney = SDelayReportUtils::compareDates($oRow->inDateTimeSch, $oRow->outDateTimeSch);
                     if ($aEmployeeOverTime[$oRow->idEmployee] == 2 || ($aEmployeeOverTime[$oRow->idEmployee] == 3 && $extendJourney->diffMinutes > 480)) {
@@ -1161,8 +1163,8 @@ class SDataProcess {
                             $oRow->overScheduleMins = 0;
 
                             $oRow->comments = $oRow->comments."Jornada TE. ";
-                            if($comments != null){
-                                if($comments->where('key_code','isIncompleteTeJourney')->first()['value']){
+                            if ($comments != null) {
+                                if ($comments->where('key_code','isIncompleteTeJourney')->first()['value']) {
                                     $oRow->isDayChecked = true;
                                 }
                             }
@@ -1243,8 +1245,8 @@ class SDataProcess {
                     $cIn = SDataProcess::isCheckSchedule($oRow->inDateTime, $oRow->inDateTimeSch, $mayBeOverTime);
                     if ($cIn && !$adjIn) {
                         $oRow->comments = $oRow->comments."Entrada atípica. ";
-                        if($comments != null){
-                            if($comments->where('key_code','isAtypicalIn')->first()['value']){
+                        if ($comments != null) {
+                            if ($comments->where('key_code','isAtypicalIn')->first()['value']) {
                                 $oRow->isDayChecked = true;
                             }
                         }
@@ -1257,8 +1259,8 @@ class SDataProcess {
                     $cOut = SDataProcess::isCheckSchedule($oRow->outDateTime, $oRow->outDateTimeSch, $mayBeOverTime);
                     if ($cOut && !$adjOut) {
                         $oRow->comments = $oRow->comments."Salida atípica. ";
-                        if($comments != null){
-                            if($comments->where('key_code','isAtypicalOut')->first()['value']){
+                        if ($comments != null) {
+                            if ($comments->where('key_code','isAtypicalOut')->first()['value']) {
                                 $oRow->isDayChecked = true;
                             }
                         }
@@ -1267,8 +1269,8 @@ class SDataProcess {
                 }
                 if (($cIn || $cOut) && (! $adjIn && ! $adjOut)) {
                     $oRow->comments = $oRow->comments."Revisar horario. ";
-                    if($comments != null){
-                        if($comments->where('key_code','isCheckSchedule')->first()['value']){
+                    if ($comments != null) {
+                        if ($comments->where('key_code','isCheckSchedule')->first()['value']) {
                             $oRow->isDayChecked = true;
                         }
                     }
@@ -1280,9 +1282,9 @@ class SDataProcess {
                 }
             }
 
-            if((($oRow->overWorkedMins + $oRow->overMinsByAdjs) >= 20) || (($oRow->overScheduleMins + $oRow->overMinsByAdjs) >= 60)){
-                if($comments != null){
-                    if($comments->where('key_code','overWorkedMins')->first()['value']){
+            if ((($oRow->overWorkedMins + $oRow->overMinsByAdjs) >= 20) || (($oRow->overScheduleMins + $oRow->overMinsByAdjs) >= 60)) {
+                if ($comments != null) {
+                    if ($comments->where('key_code','overWorkedMins')->first()['value']) {
                         $oRow->isDayChecked = true;
                     }
                 }
@@ -1390,16 +1392,20 @@ class SDataProcess {
      * 
      * @return boolean
      */
-    public static function journeyCompleted($inDateTime, $inDateTimeSch, $outDateTime, $outDateTimeSch, $bWork8hr = false)
+    public static function journeyCompleted($inDateTime, $inDateTimeSch, $outDateTime, $outDateTimeSch, $bWork8hr, $workJourneyMins)
     {
         if ($inDateTime == null || $inDateTimeSch == null || $outDateTime == null || $outDateTimeSch == null) {
             return false;
         }
-        
-        $comparisonCheck = SDelayReportUtils::compareDates($inDateTime, $outDateTime);
-        $comparisonSched = SDelayReportUtils::compareDates($inDateTimeSch, $outDateTimeSch);
-        
+
         $config = \App\SUtils\SConfiguration::getConfigurations();
+        $comparisonCheck = SDelayReportUtils::compareDates($inDateTime, $outDateTime);
+
+        if ($workJourneyMins > 0) {
+            return $comparisonCheck->diffMinutes >= ($workJourneyMins - $config->toleranceMinutes);
+        }
+        
+        $comparisonSched = SDelayReportUtils::compareDates($inDateTimeSch, $outDateTimeSch);
 
         if ($bWork8hr) {
             return $comparisonCheck->diffMinutes >= (480 - $config->toleranceMinutes);
@@ -1446,21 +1452,23 @@ class SDataProcess {
      * 
      * @return App\SUtils\SRegistryRow
      */
-    public static function determineSchedule($oRow, $sEndDate, $workships)
+    public static function determineSchedule($oRow, $sEndDate, $workshifts)
     {
         $config = \App\SUtils\SConfiguration::getConfigurations();
 
         $inDate = Carbon::parse($oRow->inDateTime)->toDateString();
         $outDate = Carbon::parse($oRow->outDateTime)->toDateString();
         $oRow->isOnSchedule = true;
-        foreach ($workships as $workship) {
-            $comparisonIn = SDelayReportUtils::compareDates($oRow->inDateTime, $inDate.$workship->entry);
-            $comparisonOut = SDelayReportUtils::compareDates($oRow->outDateTime, $outDate.$workship->departure);
+        foreach ($workshifts as $workshift) {
+            $comparisonIn = SDelayReportUtils::compareDates($oRow->inDateTime, $inDate.$workshift->entry);
+            $comparisonOut = SDelayReportUtils::compareDates($oRow->outDateTime, $outDate.$workshift->departure);
             
             if (abs($comparisonIn->diffMinutes) <= $config->maxGapSchedule && abs($comparisonOut->diffMinutes) <= $config->maxGapSchedule) {
-                $oRow->inDateTimeSch = $inDate.$workship->entry;
-                $oRow->outDateTimeSch = $outDate.$workship->departure;
-                $oRow->overDefaultMins = $workship->overtimepershift > 0 ? 60/(1/$workship->overtimepershift) : 0;
+                $oRow->inDateTimeSch = $inDate." ".$workshift->entry;
+                $oRow->outDateTimeSch = $outDate." ".$workshift->departure;
+                $oRow->overDefaultMins = $workshift->overtimepershift > 0 ? $workshift->overtimepershift * 60 : 0;
+                $oRow->workJourneyMins = $workshift->work_time * 60;
+
                 return $oRow;
             }
         }
@@ -1564,8 +1572,8 @@ class SDataProcess {
                 if ($withAbs) {
                     $oRow->hasAbsence = true;
                     $oRow->comments = $oRow->comments . ($absenceByOmission ? "Falta por omitir checar. " : "Falta. ");
-                    if($comments != null){
-                        if($comments->where('key_code','hasAbsence')->first()['value']){
+                    if ($comments != null) {
+                        if ($comments->where('key_code','hasAbsence')->first()['value']) {
                             $oRow->isDayChecked = true;
                         }
                     }
@@ -1868,11 +1876,11 @@ class SDataProcess {
                     $oNewRow->hasCheckIn = false;
                     $oNewRow->hasCheckOut = false;
                     $oNewRow->comments = $oNewRow->comments."Sin checadas. ";
-                    if($comments != null){
-                        if($comments->where('key_code','hasChecks')->first()['value'] ||
+                    if ($comments != null) {
+                        if ($comments->where('key_code','hasChecks')->first()['value'] ||
                             $comments->where('key_code','hasCheckIn')->first()['value'] ||
                             $comments->where('key_code','hasCheckOut')->first()['value']
-                        ){
+                        ) {
                             $oNewRow->isDayChecked = true;
                         }
                     }
@@ -1913,8 +1921,8 @@ class SDataProcess {
         $events = \DB::table('type_incidents')->get();
         $newEvents = [];
 
-        foreach($events as $ev){
-            if(is_null($comments->where('key_code', $ev->id)->first())){
+        foreach($events as $ev) {
+            if (is_null($comments->where('key_code', $ev->id)->first())) {
                 array_push($newEvents, ['key_code' => $ev->id, 
                                         'Comment' => $ev->name, 
                                         'value' => false, 
@@ -1927,10 +1935,8 @@ class SDataProcess {
             }
         }
 
-        if(! is_null($newEvents)){
+        if (! is_null($newEvents)) {
             \DB::table('comments_control')->insert($newEvents);
         }
-
-        return $events;
     }
 }

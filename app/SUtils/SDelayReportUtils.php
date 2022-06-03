@@ -389,6 +389,7 @@ class SDelayReportUtils {
                                         'w.overtimepershift',
                                         'w.departure', 
                                         'w.cut_id',
+                                        'w.work_time',
                                         'w.overtime_check_policy',
                                         'w.is_night',
                                         'w.agreed_extra',
