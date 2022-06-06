@@ -17,7 +17,13 @@ class SPrepayrollUtils {
      * @return array
      */
     public static function getEmployeesByUser($idUser, $payType, $bDirect, $iDelegation = null) {
-        $roles = \Auth::user()->roles;
+        // $roles = \Auth::user()->roles;
+        $roles = \DB::table('rol as r')
+                    ->join('user_rol as ur', 'ur.rol_id', 'r.id')
+                    ->where('ur.user_id', $idUser)
+                    ->select('r.id','ur.user_id')
+                    ->get();
+
         $config = \App\SUtils\SConfiguration::getConfigurations(); // Obtengo las configuraciones del sistema
 
         $seeAll = false;

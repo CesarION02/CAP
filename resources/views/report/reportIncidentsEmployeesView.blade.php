@@ -156,7 +156,7 @@
                                                     <td style="background-color: #FF8A80">{{$row->isSunday > 0 ? $row->isSunday : ""}}</td>
                                                     <td style="background-color: #FF8A80">{{$row->incident}}</td>
                                                     <td style="background-color: #FF8A80">{{$row->hasAbsence ? "falta": ""}}</td>
-                                                    <td style="background-color: #FF8A80"></td>
+                                                    <td style="background-color: #FF8A80"><button type="button" v-on:click="showModal('{{$row->idEmployee}}', '{{$row->employee}}','{{$row->outDate}}');" class="btn btn-success" style="border-radius: 50%; padding: 3px 6px; font-size: 10px;"><span class="glyphicon glyphicon-plus"></span></button></td>
                                                 </tr>
                                             @else
                                                 <tr>

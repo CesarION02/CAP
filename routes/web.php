@@ -152,6 +152,8 @@ Route::get('prepayrollempgroup/index', 'prepayrollGroupsController@employeesVsGr
 Route::get('prepayrollgroupdept/index', 'prepayrollGroupsController@departmentsVsGroups')->name('gr_depts_index');
 Route::post('prepayrollempgroup/change', 'prepayrollGroupsController@changeGroup')->name('cambiar_grupo');
 Route::post('prepayrollempgroupdept/change', 'prepayrollGroupsController@changeGroupDept')->name('cambiar_grupo_dept');
+Route::get('prepayRollEmployeesGroup/{id?}/{bDirect?}', 'prepayRollEmployeesController@index')->name('prepayroll_emp_grupo');
+Route::post('prepayRollEmployeesGroup/generate', 'prepayRollEmployeesController@generate')->name('prepayroll_emp_grupo_generate');
 /** Prenómina */
 Route::get('prepayrollcontrols', 'prePayrollController@indexS')->name('control_semana');
 Route::get('prepayrollcontrolq', 'prePayrollController@indexQ')->name('control_quincena');
