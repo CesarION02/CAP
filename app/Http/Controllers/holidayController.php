@@ -196,7 +196,9 @@ class holidayController extends Controller
                     $this->insertHoliday($jHoliday);
                 }
             }
-            catch (\Throwable $th) { }
+            catch (\Throwable $th) {
+                \Log::error($th->getMessage());
+            }
         }
     }
     

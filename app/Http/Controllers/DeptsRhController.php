@@ -49,6 +49,7 @@ class DeptsRhController extends Controller
                 }
             }
             catch (\Throwable $th) {
+                \Log::error($th->getMessage());
             }
         }
     }
