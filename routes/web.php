@@ -451,6 +451,10 @@ Route::get('cuts','periodController@getCuts')->name('getcuts');
 
 Route::get('/home', 'HomeController@index')->name('home');
 
+/* Solicitud para presentarse a trabajar */
+Route::get('requestWorkDay/{id?}', 'requestWorkDayController@index')->name('request_work_day');
+Route::post('requestWorkDay/generate', 'requestWorkDayController@generate')->name('request_work_day_generate');
+Route::post('requestWorkDay/getPDF', 'requestWorkDayController@getPDF')->name('request_work_day_getPDF');
 });
 
 
