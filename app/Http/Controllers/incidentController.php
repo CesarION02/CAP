@@ -291,6 +291,7 @@ class incidentController extends Controller
 
                 $this->saveDays($oIncident);
             }catch (\Throwable $th) {
+                \Log::error($th->getMessage());
                 $error = $th;
             }
             

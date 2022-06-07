@@ -22,6 +22,7 @@ class fdyController extends Controller
                 }
             }
             catch (\Throwable $th) {
+                \Log::error($th->getMessage());
             }
         }
     }

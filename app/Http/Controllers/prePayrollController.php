@@ -371,7 +371,9 @@ class prePayrollController extends Controller
                     $this->insertCutPrepayQ($jCut);
                 }
             }
-            catch (\Throwable $th) { }
+            catch (\Throwable $th) {
+                \Log::error($th->getMessage());
+            }
         }
     }
     
