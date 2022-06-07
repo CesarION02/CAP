@@ -356,7 +356,9 @@ class employeeController extends Controller
                     $this->insertEmployee($jEmployee);
                 }
             }
-            catch (\Throwable $th) { }
+            catch (\Throwable $th) {
+                \Log::error($th->getMessage());
+            }
         }
     }
 
