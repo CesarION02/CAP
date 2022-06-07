@@ -266,8 +266,11 @@ class SPrepayrollUtils {
         $aEmployees = SPrepayrollUtils::getEmployeesByUser($idUser, $payType, $bDirectEmployees);
 
         $aEmployeesOk = \DB::table('prepayroll_report_emp_vobos AS empvb')
-                            ->whereIn('empvb.employee_id', $aEmployees)
                             ->where('empvb.year', $prepayroll->year);
+
+        if ($aEmployees != null && is_array($aEmployees)) {
+            $aEmployeesOk = $aEmployeesOk->whereIn('empvb.employee_id', $aEmployees);
+        }
         
         if ($payType == \SCons::PAY_W_S) {
             $aEmployeesOk = $aEmployeesOk->where('empvb.num_week', $number);
