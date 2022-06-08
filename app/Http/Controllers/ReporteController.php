@@ -452,7 +452,7 @@ class ReporteController extends Controller
         $bDirect = false;
         $payType = 0;
         $bDelegation = null;
-        $subEmployees = SPrepayrollUtils::getEmployeesByUser(\Auth::user()->id, $bDirect, $payType, $bDelegation);
+        $subEmployees = SPrepayrollUtils::getEmployeesByUser(\Auth::user()->id, $payType, $bDirect, $bDelegation);
         if ($subEmployees == null) {
             $lEmployees = SGenUtils::toEmployeeIds(0, 0, []);
         }

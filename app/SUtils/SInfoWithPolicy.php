@@ -2774,7 +2774,6 @@ class SInfoWithPolicy{
                                 ->where('way_pay_id','=',1)
                                 //->where('id',1245)
                                 ->where('department_id','!=',$config->dept_foraneo)
-                                ->where('job_id','!=',$config->job_foraneo)
                                 ->orderBy('id')
                                 ->select('id AS id','policy_extratime_id AS extratime')
                                 ->get();
