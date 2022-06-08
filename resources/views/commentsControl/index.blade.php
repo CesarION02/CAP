@@ -1,6 +1,6 @@
 @extends("theme.$theme.layout")
 @section('title')
-    Panel de control de comentarios
+    Panel de control de ajustes
 @endsection
 
 @section('content')
@@ -9,7 +9,7 @@
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Panel de control de comentarios</h3>
+                <h3 class="box-title">Panel de control de ajustes</h3>
             </div>
             <div class="box-body">
                 <button onclick="desSelAll('{{route('commentsControl_update', ':id')}}')" style="float: right;">Desmarcar todo</button>
@@ -26,7 +26,7 @@
                     <tbody>
                         <tr v-for="comment in lComments">
                             <td>@{{comment.Comment}}</td>
-                            <td><input type="checkbox" name="mycheckbox" :checked="comment.value" v-on:change="updateComment($event, comment.id_commentControl, '{{route('commentsControl_update', ':id')}}')"></td>
+                            <td><input type="checkbox" name="mycheckbox" :checked="comment.value" v-on:change="updateComment($event, comment.id_commentControl, '{{route('commentsControl_update', ':id')}}')" style="transform: scale(2)"></td>
                         </tr>
                     </tbody>
                 </table>

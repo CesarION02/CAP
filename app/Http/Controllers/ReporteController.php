@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\PrepayrollReportController;
+use App\Http\Controllers\incidentController;
 use Illuminate\Http\Request;
 use App\Models\department;
 use App\Models\employees;
@@ -13,6 +14,7 @@ use App\Models\DepartmentRH;
 use App\Models\typeincident;
 use App\Models\departmentsGroup;
 use App\Models\PrepayrollDelegation;
+use App\Models\incident;
 use App\SUtils\SDelayReportUtils;
 use App\SUtils\SReportsUtils;
 use App\SUtils\SInfoWithPolicy;
@@ -811,6 +813,14 @@ class ReporteController extends Controller
         }
         else {
             $lEmployees = $this->timesTotal($lRows, $lEmployees);
+            foreach($lEmployees as $emp){
+                $oCom = $lAdjusts->where('employee_id',$emp->id)->all();
+                $arr = [];
+                foreach($oCom as $com){
+                    array_push($arr, $com->dt_date.", ".$com->comments);
+                }
+                $emp->comments = $arr;
+            }
             
             return view('report.reportDelaysTotView')
                     ->with('tReport', \SCons::REP_HR_EX_TOT)
@@ -2342,41 +2352,50 @@ class ReporteController extends Controller
                 }
                 $lEmployees = SGenUtils::toEmployeeIds($payWay, $filterType, $ids, $aEmpl);
             }
-
-            $emplIds = $lEmployees->pluck('id');
-
-            $incidents = \DB::table('incidents as in')
-                            ->leftJoin('incidents_day as in_d', 'in_d.incidents_id','=','in.id')
-                            ->leftJoin('type_incidents as tp', 'tp.id','=','in.type_incidents_id')
-                            ->where('in.is_delete',0)
-                            ->whereBetween('in.start_date',[$sStartDate,$sEndDate])
-                            ->whereIn('in.employee_id',$emplIds)
-                            ->select(
-                                'in.id','in.type_incidents_id','in.cls_inc_id','start_date','end_date',
-                                'in.nts','in.employee_id','in.is_delete','in_d.date','tp.name'
-                            )
-                            ->get();
-
-            $lRows = [];
-            
-            foreach ($lEmployees as $emp) {
-                $oDate = Carbon::parse($sStartDate);
-                $date = $oDate->format('Y-m-d');
-                for ($i=0; $i <= $diff_days; $i++) {
-                    array_push($lRows, (object)[
-                        'employee' => $emp->name,
-                        'num_employee' => substr((string)($emp->num_employee + 1000000), 1),
-                        'employee_id' => $emp->id,
-                        'date' => $date,
-                        'incident' => collect($incidents->where('employee_id', $emp->id)->where('date',$date)->first())->get('name'),
-                        'incident_type' => collect($incidents->where('employee_id', $emp->id)->where('date',$date)->first())->get('type_incidents_id')
-                    ]);
-                    $date = $oDate->addDay()->format('Y-m-d');
-                }
-            }
             
             $route = route('reporteIncidenciasEmpleados');
+            $routeStore = route('reporteIncidenciasEmpleadosStore');
 
-            return view('report.reportIncidentsEmployeesView', ['lRows' => $lRows, 'sStartDate' => $sStartDate, 'sEndDate' => $sEndDate, 'route' => $route]);
+            $typeIncidents = \DB::table('type_incidents')->where('is_agreement',1)->get();
+            $arrIncidents = \DB::table('type_incidents')->pluck('id')->toArray();
+            $lRows = SDataProcess::process($sStartDate, $sEndDate, $payWay, $lEmployees);
+
+            foreach($lRows as $row){
+                $row->incident_type = null;
+                $row->incident  = null;
+                foreach($row->events as $ev){
+                    if(in_array($ev['type_id'], $arrIncidents)){
+                        $row->incident_type = $ev['type_id'];
+                        $row->incident = $ev['type_name'];
+                    }
+                }
+            }
+
+            return view('report.reportIncidentsEmployeesView', ['lRows' => $lRows, 'sStartDate' => $sStartDate, 'sEndDate' => $sEndDate, 'route' => $route, 'typeIncidents' => $typeIncidents, 'routeStore' => $routeStore]);
+        }
+
+        public function reportIncidentsEmployeesStore(Request $request){
+            $incidentController = new incidentController();
+            try {
+                DB::transaction(function () use ($request, $incidentController) {
+                    $incident = new incident();
+                    $incident->external_key = "0_0";
+                    $incident->cls_inc_id = 1;
+                    $incident->created_by = session()->get('user_id');
+                    $incident->updated_by = session()->get('user_id');
+                    $incident->type_incidents_id = $request->typeIncident;
+                    $incident->start_date = $request->date;
+                    $incident->end_date = $request->date;
+                    $incident->employee_id = $request->employee_id;
+
+                    $incident->save();
+
+                    $incidentController->daysIncidents($incident->id,$incident->start_date,$incident->end_date,$incident->employee_id);//
+                });
+            } catch (QueryException $e) {
+                return redirect()->back()->with(['tittle' => 'Error', 'message' => 'Error al guardar el registro', 'icon' => 'error']);
+            }
+
+            return redirect()->back()->with(['tittle' => 'Realizado', 'message' => 'Registro guardado con exito', 'icon' => 'success']);
         }
 }

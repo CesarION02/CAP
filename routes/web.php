@@ -126,6 +126,7 @@ Route::get('report/reporteIncidenciasGenerar', 'ReporteController@incidentReport
 /* Reporte incidencias empleados*/
 Route::get('report/reporteIncidenciasEmpleados', 'ReporteController@reportIncidentsEmployees')->name('reporteIncidenciasEmpleados');
 Route::get('report/reporteIncidenciasEmpleadosGenerar', 'ReporteController@reportIncidentsEmployeesGenerar')->name('reporteIncidenciasEmpleadosGenerar');
+Route::post('report/reporteIncidenciasEmpleadosStore', 'ReporteController@reportIncidentsEmployeesStore')->name('reporteIncidenciasEmpleadosStore');
 /* Reporte faltas */
 Route::get('report/reporteFaltas', 'ReporteController@indexFaltasReport')->name('reporteFaltas');
 Route::get('report/reporteFaltasGenerar', 'ReporteController@FaltasReportGenerar')->name('reporteFaltasGenerar');
@@ -151,6 +152,8 @@ Route::get('prepayrollempgroup/index', 'prepayrollGroupsController@employeesVsGr
 Route::get('prepayrollgroupdept/index', 'prepayrollGroupsController@departmentsVsGroups')->name('gr_depts_index');
 Route::post('prepayrollempgroup/change', 'prepayrollGroupsController@changeGroup')->name('cambiar_grupo');
 Route::post('prepayrollempgroupdept/change', 'prepayrollGroupsController@changeGroupDept')->name('cambiar_grupo_dept');
+Route::get('prepayRollEmployeesGroup/{id?}/{bDirect?}', 'prepayRollEmployeesController@index')->name('prepayroll_emp_grupo');
+Route::post('prepayRollEmployeesGroup/generate', 'prepayRollEmployeesController@generate')->name('prepayroll_emp_grupo_generate');
 /** Prenómina */
 Route::get('prepayrollcontrols', 'prePayrollController@indexS')->name('control_semana');
 Route::get('prepayrollcontrolq', 'prePayrollController@indexQ')->name('control_quincena');
@@ -452,6 +455,10 @@ Route::get('cuts','periodController@getCuts')->name('getcuts');
 
 Route::get('/home', 'HomeController@index')->name('home');
 
+/* Solicitud para presentarse a trabajar */
+Route::get('requestWorkDay/{id?}', 'requestWorkDayController@index')->name('request_work_day');
+Route::post('requestWorkDay/generate', 'requestWorkDayController@generate')->name('request_work_day_generate');
+Route::post('requestWorkDay/getPDF', 'requestWorkDayController@getPDF')->name('request_work_day_getPDF');
 });
 
 

@@ -14,7 +14,27 @@
 @endsection
 
 @section('content')
-<div class="row">
+<div class="row" id="reportDelayApp">
+
+<!-- Modal -->
+<div class="modal fade" id="commentsModal" tabindex="-1" aria-labelledby="commentsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="commentsModalLabel">@{{nameEmployee}}</h5>
+            </div>
+            <div class="modal-body">
+                <ol>
+                    <li v-for="com in resumeComments">@{{com}}</li>
+                </ol>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
     <div class="col-lg-12">
         @include('includes.form-error')
         @include('includes.mensaje')
@@ -24,7 +44,7 @@
                 <div class="box-tools pull-right">
                 </div>
             </div>
-            <div class="box-body" id="reportDelayApp">
+            <div class="box-body">
                 @include('report.adjustsModal')
                 <div class="row">
                     <div class="col-md-6">
@@ -48,6 +68,7 @@
                                 <tr>
                                     <th>Num. Col.</th>
                                     <th>Empleado</th>
+                                    <th></th>
                                     <th>Total Tiempo retardo (min)</th>
                                     <th>Salidas anticipadas (min)</th>
                                     <th>Total Tiempo extra (hr)</th>
@@ -61,7 +82,7 @@
                                 <td>@{{ vueGui.pad(row.num_employee, 6) }}</td>
                                     <td>
                                         <form action="{{route('reportetiemposextra')}}" target="_blank">
-                                            <a href='#' onclick='this.parentNode.submit(); return false;'>@{{ row.name }}</a>
+                                            <a href='#' onclick='this.parentNode.submit(); return false;' title="Presiona para ver reporte a detalle">@{{ row.name }}</a>
                                             <input type="hidden" name="start_date" value="{{$sStartDate}}">
                                             <input type="hidden" name="end_date" value="{{$sEndDate}}">
                                             <input type="hidden" name="emp_id" :value="row.id">
@@ -70,6 +91,7 @@
                                             <input type="hidden" name="pay_way" value="{{$sPayWay}}">
                                         </form>
                                     </td>
+                                    <td><button type="button" href="#" class="btn btn-primary btn-xs" v-on:click="getResumeComments(row.id)" title="Ver comentarios"><span class="glyphicon glyphicon-list-alt"></span></button></td>
                                     <td>@{{ row.entryDelayMinutes }}</td>
                                     <td>@{{ row.prematureOut }}</td>
                                     <td>@{{ row.extraHours }}</td>
