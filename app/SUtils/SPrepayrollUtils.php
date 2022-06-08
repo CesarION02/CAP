@@ -17,7 +17,12 @@ class SPrepayrollUtils {
      * @return array
      */
     public static function getEmployeesByUser($idUser, $payType, $bDirect, $iDelegation = null) {
-        $roles = \Auth::user()->roles;
+        $roles = \DB::table('rol as r')
+                    ->join('user_rol as ur', 'ur.rol_id', 'r.id')
+                    ->where('ur.user_id', $idUser)
+                    ->select('r.id','ur.user_id')
+                    ->get();
+
         $config = \App\SUtils\SConfiguration::getConfigurations(); // Obtengo las configuraciones del sistema
 
         $seeAll = false;
@@ -263,7 +268,8 @@ class SPrepayrollUtils {
         $payType = $prepayroll->is_week ? \SCons::PAY_W_S : \SCons::PAY_W_Q;
         $number = $prepayroll->is_week ? $prepayroll->num_week : $prepayroll->num_biweek;
         
-        $aEmployees = SPrepayrollUtils::getEmployeesByUser($idUser, $payType, $bDirectEmployees);
+        $iDelegation = null;
+        $aEmployees = SPrepayrollUtils::getEmployeesByUser($idUser, $payType, $bDirectEmployees, $iDelegation);
 
         $aEmployeesOk = \DB::table('prepayroll_report_emp_vobos AS empvb')
                             ->where('empvb.year', $prepayroll->year);
