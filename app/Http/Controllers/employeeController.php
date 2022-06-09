@@ -223,6 +223,22 @@ class employeeController extends Controller
                             ->orderBy('employees.name')
                             ->select('employees.name AS nameEmployee','employees.num_employee AS numEmployee','employees.short_name AS shortName','employees.id AS idEmployee','jobs.name AS nameJob','departments.name AS nameDepartment','benefit_policies.name AS politica')
                             ->get();
+                if(count($employees) == 0){
+                    $employees = DB::table('employees')
+                            ->join('jobs','jobs.id','=','employees.job_id')
+                            ->join('departments','departments.id','=','employees.department_id')
+                            ->join('department_group','department_group.id','=','departments.dept_group_id')
+                            ->join('benefit_policies','benefit_policies.id','=','employees.ben_pol_id')
+                            ->orderBy('employees.job_id')
+                            ->where('employees.is_delete','0')
+                            ->where('employees.is_active','1')
+                            ->whereIn('departments.dept_group_id',$Adgu)
+                            ->orderBy('employees.name')
+                            ->select('employees.name AS nameEmployee','employees.num_employee AS numEmployee','employees.short_name AS shortName','employees.id AS idEmployee','jobs.name AS nameJob','departments.name AS nameDepartment','benefit_policies.name AS politica')
+                            ->get();   
+                            
+                    $iFilter = 2;
+                }
             }else{
                 $employees = DB::table('employees')
                             ->join('jobs','jobs.id','=','employees.job_id')
@@ -251,6 +267,22 @@ class employeeController extends Controller
                             ->orderBy('employees.name')
                             ->select('employees.name AS nameEmployee','employees.num_employee AS numEmployee','employees.short_name AS shortName','employees.id AS idEmployee','jobs.name AS nameJob','departments.name AS nameDepartment','benefit_policies.name AS politica')
                             ->get();
+                if(count($employees) == 0){
+                    $employees = DB::table('employees')
+                                ->join('jobs','jobs.id','=','employees.job_id')
+                                ->join('departments','departments.id','=','employees.department_id')
+                                ->join('department_group','department_group.id','=','departments.dept_group_id')
+                                ->join('benefit_policies','benefit_policies.id','=','employees.ben_pol_id')
+                                ->orderBy('employees.job_id')
+                                ->where('employees.is_delete','0')
+                                ->where('employees.is_active','1')
+                                ->whereIn('departments.dept_group_id',$Adgu)
+                                ->orderBy('employees.name')
+                                ->select('employees.name AS nameEmployee','employees.num_employee AS numEmployee','employees.short_name AS shortName','employees.id AS idEmployee','jobs.name AS nameJob','departments.name AS nameDepartment','benefit_policies.name AS politica')
+                                ->get();
+                                
+                    $iFilter = 2;    
+                }
             }else{
                 $employees = DB::table('employees')
                             ->join('jobs','jobs.id','=','employees.job_id')
@@ -457,7 +489,7 @@ class employeeController extends Controller
 
         $department = DepartmentRH::where('id',$jEmployee->dept_rh_id)->get();
         
-        $grupoPrenomina = DB::table('prepayroll_group_deptos')->where('department_id',$deparment[0]->id)->get();
+        $grupoPrenomina = DB::table('prepayroll_group_deptos')->where('department_id',$department[0]->id)->get();
 
         $emp = new employees();
 
