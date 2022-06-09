@@ -36,73 +36,121 @@ class employeesAssignsController extends Controller
     public function generateEmployeesAssigns(Request $request){
         switch ($request->tipo) {
             case 1:
-                $grupo = DB::table('department_group')
-                    ->leftJoin('departments as d', 'd.dept_group_id','=','department_group.id')
-                    ->leftJoin('employees as e', 'e.department_id','=','d.id')
-                    ->where('department_group.is_delete',0)
-                    ->where('department_group.id',$request->deptGrp)
-                    ->where('d.is_delete',0)
-                    ->where([['e.is_delete',0],['e.is_active',1]])
-                    ->select('department_group.name AS dg','d.name as dept_name','e.name as employee')
-                    ->get();
-                $supervisores = DB::table('group_dept_user')
-                    ->join('users','group_dept_user.user_id','=','users.id')
-                    ->join('department_group','group_dept_user.groupdept_id','=','department_group.id')
-                    ->leftJoin('departments as d', 'd.dept_group_id','=','department_group.id')
-                    ->where('department_group.id',$request->deptGrp)
-                    ->where('group_dept_user.is_delete',0)
-                    ->where('department_group.is_delete',0)
-                    ->where('d.is_delete',0)
-                    ->select('users.name')
-                    ->groupBy('users.name')
-                    ->get();
+                if($request->deptGrp != 0){
+                    $grupo = DB::table('department_group')
+                        ->leftJoin('departments as d', 'd.dept_group_id','=','department_group.id')
+                        ->leftJoin('employees as e', 'e.department_id','=','d.id')
+                        ->where('department_group.is_delete',0)
+                        ->where('department_group.id',$request->deptGrp)
+                        ->where('d.is_delete',0)
+                        ->where([['e.is_delete',0],['e.is_active',1]])
+                        ->select('department_group.name AS dg','d.name as dept_name','e.name as employee', 'department_group.id')
+                        ->get();
+                    $supervisores = DB::table('group_dept_user')
+                        ->join('users','group_dept_user.user_id','=','users.id')
+                        ->join('department_group','group_dept_user.groupdept_id','=','department_group.id')
+                        ->leftJoin('departments as d', 'd.dept_group_id','=','department_group.id')
+                        ->where('department_group.id',$request->deptGrp)
+                        ->where('group_dept_user.is_delete',0)
+                        ->where('department_group.is_delete',0)
+                        ->where('d.is_delete',0)
+                        ->select('users.name', 'group_dept_user.groupdept_id')
+                        ->groupBy('users.name')
+                        ->get();
+                }else{
+                    $grupo = DB::table('department_group')
+                        ->leftJoin('departments as d', 'd.dept_group_id','=','department_group.id')
+                        ->leftJoin('employees as e', 'e.department_id','=','d.id')
+                        ->where('department_group.is_delete',0)
+                        ->where('d.is_delete',0)
+                        ->where([['e.is_delete',0],['e.is_active',1]])
+                        ->select('department_group.name AS dg','d.name as dept_name','e.name as employee', 'department_group.id')
+                        ->get();
+
+                    $supervisores = DB::table('group_dept_user as gdu')
+                                        ->join('users','gdu.user_id','=','users.id')
+                                        ->select('users.name', 'gdu.groupdept_id')
+                                        ->get();
+                }
                 break;
             case 2:
-                $grupo = DB::table('department_group')
-                    ->leftJoin('departments as d', 'd.dept_group_id','=','department_group.id')
-                    ->leftJoin('employees as e', 'e.department_id','=','d.id')
-                    ->where('department_group.is_delete',0)
-                    ->where('d.id',$request->dept)
-                    ->where('d.is_delete',0)
-                    ->where([['e.is_delete',0],['e.is_active',1]])
-                    ->select('department_group.name AS dg','d.name as dept_name','e.name as employee')
-                    ->get();
-                $supervisores = DB::table('group_dept_user')
-                    ->join('users','group_dept_user.user_id','=','users.id')
-                    ->join('department_group','group_dept_user.groupdept_id','=','department_group.id')
-                    ->leftJoin('departments as d', 'd.dept_group_id','=','department_group.id')
-                    ->where('d.id',$request->dept)
-                    ->where('group_dept_user.is_delete',0)
-                    ->where('department_group.is_delete',0)
-                    ->where('d.is_delete',0)
-                    ->select('users.name')
-                    ->groupBy('users.name')
-                    ->get();
+                if($request->dept != 0){
+                    $grupo = DB::table('department_group')
+                        ->leftJoin('departments as d', 'd.dept_group_id','=','department_group.id')
+                        ->leftJoin('employees as e', 'e.department_id','=','d.id')
+                        ->where('department_group.is_delete',0)
+                        ->where('d.id',$request->dept)
+                        ->where('d.is_delete',0)
+                        ->where([['e.is_delete',0],['e.is_active',1]])
+                        ->select('department_group.name AS dg','d.name as dept_name','e.name as employee', 'department_group.id')
+                        ->get();
+                    $supervisores = DB::table('group_dept_user')
+                        ->join('users','group_dept_user.user_id','=','users.id')
+                        ->join('department_group','group_dept_user.groupdept_id','=','department_group.id')
+                        ->leftJoin('departments as d', 'd.dept_group_id','=','department_group.id')
+                        ->where('d.id',$request->dept)
+                        ->where('group_dept_user.is_delete',0)
+                        ->where('department_group.is_delete',0)
+                        ->where('d.is_delete',0)
+                        ->select('users.name', 'group_dept_user.groupdept_id')
+                        ->groupBy('users.name')
+                        ->get();
+                }else{
+                    $grupo = DB::table('department_group')
+                        ->leftJoin('departments as d', 'd.dept_group_id','=','department_group.id')
+                        ->leftJoin('employees as e', 'e.department_id','=','d.id')
+                        ->where('department_group.is_delete',0)
+                        ->where('d.is_delete',0)
+                        ->where([['e.is_delete',0],['e.is_active',1]])
+                        ->select('department_group.name AS dg','d.name as dept_name','e.name as employee', 'department_group.id')
+                        ->get();
+
+                    $supervisores = DB::table('group_dept_user as gdu')
+                                        ->join('users','gdu.user_id','=','users.id')
+                                        ->select('users.name', 'gdu.groupdept_id')
+                                        ->get();
+                }
                 break;
             case 3:
-                $grupo = DB::table('group_dept_user')
-                    ->join('users','group_dept_user.user_id','=','users.id')
-                    ->join('department_group','group_dept_user.groupdept_id','=','department_group.id')
-                    ->leftJoin('departments as d', 'd.dept_group_id','=','department_group.id')
-                    ->leftJoin('employees as e', 'e.department_id','=','d.id')
-                    ->where('users.id',$request->supervisor)
-                    ->where('group_dept_user.is_delete',0)
-                    ->where('department_group.is_delete',0)
-                    ->where('d.is_delete',0)
-                    ->where([['e.is_delete',0],['e.is_active',1]])
-                    ->select('department_group.name AS dg','d.name as dept_name','e.name as employee', 'users.name')
-                    ->get();
-                $supervisores = DB::table('group_dept_user')
-                    ->join('users','group_dept_user.user_id','=','users.id')
-                    ->join('department_group','group_dept_user.groupdept_id','=','department_group.id')
-                    ->leftJoin('departments as d', 'd.dept_group_id','=','department_group.id')
-                    ->where('users.id',$request->supervisor)
-                    ->where('group_dept_user.is_delete',0)
-                    ->where('department_group.is_delete',0)
-                    ->where('d.is_delete',0)
-                    ->select('users.name')
-                    ->groupBy('users.name')
-                    ->get();
+                if($request->supervisor != 0){
+                    $grupo = DB::table('group_dept_user')
+                        ->join('users','group_dept_user.user_id','=','users.id')
+                        ->join('department_group','group_dept_user.groupdept_id','=','department_group.id')
+                        ->leftJoin('departments as d', 'd.dept_group_id','=','department_group.id')
+                        ->leftJoin('employees as e', 'e.department_id','=','d.id')
+                        ->where('users.id',$request->supervisor)
+                        ->where('group_dept_user.is_delete',0)
+                        ->where('department_group.is_delete',0)
+                        ->where('d.is_delete',0)
+                        ->where([['e.is_delete',0],['e.is_active',1]])
+                        ->select('department_group.name AS dg','d.name as dept_name','e.name as employee', 'users.name', 'department_group.id')
+                        ->get();
+                    $supervisores = DB::table('group_dept_user')
+                        ->join('users','group_dept_user.user_id','=','users.id')
+                        ->join('department_group','group_dept_user.groupdept_id','=','department_group.id')
+                        ->leftJoin('departments as d', 'd.dept_group_id','=','department_group.id')
+                        ->where('users.id',$request->supervisor)
+                        ->where('group_dept_user.is_delete',0)
+                        ->where('department_group.is_delete',0)
+                        ->where('d.is_delete',0)
+                        ->select('users.name', 'group_dept_user.groupdept_id')
+                        ->groupBy('users.name')
+                        ->get();
+                }else{
+                    $grupo = DB::table('department_group')
+                        ->leftJoin('departments as d', 'd.dept_group_id','=','department_group.id')
+                        ->leftJoin('employees as e', 'e.department_id','=','d.id')
+                        ->where('department_group.is_delete',0)
+                        ->where('d.is_delete',0)
+                        ->where([['e.is_delete',0],['e.is_active',1]])
+                        ->select('department_group.name AS dg','d.name as dept_name','e.name as employee', 'department_group.id')
+                        ->get();
+
+                    $supervisores = DB::table('group_dept_user as gdu')
+                                        ->join('users','gdu.user_id','=','users.id')
+                                        ->select('users.name', 'gdu.groupdept_id')
+                                        ->get();
+                }
                 break;
             
             default:
@@ -112,12 +160,14 @@ class employeesAssignsController extends Controller
         }
 
         $sSup = "";
-        foreach($supervisores as $sup){
-            $sSup = $sup->name.', '.$sSup;
-        }
-
-        foreach($grupo as $gr){
+        foreach ($grupo as $gr) {
+            foreach($supervisores as $sup){
+                if($sup->groupdept_id == $gr->id){
+                    $sSup = $sup->name.', '.$sSup;
+                }
+            }
             $gr->supervisores = $sSup;
+            $sSup = "";
         }
 
         $route = route('empl_group_assign');
