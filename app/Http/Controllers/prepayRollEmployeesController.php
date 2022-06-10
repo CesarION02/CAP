@@ -15,9 +15,11 @@ class prepayRollEmployeesController extends Controller
      */
     public function index($id = null, $bDirect = 0)
     {
+        $config = \App\SUtils\SConfiguration::getConfigurations();
         $isAdmin = false;
         foreach(auth()->user()->roles()->get() as $rol){
-            if($rol->id == 1){
+            $result = in_array($rol->id, $config->rolesCanSeeAll);
+            if($result){
                 $isAdmin = true;
                 break;
             }

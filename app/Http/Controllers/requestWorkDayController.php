@@ -11,9 +11,11 @@ use Carbon\CarbonImmutable;
 class requestWorkDayController extends Controller
 {
     public function index($id = null){
+        $config = \App\SUtils\SConfiguration::getConfigurations();
         $isAdmin = false;
         foreach(auth()->user()->roles()->get() as $rol){
-            if($rol->id == 1){
+            $result = in_array($rol->id, $config->rolesCanSeeAll);
+            if($result){
                 $isAdmin = true;
                 break;
             }
