@@ -508,7 +508,10 @@
                 })
                 .then(res => {
                     console.log(res);
-                    oGui.showOk();
+                    if(!res.data.success){
+                        checked.checked = !vobo;
+                    }
+                    oGui.showMessage(res.data.title, res.data.message, res.data.icon);
                 })
                 .catch(function(error) {
                     oGui.showError(error);

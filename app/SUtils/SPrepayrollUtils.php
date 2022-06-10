@@ -34,7 +34,26 @@ class SPrepayrollUtils {
         }
 
         if ($seeAll) {
-            return null;
+            $lEmployeesGroup = \DB::table('prepayroll_group_employees as pge')
+                                ->join('employees as e', 'e.id', '=', 'pge.employee_id')
+                                ->where('pge.is_delete',0)
+                                ->where('e.is_delete',0)
+                                ->where('e.is_active',1)
+                                ->where('e.way_pay_id', $payType)
+                                ->pluck('e.id');
+
+            $lDeptEmployees = \DB::table('prepayroll_group_deptos as pgd')
+                                ->join('employees as e', 'e.department_id', '=', 'pgd.department_id')
+                                ->where('e.is_delete',0)
+                                ->where('e.is_active',1)
+                                ->where('e.way_pay_id', $payType)
+                                ->pluck('e.id');
+
+            $merge = $lEmployeesGroup->merge($lDeptEmployees);
+            $unique = $merge->unique();
+            $lEmployees = $unique->toArray();
+            
+            return $lEmployees;
         }
 
         // Obtiene los grupos de prenómina que el usuario puede ver

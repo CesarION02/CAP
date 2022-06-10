@@ -15,7 +15,15 @@ class prepayRollEmployeesController extends Controller
      */
     public function index($id = null, $bDirect = 0)
     {
-        if(auth()->user()->id == 1){
+        $isAdmin = false;
+        foreach(auth()->user()->roles()->get() as $rol){
+            if($rol->id == 1){
+                $isAdmin = true;
+                break;
+            }
+        }
+        
+        if($isAdmin){
             $lUsers = DB::table('users')
                     ->join('prepayroll_groups_users as pru','pru.head_user_id','=','users.id')
                     ->select('users.id','users.name')
