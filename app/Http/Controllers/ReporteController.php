@@ -642,6 +642,14 @@ class ReporteController extends Controller
         $bDelegation = $request->delegation;
         $iPayrollYear = $request->year;
         $iPayrollNumber = $request->payroll_number;
+        $noChecks = 0;
+        if ($request->nochecan != null) {
+            $noChecks = 1;
+        }
+        else {
+            $noChecks = 0;
+        }
+
         $lComments = \DB::table('comments')->where('is_delete', 0)->get();
 
         $oStartDate = Carbon::parse($sStartDate);
@@ -653,7 +661,7 @@ class ReporteController extends Controller
 
         if ($request->optradio == "employee") {
             if ($iEmployee > 0) {
-                $lEmployees = SGenUtils::toEmployeeIds(0, 0, 0, [$iEmployee]);
+                $lEmployees = SGenUtils::toEmployeeIds(0, 0, 0, [$iEmployee], $noChecks);
                 $payWay = $lEmployees[0]->way_pay_id;
             }
             else {
@@ -670,7 +678,7 @@ class ReporteController extends Controller
 
             $filterType = $request->i_filter;
             $ids = $request->elems;
-            $lEmployees = SGenUtils::toEmployeeIds($payWay, $filterType, $ids);
+            $lEmployees = SGenUtils::toEmployeeIds($payWay, $filterType, $ids, [], $noChecks);
         }
 
         $iDelegation = null;
