@@ -708,7 +708,7 @@ class ReporteController extends Controller
         
         $bDirect = false;
         $subEmployees = SPrepayrollUtils::getEmployeesByUser(\Auth::user()->id, $payWay, $bDirect, $iDelegation);
-        if ($subEmployees != null && count($subEmployees) >= 0) {
+        if (! is_null($subEmployees) && count($subEmployees) >= 0) {
             $lColEmps = collect($lEmployees);
     
             $lEmployees = $lColEmps->whereIn('id', $subEmployees);
