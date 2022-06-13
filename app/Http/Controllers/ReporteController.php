@@ -778,7 +778,7 @@ class ReporteController extends Controller
              */
             $isPrepayrollInspection = false;
             $lEmpVobos = [];
-            if (($payWay == \SCons::PAY_W_S || $payWay == \SCons::PAY_W_Q) && env('VOBO_BY_EMP_ENABLED')) {
+            if (($payWay == \SCons::PAY_W_S || $payWay == \SCons::PAY_W_Q) && env('VOBO_BY_EMP_ENABLED', true)) {
                 $number = SDateUtils::getNumberOfDate($sStartDate, $payWay);
                 $dates = SDateUtils::getDatesOfPayrollNumber($number, $oStartDate->year, $payWay);
                 
