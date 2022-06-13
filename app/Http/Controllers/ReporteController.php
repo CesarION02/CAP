@@ -705,13 +705,24 @@ class ReporteController extends Controller
             $oEndDate = Carbon::parse($sEndDate);
             $iDelegation = $oDelegation->id_delegation;
         }
-        
+
+        $roles = Auth()->user()->roles()->get();
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+        $seeAll = false;
+        foreach ($roles as $rol) {
+            if (in_array($rol->id, $config->rolesCanSeeAll)) {
+                $seeAll = true;
+                break;
+            }
+        }
+
         $bDirect = false;
         $subEmployees = SPrepayrollUtils::getEmployeesByUser(\Auth::user()->id, $payWay, $bDirect, $iDelegation);
         if (! is_null($subEmployees) && count($subEmployees) >= 0) {
             $lColEmps = collect($lEmployees);
-    
-            $lEmployees = $lColEmps->whereIn('id', $subEmployees);
+            if(!$seeAll){
+                $lEmployees = $lColEmps->whereIn('id', $subEmployees);
+            }
         }
 
         $lRows = SDataProcess::process($sStartDate, $sEndDate, $payWay, $lEmployees);
