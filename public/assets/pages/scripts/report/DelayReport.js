@@ -20,6 +20,7 @@ var app = new Vue({
         haveComments: false,
         resumeComments: [],
         nameEmployee: "",
+        indexRow: null,
     },
     mounted() {
         this.haveComments = this.lComments.length > 0;
@@ -110,6 +111,7 @@ var app = new Vue({
                     if (oRes.success) {
                         this.vRow.labelUpd = true;
                         this.setRowAdjusts();
+                        this.comments = "";
                         oGui.showOk();
                     } else {
                         oGui.showError(oRes.msg);
@@ -169,8 +171,9 @@ var app = new Vue({
                     console.log(error);
                 });
         },
-        showModal(oRow) {
+        showModal(oRow, index) {
             this.vRow = oRow;
+            this.indexRow = index;
             this.setRowAdjusts();
 
             this.adjType = 1;
@@ -310,6 +313,29 @@ var app = new Vue({
         },
         addComment(){
             this.comments = this.comments.length > 0 ? this.comments + ' ' + this.selComment : this.comments + this.selComment;
+        },
+        addPreviusComment(){
+            this.previusComment = "";
+            var idEmployee = this.vData.lRows[this.indexRow].idEmployee;
+            if(this.indexRow != 0){
+                if(this.vData.lRows[this.indexRow - 1].idEmployee == idEmployee){
+                    var adjusts = this.vData.lRows[this.indexRow - 1].adjusts;
+                    var previusComment = "";
+                    for (let i = 0; i < adjusts.length; i++) {
+                        previusComment = previusComment.length > 0 ? previusComment + ' ' + adjusts[i].comments : previusComment + adjusts[i].comments;
+                    }
+                    if(previusComment.length > 0){
+                        this.comments = this.comments.length > 0 ? this.comments + ' ' + previusComment : this.comments + previusComment;
+                        this.newAdjust();
+                    }else{
+                        oGui.showMessage('','No existe comentario en el dia anterior','warning');    
+                    }
+                }else{
+                    oGui.showMessage('','No existe comentario en el dia anterior','warning');
+                }
+            }else{
+                oGui.showMessage('','No existe comentario en el dia anterior','warning');
+            }
         },
         getResumeComments(idEmployee){
             this.resumeComments = [];
