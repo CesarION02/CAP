@@ -104,7 +104,7 @@
                                     <td>@{{ row.comments }}</td>
                                     <td>
                                         @if ($bModify)
-                                            <button class="btn btn-primary btn-xs" v-on:click="showModal(row)">
+                                            <button class="btn btn-primary btn-xs" v-on:click="showModal(row, index)">
                                                 <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
                                             </button>
                                         @endif

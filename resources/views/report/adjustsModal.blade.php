@@ -53,6 +53,13 @@
               </div>
               <br>
               <div class="row">
+                <div class="col-md-4"><label for="">Copiar comentario anterior:</label></div>
+                <div class="col-md-1">
+                  <button class="btn btn-success" v-on:click="addPreviusComment()"><span class="glyphicon glyphicon-copy"></span> Copiar anterior</button>
+                </div>
+              </div>
+              <br>
+              <div class="row">
                 <div class="col-md-4"><label for="">Comentarios frecuentes:</label></div>
                 <div class="col-md-7">
                   <select class="form-control" v-model="selComment" :disabled="!haveComments">
