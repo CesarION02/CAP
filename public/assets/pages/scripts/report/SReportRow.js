@@ -6,15 +6,19 @@ class SReportRow {
             row[0] = numEmploye;
             row[1] = "";
             row[2] = "";
-            row[3] = "TOTAL =";
-            row[4] = convertToHoursMins(hrs);
-            row[5] = delayMins;
-            row[6] = premMins;
-            row[7] = sundays;
-            row[8] = daysOff + 
+            row[3] = "";
+            row[4] = "";
+            row[5] = "";
+            row[6] = "";
+            row[7] = "TOTAL =";
+            row[8] = convertToHoursMins(hrs);
+            row[9] = delayMins;
+            row[10] = premMins;
+            row[11] = sundays;
+            row[12] = daysOff + 
                         " [" + (daysOffTheorical == undefined ? 0 : daysOffTheorical)  + "]";
-            row[9] = "";
-            row[10] = "";
+            row[13] = "";
+            row[14] = "";
         }
         else {        
             row[0] = numEmploye;

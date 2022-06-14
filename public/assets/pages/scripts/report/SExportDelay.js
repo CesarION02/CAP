@@ -18,18 +18,17 @@ function makeDocument() {
     }
 
     if (oData.tReport == oData.REP_HR_EX) {
-        columnNames.splice(4, 1);
+        columnNames.splice(3, 4);
         columnNames[2] = columnNames[2].replace('<span class="nobr">', '');
         columnNames[2] = columnNames[2].replace('</span>', '');
-        columnNames[3] = columnNames[2].replace('<span class="nobr">', '');
-        columnNames[3] = columnNames[2].replace('</span>', '');
+        columnNames.splice(4, 7);
     } else {
         columnNames.splice(5, 1);
     }
 
     ws_data.push(columnNames);
 
-    let oRowObj = new SReportRow();
+    // let oRowObj = new SReportRow();
 
     let numEmploye = tableData[0][0];
     let hrs = 0;
@@ -41,7 +40,7 @@ function makeDocument() {
         let value = [...rowValue];
 
         if (value[0] != numEmploye) {
-            let row = oRowObj.createRowBottom(oData.tReport, numEmploye, hrs, delayMins, premMins, sundays, daysOff);
+            let row = createRowBottom(oData.tReport, numEmploye, delayMins);
 
             ws_data.push(row);
             numEmploye = value[0];
@@ -53,20 +52,14 @@ function makeDocument() {
         }
 
         if (oData.tReport == oData.REP_HR_EX) {
-            hrs += (value[4] == "") ? 0 : parseInt(value[4], 10);
-            delayMins += (value[6] == "") ? 0 : parseInt(value[6], 10);
-            premMins += (value[7] == "") ? 0 : parseInt(value[7], 10);
-            sundays += (value[8] == "") ? 0 : parseInt(value[8], 10);
-            daysOff += (value[9] == "") ? 0 : parseInt(value[9], 10);
+            delayMins += (value[7] == "") ? 0 : parseInt(value[7], 10);
         } else {
-            hrs += (value[4] == "") ? 0 : parseInt(value[4], 10);
+            delayMins += (value[7] == "") ? 0 : parseInt(value[7], 10);
         }
 
         if (oData.tReport == oData.REP_HR_EX) {
-            value[12] = value[12].replace('<button class="btn btn-primary btn-xs"><span aria-hidden="true" class="glyphicon glyphicon-cog"></span></button>', '');
-            value[12] = value[12].replace('</p>', '');
-            value[12] = value[12].replace('<p>', '');
-            value.splice(4, 1);
+            value.splice(3, 4);
+            value.splice(4, 7);
         } else {
             value.splice(5, 1);
         }
@@ -74,7 +67,7 @@ function makeDocument() {
         ws_data.push(value);
     });
 
-    let row = oRowObj.createRowBottom(oData.tReport, numEmploye, hrs, delayMins, premMins, sundays, daysOff);
+    let row = createRowBottom(oData.tReport, numEmploye, delayMins);
 
     ws_data.push(row);
 
@@ -99,3 +92,13 @@ $("#button-a").click(function() {
     let blob = new Blob([s2ab(wbout)], { type: "application/octet-stream" });
     saveAs(blob, oData.tReport == oData.REP_HR_EX ? "PV_Reporte_CAP.xlsx" : "RET_Reporte_CAP.xlsx");
 });
+
+function createRowBottom(tReport, numEmploye, hrs) {
+    let row = [];
+    row[0] = numEmploye;
+    row[1] = "";
+    row[2] = "TOTAL =";
+    row[3] = hrs;
+
+    return row;
+}

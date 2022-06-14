@@ -586,7 +586,8 @@ class ReporteController extends Controller
                     ->with('adjTypes', $adjTypes)
                     ->with('lAdjusts', $lAdjusts)
                     ->with('lEmpWrkdDays', $lEmpWrkdDays)
-                    ->with('lRows', $lRows);
+                    ->with('lRows', $lRows)
+                    ->with('lComments', []);
     }
 
     function timesTotal($lRows, $lEmployees)
