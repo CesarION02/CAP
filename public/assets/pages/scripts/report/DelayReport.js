@@ -321,12 +321,20 @@ var app = new Vue({
                 if(this.vData.lRows[this.indexRow - 1].idEmployee == idEmployee){
                     var adjusts = this.vData.lRows[this.indexRow - 1].adjusts;
                     var previusComment = "";
+                    var hasComment = false;
                     for (let i = 0; i < adjusts.length; i++) {
-                        previusComment = previusComment.length > 0 ? previusComment + ' ' + adjusts[i].comments : previusComment + adjusts[i].comments;
+                        if(adjusts[i].adjust_type_id == 7){
+                            hasComment = true;
+                            previusComment = previusComment.length > 0 ? previusComment + ' ' + adjusts[i].comments : previusComment + adjusts[i].comments;
+                        }
                     }
-                    if(previusComment.length > 0){
+                    if(previusComment.length > 0 && hasComment == true){
                         this.comments = this.comments.length > 0 ? this.comments + ' ' + previusComment : this.comments + previusComment;
+                        this.adjType = 7;
                         this.newAdjust();
+                        this.adjType = 1;
+                        this.adjCategory = 0;
+                        this.selComment = "";
                     }else{
                         oGui.showMessage('','No existe comentario en el dia anterior','warning');    
                     }
