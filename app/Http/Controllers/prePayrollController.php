@@ -297,8 +297,55 @@ class prePayrollController extends Controller
         return $prePayroll;
     }
 
+    public static function getAllAbsences($sStartDate, $sEndDate)
+    {
+        $lAbsences = \DB::table('incidents AS i')
+                        ->join('type_incidents AS ti', 'i.type_incidents_id', '=', 'ti.id')
+                        ->whereRaw("((start_date BETWEEN '" . $sStartDate . "' AND '" . $sEndDate . "') OR 
+                                        (end_date BETWEEN '" . $sStartDate . "' AND '" . $sEndDate . "'))")
+                        ->where('i.is_delete', false)
+                        ->select('i.external_key', 
+                                    'i.employee_id',
+                                    'i.nts', 
+                                    'ti.name AS type_name', 
+                                    'i.id', 
+                                    'ti.id AS type_id', 
+                                    'i.start_date',
+                                    'i.end_date',
+                                    'ti.is_allowed')
+                        ->orderBy('ti.is_agreement', 'ASC')
+                        ->orderBy('created_by', 'DESC')
+                        ->orderBy('i.id', 'ASC')
+                        ->get();
+
+        return collect($lAbsences);
+    }
+
     /**
-     * Determina si el empleado tiene incidencias para el día en custión,
+     * Determina si el empleado tiene incidencias para el día en cuestión,
+     * regresa un arreglo con las incidencias correspondientes
+     *
+     * @param int $idEmployee
+     * @param String $sDate
+     * 
+     * @return incident array
+     */
+    public static function getAbsence($idEmployee, $sDate, $lAllAbsences)
+    {
+        $lAbsences = $lAllAbsences->filter(function ($abs) use ($sDate) {
+                                        return $abs->start_date <= $sDate && $sDate <= $abs->end_date;
+                                    })
+                                    ->where('employee_id', $idEmployee);
+
+        if ($lAbsences->isEmpty()) {
+            return [];
+        }
+
+        return $lAbsences->toArray();
+    }
+
+    /**
+     * Determina si el empleado tiene incidencias para el día en cuestión,
      * regresa un arreglo con las incidencias correspondientes
      *
      * @param int $idEmployee

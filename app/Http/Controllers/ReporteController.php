@@ -25,6 +25,7 @@ use App\SUtils\SPrepayrollUtils;
 use App\SUtils\SDateUtils;
 use App\SUtils\SPayrollDelegationUtils;
 use App\SData\SDataProcess;
+use App\SData\SPrepayrollReportCore;
 use Illuminate\Support\Collection;
 use DB;
 use Carbon\Carbon;
@@ -726,7 +727,9 @@ class ReporteController extends Controller
             }
         }
 
-        $lRows = SDataProcess::process($sStartDate, $sEndDate, $payWay, $lEmployees);
+        // $lRows = SDataProcess::process($sStartDate, $sEndDate, $payWay, $lEmployees);
+        $objReport = new SPrepayrollReportCore();
+        $lRows = $objReport->process($sStartDate, $sEndDate, $payWay, $lEmployees);
 
         $aEmployees = $lEmployees->pluck('num_employee', 'id');
         $lEmpWrkdDays = SDelayReportUtils::getTheoreticalDaysOffBasedOnDaysWorked($lRows, $aEmployees, $sStartDate, $sEndDate);

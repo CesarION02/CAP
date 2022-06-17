@@ -375,7 +375,7 @@ class SDelayReportUtils {
      * 
      * @return query ('wdd.date', 'w.name', 'w.entry', 'w.departure')
      */
-    public static function getWorkshifts($startDate, $endDate, $payWay, $lEmployees)
+    public static function getWorkshifts($startDate, $endDate, $payWay, $lEmployees, $isCollection)
     {
         $lWorkshifts = \DB::table('week_department_day AS wdd')
                             ->join('day_workshifts AS dw', 'wdd.id', '=', 'dw.day_id')
@@ -418,26 +418,23 @@ class SDelayReportUtils {
                 break;
         }
 
+        if ($isCollection) {
+            return collect($lWorkshifts->get());
+        }
+
         return $lWorkshifts;
     }
-    
-    /**
-     * Consulta en la tabla de schedule_assign si el empleado tiene asignados horarios por empleado
-     * y por departamento que cumplan con el rango de fechas recibido, que empiecen antes de la fecha inicial
-     * y terminen después de esta, que estén ambas fechas dentro del rango, fechas indefinidas, o que empiecen antes 
-     * o después de la fecha final y terminen dentro del rango o no terminen
-     *
-     * @param int $idEmployee
-     * @param int $idDepartment departamento del empleado (busca por este medio solo si no encuentra referencias al empleado)
-     * @param string $startDate [YYYY-MM-DD]
-     * @param string $endDate [YYYY-MM-DD]
-     * 
-     * @return array  schedule_assign.*
-     */
-    public static function hasAnAssing($idEmployee, $idDepartment, $startDate, $endDate)
-    {
-        // \DB::enableQueryLog();
 
+    /**
+     * Undocumented function
+     *
+     * @param [type] $startDate
+     * @param [type] $endDate
+     * @param [type] $isCollection
+     * @return void
+     */
+    public static function getAllAssigns($startDate, $endDate, $isCollection)
+    {
         /**
          * se verifica si el empleado tiene asignaciones correspondientes
          * al periodo de consulta del reporte
@@ -459,26 +456,50 @@ class SDelayReportUtils {
                     ->orderBy('order_gs', 'ASC');
 
         $assings = clone $base;
-                    
-        $assings = $assings->where('employee_id', $idEmployee)
-                            ->get();
+
+        if ($isCollection) {
+            return collect($assings->get());
+        }
+    }
+    
+    /**
+     * Consulta en la tabla de schedule_assign si el empleado tiene asignados horarios por empleado
+     * y por departamento que cumplan con el rango de fechas recibido, que empiecen antes de la fecha inicial
+     * y terminen después de esta, que estén ambas fechas dentro del rango, fechas indefinidas, o que empiecen antes 
+     * o después de la fecha final y terminen dentro del rango o no terminen
+     *
+     * @param int $idEmployee
+     * @param int $idDepartment departamento del empleado (busca por este medio solo si no encuentra referencias al empleado)
+     * @param string $startDate [YYYY-MM-DD]
+     * @param string $endDate [YYYY-MM-DD]
+     * 
+     * @return array  schedule_assign.*
+     */
+    public static function hasAnAssing($idEmployee, $idDepartment, $lAssigns)
+    {
+        // \DB::enableQueryLog();
+
+        /**
+         * se verifica si el empleado tiene asignaciones correspondientes
+         * al periodo de consulta del reporte
+         */         
+        $lAssigns = $lAssigns->where('employee_id', $idEmployee);
 
         // si el empleado no tiene asignados horarios se consulta si hay
         // asignaciones por departamento
-        if (! sizeof($assings) > 0 && $idDepartment > 0) {
-            $assings = clone $base;
+        if (! sizeof($lAssigns) > 0 && $idDepartment > 0) {
+            $lAssigns = clone $base;
 
-            $assings = $assings->where('department_id', $idDepartment)
-                                ->get();
+            $lAssigns = $lAssigns->where('department_id', $idDepartment);
         }
 
         // dd(\DB::getQueryLog());
 
-        if (! sizeof($assings) > 0) {
+        if (! sizeof($lAssigns) > 0) {
             return null;
         }
 
-        return $assings;
+        return $lAssigns;
     }
 
     /**
@@ -497,18 +518,18 @@ class SDelayReportUtils {
          * si la fecha de inicio de la asignación es nula, significa que dicha
          * asignación es indefinida y es el horario normal del empleado
          */
-        if ($lAassigns[0]->start_date == null) {
+        if ($lAassigns->first()->start_date == null) {
             //si el grupo de horarios es nullo significa que solo tiene asignado un horario
             // por lo que la comparación se hace directa con el día
-            if ($lAassigns[0]->group_schedules_id == null) {
-                return SDelayReportUtils::compareTemplate($lAassigns[0]->schedule_template_id, $registry, $tReport);
+            if ($lAassigns->first()->group_schedules_id == null) {
+                return SDelayReportUtils::compareTemplate($lAassigns->first()->schedule_template_id, $registry, $tReport);
             }
             else {
                 /**
                  * Si el grupo no es nulo, se consultan cuantos horarios tiene asignados el empleado
                  * para realizar el recorrido y verificar en qué horario se encuentra actualmente
                  */
-                $grpSchId = $lAassigns[0]->group_schedules_id;
+                $grpSchId = $lAassigns->first()->group_schedules_id;
 
                 $assignsTemplates = array();
                 foreach ($lAassigns as $assign) {
@@ -708,17 +729,19 @@ class SDelayReportUtils {
     {
         $lWEmployee = $lWorkshifts->where('e.id', $idEmployee)
                                     ->where('wdd.date', $registry->date)
-                                    ->orderBy('wdd.created_at', 'DESC');
+                                    ->sortByDesc('wdd.created_at');
 
         if ($isSpecial) {
-            $lWEmployee = $lWEmployee->whereNull('wdd.week_department_id');
+            $lWEmployee = $lWEmployee->filter(function ($row, $key) {
+                                return $row->week_department_id != null;
+                            });
 
             if ($specialApproved) {
-                $lWEmployee = $lWEmployee->where('is_approved', $specialApproved);
+                $lWEmployee = $lWEmployee->where('is_approved', true);
             }
         }
                                     
-        $lWEmployee = $lWEmployee->get();
+        // $lWEmployee = $lWEmployee->get();
         
         if (sizeof($lWEmployee) == 0) {
             return null;
@@ -751,9 +774,7 @@ class SDelayReportUtils {
             $lWEmployee = $lWEmployee->where('dwe.type_day_id', $eventId);
         }
                                     
-        $lWEmployee = $lWEmployee->orderBy('wdd.created_at', 'DESC');
-
-        $lWEmployee = $lWEmployee->get();
+        $lWEmployee = $lWEmployee->sortyByDesc('wdd.created_at')->toArray();
 
         if (sizeof($lWEmployee) == 0) {
             return null;
@@ -778,7 +799,7 @@ class SDelayReportUtils {
      * @param boolean $specialApproved
      * @return void
      */
-    public static function getSchedule($startDate, $endDate, $idEmployee, $registry, $lWorkshifts, $iRep, $specialApproved = true) {
+    public static function getSchedule($startDate, $endDate, $idEmployee, $registry, $lWorkshifts, $lAllAssigns, $iRep, $specialApproved = true) {
         // checar horario especial *******************************************************************
         $isSpecialWorkshift = true;
         $result = SDelayReportUtils::checkSchedule(clone $lWorkshifts, $idEmployee, $registry, $iRep, $isSpecialWorkshift, $specialApproved);
@@ -790,7 +811,7 @@ class SDelayReportUtils {
         }
 
         // checar horarios *******************************************************************
-        $lAssigns = SDelayReportUtils::hasAnAssing($idEmployee, 0, $startDate, $endDate);
+        $lAssigns = SDelayReportUtils::hasAnAssing($idEmployee, 0, $lAllAssigns);
 
         if ($lAssigns != null) {
             $result = SDelayReportUtils::processRegistry($lAssigns, $registry, $iRep);
@@ -812,7 +833,7 @@ class SDelayReportUtils {
          * busca el horario en base a las tablas de workshift
         */
         $isSpecialWorkshift = false;
-        $result = SDelayReportUtils::checkSchedule($lWorkshifts, $idEmployee, $registry, $iRep, $isSpecialWorkshift);
+        $result = SDelayReportUtils::checkSchedule(clone $lWorkshifts, $idEmployee, $registry, $iRep, $isSpecialWorkshift);
 
         if ($result != null) {
             $result->registry = $registry;
@@ -830,7 +851,7 @@ class SDelayReportUtils {
      * @param query $lWorkshifts
      * @return void
      */
-    public static function getNearSchedule($date, $time, $idEmployee, $lWorkshifts)
+    public static function getNearSchedule($date, $time, $idEmployee, $lWorkshifts, $lAllAssigns)
     {
         $oDate = Carbon::parse($date);
         $iDay = SDateTimeUtils::dayOfWeek($oDate);
@@ -844,7 +865,7 @@ class SDelayReportUtils {
                 'time' => $time
             ];
             
-            $result = SDelayReportUtils::getSchedule($date, $date, $idEmployee, $registry, clone $lWorkshifts, \SCons::REP_HR_EX);
+            $result = SDelayReportUtils::getSchedule($date, $date, $idEmployee, $registry, clone $lWorkshifts, clone $lAllAssigns, \SCons::REP_HR_EX);
             
             if ($result == null || ($result->auxScheduleDay != null && !$result->auxScheduleDay->is_active)) {
                 $oDate->subDays(1);
