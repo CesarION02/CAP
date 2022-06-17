@@ -1,4 +1,8 @@
 @extends("theme.$theme.layout")
+@section('styles1')
+    <link rel="stylesheet" href="{{asset("assets/css/chosen.min.css")}}">
+    <link rel="stylesheet" href="{{asset("assets/css/selectchosen.css")}}">
+@endsection
 @section('title')
     Checadas
 @endsection
@@ -25,7 +29,8 @@
                 <div class="box-footer">
                     <div class="col-lg-3"></div>
                     <div class="col-lg-6">
-                        @include('includes.button-form-create')
+                        <button type="button" class="btn btn-success" id="guardar" v-on:click="store();">Guardar</button>
+                        <button type="button" v-on:click="resetCreate();" class="btn btn-default">Deshacer</button>
                     </div>
                 </div>
             </form>
@@ -35,6 +40,30 @@
 @endsection
 
 @section("scripts")
+    <script src="{{ asset("assets/js/axios.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/vue.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/vues/SVueRegistries.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/js/chosen.jquery.min.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/pages/scripts/SGui.js") }}" type="text/javascript"></script>
+    <script>
+        var oGui = new SGui();
+        $(".chosen-select").chosen();
+    </script>
+    <script>
+        $(document).ready( function (){
+            $('#selEmployee').on('change', function(event, params) {
+                app.employee = $('#selEmployee').val();
+                app.date = null;
+                app.time = null;
+                app.type = 0;
+                app.canCheck = false;
+            });
+
+            $('#date').on('change', function(event, params) {
+                app.time = null;
+                app.type = 0;
+                app.canCheck = false;
+            });
+        })
+    </script>
 @endsection

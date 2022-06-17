@@ -279,6 +279,7 @@ Route::post('register/adjust_regs', 'RegisterController@adjustRegistries')->name
 Route::get('register/generate','RegisterController@indexGenRegisters')->name('registro_index_generate');
 Route::post('register/generate','RegisterController@registersGenerate')->name('registro_generate_generate');
 Route::post('register/generate/save','RegisterController@registersGenerateSave')->name('registro_generate_save');
+Route::post('register/getRegistry','RegisterController@getRegistry')->name('registro_get_registry');
 
 /* CONFIGURACION */
 Route::get('configuration','configController@index')->name('config');

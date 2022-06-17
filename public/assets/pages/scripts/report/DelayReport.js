@@ -336,13 +336,13 @@ var app = new Vue({
                         this.adjCategory = 0;
                         this.selComment = "";
                     }else{
-                        oGui.showMessage('','No existe comentario en el dia anterior','warning');    
+                        oGui.showMessage('','No existe comentario de tipo comentario en el dia anterior','warning');    
                     }
                 }else{
-                    oGui.showMessage('','No existe comentario en el dia anterior','warning');
+                    oGui.showMessage('','No existe comentario de tipo comentario en el dia anterior','warning');
                 }
             }else{
-                oGui.showMessage('','No existe comentario en el dia anterior','warning');
+                oGui.showMessage('','No existe comentario de tipo comentario en el dia anterior','warning');
             }
         },
         getResumeComments(idEmployee){
