@@ -76,6 +76,16 @@ class RegisterController extends Controller
                                     ->with('end_date', $end_date);
     }
 
+    public function getRegistry(Request $request){
+        $lRegistries = \DB::table('registers')
+                        ->where('employee_id', $request->employee_id)
+                        ->where('date',$request->date)
+                        ->select('date','time','type_id')
+                        ->get();
+        
+        return response()->json(['lRegistries' => $lRegistries]);
+    }
+
     public function create()
     {
         if (session()->get('rol_id') != 1){
@@ -99,7 +109,7 @@ class RegisterController extends Controller
                         ->where('employees.is_active','1')
                         ->whereIn('departments.dept_group_id',$Adgu)
                         ->orderBy('employees.name')
-                        ->select('employees.name AS nameEmployee','employees.id AS id')
+                        ->select('employees.name AS nameEmployee','employees.id AS id', 'employees.num_employee AS numEmployee')
                         ->get();
         }else{
             $employees = DB::table('employees')
@@ -109,7 +119,7 @@ class RegisterController extends Controller
                         ->where('employees.is_delete','0')
                         ->where('employees.is_active','1')
                         ->orderBy('employees.name')
-                        ->select('employees.name AS nameEmployee','employees.id AS id')
+                        ->select('employees.name AS nameEmployee','employees.id AS id', 'employees.num_employee AS numEmployee')
                         ->get();   
         }
         
@@ -132,14 +142,7 @@ class RegisterController extends Controller
         $dateregister->created_by = session()->get('user_id');
         $dateregister->is_delete = 0;
 
-        $bitacora = new Bitacora();
-        $bitacora->tipo = "Crear";
-        $bitacora->usuario_id = session()->get('user_id');
-        $bitacora->register_id = $register->id;
-        $bitacora->date = $register->date;
-        $bitacora->time = $register->time;
-        $bitacora->type = $register->type_id;
-        $bitacora->save();
+        
 
         // si solo se va a insertar una checada
         if ($request->optradio == "single") {
@@ -172,6 +175,15 @@ class RegisterController extends Controller
             $dateregister1->save();
         }
 
+        $bitacora = new Bitacora();
+        $bitacora->tipo = "Crear";
+        $bitacora->usuario_id = session()->get('user_id');
+        $bitacora->register_id = $register->id;
+        $bitacora->date = $register->date;
+        $bitacora->time = $register->time;
+        $bitacora->type = $register->type_id;
+        $bitacora->save();
+
         return redirect('register')->with('mensaje','Checada creada con éxito');
     }
 
@@ -184,8 +196,9 @@ class RegisterController extends Controller
                         ->join('department_group','department_group.id','=','departments.dept_group_id')
                         ->where('employees.is_delete','0')
                         ->where('employees.is_active','1')
+                        ->where('employees.id', $datas->employee_id)
                         ->orderBy('employees.name')
-                        ->select('employees.name AS nameEmployee','employees.id AS id')
+                        ->select('employees.name AS nameEmployee','employees.id AS id', 'employees.num_employee AS numEmployee')
                         ->get();
 
         return view('register.edit', compact('datas'))
