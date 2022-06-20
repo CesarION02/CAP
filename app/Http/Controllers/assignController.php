@@ -30,7 +30,7 @@ class assignController extends Controller
      */
     public function index()
     {
-        $iTemplateId = env('TMPLTE_SATURDAYS', 0);
+        $iTemplateId = env('TMPLTE_SATURDAYS', 1);
         
         $datas = DB::select("SELECT a.fecha_inicio, a.fecha_fin, b.name AS nombreEmpleado, s.name AS nombreHorario, a.group_assign_id, a.id
         FROM (
@@ -60,7 +60,7 @@ class assignController extends Controller
      */
     public function create($tipo)
     {
-        $iTemplateId = env('TMPLTE_SATURDAYS', 0);
+        $iTemplateId = env('TMPLTE_SATURDAYS', 1);
         $employee = employees::where('is_delete','0')->where('is_active', true)->orderBy('name','ASC')->pluck('id','name');
         $department = department::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
         $schedule_template = schedule_template::where('is_delete','0')->where('id','!=',$iTemplateId)->orderBy('name','ASC')->pluck('id','name');
@@ -146,7 +146,7 @@ class assignController extends Controller
      */
     public function edit($id)
     {   
-        $iTemplateId = env('TMPLTE_SATURDAYS', 0);
+        $iTemplateId = env('TMPLTE_SATURDAYS', 1);
         $employee = employees::where('is_delete','0')->where('is_active', true)->orderBy('name','ASC')->pluck('id','name');
         $department = department::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
         $schedule_template = schedule_template::where('is_delete','0')->where('id','!=',$iTemplateId)->orderBy('name','ASC')->pluck('id','name');
@@ -590,7 +590,7 @@ class assignController extends Controller
                     ->get();    
         }
 
-        $iTemplateId = env('TMPLTE_SATURDAYS', 0);
+        $iTemplateId = env('TMPLTE_SATURDAYS', 1);
         $schedule_template = schedule_template::where('is_delete', 0)
                                                 ->where('id', '!=', $iTemplateId)
                                                 ->orderBy('name','ASC')
@@ -627,14 +627,14 @@ class assignController extends Controller
                     ->select('employees.id AS id','employees.name AS name','employees.num_employee', 'department_group.name AS nameGroup')
                     ->get();    
         }
-        $iTemplateId = env('TMPLTE_SATURDAYS', 0);
+        $iTemplateId = env('TMPLTE_SATURDAYS', 1);
         $schedule_template = schedule_template::where('is_delete','0')->where('id','=',$iTemplateId)->orderBy('name','ASC')->pluck('id','name');
 
         return view('assign.dayProgramming')->with('employees',$employee)->with('schedule_template',$schedule_template)->with('idGroup',$id);   
     }
 
     public function schedule_template(){
-        $iTemplateId = env('TMPLTE_SATURDAYS', 0);
+        $iTemplateId = env('TMPLTE_SATURDAYS', 1);
         $schedule_template = DB::table('schedule_template')
                 ->where('is_delete','0')
                 ->where('id','!=',$iTemplateId)
@@ -797,7 +797,7 @@ class assignController extends Controller
 
     public function viewProgramming (){
 
-        $iTemplateId = env('TMPLTE_SATURDAYS', 0);
+        $iTemplateId = env('TMPLTE_SATURDAYS', 1);
         if (session()->get('rol_id') != 1){
             $numero = session()->get('name');
             $usuario = DB::table('users')
@@ -879,7 +879,7 @@ class assignController extends Controller
 
     public function viewDayprogram (){
 
-        $iTemplateId = env('TMPLTE_SATURDAYS', 0);
+        $iTemplateId = env('TMPLTE_SATURDAYS', 1);
         if (session()->get('rol_id') != 1){
             $numero = session()->get('name');
             $usuario = DB::table('users')
@@ -1131,7 +1131,7 @@ class assignController extends Controller
     }
 
     function employeesWithout(){
-        $iTemplateId = env('TMPLTE_SATURDAYS', 0);
+        $iTemplateId = env('TMPLTE_SATURDAYS', 1);
         if (session()->get('rol_id') != 1){
             $numero = session()->get('name');
             $usuario = DB::table('users')
@@ -1202,7 +1202,7 @@ class assignController extends Controller
     }
 
     public function withoutcreate($id){
-        $iTemplateId = env('TMPLTE_SATURDAYS', 0);
+        $iTemplateId = env('TMPLTE_SATURDAYS', 1);
         $employee = employees::where('is_delete','0')->where('is_active', true)->where('id',$id)->orderBy('name','ASC');
         $schedule_template = schedule_template::where('is_delete','0')->where('id','!=',$iTemplateId)->orderBy('name','ASC')->pluck('id','name');
 
