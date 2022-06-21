@@ -384,7 +384,7 @@
                         //                             (isVobo ? '(Revisado por : ' + oVobo.user_name + ')' : '') : '');
                         return value_to_return + 
                                 (oData.isPrepayrollInspection ? '   <label class="container">' + 
-                                    '<input id="cb1" onchange="handleChangeCheck(event, ' + parseInt(group, 10) + ')" type="checkbox" ' + (isVobo ? 'checked' : '') + '>' + 
+                                    '<input id="cb'+parseInt(group, 10)+'" onchange="handleChangeCheck(event, ' + parseInt(group, 10) + ')" type="checkbox" ' + (isVobo ? 'checked' : '') + '>' + 
                                 ' <span class="checkmark"></span>' +
                                 '</label>' +
                                 (isVobo ? '(Revisado por : ' + oVobo.user_name + ')' : 'Dar OK') : '')

@@ -383,11 +383,6 @@ class SDataProcess {
                                 }
                             }
                         }
-                        else {
-                            foreach ($adjs as $adj) {
-                                $newRow->adjusts[] = $adj;
-                            }
-                        }
                     }
 
                     $isNew = false;
@@ -451,11 +446,6 @@ class SDataProcess {
                                     }
                                 }
                                 $newRow->hasCheckOut = false;
-                            }
-                            else {
-                                foreach ($adjs as $adj) {
-                                    $newRow->adjusts[] = $adj;
-                                }
                             }
                         }
     
@@ -523,11 +513,6 @@ class SDataProcess {
                                 if($comments->where('key_code','hasCheckIn')->first()['value']) {
                                     $newRow->isDayChecked = true;
                                 }
-                            }
-                        }
-                        else {
-                            foreach ($adjs as $adj) {
-                                $newRow->adjusts[] = $adj;
                             }
                         }
                     }
@@ -637,11 +622,6 @@ class SDataProcess {
                                 }
                             }
                             $newRow->hasCheckOut = false;
-                        }
-                        else {
-                            foreach ($adjs as $adj) {
-                                $newRow->adjusts[] = $adj;
-                            }
                         }
                         $again = true;
                         $isNew = true;
@@ -1089,7 +1069,6 @@ class SDataProcess {
                                         if ($time == $adj->dt_time) {
                                             $hasDelay = false;
                                             $consumAdjs[] = $adj->id;
-                                            $oRow->adjusts[] = $adj;
                                         }
                                     }
                                 }
@@ -1138,7 +1117,6 @@ class SDataProcess {
                             if (count($adjs) > 0) {
                                 foreach ($adjs as $adj) {
                                     $discountMins += $adj->minutes;
-                                    $oRow->adjusts[] = $adj;
                                 }
                             }
 
@@ -1177,7 +1155,6 @@ class SDataProcess {
                             if (count($adjs) > 0) {
                                 foreach ($adjs as $adj) {
                                     $discountMins += $adj->minutes;
-                                    $oRow->adjusts[] = $adj;
                                 }
                             }
 
@@ -1229,7 +1206,6 @@ class SDataProcess {
                 $minsExtraByAdj = 0;
                 foreach ($adjs as $adj) {
                     $minsExtraByAdj += $adj->minutes;
-                    $oRow->adjusts[] = $adj;
                 }
 
                 $oRow->overMinsByAdjs = $oRow->overMinsByAdjs + $minsExtraByAdj;
@@ -1561,7 +1537,6 @@ class SDataProcess {
                                     if ($time == $adj->dt_time) {
                                         $withAbs = false;
                                         $consumAdjs[] = $adj->id;
-                                        $oRow->adjusts[] = $adj;
                                     }
                                 }
                             }

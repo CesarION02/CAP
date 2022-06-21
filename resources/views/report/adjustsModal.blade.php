@@ -12,19 +12,19 @@
         <div class="row">
           <div class="col-xs-offset-1 col-xs-11">
             <div class="form-check">
-              <input class="form-check-input" type="radio" v-model="adjCategory" v-on:change="onAdjustChange()" value="2">
+              <input :disabled="checkEmployee" class="form-check-input" type="radio" v-model="adjCategory" v-on:change="onAdjustChange()" value="2">
               <label class="form-check-label">
                 Crear comentario
               </label>
             </div>
             <div class="form-check">
-              <input class="form-check-input" type="radio" v-model="adjCategory" v-on:change="onAdjustChange()" value="0">
+              <input :disabled="checkEmployee" class="form-check-input" type="radio" v-model="adjCategory" v-on:change="onAdjustChange()" value="0">
               <label class="form-check-label">
                 Ajustar prenómina
               </label>
             </div>
             <div class="form-check">
-              <input class="form-check-input" type="radio" v-model="adjCategory" v-on:change="onAdjustChange()" value="1">
+              <input :disabled="checkEmployee" class="form-check-input" type="radio" v-model="adjCategory" v-on:change="onAdjustChange()" value="1">
               <label class="form-check-label">
                 Ajustar entrada y/o salida
               </label>
@@ -39,7 +39,7 @@
               <div class="row">
                 <div class="col-md-4"><label for="">Tipo de ajuste:*</label></div>
                 <div class="col-md-8">
-                  <select :disabled="!adjTypeEnabled" v-model="adjType" class="form-control" v-on:change="onTypeChange()">
+                  <select :disabled="!adjTypeEnabled || checkEmployee" v-model="adjType" class="form-control" v-on:change="onTypeChange()">
                     <option v-for="adjT in vData.adjTypes" :value="adjT.id">@{{ adjT.type_code + '-' + adjT.type_name }}</option>
                   </select>
                 </div>
@@ -55,32 +55,32 @@
               <div class="row">
                 <div class="col-md-4"><label for="">Copiar comentario anterior:</label></div>
                 <div class="col-md-1">
-                  <button class="btn btn-success" v-on:click="addPreviusComment()"><span class="glyphicon glyphicon-copy"></span> Copiar anterior</button>
+                  <button :disabled="checkEmployee" class="btn btn-success" v-on:click="addPreviusComment()"><span class="glyphicon glyphicon-copy"></span> Copiar anterior</button>
                 </div>
               </div>
               <br>
               <div class="row">
                 <div class="col-md-4"><label for="">Comentarios frecuentes:</label></div>
                 <div class="col-md-7">
-                  <select class="form-control" v-model="selComment" :disabled="!haveComments">
+                  <select class="form-control" v-model="selComment" :disabled="!haveComments || checkEmployee">
                     <option v-for="comment in lComments">@{{comment.comment}}</option>
                   </select>
                 </div>
                 <div class="col-md-1">
-                  <button class="btn btn-success" style="border-radius: 50%; padding: 3px 6px; font-size: 10px;" v-on:click="addComment()" :disabled="!haveComments"><span class="glyphicon glyphicon-plus"></span></button>
+                  <button :disabled="checkEmployee" class="btn btn-success" style="border-radius: 50%; padding: 3px 6px; font-size: 10px;" v-on:click="addComment()" :disabled="!haveComments"><span class="glyphicon glyphicon-plus"></span></button>
                 </div>
               </div>
               <br>
               <div class="row">
                 <div class="col-md-4"><label for="">Comentarios:</label></div>
                 <div class="col-md-8">
-                  <textarea v-model="comments" class="form-control" style="resize: none; width: 350px; height: 115px;">@{{comments}}</textarea>
+                  <textarea :disabled="checkEmployee" v-model="comments" class="form-control" style="resize: none; width: 350px; height: 115px;">@{{comments}}</textarea>
                 </div>
               </div>
               <br>
               <div class="row">
                 <div class="col-md-offset-10 col-md-1">
-                  <button type="button" v-on:click="newAdjust()" class="btn btn-success">Ajustar</button>
+                  <button :disabled="checkEmployee" type="button" v-on:click="newAdjust()" class="btn btn-success">Ajustar</button>
                 </div>
               </div>
             </div>
@@ -93,7 +93,7 @@
                       @{{ rowAdj.type_code + '-' + rowAdj.type_name + 
                         ((rowAdj.comments != null && rowAdj.comments.length > 0) ? (' / ' + rowAdj.comments) : '')
                         + (rowAdj.minutes > 0 ? (' / ' + rowAdj.minutes + ' min') : '') }}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close" v-on:click="deleteAdjust(rowAdj)">
+                    <button v-if="!checkEmployee" type="button" class="close" data-dismiss="alert" aria-label="Close" v-on:click="deleteAdjust(rowAdj)">
                         <span aria-hidden="true">&times;</span>
                       </button>
                 </li>
@@ -118,7 +118,7 @@
               </div>
             </div>
           </div>
-          <div class="row">
+          <div v-if="checkEmployee" class="row">
             <div class="col-xs-3 col-xs-offset-9">
               <button :disabled="!isModifOut && !isModifIn" type="button" class="btn btn-success" v-on:click="adjustTimes()">Ajustar</button>
             </div>

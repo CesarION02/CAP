@@ -805,6 +805,28 @@ class ReporteController extends Controller
                     $isPrepayrollInspection = true;
                 }
             }
+            
+            foreach($lRows as $row){
+                $inDate = Carbon::parse($row->inDateTime);
+                $outDate = Carbon::parse($row->outDateTime);
+
+                $adjs = $lAdjusts->where('employee_id', $row->idEmployee)
+                                ->whereBetween('dt_date', [$inDate->format('Y-m-d'), $outDate->format('Y-m-d')]);
+                
+                foreach($adjs as $adj){
+                    if($adj->apply_to == 1){
+                        $tiime = $adj->dt_time != null ? (' '.$adj->dt_time) : '';
+                        if($adj->dt_date.$tiime == $row->inDateTime){
+                            array_push($row->adjusts, $adj);
+                        }
+                    }else if($adj->apply_to == 2){
+                        $tiime = $adj->dt_time != null ? (' '.$adj->dt_time) : '';
+                        if($adj->dt_date.$tiime == $row->outDateTime){
+                            array_push($row->adjusts, $adj);
+                        }
+                    }
+                }
+            }
 
             return view('report.reportDelaysView')
                     ->with('tReport', \SCons::REP_HR_EX)

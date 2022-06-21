@@ -375,6 +375,37 @@ class PrepayrollReportController extends Controller
         return true;
     }
 
+    public static function canMakeAdjustByEmployee($employee_id, $dtDate, $payTypeId){
+        $number = SDateUtils::getNumberOfDate($dtDate, $payTypeId);
+
+        $oDate = Carbon::parse($dtDate);
+
+        $lVobos = \DB::table('prepayroll_report_emp_vobos AS prev');
+
+        $week_biWeek = "semana/quincena";
+
+        if ($payTypeId == \SCons::PAY_W_Q) {
+            $week_biWeek = "quincena";
+            $lVobos = $lVobos->where('prev.is_biweek', true)
+                            ->where('prev.num_biweek', $number);
+        }
+        else {
+            $week_biWeek = "semana";
+            $lVobos = $lVobos->where('prev.is_week', true)
+                            ->where('prev.num_week', $number);
+        }
+
+        $lVobos = $lVobos->where('prev.is_delete', false)
+                            ->where('prev.year', $oDate->year)
+                            ->get();
+
+        if (count($lVobos) == 0) {
+            return true;
+        }else{
+            return "La ".$week_biWeek." tiene visto bueno.";
+        }
+    }
+
     /**
      * Determina si la prenómina no tiene pendientes vistos buenos
      *
