@@ -280,7 +280,7 @@ class SPrepayrollUtils {
             return false;
         }
 
-        if (! env('VOBO_BY_EMP_ENABLED')) {
+        if (! env('VOBO_BY_EMP_ENABLED', true)) {
             return true;
         }
         
