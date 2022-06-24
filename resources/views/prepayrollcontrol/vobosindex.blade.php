@@ -35,32 +35,36 @@
             url:'{{ $routeChildren }}',
             data:{ idprenomina: value, id: id, _token: '{{csrf_token()}}' },
             success:function(data) {
-                if (data.users.length != 0) {
+                if (data.users.length > 0) {
                     for (var i = 0; i < data.users.length; i++) {
                         text = text + data.users[i] + ', ';
                     }
 
-                    swal("¡Error!", "Los usuarios: " + text + " no han dado el visto bueno.", "error");
-
-                    // Se comenta confirmación por solicitud de Sergio Flores: no se puede dar Vobo si los
-                    // usuarios que dependen de ti no han dado vobo.
-                    // swal({
-                    //     title: "Continuar con el visto bueno?",
-                    //     text: "los usuarios: " + text + " no han dado el visto bueno",
-                    //     icon: "warning",
-                    //     buttons: {
-                    //         confirm : {text:'Continuar', className:'sweet-warning'},
-                    //         cancel : 'Cancelar'
-                    //     },
-                    //     // dangerMode: true,
-                    // })
-                    // .then((acepted) => {
-                    //     if (acepted) {
-                    //         document.getElementById('form_vobo').submit();
-                    //     } else {
-                    //         swal("No se ha dado el visto bueno");
-                    //     }
-                    // });
+                    if (data.bCanSkip != undefined && data.bCanSkip) {
+                        // Se comenta confirmación por solicitud de Sergio Flores: no se puede dar Vobo si los usuarios que dependen de ti no han dado vobo.
+                        swal({
+                            title: "¿Continuar con el visto bueno?",
+                            text: "Los usuarios: " + text + " no han dado el visto bueno",
+                            icon: "warning",
+                            buttons: {
+                                confirm : {text:'Continuar', className:'sweet-warning'},
+                                cancel : 'Cancelar'
+                            },
+                            // dangerMode: true,
+                        })
+                        .then((acepted) => {
+                            if (acepted) {
+                                let canSkipElement = document.getElementById('can_skip_id');
+                                canSkipElement.value = 1;
+                                document.getElementById('form_vobo').submit();
+                            } else {
+                                swal("No se ha dado el visto bueno");
+                            }
+                        });
+                    }
+                    else {
+                        swal("¡Error!", "Los usuarios: " + text + " no han dado el visto bueno.", "error");
+                    }
                 }
                 else {
                     document.getElementById('form_vobo').submit();
@@ -292,6 +296,7 @@
                                         @if(! $oCtrl->is_vobo)
                                             <form id="form_vobo" action="{{ route('dar_vobo', [$oCtrl->id_control, $idPreNomina]) }}" method="POST">
                                                 @csrf
+                                                <input type="hidden" id="can_skip_id" name="can_skip" value="0">
                                                 <button onclick="checkPrevius({{$oCtrl->id_control}})" title="Visto bueno" type="button" id="btnSubmit"><i class="fa fa-check" aria-hidden="true"></i></button>
                                             </form>
                                         @endif
