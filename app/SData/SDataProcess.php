@@ -1199,8 +1199,10 @@ class SDataProcess {
                             $oRow->overDefaultMins = 0;
                             $oRow->overScheduleMins = 0;
 
-                            $oRow->comments = $oRow->comments."Jornada incompleta. ";
-                            $oRow->isOverJourney = false;
+                            if ($oRow->hasSchedule && $oRow->inDateTimeSch != null && $oRow->outDateTimeSch != null) {
+                                $oRow->comments = $oRow->comments."Jornada incompleta. ";
+                                $oRow->isOverJourney = false;
+                            }
                         }
                     }
                     else {
@@ -1208,8 +1210,10 @@ class SDataProcess {
                         $oRow->overDefaultMins = 0;
                         $oRow->overScheduleMins = 0;
                         
-                        $oRow->comments = $oRow->comments."Jornada incompleta. ";
-                        $oRow->isOverJourney = false;
+                        if ($oRow->hasSchedule && $oRow->inDateTimeSch != null && $oRow->outDateTimeSch != null) {
+                            $oRow->comments = $oRow->comments."Jornada incompleta. ";
+                            $oRow->isOverJourney = false;
+                        }
                     }
                 }
             }
