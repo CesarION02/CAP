@@ -58,6 +58,7 @@
                         <th>fecha</th>
                         <th>Hora</th>
                         <th>Tipo</th>
+                        <th>-</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -65,11 +66,13 @@
                         <td>@{{registry.date}}</td>
                         <td>@{{registry.time}}</td>
                         <td>@{{registry.type_id == 1 ? 'ENTRADA' : ( registry.type_id == 2 ? 'SALIDA' : '')}}</td>
+                        <td>@{{registry.form_creation_id == 2 ? 'Registro manual' : ( registry.form_creation_id == 4 ? 'Registro checador' : '')}}</td>
                     </tr>
                 </tbody>
             </table>
+            <p v-if="canCheck" style="color: red;">@{{messageChecks}}</p>
+            <p v-if="lIncidents.length > 0 && canCheck" style="color: red;">El colaborador tiene una incidencia para el dia @{{date}}</p>
         @endif
-        
     </div>
 </div>
 <div class="form-group">
