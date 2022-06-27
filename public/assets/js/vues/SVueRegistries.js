@@ -46,13 +46,53 @@ var app = new Vue({
                 if(this.date != null){
                     if(this.time != null){
                         if(this.picked == 'single'){
-                            if(this.type != 0){
-                                $('#form-general').submit();
+                            var checkType = "";
+                            switch (this.type) {
+                                case 1:
+                                    if(this.lRegistries.length > 0){
+                                        for (let i = (this.lRegistries.length - 1); i >= 0; i--) {
+                                            if(this.lRegistries[i].type_id == 1){
+                                                checkType = "entrada";
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    break;
+                                case 2:
+                                    if(this.lRegistries.length > 0){
+                                        for (let i = (this.lRegistries.length - 1); i >= 0; i--) {
+                                            if(this.lRegistries[i].type_id == 1){
+                                                checkType = "salida";
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    break;
+                                case 0:
+                                    oGui.showError('Debe seleccionar tipo checada');
+                                    break;
+                                default:
+                                    break;
+                            }
+                            if(checkType != ""){
+                                (async () => {
+                                    if (await oGui.confirm('Ya existe una '+ checkType,'Desea agregar una nueva?','warning')) {
+                                        $('#form-general').submit();
+                                    }
+                                })();
                             }else{
-                                oGui.showError('Debe seleccionar tipo checada');    
+                                $('#form-general').submit();
                             }
                         }else{
-                            $('#form-general').submit();
+                            if(this.lRegistries.length > 0){
+                                (async () => {
+                                    if (await oGui.confirm('Ya existe una entrada/salida','Desea agregar una nueva?','warning')) {
+                                        $('#form-general').submit();
+                                    }
+                                })();
+                            }else{
+                                $('#form-general').submit();
+                            }
                         }
                     }else{
                         oGui.showError('Debe seleccionar una hora');    
