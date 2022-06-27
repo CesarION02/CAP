@@ -47,7 +47,7 @@ var app = new Vue({
                     if(this.time != null){
                         if(this.picked == 'single'){
                             var checkType = "";
-                            switch (this.type) {
+                            switch (parseInt(this.type)) {
                                 case 1:
                                     if(this.lRegistries.length > 0){
                                         for (let i = (this.lRegistries.length - 1); i >= 0; i--) {
@@ -69,7 +69,6 @@ var app = new Vue({
                                     }
                                     break;
                                 case 0:
-                                    oGui.showError('Debe seleccionar tipo checada');
                                     break;
                                 default:
                                     break;
@@ -80,19 +79,13 @@ var app = new Vue({
                                         $('#form-general').submit();
                                     }
                                 })();
-                            }else{
+                            }else if(parseInt(this.type) != 0){
                                 $('#form-general').submit();
+                            }else{
+                                oGui.showError('Debe seleccionar tipo checada');
                             }
                         }else{
-                            if(this.lRegistries.length > 0){
-                                (async () => {
-                                    if (await oGui.confirm('Ya existe una entrada/salida','Desea agregar una nueva?','warning')) {
-                                        $('#form-general').submit();
-                                    }
-                                })();
-                            }else{
-                                $('#form-general').submit();
-                            }
+                            $('#form-general').submit();
                         }
                     }else{
                         oGui.showError('Debe seleccionar una hora');    
