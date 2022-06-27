@@ -334,7 +334,8 @@ class employeeController extends Controller
         $policy = policy_extratime::orderBy('id')->pluck('id','name');
         $ben_pol = benefitsPolice::orderBy('id')->pluck('id','name');
         $rol = session()->get('rol_id');
-        return view('employee.editShortname')->with('data',$data)->with('departments',$departments)->with('policy',$policy)->with('ben_pol',$ben_pol)->with('rol',$rol);    
+        $rutaPuesto = route('puesto_employee',['id' => $id]);
+        return view('employee.editShortname')->with('data',$data)->with('departments',$departments)->with('policy',$policy)->with('ben_pol',$ben_pol)->with('rol',$rol)->with('rutaPuesto',$rutaPuesto);    
     }
 
     public function updateShortname (Request $request, $id){
