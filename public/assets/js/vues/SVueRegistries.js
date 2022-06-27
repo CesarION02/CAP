@@ -9,7 +9,9 @@ var app = new Vue({
         time: null,
         type: 0,
         lRegistries: [],
+        lIncidents: [],
         canCheck: false,
+        messageChecks: "",
     },
     monuted() {
         
@@ -19,14 +21,28 @@ var app = new Vue({
             this.isSingle = this.picked == 'single';
         },
         getChecks(route){
+            this.messageChecks = "";
             if(this.employee != 0 && this.date != null){
                 axios.post(route, {
                     employee_id: this.employee,
                     date: this.date
                 })
                 .then(response => {
-                    console.log(response);
                     this.lRegistries = response.data.lRegistries;
+                    this.lIncidents = response.data.lIncidents;
+                    var haveEntry = false;
+                    var haveDeparture = false;
+                    for (let i = (this.lRegistries.length - 1); i >= 0; i--) {
+                        this.lRegistries[i].type_id == 1 ? haveEntry = true : '';
+                        this.lRegistries[i].type_id == 2 ? haveDeparture = true : '';
+                    }
+                    if(!haveEntry && !haveDeparture){
+                        this.messageChecks = "No existen checadas del dia";
+                    }else if(!haveEntry){
+                        this.messageChecks = "Falta entrada para completar el dia";
+                    }else if(!haveDeparture){
+                        this.messageChecks = "Falta salida para completar el dia";
+                    }
                     this.canCheck = (this.date != null && this.employee != 0) ? true : false;
                     if(this.lRegistries.length > 0){
                         oGui.showOk();
@@ -106,6 +122,7 @@ var app = new Vue({
             this.type = 0;
             this.lRegistries = [];
             this.canCheck = false;
+            this.messageChecks = "";
             $('#selEmployee').val(0).trigger('chosen:updated');
         }
     },

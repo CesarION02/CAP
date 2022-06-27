@@ -80,10 +80,16 @@ class RegisterController extends Controller
         $lRegistries = \DB::table('registers')
                         ->where('employee_id', $request->employee_id)
                         ->where('date',$request->date)
-                        ->select('date','time','type_id')
+                        ->select('date','time','type_id', 'form_creation_id')
                         ->get();
-        
-        return response()->json(['lRegistries' => $lRegistries]);
+
+        $lIncidents = \DB::table('incidents')
+                        ->where('employee_id', $request->employee_id)
+                        ->where('start_date','<=',$request->date)
+                        ->where('end_date','>=',$request->date)
+                        ->get();
+                
+        return response()->json(['lRegistries' => $lRegistries, 'lIncidents' => $lIncidents]);
     }
 
     public function create()
