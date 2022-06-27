@@ -19,7 +19,6 @@ $(document).on('change', '.departamento', function(e) {
         },
         error: function() {
             console.log('falle');
-            console.log(this.url);
         }
     });
 });

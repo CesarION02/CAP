@@ -67,14 +67,17 @@ class employeeController extends Controller
             $numColl = employees::max('num_employee');
             $numColl++;
         }
-        
+        $rutaPuesto = route('puesto_employee',['id' => $becario]);
         return view('employee.create')->with('way',$way)
                                         ->with('job',$job)
                                         ->with('becario',$becario)
                                         ->with('numColl', $numColl)
                                         ->with('department',$department)
                                         ->with('benPols',$benPols)
-                                        ->with('policy',$policy);
+                                        ->with('policy',$policy)
+                                        ->with('rutaPuesto',$rutaPuesto)
+                                        ->with('dept_rh',null)
+                                        ->with('job_rh',null);
     }
 
     /**
@@ -135,7 +138,7 @@ class employeeController extends Controller
             $dept_rh = null;
             $job_rh = null;
         }
-
+        $rutaPuesto = route('puesto_employee',['id' => $id]);
         return view('employee.edit', compact('data'))
                                         ->with('way',$way)
                                         ->with('becario', $becario)
@@ -143,7 +146,8 @@ class employeeController extends Controller
                                         ->with('dept_rh',$dept_rh)
                                         ->with('job_rh',$job_rh)
                                         ->with('benPols',$benPols)
-                                        ->with('policy',$policy);
+                                        ->with('policy',$policy)
+                                        ->with('rutaPuesto',$rutaPuesto);
     }
 
     /**
