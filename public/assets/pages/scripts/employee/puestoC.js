@@ -3,7 +3,7 @@ $(document).on('change', '.departamento', function(e) {
 
     $.ajax({
         type: 'get',
-        url: '../puesto',
+        url: rutaPuesto,
         data: { 'departamento': departamento },
 
         success: function(data) {
@@ -19,6 +19,7 @@ $(document).on('change', '.departamento', function(e) {
         },
         error: function() {
             console.log('falle');
+            console.log(this.url);
         }
     });
 });
@@ -28,7 +29,7 @@ $(document).ready(function() {
 
     $.ajax({
         type: 'get',
-        url: '../puesto',
+        url: rutaPuesto,
         data: { 'departamento': departamento },
 
         success: function(data) {
