@@ -668,12 +668,13 @@ class employeeController extends Controller
         $benPols = benefitsPolice::orderBy('name','ASC')->pluck('id','name');
         $data = employees::findOrFail($id);
         $policy = policy_extratime::orderBy('id')->pluck('id','name');
-
+        $rutaPuesto = route('puesto_employee',['id' => $id]);
         return view('employee.editoutstanding', compact('data'))
                                         ->with('way',$way)
                                         ->with('department',$departments)
                                         ->with('benPols',$benPols)
-                                        ->with('policy',$policy);    
+                                        ->with('policy',$policy)  
+                                        ->with('rutaPuesto',$rutaPuesto);
     }
     public function updateoutstanding(Request $request, $id)
     {
