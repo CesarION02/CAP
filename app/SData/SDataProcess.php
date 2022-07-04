@@ -602,7 +602,7 @@ class SDataProcess {
                                     return 0;
                                 }
                             }
-                            if (! $night && $bAfterDay) {
+                            if ((! $night && $bAfterDay) || (! $night && $newRow->inDate < $registry->date)) {
                                 $result->pinnedDateTime->subDay();
                             }
 
