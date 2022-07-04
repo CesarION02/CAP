@@ -67,14 +67,17 @@ class employeeController extends Controller
             $numColl = employees::max('num_employee');
             $numColl++;
         }
-        
+        $rutaPuesto = route('puesto_employee',['id' => $becario]);
         return view('employee.create')->with('way',$way)
                                         ->with('job',$job)
                                         ->with('becario',$becario)
                                         ->with('numColl', $numColl)
                                         ->with('department',$department)
                                         ->with('benPols',$benPols)
-                                        ->with('policy',$policy);
+                                        ->with('policy',$policy)
+                                        ->with('rutaPuesto',$rutaPuesto)
+                                        ->with('dept_rh',null)
+                                        ->with('job_rh',null);
     }
 
     /**
@@ -135,7 +138,7 @@ class employeeController extends Controller
             $dept_rh = null;
             $job_rh = null;
         }
-
+        $rutaPuesto = route('puesto_employee',['id' => $id]);
         return view('employee.edit', compact('data'))
                                         ->with('way',$way)
                                         ->with('becario', $becario)
@@ -143,7 +146,8 @@ class employeeController extends Controller
                                         ->with('dept_rh',$dept_rh)
                                         ->with('job_rh',$job_rh)
                                         ->with('benPols',$benPols)
-                                        ->with('policy',$policy);
+                                        ->with('policy',$policy)
+                                        ->with('rutaPuesto',$rutaPuesto);
     }
 
     /**
@@ -334,7 +338,8 @@ class employeeController extends Controller
         $policy = policy_extratime::orderBy('id')->pluck('id','name');
         $ben_pol = benefitsPolice::orderBy('id')->pluck('id','name');
         $rol = session()->get('rol_id');
-        return view('employee.editShortname')->with('data',$data)->with('departments',$departments)->with('policy',$policy)->with('ben_pol',$ben_pol)->with('rol',$rol);    
+        $rutaPuesto = route('puesto_employee',['id' => $id]);
+        return view('employee.editShortname')->with('data',$data)->with('departments',$departments)->with('policy',$policy)->with('ben_pol',$ben_pol)->with('rol',$rol)->with('rutaPuesto',$rutaPuesto);    
     }
 
     public function updateShortname (Request $request, $id){
@@ -663,12 +668,13 @@ class employeeController extends Controller
         $benPols = benefitsPolice::orderBy('name','ASC')->pluck('id','name');
         $data = employees::findOrFail($id);
         $policy = policy_extratime::orderBy('id')->pluck('id','name');
-
+        $rutaPuesto = route('puesto_employee',['id' => $id]);
         return view('employee.editoutstanding', compact('data'))
                                         ->with('way',$way)
                                         ->with('department',$departments)
                                         ->with('benPols',$benPols)
-                                        ->with('policy',$policy);    
+                                        ->with('policy',$policy)  
+                                        ->with('rutaPuesto',$rutaPuesto);
     }
     public function updateoutstanding(Request $request, $id)
     {

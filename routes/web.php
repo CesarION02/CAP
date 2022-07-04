@@ -223,7 +223,7 @@ Route::delete('employees/terminarconfiguracion/{id}', 'employeeController@confir
 Route::get('employees/foraneos', 'employeeController@foraneos')->name('foraneos');
 Route::delete('employees/enviarForaneos/{id}', 'employeeController@enviarForaneos')->name('enviar_empleado_foraneo');
 Route::put('employee/outstanding/{id}', 'employeeController@updateoutstanding')->name('actualizar_empleado_faltante');
-Route::get('employee/{id}/puesto','employeeController@jobs')->name('puesto');
+Route::get('employee/{id}/puesto','employeeController@jobs')->name('puesto_employee');
 Route::get('outstanding', 'employeeController@outstandingemployees')->name('empleados_pendientes');
 Route::get('employees/becarios', 'employeeController@becarios')->name('becarios');
 Route::get('employee/{id}/editoutstanding', 'employeeController@editoutstanding')->name('editar_empleado_faltante');
