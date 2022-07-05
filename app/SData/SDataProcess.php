@@ -491,8 +491,8 @@ class SDataProcess {
 
                     if (! $bFound) {
                         $newRow->outDate = $result->variableDateTime->toDateString();
-                        $newRow->outDateTime = $result->variableDateTime->format('Y-m-d   H:i:s');
-                        $newRow->outDateTimeSch = $result->pinnedDateTime->format('Y-m-d   H:i:s');
+                        $newRow->outDateTime = $result->variableDateTime->format('Y-m-d H:i:s');
+                        $newRow->outDateTimeSch = $result->pinnedDateTime->format('Y-m-d H:i:s');
                         $newRow->isModifiedOut = isset($result->registry->is_modified) ? $result->registry->is_modified : false;
 
                         $newRow->cutId = SDelayReportUtils::getCutId($result);

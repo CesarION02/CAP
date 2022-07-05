@@ -196,6 +196,13 @@ class prepayrollAdjustController extends Controller
 
         SPrepayrollAdjustUtils::verifyProcessedData($oAdjust->employee_id, $oAdjust->dt_date);
 
+        $type = \DB::table('prepayroll_adjusts_types as pat')
+                    ->where('id', $oAdjust->adjust_type_id)
+                    ->first();
+
+        $oAdjust->type_code = $type->type_code;
+        $oAdjust->type_name = $type->type_name;
+
         return json_encode(['success' => true, 'msg' => 'Ajuste aplicado correctamente.', 'data' => $oAdjust]);
     }
 

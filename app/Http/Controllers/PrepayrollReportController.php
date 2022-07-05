@@ -380,7 +380,8 @@ class PrepayrollReportController extends Controller
 
         $oDate = Carbon::parse($dtDate);
 
-        $lVobos = \DB::table('prepayroll_report_emp_vobos AS prev');
+        $lVobos = \DB::table('prepayroll_report_emp_vobos AS prev')
+                        ->where('employee_id', $employee_id);
 
         $week_biWeek = "semana/quincena";
 

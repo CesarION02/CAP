@@ -2,6 +2,7 @@
 @section('styles1')
     <link rel="stylesheet" href="{{ asset("dt/datatables.css") }}">
     <link rel="stylesheet" href="{{ asset("assets/css/reportD.css") }}">
+    <link href="{{ asset("select2js/css/select2.min.css") }}" rel="stylesheet" />
     <style>
         tr {
             font-size: 70%;
@@ -147,6 +148,7 @@
     <script src="{{ asset("js/excel/FileSaver.min.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/moment/moment.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/moment/datetime-moment.js") }}" type="text/javascript"></script>
+    <script src="{{ asset('select2js/js/select2.min.js') }}"></script>
     
     <script>
         function GlobalData () {
@@ -525,4 +527,9 @@
 
     <script src="{{asset("assets/pages/scripts/report/SReportRow.js")}}" type="text/javascript"></script>
     <script src="{{asset("assets/pages/scripts/report/SExportExcel.js")}}" type="text/javascript"></script>
+    <script>
+        $(document).ready(function() {
+            $('.select2-class').select2();
+        });
+    </script>
 @endsection

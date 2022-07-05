@@ -25,6 +25,10 @@ var app = new Vue({
     },
     mounted() {
         this.haveComments = this.lComments.length > 0;
+        let self = this;
+        $('#comentFrec').on('select2:select', function (e) {
+            self.selComment = e.params.data.text;
+        });
     },
     methods: {
         getCssClass(oRow, report) {
@@ -111,10 +115,9 @@ var app = new Vue({
 
                     if (oRes.success) {
                         this.vRow.labelUpd = true;
-                        if(res.data.data.adjust_type_id == oData.ADJ_CONS.COM){
-                            this.vRow.adjusts.push(res.data.data);
-                        }
-                        this.setRowAdjusts();
+                        this.vRow.adjusts.push(res.data.data);
+                        // this.setRowAdjusts();
+                        this.rowAdjusts = this.vRow.adjusts;
                         this.comments = "";
                         oGui.showOk();
                     } else {
@@ -171,14 +174,13 @@ var app = new Vue({
 
                     if (oRes.success) {
                         this.vRow.labelUpd = true;
-                        if(oRes.data.adjust_type_id == oData.ADJ_CONS.COM){
-                            for(var i = 0; i < this.vRow.adjusts.length; i++){
-                                if(this.vRow.adjusts[i].id == oRes.data.id){
-                                    this.vRow.adjusts.splice(i, 1);
-                                }
+                        for(var i = 0; i < this.vRow.adjusts.length; i++){
+                            if(this.vRow.adjusts[i].id == oRes.data.id){
+                                this.vRow.adjusts.splice(i, 1);
                             }
                         }
-                        this.setRowAdjusts();
+                        // this.setRowAdjusts();
+                        this.rowAdjusts = this.vRow.adjusts;
                         this.comments = "";
                         oGui.showOk();
                     } else {
@@ -190,10 +192,11 @@ var app = new Vue({
                 });
         },
         showModal(oRow, index) {
+            $('#comentFrec').val('').trigger('change');
             this.vRow = oRow;
             this.indexRow = index;
-            this.setRowAdjusts();
-
+            // this.setRowAdjusts();
+            this.rowAdjusts = oRow.adjusts;
             this.adjType = 1;
             this.minsEnabled = false;
             this.overMins = 0;

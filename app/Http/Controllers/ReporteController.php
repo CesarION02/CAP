@@ -816,12 +816,16 @@ class ReporteController extends Controller
                 foreach($adjs as $adj){
                     if($adj->apply_to == 1){
                         $tiime = $adj->dt_time != null ? (' '.$adj->dt_time) : '';
-                        if($adj->dt_date.$tiime == $row->inDateTime){
+                        $adj_date = Carbon::parse($adj->dt_date.$tiime);
+                        $row_date = Carbon::parse($row->inDateTime);
+                        if($adj_date->eq($row_date)){
                             array_push($row->adjusts, $adj);
                         }
                     }else if($adj->apply_to == 2){
                         $tiime = $adj->dt_time != null ? (' '.$adj->dt_time) : '';
-                        if($adj->dt_date.$tiime == $row->outDateTime){
+                        $adj_date = Carbon::parse($adj->dt_date.$tiime);
+                        $row_date = Carbon::parse($row->outDateTime);
+                        if($adj_date->eq($row_date)){
                             array_push($row->adjusts, $adj);
                         }
                     }
