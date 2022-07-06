@@ -19,7 +19,12 @@
             <label>
               <input type="checkbox" name="is_required" {{ isset($oCfg) && $oCfg->is_required ? 'checked' : '' }}> Es requerido
             </label>
-          </div>
+        </div>
+        <div class="checkbox">
+            <label>
+              <input type="checkbox" name="is_global" {{ isset($oCfg) && $oCfg->is_global ? 'checked' : '' }}> Es global
+            </label>
+        </div>
         <div class="form-group">
             <label for="rol_n_name">Rol de usuarios</label>
             <input type="text" class="form-control" id="rol_n_name" name="rol_n_name" placeholder="rol">
