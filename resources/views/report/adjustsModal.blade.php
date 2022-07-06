@@ -24,6 +24,12 @@
               </label>
             </div>
             <div class="form-check">
+              <input :disabled="checkEmployee" class="form-check-input" type="radio" v-model="adjCategory" v-on:change="onAdjustChange()" value="3">
+              <label class="form-check-label">
+                Rango de comentarios
+              </label>
+            </div>
+            <div class="form-check">
               <input :disabled="checkEmployee" class="form-check-input" type="radio" v-model="adjCategory" v-on:change="onAdjustChange()" value="1">
               <label class="form-check-label">
                 Ajustar entrada y/o salida
@@ -33,7 +39,7 @@
         </div>
         <br>
         <br>
-        <div v-if="adjCategory == 0 || adjCategory == 2" class="row">
+        <div v-if="adjCategory == 0 || adjCategory == 2 || adjCategory == 3" class="row">
           <div class="row">
             <div class="col-md-offset-1 col-md-10">
               <div class="row">
@@ -52,7 +58,21 @@
                 </div>
               </div>
               <br>
-              <div class="row">
+              <div v-if="adjCategory == 3" class="row">
+                <div class="col-md-4">
+                  <label>Rango:</label>
+                </div>
+                <div class="col-md-4">
+                  <label for="initDate">Fecha inicio:</label>
+                  <input type="date" name="initDate" v-model="dateInit" value="" :min="startDate" :max="endDate"/>
+                </div>
+                <div class="col-md-4">
+                  <label for="endDate">Fecha fin:</label>
+                  <input type="date" name="endDate" v-model="dateEnd" value="" :min="startDate" :max="endDate"/>
+                </div>
+              </div>
+              <br>
+              <div v-if="adjCategory != 3" class="row">
                 <div class="col-md-4"><label for="">Copiar comentario anterior:</label></div>
                 <div class="col-md-1">
                   <button :disabled="checkEmployee" class="btn btn-success" v-on:click="addPreviusComment()"><span class="glyphicon glyphicon-copy"></span> Copiar anterior</button>

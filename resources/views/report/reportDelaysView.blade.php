@@ -166,6 +166,11 @@
             this.REP_DELAY = <?php echo json_encode(\SCons::REP_DELAY) ?>;
             this.ADJ_CONS = <?php echo json_encode(\SCons::PP_TYPES) ?>;
             this.lComments = <?php echo json_encode($lComments) ?>;
+            this.startDate = <?php echo json_encode($sStartDate) ?>;
+            this.endDate = <?php echo json_encode($sEndDate) ?>;
+
+            // this.startDate = moment(this.startDate).format('DD-MM-YYYY');
+            // this.endDate = moment(this.endDate).format('DD-MM-YYYY');
 
             // this.minsCol = this.tReport == this.REP_DELAY ? 4 : 4;
             this.minsCol = 5;

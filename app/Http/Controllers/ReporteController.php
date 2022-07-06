@@ -757,7 +757,8 @@ class ReporteController extends Controller
                                     'pa.adjust_type_id',
                                     'pat.type_code',
                                     'pat.type_name',
-                                    'pa.id'
+                                    'pa.id',
+                                    'pa.apply_time'
                                     )
                         ->whereBetween('dt_date', [$sStartDate, $sEndDate])
                         ->where('is_delete', false)
@@ -816,15 +817,26 @@ class ReporteController extends Controller
                 foreach($adjs as $adj){
                     if($adj->apply_to == 1){
                         $tiime = $adj->dt_time != null ? (' '.$adj->dt_time) : '';
-                        $adj_date = Carbon::parse($adj->dt_date.$tiime);
-                        $row_date = Carbon::parse($row->inDateTime);
+                        if($adj->apply_time){
+                            $adj_date = Carbon::parse($adj->dt_date.$tiime);
+                            $row_date = Carbon::parse($row->inDateTime);
+                        }else{
+                            $adj_date = Carbon::parse($adj->dt_date);
+                            $row_date = Carbon::parse($row->inDate);
+                        }
+
                         if($adj_date->eq($row_date)){
                             array_push($row->adjusts, $adj);
                         }
                     }else if($adj->apply_to == 2){
                         $tiime = $adj->dt_time != null ? (' '.$adj->dt_time) : '';
-                        $adj_date = Carbon::parse($adj->dt_date.$tiime);
-                        $row_date = Carbon::parse($row->outDateTime);
+                        if($adj->apply_time){
+                            $adj_date = Carbon::parse($adj->dt_date.$tiime);
+                            $row_date = Carbon::parse($row->outDateTime);
+                        }else{
+                            $adj_date = Carbon::parse($adj->dt_date);
+                            $row_date = Carbon::parse($row->outDate);
+                        }
                         if($adj_date->eq($row_date)){
                             array_push($row->adjusts, $adj);
                         }
