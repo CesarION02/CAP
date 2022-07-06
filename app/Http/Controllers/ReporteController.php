@@ -472,14 +472,14 @@ class ReporteController extends Controller
                     ->with('startOfWeek', $config->startOfWeek);
     }
 
-    public function genHrExReportDelegations()
+    public function genHrExReportDelegations($id = 0)
     {
         $config = \App\SUtils\SConfiguration::getConfigurations();
 
         $payType = 0;
         $bDirect = 0;
         $iDelegations = 0;
-        $oPayrolls = SPayrollDelegationUtils::getDelegationsPayrolls(\Auth::user()->id);
+        $oPayrolls = SPayrollDelegationUtils::getDelegationsPayrolls($id == 0 ? \Auth::user()->id : $id);
 
         if (count($oPayrolls->weeks) == 0 && count($oPayrolls->biweeks) == 0) {
             return redirect()->back()->withErrors(['No hay semanas o quincenas delegadas para ti.']);
@@ -779,7 +779,7 @@ class ReporteController extends Controller
              */
             $isPrepayrollInspection = false;
             $lEmpVobos = [];
-            if (($payWay == \SCons::PAY_W_Q || $payWay == \SCons::PAY_W_S) && env('VOBO_BY_EMP_ENABLED')) {
+            if (($payWay == \SCons::PAY_W_S || $payWay == \SCons::PAY_W_Q) && env('VOBO_BY_EMP_ENABLED', true)) {
                 $number = SDateUtils::getNumberOfDate($sStartDate, $payWay);
                 $dates = SDateUtils::getDatesOfPayrollNumber($number, $oStartDate->year, $payWay);
                 

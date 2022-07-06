@@ -132,6 +132,7 @@
                             <th title="Número de semana">Tipo</th>
                             <th title="Orden de jerarquía">Orden</th>
                             <th title="Es requerido">Requerido</th>
+                            <th title="Es global">Global</th>
                             <th title="Rol">Rol</th>
                             <th title="Nombre de usuario">Usuario</th>
                             <th>-</th>
@@ -144,6 +145,7 @@
                                 <td>{{ $oCfg->is_week ? "SEMANA" : "QUINCENA" }}</td>
                                 <td>{{ $oCfg->order_vobo }}</td>
                                 <td>{{ $oCfg->is_required ? "SÍ" : "NO" }}</td>
+                                <td>{{ $oCfg->is_global ? "SÍ" : "NO" }}</td>
                                 <td>{{ $oCfg->rol_n_name }}</td>
                                 <td>{{ $oCfg->name }}</td>
                                 <td>

@@ -116,7 +116,7 @@ Route::get('report/reporteRegistros','ReporteController@reporteRegistrosView')->
 Route::get('report/reporteRetardos','ReporteController@genDelayReport')->name('generarreporteRetardos');
 Route::get('report/viewReporteRetardos','ReporteController@delaysReport')->name('reporteRetardos');
 Route::get('report/reportetiemposextra','ReporteController@genHrExReport')->name('generarreportetiemposextra');
-Route::get('report/reportetiemposextradelegados','ReporteController@genHrExReportDelegations')->name('generarreportetiemposextradel');
+Route::get('report/reportetiemposextradelegados/{id?}','ReporteController@genHrExReportDelegations')->name('generarreportetiemposextradel');
 Route::get('report/viewtiemposextra','ReporteController@hrExtReport')->name('reportetiemposextra');
 Route::get('report/usoPuertasDatos', 'ReporteController@reporteUsoPuertas')->name('reporteusopuertasdatos');
 Route::get('report/generarreportepuertas','ReporteController@generarReportePuertas')->name('generarreportepuertas');

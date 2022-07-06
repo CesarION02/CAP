@@ -324,10 +324,13 @@ class SDataProcess {
                     $newRow->hasCheckOut = false;
 
                     $response = array();
-                    $response[] = true;
+                    $isNew = true;
+                    $response[] = $isNew;
                     $response[] = $newRow;
-                    $response[] = true;
-                    $response[] = null;
+                    $again = true;
+                    $response[] = $again;
+                    $oFoundRegistry = null;
+                    $response[] = $oFoundRegistry;
 
                     if ($isOut) {
                         $response[501] = true;
@@ -455,26 +458,24 @@ class SDataProcess {
                 else {
                     //Sin entrada
                     $bFound = false;
-                    if ($result->pinnedDateTime->toDateString() == $sStartDate) {
+                    $oAux = null;
+                    if ($result->auxWorkshift != null) {
+                        $oAux = $result->auxWorkshift;
+                    }
+                    else {
+                        if ($result->auxScheduleDay != null) {
+                            $oAux = $result->auxScheduleDay;
+                        }
+                    }
+                    if ($result->pinnedDateTime->toDateString() == $sStartDate && $oAux != null && $oAux->is_night) {
                         // buscar entrada un día antes
                         $oFoundRegistryI = null;
                         $oDateAux = clone $result->pinnedDateTime;
                         $oDateAux->subDay();
-                        $oAux = null;
-                        if ($result->auxWorkshift != null) {
-                            $oAux = $result->auxWorkshift;
-                        }
-                        else {
-                            if ($result->auxScheduleDay != null) {
-                                $oAux = $result->auxScheduleDay;
-                            }
-                        }
-
                         $entry = "";
                         if ($oAux != null) {
                             $entry = $oAux->entry;
                         }
-                        
                         $oFoundRegistryI = SDelayReportUtils::getRegistry($oDateAux->toDateString(), $idEmployee, \SCons::REG_IN, $entry);
 
                         if ($oFoundRegistryI != null) {
@@ -586,7 +587,7 @@ class SDataProcess {
                                     return 0;
                                 }
                             }
-                            if (! $night && $bAfterDay) {
+                            if ((! $night && $bAfterDay) || (! $night && $newRow->inDate < $registry->date)) {
                                 $result->pinnedDateTime->subDay();
                             }
 
@@ -1175,8 +1176,10 @@ class SDataProcess {
                             $oRow->overDefaultMins = 0;
                             $oRow->overScheduleMins = 0;
 
-                            $oRow->comments = $oRow->comments."Jornada incompleta. ";
-                            $oRow->isOverJourney = false;
+                            if ($oRow->hasSchedule && $oRow->inDateTimeSch != null && $oRow->outDateTimeSch != null) {
+                                $oRow->comments = $oRow->comments."Jornada incompleta. ";
+                                $oRow->isOverJourney = false;
+                            }
                         }
                     }
                     else {
@@ -1184,8 +1187,10 @@ class SDataProcess {
                         $oRow->overDefaultMins = 0;
                         $oRow->overScheduleMins = 0;
                         
-                        $oRow->comments = $oRow->comments."Jornada incompleta. ";
-                        $oRow->isOverJourney = false;
+                        if ($oRow->hasSchedule && $oRow->inDateTimeSch != null && $oRow->outDateTimeSch != null) {
+                            $oRow->comments = $oRow->comments."Jornada incompleta. ";
+                            $oRow->isOverJourney = false;
+                        }
                     }
                 }
             }

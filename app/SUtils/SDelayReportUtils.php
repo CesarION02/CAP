@@ -544,8 +544,8 @@ class SDelayReportUtils {
                         if ($assign->group_schedules_id == null) {
                             return SDelayReportUtils::compareTemplate($assign->schedule_template_id, $registry, $tReport);
                         }
-                        else {
-                            $res = SDelayReportUtils::getScheduleAssignGrouped($assign->group_schedules_id, $registry->date);
+                        else if (isset($assign->employee_id) && $assign->employee_id > 0) {
+                            $res = SDelayReportUtils::getScheduleAssignGrouped($assign->group_schedules_id, $registry->date, $assign->employee_id);
                             if ($res == null) {
                                 continue;
                             }
@@ -560,13 +560,14 @@ class SDelayReportUtils {
         }
     }
 
-    private static function getScheduleAssignGrouped($group, $dateToCompare)
+    private static function getScheduleAssignGrouped($group, $dateToCompare, $employeeId)
     {
         $oDtCompare = Carbon::parse($dateToCompare);
         $schedules = \DB::table('schedule_assign AS sa')
-                            ->where('group_schedules_id', $group)
-                            ->where('is_delete', false)
-                            ->orderBy('order_gs', 'ASC')
+                            ->where('sa.group_schedules_id', $group)
+                            ->where('sa.is_delete', false)
+                            ->where('sa.employee_id', $employeeId)
+                            ->orderBy('sa.order_gs', 'ASC')
                             ->get();
         
         $count = sizeof($schedules);
