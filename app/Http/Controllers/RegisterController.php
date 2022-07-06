@@ -80,6 +80,7 @@ class RegisterController extends Controller
         $lRegistries = \DB::table('registers')
                         ->where('employee_id', $request->employee_id)
                         ->where('date',$request->date)
+                        ->where('is_delete', 0)
                         ->select('date','time','type_id', 'form_creation_id')
                         ->get();
 
@@ -87,6 +88,7 @@ class RegisterController extends Controller
                         ->where('employee_id', $request->employee_id)
                         ->where('start_date','<=',$request->date)
                         ->where('end_date','>=',$request->date)
+                        ->where('is_delete', 0)
                         ->get();
                 
         return response()->json(['lRegistries' => $lRegistries, 'lIncidents' => $lIncidents]);
@@ -163,13 +165,13 @@ class RegisterController extends Controller
 
             $register1 = clone $register;
 
-            $register->type_id = 1;
+            $register->type_id = 2;
             $register->save();
 
             $oDate->addSecond();
             $register1->date = $oDate->toDateString();
             $register1->time = $oDate->toTimeString();
-            $register1->type_id = 2;
+            $register1->type_id = 1;
             $register1->save();
 
             $dateregister1 = clone $dateregister;
