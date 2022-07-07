@@ -273,9 +273,12 @@ var app = new Vue({
 
             this.onAdjustChange();
 
-            var checkVobo = document.getElementById('cb' + oRow.numEmployee);
-
-            this.checkEmployee = checkVobo.checked;
+            if(this.vData.isPrepayrollInspection){
+                var checkVobo = document.getElementById('cb' + oRow.numEmployee);
+                this.checkEmployee = checkVobo.checked;
+            }else{
+                this.checkEmployee = false;
+            }
 
             $('#adjustsModal').modal('show');
         },
