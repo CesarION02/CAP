@@ -883,7 +883,17 @@ class assignController extends Controller
         return view('assign.showprogramming')->with('assigns',$assigns)->with('dgroup',$usuario[0]->id);
     }
 
-    public function viewDayprogram (){
+    public function viewDayprogram (Request $request){
+        $startDate = $request->start_date;
+        $endDate = $request->end_date;
+
+        if ($startDate == null) {
+            $now = Carbon::now();
+            $month = $now->format('m');
+            $year = $now->format('Y');
+            $startDate = SDateTimeUtils::getFirstDayOfMonth($month, $year, 'Y-m-d');
+            $endDate = SDateTimeUtils::getLastDayOfMonth($month, $year, 'Y-m-d');
+        }
 
         $iTemplateId = env('TMPLTE_SATURDAYS', 1);
         if (session()->get('rol_id') != 1){
@@ -910,6 +920,7 @@ class assignController extends Controller
                                 ->where('schedule_assign.is_delete',0)
                                 ->where('schedule_assign.schedule_template_id',$iTemplateId)
                                 ->whereIn('department_group.id',$Adgu)
+                                ->whereBetween('schedule_assign.start_date',[$startDate, $endDate])
                                 ->select('employees.name AS nombreEmpleado','schedule_assign.start_date AS fecha_inicio','schedule_template.name AS nombreHorario','schedule_assign.id AS id')
                                 ->get();
         }else{
@@ -926,10 +937,11 @@ class assignController extends Controller
                     ->where('employees.is_active',1)
                     ->where('schedule_assign.is_delete',0)
                     ->where('schedule_assign.schedule_template_id',$iTemplateId)
+                    ->whereBetween('schedule_assign.start_date',[$startDate, $endDate])
                     ->select('employees.name AS nombreEmpleado','schedule_assign.start_date AS fecha_inicio','schedule_template.name AS nombreHorario','schedule_assign.id AS id')
                     ->get();    
         }
-        return view('assign.dayprogramm')->with('assigns',$assigns)->with('dgroup',$usuario[0]->id);
+        return view('assign.dayprogramm')->with('assigns',$assigns)->with('dgroup',$usuario[0]->id)->with('startDate', $startDate)->with('endDate', $endDate);
     }
 
     public function viewSpecificDate () {
