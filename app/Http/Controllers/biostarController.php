@@ -326,7 +326,7 @@ class biostarController extends Controller
         \App\SUtils\SConfiguration::setConfiguration('lastEventSyncDateTime', $newDate->toDateTimeString());
         
         foreach ($lRegisters as $register) {
-            dispatch(new ProcessCheckNotification($register->employee_id, $register->date.' '.$register->time));
+            dispatch(new ProcessCheckNotification($register->employee_id, $register->date.' '.$register->time, "Biostar"));
         }
         
         return 1;
