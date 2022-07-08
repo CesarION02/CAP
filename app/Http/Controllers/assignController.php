@@ -30,7 +30,7 @@ class assignController extends Controller
      */
     public function index()
     {
-        $iTemplateId = env('TMPLTE_SATURDAYS', 0);
+        $iTemplateId = env('TMPLTE_SATURDAYS', 1);
         
         $datas = DB::select("SELECT a.fecha_inicio, a.fecha_fin, b.name AS nombreEmpleado, s.name AS nombreHorario, a.group_assign_id, a.id
         FROM (
@@ -60,7 +60,7 @@ class assignController extends Controller
      */
     public function create($tipo)
     {
-        $iTemplateId = env('TMPLTE_SATURDAYS', 0);
+        $iTemplateId = env('TMPLTE_SATURDAYS', 1);
         $employee = employees::where('is_delete','0')->where('is_active', true)->orderBy('name','ASC')->pluck('id','name');
         $department = department::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
         $schedule_template = schedule_template::where('is_delete','0')->where('id','!=',$iTemplateId)->orderBy('name','ASC')->pluck('id','name');
@@ -146,7 +146,7 @@ class assignController extends Controller
      */
     public function edit($id)
     {   
-        $iTemplateId = env('TMPLTE_SATURDAYS', 0);
+        $iTemplateId = env('TMPLTE_SATURDAYS', 1);
         $employee = employees::where('is_delete','0')->where('is_active', true)->orderBy('name','ASC')->pluck('id','name');
         $department = department::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
         $schedule_template = schedule_template::where('is_delete','0')->where('id','!=',$iTemplateId)->orderBy('name','ASC')->pluck('id','name');
@@ -560,10 +560,10 @@ class assignController extends Controller
         }   
     }
 
-    public function programming($id){
-        if (session()->get('rol_id') != 1){
+    public function programming($id, $withEmp = 0) {
+        if (session()->get('rol_id') != 1) {
             $dgu = DB::table('group_dept_user')
-                    ->where('user_id',$id)
+                    ->where('user_id', \Auth::user()->id)
                     ->select('groupdept_id AS id')
                     ->get();
             $Adgu = [];
@@ -571,16 +571,17 @@ class assignController extends Controller
                 $Adgu[$i]=$dgu[$i]->id;
             }
             $employee = DB::table('employees')
-                    ->join('jobs','jobs.id','=','employees.job_id')
+                    // ->join('jobs','jobs.id','=','employees.job_id')
                     ->join('departments','departments.id','=','employees.department_id')
                     ->join('department_group','department_group.id','=','departments.dept_group_id')
                     ->whereIn('departments.dept_group_id',$Adgu)
                     ->where('employees.is_active',1)
                     ->select('employees.id AS id','employees.name AS name','employees.num_employee','department_group.name AS nameGroup')
                     ->get();
-        }else{
+        }
+        else {
             $employee = DB::table('employees')
-                    ->join('jobs','jobs.id','=','employees.job_id')
+                    // ->join('jobs','jobs.id','=','employees.job_id')
                     ->join('departments','departments.id','=','employees.department_id')
                     ->join('department_group','department_group.id','=','departments.dept_group_id')
                     ->where('employees.is_active',1)
@@ -588,10 +589,14 @@ class assignController extends Controller
                     ->select('employees.id AS id','employees.name AS name','employees.num_employee','department_group.name AS nameGroup')
                     ->get();    
         }
-        $iTemplateId = env('TMPLTE_SATURDAYS', 0);
-        $schedule_template = schedule_template::where('is_delete','0')->where('id','!=',$iTemplateId)->orderBy('name','ASC')->pluck('id','name');
 
-        return view('assign.programming')->with('employees',$employee)->with('schedule_template',$schedule_template)->with('idGroup',$id);   
+        $iTemplateId = env('TMPLTE_SATURDAYS', 1);
+        $schedule_template = schedule_template::where('is_delete', 0)
+                                                ->where('id', '!=', $iTemplateId)
+                                                ->orderBy('name','ASC')
+                                                ->pluck('id','name');
+
+        return view('assign.programming')->with('employees',$employee)->with('schedule_template',$schedule_template)->with('idGroup',$id)->with('withEmp', $withEmp);   
     }
 
     public function dayProgramming($id){
@@ -622,14 +627,14 @@ class assignController extends Controller
                     ->select('employees.id AS id','employees.name AS name','employees.num_employee', 'department_group.name AS nameGroup')
                     ->get();    
         }
-        $iTemplateId = env('TMPLTE_SATURDAYS', 0);
+        $iTemplateId = env('TMPLTE_SATURDAYS', 1);
         $schedule_template = schedule_template::where('is_delete','0')->where('id','=',$iTemplateId)->orderBy('name','ASC')->pluck('id','name');
 
         return view('assign.dayProgramming')->with('employees',$employee)->with('schedule_template',$schedule_template)->with('idGroup',$id);   
     }
 
     public function schedule_template(){
-        $iTemplateId = env('TMPLTE_SATURDAYS', 0);
+        $iTemplateId = env('TMPLTE_SATURDAYS', 1);
         $schedule_template = DB::table('schedule_template')
                 ->where('is_delete','0')
                 ->where('id','!=',$iTemplateId)
@@ -644,6 +649,12 @@ class assignController extends Controller
         $end = null;
         $orden = null;
         $group_num = null;
+
+        foreach($request->all() as $elem){
+            if(is_null($elem)){
+                return redirect()->back()->withErrors('Debe llenar todos los campos del formulario');
+            }
+        }
 
         if($request->start_date != ''){
             $start = $request->start_date;
@@ -792,7 +803,7 @@ class assignController extends Controller
 
     public function viewProgramming (){
 
-        $iTemplateId = env('TMPLTE_SATURDAYS', 0);
+        $iTemplateId = env('TMPLTE_SATURDAYS', 1);
         if (session()->get('rol_id') != 1){
             $numero = session()->get('name');
             $usuario = DB::table('users')
@@ -872,9 +883,19 @@ class assignController extends Controller
         return view('assign.showprogramming')->with('assigns',$assigns)->with('dgroup',$usuario[0]->id);
     }
 
-    public function viewDayprogram (){
+    public function viewDayprogram (Request $request){
+        $startDate = $request->start_date;
+        $endDate = $request->end_date;
 
-        $iTemplateId = env('TMPLTE_SATURDAYS', 0);
+        if ($startDate == null) {
+            $now = Carbon::now();
+            $month = $now->format('m');
+            $year = $now->format('Y');
+            $startDate = SDateTimeUtils::getFirstDayOfMonth($month, $year, 'Y-m-d');
+            $endDate = SDateTimeUtils::getLastDayOfMonth($month, $year, 'Y-m-d');
+        }
+
+        $iTemplateId = env('TMPLTE_SATURDAYS', 1);
         if (session()->get('rol_id') != 1){
             $numero = session()->get('name');
             $usuario = DB::table('users')
@@ -899,6 +920,7 @@ class assignController extends Controller
                                 ->where('schedule_assign.is_delete',0)
                                 ->where('schedule_assign.schedule_template_id',$iTemplateId)
                                 ->whereIn('department_group.id',$Adgu)
+                                ->whereBetween('schedule_assign.start_date',[$startDate, $endDate])
                                 ->select('employees.name AS nombreEmpleado','schedule_assign.start_date AS fecha_inicio','schedule_template.name AS nombreHorario','schedule_assign.id AS id')
                                 ->get();
         }else{
@@ -915,10 +937,11 @@ class assignController extends Controller
                     ->where('employees.is_active',1)
                     ->where('schedule_assign.is_delete',0)
                     ->where('schedule_assign.schedule_template_id',$iTemplateId)
+                    ->whereBetween('schedule_assign.start_date',[$startDate, $endDate])
                     ->select('employees.name AS nombreEmpleado','schedule_assign.start_date AS fecha_inicio','schedule_template.name AS nombreHorario','schedule_assign.id AS id')
                     ->get();    
         }
-        return view('assign.dayprogramm')->with('assigns',$assigns)->with('dgroup',$usuario[0]->id);
+        return view('assign.dayprogramm')->with('assigns',$assigns)->with('dgroup',$usuario[0]->id)->with('startDate', $startDate)->with('endDate', $endDate);
     }
 
     public function viewSpecificDate () {
@@ -1126,7 +1149,7 @@ class assignController extends Controller
     }
 
     function employeesWithout(){
-        $iTemplateId = env('TMPLTE_SATURDAYS', 0);
+        $iTemplateId = env('TMPLTE_SATURDAYS', 1);
         if (session()->get('rol_id') != 1){
             $numero = session()->get('name');
             $usuario = DB::table('users')
@@ -1197,7 +1220,7 @@ class assignController extends Controller
     }
 
     public function withoutcreate($id){
-        $iTemplateId = env('TMPLTE_SATURDAYS', 0);
+        $iTemplateId = env('TMPLTE_SATURDAYS', 1);
         $employee = employees::where('is_delete','0')->where('is_active', true)->where('id',$id)->orderBy('name','ASC');
         $schedule_template = schedule_template::where('is_delete','0')->where('id','!=',$iTemplateId)->orderBy('name','ASC')->pluck('id','name');
 

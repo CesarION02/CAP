@@ -20,6 +20,7 @@
                       <h5 class="card-title">{{ strtoupper($employeeName) }}</h5>
                       <p class="card-text">{{ $reason }}</p>
                       <b>{{ "Checada: ".(\Carbon\Carbon::parse($dtDateTime)->format('d-m-Y H:i:s')) }}</b>
+                      <p><b>Fuente: </b>{{ $sSource }}</p>
                     </div>
                 </div>
             </div>

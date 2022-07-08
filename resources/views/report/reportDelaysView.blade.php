@@ -2,6 +2,7 @@
 @section('styles1')
     <link rel="stylesheet" href="{{ asset("dt/datatables.css") }}">
     <link rel="stylesheet" href="{{ asset("assets/css/reportD.css") }}">
+    <link href="{{ asset("select2js/css/select2.min.css") }}" rel="stylesheet" />
     <style>
         tr {
             font-size: 70%;
@@ -25,6 +26,7 @@
             <div class="box-header with-border">
                 <h3 class="box-title">{{ $sTitle }}</h3>
                 <div class="box-tools pull-right">
+                    <small style="color: blue" class="text-muted"><b>Sugerencia:</b> Haz click en el botón <span class="glyphicon glyphicon-menu-hamburger"></span> para modificar la vista.</small>
                 </div>
             </div>
             <div class="box-body" id="reportDelayApp">
@@ -104,7 +106,7 @@
                                     <td>@{{ row.comments }}</td>
                                     <td>
                                         @if ($bModify)
-                                            <button class="btn btn-primary btn-xs" v-on:click="showModal(row)">
+                                            <button class="btn btn-primary btn-xs" v-on:click="showModal(row, index)">
                                                 <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
                                             </button>
                                         @endif
@@ -113,6 +115,7 @@
                                     <td>@{{ row.external_id }}</td>
                                 </tr>
                             </tbody>
+                            <button onclick="reloadFunction()" id="reloadBtn" title="Recargar reporte">Actualizar</button>
                             <button onclick="topFunction()" id="myBtn" title="Ir arriba">Ir arriba</button>
                             <a href="{{ route('generarreportetiemposextra') }}" target="_blank" id="newButton" title="Nuevo reporte">Nuevo reporte</a>
                         </table>
@@ -147,6 +150,7 @@
     <script src="{{ asset("js/excel/FileSaver.min.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/moment/moment.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/moment/datetime-moment.js") }}" type="text/javascript"></script>
+    <script src="{{ asset('select2js/js/select2.min.js') }}"></script>
     
     <script>
         function GlobalData () {
@@ -164,6 +168,11 @@
             this.REP_DELAY = <?php echo json_encode(\SCons::REP_DELAY) ?>;
             this.ADJ_CONS = <?php echo json_encode(\SCons::PP_TYPES) ?>;
             this.lComments = <?php echo json_encode($lComments) ?>;
+            this.startDate = <?php echo json_encode($sStartDate) ?>;
+            this.endDate = <?php echo json_encode($sEndDate) ?>;
+
+            // this.startDate = moment(this.startDate).format('DD-MM-YYYY');
+            // this.endDate = moment(this.endDate).format('DD-MM-YYYY');
 
             // this.minsCol = this.tReport == this.REP_DELAY ? 4 : 4;
             this.minsCol = 5;
@@ -384,7 +393,7 @@
                         //                             (isVobo ? '(Revisado por : ' + oVobo.user_name + ')' : '') : '');
                         return value_to_return + 
                                 (oData.isPrepayrollInspection ? '   <label class="container">' + 
-                                    '<input id="cb1" onchange="handleChangeCheck(event, ' + parseInt(group, 10) + ')" type="checkbox" ' + (isVobo ? 'checked' : '') + '>' + 
+                                    '<input id="cb'+parseInt(group, 10)+'" onchange="handleChangeCheck(event, ' + parseInt(group, 10) + ')" type="checkbox" ' + (isVobo ? 'checked' : '') + '>' + 
                                 ' <span class="checkmark"></span>' +
                                 '</label>' +
                                 (isVobo ? '(Revisado por : ' + oVobo.user_name + ')' : 'Dar OK') : '')
@@ -441,6 +450,7 @@
 
     <script>
         //Get the button:
+        reloadButton = document.getElementById("reloadBtn");
         mybutton = document.getElementById("myBtn");
         theNewButton = document.getElementById("newButton");
 
@@ -449,9 +459,11 @@
 
         function scrollFunction() {
             if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                reloadButton.style.display = "block";
                 mybutton.style.display = "block";
                 theNewButton.style.display = "block";
             } else {
+                reloadButton.style.display = "none";
                 mybutton.style.display = "none";
                 theNewButton.style.display = "none";
             }
@@ -461,6 +473,11 @@
         function topFunction() {
             document.body.scrollTop = 0; // For Safari
             document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+        }
+
+        function reloadFunction() {
+            oGui.showLoading(6000);
+            location.reload();
         }
 
         function getRowsInNumEmployee(numEmployee){
@@ -525,4 +542,9 @@
 
     <script src="{{asset("assets/pages/scripts/report/SReportRow.js")}}" type="text/javascript"></script>
     <script src="{{asset("assets/pages/scripts/report/SExportExcel.js")}}" type="text/javascript"></script>
+    <script>
+        $(document).ready(function() {
+            $('.select2-class').select2();
+        });
+    </script>
 @endsection

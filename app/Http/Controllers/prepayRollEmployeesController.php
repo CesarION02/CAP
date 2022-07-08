@@ -15,7 +15,17 @@ class prepayRollEmployeesController extends Controller
      */
     public function index($id = null, $bDirect = 0)
     {
-        if(auth()->user()->id == 1){
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+        $isAdmin = false;
+        foreach(auth()->user()->roles()->get() as $rol){
+            $result = in_array($rol->id, $config->rolesCanSeeAll);
+            if($result){
+                $isAdmin = true;
+                break;
+            }
+        }
+        
+        if($isAdmin){
             $lUsers = DB::table('users')
                     ->join('prepayroll_groups_users as pru','pru.head_user_id','=','users.id')
                     ->select('users.id','users.name')

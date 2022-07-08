@@ -74,7 +74,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="row in vData.lRows" :class="getCssClass(row, vData.tReport)">
+                                <tr v-for="(row, index) in vData.lRows" :class="getCssClass(row, vData.tReport)">
                                     <td>@{{ vueGui.pad(row.numEmployee, 6) }}</td>
                                     <td>@{{ row.employee }}</td>
                                     {{-- <td>@{{ row.inDate }}</td> --}}
@@ -97,7 +97,7 @@
                                         <button class="btn btn-primary btn-xs" v-on:click="showModal(row)">
                                             <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
                                         </button>
-                                        <p>@{{ getAdjToRow(row) }}</p>
+                                        <p>@{{ getAdjToRow(row, index) }}</p>
                                     </td>
                                     <td>@{{ row.external_id }}</td>
                                 </tr>
@@ -148,6 +148,7 @@
             this.REP_HR_EX = <?php echo json_encode(\SCons::REP_HR_EX) ?>;
             this.REP_DELAY = <?php echo json_encode(\SCons::REP_DELAY) ?>;
             this.ADJ_CONS = <?php echo json_encode(\SCons::PP_TYPES) ?>;
+            this.lComments = <?php echo json_encode($lComments) ?>;
 
             // this.minsCol = this.tReport == this.REP_DELAY ? 4 : 4;
             this.minsCol = 5;

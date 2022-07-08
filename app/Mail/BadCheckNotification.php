@@ -17,17 +17,19 @@ class BadCheckNotification extends Mailable implements ShouldQueue
     private $employeeName;
     private $dtDateTime;
     private $reason;
+    private $sSource;
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($employeeName, $dtDateTime, $reason)
+    public function __construct($employeeName, $dtDateTime, $reason, $sSource)
     {
         $this->employeeName = $employeeName;
         $this->dtDateTime = $dtDateTime;
         $this->reason = $reason;
+        $this->sSource = $sSource;
     }
 
     /**
@@ -42,6 +44,7 @@ class BadCheckNotification extends Mailable implements ShouldQueue
                         ->view('mails.badcheck')
                         ->with('employeeName', $this->employeeName)
                         ->with('dtDateTime', $this->dtDateTime)
-                        ->with('reason', $this->reason);
+                        ->with('reason', $this->reason)
+                        ->with('sSource', $this->sSource);
     }
 }

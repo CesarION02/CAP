@@ -20,9 +20,19 @@ var app = new Vue({
         haveComments: false,
         resumeComments: [],
         nameEmployee: "",
+        indexRow: null,
+        checkEmployee: false,
+        startDate: oData.startDate,
+        endDate: oData.endDate,
+        dateInit: null,
+        dateEnd: null,
     },
     mounted() {
         this.haveComments = this.lComments.length > 0;
+        let self = this;
+        $('#comentFrec').on('select2:select', function (e) {
+            self.selComment = e.params.data.text;
+        });
     },
     methods: {
         getCssClass(oRow, report) {
@@ -64,6 +74,17 @@ var app = new Vue({
             let dtDate = "";
             let dtTime = "";
 
+            if(this.adjCategory == 3){
+                if(moment(this.dateInit) > moment(this.dateEnd)){
+                    oGui.showMessage('','La fecha final debe ser mayor a la fecha inicial','error');
+                    return;
+                }
+                if(this.dateInit == null || this.dateEnd == null){
+                    oGui.showMessage('','Debe seleccionar un rango de fecha','error');
+                    return;
+                }
+            }
+
             oGui.showLoading(3000);
 
             switch (this.adjType) {
@@ -101,15 +122,25 @@ var app = new Vue({
                     comments: this.comments,
                     dt_date: dtDate,
                     dt_time: dtTime,
-                    employee_id: this.vRow.idEmployee
+                    employee_id: this.vRow.idEmployee,
+                    dateInit: this.dateInit,
+                    dateEnd: this.dateEnd,
+                    adjCategory: this.adjCategory,
                 })
                 .then(res => {
                     console.log(res);
                     let oRes = res.data;
 
                     if (oRes.success) {
-                        this.vRow.labelUpd = true;
-                        this.setRowAdjusts();
+                        if(oRes.is_range){
+                            this.updateAdjRows(this.vRow.idEmployee, oRes.data);
+                        }else{
+                            this.vRow.labelUpd = true;
+                            this.vRow.adjusts.push(res.data.data);
+                            // this.setRowAdjusts();
+                            this.rowAdjusts = this.vRow.adjusts;
+                        }
+                        this.comments = "";
                         oGui.showOk();
                     } else {
                         oGui.showError(oRes.msg);
@@ -119,6 +150,35 @@ var app = new Vue({
                     console.log(error);
                 });
         },
+
+        updateAdjRows(employee_id, data) {
+            var arr_index = [];
+            this.vData.lRows.findIndex((element, index) => {
+                if (element.idEmployee == employee_id) {
+                    arr_index.push(index);
+                }
+            })
+            for (let adj of data) {
+                if(adj.apply_to == 1){
+                    for (let i = 0; i < arr_index.length; i++) {
+                        var dt = moment(this.vData.lRows[arr_index[i]].inDateTime).format('YYYY-MM-DD');
+                        if(dt == adj.dt_date){
+                            this.vData.lRows[arr_index[i]].adjusts.push(adj);
+                            this.vData.lRows[arr_index[i]].labelUpd = true;
+                        }                
+                    }
+                }else{
+                    for (let i = 0; i < arr_index.length; i++) {
+                        var dt = moment(this.vData.lRows[arr_index[i]].outDateTime).format('YYYY-MM-DD');
+                        if(dt == adj.dt_date){
+                            this.vData.lRows[arr_index[i]].adjusts.push(adj);
+                            this.vData.lRows[arr_index[i]].labelUpd = true;
+                        }                
+                    }
+                }
+            }
+        },
+
         validate() {
             if (this.adjType == oData.ADJ_CONS.DHE || this.adjType == oData.ADJ_CONS.AHE) {
                 if (!Number.isInteger(parseInt(this.overMins, 10))) {
@@ -161,18 +221,33 @@ var app = new Vue({
             axios.delete(route)
                 .then(res => {
                     console.log(res);
-                    this.vRow.labelUpd = true;
-                    this.setRowAdjusts();
-                    oGui.showOk();
+                    let oRes = res.data;
+
+                    if (oRes.success) {
+                        this.vRow.labelUpd = true;
+                        for(var i = 0; i < this.vRow.adjusts.length; i++){
+                            if(this.vRow.adjusts[i].id == oRes.data.id){
+                                this.vRow.adjusts.splice(i, 1);
+                            }
+                        }
+                        // this.setRowAdjusts();
+                        this.rowAdjusts = this.vRow.adjusts;
+                        this.comments = "";
+                        oGui.showOk();
+                    } else {
+                        oGui.showError(oRes.msg);
+                    }
                 })
                 .catch(function(error) {
                     console.log(error);
                 });
         },
-        showModal(oRow) {
+        showModal(oRow, index) {
+            $('#comentFrec').val('').trigger('change');
             this.vRow = oRow;
-            this.setRowAdjusts();
-
+            this.indexRow = index;
+            // this.setRowAdjusts();
+            this.rowAdjusts = oRow.adjusts;
             this.adjType = 1;
             this.minsEnabled = false;
             this.overMins = 0;
@@ -183,6 +258,9 @@ var app = new Vue({
             this.outDateTime = "";
             this.isModifIn = false;
             this.isModifOut = false;
+            this.checkEmployee = false;
+            this.dateInit = null;
+            this.dateEnd = null;
 
             let sIn = this.vRow.inDateTime.length == 10 ? this.vRow.inDateTime + " 00:00" : this.vRow.inDateTime.replace('   ', ' ');
             let sOut = this.vRow.outDateTime.length == 10 ? this.vRow.outDateTime + " 00:00" : this.vRow.outDateTime.replace('   ', ' ');
@@ -194,6 +272,13 @@ var app = new Vue({
             this.outDateTime = outD.format('YYYY-MM-DDTHH:mm');
 
             this.onAdjustChange();
+
+            if(this.vData.isPrepayrollInspection){
+                var checkVobo = document.getElementById('cb' + oRow.numEmployee);
+                this.checkEmployee = checkVobo.checked;
+            }else{
+                this.checkEmployee = false;
+            }
 
             $('#adjustsModal').modal('show');
         },
@@ -219,35 +304,37 @@ var app = new Vue({
         },
         getAdjToRow(oRow, index) {
             let labels = "";
-            var arrAdjust = [];
-            for (const adj of this.vData.lAdjusts) {
-                if (adj.employee_id == oRow.idEmployee) {
-                    if (adj.apply_to == 1) {
-                        let tiime = adj.dt_time != null ? (' ' + adj.dt_time) : '';
-                        if ((adj.dt_date + tiime) == oRow.inDateTime) {
-                            arrAdjust.push(adj);
-                            labels += adj.type_code + ' ';
-                        }
-                    } else {
-                        let tiime = adj.dt_time != null ? (' ' + adj.dt_time) : '';
-                        if ((adj.dt_date + tiime) == oRow.outDateTime) {
-                            if (adj.adjust_type_id == oData.ADJ_CONS.COM) {
-                                labels += adj.comments + ' ';
-                                arrAdjust.push(adj);
-                            } else {
-                                labels += adj.type_code + ' ';
-                                arrAdjust.push(adj);
-                            }
-                            if (adj.adjust_type_id == oData.ADJ_CONS.AHE ||
-                                adj.adjust_type_id == oData.ADJ_CONS.DHE) {
-                                labels += adj.minutes + 'min ';
-                            }
-                        }
-                    }
+            for(const adj of oRow.adjusts){
+                // if (adj.apply_to == 1) {
+                //     let tiime = adj.dt_time != null ? (' ' + adj.dt_time) : '';
+                //     if ((adj.dt_date + tiime) == oRow.inDateTime) {
+                //         labels += adj.type_code + ' ';
+                //     }
+                // } else {
+                //     let tiime = adj.dt_time != null ? (' ' + adj.dt_time) : '';
+                //     if ((adj.dt_date + tiime) == oRow.outDateTime) {
+                //         if (adj.adjust_type_id == oData.ADJ_CONS.COM) {
+                //             labels += adj.comments + ' ';
+                //         } else {
+                //             labels += adj.type_code + ' ';
+                //         }
+                //         if (adj.adjust_type_id == oData.ADJ_CONS.AHE ||
+                //             adj.adjust_type_id == oData.ADJ_CONS.DHE) {
+                //             labels += adj.minutes + 'min ';
+                //         }
+                //     }
+                // }
+                if (adj.adjust_type_id == oData.ADJ_CONS.COM) {
+                    labels += adj.comments + ' ';
+                } else {
+                    labels += adj.type_code + ' ';
+                }
+
+                if (adj.adjust_type_id == oData.ADJ_CONS.AHE ||
+                    adj.adjust_type_id == oData.ADJ_CONS.DHE) {
+                    labels += adj.minutes + 'min ';
                 }
             }
-            
-            this.vData.lRows[index].adjusts = arrAdjust;
 
             if (oRow.labelUpd || !(oRow.tempLabels === undefined)) {
                 labels += "¡Pendiente de actualizar!";
@@ -264,6 +351,8 @@ var app = new Vue({
             return labels;
         },
         onAdjustChange() {
+                this.dateInit = null;
+                this.dateEnd = null;
             if (this.adjCategory == "2") {
                 this.comments = "";
                 this.adjType = oData.ADJ_CONS.COM;
@@ -310,6 +399,37 @@ var app = new Vue({
         },
         addComment(){
             this.comments = this.comments.length > 0 ? this.comments + ' ' + this.selComment : this.comments + this.selComment;
+        },
+        addPreviusComment(){
+            this.previusComment = "";
+            var idEmployee = this.vData.lRows[this.indexRow].idEmployee;
+            if(this.indexRow != 0){
+                if(this.vData.lRows[this.indexRow - 1].idEmployee == idEmployee){
+                    var adjusts = this.vData.lRows[this.indexRow - 1].adjusts;
+                    var previusComment = "";
+                    var hasComment = false;
+                    for (let i = 0; i < adjusts.length; i++) {
+                        if(adjusts[i].adjust_type_id == 7){
+                            hasComment = true;
+                            previusComment = previusComment.length > 0 ? previusComment + ' ' + adjusts[i].comments : previusComment + adjusts[i].comments;
+                        }
+                    }
+                    if(previusComment.length > 0 && hasComment == true){
+                        this.comments = this.comments.length > 0 ? this.comments + ' ' + previusComment : this.comments + previusComment;
+                        this.adjType = 7;
+                        this.newAdjust();
+                        this.adjType = 1;
+                        this.adjCategory = 0;
+                        this.selComment = "";
+                    }else{
+                        oGui.showMessage('','No existe comentario de tipo comentario en el dia anterior','warning');    
+                    }
+                }else{
+                    oGui.showMessage('','No existe comentario de tipo comentario en el dia anterior','warning');
+                }
+            }else{
+                oGui.showMessage('','No existe comentario de tipo comentario en el dia anterior','warning');
+            }
         },
         getResumeComments(idEmployee){
             this.resumeComments = [];

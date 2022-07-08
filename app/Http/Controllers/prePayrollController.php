@@ -16,6 +16,8 @@ use App\SPayroll\SPrePayrollRow;
 use App\SPayroll\SPrePayrollDay;
 use App\Models\prepayrollchange;
 use App\Models\prepayrollAuthControl;
+use App\Models\PrepayReportControl;
+use App\Models\prepayrollVoboSkipped;
 use App\Http\Controllers\PrepayrollReportController;
 use App\Http\Controllers\SyncController;
 use App\SUtils\SPrepayrollUtils;
@@ -733,19 +735,20 @@ class prePayrollController extends Controller
     /**
      * Comprueba si los grupos hijos ya han dado el visto bueno a una semana/quincena
      */
-    public function checkBoVoChildrens(Request $request){
+    public function checkBoVoChildrens(Request $request) {
         $usersNotVobo = [];
         $sectNum = "";
 
-        $num = \DB::table('prepayroll_report_auth_controls')
+        $oPpAuthCtrol = \DB::table('prepayroll_report_auth_controls')
                     ->where('id_control', $request->id)
-                    ->select('num_'.$request->idprenomina,'year')
+                    ->select('num_'.$request->idprenomina, 'year', 'is_global', 'order_vobo')
                     ->first();
         
-        if($request->idprenomina == "week"){
-            $sectNum = $num->num_week;
-        }else if($request->idprenomina == "biweek"){
-            $sectNum = $num->num_biweek;
+        if ($request->idprenomina == "week") {
+            $sectNum = $oPpAuthCtrol->num_week;
+        }
+        else if ($request->idprenomina == "biweek") {
+            $sectNum = $oPpAuthCtrol->num_biweek;
         }
 
         $groups = \DB::table('prepayroll_groups AS pg')
@@ -753,38 +756,79 @@ class prePayrollController extends Controller
                         ->where('pgu.head_user_id', auth()->user()->id)
                         ->pluck('pg.id_group')
                         ->toArray();
-        
-        foreach($groups as $group){
-            $childrens = \DB::table('prepayroll_groups AS pg')
-                            ->join('prepayroll_groups_users AS pgu', 'pg.id_group', '=', 'pgu.group_id')
-                            ->join('users AS u', 'pgu.head_user_id', '=', 'u.id')
-                            ->where('pg.father_group_n_id', $group)
-                            ->select('pg.id_group','pgu.head_user_id', 'group_name', 'u.name AS user_name')->get();
-    
-            foreach ($childrens as $child) {
-                $is_vobo = \DB::table('prepayroll_report_auth_controls')
-                                ->where('year', $num->year)
-                                ->where('num_'.$request->idprenomina, $sectNum)
-                                ->where('user_vobo_id', $child->head_user_id)
-                                ->where('is_required', true);
 
+        if (count($groups) > 0) {
+            $lChildrenGroups = SPrepayrollUtils::getChildrenOfGroups($groups);
+    
+            $lGroupsHeads = \DB::table('prepayroll_groups AS pg')
+                                    ->join('prepayroll_groups_users AS pgu', 'pg.id_group', '=', 'pgu.group_id')
+                                    ->join('users AS u', 'pgu.head_user_id', '=', 'u.id')
+                                    ->whereIn('pg.id_group', $lChildrenGroups)
+                                    ->where('pgu.head_user_id', '<>', auth()->user()->id)
+                                    ->select('pg.id_group','pgu.head_user_id', 'group_name', 'u.name AS user_name')
+                                    ->get();
+            
+            foreach($lGroupsHeads as $group) {
+                $is_vobo = \DB::table('prepayroll_report_auth_controls')
+                                ->where('year', $oPpAuthCtrol->year)
+                                ->where('num_'.$request->idprenomina, $sectNum)
+                                ->where('user_vobo_id', $group->head_user_id)
+                                ->where('user_vobo_id', '<>', auth()->user()->id)
+                                ->where('is_required', true);
+    
                 $aux = clone $is_vobo;
                 $aux = $aux->get();
-
+    
                 // si el usuario no está en los vobos
                 if ($aux->count() == 0) {
                     continue;
                 }
-
+    
                 $is_vobo = $is_vobo->value('is_vobo');
                 if (! $is_vobo) {
-                    $nameUser = $child->user_name;
+                    $nameUser = $group->user_name;
                     array_push($usersNotVobo, $nameUser);
                 }
             }
         }
+        else if ($oPpAuthCtrol->is_global) {
+            $AllVobos = \DB::table('prepayroll_report_auth_controls AS prac')
+                                ->join('users AS u', 'prac.user_vobo_id', '=', 'u.id')
+                                ->where('year', $oPpAuthCtrol->year)
+                                ->where('num_'.$request->idprenomina, $sectNum)
+                                ->where('order_vobo', '<', $oPpAuthCtrol->order_vobo)
+                                ->where('is_required', true)
+                                ->where('is_vobo', false)
+                                ->select('is_vobo', 'u.name AS user_name')
+                                ->get();
 
-        return response()->json(array('users'=> $usersNotVobo), 200);
+            if (count($AllVobos) > 0) {
+                foreach ($AllVobos as $oVobo) {
+                    array_push($usersNotVobo, $oVobo->user_name);   
+                }
+            }
+        }
+
+        $bCanSkip = false;
+        if (count($usersNotVobo) > 0) {
+            $vobosMajor = \DB::table('prepayroll_report_auth_controls AS prac')
+                                ->join('users AS u', 'prac.user_vobo_id', '=', 'u.id')
+                                ->where('year', $oPpAuthCtrol->year)
+                                ->where('num_'.$request->idprenomina, $sectNum)
+                                ->where('order_vobo', '>=', $oPpAuthCtrol->order_vobo)
+                                ->where('user_vobo_id', '<>', auth()->user()->id)
+                                ->where('is_required', true)
+                                // ->where('is_vobo', false)
+                                ->select('is_vobo', 'u.name AS user_name')
+                                ->get();
+
+            $bCanSkip = count($vobosMajor) == 0;
+        }
+
+        return response()->json(array(
+                                        'users' => $usersNotVobo,
+                                        'bCanSkip' => $bCanSkip
+                                    ), 200);
     }
 
     /**
@@ -794,23 +838,42 @@ class prePayrollController extends Controller
      * 
      * @return redirect
      */
-    public function boVo($id, $idPreNomina = 1)
-    {
+    public function boVo(Request $request, $idVobo, $idPreNomina = 1) {
         $success = true;
 
         try {
-            /**
-             * Determinar si ya se ha dado Vobo a los empleados directos del usuario en sesión
-             */
-            $isAllOk = SPrepayrollUtils::isAllEmployeesOk(auth()->user()->id, $id);
+            if (! isset($request->can_skip) || $request->can_skip == 0) {
+                /**
+                 * Determinar si ya se ha dado Vobo a los empleados directos del usuario en sesión
+                */
+                $isAllOk = SPrepayrollUtils::isAllEmployeesOk(auth()->user()->id, $idVobo);
 
-            if (! $isAllOk) {
-                $success = false;
-                throw new \Exception('No se puede dar Vobo, no se han dado visto bueno a todos los empleados directos del usuario en sesión.');
+                if (! $isAllOk) {
+                    $success = false;
+                    throw new \Exception('No se puede dar Vobo, no se han dado visto bueno a todos los empleados directos del usuario en sesión.');
+                }
+            }
+            else {
+                $oAuthCtrl = PrepayReportControl::find($idVobo);
+
+                if ($oAuthCtrl != null) {
+                    $oSkipped = new prepayrollVoboSkipped();
+
+                    $oSkipped->is_week = $oAuthCtrl->is_week;
+                    $oSkipped->num_week = $oAuthCtrl->num_week;
+                    $oSkipped->is_biweek = $oAuthCtrl->is_biweek;
+                    $oSkipped->num_biweek = $oAuthCtrl->num_biweek;
+                    $oSkipped->year = $oAuthCtrl->year;
+                    $oSkipped->dt_skipped = Carbon::now()->toDateTimeString();
+                    $oSkipped->is_delete = 0;
+                    $oSkipped->skipped_by_id = auth()->user()->id;
+
+                    $oSkipped->save();
+                }
             }
 
             $res = \DB::table('prepayroll_report_auth_controls')
-                        ->where('id_control', $id)
+                        ->where('id_control', $idVobo)
                         ->where('user_vobo_id', auth()->user()->id)
                         ->update([
                             'is_vobo' => true, 
@@ -820,13 +883,12 @@ class prePayrollController extends Controller
                         ]);
         }
         catch (\Exception $e) {
-            return redirect()->route('vobos', $idPreNomina)->with(['mensaje' => $e->getMessage(), 'icon' => 'error']);
+            return redirect()->route('vobos', $idPreNomina)->with(['error' => $e->getMessage(), 'icon' => 'error']);
         }
 
         $msg = "Se dió el visto bueno correctamente";
         $icon = "success";
         
-
         // $res = \DB::table('prepayroll_report_auth_controls')
         //             ->where('id_control', $id)
         //             ->update([

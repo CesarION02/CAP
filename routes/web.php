@@ -116,7 +116,7 @@ Route::get('report/reporteRegistros','ReporteController@reporteRegistrosView')->
 Route::get('report/reporteRetardos','ReporteController@genDelayReport')->name('generarreporteRetardos');
 Route::get('report/viewReporteRetardos','ReporteController@delaysReport')->name('reporteRetardos');
 Route::get('report/reportetiemposextra','ReporteController@genHrExReport')->name('generarreportetiemposextra');
-Route::get('report/reportetiemposextradelegados','ReporteController@genHrExReportDelegations')->name('generarreportetiemposextradel');
+Route::get('report/reportetiemposextradelegados/{id?}','ReporteController@genHrExReportDelegations')->name('generarreportetiemposextradel');
 Route::get('report/viewtiemposextra','ReporteController@hrExtReport')->name('reportetiemposextra');
 Route::get('report/usoPuertasDatos', 'ReporteController@reporteUsoPuertas')->name('reporteusopuertasdatos');
 Route::get('report/generarreportepuertas','ReporteController@generarReportePuertas')->name('generarreportepuertas');
@@ -192,6 +192,8 @@ Route::delete('deptgroupuser/{id}', 'deptgroupuserController@destroy')->name('el
 /* RUTAS DE empleados asignados a grupo departamento */
 Route::get('emplDeptGroup', 'employeesAssignsController@index')->name('empl_group_assign');
 Route::get('emplDeptGroup/generate', 'employeesAssignsController@generateEmployeesAssigns')->name('empl_group_assign_generate');
+Route::get('emplSchedules', 'employeesAssignsController@indexEmployeesSchedules')->name('empl_schedules');
+Route::delete('emplSchedules/delete/{id}', 'employeesAssignsController@deleteScheduleAssign')->name('empl_schedules_delete');
 /* RUTAS DE USUARIO */
 Route::get('user/change', 'userController@change')->name('cambio_usuario');
 Route::put('user/{id}/cambio', 'userController@updatePassword')->name('actualizar_contraseña');
@@ -223,7 +225,7 @@ Route::delete('employees/terminarconfiguracion/{id}', 'employeeController@confir
 Route::get('employees/foraneos', 'employeeController@foraneos')->name('foraneos');
 Route::delete('employees/enviarForaneos/{id}', 'employeeController@enviarForaneos')->name('enviar_empleado_foraneo');
 Route::put('employee/outstanding/{id}', 'employeeController@updateoutstanding')->name('actualizar_empleado_faltante');
-Route::get('employee/{id}/puesto','employeeController@jobs')->name('puesto');
+Route::get('employee/{id}/puesto','employeeController@jobs')->name('puesto_employee');
 Route::get('outstanding', 'employeeController@outstandingemployees')->name('empleados_pendientes');
 Route::get('employees/becarios', 'employeeController@becarios')->name('becarios');
 Route::get('employee/{id}/editoutstanding', 'employeeController@editoutstanding')->name('editar_empleado_faltante');
@@ -279,6 +281,7 @@ Route::post('register/adjust_regs', 'RegisterController@adjustRegistries')->name
 Route::get('register/generate','RegisterController@indexGenRegisters')->name('registro_index_generate');
 Route::post('register/generate','RegisterController@registersGenerate')->name('registro_generate_generate');
 Route::post('register/generate/save','RegisterController@registersGenerateSave')->name('registro_generate_save');
+Route::post('register/getRegistry','RegisterController@getRegistry')->name('registro_get_registry');
 
 /* CONFIGURACION */
 Route::get('configuration','configController@index')->name('config');
@@ -300,7 +303,7 @@ Route::get('assign/specificDate/','assignController@viewSpecificDate')->name('fe
 Route::post('assign/mostrarFecha', 'assignController@mostrarFecha')->name('mostrar_fecha');
 Route::get('assign', 'assignController@index')->name('asignacion');
 Route::get('assign/create/{id}', 'assignController@create')->name('crear_asignacion');
-Route::get('assign/programming/{id}', 'assignController@programming')->name('programar');
+Route::get('assign/programming/{id}/{withEmp?}', 'assignController@programming')->name('programar');
 Route::get('assign/dayProgramming/{id}','assignController@dayProgramming')->name('programar_dia');
 Route::post('assign', 'assignController@store')->name('guardar_asignacion');
 Route::post('assign/guardar', 'assignController@guardar')->name('guardar');

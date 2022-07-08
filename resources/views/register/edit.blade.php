@@ -1,10 +1,17 @@
 @extends("theme.$theme.layout")
+@section('styles1')
+    <link rel="stylesheet" href="{{asset("assets/css/chosen.min.css")}}">
+    <link rel="stylesheet" href="{{asset("assets/css/selectchosen.css")}}">
+@endsection
 @section('title')
     Checada
 @endsection
 
 @section("scripts")
-
+<script src="{{ asset("assets/js/chosen.jquery.min.js") }}" type="text/javascript"></script>
+<script>
+    $(".chosen-select").chosen();
+</script>
 @endsection
 
 @section('content')
@@ -29,7 +36,7 @@
                 <div class="box-footer">
                     <div class="col-lg-3"></div>
                     <div class="col-lg-6">
-                        @include('includes.button-form-edit')
+                        <button type="submit" class="btn btn-success" id="guardar">Actualizar</button>
                     </div>
                 </div>
             </form>

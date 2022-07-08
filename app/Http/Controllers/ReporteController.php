@@ -472,14 +472,14 @@ class ReporteController extends Controller
                     ->with('startOfWeek', $config->startOfWeek);
     }
 
-    public function genHrExReportDelegations()
+    public function genHrExReportDelegations($id = 0)
     {
         $config = \App\SUtils\SConfiguration::getConfigurations();
 
         $payType = 0;
         $bDirect = 0;
         $iDelegations = 0;
-        $oPayrolls = SPayrollDelegationUtils::getDelegationsPayrolls(\Auth::user()->id);
+        $oPayrolls = SPayrollDelegationUtils::getDelegationsPayrolls($id == 0 ? \Auth::user()->id : $id);
 
         if (count($oPayrolls->weeks) == 0 && count($oPayrolls->biweeks) == 0) {
             return redirect()->back()->withErrors(['No hay semanas o quincenas delegadas para ti.']);
@@ -586,7 +586,8 @@ class ReporteController extends Controller
                     ->with('adjTypes', $adjTypes)
                     ->with('lAdjusts', $lAdjusts)
                     ->with('lEmpWrkdDays', $lEmpWrkdDays)
-                    ->with('lRows', $lRows);
+                    ->with('lRows', $lRows)
+                    ->with('lComments', []);
     }
 
     function timesTotal($lRows, $lEmployees)
@@ -705,13 +706,24 @@ class ReporteController extends Controller
             $oEndDate = Carbon::parse($sEndDate);
             $iDelegation = $oDelegation->id_delegation;
         }
-        
+
+        $roles = Auth()->user()->roles()->get();
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+        $seeAll = false;
+        foreach ($roles as $rol) {
+            if (in_array($rol->id, $config->rolesCanSeeAll)) {
+                $seeAll = true;
+                break;
+            }
+        }
+
         $bDirect = false;
         $subEmployees = SPrepayrollUtils::getEmployeesByUser(\Auth::user()->id, $payWay, $bDirect, $iDelegation);
-        if ($subEmployees != null && count($subEmployees) >= 0) {
+        if (! is_null($subEmployees) && count($subEmployees) >= 0) {
             $lColEmps = collect($lEmployees);
-    
-            $lEmployees = $lColEmps->whereIn('id', $subEmployees);
+            if(!$seeAll){
+                $lEmployees = $lColEmps->whereIn('id', $subEmployees);
+            }
         }
 
         $lRows = SDataProcess::process($sStartDate, $sEndDate, $payWay, $lEmployees);
@@ -745,7 +757,8 @@ class ReporteController extends Controller
                                     'pa.adjust_type_id',
                                     'pat.type_code',
                                     'pat.type_name',
-                                    'pa.id'
+                                    'pa.id',
+                                    'pa.apply_time'
                                     )
                         ->whereBetween('dt_date', [$sStartDate, $sEndDate])
                         ->where('is_delete', false)
@@ -767,7 +780,7 @@ class ReporteController extends Controller
              */
             $isPrepayrollInspection = false;
             $lEmpVobos = [];
-            if (($payWay == \SCons::PAY_W_Q || $payWay == \SCons::PAY_W_S) && env('VOBO_BY_EMP_ENABLED')) {
+            if (($payWay == \SCons::PAY_W_S || $payWay == \SCons::PAY_W_Q) && env('VOBO_BY_EMP_ENABLED', true)) {
                 $number = SDateUtils::getNumberOfDate($sStartDate, $payWay);
                 $dates = SDateUtils::getDatesOfPayrollNumber($number, $oStartDate->year, $payWay);
                 
@@ -791,6 +804,43 @@ class ReporteController extends Controller
                     $lEmpVobos = $lEmpVobos->get()->keyBy('num_employee')->toArray();
 
                     $isPrepayrollInspection = true;
+                }
+            }
+            
+            foreach($lRows as $row){
+                $inDate = Carbon::parse($row->inDateTime);
+                $outDate = Carbon::parse($row->outDateTime);
+
+                $adjs = $lAdjusts->where('employee_id', $row->idEmployee)
+                                ->whereBetween('dt_date', [$inDate->format('Y-m-d'), $outDate->format('Y-m-d')]);
+                
+                foreach($adjs as $adj){
+                    if($adj->apply_to == 1){
+                        $tiime = $adj->dt_time != null ? (' '.$adj->dt_time) : '';
+                        if($adj->apply_time){
+                            $adj_date = Carbon::parse($adj->dt_date.$tiime);
+                            $row_date = Carbon::parse($row->inDateTime);
+                        }else{
+                            $adj_date = Carbon::parse($adj->dt_date);
+                            $row_date = Carbon::parse($row->inDate);
+                        }
+
+                        if($adj_date->eq($row_date)){
+                            array_push($row->adjusts, $adj);
+                        }
+                    }else if($adj->apply_to == 2){
+                        $tiime = $adj->dt_time != null ? (' '.$adj->dt_time) : '';
+                        if($adj->apply_time){
+                            $adj_date = Carbon::parse($adj->dt_date.$tiime);
+                            $row_date = Carbon::parse($row->outDateTime);
+                        }else{
+                            $adj_date = Carbon::parse($adj->dt_date);
+                            $row_date = Carbon::parse($row->outDate);
+                        }
+                        if($adj_date->eq($row_date)){
+                            array_push($row->adjusts, $adj);
+                        }
+                    }
                 }
             }
 

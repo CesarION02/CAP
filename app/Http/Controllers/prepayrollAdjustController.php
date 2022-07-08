@@ -158,44 +158,127 @@ class prepayrollAdjustController extends Controller
      */
     public function storeAdjust(Request $request)
     {
-        $oAdjust = new prepayrollAdjust($request->all());
+        if((int)$request->adjCategory != 3){
+            $oAdjust = new prepayrollAdjust($request->all());
+            
+            $oAdjust->is_delete = false;
+            $oAdjust->created_by = \Auth::user()->id;
+            $oAdjust->updated_by = \Auth::user()->id;
+    
+            $oEmployee = employees::find($oAdjust->employee_id);
+            $canMakeAdjust = PrepayrollReportController::canMakeAdjust($oAdjust->dt_date, $oEmployee->way_pay_id);
+            if (is_string($canMakeAdjust)) {
+                return json_encode(['success' => false, 'msg' => 'No se puede aplicar el ajuste, la prenómina tiene Vobo.'.$canMakeAdjust]);
+            }
+    
+            $canMakeAdjustByEmployee = PrepayrollReportController::canMakeAdjustByEmployee($oEmployee->id, $oAdjust->dt_date, $oEmployee->way_pay_id);
+    
+            if (is_string($canMakeAdjustByEmployee)) {
+                return json_encode(['success' => false, 'msg' => 'No se puede aplicar el ajuste. '.$canMakeAdjustByEmployee]);
+            }
+    
+            try {
+                \DB::beginTransaction();
+    
+                    $oAdjust->save();
+    
+                    $config = \App\SUtils\SConfiguration::getConfigurations();
+    
+                    if ($config->enabledAdjAuths) {
+                        $this->storeAuthControl($oAdjust->employee_id, $oAdjust->id);
+                    }
+    
+                \DB::commit();
+            }
+            catch (\Throwable $th) {
+                \DB::rollBack();
+                return json_encode(['success' => false, 'msg' => $e->getMessage()]);
+            }
+    
+            SPrepayrollAdjustUtils::verifyProcessedData($oAdjust->employee_id, $oAdjust->dt_date);
+    
+            $type = \DB::table('prepayroll_adjusts_types as pat')
+                        ->where('id', $oAdjust->adjust_type_id)
+                        ->first();
+    
+            $oAdjust->type_code = $type->type_code;
+            $oAdjust->type_name = $type->type_name;
+    
+            return json_encode(['success' => true, 'msg' => 'Ajuste aplicado correctamente.', 'data' => $oAdjust, 'is_range' => false]);
+        }else if ((int)$request->adjCategory == 3) {
+            $dateInit = Carbon::parse($request->dateInit);
+            $dateEnd = Carbon::parse($request->dateEnd);
+            $diff = $dateInit->diffInDays($dateEnd);
+            $arr_adjust = [];
+            for ($i=0; $i <= $diff; $i++) {
+                $oAdjust = new prepayrollAdjust($request->all());
+            
+                $oAdjust->is_delete = false;
+                $oAdjust->created_by = \Auth::user()->id;
+                $oAdjust->updated_by = \Auth::user()->id;
+                $oAdjust->dt_date = $dateInit->format('Y-m-d');
+                $oAdjust->dt_time = null;
+                $oAdjust->apply_time = false;
         
-        $oAdjust->is_delete = false;
-        $oAdjust->created_by = \Auth::user()->id;
-        $oAdjust->updated_by = \Auth::user()->id;
-
-        $oEmployee = employees::find($oAdjust->employee_id);
-        $canMakeAdjust = PrepayrollReportController::canMakeAdjust($oAdjust->dt_date, $oEmployee->way_pay_id);
-        if (is_string($canMakeAdjust)) {
-            return json_encode(['success' => false, 'msg' => 'No se puede aplicar el ajuste, la prenómina tiene Vobo.'.$canMakeAdjust]);
-        }
-
-        try {
-            \DB::beginTransaction();
-
-                $oAdjust->save();
-
-                $config = \App\SUtils\SConfiguration::getConfigurations();
-
-                if ($config->enabledAdjAuths) {
-                    $this->storeAuthControl($oAdjust->employee_id, $oAdjust->id);
+                $oEmployee = employees::find($oAdjust->employee_id);
+                $canMakeAdjust = PrepayrollReportController::canMakeAdjust($oAdjust->dt_date, $oEmployee->way_pay_id);
+                if (is_string($canMakeAdjust)) {
+                    return json_encode(['success' => false, 'msg' => 'No se puede aplicar el ajuste, la prenómina tiene Vobo.'.$canMakeAdjust]);
+                }
+        
+                $canMakeAdjustByEmployee = PrepayrollReportController::canMakeAdjustByEmployee($oEmployee->id, $oAdjust->dt_date, $oEmployee->way_pay_id);
+        
+                if (is_string($canMakeAdjustByEmployee)) {
+                    return json_encode(['success' => false, 'msg' => 'No se puede aplicar el ajuste. '.$canMakeAdjustByEmployee]);
                 }
 
-            \DB::commit();
-        }
-        catch (\Throwable $th) {
-            \DB::rollBack();
-            return json_encode(['success' => false, 'msg' => $e->getMessage()]);
-        }
+                try {
+                    \DB::beginTransaction();
+        
+                        $oAdjust->save();
+        
+                        $config = \App\SUtils\SConfiguration::getConfigurations();
+        
+                        if ($config->enabledAdjAuths) {
+                            $this->storeAuthControl($oAdjust->employee_id, $oAdjust->id);
+                        }
+        
+                    \DB::commit();
+                }
+                catch (\Throwable $th) {
+                    \DB::rollBack();
+                    return json_encode(['success' => false, 'msg' => $e->getMessage()]);
+                }
+        
+                SPrepayrollAdjustUtils::verifyProcessedData($oAdjust->employee_id, $oAdjust->dt_date);
+        
+                $type = \DB::table('prepayroll_adjusts_types as pat')
+                            ->where('id', $oAdjust->adjust_type_id)
+                            ->first();
+        
+                $oAdjust->type_code = $type->type_code;
+                $oAdjust->type_name = $type->type_name;
 
-        SPrepayrollAdjustUtils::verifyProcessedData($oAdjust->employee_id, $oAdjust->dt_date);
+                array_push($arr_adjust, $oAdjust->getAttributes());
 
-        return json_encode(['success' => true, 'msg' => 'Ajuste aplicado correctamente.', 'data' => $oAdjust]);
+                $dateInit->addDay();
+            }
+            return json_encode(['success' => true, 'msg' => 'Ajustes aplicados correctamente.', 'data' => $arr_adjust, 'is_range' => true]);
+        }else{
+            return json_encode(['success' => false, 'msg' => 'Error al guardar el ajuste, categoria desconocida']);
+        }
     }
 
     public function deleteAdjust($idAjust)
     {
         $oAdjust = prepayrollAdjust::find($idAjust);
+
+        $oEmployee = employees::find($oAdjust->employee_id);
+        $canMakeAdjustByEmployee = PrepayrollReportController::canMakeAdjustByEmployee($oEmployee->id, $oAdjust->dt_date, $oEmployee->way_pay_id);
+
+        if (is_string($canMakeAdjustByEmployee)) {
+            return json_encode(['success' => false, 'msg' => 'No se puede eliminar el ajuste. '.$canMakeAdjustByEmployee]);
+        }
 
         $oAdjust->is_delete = true;
         $oAdjust->updated_by = \Auth::user()->id;
@@ -210,7 +293,7 @@ class prepayrollAdjustController extends Controller
 
         SPrepayrollAdjustUtils::verifyProcessedData($oAdjust->employee_id, $oAdjust->dt_date);
 
-        return json_encode($oAdjust);
+        return json_encode(['success' => true, 'msg' => 'Ajuste eliminado correctamente.', 'data' => $oAdjust]);
     }
 
     private function storeAuthControl($employeeId, $idAdjust)

@@ -1,4 +1,7 @@
 @extends("theme.$theme.layout")
+@section('styles1')
+    <link rel="stylesheet" href="{{asset("daterangepicker/daterangepicker.css")}}">
+@endsection
 @section('title')
 Plantilla horarios
 @endsection
@@ -16,6 +19,47 @@ Plantilla horarios
 	<script src="{{ asset('dt/vfs_fonts.js') }}"></script>
 	<script src="{{ asset('dt/buttons.html5.min.js') }}"></script>
 	<script src="{{ asset('dt/buttons.print.min.js') }}"></script>
+    <script src="{{ asset("daterangepicker/daterangepicker.js") }}" type="text/javascript"></script>
+    <script>
+        function ServerData () {
+                this.endDate = <?php echo json_encode($endDate); ?>;
+                this.startDate = <?php echo json_encode($startDate); ?>;
+            }
+            
+            var oServerData = new ServerData();
+    </script>
+    <script type="text/javascript">
+        $(function() {
+
+            var start = moment(oServerData.startDate);
+            var end = moment(oServerData.endDate);
+
+            function cb(start, end) {
+                $('#reportrange span').html(start.format('D MMMM YYYY') + ' - ' + end.format('D MMMM YYYY'));
+            }
+
+            $('#reportrange').daterangepicker({
+                startDate: start,
+                endDate: end,
+                ranges: {
+                    'Hoy': [moment(), moment()],
+                    'Ayer': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                    'Últimos 7 días': [moment().subtract(6, 'days'), moment()],
+                    'Últimos 30 días': [moment().subtract(29, 'days'), moment()],
+                    'Este mes': [moment().startOf('month'), moment().endOf('month')],
+                    'Último mes': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+                    'A fin de año': [moment(), moment().endOf('year')]
+                }
+            }, cb);
+
+            cb(start, end);
+        });
+
+        $('#reportrange').on('apply.daterangepicker', function(ev, picker) {
+            document.getElementById('start_date').value = picker.startDate.format('YYYY-MM-DD');
+            document.getElementById('end_date').value = picker.endDate.format('YYYY-MM-DD');
+        });
+    </script>
 <script>
     $(document).ready( function () {
         $.fn.dataTable.moment('DD/MM/YYYY');
@@ -44,7 +88,7 @@ Plantilla horarios
                     "sSortDescending": ": Activar para ordenar la columna de manera descendente"
                 }
             },
-            "order": [[ 0, 'asc' ], [ 1, 'desc' ], [ 2, 'desc' ]],
+            "order": [[ 1, 'desc' ]],
             "colReorder": true,
             "dom": 'Bfrtip',
             "lengthMenu": [
@@ -77,10 +121,32 @@ Plantilla horarios
             <div class="box-header with-border">
                 <h3 class="box-title">Asignar horario fijo</h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:asignacionhorario"])
+                <br>
+                <br>
                 <div class="box-tools pull-right">
-                    <a href="{{route('programar_dia',$dgroup)}}" class="btn btn-block btn-info btn-sm">
-                        <i class="fa fa-fw fa-plus-circle"></i> Asignar horario
-                    </a>
+                    <div class="col-md-6"></div>
+                    <div class="col-md-4">
+                        <form action="{{route('index_programacion_dia')}}">
+                            <input type="hidden" name="start_date" id="start_date">
+                            <input type="hidden" name="end_date" id="end_date">
+                            <div class="input-group">
+                                <div id="reportrange" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
+                                    <i class="fa fa-calendar"></i>&nbsp;
+                                    <span></span> <i class="fa fa-caret-down"></i>
+                                </div>
+                                <span class="input-group-btn">
+                                    <button class="btn btn-default" type="submit">
+                                        <i class="glyphicon glyphicon-search"></i>
+                                    </button>
+                                </span>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-md-2">
+                        <a href="{{route('programar_dia',$dgroup)}}" class="btn btn-block btn-info btn-sm">
+                            <i class="fa fa-fw fa-plus-circle"></i> Asignar horario
+                        </a>
+                    </div>
                 </div>
             </div>
             <div class="box-body">

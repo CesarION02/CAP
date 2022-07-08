@@ -5,10 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
-use App\Models\PrepayReportConfig;
-use App\Models\PrepayReportControl;
 use App\Models\employees;
 use App\Models\PrepayrollDelegation;
+use App\Models\prepayrollVoboSkipped;
+use App\Models\PrepayReportConfig;
+use App\Models\PrepayReportControl;
 use App\SUtils\SDateUtils;
 use App\SUtils\SPrepayrollUtils;
 
@@ -48,6 +49,7 @@ class PrepayrollReportController extends Controller
         $oCfg->order_vobo = $request->order_vobo;
         $oCfg->rol_n_name = $request->rol_n_name;
         $oCfg->user_n_id = $request->user_n_id;
+        $oCfg->is_global = isset($request->is_global);
         $oCfg->is_delete = 0;
         $oCfg->created_by = \Auth::user()->id;
         $oCfg->updated_by = \Auth::user()->id;
@@ -83,6 +85,7 @@ class PrepayrollReportController extends Controller
         $oCfg->order_vobo = $request->order_vobo;
         $oCfg->rol_n_name = $request->rol_n_name;
         $oCfg->user_n_id = $request->user_n_id;
+        $oCfg->is_global = isset($request->is_global);
         $oCfg->updated_by = \Auth::user()->id;
 
         $oCfg->save();
@@ -226,8 +229,10 @@ class PrepayrollReportController extends Controller
                             $oVobo->is_required = false;
                             $oVobo->save();
                         }
+                        $orderBovo++;
+
                         continue;
-                    } 
+                    }
                     
                     $prac->year = $year;
                     $prac->is_required = $oDelegation != null ? false : $cfg->is_required;
@@ -235,7 +240,8 @@ class PrepayrollReportController extends Controller
                     $prac->dt_vobo = null;
                     $prac->is_rejected = false;
                     $prac->dt_rejected = null;
-                    $prac->order_vobo = $orderBovo++;
+                    $prac->order_vobo = $orderBovo;
+                    $prac->is_global = $cfg->is_global;
                     $prac->is_delete = false;
                     $prac->cfg_id = $cfg->id_configuration;
                     $prac->user_vobo_id = $cfg->user_n_id;
@@ -243,8 +249,10 @@ class PrepayrollReportController extends Controller
                     $prac->updated_by = \Auth::user()->id;
     
                     $prac->save();
+
+                    $orderBovo++;
                 }
-                elseif ($cfg->rol_n_name != null) {
+                else if ($cfg->rol_n_name != null) {
                     $lUsers = App\SUtils\SPermissions::usersWithRol('Supervisores');
     
                     foreach ($lUsers as $user) {
@@ -266,6 +274,7 @@ class PrepayrollReportController extends Controller
                         $prac->is_rejected = false;
                         $prac->dt_rejected = null;
                         $prac->order_vobo = $orderBovo;
+                        $prac->is_global = $cfg->is_global;
                         $prac->is_delete = false;
                         $prac->cfg_id = $cfg->id_configuration;
                         $prac->user_vobo_id = $user->id;
@@ -283,6 +292,7 @@ class PrepayrollReportController extends Controller
         }
         catch (\Throwable $th) {
             \DB::rollBack();
+            \Log::error($th->getMessage());
         }
     }
 
@@ -373,6 +383,38 @@ class PrepayrollReportController extends Controller
         }
         
         return true;
+    }
+
+    public static function canMakeAdjustByEmployee($employee_id, $dtDate, $payTypeId){
+        $number = SDateUtils::getNumberOfDate($dtDate, $payTypeId);
+
+        $oDate = Carbon::parse($dtDate);
+
+        $lVobos = \DB::table('prepayroll_report_emp_vobos AS prev')
+                        ->where('employee_id', $employee_id);
+
+        $week_biWeek = "semana/quincena";
+
+        if ($payTypeId == \SCons::PAY_W_Q) {
+            $week_biWeek = "quincena";
+            $lVobos = $lVobos->where('prev.is_biweek', true)
+                            ->where('prev.num_biweek', $number);
+        }
+        else {
+            $week_biWeek = "semana";
+            $lVobos = $lVobos->where('prev.is_week', true)
+                            ->where('prev.num_week', $number);
+        }
+
+        $lVobos = $lVobos->where('prev.is_delete', false)
+                            ->where('prev.year', $oDate->year)
+                            ->get();
+
+        if (count($lVobos) == 0) {
+            return true;
+        }else{
+            return "La ".$week_biWeek." tiene visto bueno.";
+        }
     }
 
     /**
@@ -476,6 +518,43 @@ class PrepayrollReportController extends Controller
                                 ->get();
             
         if (count($lVobosReq) > 0) {
+            $lSkipped = prepayrollVoboSkipped::where('year', $oDate->year)
+                                                ->where('is_delete', 0);
+
+            if ($payTypeId == \SCons::PAY_W_Q) {
+                $lSkipped = $lSkipped->where('is_biweek', true)
+                                    ->where('num_biweek', $number);
+            }
+            else {
+                $lSkipped = $lSkipped->where('is_week', true)
+                                    ->where('num_week', $number);
+            }
+            
+            $lSkipped = $lSkipped->orderBy('created_at', 'DESC')
+                                ->first();
+
+            if ($lSkipped != null) {
+                $voBo = PrepayReportControl::where('user_vobo_id', $lSkipped->skipped_by_id)
+                                    ->where('year', $oDate->year)
+                                    ->where('is_delete', 0)
+                                    ->where('is_vobo', true);
+
+                if ($payTypeId == \SCons::PAY_W_Q) {
+                    $voBo = $voBo->where('is_biweek', true)
+                                ->where('num_biweek', $number);
+                }
+                else {
+                    $voBo = $voBo->where('is_week', true)
+                                ->where('num_week', $number);
+                }
+
+                $voBo = $voBo->get();
+
+                if (count($voBo) > 0) {
+                    return true;
+                }
+            }
+
             return false;
         }
         

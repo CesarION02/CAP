@@ -36,16 +36,16 @@ class SPrepayrollUtils {
         if ($seeAll) {
             $lEmployeesGroup = \DB::table('prepayroll_group_employees as pge')
                                 ->join('employees as e', 'e.id', '=', 'pge.employee_id')
-                                ->where('pge.is_delete',0)
-                                ->where('e.is_delete',0)
-                                ->where('e.is_active',1)
+                                ->where('pge.is_delete', 0)
+                                ->where('e.is_delete', 0)
+                                ->where('e.is_active', 1)
                                 ->where('e.way_pay_id', $payType)
                                 ->pluck('e.id');
 
             $lDeptEmployees = \DB::table('prepayroll_group_deptos as pgd')
                                 ->join('employees as e', 'e.department_id', '=', 'pgd.department_id')
-                                ->where('e.is_delete',0)
-                                ->where('e.is_active',1)
+                                ->where('e.is_delete', 0)
+                                ->where('e.is_active', 1)
                                 ->where('e.way_pay_id', $payType)
                                 ->pluck('e.id');
 
@@ -161,7 +161,7 @@ class SPrepayrollUtils {
      * @param array $groups
      * @return void
      */
-    private static function getChildrenOfGroups($groups) {
+    public static function getChildrenOfGroups($groups) {
         $lGroups = [];
         $lGroups = array_merge($lGroups, $groups);
         foreach ($groups as $group) {
@@ -270,7 +270,6 @@ class SPrepayrollUtils {
 
     public static function isAllEmployeesOk($idUser, $idVobo)
     {
-        $bDirectEmployees = true;
         $prepayroll = \DB::table('prepayroll_report_auth_controls AS prac')
                             ->where('prac.user_vobo_id', $idUser)
                             ->where('prac.id_control', $idVobo)
@@ -280,13 +279,14 @@ class SPrepayrollUtils {
             return false;
         }
 
-        if (! env('VOBO_BY_EMP_ENABLED')) {
+        if (! env('VOBO_BY_EMP_ENABLED', true)) {
             return true;
         }
         
         $payType = $prepayroll->is_week ? \SCons::PAY_W_S : \SCons::PAY_W_Q;
         $number = $prepayroll->is_week ? $prepayroll->num_week : $prepayroll->num_biweek;
         
+        $bDirectEmployees = true;
         $iDelegation = null;
         $aEmployees = SPrepayrollUtils::getEmployeesByUser($idUser, $payType, $bDirectEmployees, $iDelegation);
 

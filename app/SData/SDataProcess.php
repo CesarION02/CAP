@@ -324,10 +324,13 @@ class SDataProcess {
                     $newRow->hasCheckOut = false;
 
                     $response = array();
-                    $response[] = true;
+                    $isNew = true;
+                    $response[] = $isNew;
                     $response[] = $newRow;
-                    $response[] = true;
-                    $response[] = null;
+                    $again = true;
+                    $response[] = $again;
+                    $oFoundRegistry = null;
+                    $response[] = $oFoundRegistry;
 
                     if ($isOut) {
                         $response[501] = true;
@@ -381,11 +384,6 @@ class SDataProcess {
                                 if ($comments->where('key_code','hasCheckIn')->first()['value']) {
                                     $newRow->isDayChecked = true;
                                 }
-                            }
-                        }
-                        else {
-                            foreach ($adjs as $adj) {
-                                $newRow->adjusts[] = $adj;
                             }
                         }
                     }
@@ -452,11 +450,6 @@ class SDataProcess {
                                 }
                                 $newRow->hasCheckOut = false;
                             }
-                            else {
-                                foreach ($adjs as $adj) {
-                                    $newRow->adjusts[] = $adj;
-                                }
-                            }
                         }
     
                         $isNew = true;
@@ -465,26 +458,24 @@ class SDataProcess {
                 else {
                     //Sin entrada
                     $bFound = false;
-                    if ($result->pinnedDateTime->toDateString() == $sStartDate) {
+                    $oAux = null;
+                    if ($result->auxWorkshift != null) {
+                        $oAux = $result->auxWorkshift;
+                    }
+                    else {
+                        if ($result->auxScheduleDay != null) {
+                            $oAux = $result->auxScheduleDay;
+                        }
+                    }
+                    if ($result->pinnedDateTime->toDateString() == $sStartDate && $oAux != null && $oAux->is_night) {
                         // buscar entrada un día antes
                         $oFoundRegistryI = null;
                         $oDateAux = clone $result->pinnedDateTime;
                         $oDateAux->subDay();
-                        $oAux = null;
-                        if ($result->auxWorkshift != null) {
-                            $oAux = $result->auxWorkshift;
-                        }
-                        else {
-                            if ($result->auxScheduleDay != null) {
-                                $oAux = $result->auxScheduleDay;
-                            }
-                        }
-
                         $entry = "";
                         if ($oAux != null) {
                             $entry = $oAux->entry;
                         }
-                        
                         $oFoundRegistryI = SDelayReportUtils::getRegistry($oDateAux->toDateString(), $idEmployee, \SCons::REG_IN, $entry);
 
                         if ($oFoundRegistryI != null) {
@@ -501,8 +492,8 @@ class SDataProcess {
 
                     if (! $bFound) {
                         $newRow->outDate = $result->variableDateTime->toDateString();
-                        $newRow->outDateTime = $result->variableDateTime->format('Y-m-d   H:i:s');
-                        $newRow->outDateTimeSch = $result->pinnedDateTime->format('Y-m-d   H:i:s');
+                        $newRow->outDateTime = $result->variableDateTime->format('Y-m-d H:i:s');
+                        $newRow->outDateTimeSch = $result->pinnedDateTime->format('Y-m-d H:i:s');
                         $newRow->isModifiedOut = isset($result->registry->is_modified) ? $result->registry->is_modified : false;
 
                         $newRow->cutId = SDelayReportUtils::getCutId($result);
@@ -523,11 +514,6 @@ class SDataProcess {
                                 if($comments->where('key_code','hasCheckIn')->first()['value']) {
                                     $newRow->isDayChecked = true;
                                 }
-                            }
-                        }
-                        else {
-                            foreach ($adjs as $adj) {
-                                $newRow->adjusts[] = $adj;
                             }
                         }
                     }
@@ -601,7 +587,7 @@ class SDataProcess {
                                     return 0;
                                 }
                             }
-                            if (! $night && $bAfterDay) {
+                            if ((! $night && $bAfterDay) || (! $night && $newRow->inDate < $registry->date)) {
                                 $result->pinnedDateTime->subDay();
                             }
 
@@ -637,11 +623,6 @@ class SDataProcess {
                                 }
                             }
                             $newRow->hasCheckOut = false;
-                        }
-                        else {
-                            foreach ($adjs as $adj) {
-                                $newRow->adjusts[] = $adj;
-                            }
                         }
                         $again = true;
                         $isNew = true;
@@ -1089,7 +1070,6 @@ class SDataProcess {
                                         if ($time == $adj->dt_time) {
                                             $hasDelay = false;
                                             $consumAdjs[] = $adj->id;
-                                            $oRow->adjusts[] = $adj;
                                         }
                                     }
                                 }
@@ -1138,7 +1118,6 @@ class SDataProcess {
                             if (count($adjs) > 0) {
                                 foreach ($adjs as $adj) {
                                     $discountMins += $adj->minutes;
-                                    $oRow->adjusts[] = $adj;
                                 }
                             }
 
@@ -1177,7 +1156,6 @@ class SDataProcess {
                             if (count($adjs) > 0) {
                                 foreach ($adjs as $adj) {
                                     $discountMins += $adj->minutes;
-                                    $oRow->adjusts[] = $adj;
                                 }
                             }
 
@@ -1198,8 +1176,10 @@ class SDataProcess {
                             $oRow->overDefaultMins = 0;
                             $oRow->overScheduleMins = 0;
 
-                            $oRow->comments = $oRow->comments."Jornada incompleta. ";
-                            $oRow->isOverJourney = false;
+                            if ($oRow->hasSchedule && $oRow->inDateTimeSch != null && $oRow->outDateTimeSch != null) {
+                                $oRow->comments = $oRow->comments."Jornada incompleta. ";
+                                $oRow->isOverJourney = false;
+                            }
                         }
                     }
                     else {
@@ -1207,8 +1187,10 @@ class SDataProcess {
                         $oRow->overDefaultMins = 0;
                         $oRow->overScheduleMins = 0;
                         
-                        $oRow->comments = $oRow->comments."Jornada incompleta. ";
-                        $oRow->isOverJourney = false;
+                        if ($oRow->hasSchedule && $oRow->inDateTimeSch != null && $oRow->outDateTimeSch != null) {
+                            $oRow->comments = $oRow->comments."Jornada incompleta. ";
+                            $oRow->isOverJourney = false;
+                        }
                     }
                 }
             }
@@ -1229,7 +1211,6 @@ class SDataProcess {
                 $minsExtraByAdj = 0;
                 foreach ($adjs as $adj) {
                     $minsExtraByAdj += $adj->minutes;
-                    $oRow->adjusts[] = $adj;
                 }
 
                 $oRow->overMinsByAdjs = $oRow->overMinsByAdjs + $minsExtraByAdj;
@@ -1561,7 +1542,6 @@ class SDataProcess {
                                     if ($time == $adj->dt_time) {
                                         $withAbs = false;
                                         $consumAdjs[] = $adj->id;
-                                        $oRow->adjusts[] = $adj;
                                     }
                                 }
                             }

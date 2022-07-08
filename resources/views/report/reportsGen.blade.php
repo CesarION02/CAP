@@ -130,7 +130,7 @@
                         <p style="color:red">Nota: Este proceso podría demorar algunos minutos</p>
                     </div>
                     <div class="col-lg-2">
-                        <button class="btn btn-warning" id="generar" name="generar" type="submit">Generar</button>
+                        <button class="btn btn-warning" id="generar" name="generar" type="submit" onclick="this.form.submit(); this.disabled=true; oGui.showLoading(60000); ">Generar</button>
                     </div>
                 </div>
                 <br>
@@ -153,6 +153,7 @@
     <script src="{{ asset("assets/js/axios.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/chosen.jquery.min.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/vue.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/pages/scripts/SGui.js") }}" type="text/javascript"></script>
     
     <script>
             function GlobalData () {
@@ -162,7 +163,7 @@
                 this.lAreas = this.aData[0];
                 this.lDepts = this.aData[1];
             }
-            
+            var oGui = new SGui();
             var oData = new GlobalData();
         </script>
     <script src="{{ asset("assets/pages/scripts/filters/SFilter.js") }}" type="text/javascript"></script>

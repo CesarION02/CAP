@@ -18,11 +18,11 @@ function makeDocument() {
     }
 
     if (oData.tReport == oData.REP_HR_EX) {
-        columnNames.splice(4, 1);
+        columnNames.splice(5, 1);
         columnNames[2] = columnNames[2].replace('<span class="nobr">', '');
         columnNames[2] = columnNames[2].replace('</span>', '');
-        columnNames[3] = columnNames[2].replace('<span class="nobr">', '');
-        columnNames[3] = columnNames[2].replace('</span>', '');
+        columnNames[3] = columnNames[3].replace('<span class="nobr">', '');
+        columnNames[3] = columnNames[3].replace('</span>', '');
     }
     else {
         columnNames.splice(5, 1);
@@ -54,21 +54,21 @@ function makeDocument() {
         }
 
         if (oData.tReport == oData.REP_HR_EX) {
-            hrs += (value[4] == "") ? 0 : parseInt(value[4], 10);
-            delayMins += (value[6] == "") ? 0 : parseInt(value[6], 10);
-            premMins += (value[7] == "") ? 0 : parseInt(value[7], 10);
-            sundays += (value[8] == "") ? 0 : parseInt(value[8], 10);
-            daysOff += (value[9] == "") ? 0 : parseInt(value[9], 10);
+            hrs += (value[5] == "") ? 0 : parseInt(value[5], 10);
+            delayMins += (value[10] == "") ? 0 : parseInt(value[10], 10);
+            premMins += (value[11] == "") ? 0 : parseInt(value[11], 10);
+            sundays += (value[12] == "") ? 0 : parseInt(value[12], 10);
+            daysOff += (value[13] == "") ? 0 : parseInt(value[13], 10);
         }
         else {
-            hrs += (value[4] == "") ? 0 : parseInt(value[4], 10);
+            hrs += (value[5] == "") ? 0 : parseInt(value[5], 10);
         }
 
         if (oData.tReport == oData.REP_HR_EX) {
-            value[12] = value[12].replace('<button class="btn btn-primary btn-xs"><span aria-hidden="true" class="glyphicon glyphicon-cog"></span></button>', '');
-            value[12] = value[12].replace('</p>', '');
-            value[12] = value[12].replace('<p>', '');
-            value.splice(4, 1);
+            value[16] = value[16].replace('<button class="btn btn-primary btn-xs"><span aria-hidden="true" class="glyphicon glyphicon-cog"></span></button>', '');
+            value[16] = value[16].replace('</p>', '');
+            value[16] = value[16].replace('<p>', '');
+            value.splice(5, 1);
         }
         else {
             value.splice(5, 1);
