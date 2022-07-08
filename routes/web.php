@@ -192,6 +192,8 @@ Route::delete('deptgroupuser/{id}', 'deptgroupuserController@destroy')->name('el
 /* RUTAS DE empleados asignados a grupo departamento */
 Route::get('emplDeptGroup', 'employeesAssignsController@index')->name('empl_group_assign');
 Route::get('emplDeptGroup/generate', 'employeesAssignsController@generateEmployeesAssigns')->name('empl_group_assign_generate');
+Route::get('emplSchedules', 'employeesAssignsController@indexEmployeesSchedules')->name('empl_schedules');
+Route::delete('emplSchedules/delete/{id}', 'employeesAssignsController@deleteScheduleAssign')->name('empl_schedules_delete');
 /* RUTAS DE USUARIO */
 Route::get('user/change', 'userController@change')->name('cambio_usuario');
 Route::put('user/{id}/cambio', 'userController@updatePassword')->name('actualizar_contraseña');

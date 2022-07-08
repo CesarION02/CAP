@@ -173,4 +173,64 @@ class employeesAssignsController extends Controller
         $route = route('empl_group_assign');
         return view('employeesAssigns.generated',['grupo' => $grupo, 'supervisores' => $supervisores, 'tipo' => $request->tipo, 'route' => $route]);
     }
+
+    public function indexEmployeesSchedules(Request $request){
+        $grupo = DB::table('group_dept_user as gdu')
+                    ->join('users as u','gdu.user_id','=','u.id')
+                    ->join('department_group as dg','gdu.groupdept_id','=','dg.id')
+                    ->leftJoin('departments as d', 'd.dept_group_id','=','dg.id')
+                    ->leftJoin('employees as e', 'e.department_id','=','d.id')
+                    ->where('u.id', \Auth::user()->id)
+                    ->where('gdu.is_delete',0)
+                    ->where('dg.is_delete',0)
+                    ->where('d.is_delete',0)
+                    ->where([['e.is_delete',0],['e.is_active',1]])
+                    ->select('u.name as supervisor', 'dg.name as dept_group', 'd.name as dept', 'e.id as employee_id',
+                                'e.num_employee', 'e.name as employee_name',
+                                \DB::raw("CONCAT(d.name,' - ',e.name,' - ',e.num_employee) AS employee"))
+                    ->get();
+
+        if($request->selEmployee){
+            $schedules = \DB::table('schedule_assign AS sa')
+                        ->join('schedule_template as st', 'sa.schedule_template_id', '=', 'st.id')
+                        ->where('sa.is_delete', 0)
+                        ->where('st.id', '!=', 1)
+                        ->where('sa.employee_id', $request->selEmployee)
+                        ->select('sa.employee_id', 'sa.start_date', 'sa.end_date', 'st.name', 'sa.employee_id', 'sa.id as schedule_id', 'st.id as st_id')
+                        ->orderBy('start_date')
+                        ->get();
+
+            $schedulesDays = \DB::table('schedule_assign AS sa')
+                                ->join('schedule_template as st', 'sa.schedule_template_id', '=', 'st.id')
+                                ->join('schedule_day as sd', 'sd.schedule_template_id', '=', 'st.id')
+                                ->where('sa.is_delete', 0)
+                                ->where('sa.employee_id', $request->selEmployee)
+                                ->select('sd.is_active', 'sd.day_name', 'sd.day_num', 'sd.entry as day_entry', 'sd.departure as day_departure', 'sd.schedule_template_id')
+                                ->groupBy('sd.schedule_template_id', 'sd.day_name')
+                                ->orderBy('sd.schedule_template_id', 'asc')
+                                ->orderBy('sd.day_num', 'asc')
+                                ->get();
+
+            foreach($schedules as $schedule){
+                $schDay = $schedulesDays->where('schedule_template_id',$schedule->st_id)->all();
+                $schedule->days = $schDay;
+            }
+
+            $oEmployee = $grupo->where('employee_id', $request->selEmployee)->first();
+        }else{
+            $schedules = [];
+            $oEmployee = new \stdClass();
+            $oEmployee->employee_id = 0;
+        }
+
+        return view('employeesSchedules.index', ['lEmployees' => $grupo, 'lSchedules' => $schedules, 'oEmployee' => $oEmployee]);
+    }
+
+    public function deleteScheduleAssign($id){
+        $schedule = \DB::table('schedule_assign')
+                        ->where('id',$id)
+                        ->update(['is_delete' => 1]);
+
+        return json_encode(['success' => $schedule]);
+    }
 }
