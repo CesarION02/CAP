@@ -58,7 +58,6 @@ Plantilla horarios
         $('#reportrange').on('apply.daterangepicker', function(ev, picker) {
             document.getElementById('start_date').value = picker.startDate.format('YYYY-MM-DD');
             document.getElementById('end_date').value = picker.endDate.format('YYYY-MM-DD');
-            // app.setDates(picker.startDate.format('YYYY-MM-DD'), picker.endDate.format('YYYY-MM-DD'));
         });
     </script>
 <script>
@@ -89,7 +88,7 @@ Plantilla horarios
                     "sSortDescending": ": Activar para ordenar la columna de manera descendente"
                 }
             },
-            "order": [[ 0, 'asc' ], [ 1, 'desc' ], [ 2, 'desc' ]],
+            "order": [[ 1, 'desc' ]],
             "colReorder": true,
             "dom": 'Bfrtip',
             "lengthMenu": [

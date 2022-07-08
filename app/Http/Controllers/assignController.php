@@ -571,7 +571,7 @@ class assignController extends Controller
                 $Adgu[$i]=$dgu[$i]->id;
             }
             $employee = DB::table('employees')
-                    ->join('jobs','jobs.id','=','employees.job_id')
+                    // ->join('jobs','jobs.id','=','employees.job_id')
                     ->join('departments','departments.id','=','employees.department_id')
                     ->join('department_group','department_group.id','=','departments.dept_group_id')
                     ->whereIn('departments.dept_group_id',$Adgu)
@@ -581,7 +581,7 @@ class assignController extends Controller
         }
         else {
             $employee = DB::table('employees')
-                    ->join('jobs','jobs.id','=','employees.job_id')
+                    // ->join('jobs','jobs.id','=','employees.job_id')
                     ->join('departments','departments.id','=','employees.department_id')
                     ->join('department_group','department_group.id','=','departments.dept_group_id')
                     ->where('employees.is_active',1)
