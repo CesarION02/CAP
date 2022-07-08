@@ -12,7 +12,13 @@ Asignar horario fijo
 <script>
         $(document).ready(function() {
             $('.js-example-basic-multiple').select2();
+            if(withEmp){
+                document.getElementById('empleado').setAttribute('disabled', 'disabled');
+            }
         });
+</script>
+<script>
+    var withEmp = <?php echo json_encode($withEmp); ?>;
 </script>
 @endsection
 
@@ -38,7 +44,8 @@ Asignar horario fijo
                 <div class="box-footer">
                     <div class="col-lg-3"></div>
                     <div class="col-lg-6">
-                        @include('includes.button-form-create')
+                        <button type="submit" class="btn btn-success" id="guardar">Guardar</button>
+                        <button type="button" onclick="" class="btn btn-default">Deshacer</button>
                     </div>
                 </div>
             </form>

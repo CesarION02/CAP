@@ -128,7 +128,7 @@
             this.oEmployee = <?php echo json_encode($oEmployee) ?>;
             this.lSchedules = <?php echo json_encode($lSchedules) ?>;
             this.routeDelSchedules = <?php echo json_encode(route('empl_schedules_delete', ':id')) ?>;
-            this.routeProgramming = <?php echo json_encode(route('programar', ':id')) ?>;
+            this.routeProgramming = <?php echo json_encode(route('programar', ['id' => ':id', 'withEmp' => '1'])) ?>;
         }
         var oData = new GlobalData();
         var oGui = new SGui();

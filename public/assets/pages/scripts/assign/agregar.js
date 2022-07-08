@@ -4,7 +4,7 @@ function agregar() {
     contador++;
     var nameDiv = "div";
     nameDiv += contador;
-    var div = '<div class="form-group ' + nameDiv + '"><label class="col-lg-3 control-label requerido">Horario:</label><div class="col-lg-4"><select name="horario' + contador + '" id="horario' + contador + '">'
+    var div = '<div class="form-group ' + nameDiv + '"><label class="col-lg-3 control-label requerido">Horario:</label><div class="col-lg-4"><select class="js-example-basic-multiple" name="horario' + contador + '" id="horario' + contador + '" required>'
     $.ajax({
         type: 'get',
         url: 'schedule_template',
@@ -17,9 +17,10 @@ function agregar() {
                     div += '<option value="' + data[i].id + '">' + data[i].name + '</option>';
                 }
             }
-            div += '</select></div><label class="col-lg-2 control-label requerido">Orden:</label><div class="col-lg-1"><input type="number" name="orden' + contador + '" id="orden' + contador + '" value="' + contador + '" style="width:70%"></div></div>'
+            div += '</select></div><label class="col-lg-2 control-label requerido">Orden:</label><div class="col-lg-1"><input type="number" name="orden' + contador + '" id="orden' + contador + '" value="' + contador + '" style="width:70%" required></div></div>'
 
             $('.box-body').append(div);
+            $('.js-example-basic-multiple').select2();
             $('#orden1').removeAttr('disabled');
             document.getElementById("contador").value = contador;
         }

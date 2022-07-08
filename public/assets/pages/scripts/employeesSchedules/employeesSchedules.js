@@ -54,7 +54,7 @@ var app = new Vue({
         },
 
         programarNuevo(){
-            if(this.selEmployee != null){
+            if(this.selEmployee != null && this.selEmployee != ''){
                 var route = this.routeProgramming.replace(':id', this.selEmployee);
                 window.open(route, '_blank');
             }

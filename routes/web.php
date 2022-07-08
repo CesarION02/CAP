@@ -303,7 +303,7 @@ Route::get('assign/specificDate/','assignController@viewSpecificDate')->name('fe
 Route::post('assign/mostrarFecha', 'assignController@mostrarFecha')->name('mostrar_fecha');
 Route::get('assign', 'assignController@index')->name('asignacion');
 Route::get('assign/create/{id}', 'assignController@create')->name('crear_asignacion');
-Route::get('assign/programming/{id}', 'assignController@programming')->name('programar');
+Route::get('assign/programming/{id}/{withEmp?}', 'assignController@programming')->name('programar');
 Route::get('assign/dayProgramming/{id}','assignController@dayProgramming')->name('programar_dia');
 Route::post('assign', 'assignController@store')->name('guardar_asignacion');
 Route::post('assign/guardar', 'assignController@guardar')->name('guardar');
