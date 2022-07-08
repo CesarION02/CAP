@@ -560,7 +560,7 @@ class assignController extends Controller
         }   
     }
 
-    public function programming($id) {
+    public function programming($id, $withEmp = 0) {
         if (session()->get('rol_id') != 1) {
             $dgu = DB::table('group_dept_user')
                     ->where('user_id',$id)
@@ -596,7 +596,7 @@ class assignController extends Controller
                                                 ->orderBy('name','ASC')
                                                 ->pluck('id','name');
 
-        return view('assign.programming')->with('employees',$employee)->with('schedule_template',$schedule_template)->with('idGroup',$id);   
+        return view('assign.programming')->with('employees',$employee)->with('schedule_template',$schedule_template)->with('idGroup',$id)->with('withEmp', $withEmp);   
     }
 
     public function dayProgramming($id){
@@ -649,6 +649,12 @@ class assignController extends Controller
         $end = null;
         $orden = null;
         $group_num = null;
+
+        foreach($request->all() as $elem){
+            if(is_null($elem)){
+                return redirect()->back()->withErrors('Debe llenar todos los campos del formulario');
+            }
+        }
 
         if($request->start_date != ''){
             $start = $request->start_date;

@@ -2,17 +2,17 @@
     <label for="start_date" class="col-lg-3 control-label requerido">Fecha inicial:</label>
     <div class="col-lg-3">
         @if(isset($datas))
-            <input type="date" name="start_date" id="start_date" value="{{$datas->start_date}}" >
+            <input type="date" name="start_date" id="start_date" value="{{$datas->start_date}}" required>
         @else
-        <input type="date" name="start_date" id="start_date">
+        <input type="date" name="start_date" id="start_date" required>
         @endif
     </div>  
     <label for="departamento" class="col-lg-2 control-label">Fecha final:</label>
     <div class="col-lg-3">
         @if(isset($datas))
-            <input type="date" name="end_date" id="end_date" value="{{$datas->end_date}}" >
+            <input type="date" name="end_date" id="end_date" value="{{$datas->end_date}}" required>
         @else
-            <input type="date" name="end_date" id="end_date">
+            <input type="date" name="end_date" id="end_date" required>
         @endif
     </div> 
 </div> 
@@ -20,9 +20,14 @@
 <div class="form-group">
     <label for="empleado" class="col-lg-3 control-label requerido">Empleados:</label>
     <div class="col-lg-8">
-        <select style="width: 95%" class="js-example-basic-multiple" name="empleado" id="empleado">
+        <select style="width: 95%" class="js-example-basic-multiple" name="empleado" id="empleado" required>
             @foreach($employees as $employee)
-                <option value="{{$employee->id}}">{{$employee->name.' - '.$employee->num_employee}}</option>
+                <option value=""></option>
+                @if ($idGroup == $employee->id)
+                    <option value="{{$employee->id}}" selected>{{$employee->name.' - '.$employee->num_employee}}</option>
+                @else
+                    <option value="{{$employee->id}}">{{$employee->name.' - '.$employee->num_employee}}</option>
+                @endif
             @endforeach
         </select>    
     </div>
@@ -30,8 +35,9 @@
 <div class="form-group">
     <label for="horario" class="col-lg-3 control-label requerido">Horario:</label>
     <div class="col-lg-4">
-        <select name="horario1" id="horario1">
+        <select name="horario1" class="js-example-basic-multiple" id="horario1" required>
             @foreach($schedule_template as $schedule_template => $index)
+                <option value=""></option>
                 @if(isset($datas))
                     @if($datas->schedule_template_id == $index)
                         <option selected value="{{$index}}">{{$schedule_template}}</option>
@@ -46,7 +52,7 @@
     </div>
     <label for="orden" class="col-lg-2 control-label requerido">Orden:</label>
     <div class="col-md-1">
-        <input type="number" name="orden1" id="orden1" value="1" style="width:70%" disabled>
+        <input type="number" name="orden1" id="orden1" value="1" style="width:70%" disabled required>
     </div>
     <div class="col-lg-1">
         <button type="button" class="btn btn-primary" onclick="agregar()"><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span></button>

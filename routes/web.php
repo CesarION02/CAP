@@ -192,6 +192,8 @@ Route::delete('deptgroupuser/{id}', 'deptgroupuserController@destroy')->name('el
 /* RUTAS DE empleados asignados a grupo departamento */
 Route::get('emplDeptGroup', 'employeesAssignsController@index')->name('empl_group_assign');
 Route::get('emplDeptGroup/generate', 'employeesAssignsController@generateEmployeesAssigns')->name('empl_group_assign_generate');
+Route::get('emplSchedules', 'employeesAssignsController@indexEmployeesSchedules')->name('empl_schedules');
+Route::delete('emplSchedules/delete/{id}', 'employeesAssignsController@deleteScheduleAssign')->name('empl_schedules_delete');
 /* RUTAS DE USUARIO */
 Route::get('user/change', 'userController@change')->name('cambio_usuario');
 Route::put('user/{id}/cambio', 'userController@updatePassword')->name('actualizar_contraseña');
@@ -301,7 +303,7 @@ Route::get('assign/specificDate/','assignController@viewSpecificDate')->name('fe
 Route::post('assign/mostrarFecha', 'assignController@mostrarFecha')->name('mostrar_fecha');
 Route::get('assign', 'assignController@index')->name('asignacion');
 Route::get('assign/create/{id}', 'assignController@create')->name('crear_asignacion');
-Route::get('assign/programming/{id}', 'assignController@programming')->name('programar');
+Route::get('assign/programming/{id}/{withEmp?}', 'assignController@programming')->name('programar');
 Route::get('assign/dayProgramming/{id}','assignController@dayProgramming')->name('programar_dia');
 Route::post('assign', 'assignController@store')->name('guardar_asignacion');
 Route::post('assign/guardar', 'assignController@guardar')->name('guardar');
