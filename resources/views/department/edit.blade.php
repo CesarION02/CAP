@@ -24,7 +24,7 @@
             <form action="{{route('actualizar_departamento', ['id' => $data->id])}}" id="form-general" class="form-horizontal" method="POST" autocomplete="off">
                 @csrf @method("put")
                 <div class="box-body">
-                    @include('department.form')
+                    @include('department.formEdit')
                 </div>
                 <div class="box-footer">
                     <div class="col-lg-3"></div>
