@@ -563,7 +563,7 @@ class assignController extends Controller
     public function programming($id, $withEmp = 0) {
         if (session()->get('rol_id') != 1) {
             $dgu = DB::table('group_dept_user')
-                    ->where('user_id',$id)
+                    ->where('user_id', \Auth::user()->id)
                     ->select('groupdept_id AS id')
                     ->get();
             $Adgu = [];
