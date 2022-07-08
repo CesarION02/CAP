@@ -175,20 +175,37 @@ class employeesAssignsController extends Controller
     }
 
     public function indexEmployeesSchedules(Request $request){
-        $grupo = DB::table('group_dept_user as gdu')
-                    ->join('users as u','gdu.user_id','=','u.id')
-                    ->join('department_group as dg','gdu.groupdept_id','=','dg.id')
-                    ->leftJoin('departments as d', 'd.dept_group_id','=','dg.id')
-                    ->leftJoin('employees as e', 'e.department_id','=','d.id')
-                    ->where('u.id', \Auth::user()->id)
-                    ->where('gdu.is_delete',0)
-                    ->where('dg.is_delete',0)
-                    ->where('d.is_delete',0)
-                    ->where([['e.is_delete',0],['e.is_active',1]])
-                    ->select('u.name as supervisor', 'dg.name as dept_group', 'd.name as dept', 'e.id as employee_id',
-                                'e.num_employee', 'e.name as employee_name',
-                                \DB::raw("CONCAT(d.name,' - ',e.name,' - ',e.num_employee) AS employee"))
-                    ->get();
+        if (session()->get('rol_id') != 1){
+            $grupo = DB::table('group_dept_user as gdu')
+                        ->join('users as u','gdu.user_id','=','u.id')
+                        ->join('department_group as dg','gdu.groupdept_id','=','dg.id')
+                        ->leftJoin('departments as d', 'd.dept_group_id','=','dg.id')
+                        ->leftJoin('employees as e', 'e.department_id','=','d.id')
+                        ->where('u.id', \Auth::user()->id)
+                        ->where('gdu.is_delete',0)
+                        ->where('dg.is_delete',0)
+                        ->where('d.is_delete',0)
+                        ->where([['e.is_delete',0],['e.is_active',1]])
+                        ->select('u.name as supervisor', 'dg.name as dept_group', 'd.name as dept', 'e.id as employee_id',
+                                    'e.num_employee', 'e.name as employee_name',
+                                    \DB::raw("CONCAT(d.name,' - ',e.name,' - ',e.num_employee) AS employee"))
+                        ->get();
+        }else{
+            $grupo = DB::table('group_dept_user as gdu')
+                        ->join('users as u','gdu.user_id','=','u.id')
+                        ->join('department_group as dg','gdu.groupdept_id','=','dg.id')
+                        ->leftJoin('departments as d', 'd.dept_group_id','=','dg.id')
+                        ->leftJoin('employees as e', 'e.department_id','=','d.id')
+                        ->where('gdu.is_delete',0)
+                        ->where('dg.is_delete',0)
+                        ->where('d.is_delete',0)
+                        ->where([['e.is_delete',0],['e.is_active',1]])
+                        ->select('u.name as supervisor', 'dg.name as dept_group', 'd.name as dept', 'e.id as employee_id',
+                                    'e.num_employee', 'e.name as employee_name',
+                                    \DB::raw("CONCAT(d.name,' - ',e.name,' - ',e.num_employee) AS employee"))
+                        ->groupBy('e.id')
+                        ->get();
+        }
 
         if($request->selEmployee){
             $schedules = \DB::table('schedule_assign AS sa')

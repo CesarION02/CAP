@@ -21,8 +21,8 @@
     <label for="empleado" class="col-lg-3 control-label requerido">Empleados:</label>
     <div class="col-lg-8">
         <select style="width: 95%" class="js-example-basic-multiple" name="empleado" id="empleado" required>
+            <option value=""></option>
             @foreach($employees as $employee)
-                <option value=""></option>
                 @if ($idGroup == $employee->id)
                     <option value="{{$employee->id}}" selected>{{$employee->name.' - '.$employee->num_employee}}</option>
                 @else
