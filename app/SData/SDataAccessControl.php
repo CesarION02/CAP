@@ -288,7 +288,7 @@ class SDataAccessControl {
         return $res;
     }
 
-    public static function evaluateToSend($idEmployee, $dateTime)
+    public static function evaluateToSend($idEmployee, $dateTime, $sSource)
     {
         $dtDate = Carbon::parse($dateTime)->toDateString();
         $dtDateTime = $dateTime;
@@ -316,7 +316,7 @@ class SDataAccessControl {
         }
 
         Mail::to($rec)
-                ->send(new BadCheckNotification($oEmployee->name, $dateTime, $result[1]));
+                ->send(new BadCheckNotification($oEmployee->name, $dateTime, $result[1], $sSource));
     }
 
     /**

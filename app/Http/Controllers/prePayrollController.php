@@ -883,7 +883,7 @@ class prePayrollController extends Controller
                         ]);
         }
         catch (\Exception $e) {
-            return redirect()->route('vobos', $idPreNomina)->with(['mensaje' => $e->getMessage(), 'icon' => 'error']);
+            return redirect()->route('vobos', $idPreNomina)->with(['error' => $e->getMessage(), 'icon' => 'error']);
         }
 
         $msg = "Se dió el visto bueno correctamente";

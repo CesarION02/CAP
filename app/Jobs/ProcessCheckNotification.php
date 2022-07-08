@@ -16,16 +16,18 @@ class ProcessCheckNotification implements ShouldQueue
 
     private $idEmployee;
     private $dtDateTime;
+    private $sourceString;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($id, $dtDateTime)
+    public function __construct($id, $dtDateTime, $sSource)
     {
         $this->idEmployee = $id;
         $this->dtDateTime = $dtDateTime;
+        $this->sourceString = $sSource;
     }
 
     /**
@@ -35,6 +37,6 @@ class ProcessCheckNotification implements ShouldQueue
      */
     public function handle()
     {
-        SDataAccessControl::evaluateToSend($this->idEmployee, $this->dtDateTime);
+        SDataAccessControl::evaluateToSend($this->idEmployee, $this->dtDateTime, $this->sourceString);
     }
 }

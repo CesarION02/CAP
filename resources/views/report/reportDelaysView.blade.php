@@ -26,6 +26,7 @@
             <div class="box-header with-border">
                 <h3 class="box-title">{{ $sTitle }}</h3>
                 <div class="box-tools pull-right">
+                    <small style="color: blue" class="text-muted"><b>Sugerencia:</b> Haz click en el botón <span class="glyphicon glyphicon-menu-hamburger"></span> para modificar la vista.</small>
                 </div>
             </div>
             <div class="box-body" id="reportDelayApp">
@@ -114,6 +115,7 @@
                                     <td>@{{ row.external_id }}</td>
                                 </tr>
                             </tbody>
+                            <button onclick="reloadFunction()" id="reloadBtn" title="Recargar reporte">Actualizar</button>
                             <button onclick="topFunction()" id="myBtn" title="Ir arriba">Ir arriba</button>
                             <a href="{{ route('generarreportetiemposextra') }}" target="_blank" id="newButton" title="Nuevo reporte">Nuevo reporte</a>
                         </table>
@@ -448,6 +450,7 @@
 
     <script>
         //Get the button:
+        reloadButton = document.getElementById("reloadBtn");
         mybutton = document.getElementById("myBtn");
         theNewButton = document.getElementById("newButton");
 
@@ -456,9 +459,11 @@
 
         function scrollFunction() {
             if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                reloadButton.style.display = "block";
                 mybutton.style.display = "block";
                 theNewButton.style.display = "block";
             } else {
+                reloadButton.style.display = "none";
                 mybutton.style.display = "none";
                 theNewButton.style.display = "none";
             }
@@ -468,6 +473,11 @@
         function topFunction() {
             document.body.scrollTop = 0; // For Safari
             document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+        }
+
+        function reloadFunction() {
+            oGui.showLoading(6000);
+            location.reload();
         }
 
         function getRowsInNumEmployee(numEmployee){
