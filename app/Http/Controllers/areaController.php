@@ -60,6 +60,11 @@ class areaController extends Controller
      */
     public function store(Request $request)
     {
+        foreach($request->all() as $elem){
+            if(is_null($elem)){
+                return redirect()->back()->withErrors('Debe llenar todos los campos del formulario');
+            }
+        }
         $area = area::create($request->all());
         $id = session()->get('user_id');
         $name = session()->get('name');
@@ -105,6 +110,11 @@ class areaController extends Controller
      */
     public function update(Request $request, $id)
     {
+        foreach($request->all() as $elem){
+            if(is_null($elem)){
+                return redirect()->back()->withErrors('Debe llenar todos los campos del formulario');
+            }
+        }
         $area = area::findOrFail($id);
         $area->updated_by = session()->get('user_id');
         $area->boss_id = $request->boss_id;
