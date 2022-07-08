@@ -4,7 +4,12 @@
 @endsection
 
 @section("scripts")
-
+<script src="{{ asset('select2js/js/select2.min.js') }}"></script>
+<script>
+    $(document).ready(function () {
+        $('.select2-class').select2();
+    })
+</script>
 @endsection
 
 @section('content')

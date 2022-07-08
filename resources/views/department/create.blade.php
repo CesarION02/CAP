@@ -6,6 +6,12 @@
 @section("scripts")
     <script src="{{asset("assets/pages/scripts/departments/agregar.js")}}" type="text/javascript"></script>
     <script src="{{asset("assets/pages/scripts/departments/eliminar.js")}}" type="text/javascript"></script>
+    <script src="{{ asset('select2js/js/select2.min.js') }}"></script>
+    <script>
+        $(document).ready(function () {
+            $('.select2-class').select2();
+        })
+    </script>
 @endsection
 
 @section('content')

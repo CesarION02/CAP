@@ -137,6 +137,11 @@ class departmentController extends Controller
      */
     public function store(Request $request)
     {
+        foreach($request->all() as $elem){
+            if(is_null($elem)){
+                return redirect()->back()->withErrors('Debe llenar todos los campos del formulario');
+            }
+        }
         $department = department::create($request->all());
         $department->rh_department_id = $request->rh_department_id;
         $department->boss_id = $request->boss_id;
@@ -202,6 +207,11 @@ class departmentController extends Controller
      */
     public function update(Request $request, $id)
     {
+        foreach($request->all() as $elem){
+            if(is_null($elem)){
+                return redirect()->back()->withErrors('Debe llenar todos los campos del formulario');
+            }
+        }
         $department = department::findOrFail($id);
         $department->rh_department_id = $request->rh_department_id;
         $department->boss_id = $request->boss_id;
