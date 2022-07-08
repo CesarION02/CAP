@@ -67,6 +67,11 @@ class jobController extends Controller
      */
     public function store(Request $request)
     {
+        foreach($request->all() as $elem){
+            if(is_null($elem)){
+                return redirect()->back()->withErrors('Debe llenar todos los campos del formulario');
+            }
+        }
         $job = job::create($request->all());
         $job->updated_by = session()->get('user_id');
         $job->created_by = session()->get('user_id');
@@ -109,6 +114,11 @@ class jobController extends Controller
      */
     public function update(Request $request, $id)
     {
+        foreach($request->all() as $elem){
+            if(is_null($elem)){
+                return redirect()->back()->withErrors('Debe llenar todos los campos del formulario');
+            }
+        }
         $job = job::findOrFail($id);
         $job->updated_by = session()->get('user_id');
         $job->policy_holiday_id = $request->policy_holiday_id;
