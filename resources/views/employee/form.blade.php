@@ -19,7 +19,7 @@
 <div class="form-group">
         <label for="way_register_id" class="col-lg-3 control-label requerido">Política registro:</label>
         <div class="col-lg-8">
-                <select id="way_register_id" name="way_register_id" class="form-control">
+                <select id="way_register_id" name="way_register_id" class="form-control select2-class">
                     @foreach($way as $way => $index)
                         @if(isset($data))
                                 @if($index == $data->way_register_id)
@@ -37,7 +37,7 @@
 <div class="form-group">
         <label for="is_overtime" class="col-lg-3 control-label requerido">Tiempo extra:</label>
         <div class="col-lg-8">
-                <select id="policy_id" name="policy_id" class="form-control">
+                <select id="policy_id" name="policy_id" class="form-control select2-class">
                         @foreach($policy as $policy => $index)
                             @if(isset($data))
                                     @if($index == $data->policy_extratime_id)
@@ -55,7 +55,7 @@
 <div class="form-group">
         <label for="department_id" class="col-lg-3 control-label requerido">Departamento CAP:</label>
         <div class="col-lg-8">
-                <select id="department_id" name="department_id" class="departamento form-control">
+                <select id="department_id" name="department_id" class="departamento form-control select2-class">
                     @foreach($department as $department => $index)
                         @if(isset($data))
                                 @if($index == $data->department_id)
@@ -91,7 +91,7 @@
 <div class="form-group">
         <label for="ben_pol_id" class="col-lg-3 control-label requerido">Criterio beneficios:</label>
         <div class="col-lg-8">
-                <select id="ben_pol_id" name="ben_pol_id" class="form-control">
+                <select id="ben_pol_id" name="ben_pol_id" class="form-control select2-class">
                     @foreach($benPols as $bp => $index)
                         @if(isset($data))
                                 @if($index == $data->ben_pol_id)
