@@ -1,7 +1,7 @@
     <div class="form-group">
         <label for="horario" class="col-lg-3 control-label requerido">Horario:</label>
         <div class="col-lg-3">
-            <select name="horario" id="horario">
+            <select name="horario" id="horario" class="js-example-basic-multiple" required>
                 @foreach($schedule_template as $schedule_template => $index)
                     @if(isset($datas))
                         @if($datas->schedule_template_id == $index)
@@ -20,9 +20,9 @@
         <label for="start_date" class="col-lg-3 control-label requerido">Fecha inicial:</label>
         <div class="col-lg-3">
             @if(isset($datas))
-                <input type="date" name="start_date" id="start_date" value="{{$datas->start_date}}" >
+                <input type="date" name="start_date" id="start_date" value="{{$datas->start_date}}" required>
             @else
-            <input type="date" name="start_date" id="start_date">
+            <input type="date" name="start_date" id="start_date" required>
             @endif
         </div>  
         <label for="departamento" class="col-lg-2 control-label">Fecha final:</label>
@@ -75,7 +75,7 @@
         <div class="form-group">
             <label for="departamento" class="col-lg-3 control-label requerido">Departamentos CAP:</label>
             <div class="col-lg-8">              
-                <select name="departamento" id="departamento">  
+                <select name="departamento" id="departamento" class="js-example-basic-multiple" required>  
                     <option value=0>Seleccione departamento CAP</option>
                     @foreach($department as $department => $index)
                             @if((isset($datas)) == true && $datas->department_id == $index)

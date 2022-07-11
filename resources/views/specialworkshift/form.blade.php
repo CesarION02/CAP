@@ -3,7 +3,7 @@
     <div class="col-lg-8">
         
             @if(isset($datas))
-                <select name="employee_id" id="employee_id">
+                <select name="employee_id" id="employee_id" class="chosen-select">
                     <option value="0">Seleccione empleado</option>
                     @for($i = 0 ; count($employees) > $i ; $i++)
                         @if($employees[$i]->idEmployee == $datas[0]->employee_id)
@@ -25,7 +25,7 @@
 <div class="form-group">
     <label for="nombre" class="col-lg-3 control-label requerido">Turno:</label>
     <div class="col-lg-8">
-        <select name="workshift_id" id="workshift_id">
+        <select name="workshift_id" id="workshift_id" class="chosen-select">
             @if(isset($datas))
                 <option value="0">Seleccione turno</option>
                 @for($i = 0 ; count($workshifts) > $i ; $i++)

@@ -57,6 +57,16 @@ class commentsController extends Controller
      */
     public function store(Request $request)
     {
+        foreach($request->all() as $elem){
+            if(is_null($elem)){
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Debe ingresar un comentario',
+                    'icon' => 'error',
+                    'oComment' => null
+                ]);
+            }
+        }
         $comment = null;
         try {
             $comment = Comments::create([
@@ -67,12 +77,14 @@ class commentsController extends Controller
             ]);
         } catch (QueryException $e) {
             return response()->json([
+                'success' => false,
                 'message' => 'Error al guardar el registro',
                 'icon' => 'error'
             ]);
         }
 
         return response()->json([
+            'success' => true,
             'message' => 'Se guardó el registro con éxito',
             'icon' => 'success',
             'oComment' => $comment
@@ -110,6 +122,16 @@ class commentsController extends Controller
      */
     public function update(Request $request, $id)
     {
+        foreach($request->all() as $elem){
+            if(is_null($elem)){
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Debe ingresar un comentario',
+                    'icon' => 'error',
+                    'oComment' => null
+                ]);
+            }
+        }
         $comment = null;
         try {
             DB::transaction( function () use($request, $id, $comment){
@@ -121,12 +143,14 @@ class commentsController extends Controller
             });
         } catch (QueryException $e) {
             return response()->json([
+                'success' => false,
                 'message' => 'Error al actualizar el registro',
                 'icon' => 'error'
             ]);
         }
 
         return response()->json([
+            'success' => true,
             'message' => 'Se actualizó el registro con éxito',
             'icon' => 'success',
             'oComment' => $comment

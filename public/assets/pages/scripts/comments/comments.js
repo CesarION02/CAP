@@ -4,7 +4,8 @@ var app = new Vue({
       vueData: oServerData,
       lComments: [],
       comment: null,
-      route: null
+      route: null,
+      modalDisabled: false,
     },
     mounted(){
         this.lComments = this.vueData.lComments;
@@ -19,17 +20,29 @@ var app = new Vue({
             this.showModal(ruta);
         },
         storeComment(){
+            this.modalDisabled = true;
             var route = this.route;
-            axios.post(route, {
-                comment: this.comment
-            })
-            .then(response => {
-                window.location.reload(true);
-                oGui.showOk();
-            })
-            .catch(function (error) {
-                oGui.showError('Error al guardar el registro');
-            });
+            if(this.comment != null && this.comment != ''){
+                axios.post(route, {
+                    comment: this.comment
+                })
+                .then(response => {
+                    if(response.data.success){
+                        window.location.reload(true);
+                        oGui.showOk();
+                    }else{
+                        this.modalDisabled = false;
+                        oGui.showMessage('',response.data.message,response.data.icon);
+                    }
+                })
+                .catch(function (error) {
+                    this.modalDisabled = false;
+                    oGui.showError('Error al guardar el registro');
+                });
+            }else{
+                this.modalDisabled = false;
+                oGui.showError('Debe ingresar un comentario');
+            }
         },
         editComment(id, comment, ruta){
             this.comment = comment;

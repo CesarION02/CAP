@@ -14,7 +14,7 @@
 <div class="form-group">
     <label for="department_id" class="col-lg-3 control-label requerido">Departamento CAP:</label>
     <div class="col-lg-8">
-            <select id="department_id" name="department_id" class="departamento form-control">
+            <select id="department_id" name="department_id" class="departamento form-control select2-class">
                 @foreach($departments as $department)
                     @if(isset($data))
                             @if($department->idDep == $data->department_id)
@@ -50,7 +50,7 @@
 </div><div class="form-group">
     <label for="department_id" class="col-lg-3 control-label requerido">Departamento CAP:</label>
     <div class="col-lg-8">
-            <select id="department_id" name="department_id" class="departamento form-control">
+            <select id="department_id" name="department_id" class="departamento form-control select2-class">
                 @foreach($departments as $department)
                     @if(isset($data))
                             @if($department->idDep == $data->department_id)
@@ -84,7 +84,7 @@
 <div class="form-group">
     <label for="ben_pol_id" class="col-lg-3 control-label requerido">Politica checado:</label>
     <div class="col-lg-8">
-            <select id="ben_pol_id" name="ben_pol_id" class="departamento form-control">
+            <select id="ben_pol_id" name="ben_pol_id" class="departamento form-control select2-class">
                 @foreach($ben_pol as $ben => $index)
                     @if(isset($data))
                             @if($index == $data->ben_pol_id)

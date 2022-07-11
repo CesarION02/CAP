@@ -1,10 +1,17 @@
 @extends("theme.$theme.layout")
+@section('styles1')
+    <link rel="stylesheet" href="{{asset("assets/css/chosen.min.css")}}">
+    <link rel="stylesheet" href="{{asset("assets/css/selectchosen.css")}}">
+@endsection
 @section('title')
     turno especial
 @endsection
 
 @section("scripts")
-
+    <script src="{{ asset("assets/js/chosen.jquery.min.js") }}" type="text/javascript"></script>
+    <script>
+        $(".chosen-select").chosen();
+    </script>
 @endsection
 
 @section('content')
