@@ -235,6 +235,17 @@ class specialWorkshiftController extends Controller
      */
     public function store(Request $request)
     {
+        foreach($request->all() as $elem){
+            if(is_null($elem)){
+                return redirect()->back()->withErrors('Debe llenar todos los campos del formulario');
+            }
+        }
+        if($request->employee_id == 0){
+            return redirect()->back()->withErrors('Debe seleccionar un empleado');
+        }
+        if($request->workshift_id == 0){
+            return redirect()->back()->withErrors('Debe seleccionar un turno');
+        }
         $dateI = Carbon::parse($request->datei);
         $dateS = Carbon::parse($request->dates);
 
@@ -367,6 +378,17 @@ class specialWorkshiftController extends Controller
      */
     public function update(Request $request, $id)
     {
+        foreach($request->all() as $elem){
+            if(is_null($elem)){
+                return redirect()->back()->withErrors('Debe llenar todos los campos del formulario');
+            }
+        }
+        if($request->employee_id == 0){
+            return redirect()->back()->withErrors('Debe seleccionar un empleado');
+        }
+        if($request->workshift_id == 0){
+            return redirect()->back()->withErrors('Debe seleccionar un turno');
+        }
         $specialworkshift = specialworkshift::findOrFail($id);
 
         $dateI = Carbon::parse($request->datei);
