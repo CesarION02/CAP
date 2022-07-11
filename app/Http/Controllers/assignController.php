@@ -81,8 +81,13 @@ class assignController extends Controller
         if($request->start_date != ''){
             $start = $request->start_date;
             $end = $request->end_date;
+        }else{
+            return redirect()->back()->withErrors('Debe seleccionar una fecha inicial');
         }
         if($request->tipo == 1){
+            if(!isset($request->empleado)){
+                return redirect()->back()->withErrors('Debe seleccionar al menos un empleado');
+            }
             $empleados = $request->empleado;
             if(count($empleados) == 1){
                 $asignacion = new assign_schedule();
@@ -114,6 +119,9 @@ class assignController extends Controller
     
             }
         }else{
+            if($request->departamento == 0){
+                return redirect()->back()->withErrors('Debe seleccionar un departamento');
+            }
             $asignacion = new assign_schedule();
             $asignacion->department_id = $request->departamento;
             $asignacion->schedule_template_id = $request->horario;
@@ -186,8 +194,13 @@ class assignController extends Controller
         if($request->start_date != ''){
             $start = $request->start_date;
             $end = $request->end_date;
+        }else{
+            return redirect()->back()->withErrors('Debe seleccionar una fecha inicial');
         }
         if($request->tipo == 1){
+            if(!isset($request->empleado)){
+                return redirect()->back()->withErrors('Debe seleccionar al menos un empleado');
+            }
             $empleados = $request->empleado;
             if($request->group == 0){
                 assign_schedule::where('id', $id)->delete();
