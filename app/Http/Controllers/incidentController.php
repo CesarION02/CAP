@@ -153,7 +153,11 @@ class incidentController extends Controller
      */
     public function store(Request $request)
     {
-        
+        foreach($request->all() as $elem){
+            if(is_null($elem)){
+                return redirect()->back()->withErrors('Debe llenar todos los campos del formulario');
+            }
+        }
         $incidents = DB::table('incidents')
                 ->where('employee_id','=',$request->employee_id)
                 ->whereIn('incidents.start_date',[$request->start_date,$request->end_date])
