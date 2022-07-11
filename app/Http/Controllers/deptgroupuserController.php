@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\departmentsGroup;
 use App\Models\group_dept_user;
-use App\User;
+use App\Models\User;
 use DB;
 
 class deptgroupuserController extends Controller
@@ -82,6 +82,18 @@ class deptgroupuserController extends Controller
      */
     public function store(Request $request)
     {
+        if(isset($request->dgu)){
+            if(!(count($request->dgu) > 0)){
+                return redirect()->back()->withErrors('Debe llenar todos los campos del formulario');
+            }
+        }else{
+            return redirect()->back()->withErrors('Debe llenar todos los campos del formulario');
+        }
+        foreach($request->all() as $elem){
+            if(is_null($elem)){
+                return redirect()->back()->withErrors('Debe llenar todos los campos del formulario');
+            }
+        }
         $numero = count($request->dgu);
         for($i = 0 ; $numero > $i ; $i++){
             $dgu = new group_dept_user();
@@ -139,6 +151,18 @@ class deptgroupuserController extends Controller
      */
     public function update(Request $request, $id)
     {
+        if(isset($request->dgu)){
+            if(!(count($request->dgu) > 0)){
+                return redirect()->back()->withErrors('Debe llenar todos los campos del formulario');
+            }
+        }else{
+            return redirect()->back()->withErrors('Debe llenar todos los campos del formulario');
+        }
+        foreach($request->all() as $elem){
+            if(is_null($elem)){
+                return redirect()->back()->withErrors('Debe llenar todos los campos del formulario');
+            }
+        }
         $borrar = group_dept_user::where('user_id',$id)->delete();
         $numero = count($request->dgu);
         for($i = 0 ; $numero > $i ; $i++){
