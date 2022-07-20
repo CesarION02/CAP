@@ -78,7 +78,7 @@ Empleados con checadas
         <div class="box">
             <div class="box-header with-border">
                 <h3 class="box-title">Empleados con checadas</h3>
-                @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:nombrecorto"])
+                @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:checadasempleados"])
                 <div class="box-tools pull-right">
 
                 </div>
