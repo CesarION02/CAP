@@ -20,6 +20,7 @@ Reporte Entradas/Salidas
                     @break
                     @case(2)
                     <h3 class="box-title">Reporte STPS</h3>
+                    @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:reportechecadas"])
                     @break
                     @case(3)
                     <h3 class="box-title">Reporte prenómina</h3>

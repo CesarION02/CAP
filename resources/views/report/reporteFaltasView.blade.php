@@ -39,8 +39,8 @@
         @include('includes.mensaje')
         <div class="box box-danger">
             <div class="box-header with-border">
-                <h3 class="box-title">Reporte faltas</h3>
-                
+                <h3 class="box-title">Reporte ausentismo</h3>
+                @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:reporteausentismo"])
                 <div class="box-tools pull-right">
                 </div>
             

@@ -663,8 +663,8 @@ class assignController extends Controller
         $orden = null;
         $group_num = null;
 
-        foreach($request->all() as $elem){
-            if(is_null($elem)){
+        foreach($request->all() as $key => $elem){
+            if($key != 'end_date' && is_null($elem)){
                 return redirect()->back()->withErrors('Debe llenar todos los campos del formulario');
             }
         }
@@ -672,6 +672,8 @@ class assignController extends Controller
         if($request->start_date != ''){
             $start = $request->start_date;
             $end = $request->end_date;
+        }else{
+            return redirect()->back()->withErrors('Debe seleccionar una fecha inicial');
         }
         
         if($request->contador > 1){

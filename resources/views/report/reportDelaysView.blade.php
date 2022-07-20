@@ -25,6 +25,7 @@
         <div class="box box-danger">
             <div class="box-header with-border">
                 <h3 class="box-title">{{ $sTitle }}</h3>
+                @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:reportetiemposextra"])
                 <div class="box-tools pull-right">
                     <small style="color: blue" class="text-muted"><b>Sugerencia:</b> Haz click en el botón <span class="glyphicon glyphicon-menu-hamburger"></span> para modificar la vista.</small>
                 </div>

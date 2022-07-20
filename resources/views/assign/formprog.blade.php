@@ -10,9 +10,9 @@
     <label for="departamento" class="col-lg-2 control-label">Fecha final:</label>
     <div class="col-lg-3">
         @if(isset($datas))
-            <input type="date" name="end_date" id="end_date" value="{{$datas->end_date}}" required>
+            <input type="date" name="end_date" id="end_date" value="{{$datas->end_date}}">
         @else
-            <input type="date" name="end_date" id="end_date" required>
+            <input type="date" name="end_date" id="end_date">
         @endif
     </div> 
 </div> 

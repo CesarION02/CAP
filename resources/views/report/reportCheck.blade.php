@@ -106,7 +106,8 @@ Reporte revisión
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Reporte número de checadas</h3>
+                <h3 class="box-title">Reporte revisión día checado</h3>
+                @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:reporterevisiondiachecado"])
                 <div class="box-tools pull-right">
                 </div>
             </div>

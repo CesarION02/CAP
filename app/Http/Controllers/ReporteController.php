@@ -1885,7 +1885,7 @@ class ReporteController extends Controller
                                     ->whereBetween('incidents.end_date',[$sStartDate,$sEndDate])
                                     ->where('dept_rh.id',$department) 
                                     ->orderBy('incidents.start_date')
-                                    ->select('incidents.start_date AS fechaI','incidents.end_date AS fechaF','type_incidents.name AS tipo','dept_rh.name AS departamento');
+                                    ->select('incidents.start_date AS fechaI','incidents.end_date AS fechaF','type_incidents.name AS tipo','dept_rh.name AS departamento', 'employees.name AS empleado');
                     break;
                 //Caso de empleados
                 case 2:
