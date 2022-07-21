@@ -450,8 +450,8 @@ class shiftprogrammingController extends Controller
                             ->where('id',$typearea)
                             ->get();
             
-            //$nombrePdf = 'RolTur'.$week->week_number.''.$week->year.''.$codigo[0]->code.'.pdf';
-            $nombrePdf = 'RolTur'.$week->year.''.$week->week_number.''.$codigo[0]->code.'.pdf';
+            $nombrePdf = 'RolTur'.$week->week_number.''.$week->year.''.$codigo[0]->code.'.pdf';
+            //$nombrePdf = 'RolTur'.$week->year.''.$week->week_number.''.$codigo[0]->code.'.pdf';
             if($request->pdfFlag == 0){
                 $guardarPdf = new pdf_week();
                 $guardarPdf->dept_group_id = $typearea;

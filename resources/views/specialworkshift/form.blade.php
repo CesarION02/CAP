@@ -68,3 +68,22 @@
         
     </div>
 </div>
+<div class="form-gruop">
+    <label class="col-lg-3 control-label" for="">Comentarios frecuentes:</label>
+    <div class="col-lg-8">
+        <select class="form-control select2-class" id="comentFrec" style="width: 80%;" title="Lista de comentarios frecuentes.">
+            @foreach ($lComments as $comment)
+                <option ="comment in lComments">{{$comment->comment}}</option>   
+            @endforeach  
+        </select>
+        <button class="btn btn-success" type="button" title="Agregar texto." style="border-radius: 50%; padding: 3px 6px; font-size: 10px;" onclick="addComment()"><span class="glyphicon glyphicon-arrow-right"></span></button>
+        <small class="text-muted">Debe dar click en el botón <span class="glyphicon glyphicon-arrow-right"></span> para agregar comentario</small>
+    </div>
+</div>
+  <br>
+<div class="form-gruop">
+    <label class="col-lg-3 control-label requerido" for="">Comentarios:</label>
+    <div class="col-lg-8">
+      <textarea required id="comentarios" name="comentarios" title="Escribe el comentario que deseas que aparezca en el renglón."  class="form-control" style="resize: none; width: 350px; height: 115px;"></textarea>
+    </div>
+</div>

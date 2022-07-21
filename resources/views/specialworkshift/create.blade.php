@@ -2,6 +2,7 @@
 @section('styles1')
     <link rel="stylesheet" href="{{asset("assets/css/chosen.min.css")}}">
     <link rel="stylesheet" href="{{asset("assets/css/selectchosen.css")}}">
+    <link href="{{ asset("select2js/css/select2.min.css") }}" rel="stylesheet" />
 @endsection
 @section('title')
     Turnos
@@ -10,6 +11,7 @@
 @section("scripts")
     <script src="{{asset("assets/pages/scripts/reglasSW.js")}}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/chosen.jquery.min.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/pages/scripts/specialw/specialw.js")}}" type="text/javascript"></script>
     <script>
         $(".chosen-select").chosen();
     </script>

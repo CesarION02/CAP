@@ -1312,8 +1312,18 @@ class SInfoWithPolicy{
                 //if($days < 7){ return $lRows;};
                 
                 $descansoImpl = 0;
+
+
                 for($i = 0 ; count($lRows) > $i ; $i++){
                     $banderaAjuste = 0;
+                    $dayA = [];
+                    $dayA = days_works_array(1);
+                    if($lRow[$i]->hasChecks == 0){
+                        if( $dayA[$i] == 0 ){
+                            $lRow[$i]->workable == 0;    
+                        }    
+                    }
+
                     if($lRows[$i]->workable == 1){
                         if($lRows[$i]->isDayRepeated == false){
                             //checar si tiene ajuste
@@ -1734,6 +1744,13 @@ class SInfoWithPolicy{
                         $diferencia = $contadorRegistros + $i;
                         if($diferencia != 0){ 
                         for($i ; $diferencia >= $i ; $i++){
+                            $dayA = [];
+                            $dayA = days_works_array(1);
+                            if($lRow[$i]->hasChecks == 0){
+                                if( $dayA[$i] == 0 ){
+                                    $lRow[$i]->workable == 0;    
+                                }    
+                            }
                             if($lRows[$i]->workable == 1){
                                 if($lRows[$i]->isDayRepeated == false){
                                     if(count($lRows[$i]->adjusts) != 0){
@@ -2915,6 +2932,35 @@ class SInfoWithPolicy{
 
         }
       }
+
+      public static function days_works_array($type = 0){
+        
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+
+        if( $type == 1){
+            $dayA = [];
+            $dayA[0] = $config->work_days_week->lunes;
+            $dayA[1] = $config->work_days_week->martes;
+            $dayA[2] = $config->work_days_week->miercoles;
+            $dayA[3] = $config->work_days_week->jueves;
+            $dayA[4] = $config->work_days_week->viernes;
+            $dayA[5] = $config->work_days_week->sabado;
+            $dayA[6] = $config->work_days_week->domingo;
+
+        }else{
+            $dayA = [];
+            $dayA[0] = $config->work_days_week->lunes;
+            $dayA[1] = $config->work_days_week->martes;
+            $dayA[2] = $config->work_days_week->miercoles;
+            $dayA[3] = $config->work_days_week->jueves;
+            $dayA[4] = $config->work_days_week->viernes;
+            $dayA[5] = $config->work_days_week->sabado;
+            $dayA[6] = $config->work_days_week->domingo;
+        }
+
+        return $dayA;
+      }
+
       public static function initArr(){
         // cero horas y todos sus minutos
         $arrmin[0][0]=3;

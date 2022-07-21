@@ -17,6 +17,8 @@ use DateTime;
 use DB;
 use Carbon\Carbon;
 use PDF;
+use App\Models\prepayrollAdjust;
+use App\Models\adjust_link;
 
 
 class specialWorkshiftController extends Controller
@@ -224,7 +226,10 @@ class specialWorkshiftController extends Controller
                         ->select('name AS name','entry AS entrada', 'departure AS salida','id AS id')
                         ->get();    
         }
-        return view('specialworkshift.create')->with('employees',$employees)->with('workshifts',$workshifts);
+
+        $lComments = \DB::table('comments')->where('is_delete', 0)->get();
+
+        return view('specialworkshift.create')->with('employees',$employees)->with('workshifts',$workshifts)->with('lComments', $lComments);
     }
 
     /**
@@ -273,7 +278,7 @@ class specialWorkshiftController extends Controller
             $day_workshifts->is_delete = 0;
             $day_workshifts->save();
 
-            $day_workshifts_employee = new day_workshifts_employee;
+            $day_workshifts_employee = new day_workshifts_employee();
             $day_workshifts_employee->employee_id = $request->employee_id;
             $day_workshifts_employee->day_id = $day_workshifts->id;
             $day_workshifts_employee->job_id = null;   
@@ -281,9 +286,32 @@ class specialWorkshiftController extends Controller
             $day_workshifts_employee->type_day_id = 1;
             $day_workshifts_employee->is_delete = 0; 
             $day_workshifts_employee->save();
+            
+
+            $adjust = new prepayrollAdjust();
+            $adjust->employee_id = $request->employee_id;
+            $adjust->dt_date = $dateI->toDateString();
+            $adjust->minutes = 0;
+            $adjust->apply_to = 2;
+            $adjust->comments = $request->comentarios;
+            $adjust->is_delete = 0;
+            $adjust->adjust_type_id = 7;
+            $adjust->apply_time = 0;
+            $adjust->created_by = session()->get('user_id');
+            $adjust->updated_by = session()->get('user_id');
+            $adjust->save();
+
+            $link = new adjust_link();
+            $link->adjust_id = $adjust->id;
+            $link->is_special = 1;
+            $link->special_id = $special->id;
+            $link->save();
+
             $dateI->addDay();
         }
         
+        $special->adjust_id = $adjust->id;
+        $special->save(); 
          
 
         return redirect('specialworkshift')->with('mensaje', 'Turno especial creado con exito');
@@ -456,6 +484,22 @@ class specialWorkshiftController extends Controller
             $special->is_approved = session()->get('user_id');
             $special->is_delete = 1;
             $special->save();
+            
+            //sacar ajustes que tendran que borrarse
+
+            $adjust_delete = DB::table('adjust_link')
+                    ->where('special_id',$special->id)
+                    ->get();
+            
+            //$adjust_delete->toArray();
+
+            for( $i = 0 ; count($adjust_delete) > $i ; $i++ ){
+                prepayrollAdjust::where('id',$adjust_delete[$i]->adjust_id)->delete();
+            }
+
+            $adjust_delete = DB::table('adjust_link')
+                    ->where('special_id',$special->id)
+                    ->delete();
             
             $week_department_day = DB::table('week_department_day')->where('special','=',$id)->delete();
             

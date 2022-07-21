@@ -323,6 +323,7 @@ class biostarController extends Controller
         DB::commit();
 
         $newDate = Carbon::now();
+        $newDate->subHour(2);
         \App\SUtils\SConfiguration::setConfiguration('lastEventSyncDateTime', $newDate->toDateTimeString());
         
         foreach ($lRegisters as $register) {

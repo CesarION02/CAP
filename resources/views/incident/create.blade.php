@@ -8,11 +8,12 @@
 @endsection
 
 @section("scripts")
-<script src="{{asset("assets/pages/scripts/fecha.js")}}" type="text/javascript"></script>
-<script src="{{ asset("assets/js/chosen.jquery.min.js") }}" type="text/javascript"></script>
-<script>
-    $(".chosen-select").chosen();
-</script>
+    <script src="{{asset("assets/pages/scripts/fecha.js")}}" type="text/javascript"></script>
+    <script src="{{ asset("assets/js/chosen.jquery.min.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/pages/scripts/specialw/specialw.js")}}" type="text/javascript"></script>
+    <script>
+        $(".chosen-select").chosen();
+    </script>
 @endsection
 
 @section('content')

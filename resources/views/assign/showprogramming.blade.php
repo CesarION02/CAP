@@ -77,10 +77,37 @@ Plantilla horarios
             <div class="box-header with-border">
                 <h3 class="box-title">Asignar horario fijo</h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:asignacionhorario"])
-                <div class="box-tools pull-right">
-                    <a href="{{route('programar',$dgroup)}}" class="btn btn-block btn-info btn-sm">
-                        <i class="fa fa-fw fa-plus-circle"></i> Asignar horario
-                    </a>
+                <div class="row">
+                    <div class="col-md-3 col-md-offset-9">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <a href="{{route('programar',$dgroup)}}" class="btn btn-block btn-info btn-sm">
+                                    <i class="fa fa-fw fa-plus-circle"></i> Asignar horario
+                                </a>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <form action="{{ route('empleado') }}">
+                                <input type="hidden" id="ifilter" name="ifilter">
+                                <div class="col-md-16">
+                                    <div class="btn-group" role="group" aria-label="Basic example">
+                                        @switch($iFilter)
+                                            @case(1)
+                                            <button onclick="filter(1)" type="submit" class="btn btn-secondary active">Emp. sin horario</button>
+                                            <button onclick="filter(2)" type="submit" class="btn btn-secondary">Todos</button>
+                                            @break
+                                            @case(2)
+                                            <button onclick="filter(1)" type="submit" class="btn btn-secondary">Emp. sin horario</button>
+                                            <button onclick="filter(2)" type="submit" class="btn btn-secondary active">Todos</button>
+                                            @break
+                                        @endswitch
+                                    </div>
+                                </div>
+                            </form>
+                
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="box-body">
@@ -98,30 +125,38 @@ Plantilla horarios
                             @foreach ($assigns as $assign)
                             <tr>
                                 <td>{{$assign->nombreEmpleado}}</td>
-                                <td>@if($assign->fecha_inicio == null)
-                                    N/A
-                                    @else
-                                    {{\App\SUtils\SDateTimeUtils::orderDate($assign->fecha_inicio)}}
-                                    @endif
-                                </td>
-                                <td>@if($assign->fecha_fin == null)
+                                @if($iFilter == 1)
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                @else
+                                    <td>@if($assign->fecha_inicio == null)
                                         N/A
-                                    @else
-                                        {{\App\SUtils\SDateTimeUtils::orderDate($assign->fecha_fin)}}
-                                    @endif
-                                </td>
-                                <td>{{$assign->nombreHorario}}</td>
-                                <td>
-                                    <a href="{{route('editar_programacion', ['id' => $assign->id])}}" class="btn-accion-tabla tooltipsC" title="Ver/Modificar este registro">
-                                        <i class="fa fa-fw fa-pencil"></i>
-                                    </a>
-                                    <form action="{{route('eliminar', ['id' => $assign->id])}}" class="d-inline form-eliminar" method="POST">
-                                        @csrf @method("delete")
-                                        <button type="submit" class="btn-accion-tabla eliminar tooltipsC" title="Eliminar este registro">
-                                            <i class="fa fa-fw fa-trash text-danger"></i>
-                                        </button>
-                                    </form>
-                                </td>
+                                        @else
+                                        {{\App\SUtils\SDateTimeUtils::orderDate($assign->fecha_inicio)}}
+                                        @endif
+                                    </td>
+                                    <td>@if($assign->fecha_fin == null)
+                                            N/A
+                                        @else
+                                            {{\App\SUtils\SDateTimeUtils::orderDate($assign->fecha_fin)}}
+                                        @endif
+                                    </td>
+                                    <td>{{$assign->nombreHorario}}</td>
+                                    <td>
+                                        <a href="{{route('editar_programacion', ['id' => $assign->id])}}" class="btn-accion-tabla tooltipsC" title="Ver/Modificar este registro">
+                                            <i class="fa fa-fw fa-pencil"></i>
+                                        </a>
+                                        <form action="{{route('eliminar', ['id' => $assign->id])}}" class="d-inline form-eliminar" method="POST">
+                                            @csrf @method("delete")
+                                            <button type="submit" class="btn-accion-tabla eliminar tooltipsC" title="Eliminar este registro">
+                                                <i class="fa fa-fw fa-trash text-danger"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                @endif
+
                             </tr>
                             @endforeach
                     </tbody>

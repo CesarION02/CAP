@@ -13,6 +13,8 @@ use App\Models\company;
 use App\Http\Requests\ValidacionTypeincident;
 use App\SUtils\SPrepayrollAdjustUtils;
 use DB;
+use App\Models\prepayrollAdjust;
+use App\Models\adjust_link;
 
 class incidentController extends Controller
 {
@@ -133,16 +135,17 @@ class incidentController extends Controller
             $employees = DB::table('employees')
                                 ->join('departments','departments.id','=','employees.department_id')
                                 ->where('is_active', true)
-                                ->where('department_id',15)
                                 ->orderBy('name','ASC')
                                 ->select('employees.name AS name','employees.id AS num', 'employees.num_employee')
                                 ->get();    
         }
+        $lComments = \DB::table('comments')->where('is_delete', 0)->get();
 
         return view('incident.create')
                         ->with('incidentType', $incidentType)
                         ->with('incidents', $incidents)
-                        ->with('employees', $employees);
+                        ->with('employees', $employees)
+                        ->with('lComments', $lComments);
     }
 
     /**
@@ -157,6 +160,7 @@ class incidentController extends Controller
         $incidents = DB::table('incidents')
                 ->where('employee_id','=',$request->employee_id)
                 ->whereIn('incidents.start_date',[$request->start_date,$request->end_date])
+                ->where('is_delete',0)
                 ->get();
         if(count($incidents) == 0){
             $incident = new incident($request->all());
@@ -167,6 +171,36 @@ class incidentController extends Controller
 
 
             $incident->save();
+
+            //inserción de comentarios
+
+            $dateI = Carbon::parse($request->start_date);
+            $dateS = Carbon::parse($request->end_date);
+
+            $diferencia = ($dateI->diffInDays($dateS));
+
+            for($i = 0 ; $diferencia >= $i ; $i++){
+                $adjust = new prepayrollAdjust();
+                $adjust->employee_id = $request->employee_id;
+                $adjust->dt_date = $dateI->toDateString();
+                $adjust->minutes = 0;
+                $adjust->apply_to = 2;
+                $adjust->comments = $request->comentarios;
+                $adjust->is_delete = 0;
+                $adjust->adjust_type_id = 7;
+                $adjust->apply_time = 0;
+                $adjust->created_by = session()->get('user_id');
+                $adjust->updated_by = session()->get('user_id');
+                $adjust->save();
+
+                $link = new adjust_link();
+                $link->adjust_id = $adjust->id;
+                $link->is_incident = 1;
+                $link->incident_id = $incident->id;
+                $link->save();
+
+                $dateI->addDay();
+            }
 
             $this->daysIncidents($incident->id,$incident->start_date,$incident->end_date,$incident->employee_id);
 
@@ -235,6 +269,23 @@ class incidentController extends Controller
             $incident->fill($request->all());
             $incident->is_delete = 1;
             $incident->save();
+
+            //sacar ajustes que tendran que borrarse
+
+            $adjust_delete = DB::table('adjust_link')
+                    ->where('special_id',$incident->id)
+                    ->get();
+            
+            //$adjust_delete->toArray();
+
+            for( $i = 0 ; count($adjust_delete) > $i ; $i++ ){
+                prepayrollAdjust::where('id',$adjust_delete[$i]->adjust_id)->delete();
+            }
+
+            $adjust_delete = DB::table('adjust_link')
+                    ->where('special_id',$incident->id)
+                    ->delete();
+                    
             return response()->json(['mensaje' => 'ok']);
         } else {
             abort(404);
