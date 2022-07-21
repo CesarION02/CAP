@@ -815,11 +815,13 @@ class assignController extends Controller
         $url =  'assigns/viewProgramming';
         return redirect($url)->with('mensaje','Asignación fue actualizada con éxito');
     }
-
-    public function viewProgramming (){
-
+    public function viewProgramming (Request $request){
+        $iFilter = $request->ifilter == 0 ? 1 : $request->ifilter;
+        
         $iTemplateId = env('TMPLTE_SATURDAYS', 1);
+
         if (session()->get('rol_id') != 1){
+
             $numero = session()->get('name');
             $usuario = DB::table('users')
                     ->where('name',$numero)
@@ -839,21 +841,55 @@ class assignController extends Controller
                 }
                 
             }
-            /*$assigns = DB::table('schedule_assign')
-                ->join('employees','employees.id','=','schedule_assign.employee_id')
-                ->join('schedule_template','schedule_template.id','=','schedule_assign.schedule_template_id')
-                ->join('jobs','jobs.id','=','employees.job_id')
-                ->join('departments','departments.id','=','jobs.department_id')
-                ->where('schedule_assign.is_delete',0)
-                ->where('schedule_assign.schedule_template_id','!=',$iTemplateId)
-                ->whereIn('departments.dept_group_id',$Adgu)
-                ->select('schedule_template.name AS template','employees.id AS id','employees.name AS name','schedule_assign.start_date AS startDate','schedule_assign.end_date AS endDate','schedule_assign.id AS idAssign')
-                ->orderBy('employees.id')
-                ->orderBy('schedule_assign.group_schedules_id')
-                ->groupBy('employees.id')
-                ->get(); 
-              */  
-                $assigns = DB::select("SELECT a.fecha_inicio, a.fecha_fin, b.name AS nombreEmpleado, s.name AS nombreHorario, a.group_assign_id, a.id
+            
+            if( $iFilter == 1 ){
+
+                $assigns = DB::table('schedule_assign')
+                                ->join('employees','employees.id' , '=', 'schedule_assign.employee_id')
+                                ->join('departments','departments.id', '=', 'employees.department_id')
+                                ->join('department_group','department_group.id','=','departments.dept_group_id')
+                                ->where('schedule_assign.is_delete',0)
+                                ->where('schedule_assign.schedule_template_id',"!=",$iTemplateId)
+                                ->whereIn('department_group.id',$Adgu)
+                                ->select('employees.id AS idEmployee')
+                                ->get();
+                
+                $employees = [];
+
+                for($i = 0 ; count($assigns) > $i ; $i++){
+                    $employees[$i] = $assigns[$i]->idEmployee;
+                }
+
+                $assigns = DB::table('employees')
+                                ->whereNotIn('employees.id',$employees)
+                                ->join('departments','departments.id', '=', 'employees.department_id')
+                                ->join('department_group','department_group.id','=','departments.dept_group_id')
+                                ->whereIn('department_group.id',$Adgu)
+                                ->select('employees.id AS idEmployee','employees.name AS nombreEmpleado','departments.name AS nameDept')
+                                ->groupBy('employees.id')
+                                ->get();
+                if( count($assigns) == 0){
+                    $assigns = DB::select("SELECT a.fecha_inicio, a.fecha_fin, b.name AS nombreEmpleado, s.name AS nombreHorario, a.group_assign_id, a.id, b.id AS idEmployee
+                    FROM (
+                        SELECT start_date as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE is_delete = 0 AND schedule_template_id != ".$iTemplateId." ORDER BY p.employee_id, start_date DESC
+                    ) a
+                    INNER JOIN employees b ON a.employee_id = b.id
+                    INNER JOIN schedule_template s ON a.schedule_template_id = s.id
+                    INNER JOIN jobs j ON b.job_id = j.id
+                    INNER JOIN departments d ON b.department_id = d.id
+                    INNER JOIN department_group g ON d.dept_group_id = g.id
+                    WHERE b.is_active = 1
+                    AND g.id IN (".$adguString. ")
+                    GROUP By a.employee_id");
+
+                    $iFilter = 2;
+                }
+                // si no se cumple el assign queda con los empleados faltantes de horario.
+
+                
+            }else{
+                
+                $assigns = DB::select("SELECT a.fecha_inicio, a.fecha_fin, b.name AS nombreEmpleado, s.name AS nombreHorario, a.group_assign_id, a.id, b.id AS idEmployee
                 FROM (
                     SELECT start_date as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE is_delete = 0 AND schedule_template_id != ".$iTemplateId." ORDER BY p.employee_id, start_date DESC
                 ) a
@@ -864,38 +900,75 @@ class assignController extends Controller
                 INNER JOIN department_group g ON d.dept_group_id = g.id
                 WHERE b.is_active = 1
                 AND g.id IN (".$adguString. ")
-                 GROUP By a.employee_id");
+                GROUP By a.employee_id");   
+
+            }
         }else{
             $numero = session()->get('name');
             $usuario = DB::table('users')
                     ->where('name',$numero)
                     ->get();
-            /*$assigns = DB::table('schedule_assign')
-                ->join('employees','employees.id','=','schedule_assign.employee_id')
-                ->join('schedule_template','schedule_template.id','=','schedule_assign.schedule_template_id')
-                ->join('jobs','jobs.id','=','employees.job_id')
-                ->join('departments','departments.id','=','jobs.department_id')
-                ->where('schedule_assign.is_delete',0)
-                ->where('schedule_assign.schedule_template_id','!=',$iTemplateId)
-                ->select('schedule_template.name AS template','employees.id AS id','employees.name AS name','schedule_assign.start_date AS startDate','schedule_assign.end_date AS endDate','schedule_assign.id AS idAssign')
-                ->orderBy('employees.name')
-                ->orderBy('schedule_assign.group_schedules_id')
-                ->groupBy('employees.id')
-                ->get();
-            */ 
-                $assigns = DB::select("SELECT a.fecha_inicio, a.fecha_fin, b.name AS nombreEmpleado, s.name AS nombreHorario, a.group_assign_id, a.id
-                FROM (
-                    SELECT start_date as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE is_delete = 0 AND schedule_template_id != ".$iTemplateId." ORDER BY p.employee_id, start_date DESC
-                ) a
-                INNER JOIN employees b ON a.employee_id = b.id
-                INNER JOIN schedule_template s ON a.schedule_template_id = s.id
-                INNER JOIN jobs j ON b.job_id = j.id
-                INNER JOIN departments d ON b.department_id = d.id
-                INNER JOIN department_group g ON d.dept_group_id = g.id
-                WHERE b.is_active = 1
-                GROUP By a.employee_id");    
+            
+                    if( $iFilter == 1 ){
+
+                        $assigns = DB::table('schedule_assign')
+                                        ->join('employees','employees.id' , '=', 'schedule_assign.employee_id')
+                                        ->join('departments','departments.id', '=', 'employees.department_id')
+                                        ->join('department_group','department_group.id','=','departments.dept_group_id')
+                                        ->where('schedule_assign.is_delete',0)
+                                        ->where('schedule_assign.schedule_template_id',"!=",$iTemplateId)
+                                        ->select('employees.id AS idEmployee')
+                                        ->get();
+                        
+                        $employees = [];
+        
+                        for($i = 0 ; count($assigns) > $i ; $i++){
+                            $employees[$i] = $assigns[$i]->idEmployee;
+                        }
+        
+                        $assigns = DB::table('employees')
+                                        ->whereNotIn('employees.id',$employees)
+                                        ->join('departments','departments.id', '=', 'employees.department_id')
+                                        ->join('department_group','department_group.id','=','departments.dept_group_id')
+                                        ->select('employees.id AS idEmployee','employees.name AS nombreEmpleado','departments.name AS nameDept')
+                                        ->groupBy('employees.id')
+                                        ->get();
+                        if( count($assigns) == 0){
+                            $assigns = DB::select("SELECT a.fecha_inicio, a.fecha_fin, b.name AS nombreEmpleado, s.name AS nombreHorario, a.group_assign_id, a.id, b.id AS idEmployee
+                            FROM (
+                                SELECT start_date as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE is_delete = 0 AND schedule_template_id != ".$iTemplateId." ORDER BY p.employee_id, start_date DESC
+                            ) a
+                            INNER JOIN employees b ON a.employee_id = b.id
+                            INNER JOIN schedule_template s ON a.schedule_template_id = s.id
+                            INNER JOIN jobs j ON b.job_id = j.id
+                            INNER JOIN departments d ON b.department_id = d.id
+                            INNER JOIN department_group g ON d.dept_group_id = g.id
+                            WHERE b.is_active = 1
+                            GROUP By a.employee_id");
+        
+                            $iFilter = 2;
+                        }
+                        // si no se cumple el assign queda con los empleados faltantes de horario.
+        
+                        
+                    }else{
+                        
+                        $assigns = DB::select("SELECT a.fecha_inicio, a.fecha_fin, b.name AS nombreEmpleado, s.name AS nombreHorario, a.group_assign_id, a.id, b.id AS idEmployee
+                        FROM (
+                            SELECT start_date as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE is_delete = 0 AND schedule_template_id != ".$iTemplateId." ORDER BY p.employee_id, start_date DESC
+                        ) a
+                        INNER JOIN employees b ON a.employee_id = b.id
+                        INNER JOIN schedule_template s ON a.schedule_template_id = s.id
+                        INNER JOIN jobs j ON b.job_id = j.id
+                        INNER JOIN departments d ON b.department_id = d.id
+                        INNER JOIN department_group g ON d.dept_group_id = g.id
+                        WHERE b.is_active = 1
+                        GROUP By a.employee_id");   
+        
+                    }          
         }
-        return view('assign.showprogramming')->with('assigns',$assigns)->with('dgroup',$usuario[0]->id);
+
+        return view('assign.showprogramming')->with('assigns',$assigns)->with('dgroup',$usuario[0]->id)->with('iFilter',$iFilter);
     }
 
     public function viewDayprogram (Request $request){

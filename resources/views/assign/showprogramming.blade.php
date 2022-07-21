@@ -7,6 +7,7 @@ Plantilla horarios
     <script src="{{asset("assets/pages/scripts/admin/funciones.js")}}" type="text/javascript"></script>
     <script src="{{asset("assets/pages/scripts/admin/datatable/index.js")}}" type="text/javascript"></script>
     <script src="{{ asset("dt/datatables.js") }}" type="text/javascript"></script>
+    <script src="{{asset("assets/pages/scripts/filter.js")}}" type="text/javascript"></script>
     <script src="{{ asset('dt/dataTables.buttons.min.js') }}"></script>
     <script src="{{ asset("assets/js/moment/moment.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/moment/datetime-moment.js") }}" type="text/javascript"></script>
@@ -77,11 +78,37 @@ Plantilla horarios
             <div class="box-header with-border">
                 <h3 class="box-title">Asignar horario fijo</h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:asignacionpordept"])
-                <div class="box-tools pull-right">
-                    <a href="{{route('programar',$dgroup)}}" class="btn btn-block btn-info btn-sm">
-                        <i class="fa fa-fw fa-plus-circle"></i> Asignar horario
-                    </a>
-                </div>
+                <div class="row">
+                    <div class="col-md-3 col-md-offset-9">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <a href="{{route('programar',$dgroup)}}" class="btn btn-block btn-info btn-sm">
+                                    <i class="fa fa-fw fa-plus-circle"></i> Asignar horario
+                                </a>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <form action="{{ route('index_programacion') }}">
+                                <input type="hidden" id="ifilter" name="ifilter">
+                                <div class="col-md-16">
+                                    <div class="btn-group" role="group" aria-label="Basic example">
+                                        @switch($iFilter)
+                                            @case(1)
+                                            <button onclick="filter(1)" type="submit" class="btn btn-secondary active">Emp. sin horario</button>
+                                            <button onclick="filter(2)" type="submit" class="btn btn-secondary">Emp. con horario</button>
+                                            @break
+                                            @case(2)
+                                            <button onclick="filter(1)" type="submit" class="btn btn-secondary">Emp. sin horario</button>
+                                            <button onclick="filter(2)" type="submit" class="btn btn-secondary active">Emp. con horario</button>
+                                            @break
+                                        @endswitch
+                                    </div>
+                                </div>
+                            </form>
+                
+                        </div>
+                    </div>
             </div>
             <div class="box-body">
                 <table class="table table-striped table-bordered table-hover" id="myTable">
