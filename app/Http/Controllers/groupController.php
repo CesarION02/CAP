@@ -41,6 +41,11 @@ class groupController extends Controller
      */
     public function store(Request $request)
     {
+        foreach($request->all() as $elem){
+            if(is_null($elem)){
+                return redirect()->back()->withErrors('Debe llenar todos los campos del formulario');
+            }
+        }
         $contador = $request->contador;
         $numSeleccion = 0;
         $arrSeleccion = [];
@@ -49,6 +54,10 @@ class groupController extends Controller
                 $arrSeleccion[$numSeleccion] = $_POST['check'.$i];
                 $numSeleccion ++;
             }
+        }
+
+        if($numSeleccion == 0){
+            return redirect()->back()->withErrors('Debe seleccionar al menos un horario');
         }
 
         $group_workshift = new groupworkshift();
@@ -108,7 +117,12 @@ class groupController extends Controller
      */
     public function update(Request $request, $id)
     {
-        groupworkshiftline::where('group_workshifts_id',$id)->delete();
+        foreach($request->all() as $elem){
+            if(is_null($elem)){
+                return redirect()->back()->withErrors('Debe llenar todos los campos del formulario');
+            }
+        }
+        
         $contador = $request->contador;
         $numSeleccion = 0;
         $arrSeleccion = [];
@@ -118,7 +132,13 @@ class groupController extends Controller
                 $numSeleccion ++;
             }
         }
-
+        
+        if($numSeleccion == 0){
+            return redirect()->back()->withErrors('Debe seleccionar al menos un horario');
+        }else{
+            groupworkshiftline::where('group_workshifts_id',$id)->delete();
+        }
+        
         for($j = 0 ; $numSeleccion > $j ; $j++){
             $group_workshift_line = new groupworkshiftline();
             $group_workshift_line->group_workshifts_id = $id;

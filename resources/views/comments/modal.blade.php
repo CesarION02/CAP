@@ -20,7 +20,7 @@
           <div class="row">
             <div class="col-md-4" style="float: right;">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-              <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="this.disabled=true;" v-on:click="storeComment()">Guardar</button>
+              <button type="button" class="btn btn-primary" data-dismiss="modal" :disabled="modalDisabled" v-on:click="storeComment()">Guardar</button>
             </div>
           </div>
         </div>

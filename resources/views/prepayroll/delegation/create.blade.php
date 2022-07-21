@@ -15,6 +15,7 @@
         <div class="box box-danger">
             <div class="box-header with-border">
                 <h3 class="box-title">Crear Delegación de V.º B.º de prenómina</h3>
+                @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:delegacionvobo"])
                 <div class="box-tools pull-right">
                     <a href="{{ route('prepayrolldelegation.index') }}" class="btn btn-block btn-info btn-sm">
                         <i class="fa fa-fw fa-reply-all"></i> Regresar

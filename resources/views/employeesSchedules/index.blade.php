@@ -9,7 +9,8 @@
     <div class="col-lg-12">
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Horarios</h3>
+                <h3 class="box-title">Horarios colaboradores</h3>
+                @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:horarioscolaboradores"])
                 <div class="row">
                     <form action="{{route('empl_schedules')}}">
                         @csrf

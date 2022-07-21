@@ -5,7 +5,7 @@
         @if(isset($empleados))
             <input type="text" name="usuario" id="usuario" value="{{$empleados[0]->nombre}}" disabled>
         @else
-            <select name="usuario" id="usuario">
+            <select name="usuario" id="usuario" class="chosen-select" required>
                 @foreach($users as $user => $index)
                 
                     <option value="{{$index}}">{{$user}}</option>

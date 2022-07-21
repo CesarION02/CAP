@@ -157,7 +157,7 @@
               </div>
             </div>
           </div>
-          <div v-if="checkEmployee" class="row">
+          <div class="row">
             <div class="col-xs-3 col-xs-offset-9">
               <button :disabled="!isModifOut && !isModifIn" type="button" class="btn btn-success" v-on:click="adjustTimes()">Ajustar</button>
             </div>
