@@ -865,6 +865,7 @@ class assignController extends Controller
                                 ->join('departments','departments.id', '=', 'employees.department_id')
                                 ->join('department_group','department_group.id','=','departments.dept_group_id')
                                 ->whereIn('department_group.id',$Adgu)
+                                ->where('employees.is_active',1)
                                 ->select('employees.id AS idEmployee','employees.name AS nombreEmpleado','departments.name AS nameDept')
                                 ->groupBy('employees.id')
                                 ->get();
