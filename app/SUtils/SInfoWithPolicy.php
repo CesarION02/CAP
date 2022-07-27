@@ -1316,6 +1316,8 @@ class SInfoWithPolicy{
 
                 for($i = 0 ; count($lRows) > $i ; $i++){
                     $banderaAjuste = 0;
+                    
+                    /*
                     $dayA = [];
                     $dayA = SInfoWithPolicy::days_works_array(1);
                     if($lRow[$i]->hasChecks == 0){
@@ -1323,6 +1325,7 @@ class SInfoWithPolicy{
                             $lRow[$i]->workable == 0;    
                         }    
                     }
+                    */
 
                     if($lRows[$i]->workable == 1){
                         if($lRows[$i]->isDayRepeated == false){
@@ -1744,13 +1747,15 @@ class SInfoWithPolicy{
                         $diferencia = $contadorRegistros + $i;
                         if($diferencia != 0){ 
                         for($i ; $diferencia >= $i ; $i++){
-                            $dayA = [];
-                            $dayA = SInfoWithPolicy::days_works_array(1);
-                            if($lRow[$i]->hasChecks == 0){
-                                if( $dayA[$i] == 0 ){
-                                    $lRow[$i]->workable == 0;    
-                                }    
-                            }
+                            /*
+                    $dayA = [];
+                    $dayA = SInfoWithPolicy::days_works_array(1);
+                    if($lRow[$i]->hasChecks == 0){
+                        if( $dayA[$i] == 0 ){
+                            $lRow[$i]->workable == 0;    
+                        }    
+                    }
+                    */
                             if($lRows[$i]->workable == 1){
                                 if($lRows[$i]->isDayRepeated == false){
                                     if(count($lRows[$i]->adjusts) != 0){
