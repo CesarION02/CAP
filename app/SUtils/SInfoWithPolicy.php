@@ -1317,7 +1317,7 @@ class SInfoWithPolicy{
                 for($i = 0 ; count($lRows) > $i ; $i++){
                     $banderaAjuste = 0;
                     $dayA = [];
-                    $dayA = days_works_array(1);
+                    $dayA = SInfoWithPolicy::days_works_array(1);
                     if($lRow[$i]->hasChecks == 0){
                         if( $dayA[$i] == 0 ){
                             $lRow[$i]->workable == 0;    
@@ -1745,7 +1745,7 @@ class SInfoWithPolicy{
                         if($diferencia != 0){ 
                         for($i ; $diferencia >= $i ; $i++){
                             $dayA = [];
-                            $dayA = days_works_array(1);
+                            $dayA = SInfoWithPolicy::days_works_array(1);
                             if($lRow[$i]->hasChecks == 0){
                                 if( $dayA[$i] == 0 ){
                                     $lRow[$i]->workable == 0;    
