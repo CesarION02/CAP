@@ -26,6 +26,7 @@ var app = new Vue({
         endDate: oData.endDate,
         dateInit: null,
         dateEnd: null,
+        dataSchedules: [],
     },
     mounted() {
         this.haveComments = this.lComments.length > 0;
@@ -33,6 +34,17 @@ var app = new Vue({
         $('#comentFrec').on('select2:select', function (e) {
             self.selComment = e.params.data.text;
         });
+
+        var horarios = [];
+        for(var i = 0; i<self.vData.lRows.length; i++){
+            horarios.push(self.vData.lRows[i].scheduleText);
+        }
+
+        let unique = [...new Set(horarios)];
+        self.dataSchedules.push({id: 'NA', text: 'No aplica'});
+        for (let i = 0; i < unique.length; i++) {
+            self.dataSchedules.push({id: unique[i], text: unique[i]});
+        }
     },
     methods: {
         getCssClass(oRow, report) {
