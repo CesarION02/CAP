@@ -139,7 +139,6 @@ Grupos prenomina empleados
             });
             
             var checked = '<?php echo $bDirect; ?>';
-            console.log(checked);
             if(checked == 1){
                 document.getElementById('bDirect').checked = true;
             }
