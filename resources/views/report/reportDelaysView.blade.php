@@ -26,10 +26,10 @@
             <div class="box-header with-border">
                 <h3 class="box-title">{{ $sTitle }}</h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:reportetiemposextra"])
-                <div id="sugerencia" class="box-tools pull-right" style="width: 30%; background-color: #555; text-align: center;
+                <div id="sugerencia" class="box-tools pull-right" style="background-color: #555; text-align: center;
                 border-radius: 6px; padding: 8px 0; bottom: 125%; left: 50%; margin-left: -80px;">
-                    <small style="color: white" class="text-muted"><b>Sugerencia:</b> Haz click en el botón <span class="glyphicon glyphicon-menu-hamburger"></span> para modificar la vista.</small>
-                    <a href="#" class="glyphicon glyphicon-remove-sign" onclick="closeSugerencia();" style="color: white"></a>
+                    <small style="color: white" class="text-muted">&nbsp;<b>Sugerencia:</b> Haz click en el botón <span class="glyphicon glyphicon-menu-hamburger"></span> para modificar la vista.&nbsp;</small>
+                    <a href="#" class="glyphicon glyphicon-remove-sign" onclick="closeSugerencia();" style="color: white"></a>&nbsp;
                 </div>
             </div>
             <div class="box-body" id="reportDelayApp">
@@ -562,7 +562,7 @@
             });
             setTimeout(() => {
                 const elem = document.getElementById("sugerencia");
-                if(typeof(element) != 'undefined' && element != null){
+                if(typeof(elem) != 'undefined' && elem != null){
                     elem.parentNode.removeChild(elem);
                 }
             }, 15000);
