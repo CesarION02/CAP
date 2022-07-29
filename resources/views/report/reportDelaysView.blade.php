@@ -35,20 +35,25 @@
             <div class="box-body" id="reportDelayApp">
                 @include('report.adjustsModal')
                 <div class="row">
-                    <div class="col-md-6">
+                    @if ($isAdmin)
+                        <div class="col-md-5">
+                    @else   
+                        <div class="col-md-8">
+                    @endif
                         <p>Periodo: <b>{{ $sStartDate }}</b> - <b>{{ $sEndDate }}</b>. P. pago: <b>{{ $sPayWay }}</b>.</p>
                     </div>
-                    <div class="col-md-2">
-                        <select class="form-control" name="sel-collaborator" id="sel-collaborator">
-                            <option value="0" selected>Todos</option>
-                            <option value="1">Empleados</option>
-                            <option value="2">Practicantes</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
+                    @if($isAdmin)
+                        <div class="col-md-3">
+                            <label>Supervisores: </label>
+                            <select class="select2-class" id="supervisores">
+                                <option v-for="user in lUsers" :value="user.id">@{{user.name}}</option>
+                            </select>
+                        </div>
+                    @endif
+                    <div class="col-md-2" style="text-align: right">
                         <a href="{{ route('generarreportetiemposextra') }}" target="_blank" class="btn btn-success">Nuevo reporte</a>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-2" style="text-align: center">
                         <div id="wrapper">
                             <button class="btn btn-info" id="button-a">Crear Excel</button>
                         </div>
@@ -82,6 +87,7 @@
                                     <th>Incidencias</th>
                                     <th>Ajustes</th>
                                     <th>id_externo</th>
+                                    <th>-</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -116,6 +122,7 @@
                                         <p>@{{ getAdjToRow(row, index) }}</p>
                                     </td>
                                     <td>@{{ row.external_id }}</td>
+                                    <td>@{{ row.idEmployee }}</td>
                                 </tr>
                             </tbody>
                             <button onclick="reloadFunction()" id="reloadBtn" title="Recargar reporte">Actualizar</button>
@@ -173,6 +180,9 @@
             this.lComments = <?php echo json_encode($lComments) ?>;
             this.startDate = <?php echo json_encode($sStartDate) ?>;
             this.endDate = <?php echo json_encode($sEndDate) ?>;
+            this.subEmployees = <?php echo json_encode($subEmployees) ?>;
+            this.lUsers = <?php echo json_encode($lUsers) ?>;
+            this.routegetDirectEmployees = <?php echo json_encode(route('getDirectEmployees')) ?>;
 
             // this.startDate = moment(this.startDate).format('DD-MM-YYYY');
             // this.endDate = moment(this.endDate).format('DD-MM-YYYY');
@@ -183,6 +193,7 @@
             this.minsDelayCol = this.tReport == this.REP_DELAY ? 4 : 10;
             this.sunCol = 12;
             this.dayoffCol = 13;
+            this.hiddenColEmId = 18;
             this.hiddenColExId = 17;
             this.hiddenCol = this.tReport == this.REP_DELAY ? 5 : 5;
             this.toExport = this.tReport == this.REP_DELAY ? [0, 1, 2, 3, 4, 6] : [0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12];
@@ -221,32 +232,6 @@
     <script>
         $.fn.dataTable.moment('DD/MM/YYYY HH:mm:ss');
 
-        $.fn.dataTable.ext.search.push(
-            function( settings, data, dataIndex ) {
-                // var min = parseInt( $('#min').val(), 10 );
-                let collaboratorVal = parseInt( $('#sel-collaborator').val(), 10 );
-                let externalId = 0;
-
-                switch (collaboratorVal) {
-                    case 0:
-                        return true;
-
-                    case 1:
-                        externalId = parseInt( data[17] );
-                        return externalId > 0;
-
-                    case 2:
-                        externalId = parseInt( data[17] );
-                        return ! (externalId > 0);
-
-                    default:
-                        break;
-                }
-
-                return false;
-            }
-        );
-
         var oTable = $('#delays_table').DataTable({
                 language: {
                     "sProcessing":     "Procesando...",
@@ -278,7 +263,7 @@
                 order: [[0, 'asc']],
                 columnDefs: [
                     {
-                        targets: [ oData.hiddenCol, oData.hiddenColExId ],
+                        targets: [ oData.hiddenCol, oData.hiddenColExId, oData.hiddenColEmId ],
                         visible: false
                     },
                     {
@@ -445,7 +430,55 @@
                         }
                     ]
             });
-            $('#delays_table_filter').prepend('<label for="filtro_horario">Filtrar por horario: </label><select id="filtro_horario" class="select2-class" style="width: 20%;"></select> &nbsp');
+            
+            $('#delays_table_filter').prepend('<label for="filtro_horario">Horario: </label>' +
+                        '<select id="filtro_horario" class="select2-class" style="width: 20%">' +
+                        '</select>' +
+                        '&nbsp'
+            );
+            
+            $('#delays_table_filter').prepend('<label for="directos">Empleados: </label>' +
+                        '<select id="directos" class="select2-class" style="width: 10%">' +
+                            '<option value="0">Todos</option>' +
+                            '<option value="1">Directos</option>' +
+                        '</select>' +
+                        '&nbsp'
+            );
+            
+            $('#delays_table_filter').prepend('<label for="directos">Practicantes: </label>' +
+                        '<select class="form-control" name="sel-collaborator" id="sel-collaborator">' +
+                            '<option value="0" selected>Todos</option>' +
+                            '<option value="1">Empleados</option>' +
+                            '<option value="2">Practicantes</option>' +
+                        '</select>' +
+                        '&nbsp'
+            );
+
+            $.fn.dataTable.ext.search.push(
+                function( settings, data, dataIndex ) {
+                    // var min = parseInt( $('#min').val(), 10 );
+                    let collaboratorVal = parseInt( $('#sel-collaborator').val(), 10 );
+                    let externalId = 0;
+
+                    switch (collaboratorVal) {
+                        case 0:
+                            return true;
+
+                        case 1:
+                            externalId = parseInt( data[17] );
+                            return externalId > 0;
+
+                        case 2:
+                            externalId = parseInt( data[17] );
+                            return ! (externalId > 0);
+
+                        default:
+                            break;
+                    }
+
+                    return false;
+                }
+            );
 
             $('#sel-collaborator').change( function() {
                 oTable.draw();
@@ -549,6 +582,7 @@
     <script>
         $(document).ready(function() {
             $('.select2-class').select2();
+            
             $('#filtro_horario').select2({
                 placeholder: 'selecciona horario',
                 data: app.dataSchedules,
@@ -560,6 +594,20 @@
                     oTable.columns().search('').draw();
                 }
             });
+
+            $('#directos').on('select2:select', function (e){
+                if(e.params.data.id == 1){
+                    var searchValues = "";
+                    for(let i = 0; i < oData.subEmployees.length; i++){
+                        searchValues = searchValues + '^' + oData.subEmployees[i] + '$' + (i < (oData.subEmployees.length-1) ? "|" : "");
+                    }
+                    console.log(searchValues, oData.subEmployees);
+                    oTable.column(18).search("(" + searchValues + ")", true, false).draw();
+                }else{
+                    oTable.columns().search('').draw();
+                }
+            });
+
             setTimeout(() => {
                 const elem = document.getElementById("sugerencia");
                 if(typeof(elem) != 'undefined' && elem != null){
@@ -568,6 +616,26 @@
             }, 15000);
         });
     </script>
+    @if($isAdmin)
+        <script>
+            $(document).ready(function() {
+                $('#supervisores').on('select2:select', function (e){
+                    $('#directos').val(0).trigger('change');
+                    oTable.columns().search('').draw();
+                    axios.post(oData.routegetDirectEmployees, {
+                        id: e.params.data.id
+                    })
+                    .then(res => {
+                        console.log(res.data);
+                        oData.subEmployees = res.data;
+                    })
+                    .catch(function(error) {
+                        console.log(error);
+                    });
+                });
+            })
+        </script>
+    @endif
     <script>
         function closeSugerencia() {
             const elem = document.getElementById("sugerencia");

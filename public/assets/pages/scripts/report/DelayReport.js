@@ -27,6 +27,7 @@ var app = new Vue({
         dateInit: null,
         dateEnd: null,
         dataSchedules: [],
+        lUsers: oData.lUsers,
     },
     mounted() {
         this.haveComments = this.lComments.length > 0;

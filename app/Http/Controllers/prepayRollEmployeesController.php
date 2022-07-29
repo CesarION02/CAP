@@ -73,6 +73,15 @@ class prepayRollEmployeesController extends Controller
         return redirect(route('prepayroll_emp_grupo', ['id' => $idUser, 'bDirect' => $bDirect]));
     }
 
+    public function getDirectEmployees(Request $request){
+        $dirEmpl = SPrepayrollUtils::getEmployeesByUser($request->id, 0, true, null);
+        $subEmployees = [];
+        foreach($dirEmpl as $data){
+            array_push($subEmployees, $data);
+        }
+        return json_encode($subEmployees);
+    }
+
     /**
      * Store a newly created resource in storage.
      *
