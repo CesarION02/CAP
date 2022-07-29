@@ -26,8 +26,10 @@
             <div class="box-header with-border">
                 <h3 class="box-title">{{ $sTitle }}</h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:reportetiemposextra"])
-                <div class="box-tools pull-right">
-                    <small style="color: blue" class="text-muted"><b>Sugerencia:</b> Haz click en el botón <span class="glyphicon glyphicon-menu-hamburger"></span> para modificar la vista.</small>
+                <div id="sugerencia" class="box-tools pull-right" style="background-color: #555; text-align: center;
+                border-radius: 6px; padding: 8px 0; bottom: 125%; left: 50%; margin-left: -80px;">
+                    <small style="color: white" class="text-muted">&nbsp;<b>Sugerencia:</b> Haz click en el botón <span class="glyphicon glyphicon-menu-hamburger"></span> para modificar la vista.&nbsp;</small>
+                    <a href="#" class="glyphicon glyphicon-remove-sign" onclick="closeSugerencia();" style="color: white"></a>&nbsp;
                 </div>
             </div>
             <div class="box-body" id="reportDelayApp">
@@ -443,6 +445,7 @@
                         }
                     ]
             });
+            $('#delays_table_filter').prepend('<label for="filtro_horario">Filtrar por horario: </label><select id="filtro_horario" class="select2-class" style="width: 20%;"></select> &nbsp');
 
             $('#sel-collaborator').change( function() {
                 oTable.draw();
@@ -546,6 +549,29 @@
     <script>
         $(document).ready(function() {
             $('.select2-class').select2();
+            $('#filtro_horario').select2({
+                placeholder: 'selecciona horario',
+                data: app.dataSchedules,
+            })
+            .on('select2:select', function (e){
+                if(e.params.data.id != 'NA'){
+                    oTable.columns( 4 ).search( e.params.data.text ).draw();
+                }else{
+                    oTable.columns().search('').draw();
+                }
+            });
+            setTimeout(() => {
+                const elem = document.getElementById("sugerencia");
+                if(typeof(elem) != 'undefined' && elem != null){
+                    elem.parentNode.removeChild(elem);
+                }
+            }, 15000);
         });
+    </script>
+    <script>
+        function closeSugerencia() {
+            const elem = document.getElementById("sugerencia");
+            elem.parentNode.removeChild(elem);
+        }
     </script>
 @endsection

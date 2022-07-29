@@ -58,6 +58,7 @@ class prepayRollEmployeesController extends Controller
                             'pgDep.group_name as group_name_depto')
                             ->whereIn('e.id',$subEmployees)
                             ->where('e.external_id','!=',null)
+                            ->groupBy('e.id')
                             ->get();
         
         return view('prepayRollGroupEmployees.index',['lUsers' => $lUsers, 'lEmployees' => $lEmployees, 'idUser' => $id, 'bDirect' => $bDirect]);
