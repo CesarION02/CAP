@@ -55,7 +55,7 @@ var app = new Vue({
             if (oRow.hasSchedule == false && oRow.hasChecks == false) {
                 return 'noprogramming';
             }
-            if (oRow.isCheckSchedule || (oRow.events.length > 0 && oRow.hasChecks)) {
+            if (oRow.isCheckSchedule || (oRow.events.length > 0 && oRow.hasChecks) || oRow.isDayRepeated) {
                 return 'check';
             }
             if (report != oData.REP_DELAY) {

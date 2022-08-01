@@ -132,6 +132,7 @@ class SOverJourneyCore {
 
                     $oRow->isDayRepeated = !$isPreviousDay;
                     if($oRow->isDayRepeated){
+                        $oRow->comments = $oRow->comments.'Jornada doble. ';
                         if($comments != null){
                             if($comments->where('key_code','isDayRepeated')->first()['value']){
                                 $oRow->isDayChecked = true;

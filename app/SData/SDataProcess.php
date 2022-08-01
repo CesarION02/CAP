@@ -128,7 +128,7 @@ class SDataProcess {
                 if (sizeof($registries) > 0) {
                     foreach ($registries as $registry) {
                         $qWorkshifts = clone $lWorkshifts;
-                        $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $qWorkshifts, $sStartDate, $sEndDate, $comments);
+                        $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $qWorkshifts, $sStartDate, $sEndDate, $comments, $payWay);
         
                         $isNew = $theRow[0];
                         $newRow = $theRow[1];
@@ -141,10 +141,10 @@ class SDataProcess {
 
                         if ($again) {
                             if ($fRegistry != null) {
-                                $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $fRegistry, clone $lWorkshifts, $sStartDate, $sEndDate, $comments);
+                                $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $fRegistry, clone $lWorkshifts, $sStartDate, $sEndDate, $comments, $payWay);
                             }
                             else {
-                                $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $lWorkshifts, $sStartDate, $sEndDate, $comments);
+                                $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $lWorkshifts, $sStartDate, $sEndDate, $comments, $payWay);
                             }
                             $isNew = $theRow[0];
                             $newRow = $theRow[1];
@@ -166,7 +166,7 @@ class SDataProcess {
                             'is_modified' => false
                         ];
 
-                        $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $lWorkshifts, $sStartDate, $sEndDate, $comments);
+                        $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $lWorkshifts, $sStartDate, $sEndDate, $comments, $payWay);
 
                         $isNew = $theRow[0];
                         $newRow = $theRow[1];
@@ -235,7 +235,7 @@ class SDataProcess {
                         'is_modified' => false
                     ];
 
-                    $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $lWorkshifts, $sStartDate, $sEndDate, $comments);
+                    $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $lWorkshifts, $sStartDate, $sEndDate, $comments, $payWay);
                     $isNew = [0];
                     $newRow = $theRow[1];
                     $again = $theRow[2];
@@ -255,10 +255,10 @@ class SDataProcess {
 
                     if ($again) {
                         if ($fRegistry != null) {
-                            $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $fRegistry, clone $lWorkshifts, $sStartDate, $sEndDate, $comments);
+                            $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $fRegistry, clone $lWorkshifts, $sStartDate, $sEndDate, $comments, $payWay);
                         }
                         else {
-                            $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $lWorkshifts, $sStartDate, $sEndDate, $comments);
+                            $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $lWorkshifts, $sStartDate, $sEndDate, $comments, $payWay);
                         }
 
                         $isNew = $theRow[0];
@@ -293,7 +293,7 @@ class SDataProcess {
      *               $response[1] = SRegistryRow que puede ser procesado de nuevo o estar completo
      *               $response[2] = boolean que determina si el renglón será reprocesado, esto cuando falta un registro de entrada o salida
      */
-    private static function manageRow($newRow, $isNew, $idEmployee, $registry, $qWorkshifts, $sStartDate, $sEndDate, $comments = null)
+    private static function manageRow($newRow, $isNew, $idEmployee, $registry, $qWorkshifts, $sStartDate, $sEndDate, $comments = null, $payWay = null)
     {
         if ($isNew) {
             $newRow = new SRegistryRow();
@@ -535,6 +535,47 @@ class SDataProcess {
                     // Sin salida
                     $bFound = false;
                     $bAfterDay = false;
+
+                    $dateCut = null;
+
+                    switch ($payWay) {
+                        case \SCons::PAY_W_Q:
+                            $dateCut =  \DB::table('hrs_prepay_cut')
+                                            ->where([['dt_cut', $newRow->inDate], ['is_delete', 0]])
+                                            ->value('dt_cut');
+
+                            break;
+                        case \SCons::PAY_W_S:
+                            $dateCut =  \DB::table('week_cut')
+                                            ->where('fin', $newRow->inDate)
+                                            ->value('fin');
+                            
+                            break;
+                        default:
+                            break;
+                    }
+                    $isNight = false;
+                    $dateTime = Carbon::parse($newRow->inDateTime);
+                    $oSchedule = SDelayReportUtils::getSchedule($sStartDate, $sEndDate, $idEmployee, $registry, clone $qWorkshifts, \SCons::REP_HR_EX);
+
+                    if (!is_null($oSchedule)){
+                        if (!is_null($oSchedule->auxWorkshift)){
+                            $oAuxSchedule = $oSchedule->auxWorkshift;
+                            $isNight = $oAuxSchedule->is_night != null ? $oAuxSchedule->is_night : false;
+                            $chekHourEntry = (Carbon::parse($oAuxSchedule->entry)->hour) - 1;
+                        }else if (!is_null($oAuxSchedule = $oSchedule->auxScheduleDay)){
+                            $oAuxSchedule = $oSchedule->auxScheduleDay;
+                            $isNight = $oAuxSchedule->is_night != null ? $oAuxSchedule->is_night : false;
+                            $chekHourEntry = (Carbon::parse($oAuxSchedule->entry)->hour) - 1;
+                        }
+                    }
+
+                    if(!is_null($dateCut) && $isNight){
+                        if($dateTime->hour >= $chekHourEntry){
+                            $isOut = true;
+                        }
+                    }
+
                     if ($newRow->inDate == $sEndDate) {
                         // buscar salida un día después
                         $oDateAux = Carbon::parse($registry->date);
