@@ -846,12 +846,23 @@ class prePayrollController extends Controller
                 /**
                  * Determinar si ya se ha dado Vobo a los empleados directos del usuario en sesión
                 */
+
                 $isAllOk = SPrepayrollUtils::isAllEmployeesOk(auth()->user()->id, $idVobo);
 
                 if (! $isAllOk) {
                     $success = false;
                     throw new \Exception('No se puede dar Vobo, no se han dado visto bueno a todos los empleados directos del usuario en sesión.');
                 }
+
+                //determinar si la fecha ya paso y se puede dar visto bueno
+                $greaterThan = SPrepayrollUtils::isAdvancedDate($idVobo);   
+
+                if ($greaterThan == false) {
+                    $success = false;
+                    throw new \Exception('No se puede dar Vobo, fecha de corte aun no a pasado.');
+                }
+
+                
             }
             else {
                 $oAuthCtrl = PrepayReportControl::find($idVobo);

@@ -1,6 +1,8 @@
 <?php namespace App\SUtils;
 
 use App\SUtils\SPayrollDelegationUtils;
+use DB;
+use Carbon\Carbon;
 class SPrepayrollUtils {
 
     /**
@@ -315,6 +317,28 @@ class SPrepayrollUtils {
         }
 
         return true;
+    }
+
+    public static function isAdvancedDate($idVobo){
+        // sacar cual es la prenomina.
+        $prepayroll = DB::table('prepayroll_report_auth_controls')->where('id_control',$idVobo)->get();
+
+        // ver si es semana o quincena
+        if($prepayroll[0]->is_week == 1){
+            //semana
+            $fechaPrepayroll = DB::table('week_cut')->where('num',$prepayroll[0]->num_week)->where('year',$prepayroll[0]->year)->get();
+            $fechaComparacion = $fechaPrepayroll[0]->fin;
+        }else{
+            //quincena
+            $fechaPrepayroll = DB::table('hrs_prepay_cut')->where('num',$prepayroll[0]->num_biweek)->where('year',$prepayroll[0]->year)->get();
+            $fechaComparacion = $fechaPrepayroll[0]->dt_cut;
+        }
+        
+        $fechaComparacion = Carbon::parse($fechaComparacion);
+        $fechaActual = Carbon::now();
+        $mayor = $fechaActual->greaterThan($fechaComparacion);  
+        return $mayor;
+
     }
 }
         
