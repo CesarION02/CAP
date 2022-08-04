@@ -651,6 +651,12 @@ class ReporteController extends Controller
         if (! $oStartDate->lessThanOrEqualTo($oEndDate)) {
             return \Redirect::back()->withErrors(['Error', 'La fecha de inicio debe ser previa a la fecha final']);
         }
+        
+        $numIni = sDateUtils::getNumberOfDate($sStartDate, $request->pay_way == null ? \SCons::PAY_W_S : $request->pay_way);
+        $numFin = sDateUtils::getNumberOfDate($sEndDate, $request->pay_way == null ? \SCons::PAY_W_S : $request->pay_way);
+        if ( ($oStartDate->year != $oEndDate->year) || $numIni > $numFin) {
+            return \Redirect::back()->withErrors(['Error', 'No se puede generar un reporte que abarca más de un año']);
+        }
 
         if ($request->optradio == "employee") {
             if ($iEmployee > 0) {
