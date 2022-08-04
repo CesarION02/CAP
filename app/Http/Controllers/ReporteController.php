@@ -775,22 +775,23 @@ class ReporteController extends Controller
                         ->pluck('dept_job', 'num_employee');
 
         $isAdmin = false;
-        foreach(auth()->user()->roles()->get() as $rol){
+        foreach (auth()->user()->roles()->get() as $rol) {
             $result = in_array($rol->id, $config->rolesCanSeeAll);
-            if($result){
+            if ($result) {
                 $isAdmin = true;
                 break;
             }
         }
 
         $subEmployees = [];
-        if(!$isAdmin){
+        if (!$isAdmin) {
             $dirEmpl = SPrepayrollUtils::getEmployeesByUser(auth()->user()->id, 0, true, null);
-            foreach($dirEmpl as $data){
+            foreach ($dirEmpl as $data) {
                 array_push($subEmployees, $data);
             }
             $lUsers = null;
-        }else{
+        }
+        else {
             $lUsers = DB::table('users')
                 ->join('prepayroll_groups_users as pru','pru.head_user_id','=','users.id')
                 ->select('users.id','users.name')

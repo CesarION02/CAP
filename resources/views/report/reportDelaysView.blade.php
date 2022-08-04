@@ -551,7 +551,7 @@
             let url = "{{ route('employee_vobo') }}";
             let vobo = checked.checked ? 1 : 0;
             var result = vobo == 1 ? checkAdjust(dataEmployee) : new Array(true);
-            if(result[0]){
+            if (result[0]) {
                 oGui.showLoading(3000);
                 axios.post(url, {
                     _token: "{{ csrf_token() }}",
@@ -562,7 +562,7 @@
                 })
                 .then(res => {
                     console.log(res);
-                    if(!res.data.success){
+                    if (!res.data.success) {
                         checked.checked = !vobo;
                     }
                     oGui.showMessage(res.data.title, res.data.message, res.data.icon);
@@ -570,7 +570,8 @@
                 .catch(function(error) {
                     oGui.showError(error);
                 });
-            }else{
+            }
+            else {
                 checked.checked = false;
                 oGui.showError('Falta comentario para la fecha:\n' + 'Entrada: ' + app.vueGui.formatDate(result[1]) + ' Salida: ' +app.vueGui.formatDate(result[2]));
             }
@@ -588,29 +589,31 @@
                 data: app.dataSchedules,
             })
             .on('select2:select', function (e){
-                if(e.params.data.id != 'NA'){
+                if (e.params.data.id != 'NA') {
                     oTable.columns( 4 ).search( e.params.data.text ).draw();
-                }else{
+                }
+                else {
                     oTable.columns().search('').draw();
                 }
             });
 
             $('#directos').on('select2:select', function (e){
-                if(e.params.data.id == 1){
+                if (e.params.data.id == 1) {
                     var searchValues = "";
-                    for(let i = 0; i < oData.subEmployees.length; i++){
+                    for (let i = 0; i < oData.subEmployees.length; i++) {
                         searchValues = searchValues + '^' + oData.subEmployees[i] + '$' + (i < (oData.subEmployees.length-1) ? "|" : "");
                     }
                     console.log(searchValues, oData.subEmployees);
                     oTable.column(18).search("(" + searchValues + ")", true, false).draw();
-                }else{
+                }
+                else {
                     oTable.columns().search('').draw();
                 }
             });
 
             setTimeout(() => {
                 const elem = document.getElementById("sugerencia");
-                if(typeof(elem) != 'undefined' && elem != null){
+                if (typeof(elem) != 'undefined' && elem != null) {
                     elem.parentNode.removeChild(elem);
                 }
             }, 15000);

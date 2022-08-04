@@ -306,29 +306,31 @@
                 data: app.dataSchedules,
             })
             .on('select2:select', function (e){
-                if(e.params.data.id != 'NA'){
+                if (e.params.data.id != 'NA') {
                     oTable.columns(3).search( e.params.data.text ).draw();
-                }else{
+                }
+                else {
                     oTable.columns().search('').draw();
                 }
             });
 
-            $('#directos').on('select2:select', function (e){
-                if(e.params.data.id == 1){
+            $('#directos').on('select2:select', function (e) {
+                if (e.params.data.id == 1) {
                     var searchValues = "";
-                    for(let i = 0; i < oData.subEmployees.length; i++){
+                    for (let i = 0; i < oData.subEmployees.length; i++) {
                         searchValues = searchValues + '^' + oData.subEmployees[i] + '$' + (i < (oData.subEmployees.length-1) ? "|" : "");
                     }
                     console.log(searchValues, oData.subEmployees);
                     oTable.column(10).search("(" + searchValues + ")", true, false).draw();
-                }else{
+                }
+                else {
                     oTable.columns().search('').draw();
                 }
             });
 
             setTimeout(() => {
                 const elem = document.getElementById("sugerencia");
-                if(typeof(elem) != 'undefined' && elem != null){
+                if (typeof(elem) != 'undefined' && elem != null) {
                     elem.parentNode.removeChild(elem);
                 }
             }, 15000);
@@ -337,7 +339,7 @@
     @if($isAdmin)
         <script>
             $(document).ready(function() {
-                $('#supervisores').on('select2:select', function (e){
+                $('#supervisores').on('select2:select', function (e) {
                     $('#directos').val(0).trigger('change');
                     oTable.columns().search('').draw();
                     axios.post(oData.routegetDirectEmployees, {
