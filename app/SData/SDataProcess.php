@@ -573,42 +573,45 @@ class SDataProcess {
                     $bAfterDay = false;
 
                     $dateCut = null;
-
                     switch ($payWay) {
                         case \SCons::PAY_W_Q:
                             $dateCut =  \DB::table('hrs_prepay_cut')
                                             ->where([['dt_cut', $newRow->inDate], ['is_delete', 0]])
                                             ->value('dt_cut');
-
                             break;
                         case \SCons::PAY_W_S:
                             $dateCut =  \DB::table('week_cut')
                                             ->where('fin', $newRow->inDate)
                                             ->value('fin');
-                            
                             break;
                         default:
                             break;
                     }
-                    $isNight = false;
-                    $dateTime = Carbon::parse($newRow->inDateTime);
-                    $oSchedule = SDelayReportUtils::getSchedule($sStartDate, $sEndDate, $idEmployee, $registry, clone $qWorkshifts, \SCons::REP_HR_EX);
-
-                    if (!is_null($oSchedule)){
-                        if (!is_null($oSchedule->auxWorkshift)){
-                            $oAuxSchedule = $oSchedule->auxWorkshift;
-                            $isNight = $oAuxSchedule->is_night != null ? $oAuxSchedule->is_night : false;
-                            $chekHourEntry = (Carbon::parse($oAuxSchedule->entry)->hour) - 1;
-                        }else if (!is_null($oAuxSchedule = $oSchedule->auxScheduleDay)){
-                            $oAuxSchedule = $oSchedule->auxScheduleDay;
-                            $isNight = $oAuxSchedule->is_night != null ? $oAuxSchedule->is_night : false;
-                            $chekHourEntry = (Carbon::parse($oAuxSchedule->entry)->hour) - 1;
+                    if($newRow->inDate == $sEndDate){
+                        $isNight = false;
+                        $oDate = Carbon::parse($sEndDate);
+                        $oDate->addDay();
+                        $dateTime = Carbon::parse($newRow->inDateTime);
+                        $auxRegistry = $registry;
+                        $auxRegistry->date = $oDate->format('Y-m-d');
+                        $oSchedule = SDelayReportUtils::getSchedule($oDate->format('Y-m-d'), $oDate->format('Y-m-d'), $idEmployee, $auxRegistry , clone $qWorkshifts, \SCons::REP_HR_EX);
+    
+                        if (!is_null($oSchedule)){
+                            if (!is_null($oSchedule->auxWorkshift)){
+                                $oAuxSchedule = $oSchedule->auxWorkshift;
+                                $isNight = $oAuxSchedule->is_night != null ? $oAuxSchedule->is_night : false;
+                                $chekHourEntry = (Carbon::parse($oAuxSchedule->entry)->hour) - 1;
+                            }else if (!is_null($oAuxSchedule = $oSchedule->auxScheduleDay)){
+                                $oAuxSchedule = $oSchedule->auxScheduleDay;
+                                $isNight = $oAuxSchedule->is_night != null ? $oAuxSchedule->is_night : false;
+                                $chekHourEntry = (Carbon::parse($oAuxSchedule->entry)->hour) - 1;
+                            }
                         }
-                    }
-
-                    if(!is_null($dateCut) && $isNight){
-                        if($dateTime->hour >= $chekHourEntry){
-                            $isOut = true;
+    
+                        if(!is_null($dateCut) && $isNight){
+                            if($dateTime->hour >= $chekHourEntry){
+                                $isOut = true;
+                            }
                         }
                     }
 
@@ -2002,31 +2005,6 @@ class SDataProcess {
         $num = sDateUtils::getNumberOfDate($sDate, $payWay);
         $date = Carbon::parse($sDate);
         $dateIni = Carbon::parse($sStartDate);
-        // switch ($payWay) {
-        //     case \SCons::PAY_W_Q:
-        //         $dateIni =  \DB::table('hrs_prepay_cut')
-        //                         ->where([['num', ($num - 1)], ['is_delete', 0]])
-        //                         ->value('dt_cut');
-                
-        //         if(!is_null($dateIni)){
-        //             $dateIni = Carbon::parse($dateIni)->addDay();
-        //         }
-
-        //         break;
-        //     case \SCons::PAY_W_S:
-        //         $dateIni =  \DB::table('week_cut')
-        //                         ->where([['num', $num], ['year', $date->year]])
-        //                         ->value('ini');
-
-        //         if(!is_null($dateIni)){
-        //             $dateIni = Carbon::parse($dateIni);
-        //         }
-                
-        //         break;
-        //     default:
-        //         break;
-        // }
-
         if($date->eq($dateIni)){
             $subDay = $dateIni->subDay();
 
@@ -2046,5 +2024,44 @@ class SDataProcess {
         }
 
         return $checkDayBefore;
+    }
+
+    private static function checkNextDay($payWay, $newRow, $sDate, $idEmployee, $registry, $qWorkshifts){
+        $dateCut = null;
+        switch ($payWay) {
+            case \SCons::PAY_W_Q:
+                $dateCut =  \DB::table('hrs_prepay_cut')
+                                ->where([['dt_cut', $newRow->inDate], ['is_delete', 0]])
+                                ->value('dt_cut');
+                break;
+            case \SCons::PAY_W_S:
+                $dateCut =  \DB::table('week_cut')
+                                ->where('fin', $newRow->inDate)
+                                ->value('fin');
+                break;
+            default:
+                break;
+        }
+        $isNight = false;
+        $dateTime = Carbon::parse($newRow->inDateTime);
+        $oSchedule = SDelayReportUtils::getSchedule($sDate, $sDate, $idEmployee, $registry, clone $qWorkshifts, \SCons::REP_HR_EX);
+
+        if (!is_null($oSchedule)){
+            if (!is_null($oSchedule->auxWorkshift)){
+                $oAuxSchedule = $oSchedule->auxWorkshift;
+                $isNight = $oAuxSchedule->is_night != null ? $oAuxSchedule->is_night : false;
+                $chekHourEntry = (Carbon::parse($oAuxSchedule->entry)->hour) - 1;
+            }else if (!is_null($oAuxSchedule = $oSchedule->auxScheduleDay)){
+                $oAuxSchedule = $oSchedule->auxScheduleDay;
+                $isNight = $oAuxSchedule->is_night != null ? $oAuxSchedule->is_night : false;
+                $chekHourEntry = (Carbon::parse($oAuxSchedule->entry)->hour) - 1;
+            }
+        }
+
+        if(!is_null($dateCut) && $isNight){
+            if($dateTime->hour >= $chekHourEntry){
+                $isOut = true;
+            }
+        }
     }
 }
