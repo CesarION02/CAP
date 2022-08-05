@@ -779,6 +779,31 @@ class ReporteController extends Controller
                         ->join('jobs AS j', 'e.job_id', '=', 'j.id')
                         ->selectRaw('e.num_employee, CONCAT("DEPTO.: ", d.name, ", PUESTO: ", j.name) AS dept_job')
                         ->pluck('dept_job', 'num_employee');
+
+        $isAdmin = false;
+        foreach (auth()->user()->roles()->get() as $rol) {
+            $result = in_array($rol->id, $config->rolesCanSeeAll);
+            if ($result) {
+                $isAdmin = true;
+                break;
+            }
+        }
+
+        $subEmployees = [];
+        if (!$isAdmin) {
+            $dirEmpl = SPrepayrollUtils::getEmployeesByUser(auth()->user()->id, 0, true, null);
+            foreach ($dirEmpl as $data) {
+                array_push($subEmployees, $data);
+            }
+            $lUsers = null;
+        }
+        else {
+            $lUsers = DB::table('users')
+                ->join('prepayroll_groups_users as pru','pru.head_user_id','=','users.id')
+                ->select('users.id','users.name')
+                ->orderBy('users.name')
+                ->get();
+        }
         
         if ($reportMode == \SCons::REP_HR_EX) {
             /**
@@ -865,10 +890,14 @@ class ReporteController extends Controller
                     ->with('bModify', $bModify)
                     ->with('registriesRoute', route('registro_ajuste'))
                     ->with('lRows', $lRows)
-                    ->with('lComments', $lComments);
+                    ->with('lComments', $lComments)
+                    ->with('subEmployees', $subEmployees)
+                    ->with('isAdmin', $isAdmin)
+                    ->with('lUsers', $lUsers);
         }
         else {
             $lEmployees = $this->timesTotal($lRows, $lEmployees);
+            $col = collect($lRows);
             foreach($lEmployees as $emp){
                 $oCom = $lAdjusts->where('employee_id',$emp->id)->all();
                 $arr = [];
@@ -876,6 +905,7 @@ class ReporteController extends Controller
                     array_push($arr, $com->dt_date.", ".$com->comments);
                 }
                 $emp->comments = $arr;
+                $emp->scheduleText = $col->where('idEmployee', $emp->id)->first()->scheduleText;
             }
             
             return view('report.reportDelaysTotView')
@@ -890,7 +920,11 @@ class ReporteController extends Controller
                     ->with('bModify', $bModify)
                     ->with('registriesRoute', route('registro_ajuste'))
                     ->with('lRows', $lRows)
-                    ->with('lEmployees', $lEmployees);
+                    ->with('lComments', [])
+                    ->with('lEmployees', $lEmployees)
+                    ->with('subEmployees', $subEmployees)
+                    ->with('isAdmin', $isAdmin)
+                    ->with('lUsers', $lUsers);
         }
         
     }
