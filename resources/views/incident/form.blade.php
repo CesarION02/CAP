@@ -1,9 +1,10 @@
 <div class="form-group">
     <label for="Tipoincidente" class="col-lg-3 control-label requerido">Tipo incidencia:</label>
     <div class="col-lg-8">
-        <select id="type_incidents_id" name="type_incidents_id" class="form-control">
+        <select id="type_incidents_id" name="type_incidents_id" class="form-control" onchange="tipo_incidencia(this)">
+                <option value="0">Elige una opción</option>
             @foreach($incidents as $type => $index)
-            <option value="{{ $index }}" {{old('type_incidents_id') == $index ? 'selected' : '' }}> {{$type}}</option>
+                <option value="{{ $index }}" {{old('type_incidents_id') == $index ? 'selected' : '' }}> {{$type}}</option>
             @endforeach
         </select>
 
@@ -47,11 +48,28 @@
 <div class="form-gruop">
     <label class="col-lg-3 control-label" for="">Comentarios frecuentes:</label>
     <div class="col-lg-8">
-        <select class="form-control select2-class" id="comentFrec" style="width: 80%;" title="Lista de comentarios frecuentes.">
-            @foreach ($lComments as $comment)
-                <option ="comment in lComments">{{$comment->comment}}</option>   
-            @endforeach  
-        </select>
+        @if(isset($datas))
+            @if($activar == 1)
+                <select class="form-control select2-class" id="comentFrec" style="width: 80%;" title="Lista de comentarios frecuentes.">
+                    @foreach ($lComments as $comment)
+                        <option ="comment in lComments">{{$comment->comment}}</option>   
+                    @endforeach  
+                </select>
+            @else
+                <select disabled class="form-control select2-class" id="comentFrec" style="width: 80%;" title="Lista de comentarios frecuentes.">
+                    @foreach ($lComments as $comment)
+                        <option ="comment in lComments">{{$comment->comment}}</option>   
+                    @endforeach  
+                </select>
+            @endif
+        
+        @else
+            <select disabled class="form-control select2-class" id="comentFrec" style="width: 80%;" title="Lista de comentarios frecuentes.">
+                @foreach ($lComments as $comment)
+                    <option ="comment in lComments">{{$comment->comment}}</option>   
+                @endforeach  
+            </select>
+        @endif
         <button class="btn btn-success" type="button" title="Agregar texto." style="border-radius: 50%; padding: 3px 6px; font-size: 10px;" onclick="addComment()"><span class="glyphicon glyphicon-arrow-right"></span></button>
         <small class="text-muted">Debe dar click en el botón <span class="glyphicon glyphicon-arrow-right"></span> para agregar comentario</small>
     </div>
@@ -60,6 +78,17 @@
 <div class="form-gruop">
     <label class="col-lg-3 control-label requerido" for="">Comentarios:</label>
     <div class="col-lg-8">
-      <textarea required id="comentarios" name="comentarios" title="Escribe el comentario que deseas que aparezca en el renglón."  class="form-control" style="resize: none; width: 350px; height: 115px;"></textarea>
+      
+        @if(isset($datas))
+            @if($activar == 1)
+                <textarea required id="comentarios" name="comentarios" title="Escribe el comentario que deseas que aparezca en el renglón."  class="form-control" style="resize: none; width: 350px; height: 115px;">{{$comment_adjust[0]->comments}}</textarea>
+            @else
+                <textarea id="comentarios" name="comentarios" title="Escribe el comentario que deseas que aparezca en el renglón."  class="form-control" style="resize: none; width: 350px; height: 115px;" disabled></textarea>
+            @endif
+        @else
+            <textarea required id="comentarios" name="comentarios" title="Escribe el comentario que deseas que aparezca en el renglón."  class="form-control" style="resize: none; width: 350px; height: 115px;" disabled></textarea>
+        @endif
     </div>
 </div>
+<input type="hidden" value="{{$incident_comment}}" id="atipos">
+<input type="hidden" id="sincomentarios" name="sincomentarios" value="0">

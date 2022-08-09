@@ -141,10 +141,21 @@ class incidentController extends Controller
         }
         $lComments = \DB::table('comments')->where('is_delete', 0)->get();
 
+        $incident_comment = \DB::table('comments_control')->where('value',1)->select('key_code')->get();
+        $cadenaComparacion = "";
+        for( $i = 0 ; count($incident_comment) > $i ; $i++ ){
+            if($cadenaComparacion == ''){
+                $cadenaComparacion = $incident_comment[$i]->key_code;
+            }else{
+                $cadenaComparacion = $cadenaComparacion.','.$incident_comment[$i]->key_code;
+            }
+        }
+
         return view('incident.create')
                         ->with('incidentType', $incidentType)
                         ->with('incidents', $incidents)
                         ->with('employees', $employees)
+                        ->with('incident_comment',$cadenaComparacion)
                         ->with('lComments', $lComments);
     }
 
@@ -197,11 +208,14 @@ class incidentController extends Controller
                 $adjust->updated_by = session()->get('user_id');
                 $adjust->save();
 
-                $link = new adjust_link();
-                $link->adjust_id = $adjust->id;
-                $link->is_incident = 1;
-                $link->incident_id = $incident->id;
-                $link->save();
+                if($request->sincomentarios == 1){
+                    $link = new adjust_link();
+                    $link->adjust_id = $adjust->id;
+                    $link->is_incident = 1;
+                    $link->incident_id = $incident->id;
+                    $link->save();
+                }
+                
 
                 $dateI->addDay();
             }
@@ -242,9 +256,36 @@ class incidentController extends Controller
         $datas = DB::table('incidents')
                         ->join('employees','employees.id',"=","incidents.employee_id")
                         ->where('incidents.id',$id)
-                        ->select('incidents.id AS id','employees.name AS name','incidents.start_date AS ini','incidents.end_date AS fin')
+                        ->select('incidents.id AS id','employees.name AS name','incidents.start_date AS ini','incidents.end_date AS fin','type_incidents_id AS tipo')
                         ->get();
-        return view('incident.edit', compact('datas'))->with('incidents',$incidents);
+        
+        $lComments = \DB::table('comments')->where('is_delete', 0)->get();
+
+        $incident_comment = \DB::table('comments_control')->where('value',1)->select('key_code')->get();
+        $cadenaComparacion = "";
+        for( $i = 0 ; count($incident_comment) > $i ; $i++ ){
+            if($cadenaComparacion == ''){
+                $cadenaComparacion = $incident_comment[$i]->key_code;
+            }else{
+                $cadenaComparacion = $cadenaComparacion.','.$incident_comment[$i]->key_code;
+            }
+        }
+
+        $adjust = \DB::table('adjust_link')
+                    ->where('incident_id',$datas[0]->id)
+                    ->get();
+        $activar = 0;
+        for ($i = 0; count($incident_comment) > $i; $i++) {
+            if ($datas[0]->tipo == $incident_comment[$i]->key_code) {
+                $activar = 1;
+            }
+        }
+        if( $activar != 0 ){
+            $comment_adjust = \DB::table('prepayroll_adjusts')->where('id',$adjust[0]->adjust_id)->get();
+        }else{
+            $comment_adjust = 0;
+        }
+        return view('incident.edit', compact('datas'))->with('incidents',$incidents)->with('incident_comment',$cadenaComparacion)->with('lComments', $lComments)->with('adjust',$adjust)->with('activar',$activar)->with('comment_adjust',$comment_adjust);
     }
 
     /**
@@ -257,6 +298,52 @@ class incidentController extends Controller
     public function update(Request $request, $id)
     {
         incident::findOrFail($id)->update($request->all());
+
+        $adjust_delete = DB::table('adjust_link')
+                    ->where('incident_id',$id)
+                    ->get();
+
+        for( $i = 0 ; count($adjust_delete) > $i ; $i++ ){
+            $delete = prepayrollAdjust::where('id',$adjust_delete[$i]->adjust_id)->get();
+            $delete[0]->is_delete = 1;
+            $delete[0]->save();
+        }
+
+        $adjust_delete = DB::table('adjust_link')
+                ->where('incident_id',$incident->id)
+                ->delete();
+
+        $dateI = Carbon::parse($request->start_date);
+        $dateS = Carbon::parse($request->end_date);
+    
+        $diferencia = ($dateI->diffInDays($dateS));
+    
+        for($i = 0 ; $diferencia >= $i ; $i++){
+            $adjust = new prepayrollAdjust();
+            $adjust->employee_id = $request->employee_id;
+            $adjust->dt_date = $dateI->toDateString();
+            $adjust->minutes = 0;
+            $adjust->apply_to = 2;
+            $adjust->comments = $request->comentarios;
+            $adjust->is_delete = 0;
+            $adjust->adjust_type_id = 7;
+            $adjust->apply_time = 0;
+            $adjust->created_by = session()->get('user_id');
+            $adjust->updated_by = session()->get('user_id');
+            $adjust->save();
+    
+            if($request->sincomentarios == 1){
+                $link = new adjust_link();
+                $link->adjust_id = $adjust->id;
+                $link->is_incident = 1;
+                $link->incident_id = $incident->id;
+                $link->save();
+            }
+                    
+    
+            $dateI->addDay();
+        }
+
         return redirect('incidents')->with('mensaje', 'Incidente actualizado con exito');
     }
 
@@ -277,17 +364,19 @@ class incidentController extends Controller
             //sacar ajustes que tendran que borrarse
 
             $adjust_delete = DB::table('adjust_link')
-                    ->where('special_id',$incident->id)
+                    ->where('incident_id',$incident->id)
                     ->get();
             
             //$adjust_delete->toArray();
 
             for( $i = 0 ; count($adjust_delete) > $i ; $i++ ){
-                prepayrollAdjust::where('id',$adjust_delete[$i]->adjust_id)->delete();
+                $delete = prepayrollAdjust::where('id',$adjust_delete[$i]->adjust_id)->get();
+                $delete[0]->is_delete = 1;
+                $delete[0]->save();
             }
 
             $adjust_delete = DB::table('adjust_link')
-                    ->where('special_id',$incident->id)
+                    ->where('incident_id',$incident->id)
                     ->delete();
                     
             return response()->json(['mensaje' => 'ok']);

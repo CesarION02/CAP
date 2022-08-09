@@ -229,6 +229,7 @@ class specialWorkshiftController extends Controller
 
         $lComments = \DB::table('comments')->where('is_delete', 0)->get();
 
+
         return view('specialworkshift.create')->with('employees',$employees)->with('workshifts',$workshifts)->with('lComments', $lComments);
     }
 
@@ -392,8 +393,16 @@ class specialWorkshiftController extends Controller
                             ->select('name AS name','entry AS entrada', 'departure AS salida','id AS id')
                             ->get();    
         }
+
+        $lComments = \DB::table('comments')->where('is_delete', 0)->get();
+
+        $adjust = \DB::table('adjust_link')
+                    ->where('special_id',$datas[0]->id)
+                    ->get();
+
+        $comment_adjust = \DB::table('prepayroll_adjusts')->where('id',$adjust[0]->adjust_id)->get();
         
-        return view('specialworkshift.edit')->with('datas',$datas)->with('employees',$employees)->with('workshifts',$workshifts);
+        return view('specialworkshift.edit')->with('datas',$datas)->with('employees',$employees)->with('workshifts',$workshifts)->with('lComments', $lComments)->with('comment_adjust',$comment_adjust);
 
     }
 
@@ -433,6 +442,24 @@ class specialWorkshiftController extends Controller
 
         $week_department_day = DB::table('week_department_day')->where('special','=',$id)->delete();
 
+        //sacar ajustes que tendran que borrarse
+
+        $adjust_delete = DB::table('adjust_link')
+        ->where('special_id',$id)
+        ->get();
+
+        //$adjust_delete->toArray();
+
+        for( $i = 0 ; count($adjust_delete) > $i ; $i++ ){
+            $delete = prepayrollAdjust::where('id',$adjust_delete[$i]->adjust_id)->get();
+            $delete[0]->is_delete = 1;
+            $delete[0]->save();
+        }
+
+        $adjust_delete = DB::table('adjust_link')
+            ->where('special_id',$id)
+            ->delete();
+
         for($i = 0 ; $diferencia >= $i ; $i++){
             $week_department_day = new week_department_day();
             $week_department_day->date = $dateI->toDateString();
@@ -458,6 +485,25 @@ class specialWorkshiftController extends Controller
             $day_workshifts_employee->is_delete = 0; 
             $day_workshifts_employee->save();
             $dateI->addDay();
+
+            $adjust = new prepayrollAdjust();
+            $adjust->employee_id = $request->employee_id;
+            $adjust->dt_date = $dateI->toDateString();
+            $adjust->minutes = 0;
+            $adjust->apply_to = 2;
+            $adjust->comments = $request->comentarios;
+            $adjust->is_delete = 0;
+            $adjust->adjust_type_id = 7;
+            $adjust->apply_time = 0;
+            $adjust->created_by = session()->get('user_id');
+            $adjust->updated_by = session()->get('user_id');
+            $adjust->save();
+
+            $link = new adjust_link();
+            $link->adjust_id = $adjust->id;
+            $link->is_special = 1;
+            $link->special_id = $id;
+            $link->save();
         }
     
 
@@ -516,7 +562,9 @@ class specialWorkshiftController extends Controller
             //$adjust_delete->toArray();
 
             for( $i = 0 ; count($adjust_delete) > $i ; $i++ ){
-                prepayrollAdjust::where('id',$adjust_delete[$i]->adjust_id)->delete();
+                $delete = prepayrollAdjust::where('id',$adjust_delete[$i]->adjust_id)->get();
+                $delete[0]->is_delete = 1;
+                $delete[0]->save();
             }
 
             $adjust_delete = DB::table('adjust_link')

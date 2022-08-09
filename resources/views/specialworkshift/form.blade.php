@@ -84,6 +84,10 @@
 <div class="form-gruop">
     <label class="col-lg-3 control-label requerido" for="">Comentarios:</label>
     <div class="col-lg-8">
-      <textarea required id="comentarios" name="comentarios" title="Escribe el comentario que deseas que aparezca en el renglón."  class="form-control" style="resize: none; width: 350px; height: 115px;"></textarea>
+    @if(isset($datas))
+        <textarea required id="comentarios" name="comentarios" title="Escribe el comentario que deseas que aparezca en el renglón."  class="form-control" style="resize: none; width: 350px; height: 115px;">{{$comment_adjust[0]->comments}}</textarea>
+    @else
+        <textarea required id="comentarios" name="comentarios" title="Escribe el comentario que deseas que aparezca en el renglón."  class="form-control" style="resize: none; width: 350px; height: 115px;"></textarea>
+    @endif
     </div>
 </div>

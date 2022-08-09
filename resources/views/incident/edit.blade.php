@@ -5,6 +5,8 @@
 
 @section("scripts")
 <script src="{{asset("assets/pages/scripts/fecha.js")}}" type="text/javascript"></script>
+<script src="{{ asset("assets/pages/scripts/specialw/specialw.js")}}" type="text/javascript"></script>
+<script src="{{ asset("assets/pages/scripts/incidentsEmployeesView/tipoIncidencia.js")}}" type="text/javascript"></script>
 @endsection
 
 @section('content')
