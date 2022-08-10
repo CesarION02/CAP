@@ -317,10 +317,13 @@ class SDelayReportUtils {
     {
         $registry = \DB::table('registers AS r')
                                 ->join('employees AS e', 'e.id', '=', 'r.employee_id')
+                                ->leftJoin('jobs AS j', 'j.id', '=', 'e.job_id')
+                                ->leftJoin('departments AS d', 'd.id', '=', 'j.department_id')
                                 ->where('r.date', $sDate)
                                 ->where('e.id', $iEmployee)
                                 // ->select('r.*', 'e.num_employee', 'e.name', 'e.is_overtime')
-                                ->select('r.*', 'e.num_employee', 'e.name', 'e.policy_extratime_id', 'e.external_id');
+                                // ->select('r.*', 'e.num_employee', 'e.name', 'e.policy_extratime_id', 'e.external_id');
+                                ->select('r.*', 'd.id AS dept_id', 'e.num_employee', 'e.name', 'e.policy_extratime_id', 'e.external_id', 'd.area_id AS employee_area_id');
 
         if ($iType == \SCons::REG_IN) {
             $registry = $registry->orderBy('date', 'DESC')
