@@ -5,6 +5,7 @@ use App\SUtils\SDelayReportUtils;
 use App\SUtils\SDateTimeUtils;
 use App\SUtils\SRegistryRow;
 use App\SUtils\SPrepayrollAdjustUtils;
+use App\SUtils\SDateUtils;
 use App\SData\SOverJourneyCore;
 use App\Http\Controllers\prePayrollController;
 use App\Models\commentsControl;
@@ -48,7 +49,7 @@ class SDataProcess {
         $aEmployees = $lEmployees->pluck('id');
         $lWorkshifts = SDelayReportUtils::getWorkshifts($sStartDate, $sEndDate, $payWay, $aEmployees);
         // Rutina para verificación de renglones completos
-        // $lDataComplete = SDataProcess::completeDays($sStartDate, $sEndDate, $data53, $aEmployees, $lWorkshifts);
+        // $lDataComplete = SDataProcess::completeDays($sStartDate, $sEndDate, $data53, $aEmployees, $lWorkshifts, $comments);
         $lData53_2 = SDataProcess::addEventsDaysOffAndHolidays($data53, $lWorkshifts, $comments);
         
         $aEmployeeBen = $lEmployees->pluck('ben_pol_id', 'id');
@@ -100,9 +101,9 @@ class SDataProcess {
         $lRows = array();
         $idEmployee = 0;
         $isNew = true;
-        $newRow = null;
-
+        
         foreach ($lEmployees as $oEmployee) {
+            $newRow = null;
             $idEmployee = $oEmployee->id;
             
             foreach ($aDates as $sDate) {
@@ -128,7 +129,7 @@ class SDataProcess {
                 if (sizeof($registries) > 0) {
                     foreach ($registries as $registry) {
                         $qWorkshifts = clone $lWorkshifts;
-                        $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $qWorkshifts, $sStartDate, $sEndDate, $comments);
+                        $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $qWorkshifts, $sStartDate, $sEndDate, $comments, $payWay);
         
                         $isNew = $theRow[0];
                         $newRow = $theRow[1];
@@ -141,10 +142,10 @@ class SDataProcess {
 
                         if ($again) {
                             if ($fRegistry != null) {
-                                $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $fRegistry, clone $lWorkshifts, $sStartDate, $sEndDate, $comments);
+                                $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $fRegistry, clone $lWorkshifts, $sStartDate, $sEndDate, $comments, $payWay);
                             }
                             else {
-                                $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $lWorkshifts, $sStartDate, $sEndDate, $comments);
+                                $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $lWorkshifts, $sStartDate, $sEndDate, $comments, $payWay);
                             }
                             $isNew = $theRow[0];
                             $newRow = $theRow[1];
@@ -166,7 +167,7 @@ class SDataProcess {
                             'is_modified' => false
                         ];
 
-                        $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $lWorkshifts, $sStartDate, $sEndDate, $comments);
+                        $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $lWorkshifts, $sStartDate, $sEndDate, $comments, $payWay);
 
                         $isNew = $theRow[0];
                         $newRow = $theRow[1];
@@ -188,39 +189,77 @@ class SDataProcess {
                                 
                     $result = SDelayReportUtils::getSchedule($sDate, $sDate, $idEmployee, $registry, clone $lWorkshifts, \SCons::REP_HR_EX);
 
-                    $otherRow = new SRegistryRow();
-                    $otherRow->idEmployee = $idEmployee;
-                    $otherRow->numEmployee = $oEmployee->num_employee;
-                    $otherRow->employeeAreaId = $oEmployee->employee_area_id;
-                    $otherRow->employee = $oEmployee->name;
-                    $otherRow->external_id = $oEmployee->external_id;
-                    $otherRow->overtimeCheckPolicy = $oEmployee->policy_extratime_id;
-
-                    $otherRow = SDataProcess::setDates($result, $otherRow, $sDate, $comments);
-
-                    $otherRow->hasChecks = false;
-                    $otherRow->hasCheckOut = false;
-                    $otherRow->hasCheckIn = false;
-                    if ($otherRow->workable) {
-                        $otherRow->comments = $otherRow->comments."Sin checadas. ";
-                        if ($comments != null) {
-                            if ($comments->where('key_code','hasChecks')->first()['value'] ||
-                                $comments->where('key_code','hasCheckIn')->first()['value'] ||
-                                $comments->where('key_code','hasCheckOut')->first()['value']
-                            ) {
-                                $otherRow->isDayChecked = true;
-                            }
+                    //Revisa si el turno actual es nocturno
+                    $isNight = false;
+                    $scheduleText = null;
+                    $dayBefore = null;
+                    if (!is_null($result)) {
+                        if (!is_null($result->auxWorkshift)) {
+                            $oAuxSchedule = $result->auxWorkshift;
+                            $isNight = $oAuxSchedule->is_night != null ? $oAuxSchedule->is_night : false;
+                            $chekHourEntry = Carbon::parse($oAuxSchedule->entry)->subHour();
+                            $scheduleName = $oAuxSchedule->name;
+                        }
+                        else if (!is_null($oAuxSchedule = $result->auxScheduleDay)) {
+                            $oAuxSchedule = $result->auxScheduleDay;
+                            $isNight = $oAuxSchedule->is_night != null ? $oAuxSchedule->is_night : false;
+                            $chekHourEntry = Carbon::parse($oAuxSchedule->entry)->subHour();
+                            $scheduleName = $oAuxSchedule->template_name;
                         }
                     }
 
-                    $otherRow->inDateTime = $sDate;
-                    $otherRow->outDateTime = $sDate;
+                    //si el turno es nocturno busca entrada un dia anterior (solo si el dia del renglon es igual a la fecha de inicio)
+                    if ($isNight) {
+                        $dayBefore = SDataProcess::checkDayBefore($sStartDate, $sDate, $idEmployee, $payWay, $chekHourEntry->toTimeString());
+                        if (!is_null($dayBefore)) {
+                            $qWorkshifts = clone $lWorkshifts;
+                            $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $dayBefore, clone $qWorkshifts, $sStartDate, $sEndDate, $comments, $payWay);
+                            $newRow = $theRow[1];
+                            $newRow->outDateTime = $sDate;
+                            $newRow->hasCheckOut = false;
+                            $newRow->comments = $newRow->comments."Sin salida. ";
+                            $newRow->isDayChecked = true;
+                            $newRow->scheduleText = strtoupper($scheduleName);
+                            $lRows[] = $newRow;
+                        }
+                    }
 
-                    $lRows[] = $otherRow;
+                    if (is_null($dayBefore)) {
 
-                    if ($bug) {
-                        $registries = $regTemp;
-                        goto toAbsences;
+                        $otherRow = new SRegistryRow();
+                        $otherRow->idEmployee = $idEmployee;
+                        $otherRow->numEmployee = $oEmployee->num_employee;
+                        $otherRow->employeeAreaId = $oEmployee->employee_area_id;
+                        $otherRow->employee = $oEmployee->name;
+                        $otherRow->external_id = $oEmployee->external_id;
+                        $otherRow->overtimeCheckPolicy = $oEmployee->policy_extratime_id;
+    
+                        $otherRow = SDataProcess::setDates($result, $otherRow, $sDate, $comments);
+    
+                        $otherRow->hasChecks = false;
+                        $otherRow->hasCheckOut = false;
+                        $otherRow->hasCheckIn = false;
+                        if ($otherRow->workable) {
+                            $otherRow->comments = $otherRow->comments."Sin checadas. ";
+                            if ($comments != null) {
+                                if ($comments->where('key_code','hasChecks')->first()['value'] ||
+                                    $comments->where('key_code','hasCheckIn')->first()['value'] ||
+                                    $comments->where('key_code','hasCheckOut')->first()['value']
+                                ) {
+                                    $otherRow->isDayChecked = true;
+                                }
+                            }
+                        }
+    
+                        $otherRow->inDateTime = $sDate;
+                        $otherRow->outDateTime = $sDate;
+    
+                        $lRows[] = $otherRow;
+    
+                        if ($bug) {
+                            $registries = $regTemp;
+                            goto toAbsences;
+                        }
                     }
                 }
             }
@@ -235,7 +274,7 @@ class SDataProcess {
                         'is_modified' => false
                     ];
 
-                    $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $lWorkshifts, $sStartDate, $sEndDate, $comments);
+                    $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $lWorkshifts, $sStartDate, $sEndDate, $comments, $payWay);
                     $isNew = [0];
                     $newRow = $theRow[1];
                     $again = $theRow[2];
@@ -255,10 +294,10 @@ class SDataProcess {
 
                     if ($again) {
                         if ($fRegistry != null) {
-                            $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $fRegistry, clone $lWorkshifts, $sStartDate, $sEndDate, $comments);
+                            $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $fRegistry, clone $lWorkshifts, $sStartDate, $sEndDate, $comments, $payWay);
                         }
                         else {
-                            $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $lWorkshifts, $sStartDate, $sEndDate, $comments);
+                            $theRow = SDataProcess::manageRow($newRow, $isNew, $idEmployee, $registry, clone $lWorkshifts, $sStartDate, $sEndDate, $comments, $payWay);
                         }
 
                         $isNew = $theRow[0];
@@ -293,7 +332,7 @@ class SDataProcess {
      *               $response[1] = SRegistryRow que puede ser procesado de nuevo o estar completo
      *               $response[2] = boolean que determina si el renglón será reprocesado, esto cuando falta un registro de entrada o salida
      */
-    private static function manageRow($newRow, $isNew, $idEmployee, $registry, $qWorkshifts, $sStartDate, $sEndDate, $comments = null)
+    private static function manageRow($newRow, $isNew, $idEmployee, $registry, $qWorkshifts, $sStartDate, $sEndDate, $comments = null, $payWay = null)
     {
         if ($isNew) {
             $newRow = new SRegistryRow();
@@ -535,6 +574,53 @@ class SDataProcess {
                     // Sin salida
                     $bFound = false;
                     $bAfterDay = false;
+
+                    $dateCut = null;
+                    switch ($payWay) {
+                        case \SCons::PAY_W_Q:
+                            $dateCut =  \DB::table('hrs_prepay_cut')
+                                            ->where([['dt_cut', $newRow->inDate], ['is_delete', 0]])
+                                            ->value('dt_cut');
+                            break;
+                        case \SCons::PAY_W_S:
+                            $dateCut =  \DB::table('week_cut')
+                                            ->where('fin', $newRow->inDate)
+                                            ->value('fin');
+                            break;
+                        default:
+                            break;
+                    }
+
+                    //Si el ultimo renglon tiene una entrada correspondiente al dia siguiente (turno nocturno) lo elimina.
+                    if ($newRow->inDate == $sEndDate) {
+                        $isNight = false;
+                        $oDate = Carbon::parse($sEndDate);
+                        $oDate->addDay();
+                        $dateTime = Carbon::parse($newRow->inDateTime);
+                        $auxRegistry = $registry;
+                        $auxRegistry->date = $oDate->format('Y-m-d');
+                        $oSchedule = SDelayReportUtils::getSchedule($oDate->format('Y-m-d'), $oDate->format('Y-m-d'), $idEmployee, $auxRegistry , clone $qWorkshifts, \SCons::REP_HR_EX);
+    
+                        if (!is_null($oSchedule)) {
+                            if (!is_null($oSchedule->auxWorkshift)) {
+                                $oAuxSchedule = $oSchedule->auxWorkshift;
+                                $isNight = $oAuxSchedule->is_night != null ? $oAuxSchedule->is_night : false;
+                                $chekHourEntry = (Carbon::parse($oAuxSchedule->entry)->hour) - 1;
+                            }
+                            else if (!is_null($oAuxSchedule = $oSchedule->auxScheduleDay)) {
+                                $oAuxSchedule = $oSchedule->auxScheduleDay;
+                                $isNight = $oAuxSchedule->is_night != null ? $oAuxSchedule->is_night : false;
+                                $chekHourEntry = (Carbon::parse($oAuxSchedule->entry)->hour) - 1;
+                            }
+                        }
+    
+                        if (!is_null($dateCut) && $isNight) {
+                            if ($dateTime->hour >= $chekHourEntry) {
+                                $isOut = true;
+                            }
+                        }
+                    }
+
                     if ($newRow->inDate == $sEndDate) {
                         // buscar salida un día después
                         $oDateAux = Carbon::parse($registry->date);
@@ -1799,7 +1885,7 @@ class SDataProcess {
      * 
      * @return array
      */
-    public static function completeDays($sStartDate, $sEndDate, $lData, $aEmployees, $qWorkshifts)
+    public static function completeDays($sStartDate, $sEndDate, $lData, $aEmployees, $qWorkshifts, $comments = null)
     {
         $aDates = [];
         $oStartDate = Carbon::parse($sStartDate);
@@ -1918,5 +2004,33 @@ class SDataProcess {
         if (! is_null($newEvents)) {
             \DB::table('comments_control')->insert($newEvents);
         }
+    }
+
+    //Revisa el dia anterior en busca de una entrada solo si el dia del renglon es el dia inicial
+    private static function checkDayBefore ($sStartDate, $sDate, $idEmployee, $payWay, $chekHourEntry)
+    {
+        $checkDayBefore = null;
+        $num = sDateUtils::getNumberOfDate($sDate, $payWay);
+        $date = Carbon::parse($sDate);
+        $dateIni = Carbon::parse($sStartDate);
+        if ($date->eq($dateIni)) {
+            $subDay = $dateIni->subDay();
+
+            $checkDayBefore = \DB::table('registers AS r')
+                                ->join('employees AS e', 'e.id', '=', 'r.employee_id')
+                                ->leftJoin('jobs AS j', 'j.id', '=', 'e.job_id')
+                                ->leftJoin('departments AS d', 'd.id', '=', 'j.department_id')
+                                ->where([
+                                            ['r.employee_id', $idEmployee],
+                                            ['r.date', $subDay->toDateString()],
+                                            ['r.type_id', 1],
+                                            ['r.time', '>=', $chekHourEntry],
+                                            ['r.is_delete', 0]
+                                        ])
+                                ->select('r.*', 'd.id AS dept_id', 'e.num_employee', 'e.name', 'e.policy_extratime_id', 'e.external_id', 'd.area_id AS employee_area_id')
+                                ->first();
+        }
+
+        return $checkDayBefore;
     }
 }

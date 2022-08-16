@@ -12,6 +12,7 @@
     <script>
         $(".chosen-select").chosen();
     </script>
+    <script src="{{ asset("assets/pages/scripts/specialw/specialw.js")}}" type="text/javascript"></script>
 @endsection
 
 @section('content')
