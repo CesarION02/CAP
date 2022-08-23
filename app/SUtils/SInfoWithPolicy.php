@@ -1515,15 +1515,25 @@ class SInfoWithPolicy{
                             }
                             if(isset($posicionMenor) && $concluir == 0){
                                 for($i = 0 ; count($posicionMenor) > $i ; $i++){
-                                    for($j = 0 ; count($diasDespues) > $j ; $j++){
-                                        if($posicionMenor[$i] == $diasDespues[$j]){
+                                    if($posicionMenor[$i] == $diasOptimo){
                                             $lRows[$posicionMenor[$i]]->isDayOff = 1;
-                                            $posicionTransformar = $posicionMenor[$i];
                                             if( $posicionMenor[$i] == $diasCorrectos[0] ){ $diaSumar = 1;}
                                             $concluir = 1;
                                             $i = $i + 10;
-                                            $j = $j + 10;
-                                    } 
+                                    }
+                                }
+                                if($concluir != 1){
+                                    for($i = 0 ; count($posicionMenor) > $i ; $i++){
+                                        for($j = 0 ; count($diasDespues) > $j ; $j++){
+                                            if($posicionMenor[$i] == $diasDespues[$j]){
+                                                $lRows[$posicionMenor[$i]]->isDayOff = 1;
+                                                $posicionTransformar = $posicionMenor[$i];
+                                                if( $posicionMenor[$i] == $diasCorrectos[0] ){ $diaSumar = 1;}
+                                                $concluir = 1;
+                                                $i = $i + 10;
+                                                $j = $j + 10;
+                                        } 
+                                        }
                                     }
                                 }
                                 if($concluir != 1){
@@ -2783,7 +2793,7 @@ class SInfoWithPolicy{
                 $empleados = DB::table('employees')
                                 ->where('is_active','=',1)
                                 ->where('way_pay_id','=',2)
-                                //->where('id',1530)
+                                ->where('id',1313)
                                 ->orderBy('id')
                                 ->select('id AS id','policy_extratime_id AS extratime')
                                 ->get();
@@ -2823,7 +2833,7 @@ class SInfoWithPolicy{
                 $empleados = DB::table('employees')
                                 ->where('is_active','=',1)
                                 ->where('way_pay_id','=',1)
-                                //->where('id',1245)
+                                //->where('id',1313)
                                 ->where('department_id','!=',$config->dept_foraneo)
                                 ->orderBy('id')
                                 ->select('id AS id','policy_extratime_id AS extratime')
