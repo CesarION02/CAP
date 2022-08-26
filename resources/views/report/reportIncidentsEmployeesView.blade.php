@@ -21,22 +21,26 @@
             <button type="button" class="close" data-dismiss="modal">&times;</button>
             <h4 class="modal-title">@{{date}} : @{{employee}}</h4>
         </div>
-        <form action="{{$routeStore}}" method="POST" id="incidentForm">
+        <form method="POST" id="incidentForm">
         <div class="modal-body">
                 @csrf
                 <div class="row">
                     <div class="col-md-3"><label for="typeIncident">Incidente:</label></div>
                     <div class="col-md-9">
-                        <select name="typeIncident" v-model="selIncident" class="form-control" required>
+                        <select id="typeIncident" name="typeIncident" v-model="selIncident" class="form-control" required>
                             <option v-for="incident in lIncidents" :value="incident.id">@{{incident.name}}</option>
                         </select>
                         <input type="hidden" name="employee_id" :value="employee_id">
                         <input type="hidden" name="date" :value="date">
+                        <input type="hidden" name="oldIncident" :value="oldIncident">
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <div class="row">
+                    <div class="col-md-2" style="float: left;">
+                        <button type="button" id="btnDelete" class="btn btn-danger" data-dismiss="modal" :disabled="onSubmit" v-on:click="deleteIncident();">Eliminar</button>
+                    </div>
                     <div class="col-md-4" style="float: right;">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
                         <button type="button" id="btnSubmit" class="btn btn-primary" data-dismiss="modal" :disabled="onSubmit" v-on:click="store();">Guardar</button>
@@ -57,7 +61,6 @@
                 <div class="box-tools pull-right">
                     <a class="btn btn-success" href="{{$route}}">Nuevo reporte</a>
                 </div>
-            
             </div>
             <div class="box-body" >
                 <div class="row">
@@ -65,111 +68,98 @@
                         <table id="incidentsTable" class="display" style="width:100%">
                             <thead>
                                 <tr>
-                                    <th>Num empleado</th>
-                                    <th>Empleado</th>
-                                    <th>Fecha</th>
-                                    <th>Prima dominical</th>
-                                    <th>Incidencia</th>
-                                    <th>Falta</th>
-                                    <th>-</th>
+                                    <th style="border: solid 1px rgb(86, 86, 86);">id empleado</th>
+                                    <th style="border: solid 1px rgb(86, 86, 86);">Num empleado</th>
+                                    <th style="border: solid 1px rgb(86, 86, 86);">Empleado</th>
+                                    @foreach ($aDates as $date)
+                                        <th style="border: solid 1px rgb(86, 86, 86);"  >{{$date}}</th>
+                                    @endforeach
+                                    <th style="border: solid 1px rgb(86, 86, 86);">Faltas</th>
+                                    <th style="border: solid 1px rgb(86, 86, 86);">Descansos</th>
+                                    <th style="border: solid 1px rgb(86, 86, 86);">Vacaciones</th>
+                                    <th style="border: solid 1px rgb(86, 86, 86);">Inasistencias</th>
+                                    <th style="border: solid 1px rgb(86, 86, 86);">Incapacidad</th>
+                                    <th style="border: solid 1px rgb(86, 86, 86);">Onomastico</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($lRows as $row)
-                                        @switch($row->incident_type)
-                                            @case(1)
-                                            @case(2)
-                                            @case(3)
-                                            @case(4)
-                                            @case(5)
-                                            @case(6)
-                                            @case(20)
-                                                <tr>
-                                                    <td style="background-color: #B388FF">{{$row->numEmployee}}</td>
-                                                    <td style="background-color: #B388FF">{{$row->employee}}</td>
-                                                    <td style="background-color: #B388FF">{{$row->outDate}}</td>
-                                                    <td style="background-color: #B388FF">{{$row->isSunday > 0 ? $row->isSunday : ""}}</td>
-                                                    <td style="background-color: #B388FF">{{$row->incident}}</td>
-                                                    <td style="background-color: #B388FF">{{$row->hasAbsence ? "falta": ""}}</td>
-                                                    <td style="background-color: #B388FF"></td>
-                                                </tr>
-                                                @break
-                                            @case(8)
-                                            @case(9)
-                                            @case(18)
-                                                <tr>
-                                                    <td style="background-color: #80D8FF">{{$row->numEmployee}}</td>
-                                                    <td style="background-color: #80D8FF">{{$row->employee}}</td>
-                                                    <td style="background-color: #80D8FF">{{$row->outDate}}</td>
-                                                    <td style="background-color: #80D8FF">{{$row->isSunday > 0 ? $row->isSunday : ""}}</td>
-                                                    <td style="background-color: #80D8FF">{{$row->incident}}</td>
-                                                    <td style="background-color: #80D8FF">{{$row->hasAbsence ? "falta": ""}}</td>
-                                                    <td style="background-color: #80D8FF"></td>
-                                                </tr>
-                                                @break
-                                            @case(10)
-                                            @case(11)
-                                            @case(16)
-                                                <tr>
-                                                    <td style="background-color: #EA80FC">{{$row->numEmployee}}</td>
-                                                    <td style="background-color: #EA80FC">{{$row->employee}}</td>
-                                                    <td style="background-color: #EA80FC">{{$row->outDate}}</td>
-                                                    <td style="background-color: #EA80FC">{{$row->isSunday > 0 ? $row->isSunday : ""}}</td>
-                                                    <td style="background-color: #EA80FC">{{$row->incident}}</td>
-                                                    <td style="background-color: #EA80FC">{{$row->hasAbsence ? "falta": ""}}</td>
-                                                    <td style="background-color: #EA80FC"></td>
-                                                </tr>
-                                                @break
-                                            @case(7)
-                                            @case(12)
-                                            @case(13)
-                                            @case(17)
-                                            @case(19)
-                                                <tr>
-                                                    <td style="background-color: #B2FF59">{{$row->numEmployee}}</td>
-                                                    <td style="background-color: #B2FF59">{{$row->employee}}</td>
-                                                    <td style="background-color: #B2FF59">{{$row->outDate}}</td>
-                                                    <td style="background-color: #B2FF59">{{$row->isSunday > 0 ? $row->isSunday : ""}}</td>
-                                                    <td style="background-color: #B2FF59">{{$row->incident}}</td>
-                                                    <td style="background-color: #B2FF59">{{$row->hasAbsence ? "falta": ""}}</td>
-                                                    <td style="background-color: #B2FF59"></td>
-                                                </tr>
-                                                @break
-                                            @case(14)
-                                            @case(15)
-                                                <tr>
-                                                    <td style="background-color: #FFD180">{{$row->numEmployee}}</td>
-                                                    <td style="background-color: #FFD180">{{$row->employee}}</td>
-                                                    <td style="background-color: #FFD180">{{$row->outDate}}</td>
-                                                    <td style="background-color: #FFD180">{{$row->isSunday > 0 ? $row->isSunday : ""}}</td>
-                                                    <td style="background-color: #FFD180">{{$row->incident}}</td>
-                                                    <td style="background-color: #FFD180">{{$row->hasAbsence ? "falta": ""}}</td>
-                                                    <td style="background-color: #FFD180"></td>
-                                                </tr>
-                                                @break
-                                            @default
-                                            @if ($row->hasAbsence)
-                                                <tr>
-                                                    <td style="background-color: #FF8A80">{{$row->numEmployee}}</td>
-                                                    <td style="background-color: #FF8A80">{{$row->employee}}</td>
-                                                    <td style="background-color: #FF8A80">{{$row->outDate}}</td>
-                                                    <td style="background-color: #FF8A80">{{$row->isSunday > 0 ? $row->isSunday : ""}}</td>
-                                                    <td style="background-color: #FF8A80">{{$row->incident}}</td>
-                                                    <td style="background-color: #FF8A80">{{$row->hasAbsence ? "falta": ""}}</td>
-                                                    <td style="background-color: #FF8A80"><button type="button" v-on:click="showModal('{{$row->idEmployee}}', '{{$row->employee}}','{{$row->outDate}}');" class="btn btn-success" style="border-radius: 50%; padding: 3px 6px; font-size: 10px;"><span class="glyphicon glyphicon-plus"></span></button></td>
-                                                </tr>
-                                            @else
-                                                <tr>
-                                                    <td>{{$row->numEmployee}}</td>
-                                                    <td>{{$row->employee}}</td>
-                                                    <td>{{$row->outDate}}</td>
-                                                    <td>{{$row->isSunday > 0 ? $row->isSunday : ""}}</td>
-                                                    <td>{{$row->incident}}</td>
-                                                    <td>{{$row->hasAbsence ? "falta": ""}}</td>
-                                                    <td><button type="button" v-on:click="showModal('{{$row->idEmployee}}', '{{$row->employee}}','{{$row->outDate}}');" class="btn btn-success" style="border-radius: 50%; padding: 3px 6px; font-size: 10px;"><span class="glyphicon glyphicon-plus"></span></button></td>
-                                                </tr>
-                                            @endif
-                                        @endswitch
+                                    <tr>
+                                        <td style="border: solid 1px rgb(86, 86, 86); text-align: center;">{{$row->first()->idEmployee}}</td>
+                                        <td style="border: solid 1px rgb(86, 86, 86); text-align: center;">{{$row->first()->numEmployee}}</td>
+                                        <td style="border: solid 1px rgb(86, 86, 86); text-align: center; font-weight: bold;">{{$row->first()->employee}}</td>
+                                        @foreach ($row as $r)
+                                            @switch($r->incident_type)
+                                                @case(1)
+                                                @case(2)
+                                                @case(3)
+                                                @case(4)
+                                                @case(5)
+                                                @case(6)
+                                                @case(20)
+                                                    <td style="border: solid 1px rgb(86, 86, 86);
+                                                        text-align: center; background-color: #B388FF;">
+                                                        {{$r->incident}}
+                                                    </td>
+                                                    @break
+                                                @case(8)
+                                                @case(9)
+                                                @case(18)
+                                                    <td style="border: solid 1px rgb(86, 86, 86);
+                                                        text-align: center; background-color: #80D8FF;">
+                                                        {{$r->incident}}
+                                                    </td>
+                                                    @break
+                                                @case(10)
+                                                @case(11)
+                                                @case(16)
+                                                    <td style="border: solid 1px rgb(86, 86, 86);
+                                                        text-align: center; background-color: #EA80FC;">
+                                                        {{$r->incident}}
+                                                    </td>
+                                                    @break
+                                                @case(7)
+                                                @case(12)
+                                                @case(13)
+                                                @case(17)
+                                                @case(19)
+                                                    <td style="border: solid 1px rgb(86, 86, 86);
+                                                        text-align: center; background-color: #B2FF59;">
+                                                        {{$r->incident}}
+                                                    </td>
+                                                    @break
+                                                @case(14)
+                                                @case(15)
+                                                    <td style="border: solid 1px rgb(86, 86, 86);
+                                                        text-align: center; background-color: #FFD180;">
+                                                        {{$r->incident}}
+                                                    </td>
+                                                    @break
+                                                @case(-1)
+                                                    <td style="border: solid 1px rgb(86, 86, 86);
+                                                        text-align: center; background-color: #a4a4a4;">
+                                                        -
+                                                    </td>
+                                                    @break
+                                                @default
+                                                    @if ($r->hasAbsence)
+                                                        <td style="border: solid 1px rgb(86, 86, 86);
+                                                            text-align: center; background-color: #FF8A80;">
+                                                            Falta
+                                                        </td>
+                                                    @else
+                                                        <td style="border: solid 1px rgb(86, 86, 86);"></td>
+                                                    @endif
+                                                    @break
+                                            @endswitch
+                                        @endforeach
+                                        <td style="border: solid 1px rgb(86, 86, 86);">{{$row->faltas}}</td>
+                                        <td style="border: solid 1px rgb(86, 86, 86);">{{$row->descansos}}</td>
+                                        <td style="border: solid 1px rgb(86, 86, 86);">{{$row->vacaciones}}</td>
+                                        <td style="border: solid 1px rgb(86, 86, 86);">{{$row->inasistencias}}</td>
+                                        <td style="border: solid 1px rgb(86, 86, 86);">{{$row->incapacidad}}</td>
+                                        <td style="border: solid 1px rgb(86, 86, 86);">{{$row->onomastico}}</td>
+                                    </tr>
                                 @endforeach
                             </tbody>
                         </table>
@@ -197,7 +187,7 @@
     <script src="{{ asset("assets/pages/scripts/SGui.js") }}" type="text/javascript"></script>
     <script>
         $(document).ready(function() {
-            $('#incidentsTable').DataTable({
+            table = $('#incidentsTable').DataTable({
                 "language": {
                     "sProcessing":     "Procesando...",
                     "sLengthMenu":     "Mostrar _MENU_ registros",
@@ -222,19 +212,26 @@
                         "sSortDescending": ": Activar para ordenar la columna de manera descendente"
                     }
                 },
-                "order": [[ 1, 'asc' ]],
+                "columnDefs": [
+                    {
+                        "targets": [0],
+                        "visible": false,
+                        "searchable": false,
+                    }
+                ],
+                "scrollY": "500px",
+                "scrollX": true,
+                "fixedHeader": true,
+                "colReorder": true,
+                "order": [[ 2, 'asc' ]],
                 "colReorder": true,
                 "dom": 'Bfrtip',
+                
                 "lengthMenu": [
-                    [ 10, 25, 50, 100, -1 ],
+                    [ -1, 100, 50, 25, 10 ],
                     [ 'Mostrar 10', 'Mostrar 25', 'Mostrar 50', 'Mostrar 100', 'Mostrar todo' ]
                 ],
                 "buttons": [
-                        'pageLength',
-                        {
-                            extend: 'copy',
-                            text: 'Copiar'
-                        }, 
                         'csv', 
                         'excel', 
                         {
@@ -242,33 +239,51 @@
                             text: 'Imprimir'
                         }
                     ],
-                "drawCallback": function ( settings ) {
-                    var api = this.api();
-                    var rows = api.rows( {page:'current'} ).nodes();
-                    var last=null;
-        
-                    api.column(1, {page:'current'} ).data().each( function ( group, i ) {
-                        if ( last !== group ) {
-                            $(rows).eq( i ).before(
-                                '<tr class="group"><td colspan="7" style="background-color: #9C9C9C;">'+group+'</td></tr>'
-                            );
-        
-                            last = group;
-                        }
-                    } );
+            });
+
+            $('#incidentsTable tbody').on('click', 'td', function () {
+                if ($(this).hasClass('selected')) {
+                    $(this).removeClass('selected');
                 }
-            });    
+                else {
+                    if(table.cell( this ).data().length == 0 || 
+                    table.cell( this ).data() == "Falta" ||
+                    table.cell( this ).data() == "CAPACITACIÓN" ||
+                    table.cell( this ).data() == "TRABAJO FUERA PLANTA" ||
+                    table.cell( this ).data() == "DESCANSO" || 
+                    table.cell( this ).data() == "INASIST. TRABAJO FUERA DE PLANTA"){
+                        
+                        table.$('td.selected').removeClass('selected');
+                        $(this).addClass('selected');
+                        var cellIdx = table.cell( this ).index();
+                        var rowIdx = table.cell( this ).index().row;
+                        var data = table.row(rowIdx).data();
+                        var title = table.column( cellIdx.column ).header();
+                        appVue.showModal(data[0], data[2], $(title).html(), table.cell( this ).data());
+                        event.stopPropagation();
+                    }
+                }
+            });
+
+            $('body').on('click', function () {
+                table.$('td.selected').removeClass('selected');
+            });
         });
        </script>
        <script>
         function ServerData () {
             this.lIncidents = <?php echo json_encode($typeIncidents) ?>;
+            this.routeDelete = <?php echo json_encode($routeDelete) ?>;
+            this.routeStore = <?php echo json_encode($routeStore) ?>;
         }
         
         var oServerData = new ServerData();
         var oGui = new SGui();
     </script>
     <script src="{{ asset("assets/pages/scripts/incidentsEmployeesView/incidentsEmployees.js") }}" type="text/javascript"></script>
+    <script>
+        var appVue = app;    
+    </script>
     @if (session('message'))
         <script>    
             oGui.showMessage('{{session('tittle')}}', '{{session('message')}}', '{{session('icon')}}');

@@ -257,9 +257,8 @@
                         "sSortDescending": ": Activar para ordenar la columna de manera descendente"
                     }
                 },
-                fixedHeader: {
-                    header: true
-                },
+                scrollX: true,
+                scrollY: "500px",
                 order: [[0, 'asc']],
                 columnDefs: [
                     {

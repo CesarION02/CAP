@@ -15,6 +15,7 @@ use App\Models\typeincident;
 use App\Models\departmentsGroup;
 use App\Models\PrepayrollDelegation;
 use App\Models\incident;
+use App\Models\incidentDay;
 use App\SUtils\SDelayReportUtils;
 use App\SUtils\SReportsUtils;
 use App\SUtils\SInfoWithPolicy;
@@ -2445,12 +2446,17 @@ class ReporteController extends Controller
             
             $route = route('reporteIncidenciasEmpleados');
             $routeStore = route('reporteIncidenciasEmpleadosStore');
+            $routeDelete = route('reporteIncidenciasEmpleadosDelete');
 
             $typeIncidents = \DB::table('type_incidents')->where('is_agreement',1)->get();
             $arrIncidents = \DB::table('type_incidents')->pluck('id')->toArray();
             $lRows = SDataProcess::process($sStartDate, $sEndDate, $payWay, $lEmployees);
 
-            foreach($lRows as $row){
+            $faltas = 0;
+            $descanso = 0;
+            $inasistencia = 0;
+            $incapacidad = 0;
+            foreach($lRows as $key => $row){
                 $row->incident_type = null;
                 $row->incident  = null;
                 foreach($row->events as $ev){
@@ -2459,16 +2465,98 @@ class ReporteController extends Controller
                         $row->incident = $ev['type_name'];
                     }
                 }
+
+                if($key > 0){
+                    if(isset($lRows[$key-1])){
+                        if(Carbon::parse($row->outDateTime)->toDateString() == Carbon::parse($lRows[$key-1]->outDateTime)->toDateString()){
+                            if($lRows[$key-1]->isDayRepeated){
+                                unset($lRows[$key-1]);
+                            } else if ($row->isDayRepeated){
+                                unset($lRows[$key]);
+                            } else if ($lRows[$key-1]->incident_type == null){
+                                unset($lRows[$key-1]);
+                            } else if ($row->incident_type == null){
+                                unset($lRows[$key]);
+                            }
+                        }
+                    }
+                }
+                
             }
 
-            return view('report.reportIncidentsEmployeesView', ['lRows' => $lRows, 'sStartDate' => $sStartDate, 'sEndDate' => $sEndDate, 'route' => $route, 'typeIncidents' => $typeIncidents, 'routeStore' => $routeStore]);
+            $aDates = [];
+            $oDate = Carbon::parse($sStartDate);
+            $oEndDate = Carbon::parse($sEndDate);
+
+            while ($oDate->lessThanOrEqualTo($oEndDate)) {
+                $aDates[] = $oDate->toDateString();
+                $oDate->addDay();
+            }
+
+            $totRows = collect($lRows)->groupBy('idEmployee');
+
+            foreach($totRows as $key => $row){
+                $faltas = 0;
+                $descansos = 0;
+                $vacaciones = 0;
+                $inasistencias = 0;
+                $incapacidad = 0;
+                $onomastico = 0;
+                // if(count($row) < count($aDates)){
+                    for($i=0; $i<count($aDates); $i++){
+                        if($row[$i]->outDate != $aDates[$i]){
+                            $r = new \stdClass();
+                            $r->outDate = $aDates[$i];
+                            $r->incident_type = -1;
+                            $r->incident = null;
+                            $r->hasAbsence = null;
+                            $row->splice($i, 0, [$r]);
+                        }
+                        $row[$i]->hasAbsence == true ? $faltas++ : '';
+                        $row[$i]->incident_type == 19 ? $descansos++ : '';
+                        $row[$i]->incident_type == 12 ? $vacaciones++ : '';
+                        $row[$i]->incident_type == 7 ? $onomastico++ : '';
+                        in_array($row[$i]->incident_type, [1,2,3,4,5,6,20]) == true ? $inasistencias++ : '';
+                        in_array($row[$i]->incident_type, [9,10,11,18,16]) == true ? $incapacidad++ : '';
+                    }
+                    $totRows[$key]->faltas = $faltas;
+                    $totRows[$key]->descansos = $descansos;
+                    $totRows[$key]->vacaciones = $vacaciones;
+                    $totRows[$key]->inasistencias = $inasistencias;
+                    $totRows[$key]->incapacidad = $incapacidad;
+                    $totRows[$key]->onomastico = $onomastico;
+            }
+
+            return view('report.reportIncidentsEmployeesView', [
+                                                            'lRows' => $totRows,
+                                                            'sStartDate' => $sStartDate,
+                                                            'sEndDate' => $sEndDate,
+                                                            'route' => $route,
+                                                            'typeIncidents' => $typeIncidents,
+                                                            'routeStore' => $routeStore,
+                                                            'routeDelete' => $routeDelete,
+                                                            'aDates' => $aDates
+                                                        ]);
         }
 
         public function reportIncidentsEmployeesStore(Request $request){
-            $incidentController = new incidentController();
+            $incident = incident::where([
+                ['cls_inc_id', 1],
+                ['type_incidents_id', $request->oldIncident],
+                ['start_date', $request->date],
+                ['end_date', $request->date],
+                ['employee_id', $request->employee_id],
+                ['is_delete', 0],
+            ])->first();
+            
+            $incidentController = null;
+            if(is_null($incident)){
+                $incident = new incident();
+                $incidentController = new incidentController();
+            }
+
             try {
-                DB::transaction(function () use ($request, $incidentController) {
-                    $incident = new incident();
+                DB::transaction(function () use ($request, $incidentController, $incident) {
                     $incident->external_key = "0_0";
                     $incident->cls_inc_id = 1;
                     $incident->created_by = session()->get('user_id');
@@ -2477,12 +2565,45 @@ class ReporteController extends Controller
                     $incident->start_date = $request->date;
                     $incident->end_date = $request->date;
                     $incident->employee_id = $request->employee_id;
-
-                    $incident->save();
-
-                    $incidentController->daysIncidents($incident->id,$incident->start_date,$incident->end_date,$incident->employee_id);//
+                    
+                    if(!is_null($incidentController)){
+                        $incident->save();
+                        $incidentController->daysIncidents($incident->id,$incident->start_date,$incident->end_date,$incident->employee_id);
+                    }else {
+                        $incident->update();
+                    }
                 });
-            } catch (QueryException $e) {
+            } catch (\Throwable $e) {
+                return redirect()->back()->with(['tittle' => 'Error', 'message' => 'Error al guardar el registro', 'icon' => 'error']);
+            }
+
+            return redirect()->back()->with(['tittle' => 'Realizado', 'message' => 'Registro guardado con exito', 'icon' => 'success']);
+        }
+
+        public function reportIncidentsEmployeesDelete(Request $request){
+            $incident = incident::where([
+                ['cls_inc_id', 1],
+                ['type_incidents_id', $request->typeIncident],
+                ['start_date', $request->date],
+                ['end_date', $request->date],
+                ['employee_id', $request->employee_id],
+                ['is_delete', 0],
+            ])->first();
+
+            try {
+                DB::transaction(function () use ($request, $incident) {
+                    if(!is_null($incident)){
+                        $incident->is_delete = 1;
+                        $incident->update();
+                        
+                        $incidentDay = incidentDay::where('incidents_id', $incident->id)->first();
+                        if(!is_null($incidentDay)){
+                            $incidentDay->is_delete = 1;
+                            $incidentDay->update();
+                        }
+                    }
+                });
+            } catch (\Throwable $e) {
                 return redirect()->back()->with(['tittle' => 'Error', 'message' => 'Error al guardar el registro', 'icon' => 'error']);
             }
 
