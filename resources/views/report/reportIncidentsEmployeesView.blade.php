@@ -105,6 +105,7 @@
                                                 @case(8)
                                                 @case(9)
                                                 @case(18)
+                                                @case(22)
                                                     <td style="border: solid 1px rgb(86, 86, 86);
                                                         text-align: center; background-color: #80D8FF;">
                                                         {{$r->incident}}
@@ -123,6 +124,8 @@
                                                 @case(13)
                                                 @case(17)
                                                 @case(19)
+                                                @case(21)
+                                                @case(23)
                                                     <td style="border: solid 1px rgb(86, 86, 86);
                                                         text-align: center; background-color: #B2FF59;">
                                                         {{$r->incident}}
