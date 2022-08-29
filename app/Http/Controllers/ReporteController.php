@@ -2450,6 +2450,7 @@ class ReporteController extends Controller
 
             $typeIncidents = \DB::table('type_incidents')->where('is_agreement',1)->get();
             $arrIncidents = \DB::table('type_incidents')->pluck('id')->toArray();
+            $siieIncidents = \DB::table('type_incidents')->where('is_agreement', 0)->pluck('id')->toArray();
             $lRows = SDataProcess::process($sStartDate, $sEndDate, $payWay, $lEmployees);
 
             $faltas = 0;
@@ -2463,6 +2464,7 @@ class ReporteController extends Controller
                     if(in_array($ev['type_id'], $arrIncidents)){
                         $row->incident_type = $ev['type_id'];
                         $row->incident = $ev['type_name'];
+                        $row->is_agreement = in_array($ev['type_id'], $siieIncidents);
                     }
                 }
 
@@ -2476,6 +2478,10 @@ class ReporteController extends Controller
                             } else if ($lRows[$key-1]->incident_type == null){
                                 unset($lRows[$key-1]);
                             } else if ($row->incident_type == null){
+                                unset($lRows[$key]);
+                            } else if ($lRows[$key-1]->is_agreement == false){
+                                unset($lRows[$key-1]);
+                            } else {
                                 unset($lRows[$key]);
                             }
                         }
