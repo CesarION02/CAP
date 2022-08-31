@@ -539,6 +539,12 @@ class SDataProcess {
                         $newRow->outDateTimeSch = $result->pinnedDateTime->format('Y-m-d H:i:s');
                         $newRow->isModifiedOut = isset($result->registry->is_modified) ? $result->registry->is_modified : false;
 
+                        if(!is_null($result->auxScheduleDay)){
+                            $newRow->scheduleText = strtoupper($result->auxScheduleDay->template_name);
+                        }else if(!is_null($result->auxWorkshift)){
+                            $newRow->scheduleText = strtoupper($result->auxWorkshift->name);
+                        }
+
                         $newRow->cutId = SDelayReportUtils::getCutId($result);
                         $newRow->overtimeCheckPolicy = SDelayReportUtils::getOvertimePolicy($result);
 

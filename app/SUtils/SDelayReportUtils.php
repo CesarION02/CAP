@@ -469,10 +469,26 @@ class SDelayReportUtils {
         // si el empleado no tiene asignados horarios se consulta si hay
         // asignaciones por departamento
         if (! sizeof($assings) > 0 && $idDepartment > 0) {
-            $assings = clone $base;
+            $oDept = \DB::table('employees as e')
+                        ->join('departments as d', 'd.id', '=', 'department_id')
+                        ->where('e.id', $idEmployee)
+                        ->where('d.is_delete', 0)
+                        ->select('d.id as department_id', 'd.area_id as area_id')
+                        ->first();
 
-            $assings = $assings->where('department_id', $idDepartment)
-                                ->get();
+            if(!is_null($oDept)){
+                $assings = clone $base;
+    
+                $assings = $assings->where('department_id', $oDept->department_id)
+                                    ->get();
+    
+                if(! sizeof($assings) > 0){
+                    $assings = clone $base;
+    
+                    $assings = $assings->where('area_id', $oDept->area_id)
+                                        ->get();
+                }
+            }
         }
 
         // dd(\DB::getQueryLog());
@@ -819,6 +835,16 @@ class SDelayReportUtils {
 
         if ($result != null) {
             $result->registry = $registry;
+        } else {
+            $lAssigns = SDelayReportUtils::hasAnAssing($idEmployee, 1, $startDate, $endDate);
+            if ($lAssigns != null) {
+                $result = SDelayReportUtils::processRegistry($lAssigns, $registry, $iRep);
+    
+                if ($result != null) {
+                    $result->registry = $registry;
+                    return $result;
+                }
+            }
         }
         
         return $result;

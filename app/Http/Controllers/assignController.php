@@ -1338,5 +1338,160 @@ class assignController extends Controller
         $asignacion->save();    
     }
 
-}
+    public function viewAreaProgramming (Request $request){
+        $iFilter = $request->ifilter == 0 ? 1 : $request->ifilter;
+        $iTemplateId = env('TMPLTE_SATURDAYS', 1);
 
+        $numero = session()->get('name');
+        $usuario = DB::table('users')
+                ->where('name',$numero)
+                ->get();
+
+        if($iFilter == 1){
+            $assigns = DB::table('schedule_assign as sa')
+                        ->where('area_id', '!=', null)
+                        ->where('is_delete', 0)
+                        ->get();
+                    
+            $areas = [];
+
+            for($i = 0 ; count($assigns) > $i ; $i++){
+                $areas[$i] = $assigns[$i]->area_id;
+            }
+
+            $assigns = DB::table('areas as a')
+                        ->whereNotIn('a.id', $areas)
+                        ->where('is_delete', 0)
+                        ->select('a.id as areaId', 'a.name as area')
+                        ->get();
+
+        } else {
+            $assigns = DB::table('schedule_assign as sa')
+                        ->join('areas as a', 'a.id', '=', 'sa.area_id')
+                        ->join('schedule_template as st', 'st.id', '=', 'sa.schedule_template_id')
+                        ->where('sa.area_id', '!=', null)
+                        ->where('sa.is_delete', 0)
+                        ->where('a.is_delete', 0)
+                        ->where('st.is_delete', 0)
+                        ->select(
+                            'a.id as areaId',
+                            'a.name as area',
+                            'st.id as scheduleId',
+                            'st.name as schedule',
+                            'sa.id as assignId',
+                            'sa.area_id',
+                            'sa.start_date',
+                            'sa.end_date'
+                            )
+                        ->get();
+        }
+
+        return view('assign.showAreaProgramming')->with('assigns',$assigns)->with('iFilter',$iFilter);
+    }
+
+    public function areaProgramming() {
+        $areas = DB::table('areas as a')
+                    ->where('is_delete', 0)
+                    ->get();
+
+        $iTemplateId = env('TMPLTE_SATURDAYS', 1);
+        $schedule_template = schedule_template::where('is_delete', 0)
+                                                ->where('id', '!=', $iTemplateId)
+                                                ->orderBy('name','ASC')
+                                                ->pluck('id','name');
+
+        $getAreaProgRoute = route('get_areaProgramming');
+        $storeRoute = route('store_areaProgramming');
+        $indexRoute = route('index_areaProgramming');
+
+        return view('assign.AreaProgramming')->with('areas',$areas)
+                                            ->with('schedule_template',$schedule_template)
+                                            ->with('getAreaProgRoute', $getAreaProgRoute)
+                                            ->with('storeRoute', $storeRoute)
+                                            ->with('indexRoute', $indexRoute);
+    }
+
+    public function editAreaProgramming($areaId = 0){
+        $schedule_assign = DB::table('schedule_assign as sa')
+                            ->where('is_delete', 0)
+                            ->where('area_id', $areaId)
+                            ->first();
+
+        $areas = DB::table('areas as a')
+                    ->where('is_delete', 0)
+                    ->get();
+        
+        $iTemplateId = env('TMPLTE_SATURDAYS', 1);
+        $schedule_template = schedule_template::where('is_delete', 0)
+                                                ->where('id', '!=', $iTemplateId)
+                                                ->orderBy('name','ASC')
+                                                ->pluck('id','name');
+
+        $getAreaProgRoute = route('get_areaProgramming');
+        $storeRoute = route('store_areaProgramming');
+        $indexRoute = route('index_areaProgramming');
+
+        return view('assign.AreaProgramming')->with('areas',$areas)
+                            ->with('schedule_template',$schedule_template)
+                            ->with('getAreaProgRoute', $getAreaProgRoute)
+                            ->with('storeRoute', $storeRoute)
+                            ->with('indexRoute', $indexRoute)
+                            ->with('datas', $schedule_assign);
+    }
+
+    public function getAreaProgramming(Request $request){
+        $schedule_assign = DB::table('schedule_assign as sa')
+                            ->where('is_delete', 0)
+                            ->where('area_id', $request->areaId)
+                            ->get();
+
+        count($schedule_assign) > 0 ? $has_schedule = true : $has_schedule = false;
+
+        return json_encode(['has_schedule' => $has_schedule, 'schedule_assign' => $schedule_assign]);
+    }
+    
+    public function storeAreaProgramming(Request $request){
+        $asignacion = assign_schedule::where([['is_delete', 0], ['area_id', $request->areaId]])->first();
+        if(is_null($asignacion)){
+            $asignacion = new assign_schedule();
+        }
+
+        try{
+            \DB::beginTransaction();
+
+            $asignacion->area_id = $request->areaId;
+            $asignacion->schedule_template_id = $request->scheduleId;
+            $asignacion->start_date = $request->start_date;
+            $asignacion->created_by = session()->get('user_id');
+            $asignacion->updated_by = session()->get('user_id');
+            $asignacion->save();
+
+            \DB::commit();
+        }catch(\Throwable $th){
+            \DB::rollBack();
+            return json_encode(['success' => false, 'message' => 'Error al guardar el registro', 'icon' => 'error']);
+        }
+
+        return json_encode(['success' => true, 'message' => 'Registro guardado con exito', 'icon' => 'success']);
+    }
+
+    public function deleteAreaProgramming(Request $request, $areaId){
+        $asignacion = assign_schedule::where([['is_delete', 0], ['area_id', $request->areaId]])->first();
+
+        try{
+            \DB::beginTransaction();
+
+            $asignacion->is_delete = 1;
+            $asignacion->created_by = session()->get('user_id');
+            $asignacion->updated_by = session()->get('user_id');
+            $asignacion->save();
+
+            \DB::commit();
+        }catch(\Throwable $th){
+            \DB::rollBack();
+            return redirect(route('index_areaProgramming'))->with('error', 'Error al eliminar el registro');
+        }
+
+        return redirect(route('index_areaProgramming'))->with('mensaje', 'Registro eliminado con exito');
+    }
+}
