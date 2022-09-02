@@ -1799,10 +1799,12 @@ class SDataProcess {
             $outTime = $result->auxScheduleDay->departure;
         }
 
+        $lRegistries = SDataProcess::filterDoubleCheks($lCheks);
+
         $inDateTime = $sDate.' '.$inTime;
         $outDateTime = $sDate.' '.$outTime;
-        $originalChecks = clone $lCheks;
-        foreach ($lCheks as $oCheck) {
+        $originalChecks = clone collect($lRegistries);
+        foreach ($lRegistries as $oCheck) {
             $check = clone $oCheck;
             $checkDateTime = $check->date.' '.$check->time;
 
@@ -1827,7 +1829,7 @@ class SDataProcess {
             $lNewChecks[] = $check;
         }
 
-        return SDataProcess::filterDoubleCheks($lNewChecks);
+        return $lNewChecks;
     }
 
     private static function manageOneCheck($sDate, $idEmployee, $registries, $lWorkshifts)
