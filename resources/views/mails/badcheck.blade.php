@@ -17,7 +17,7 @@
                         Notificación CAP
                     </div>
                     <div class="card-body">
-                      <h5 class="card-title">{{ str_pad($numEmployee, 5, "0", STR_PAD_LEFT).' - '.strtoupper($employeeName) }}</h5>
+                      <h5 class="card-title">{{ strtoupper($employeeName) }}</h5>
                       <p class="card-text">{{ $reason }}</p>
                       <b>{{ "Checada: ".(\Carbon\Carbon::parse($dtDateTime)->format('d-m-Y H:i:s')) }}</b>
                       <p><b>Fuente: </b>{{ $sSource }}</p>

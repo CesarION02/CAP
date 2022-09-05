@@ -20,16 +20,7 @@ class SDataAccessControl {
     {
         $employee = \DB::table('employees AS e')
                     ->leftJoin('departments AS d', 'd.id', '=', 'e.department_id')
-                    ->leftJoin('jobs AS j', 'j.id', '=', 'e.job_id')
-                    ->select('e.id', 
-                            'e.name', 
-                            'e.num_employee', 
-                            'e.external_id', 
-                            'e.is_active', 
-                            'e.is_delete',
-                            'd.name AS dept_name',
-                            'j.name AS job_name',
-                            'd.area_id')
+                    ->select('e.id', 'e.name', 'e.num_employee', 'e.external_id', 'e.is_active', 'e.is_delete', 'd.area_id')
                     ->where('e.id', $id)
                     ->get();
 
@@ -324,7 +315,8 @@ class SDataAccessControl {
             $rec = $config->rec_plant;
         }
 
-        Mail::to($rec)->send(new BadCheckNotification($oEmployee->name, $oEmployee->num_employee, $dateTime, $result[1], $sSource));
+        Mail::to($rec)
+                ->send(new BadCheckNotification($oEmployee->name, $dateTime, $result[1], $sSource));
     }
 
     /**
