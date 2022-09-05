@@ -316,6 +316,13 @@ Route::put('assign/{id}', 'assignController@update')->name('actualizar_asignacio
 Route::delete('assign/{id}', 'assignController@destroy')->name('eliminar_asignacion');
 Route::delete('assign/programming/{id}', 'assignController@eliminar')->name('eliminar');
 
+Route::get('assigns/viewAreaProgramming','assignController@viewAreaProgramming')->name('index_areaProgramming');
+Route::get('assign/areaProgramming', 'assignController@areaProgramming')->name('areaProgramming');
+Route::post('assign/getAreaProgramming', 'assignController@getAreaProgramming')->name('get_areaProgramming');
+Route::post('assign/storeAreaProgramming', 'assignController@storeAreaProgramming')->name('store_areaProgramming');
+Route::get('assign/editAreaProgramming/{areaId}', 'assignController@editAreaProgramming')->name('edit_areaProgramming');
+Route::delete('assign/delete/{areaId}', 'assignController@deleteAreaProgramming')->name('delete_areaProgramming');
+
 // 
 Route::get('assignone', 'assignController@indexOneDay')->name('asignar_uno');
 Route::post('assignone', 'assignController@storeOne')->name('guardar_uno');
