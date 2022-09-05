@@ -215,7 +215,6 @@
                         "searchable": false,
                     }
                 ],
-                "scrollY": "500px",
                 "scrollX": true,
                 "fixedHeader": true,
                 "colReorder": true,
