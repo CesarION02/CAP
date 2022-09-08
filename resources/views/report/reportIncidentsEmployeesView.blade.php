@@ -58,9 +58,11 @@
             <div class="box-header with-border">
                 <h3 class="box-title">Reporte prenómina de {{$sStartDate}} a {{$sEndDate}}</h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:reporteincidenciasempleado"])
-                <div class="box-tools pull-right">
-                    <a class="btn btn-success" href="{{$route}}">Nuevo reporte</a>
-                </div>
+                    @if($wizard != 2)
+                        <div class="box-tools pull-right">
+                            <a class="btn btn-success" href="{{$route}}">Nuevo reporte</a>
+                        </div>
+                    @endif
             </div>
             <div class="box-body" >
                 <div class="row">
@@ -166,6 +168,37 @@
                                 @endforeach
                             </tbody>
                         </table>
+                        @if( $wizard == 2)
+                            <p>
+                                <div class="row">
+                                    <div class="col-md-2"><b>Estatus proceso:</b> </div>
+                                    <div class="col-md-1">
+                                        <button type="submit" class="btn btn-primary" id="guardar" disabled>Anterior</button>
+                                    </div>
+                                    &nbsp;
+                                    <div class="col-md-2" style="font-size:20px;">
+                                        &nbsp;<span class="label label-primary"> 1 </span> 
+                                        &nbsp;<span class="label label-default"> 2 </span> 
+                                        &nbsp;<span class="label label-default"> 3 </span>&nbsp;    
+                                    </div>        
+                                    <div class="col-md-1">
+                                        <form action="{{route('reportetiemposextra')}}" autocomplete="off">
+                                            <input type="hidden" name="start_date" value={{ $sStartDate }} >
+                                            <input type="hidden" name="end_date" value={{ $sEndDate }} >
+                                            <input type="hidden" name="emp_id" value="0" >
+                                            <input type="hidden" name="report_mode" value="2" >
+                                            <input type="hidden" name="delegation" value="0" >
+                                            <input type="hidden" name="pay_way" value={{ $payWay }} >
+                                            <input type="hidden" name="wizard" value={{ $wizard }} >
+                                            <button type="submit" class="btn btn-primary" id="guardar">Siguiente</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </p>
+                            <div class="row">
+                                <div class="col-md-2"><a href="{{ route('inicio') }}" class="btn btn-danger">Cancelar</a></div>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>

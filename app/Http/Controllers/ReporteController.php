@@ -644,6 +644,13 @@ class ReporteController extends Controller
         $bDelegation = $request->delegation;
         $iPayrollYear = $request->year;
         $iPayrollNumber = $request->payroll_number;
+        
+        if(isset($request->wizard)){
+            $wizard = $request->wizard;
+        }else{
+            $wizard = 0;
+        }
+
         $lComments = \DB::table('comments')->where('is_delete', 0)->get();
 
         $oStartDate = Carbon::parse($sStartDate);
@@ -894,7 +901,9 @@ class ReporteController extends Controller
                     ->with('lComments', $lComments)
                     ->with('subEmployees', $subEmployees)
                     ->with('isAdmin', $isAdmin)
-                    ->with('lUsers', $lUsers);
+                    ->with('lUsers', $lUsers)
+                    ->with('wizard', $wizard )
+                    ->with('pay_way', $request->pay_way);
         }
         else {
             $lEmployees = $this->timesTotal($lRows, $lEmployees);
@@ -925,7 +934,9 @@ class ReporteController extends Controller
                     ->with('lEmployees', $lEmployees)
                     ->with('subEmployees', $subEmployees)
                     ->with('isAdmin', $isAdmin)
-                    ->with('lUsers', $lUsers);
+                    ->with('lUsers', $lUsers)
+                    ->with('wizard', $wizard )
+                    ->with('pay_way', $request->pay_way);
         }
         
     }
@@ -2350,7 +2361,9 @@ class ReporteController extends Controller
             return view('report.reporteFaltasView',  ['data' => $merged, 'range' => $range, 'totEmployees' => $totEmployees, 'calendarStart' => $calendarStart]);
         }
 
-        public function reportIncidentsEmployees(){
+        public function reportIncidentsEmployees($wizard = 0){
+            // wizard = 1 -> funcionamiento independiente de la vista.
+            // wizard = 2 -> funcionamiento en conjunto de las vistas para hacer un wizard de revisión prenómina.
             $config = \App\SUtils\SConfiguration::getConfigurations();
 
             $bDirect = false;
@@ -2372,15 +2385,19 @@ class ReporteController extends Controller
                         ->with('tReport', \SCons::REP_HR_EX)
                         ->with('sRoute', 'reporteIncidenciasEmpleadosGenerar')
                         ->with('lEmployees', $lEmployees)
-                        ->with('startOfWeek', $config->startOfWeek);
+                        ->with('startOfWeek', $config->startOfWeek)
+                        ->with('wizard',$wizard );
         }
 
         public function reportIncidentsEmployeesGenerar(Request $request)
         {
             $sStartDate = $request->start_date;
             $sEndDate = $request->end_date;
-            $iEmployee = $request->emp_id;
-
+            //si no es el wizard entra en esta parte
+            if ( $request->wizard != 2 ){
+                $iEmployee = $request->emp_id;
+            }
+            
             $oStartDate = Carbon::parse($sStartDate);
             $oEndDate = Carbon::parse($sEndDate);
 
@@ -2435,8 +2452,14 @@ class ReporteController extends Controller
                  */
                 $payWay = $request->pay_way == null ? \SCons::PAY_W_S : $request->pay_way;
 
-                $filterType = $request->i_filter;
-                $ids = $request->elems;
+                //si es parte del wizard se queda vacio
+                if($request->wizard != 2){
+                    $filterType = $request->i_filter;
+                    $ids = $request->elems;
+                }else{
+                    $filterType = 0;
+                    $ids = 0;   
+                }
                 $aEmpl = [];
                 foreach($employee as $emp){
                     array_push($aEmpl, $emp->id);
@@ -2444,7 +2467,13 @@ class ReporteController extends Controller
                 $lEmployees = SGenUtils::toEmployeeIds($payWay, $filterType, $ids, $aEmpl);
             }
             
-            $route = route('reporteIncidenciasEmpleados');
+            // si es parte del wizard cambia la ruta
+            if($request->wizard != 2){
+                $route = route('reporteIncidenciasEmpleados', "['id' => 1]");
+            }else{
+                $route = route('reporteIncidenciasEmpleados', "['id' => 2]");
+                //$routeSiguiente = route('wizardSiguiente1') ;
+            }
             $routeStore = route('reporteIncidenciasEmpleadosStore');
             $routeDelete = route('reporteIncidenciasEmpleadosDelete');
 
@@ -2541,7 +2570,9 @@ class ReporteController extends Controller
                                                             'typeIncidents' => $typeIncidents,
                                                             'routeStore' => $routeStore,
                                                             'routeDelete' => $routeDelete,
-                                                            'aDates' => $aDates
+                                                            'aDates' => $aDates,
+                                                            'wizard' => $request->wizard,
+                                                            'payWay' => $payWay
                                                         ]);
         }
 
@@ -2614,5 +2645,21 @@ class ReporteController extends Controller
             }
 
             return redirect()->back()->with(['tittle' => 'Realizado', 'message' => 'Registro guardado con exito', 'icon' => 'success']);
+        }
+
+        public function wizardSiguiente($pagina){
+            if( $pagina == 1 ){
+
+            }elseif( $pagina == 2){
+
+            }
+        }
+
+        public function wizardAtras($pagina){
+            if( $pagina == 2 ){
+
+            }elseif( $pagina == 3 ){
+
+            }
         }
 }

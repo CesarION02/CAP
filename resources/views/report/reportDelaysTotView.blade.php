@@ -64,9 +64,17 @@
                             </select>
                         </div>
                     @endif
-                    <div class="col-md-2">
-                        <a href="{{ route('generarreportetiemposextra') }}" target="_blank" class="btn btn-success">Nuevo reporte</a>
-                    </div>
+                    @if( isset($wizard) )
+                        @if( $wizard != 2 )
+                            <div class="col-md-2">
+                                <a href="{{ route('generarreportetiemposextra') }}" target="_blank" class="btn btn-success">Nuevo reporte</a>
+                            </div>
+                        @endif
+                    @else
+                        <div class="col-md-2">
+                            <a href="{{ route('generarreportetiemposextra') }}" target="_blank" class="btn btn-success">Nuevo reporte</a>
+                        </div>
+                    @endif
                 </div>
                 <div class="row">
                     <div class="col-md-12">
@@ -111,9 +119,56 @@
                                     <td>@{{ row.id }}</td>
                                 </tr>
                             </tbody>
-                            <button onclick="topFunction()" id="myBtn" title="Ir arriba">Ir arriba</button>
-                            <a href="{{ route('generarreportetiemposextra') }}" target="_blank" id="newButton" title="Nuevo reporte">Nuevo reporte</a>
+                            @if( isset($wizard) )
+                                @if( $wizard != 2 )
+                                    <button onclick="topFunction()" id="myBtn" title="Ir arriba">Ir arriba</button>
+                                    <a href="{{ route('generarreportetiemposextra') }}" target="_blank" id="newButton" title="Nuevo reporte">Nuevo reporte</a>
+                                @endif
+                            @else
+                                <button onclick="topFunction()" id="myBtn" title="Ir arriba">Ir arriba</button>
+                                <a href="{{ route('generarreportetiemposextra') }}" target="_blank" id="newButton" title="Nuevo reporte">Nuevo reporte</a>
+                            @endif
                         </table>
+                        @if( isset($wizard))
+                            @if( $wizard == 2)
+                                <p>
+                                    <div class="row">
+                                        <div class="col-md-2"><b>Estatus proceso:</b> </div>
+                                        <div class="col-md-1">
+                                            <form action="{{route('reportetiemposextra')}}" autocomplete="off">
+                                                <input type="hidden" name="start_date" value={{ $sStartDate }} >
+                                                <input type="hidden" name="end_date" value={{ $sEndDate }} >
+                                                <input type="hidden" name="emp_id" value="0" >
+                                                <input type="hidden" name="report_mode" value="2" >
+                                                <input type="hidden" name="delegation" value="0" >
+                                                <input type="hidden" name="pay_way" value={{ $pay_way }} >
+                                                <input type="hidden" name="wizard" value={{ $wizard }} >
+                                                <button type="submit" class="btn btn-primary" id="guardar">Anterior</button>
+                                            </form>
+                                        </div>
+                                        &nbsp;
+                                        <div class="col-md-2" style="font-size:20px;">
+                                            &nbsp;<span class="label label-default"> 1 </span> 
+                                            &nbsp;<span class="label label-default"> 2 </span> 
+                                            &nbsp;<span class="label label-primary"> 3 </span>&nbsp;    
+                                        </div>        
+                                        <div class="col-md-1">
+                                            <button type="submit" class="btn btn-primary" id="guardar" disabled>Siguiente</button>
+                                        </div>
+                                    </div>
+                                </p>
+                                <p>
+                                    <div class="row">
+                                        <div class="col-md-1"><a href="{{ route('inicio') }}" class="btn btn-danger">Cancelar</a></div>
+                                        @if( $pay_way == 2 )
+                                            <div class="col-md-1"><a href="{{ route('vobos',['id'=> 'week']) }}" class="btn btn-primary">Terminar proceso</a></div>
+                                        @else
+                                            <div class="col-md-1"><a href="{{ route('vobos',['id'=> 'biweek']) }}" class="btn btn-primary">Terminar proceso</a></div>
+                                        @endif
+                                    </div>
+                                </p>
+                            @endif
+                        @endif
                     </div>
                 </div>
             </div>
