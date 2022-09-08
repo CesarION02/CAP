@@ -306,7 +306,7 @@ class prePayrollController extends Controller
      * @param int $idEmployee
      * @param String $sDate
      * 
-     * @return incident array
+     * @return 'Illuminate\Support\Collection' incident
      */
     public static function searchAbsence($idEmployee, $sDate)
     {
