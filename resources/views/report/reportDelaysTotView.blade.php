@@ -81,22 +81,27 @@
                         <table id="delays_table" class="table table-condensed" style="width:100%">
                         <thead>
                                 <tr>
-                                    <th>Num. Col.</th>
-                                    <th>Empleado</th>
-                                    <th></th>
-                                    <th>Horario</th>
-                                    <th>Total Tiempo retardo (min)</th>
-                                    <th>Salidas anticipadas (min)</th>
-                                    <th>Total Tiempo extra (hr)</th>
-                                    <th>Primas Dominicales</th>
-                                    <th>Descansos</th>
-                                    <th>Faltas</th>
+                                    <th title="Número de Colaborador">Num. Col.</th>
+                                    <th title="Nombre del colaborador">Empleado</th>
+                                    <th title="Comentarios">Com.</th>
+                                    <th>Retardo (min)</th>
+                                    <th title="Salida anticipada (minutos)">Antic. (min)</th>
+                                    <th title="Total tiempo extra por pagar">TE p/pagar (hr)</th>
+                                    <th title="Prima dominical">Pr. Dom.</th>
+                                    <th title="Descansos">Desc.</th>
+                                    <th title="Falta por ausencia de quecadas sin eventos">Faltas</th>
+                                    <th title="Vacaciones">Vac.</th>
+                                    <th title="Inasistencia por incidencia">Inasis.</th>
+                                    <th title="Incapacidad">Incap.</th>
+                                    <th title="Incidencias que se van a pagar">Incid. c/pago</th>
+                                    <th title="Incidencias sin pago (días descontados)">Incid. s/pago</th>
+                                    <th title="Visto bueno individual">Vobo</th>
                                     <th>-</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr v-for="row in vData.lEmployees">
-                                <td>@{{ vueGui.pad(row.num_employee, 6) }}</td>
+                                    <td>@{{ vueGui.pad(row.num_employee, 6) }}</td>
                                     <td>
                                         <form action="{{route('reportetiemposextra')}}" target="_blank">
                                             <a href='#' onclick='this.parentNode.submit(); return false;' title="Presiona para ver reporte a detalle">@{{ row.name }}</a>
@@ -108,14 +113,35 @@
                                             <input type="hidden" name="pay_way" value="{{$sPayWay}}">
                                         </form>
                                     </td>
-                                    <td><button type="button" href="#" class="btn btn-primary btn-xs" v-on:click="getResumeComments(row.id)" title="Ver comentarios"><span class="glyphicon glyphicon-list-alt"></span></button></td>
-                                    <td>@{{ row.scheduleText }}</td>
+                                    <td>
+                                        <button type="button" href="#" v-on:click="getResumeComments(row.id)" title="Ver comentarios">
+                                            <span class="glyphicon glyphicon-list-alt"></span>
+                                        </button>
+                                    </td>
                                     <td>@{{ row.entryDelayMinutes }}</td>
                                     <td>@{{ row.prematureOut }}</td>
                                     <td>@{{ row.extraHours }}</td>
                                     <td>@{{ row.isSunday }}</td>
                                     <td>@{{ row.isDayOff }}</td>
                                     <td>@{{ row.hasAbsence }}</td>
+                                    <td :title="row.vacations">@{{ row.countVacations }}</td>
+                                    <td :title="row.absenceByEvent">@{{ row.countAbsenceByEvent }}</td>
+                                    <td :title="row.inability">@{{ row.countInability }}</td>
+                                    <td :title="row.payableEvents">@{{ row.countPayableEvents }}</td>
+                                    <td :title="row.noPayableEvents">@{{ row.countNoPayableEvents }}</td>
+                                    <td v-if="vData.isPrepayrollInspection">
+                                        <label class='container'>
+                                            <input :checked="isVoboResume(row.num_employee) != undefined" id='cb31' v-on:change="onChangeVoboResume($event, row.num_employee)" type='checkbox'>
+                                            <span class='checkmark'></span>
+                                            <br>
+                                            <div v-if="isVoboResume(row.num_employee) != undefined" style="font-size: 35%">
+                                                <span class="nobr">
+                                                    (Revisado por: <b>@{{ isVoboResume(row.num_employee).user_name }})</b>
+                                                </span>
+                                            </div>
+                                        </label>
+                                    </td>
+                                    <td v-else></td>
                                     <td>@{{ row.id }}</td>
                                 </tr>
                             </tbody>
@@ -212,6 +238,8 @@
         this.adjTypes = <?php echo json_encode($adjTypes) ?>;
         this.lAdjusts = <?php echo json_encode($lAdjusts) ?>;
         this.tReport = <?php echo json_encode($tReport) ?>;
+        this.lEmpVobos = <?php echo json_encode($lEmpVobos) ?>;
+        this.isPrepayrollInspection = <?php echo json_encode($isPrepayrollInspection) ?>;
         this.registriesRoute = <?php echo json_encode($registriesRoute) ?>;
         this.REP_HR_EX = <?php echo json_encode(\SCons::REP_HR_EX) ?>;
         this.REP_DELAY = <?php echo json_encode(\SCons::REP_DELAY) ?>;
@@ -226,7 +254,7 @@
         this.minsDelayCol = this.tReport == this.REP_DELAY ? 4 : 7;
         this.sunCol = 9;
         this.dayoffCol = 10;
-        this.hiddenColEmId = 10;
+        this.hiddenColEmId = 15;
         this.hiddenColExId = 14;
         this.hiddenCol = this.tReport == this.REP_DELAY ? 5 : 5;
         this.toExport = this.tReport == this.REP_DELAY ? [0, 1, 2, 3, 4, 6] : [0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12];
@@ -294,9 +322,7 @@
                     "sSortDescending": ": Activar para ordenar la columna de manera descendente"
                 }
             },
-            fixedHeader: {
-                header: true
-            },
+            fixedHeader: true,
             order: [[0, 'asc']],
             columnDefs: [
                     {
@@ -333,15 +359,9 @@
                     }
                 ]
         });
-
-        $('#delays_table_filter').prepend('<label for="filtro_horario">Horario: </label>' +
-                    '<select id="filtro_horario" class="select2-class" style="width: 20%">' +
-                    '</select>' +
-                    '&nbsp'
-        );
         
         $('#delays_table_filter').prepend('<label for="directos">Empleados: </label>' +
-                    '<select id="directos" class="select2-class" style="width: 10%">' +
+                    '<select id="directos" class="select2-class" style="width: 35%">' +
                         '<option value="0">Todos</option>' +
                         '<option value="1">Directos</option>' +
                     '</select>' +
@@ -355,19 +375,6 @@
 <script>
         $(document).ready(function() {
             $('.select2-class').select2();
-            
-            $('#filtro_horario').select2({
-                placeholder: 'selecciona horario',
-                data: app.dataSchedules,
-            })
-            .on('select2:select', function (e){
-                if (e.params.data.id != 'NA') {
-                    oTable.columns(3).search( e.params.data.text ).draw();
-                }
-                else {
-                    oTable.columns().search('').draw();
-                }
-            });
 
             $('#directos').on('select2:select', function (e) {
                 if (e.params.data.id == 1) {
@@ -376,7 +383,7 @@
                         searchValues = searchValues + '^' + oData.subEmployees[i] + '$' + (i < (oData.subEmployees.length-1) ? "|" : "");
                     }
                     console.log(searchValues, oData.subEmployees);
-                    oTable.column(10).search("(" + searchValues + ")", true, false).draw();
+                    oTable.column(9).search("(" + searchValues + ")", true, false).draw();
                 }
                 else {
                     oTable.columns().search('').draw();
@@ -433,6 +440,65 @@
     function topFunction() {
         document.body.scrollTop = 0; // For Safari
         document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+    }
+
+    function getRowsInNumEmployee(numEmployee) {
+        var data = app.vData.lRows;
+        var dataEmployee = [];
+
+        for (let i = 0; i < data.length; i++) {
+            if(data[i]['numEmployee'] == numEmployee){
+                dataEmployee.push(data[i]);
+            }
+        }
+
+        return dataEmployee;
+    }
+
+    function checkAdjust(dataEmployee) {
+        for (let i = 0; i < dataEmployee.length; i++) {
+            if (dataEmployee[i]['isDayChecked'] == true && dataEmployee[i]['adjusts'].length < 1) {
+                return [false, dataEmployee[i]['inDateTime'], dataEmployee[i]['outDateTime']];
+            }
+        }
+
+        return [true,null,null];
+    }
+
+    /**
+     * @param {*} event 
+     * @param {*} id 
+     */
+    function handleChangeCheck(event, numEmployee) {
+        var dataEmployee = getRowsInNumEmployee(numEmployee);
+        let checked = event.target;
+        let url = "{{ route('employee_vobo') }}";
+        let vobo = checked.checked ? 1 : 0;
+        var result = vobo == 1 ? checkAdjust(dataEmployee) : new Array(true);
+        if (result[0]) {
+            oGui.showLoading(3000);
+            axios.post(url, {
+                _token: "{{ csrf_token() }}",
+                num_employee: numEmployee,
+                is_vobo: vobo,
+                start_date: "{{ $sStartDate }}",
+                end_date: "{{ $sEndDate }}"
+            })
+            .then(res => {
+                console.log(res);
+                if (!res.data.success) {
+                    checked.checked = !vobo;
+                }
+                oGui.showMessage(res.data.title, res.data.message, res.data.icon);
+            })
+            .catch(function(error) {
+                oGui.showError(error);
+            });
+        }
+        else {
+            checked.checked = false;
+            oGui.showError('Falta comentario para la fecha:\n' + 'Entrada: ' + app.vueGui.formatDate(result[1]) + ' Salida: ' +app.vueGui.formatDate(result[2]));
+        }
     }
 </script>
 

@@ -317,10 +317,13 @@ class SDelayReportUtils {
     {
         $registry = \DB::table('registers AS r')
                                 ->join('employees AS e', 'e.id', '=', 'r.employee_id')
+                                ->leftJoin('jobs AS j', 'j.id', '=', 'e.job_id')
+                                ->leftJoin('departments AS d', 'd.id', '=', 'j.department_id')
                                 ->where('r.date', $sDate)
                                 ->where('e.id', $iEmployee)
                                 // ->select('r.*', 'e.num_employee', 'e.name', 'e.is_overtime')
-                                ->select('r.*', 'e.num_employee', 'e.name', 'e.policy_extratime_id', 'e.external_id');
+                                // ->select('r.*', 'e.num_employee', 'e.name', 'e.policy_extratime_id', 'e.external_id');
+                                ->select('r.*', 'd.id AS dept_id', 'e.num_employee', 'e.name', 'e.policy_extratime_id', 'e.external_id', 'd.area_id AS employee_area_id');
 
         if ($iType == \SCons::REG_IN) {
             $registry = $registry->orderBy('date', 'DESC')
@@ -466,10 +469,26 @@ class SDelayReportUtils {
         // si el empleado no tiene asignados horarios se consulta si hay
         // asignaciones por departamento
         if (! sizeof($assings) > 0 && $idDepartment > 0) {
-            $assings = clone $base;
+            $oDept = \DB::table('employees as e')
+                        ->join('departments as d', 'd.id', '=', 'department_id')
+                        ->where('e.id', $idEmployee)
+                        ->where('d.is_delete', 0)
+                        ->select('d.id as department_id', 'd.area_id as area_id')
+                        ->first();
 
-            $assings = $assings->where('department_id', $idDepartment)
-                                ->get();
+            if(!is_null($oDept)){
+                $assings = clone $base;
+    
+                $assings = $assings->where('department_id', $oDept->department_id)
+                                    ->get();
+    
+                if(! sizeof($assings) > 0){
+                    $assings = clone $base;
+    
+                    $assings = $assings->where('area_id', $oDept->area_id)
+                                        ->get();
+                }
+            }
         }
 
         // dd(\DB::getQueryLog());
@@ -816,6 +835,16 @@ class SDelayReportUtils {
 
         if ($result != null) {
             $result->registry = $registry;
+        } else {
+            $lAssigns = SDelayReportUtils::hasAnAssing($idEmployee, 1, $startDate, $endDate);
+            if ($lAssigns != null) {
+                $result = SDelayReportUtils::processRegistry($lAssigns, $registry, $iRep);
+    
+                if ($result != null) {
+                    $result->registry = $registry;
+                    return $result;
+                }
+            }
         }
         
         return $result;

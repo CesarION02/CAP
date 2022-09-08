@@ -119,6 +119,10 @@ class SDataProcess {
                 if (sizeof($registries) == 1) {
                     $res = SDataProcess::manageOneCheck($sDate, $idEmployee, $registries, $lWorkshifts);
                     
+                    if(is_array($res)){
+                        $registries = $res[1];
+                    }
+
                     if ($res == 2) {
                         $regTemp = $registries;
                         $bug = true;
@@ -534,6 +538,12 @@ class SDataProcess {
                         $newRow->outDateTime = $result->variableDateTime->format('Y-m-d H:i:s');
                         $newRow->outDateTimeSch = $result->pinnedDateTime->format('Y-m-d H:i:s');
                         $newRow->isModifiedOut = isset($result->registry->is_modified) ? $result->registry->is_modified : false;
+
+                        if(!is_null($result->auxScheduleDay)){
+                            $newRow->scheduleText = strtoupper($result->auxScheduleDay->template_name);
+                        }else if(!is_null($result->auxWorkshift)){
+                            $newRow->scheduleText = strtoupper($result->auxWorkshift->name);
+                        }
 
                         $newRow->cutId = SDelayReportUtils::getCutId($result);
                         $newRow->overtimeCheckPolicy = SDelayReportUtils::getOvertimePolicy($result);
@@ -1799,10 +1809,12 @@ class SDataProcess {
             $outTime = $result->auxScheduleDay->departure;
         }
 
+        $lRegistries = SDataProcess::filterDoubleCheks($lCheks);
+
         $inDateTime = $sDate.' '.$inTime;
         $outDateTime = $sDate.' '.$outTime;
-        $originalChecks = clone $lCheks;
-        foreach ($lCheks as $oCheck) {
+        $originalChecks = clone collect($lRegistries);
+        foreach ($lRegistries as $oCheck) {
             $check = clone $oCheck;
             $checkDateTime = $check->date.' '.$check->time;
 
@@ -1827,7 +1839,7 @@ class SDataProcess {
             $lNewChecks[] = $check;
         }
 
-        return SDataProcess::filterDoubleCheks($lNewChecks);
+        return $lNewChecks;
     }
 
     private static function manageOneCheck($sDate, $idEmployee, $registries, $lWorkshifts)
@@ -1862,7 +1874,8 @@ class SDataProcess {
                     $comparison = SDelayReportUtils::compareDates($oFoundRegistry->date.' '.$oFoundRegistry->time, $oDateAux->toDateString().' 22:30:00');
 
                     if (abs($comparison->diffMinutes) <= $config->maxGapMinutes) {
-                        return 0;
+                        array_unshift($registries,$oFoundRegistry);
+                        return [0, $registries];
                     }
                     else {
                         return 2;

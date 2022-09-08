@@ -8,7 +8,8 @@ class assign_schedule extends Model
 {
     protected $table = 'schedule_assign';
     protected $primary = 'id';
-    protected $fillable = ['department_id',
+    protected $fillable = ['area_id',
+                            'department_id',
                             'employee_id',
                             'group_assign_id',
                             'schedule_template_id',

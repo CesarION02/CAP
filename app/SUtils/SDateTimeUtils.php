@@ -45,8 +45,7 @@ class SDateTimeUtils {
      * @param [String o Carbon] $date
      * @return int día entero
      */
-    public static function dayOfWeek($date)
-    {
+    public static function dayOfWeek($date) {
         if (is_string($date)) {
             $oDate = Carbon::parse($date);
         }
@@ -60,12 +59,42 @@ class SDateTimeUtils {
         return $day;
     }
 
-    public static function orderDate($date){
+    public static function orderDate($date) {
         $dateAux = explode('-',$date);
 
         $newDate = ''.$dateAux[2].'/'.$dateAux[1].'/'.$dateAux[0];
 
         return $newDate;
+    }
+
+    /**
+     * Determina el tiempo extra que se otorgará al empleado en base a las reglas establecidas.
+     * Menos de 20 min, 0 horas extra.
+     * Entre 20 y 49 Min, 0.5 horas
+     * 50 min o más, 1 hora extra.
+     *
+     * @param integer $overMins
+     * 
+     * @return integer tiempo extra en minutos
+     */
+    public static function getExtraTimeByRules($overMins = 0) {
+        $initialLimitHalf = 20;
+        $initialLimitHour = 50;
+        $finalLimitHour = 60;
+
+        $completeHours = intdiv($overMins, 60);
+        $halfHours = $overMins % 60;
+        $auxHalfHours = 0;
+        if ($initialLimitHour <= $halfHours && $halfHours <= $finalLimitHour) {
+            $auxHalfHours = 1;
+        }
+        else if ($initialLimitHalf <= $halfHours && $halfHours < $initialLimitHour) {
+            $auxHalfHours = 0.5;
+        }
+
+        $overMinsByRule = ($completeHours + $auxHalfHours) * 60;
+
+        return $overMinsByRule;
     }
 }
 
