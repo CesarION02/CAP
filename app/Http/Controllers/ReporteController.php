@@ -24,6 +24,7 @@ use App\SUtils\SGenUtils;
 use App\SUtils\SPermissions;
 use App\SUtils\SPrepayrollUtils;
 use App\SUtils\SDateUtils;
+use App\SUtils\SDateTimeUtils;
 use App\SUtils\SPayrollDelegationUtils;
 use App\SData\SDataProcess;
 use Illuminate\Support\Collection;
@@ -591,44 +592,6 @@ class ReporteController extends Controller
                     ->with('lComments', []);
     }
 
-    function timesTotal($lRows, $lEmployees)
-    {
-        $delayTot;
-        $extraHoursTot;
-        $prematureOutTot;
-        $absences;
-        $sundays;
-        $daysOff;
-        foreach($lEmployees as $lEmployee){
-            $delayTot = 0;
-            $prematureOutTot = 0;
-            $extraHoursTot = 0;
-            $absences = 0;
-            $sundays = 0;
-            $daysOff = 0;
-            foreach($lRows as $lRow){
-                if($lEmployee->id === $lRow->idEmployee){
-                    $delayTot = $delayTot + $lRow->entryDelayMinutes;
-                    $extraHoursTot = $extraHoursTot + $lRow->overMinsTotal;
-                    $prematureOutTot = $prematureOutTot + $lRow->prematureOut;
-                    $sundays = $sundays + $lRow->isSunday;
-                    $daysOff = $daysOff + $lRow->isDayOff;
-                    if($lRow->hasAbsence){
-                        $absences++;
-                    }
-                }
-            }
-            $lEmployee->entryDelayMinutes = $delayTot;
-            $lEmployee->extraHours = $extraHoursTot;
-            $lEmployee->prematureOut = $prematureOutTot;
-            $lEmployee->isSunday = $sundays;
-            $lEmployee->isDayOff = $daysOff;
-            $lEmployee->hasAbsence = $absences;
-        }
-
-        return $lEmployees;
-    }
-
     /**
      * Muestra reporte de tiempos extra
      *
@@ -806,40 +769,40 @@ class ReporteController extends Controller
                 ->get();
         }
         
-        if ($reportMode == \SCons::REP_HR_EX) {
-            /**
-             * Obtención de vobos de empleados
-             */
-            $isPrepayrollInspection = false;
-            $lEmpVobos = [];
-            if (($payWay == \SCons::PAY_W_S || $payWay == \SCons::PAY_W_Q) && env('VOBO_BY_EMP_ENABLED', true)) {
-                $number = SDateUtils::getNumberOfDate($sStartDate, $payWay);
-                $dates = SDateUtils::getDatesOfPayrollNumber($number, $oStartDate->year, $payWay);
-                
-                if ($dates[0] == $sStartDate && $dates[1] == $sEndDate) {
-                    $lEmpVobos = DB::table('prepayroll_report_emp_vobos AS evb')
-                                        ->join('users AS u', 'evb.vobo_by_id', '=', 'u.id')
-                                        ->join('employees AS e', 'evb.employee_id', '=', 'e.id')
-                                        ->where('evb.is_delete', 0)
-                                        ->where('year', $oStartDate->year)
-                                        ->select('u.name AS user_name', 'evb.employee_id', 'evb.vobo_by_id', 'e.num_employee');
-
-                    if ($payWay == \SCons::PAY_W_Q) {
-                        $lEmpVobos = $lEmpVobos->where('evb.is_biweek', true)
-                                                ->where('evb.num_biweek', $number);
-                    }
-                    else {
-                        $lEmpVobos = $lEmpVobos->where('evb.is_week', true)
-                                                ->where('evb.num_week', $number);
-                    }
-
-                    $lEmpVobos = $lEmpVobos->get()->keyBy('num_employee')->toArray();
-
-                    $isPrepayrollInspection = true;
-                }
-            }
+        /**
+         * Obtención de vobos de empleados
+         */
+        $isPrepayrollInspection = false;
+        $lEmpVobos = [];
+        if (($payWay == \SCons::PAY_W_S || $payWay == \SCons::PAY_W_Q) && env('VOBO_BY_EMP_ENABLED', true)) {
+            $number = SDateUtils::getNumberOfDate($sStartDate, $payWay);
+            $dates = SDateUtils::getDatesOfPayrollNumber($number, $oStartDate->year, $payWay);
             
-            foreach($lRows as $row){
+            if ($dates[0] == $sStartDate && $dates[1] == $sEndDate) {
+                $lEmpVobos = DB::table('prepayroll_report_emp_vobos AS evb')
+                                    ->join('users AS u', 'evb.vobo_by_id', '=', 'u.id')
+                                    ->join('employees AS e', 'evb.employee_id', '=', 'e.id')
+                                    ->where('evb.is_delete', 0)
+                                    ->where('year', $oStartDate->year)
+                                    ->select('u.name AS user_name', 'evb.employee_id', 'evb.vobo_by_id', 'e.num_employee');
+
+                if ($payWay == \SCons::PAY_W_Q) {
+                    $lEmpVobos = $lEmpVobos->where('evb.is_biweek', true)
+                                            ->where('evb.num_biweek', $number);
+                }
+                else {
+                    $lEmpVobos = $lEmpVobos->where('evb.is_week', true)
+                                            ->where('evb.num_week', $number);
+                }
+
+                $lEmpVobos = $lEmpVobos->get()->keyBy('num_employee')->toArray();
+
+                $isPrepayrollInspection = true;
+            }
+        }
+
+        if ($reportMode == \SCons::REP_HR_EX) {
+            foreach($lRows as $row) {
                 $inDate = Carbon::parse($row->inDateTime);
                 $outDate = Carbon::parse($row->outDateTime);
 
@@ -854,7 +817,7 @@ class ReporteController extends Controller
                             $row_date = Carbon::parse($row->inDateTime);
                         }else{
                             $adj_date = Carbon::parse($adj->dt_date);
-                            $row_date = Carbon::parse($row->inDate);
+                            $row_date = Carbon::parse(is_null($row->inDate) ? $row->inDateTime : $row->inDate);
                         }
 
                         if($adj_date->eq($row_date)){
@@ -897,13 +860,13 @@ class ReporteController extends Controller
                     ->with('lUsers', $lUsers);
         }
         else {
-            $lEmployees = $this->timesTotal($lRows, $lEmployees);
+            $lEmployees = SReportsUtils::resumeReportRows($lRows, $lEmployees);
             $col = collect($lRows);
-            foreach($lEmployees as $emp){
-                $oCom = $lAdjusts->where('employee_id',$emp->id)->all();
+            foreach ($lEmployees as $emp) {
+                $oCom = $lAdjusts->where('employee_id', $emp->id)->all();
                 $arr = [];
-                foreach($oCom as $com){
-                    array_push($arr, $com->dt_date.", ".$com->comments);
+                foreach ($oCom as $com) {
+                    array_push($arr, $com->dt_date . ", " . $com->comments);
                 }
                 $emp->comments = $arr;
                 $emp->scheduleText = $col->where('idEmployee', $emp->id)->first()->scheduleText;
@@ -919,6 +882,8 @@ class ReporteController extends Controller
                     ->with('lAdjusts', $lAdjusts)
                     ->with('lEmpWrkdDays', $lEmpWrkdDays)
                     ->with('bModify', $bModify)
+                    ->with('lEmpVobos', $lEmpVobos)
+                    ->with('isPrepayrollInspection', $isPrepayrollInspection)
                     ->with('registriesRoute', route('registro_ajuste'))
                     ->with('lRows', $lRows)
                     ->with('lComments', [])
