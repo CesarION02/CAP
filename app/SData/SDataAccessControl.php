@@ -173,7 +173,7 @@ class SDataAccessControl {
     /**
      * Determina si el empleado tiene autorizado el ingreso al sistema
      *
-     * @param [type] $oData
+     * @param 'App\SUtils\SAccessControlData' $oData
      * @param [type] $id
      * @param [type] $dtDate
      * @param [type] $time
@@ -182,7 +182,7 @@ class SDataAccessControl {
      * 
      * @return array [0] true or false, [1] text reason, [2] case to notification
      */
-    public static function isAuthorized($oData = null, $id, $dtDate, $time, $inMins, $outMins)
+    public static function isAuthorized($oData, $id, $dtDate, $time, $inMins, $outMins)
     {
         $result = [];
         $reason = "";
