@@ -1494,4 +1494,161 @@ class assignController extends Controller
 
         return redirect(route('index_areaProgramming'))->with('mensaje', 'Registro eliminado con exito');
     }
+
+    public function viewDeptoProgramming (Request $request){
+        $iFilter = $request->ifilter == 0 ? 1 : $request->ifilter;
+        $iTemplateId = env('TMPLTE_SATURDAYS', 1);
+
+        $numero = session()->get('name');
+        $usuario = DB::table('users')
+                ->where('name',$numero)
+                ->get();
+
+        if($iFilter == 1){
+            $assigns = DB::table('schedule_assign as sa')
+                        ->where('department_id', '!=', null)
+                        ->where('is_delete', 0)
+                        ->get();
+                    
+            $deptos = [];
+
+            for($i = 0 ; count($assigns) > $i ; $i++){
+                $deptos[$i] = $assigns[$i]->department_id;
+            }
+
+            $assigns = DB::table('departments')
+                        ->whereNotIn('id', $deptos)
+                        ->where('is_delete', 0)
+                        ->select('id as deptoId', 'name as depto')
+                        ->get();
+
+        } else {
+            $assigns = DB::table('schedule_assign as sa')
+                        ->join('departments as d', 'd.id', '=', 'sa.department_id')
+                        ->join('schedule_template as st', 'st.id', '=', 'sa.schedule_template_id')
+                        ->where('sa.department_id', '!=', null)
+                        ->where('sa.is_delete', 0)
+                        ->where('d.is_delete', 0)
+                        ->where('st.is_delete', 0)
+                        ->select(
+                            'd.id as deptoId',
+                            'd.name as depto',
+                            'st.id as scheduleId',
+                            'st.name as schedule',
+                            'sa.id as assignId',
+                            'sa.department_id',
+                            'sa.start_date',
+                            'sa.end_date'
+                            )
+                        ->get();
+        }
+
+        return view('assign.showDeptoProgramming')->with('assigns',$assigns)->with('iFilter',$iFilter);
+    }
+
+    public function deptoProgramming() {
+        $deptos = DB::table('departments as d')
+                    ->where('is_delete', 0)
+                    ->get();
+
+        $iTemplateId = env('TMPLTE_SATURDAYS', 1);
+        $schedule_template = schedule_template::where('is_delete', 0)
+                                                ->where('id', '!=', $iTemplateId)
+                                                ->orderBy('name','ASC')
+                                                ->pluck('id','name');
+
+        $getDeptoProgRoute = route('get_deptoProgramming');
+        $storeRoute = route('store_deptoProgramming');
+        $indexRoute = route('index_deptoProgramming');
+
+        return view('assign.DeptoProgramming')->with('deptos',$deptos)
+                                            ->with('schedule_template',$schedule_template)
+                                            ->with('getDeptoProgRoute', $getDeptoProgRoute)
+                                            ->with('storeRoute', $storeRoute)
+                                            ->with('indexRoute', $indexRoute);
+    }
+
+    public function editDeptoProgramming($deptoId = 0){
+        $schedule_assign = DB::table('schedule_assign as sa')
+                            ->where('is_delete', 0)
+                            ->where('department_id', $deptoId)
+                            ->first();
+
+        $deptos = DB::table('departments as d')
+                    ->where('is_delete', 0)
+                    ->get();
+        
+        $iTemplateId = env('TMPLTE_SATURDAYS', 1);
+        $schedule_template = schedule_template::where('is_delete', 0)
+                                                ->where('id', '!=', $iTemplateId)
+                                                ->orderBy('name','ASC')
+                                                ->pluck('id','name');
+
+        $getDeptoProgRoute = route('get_deptoProgramming');
+        $storeRoute = route('store_deptoProgramming');
+        $indexRoute = route('index_deptoProgramming');
+
+        return view('assign.DeptoProgramming')->with('deptos',$deptos)
+                            ->with('schedule_template',$schedule_template)
+                            ->with('getDeptoProgRoute', $getDeptoProgRoute)
+                            ->with('storeRoute', $storeRoute)
+                            ->with('indexRoute', $indexRoute)
+                            ->with('datas', $schedule_assign);
+    }
+
+    public function getDeptoProgramming(Request $request){
+        $schedule_assign = DB::table('schedule_assign as sa')
+                            ->where('is_delete', 0)
+                            ->where('department_id', $request->deptoId)
+                            ->get();
+
+        count($schedule_assign) > 0 ? $has_schedule = true : $has_schedule = false;
+
+        return json_encode(['has_schedule' => $has_schedule, 'schedule_assign' => $schedule_assign]);
+    }
+
+    public function storeDeptoProgramming(Request $request){
+        $asignacion = assign_schedule::where([['is_delete', 0], ['department_id', $request->deptoId]])->first();
+        if(is_null($asignacion)){
+            $asignacion = new assign_schedule();
+        }
+
+        try{
+            \DB::beginTransaction();
+
+            $asignacion->department_id = $request->deptoId;
+            $asignacion->schedule_template_id = $request->scheduleId;
+            $asignacion->start_date = $request->start_date;
+            $asignacion->created_by = session()->get('user_id');
+            $asignacion->updated_by = session()->get('user_id');
+            $asignacion->save();
+
+            \DB::commit();
+        }catch(\Throwable $th){
+            \DB::rollBack();
+            return json_encode(['success' => false, 'message' => 'Error al guardar el registro', 'icon' => 'error']);
+        }
+
+        return json_encode(['success' => true, 'message' => 'Registro guardado con exito', 'icon' => 'success']);
+    }
+
+    public function deleteDeptoProgramming(Request $request, $deptoId){
+        $asignacion = assign_schedule::where([['is_delete', 0], ['department_id', $request->deptoId]])->first();
+
+        try{
+            \DB::beginTransaction();
+
+            $asignacion->is_delete = 1;
+            $asignacion->created_by = session()->get('user_id');
+            $asignacion->updated_by = session()->get('user_id');
+            $asignacion->save();
+
+            \DB::commit();
+        }catch(\Throwable $th){
+            \DB::rollBack();
+            return redirect(route('index_deptoProgramming'))->with('error', 'Error al eliminar el registro');
+        }
+
+        return redirect(route('index_deptoProgramming'))->with('mensaje', 'Registro eliminado con exito');
+    }
 }

@@ -326,6 +326,13 @@ Route::post('assign/storeAreaProgramming', 'assignController@storeAreaProgrammin
 Route::get('assign/editAreaProgramming/{areaId}', 'assignController@editAreaProgramming')->name('edit_areaProgramming');
 Route::delete('assign/delete/{areaId}', 'assignController@deleteAreaProgramming')->name('delete_areaProgramming');
 
+Route::get('assigns/viewDeptoProgramming','assignController@viewDeptoProgramming')->name('index_deptoProgramming');
+Route::get('assign/deptoProgramming', 'assignController@deptoProgramming')->name('deptoProgramming');
+Route::post('assign/getDeptoProgramming', 'assignController@getDeptoProgramming')->name('get_deptoProgramming');
+Route::post('assign/storeDeptoProgramming', 'assignController@storeDeptoProgramming')->name('store_deptoProgramming');
+Route::get('assign/editDeptoProgramming/{deptoId}', 'assignController@editDeptoProgramming')->name('edit_deptoProgramming');
+Route::delete('assign/delete/depto/{deptoId}', 'assignController@deleteDeptoProgramming')->name('delete_deptoProgramming');
+
 // 
 Route::get('assignone', 'assignController@indexOneDay')->name('asignar_uno');
 Route::post('assignone', 'assignController@storeOne')->name('guardar_uno');
