@@ -210,6 +210,8 @@ Route::put('user/{id}', 'userController@update')->name('actualizar_usuario');
 Route::delete('user/{id}', 'userController@destroy')->name('eliminar_usuario');
 Route::delete('user/disable/{id}', 'userController@activar')->name('activar_usuario');
 
+/** RUTAS COPIAR USUARIO */
+Route::post('user/copyUser', 'userController@storeCopyUser')->name('store_copyUser');
 
 /* RUTAS DE EMPRESAS */
 Route::get('company', 'companyController@index')->name('company');
