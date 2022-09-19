@@ -32,9 +32,11 @@
                         <div class="col-md-3 col-md-offset-1">
                             <label><input v-model="picked" v-on:change="onFilterTypeChange()" type="radio" name="optradio" value="period" onclick="chosDisable();">Periodicidad de pago</label>
                         </div>
-                        <div class="col-md-3">
-                            <label><input v-model="picked" v-on:change="onFilterTypeChange()" type="radio" name="optradio" value="employee" onclick="chosEnable();">Empleado</label>
-                        </div>
+                        @if( $wizard != 2 )
+                            <div class="col-md-3">
+                                <label><input v-model="picked" v-on:change="onFilterTypeChange()" type="radio" name="optradio" value="employee" onclick="chosEnable();">Empleado</label>
+                            </div>
+                        @endif
                     </div>
                     <br>
                     <div>
@@ -53,27 +55,32 @@
                         <br>
                     </div>
                     <div>
-                        <div class="row">
-                            <div class="col-md-2">
-                                Empleado:*
+                        @if( $wizard != 2)
+                            <div class="row">
+                                <div class="col-md-2">
+                                    Empleado:*
+                                </div>
+                                <div class="col-md-7 col-md-offset-1">
+                                    <select :disabled="picked == 'period'" v-model='idEmployee' name="emp_id" form="theForm" id="emp_id" class="form-control chosen-select" data-placeholder="Selecciona empleado...">
+                                        <option v-for="employee in lEmps" :value="employee.id">@{{ employee.name }} - @{{ employee.num_employee }}</option>
+                                    </select>
+                                </div>
                             </div>
-                            <div class="col-md-7 col-md-offset-1">
-                                <select :disabled="picked == 'period'" v-model='idEmployee' name="emp_id" form="theForm" id="emp_id" class="form-control chosen-select" data-placeholder="Selecciona empleado...">
-                                    <option v-for="employee in lEmps" :value="employee.id">@{{ employee.name }} - @{{ employee.num_employee }}</option>
-                                </select>
-                            </div>
-                        </div>
+                        @endif
                         <br>
                     </div>
-                    <div class="row">
-                        <div class="col-md-2">
-                            Filtrar:*
+                    @if( $wizard != 2)
+                        <div class="row">
+                            <div class="col-md-2">
+                                Filtrar:*
+                            </div>
+                            <div class="col-md-7 col-md-offset-1">
+                                @include('filters.adept')
+                            </div>
                         </div>
-                        <div class="col-md-7 col-md-offset-1">
-                            @include('filters.adept')
-                        </div>
-                    </div>
+                    @endif
                     <br>
+                    <input type="hidden" id="wizard" name="wizard" value="{{$wizard}}">
                     <div class="row">
                         <div class="col-md-2">
                             Fecha inicial:*

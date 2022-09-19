@@ -54,6 +54,31 @@ class SCons {
    
    const OVERTIME_CHECK_POLICY_IN = 1;
    const OVERTIME_CHECK_POLICY_OUT = 2;
+   const INC_TYPE = [
+      'INA_S_PER' => 1, // INASIST. S/PERMISO
+      'INA_C_PER_SG' => 2,// INASIST. C/PERMISO S/GOCE
+      'INA_C_PER_CG' => 3,// INASIST. C/PERMISO C/GOCE
+      'INA_AD_REL_CH' => 4,// INASIST. ADMTIVA. RELOJ CHECADOR
+      'INA_AD_SUSP' => 5,// INASIST. ADMTIVA. SUSPENSIÓN
+      'INA_AD_OT' => 6,// INASIST. ADMTIVA. OTROS
+      'ONOM_EXT' => 7,// ONOMÁSTICO
+      'RIESGO' => 8,// Riesgo de trabajo
+      'ENFERMEDAD' => 9,// Enfermedad en general
+      'MATER' => 10,// Maternidad
+      'LIC_CUIDADOS' => 11,// Licencia por cuidados médicos de hijos diagnosticados con cáncer.
+      'VAC' => 12,// VACACIONES
+      'VAC_PEND' => 13,// VACACIONES PENDIENTES
+      'CAPACIT' => 14,// CAPACITACIÓN
+      'TRAB_F_PL' => 15,// TRABAJO FUERA PLANTA
+      'PATER' => 16,// PATERNIDAD
+      'DIA_OTOR' => 17,// DIA OTORGADO
+      'INA_PRES_MED' => 18,// INASIST. PRESCRIPCION MEDICA
+      'DESCANSO' => 19,// DESCANSO
+      'INA_TR_F_PL' => 20,// INASIST. TRABAJO FUERA DE PLANTA
+      'VAC_CAP' => 21,// VACACIONES
+      'INC_CAP' => 22,// INCAPACIDAD
+      'ONOM_CAP' => 23// ONOMÁSTICO
+   ];
 }
 
 ?>

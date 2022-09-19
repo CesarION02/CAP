@@ -455,6 +455,29 @@ var app = new Vue({
             }
             
             $('#commentsModal').modal('show');
+        },
+        /**
+         * Invoca al método externo que se encarga de manejar el onChange del checkbox
+         * 
+         * @param $event event 
+         * @param integer num 
+         */
+        onChangeVoboResume(event, num) {
+            handleChangeCheck(event, num);
+        },
+        /**
+         * Determina si el empleado ya ha sido revisado en la nómina actual.
+         * Retorna un objeto de tipo VoBo si el Visto Bueno ha sido otorgado, si no,
+         * retorna un undefined
+         * 
+         * @param integer numEmployee 
+         * 
+         * @returns Object
+         */
+        isVoboResume(numEmployee) {
+            let vobo = this.vData.lEmpVobos[parseInt(numEmployee, 10)];
+
+            return vobo;
         }
     },
 })

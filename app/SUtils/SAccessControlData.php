@@ -6,6 +6,9 @@
         public $events;
         public $schedule;
         public $nextSchedule;
+        public $authorized;
+        public $message;
+        public $employees;
 
         public function __construct() {
             $this->employee = null;
@@ -13,6 +16,9 @@
             $this->events = null;
             $this->schedule = null;
             $this->nextSchedule = null;
+            $this->authorized = null;
+            $this->message = null;
+            $this->employees = null;
         }
     }
 

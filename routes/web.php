@@ -123,11 +123,14 @@ Route::get('report/generarreportepuertas','ReporteController@generarReportePuert
 /* Reporte incidencias */
 Route::get('report/reporteIncidencias', 'ReporteController@incidentReportView')->name('reporteIncidencias');
 Route::get('report/reporteIncidenciasGenerar', 'ReporteController@incidentReportGenerar')->name('reporteIncidenciasGenerar');
-/* Reporte incidencias empleados*/
-Route::get('report/reporteIncidenciasEmpleados', 'ReporteController@reportIncidentsEmployees')->name('reporteIncidenciasEmpleados');
+/* Reporte incidencias empleados ADRIAN*/
+Route::get('report/reporteIncidenciasEmpleados/{wizard}', 'ReporteController@reportIncidentsEmployees')->name('reporteIncidenciasEmpleados');
 Route::get('report/reporteIncidenciasEmpleadosGenerar', 'ReporteController@reportIncidentsEmployeesGenerar')->name('reporteIncidenciasEmpleadosGenerar');
 Route::post('report/reporteIncidenciasEmpleadosStore', 'ReporteController@reportIncidentsEmployeesStore')->name('reporteIncidenciasEmpleadosStore');
 Route::post('report/reporteIncidenciasEmpleadosDelete', 'ReporteController@reportIncidentsEmployeesDelete')->name('reporteIncidenciasEmpleadosDelete');
+/* Botones wizard prenómina */
+Route::get('report/botonSiguiente/{pagina}', 'ReporteController@wizardSiguiente')->name('boton_siguiente');
+Route::get('report/botonAtras/{pagina}', 'ReporteController@wizardAtras')->name('boton_atras');
 /* Reporte faltas */
 Route::get('report/reporteFaltas', 'ReporteController@indexFaltasReport')->name('reporteFaltas');
 Route::get('report/reporteFaltasGenerar', 'ReporteController@FaltasReportGenerar')->name('reporteFaltasGenerar');

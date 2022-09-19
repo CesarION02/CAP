@@ -24,6 +24,7 @@ use App\SUtils\SGenUtils;
 use App\SUtils\SPermissions;
 use App\SUtils\SPrepayrollUtils;
 use App\SUtils\SDateUtils;
+use App\SUtils\SDateTimeUtils;
 use App\SUtils\SPayrollDelegationUtils;
 use App\SData\SDataProcess;
 use Illuminate\Support\Collection;
@@ -591,44 +592,6 @@ class ReporteController extends Controller
                     ->with('lComments', []);
     }
 
-    function timesTotal($lRows, $lEmployees)
-    {
-        $delayTot;
-        $extraHoursTot;
-        $prematureOutTot;
-        $absences;
-        $sundays;
-        $daysOff;
-        foreach($lEmployees as $lEmployee){
-            $delayTot = 0;
-            $prematureOutTot = 0;
-            $extraHoursTot = 0;
-            $absences = 0;
-            $sundays = 0;
-            $daysOff = 0;
-            foreach($lRows as $lRow){
-                if($lEmployee->id === $lRow->idEmployee){
-                    $delayTot = $delayTot + $lRow->entryDelayMinutes;
-                    $extraHoursTot = $extraHoursTot + $lRow->overMinsTotal;
-                    $prematureOutTot = $prematureOutTot + $lRow->prematureOut;
-                    $sundays = $sundays + $lRow->isSunday;
-                    $daysOff = $daysOff + $lRow->isDayOff;
-                    if($lRow->hasAbsence){
-                        $absences++;
-                    }
-                }
-            }
-            $lEmployee->entryDelayMinutes = $delayTot;
-            $lEmployee->extraHours = $extraHoursTot;
-            $lEmployee->prematureOut = $prematureOutTot;
-            $lEmployee->isSunday = $sundays;
-            $lEmployee->isDayOff = $daysOff;
-            $lEmployee->hasAbsence = $absences;
-        }
-
-        return $lEmployees;
-    }
-
     /**
      * Muestra reporte de tiempos extra
      *
@@ -644,6 +607,13 @@ class ReporteController extends Controller
         $bDelegation = $request->delegation;
         $iPayrollYear = $request->year;
         $iPayrollNumber = $request->payroll_number;
+        
+        if(isset($request->wizard)){
+            $wizard = $request->wizard;
+        }else{
+            $wizard = 0;
+        }
+
         $lComments = \DB::table('comments')->where('is_delete', 0)->get();
 
         $oStartDate = Carbon::parse($sStartDate);
@@ -806,40 +776,40 @@ class ReporteController extends Controller
                 ->get();
         }
         
-        if ($reportMode == \SCons::REP_HR_EX) {
-            /**
-             * Obtención de vobos de empleados
-             */
-            $isPrepayrollInspection = false;
-            $lEmpVobos = [];
-            if (($payWay == \SCons::PAY_W_S || $payWay == \SCons::PAY_W_Q) && env('VOBO_BY_EMP_ENABLED', true)) {
-                $number = SDateUtils::getNumberOfDate($sStartDate, $payWay);
-                $dates = SDateUtils::getDatesOfPayrollNumber($number, $oStartDate->year, $payWay);
-                
-                if ($dates[0] == $sStartDate && $dates[1] == $sEndDate) {
-                    $lEmpVobos = DB::table('prepayroll_report_emp_vobos AS evb')
-                                        ->join('users AS u', 'evb.vobo_by_id', '=', 'u.id')
-                                        ->join('employees AS e', 'evb.employee_id', '=', 'e.id')
-                                        ->where('evb.is_delete', 0)
-                                        ->where('year', $oStartDate->year)
-                                        ->select('u.name AS user_name', 'evb.employee_id', 'evb.vobo_by_id', 'e.num_employee');
-
-                    if ($payWay == \SCons::PAY_W_Q) {
-                        $lEmpVobos = $lEmpVobos->where('evb.is_biweek', true)
-                                                ->where('evb.num_biweek', $number);
-                    }
-                    else {
-                        $lEmpVobos = $lEmpVobos->where('evb.is_week', true)
-                                                ->where('evb.num_week', $number);
-                    }
-
-                    $lEmpVobos = $lEmpVobos->get()->keyBy('num_employee')->toArray();
-
-                    $isPrepayrollInspection = true;
-                }
-            }
+        /**
+         * Obtención de vobos de empleados
+         */
+        $isPrepayrollInspection = false;
+        $lEmpVobos = [];
+        if (($payWay == \SCons::PAY_W_S || $payWay == \SCons::PAY_W_Q) && env('VOBO_BY_EMP_ENABLED', true)) {
+            $number = SDateUtils::getNumberOfDate($sStartDate, $payWay);
+            $dates = SDateUtils::getDatesOfPayrollNumber($number, $oStartDate->year, $payWay);
             
-            foreach($lRows as $row){
+            if ($dates[0] == $sStartDate && $dates[1] == $sEndDate) {
+                $lEmpVobos = DB::table('prepayroll_report_emp_vobos AS evb')
+                                    ->join('users AS u', 'evb.vobo_by_id', '=', 'u.id')
+                                    ->join('employees AS e', 'evb.employee_id', '=', 'e.id')
+                                    ->where('evb.is_delete', 0)
+                                    ->where('year', $oStartDate->year)
+                                    ->select('u.name AS user_name', 'evb.employee_id', 'evb.vobo_by_id', 'e.num_employee');
+
+                if ($payWay == \SCons::PAY_W_Q) {
+                    $lEmpVobos = $lEmpVobos->where('evb.is_biweek', true)
+                                            ->where('evb.num_biweek', $number);
+                }
+                else {
+                    $lEmpVobos = $lEmpVobos->where('evb.is_week', true)
+                                            ->where('evb.num_week', $number);
+                }
+
+                $lEmpVobos = $lEmpVobos->get()->keyBy('num_employee')->toArray();
+
+                $isPrepayrollInspection = true;
+            }
+        }
+
+        if ($reportMode == \SCons::REP_HR_EX) {
+            foreach($lRows as $row) {
                 $inDate = Carbon::parse($row->inDateTime);
                 $outDate = Carbon::parse($row->outDateTime);
 
@@ -854,7 +824,7 @@ class ReporteController extends Controller
                             $row_date = Carbon::parse($row->inDateTime);
                         }else{
                             $adj_date = Carbon::parse($adj->dt_date);
-                            $row_date = Carbon::parse($row->inDate);
+                            $row_date = Carbon::parse(is_null($row->inDate) ? $row->inDateTime : $row->inDate);
                         }
 
                         if($adj_date->eq($row_date)){
@@ -894,16 +864,18 @@ class ReporteController extends Controller
                     ->with('lComments', $lComments)
                     ->with('subEmployees', $subEmployees)
                     ->with('isAdmin', $isAdmin)
-                    ->with('lUsers', $lUsers);
+                    ->with('lUsers', $lUsers)
+                    ->with('wizard', $wizard )
+                    ->with('pay_way', $request->pay_way);
         }
         else {
-            $lEmployees = $this->timesTotal($lRows, $lEmployees);
+            $lEmployees = SReportsUtils::resumeReportRows($lRows, $lEmployees);
             $col = collect($lRows);
-            foreach($lEmployees as $emp){
-                $oCom = $lAdjusts->where('employee_id',$emp->id)->all();
+            foreach ($lEmployees as $emp) {
+                $oCom = $lAdjusts->where('employee_id', $emp->id)->all();
                 $arr = [];
-                foreach($oCom as $com){
-                    array_push($arr, $com->dt_date.", ".$com->comments);
+                foreach ($oCom as $com) {
+                    array_push($arr, $com->dt_date . ", " . $com->comments);
                 }
                 $emp->comments = $arr;
                 $emp->scheduleText = $col->where('idEmployee', $emp->id)->first()->scheduleText;
@@ -919,13 +891,17 @@ class ReporteController extends Controller
                     ->with('lAdjusts', $lAdjusts)
                     ->with('lEmpWrkdDays', $lEmpWrkdDays)
                     ->with('bModify', $bModify)
+                    ->with('lEmpVobos', $lEmpVobos)
+                    ->with('isPrepayrollInspection', $isPrepayrollInspection)
                     ->with('registriesRoute', route('registro_ajuste'))
                     ->with('lRows', $lRows)
                     ->with('lComments', [])
                     ->with('lEmployees', $lEmployees)
                     ->with('subEmployees', $subEmployees)
                     ->with('isAdmin', $isAdmin)
-                    ->with('lUsers', $lUsers);
+                    ->with('lUsers', $lUsers)
+                    ->with('wizard', $wizard )
+                    ->with('pay_way', $request->pay_way);
         }
         
     }
@@ -2350,7 +2326,9 @@ class ReporteController extends Controller
             return view('report.reporteFaltasView',  ['data' => $merged, 'range' => $range, 'totEmployees' => $totEmployees, 'calendarStart' => $calendarStart]);
         }
 
-        public function reportIncidentsEmployees(){
+        public function reportIncidentsEmployees($wizard = 0){
+            // wizard = 1 -> funcionamiento independiente de la vista.
+            // wizard = 2 -> funcionamiento en conjunto de las vistas para hacer un wizard de revisión prenómina.
             $config = \App\SUtils\SConfiguration::getConfigurations();
 
             $bDirect = false;
@@ -2372,15 +2350,19 @@ class ReporteController extends Controller
                         ->with('tReport', \SCons::REP_HR_EX)
                         ->with('sRoute', 'reporteIncidenciasEmpleadosGenerar')
                         ->with('lEmployees', $lEmployees)
-                        ->with('startOfWeek', $config->startOfWeek);
+                        ->with('startOfWeek', $config->startOfWeek)
+                        ->with('wizard',$wizard );
         }
 
         public function reportIncidentsEmployeesGenerar(Request $request)
         {
             $sStartDate = $request->start_date;
             $sEndDate = $request->end_date;
-            $iEmployee = $request->emp_id;
-
+            //si no es el wizard entra en esta parte
+            if ( $request->wizard != 2 ){
+                $iEmployee = $request->emp_id;
+            }
+            
             $oStartDate = Carbon::parse($sStartDate);
             $oEndDate = Carbon::parse($sEndDate);
 
@@ -2435,8 +2417,14 @@ class ReporteController extends Controller
                  */
                 $payWay = $request->pay_way == null ? \SCons::PAY_W_S : $request->pay_way;
 
-                $filterType = $request->i_filter;
-                $ids = $request->elems;
+                //si es parte del wizard se queda vacio
+                if($request->wizard != 2){
+                    $filterType = $request->i_filter;
+                    $ids = $request->elems;
+                }else{
+                    $filterType = 0;
+                    $ids = 0;   
+                }
                 $aEmpl = [];
                 foreach($employee as $emp){
                     array_push($aEmpl, $emp->id);
@@ -2444,7 +2432,13 @@ class ReporteController extends Controller
                 $lEmployees = SGenUtils::toEmployeeIds($payWay, $filterType, $ids, $aEmpl);
             }
             
-            $route = route('reporteIncidenciasEmpleados');
+            // si es parte del wizard cambia la ruta
+            if($request->wizard != 2){
+                $route = route('reporteIncidenciasEmpleados', "['id' => 1]");
+            }else{
+                $route = route('reporteIncidenciasEmpleados', "['id' => 2]");
+                //$routeSiguiente = route('wizardSiguiente1') ;
+            }
             $routeStore = route('reporteIncidenciasEmpleadosStore');
             $routeDelete = route('reporteIncidenciasEmpleadosDelete');
 
@@ -2550,7 +2544,9 @@ class ReporteController extends Controller
                                                             'typeIncidents' => $typeIncidents,
                                                             'routeStore' => $routeStore,
                                                             'routeDelete' => $routeDelete,
-                                                            'aDates' => $aDates
+                                                            'aDates' => $aDates,
+                                                            'wizard' => $request->wizard,
+                                                            'payWay' => $payWay
                                                         ]);
         }
 
@@ -2623,5 +2619,21 @@ class ReporteController extends Controller
             }
 
             return redirect()->back()->with(['tittle' => 'Realizado', 'message' => 'Registro guardado con exito', 'icon' => 'success']);
+        }
+
+        public function wizardSiguiente($pagina){
+            if( $pagina == 1 ){
+
+            }elseif( $pagina == 2){
+
+            }
+        }
+
+        public function wizardAtras($pagina){
+            if( $pagina == 2 ){
+
+            }elseif( $pagina == 3 ){
+
+            }
         }
 }

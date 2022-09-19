@@ -25,8 +25,8 @@ class AccessControlController extends Controller
 
         if (sizeof($lEmployees) > 0) {
             $oData = new SAccessControlData();
-
             $oData->employees = $lEmployees;
+            
             return json_encode($oData);
         }
 
@@ -59,8 +59,15 @@ class AccessControlController extends Controller
             return $oData;
         }
 
-        $oData->absences = SDataAccessControl::getAbsences($idEmp, $dtDate);
-        $oData->events = SDataAccessControl::getEvents($idEmp, $dtDate);
+        $dtDateForDay = $dtDate;
+        if ($time > '21:00') {
+            $oDate = Carbon::parse($dtDate);
+            $oDate->addDay();
+            $dtDateForDay = $oDate->toDateString();
+        }
+
+        $oData->absences = SDataAccessControl::getAbsences($idEmp, $dtDateForDay);
+        $oData->events = SDataAccessControl::getEvents($idEmp, $dtDateForDay);
         $oData->schedule = SDataAccessControl::getSchedule($idEmp, $dtDate, $time);
         $oData->nextSchedule = SDataAccessControl::getNextSchedule($idEmp, $dtDate, $nextDays);
 

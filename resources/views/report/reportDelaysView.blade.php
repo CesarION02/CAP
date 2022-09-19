@@ -50,9 +50,17 @@
                             </select>
                         </div>
                     @endif
-                    <div class="col-md-2" style="text-align: right">
-                        <a href="{{ route('generarreportetiemposextra') }}" target="_blank" class="btn btn-success">Nuevo reporte</a>
-                    </div>
+                    @if(isset($wizard))
+                        @if( $wizard != 2)
+                            <div class="col-md-2" style="text-align: right">
+                                <a href="{{ route('generarreportetiemposextra') }}" target="_blank" class="btn btn-success">Nuevo reporte</a>
+                            </div>
+                        @endif
+                    @else
+                        <div class="col-md-2" style="text-align: right">
+                            <a href="{{ route('generarreportetiemposextra') }}" target="_blank" class="btn btn-success">Nuevo reporte</a>
+                        </div>
+                    @endif
                     <div class="col-md-2" style="text-align: center">
                         <div id="wrapper">
                             <button class="btn btn-info" id="button-a">Crear Excel</button>
@@ -126,10 +134,62 @@
                                     <td>@{{ row.idEmployee }}</td>
                                 </tr>
                             </tbody>
-                            <button onclick="reloadFunction()" id="reloadBtn" title="Recargar reporte">Actualizar</button>
-                            <button onclick="topFunction()" id="myBtn" title="Ir arriba">Ir arriba</button>
-                            <a href="{{ route('generarreportetiemposextra') }}" target="_blank" id="newButton" title="Nuevo reporte">Nuevo reporte</a>
+                            @if( isset($wizard) )
+                                @if( $wizard != 2)
+                                    <button onclick="reloadFunction()" id="reloadBtn" title="Recargar reporte">Actualizar</button>
+                                    <button onclick="topFunction()" id="myBtn" title="Ir arriba">Ir arriba</button>
+                                    <a href="{{ route('generarreportetiemposextra') }}" target="_blank" id="newButton" title="Nuevo reporte">Nuevo reporte</a>
+                                @endif
+                            @else
+                                <button onclick="reloadFunction()" id="reloadBtn" title="Recargar reporte">Actualizar</button>
+                                <button onclick="topFunction()" id="myBtn" title="Ir arriba">Ir arriba</button>
+                                <a href="{{ route('generarreportetiemposextra') }}" target="_blank" id="newButton" title="Nuevo reporte">Nuevo reporte</a>
+                            @endif
                         </table>
+                        @if( isset($wizard))
+                            @if( $wizard == 2)
+                                <p>
+                                    <div class="row">
+                                        <div class="col-md-2"><b>Estatus proceso:</b> </div>
+                                        <div class="col-md-1">
+                                            <form action="{{route('reporteIncidenciasEmpleadosGenerar')}}"  autocomplete="off">
+                                                <input type="hidden" name="start_date" value={{ $sStartDate }} >
+                                                <input type="hidden" name="end_date" value={{ $sEndDate }} >
+                                                <input type="hidden" name="emp_id" value="0" >
+                                                <input type="hidden" name="report_mode" value="3" >
+                                                <input type="hidden" name="delegation" value="0" >
+                                                <input type="hidden" name="pay_way" value={{ $pay_way }} >
+                                                <input type="hidden" name="wizard" value={{ $wizard }} >
+                                                <button type="submit" class="btn btn-primary" id="guardar" >Anterior</button>
+                                            </form>
+                                        </div>
+                                        &nbsp;
+                                        <div class="col-md-2" style="font-size:20px;">
+                                            &nbsp;<span class="label label-default"> 1 </span> 
+                                            &nbsp;<span class="label label-primary"> 2 </span> 
+                                            &nbsp;<span class="label label-default"> 3 </span>&nbsp;    
+                                        </div>        
+                                        <div class="col-md-1">
+                                            <form action="{{route('reportetiemposextra')}}"  autocomplete="off">
+                                                <input type="hidden" name="start_date" value={{ $sStartDate }} >
+                                                <input type="hidden" name="end_date" value={{ $sEndDate }} >
+                                                <input type="hidden" name="emp_id" value="0" >
+                                                <input type="hidden" name="report_mode" value="3" >
+                                                <input type="hidden" name="delegation" value="0" >
+                                                <input type="hidden" name="pay_way" value={{ $pay_way }} >
+                                                <input type="hidden" name="wizard" value={{ $wizard }} >
+                                                <button type="submit" class="btn btn-primary" id="guardar">Siguiente</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </p>
+                                <p>
+                                    <div class="row">
+                                        <div class="col-md-2"><a href="{{ route('inicio') }}" class="btn btn-danger">Cancelar</a></div>
+                                    </div>
+                                </p>
+                            @endif
+                        @endif
                     </div>
                 </div>
             </div>
