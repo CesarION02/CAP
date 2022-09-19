@@ -15,6 +15,7 @@ use App\SUtils\SPrepayrollAdjustUtils;
 use DB;
 use App\Models\prepayrollAdjust;
 use App\Models\adjust_link;
+use App\Models\holidayworked;
 
 class incidentController extends Controller
 {
@@ -151,11 +152,14 @@ class incidentController extends Controller
             }
         }
 
+        $holidays = \DB::table('holidays')->where('is_delete',0)->get();                                                                        
+
         return view('incident.create')
                         ->with('incidentType', $incidentType)
                         ->with('incidents', $incidents)
                         ->with('employees', $employees)
                         ->with('incident_comment',$cadenaComparacion)
+                        ->with('holidays', $holidays)
                         ->with('lComments', $lComments);
     }
 
@@ -178,9 +182,21 @@ class incidentController extends Controller
                 ->where('is_delete',0)
                 ->get();
         if(count($incidents) == 0){
+            if($request->type_incidents_id == 17){
+                $holiday_worked = new holidayworked();
+                $holiday_worked->employee_id = $request->employee_id;
+                $holiday_worked->holiday_id = $request->holiday_id;
+                $holiday_worked->number_assignments = 0;
+                $holiday_worked->is_delete = 0;
+                $holiday_worked->save();
+            }
+
             $incident = new incident($request->all());
             $incident->external_key = "0_0";
             $incident->cls_inc_id = 1;
+            if($request->type_incidents_id == 17){
+                $incident->holiday_worked_id = $holiday_worked->id;
+            }
             $incident->created_by = session()->get('user_id');
             $incident->updated_by = session()->get('user_id');
 
@@ -193,6 +209,8 @@ class incidentController extends Controller
             $dateS = Carbon::parse($request->end_date);
 
             $diferencia = ($dateI->diffInDays($dateS));
+
+            
 
             for($i = 0 ; $diferencia >= $i ; $i++){
                 $adjust = new prepayrollAdjust();

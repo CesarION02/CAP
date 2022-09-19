@@ -3,12 +3,15 @@ function tipo_incidencia(opcion) {
 
     var stipos = document.getElementById("atipos").value;
     var atipos = stipos.split(",");
-
+    var festivo = 0;
     var activar = 0;
     for (var i = 0; atipos.length > i; i++) {
         if (opcion.value == atipos[i]) {
             activar = 1;
         }
+    }
+    if (opcion.value == 17) {
+        document.getElementById("holiday_id").disabled = false;
     }
 
     if (activar == 1) {
