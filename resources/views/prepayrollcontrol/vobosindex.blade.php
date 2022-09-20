@@ -283,7 +283,7 @@
                             <tr style="background-color: {{ $oCtrl->is_vobo ? ("rgb(203, 255, 202)") : ($oCtrl->is_rejected ? "rgb(194, 126, 140)" : "") }}">
                                 <td>{{ $oCtrl->num_week }}</td>
                                 <td>{{ $oCtrl->num_biweek }}</td>
-                                <td style="white-space: nowrap;">{{ $oCtrl->num_week > 0 ? $oCtrl->ini : \Carbon\Carbon::parse($oCtrl->dt_cut)->subDays(14)->toDateString() }}</td>
+                                <td style="white-space: nowrap;">{{ $oCtrl->num_week > 0 ? $oCtrl->ini : $oCtrl->dt_ini }}</td>
                                 <td style="white-space: nowrap;">{{ $oCtrl->num_week > 0 ? $oCtrl->fin : $oCtrl->dt_cut }}</td>
                                 <td>{{ $oCtrl->name }}</td>
                                 <td>{{ $oCtrl->is_required ? "SÍ" : "NO" }}</td>

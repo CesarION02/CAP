@@ -22,7 +22,6 @@ use App\Http\Controllers\PrepayrollReportController;
 use App\Http\Controllers\SyncController;
 use App\SUtils\SPrepayrollUtils;
 use Illuminate\Database\QueryException;
-
 class prePayrollController extends Controller
 {
     public function __construct() {
@@ -606,7 +605,61 @@ class prePayrollController extends Controller
         $endDate = $request->end_date == null ? Carbon::now()->lastOfMonth()->toDateString() : $request->end_date;
         $config = \App\SUtils\SConfiguration::getConfigurations();
         
-        $lControls = \DB::table('prepayroll_report_auth_controls AS prac')
+        switch ($idPreNomina) {
+            case 'week':
+                $lControls = \DB::table('prepayroll_report_auth_controls AS prac')
+                            ->join('users AS u', 'prac.user_vobo_id', '=', 'u.id')
+                            ->leftJoin('week_cut AS wc', function($join)
+                            {
+                                $join->on('prac.num_week', '=', 'wc.num');
+                                $join->on('wc.year','=', 'prac.year');
+                            })
+                            ->where(function($query) use ($startDate, $endDate) {
+                                $query->where('wc.ini', '!=', null)
+                                ->where(function($query2) use ($startDate, $endDate)  {
+                                    $query2->whereBetween('wc.ini', [$startDate, $endDate])
+                                    ->orWhere(function($query3) use ($startDate, $endDate){
+                                        $query3->whereBetween('wc.fin', [$startDate, $endDate]);
+                                    });
+                                });
+                            })
+                            ->where('prac.is_delete',0)
+							->get();
+                break;
+            case 'biweek':
+                $lControls = \DB::table('prepayroll_report_auth_controls AS prac')
+                            ->join('users AS u', 'prac.user_vobo_id', '=', 'u.id')
+                            ->leftJoin('hrs_prepay_cut AS hpc', function($join)
+                            {
+                                $join->on('prac.num_biweek', '=', 'hpc.num');
+                                $join->on('hpc.year','=', 'prac.year');
+                            })
+                            ->where(function($query) use ($startDate, $endDate) {
+                                    $query
+                                    ->where(function($query4) use ($startDate, $endDate){
+                                        $query4->where('hpc.dt_cut', '!=', null)
+                                        ->where(function($query5) use ($startDate, $endDate){
+                                            $query5->whereBetween('dt_cut', [$startDate, $endDate]);
+                                            // ->orWhere(function($query6) use ($startDate, $endDate){
+                                            //     $query6->whereBetween(\DB::raw('DATE_SUB(dt_cut,INTERVAL 14 DAY)'), [$startDate, $endDate]);
+                                            // });
+                                        });
+                                    });
+                            })
+                            ->where('prac.is_delete',0)
+							->get();
+
+                foreach($lControls as $cont){
+                    $dt_ini = \DB::table('hrs_prepay_cut')
+                                        ->where('year', Carbon::parse($startDate)->format('Y'))
+                                        ->where('num', ($cont->num_biweek - 1))
+                                        ->value('dt_cut');
+
+                    $cont->dt_ini = Carbon::parse($dt_ini)->addDay()->toDateString();
+                }
+                break;
+            default:
+                $lControls = \DB::table('prepayroll_report_auth_controls AS prac')
                             ->join('users AS u', 'prac.user_vobo_id', '=', 'u.id')
                             ->leftJoin('week_cut AS wc', function($join)
                             {
@@ -618,10 +671,40 @@ class prePayrollController extends Controller
                                 $join->on('prac.num_biweek', '=', 'hpc.num');
                                 $join->on('hpc.year','=', 'prac.year');
                             })
-                            ->whereRaw("((wc.ini IS NOT NULL AND (wc.ini BETWEEN '".$startDate."' AND '".$endDate."' OR wc.fin BETWEEN '".$startDate."' AND '".$endDate."')) OR 
-                                        (hpc.dt_cut IS NOT NULL AND (dt_cut BETWEEN '".$startDate."' AND '".$endDate."' OR DATE_SUB(dt_cut,INTERVAL 14 DAY) BETWEEN '".$startDate."' AND '".$endDate."')))")
+                            ->where(function($query) use ($startDate, $endDate) {
+                                    $query->where('wc.ini', '!=', null)
+                                    ->where(function($query2) use ($startDate, $endDate)  {
+                                        $query2->whereBetween('wc.ini', [$startDate, $endDate])
+                                        ->orWhere(function($query3) use ($startDate, $endDate){
+                                            $query3->whereBetween('wc.fin', [$startDate, $endDate]);
+                                        });
+                                    })
+                                    ->orWhere(function($query4) use ($startDate, $endDate){
+                                        $query4->where('hpc.dt_cut', '!=', null)
+                                        ->where(function($query5) use ($startDate, $endDate){
+                                            $query5->whereBetween('dt_cut', [$startDate, $endDate])
+                                            ->orWhere(function($query6) use ($startDate, $endDate){
+                                                $query6->whereBetween(\DB::raw('DATE_SUB(dt_cut,INTERVAL 14 DAY)'), [$startDate, $endDate]);
+                                            });
+                                        });
+                                    });
+                            })
                             ->where('prac.is_delete',0)
 							->get();
+
+                foreach($lControls as $cont){
+                    if($cont->is_biweek){
+                        $dt_ini = \DB::table('hrs_prepay_cut')
+                                            ->where('year', Carbon::parse($startDate)->format('Y'))
+                                            ->where('num', ($cont->num_biweek - 1))
+                                            ->value('dt_cut');
+    
+                        $cont->dt_ini = Carbon::parse($dt_ini)->addDay()->toDateString();
+                    }
+                }
+                break;
+        }
+
         $routePrev = route('checkPrevius_vobos');
         $routeChildren = route('checkChildrens_vobos');
 
