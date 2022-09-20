@@ -20,7 +20,16 @@ class SDataAccessControl {
     {
         $employee = \DB::table('employees AS e')
                     ->leftJoin('departments AS d', 'd.id', '=', 'e.department_id')
-                    ->select('e.id', 'e.name', 'e.num_employee', 'e.external_id', 'e.is_active', 'e.is_delete', 'd.area_id')
+                    ->leftJoin('jobs AS j', 'j.id', '=', 'e.job_id')
+                    ->select('e.id', 
+                            'e.name', 
+                            'e.num_employee', 
+                            'e.external_id', 
+                            'e.is_active', 
+                            'e.is_delete',
+                            'd.name AS dept_name',
+                            'j.name AS job_name',
+                            'd.area_id')
                     ->where('e.id', $id)
                     ->get();
 
@@ -164,7 +173,7 @@ class SDataAccessControl {
     /**
      * Determina si el empleado tiene autorizado el ingreso al sistema
      *
-     * @param [type] $oData
+     * @param 'App\SUtils\SAccessControlData' $oData
      * @param [type] $id
      * @param [type] $dtDate
      * @param [type] $time
@@ -173,7 +182,7 @@ class SDataAccessControl {
      * 
      * @return array [0] true or false, [1] text reason, [2] case to notification
      */
-    public static function isAuthorized($oData = null, $id, $dtDate, $time, $inMins, $outMins)
+    public static function isAuthorized($oData, $id, $dtDate, $time, $inMins, $outMins)
     {
         $result = [];
         $reason = "";
@@ -315,8 +324,7 @@ class SDataAccessControl {
             $rec = $config->rec_plant;
         }
 
-        Mail::to($rec)
-                ->send(new BadCheckNotification($oEmployee->name, $dateTime, $result[1], $sSource));
+        Mail::to($rec)->send(new BadCheckNotification($oEmployee->name, $oEmployee->num_employee, $dateTime, $result[1], $sSource));
     }
 
     /**

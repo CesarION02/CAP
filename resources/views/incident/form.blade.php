@@ -45,6 +45,20 @@
             @endif
         </div>
 </div>
+<div class="form-group">
+    <label for="employee_id" class="col-lg-3 control-label requerido">Día festivo correspondiente:</label>
+    <div class="col-lg-8">
+        @if(isset($datas))
+            
+        @else
+            <select id="holiday_id"  name="holiday_id" class="form-control " disabled>
+                @foreach($holidays as $holiday)
+                    <option value="{{ $holiday->id }}"> {{$holiday->name.' - '.$holiday->fecha}}</option>
+                @endforeach
+            </select>
+        @endif
+    </div>
+</div>
 <div class="form-gruop">
     <label class="col-lg-3 control-label" for="">Comentarios frecuentes:</label>
     <div class="col-lg-8">

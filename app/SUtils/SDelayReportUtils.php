@@ -791,8 +791,8 @@ class SDelayReportUtils {
      * @param String $startDate
      * @param String $endDate
      * @param int $idEmployee
-     * @param [type] $registry
-     * @param query $lWorkshifts
+     * @param object $registry
+     * @param collection $lWorkshifts
      * @param int $iRep [\SCons::REP_DELAY, \SCons::REP_HR_EX]
      * @param boolean $specialApproved
      * @return void
