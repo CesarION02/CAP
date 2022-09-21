@@ -971,6 +971,7 @@ class SDataProcess {
             if ($num > 0) {
                 $oRow->isHoliday = $num;
                 $oRow->others = $oRow->others.'Festivo. ';
+                $oRow->isDayChecked = false;
             }
 
             if ($oRow->isTypeDayChecked || $oRow->hasAssign) {
@@ -1960,7 +1961,11 @@ class SDataProcess {
                             $comments->where('key_code','hasCheckIn')->first()['value'] ||
                             $comments->where('key_code','hasCheckOut')->first()['value']
                         ) {
-                            $oNewRow->isDayChecked = true;
+                            if($oNewRow->isHoliday < 1){
+                                $oNewRow->isDayChecked = true;
+                            }else{
+                                $oNewRow->isDayChecked = false;
+                            }
                         }
                     }
 
