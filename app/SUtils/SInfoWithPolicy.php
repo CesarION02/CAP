@@ -1517,6 +1517,7 @@ class SInfoWithPolicy{
                                 for($i = 0 ; count($posicionMenor) > $i ; $i++){
                                     if($posicionMenor[$i] == $diasOptimo){
                                             $lRows[$posicionMenor[$i]]->isDayOff = 1;
+                                            $posicionTransformar = $posicionMenor[$i];
                                             if( $posicionMenor[$i] == $diasCorrectos[0] ){ $diaSumar = 1;}
                                             $concluir = 1;
                                             $i = $i + 10;
@@ -2793,7 +2794,7 @@ class SInfoWithPolicy{
                 $empleados = DB::table('employees')
                                 ->where('is_active','=',1)
                                 ->where('way_pay_id','=',2)
-                                //->where('id',1313)
+                                ->where('id',1237)
                                 ->orderBy('id')
                                 ->select('id AS id','policy_extratime_id AS extratime')
                                 ->get();
