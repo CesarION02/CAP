@@ -842,6 +842,8 @@ class prePayrollController extends Controller
 
         if (count($groups) > 0) {
             $lChildrenGroups = SPrepayrollUtils::getChildrenOfGroups($groups);
+
+            $lChildrenGroups = array_diff($lChildrenGroups, $groups);
     
             $lGroupsHeads = \DB::table('prepayroll_groups AS pg')
                                     ->join('prepayroll_groups_users AS pgu', 'pg.id_group', '=', 'pgu.group_id')
