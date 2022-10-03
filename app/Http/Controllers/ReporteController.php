@@ -2504,7 +2504,7 @@ class ReporteController extends Controller
                 $onomastico = 0;
                 // if(count($row) < count($aDates)){
                     for($i=0; $i<count($aDates); $i++){
-                        if($row[$i]->outDate != $aDates[$i]){
+                        if(isset($row[$i]) && isset($aDates[$i]) && $row[$i]->outDate != $aDates[$i]){
                             $r = new \stdClass();
                             $r->outDate = $aDates[$i];
                             $r->incident_type = -1;
@@ -2521,12 +2521,14 @@ class ReporteController extends Controller
                             }
                             $row->splice($i, 0, [$r]);
                         }
-                        $row[$i]->hasAbsence == true ? $faltas++ : '';
-                        $row[$i]->incident_type == 19 ? $descansos++ : '';
-                        $row[$i]->incident_type == 12 ? $vacaciones++ : '';
-                        $row[$i]->incident_type == 7 ? $onomastico++ : '';
-                        in_array($row[$i]->incident_type, [1,2,3,4,5,6,20]) == true ? $inasistencias++ : '';
-                        in_array($row[$i]->incident_type, [9,10,11,18,16]) == true ? $incapacidad++ : '';
+                        if( isset($row[$i]) ){
+                            $row[$i]->hasAbsence == true ? $faltas++ : '';
+                            $row[$i]->incident_type == 19 ? $descansos++ : '';
+                            $row[$i]->incident_type == 12 ? $vacaciones++ : '';
+                            $row[$i]->incident_type == 7 ? $onomastico++ : '';
+                            in_array($row[$i]->incident_type, [1,2,3,4,5,6,20]) == true ? $inasistencias++ : '';
+                            in_array($row[$i]->incident_type, [9,10,11,18,16]) == true ? $incapacidad++ : '';
+                        }
                     }
                     $totRows[$key]->faltas = $faltas;
                     $totRows[$key]->descansos = $descansos;
