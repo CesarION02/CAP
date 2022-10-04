@@ -2520,6 +2520,22 @@ class ReporteController extends Controller
                                 $r->employee = $row[$i-1]->employee;
                             }
                             $row->splice($i, 0, [$r]);
+                        } else if (!isset($row[$i])) {
+                            $r = new \stdClass();
+                            $r->outDate = $aDates[$i];
+                            $r->incident_type = -1;
+                            $r->incident = null;
+                            $r->hasAbsence = null;
+                            if(isset($row[$i + 1])){
+                                $r->idEmployee = $row[$i+1]->idEmployee;
+                                $r->numEmployee = $row[$i+1]->numEmployee;
+                                $r->employee = $row[$i+1]->employee;
+                            } else if (isset($row[$i - 1])){
+                                $r->idEmployee = $row[$i-1]->idEmployee;
+                                $r->numEmployee = $row[$i-1]->numEmployee;
+                                $r->employee = $row[$i-1]->employee;
+                            }
+                            $row->splice($i, 0, [$r]);
                         }
                         if( isset($row[$i]) ){
                             $row[$i]->hasAbsence == true ? $faltas++ : '';
