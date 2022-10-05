@@ -1526,9 +1526,9 @@ class SDataProcess {
      * Determina por las checadas de entrada y salida si el horario pertenece a alguno
      * de los que otorgan tiempo extra y los asigna al empleado junto con sus horas extra
      *
-     * @param App\SUtils\SRegistryRow $oRow
+     * @param 'App\SUtils\SRegistryRow' $oRow
      * 
-     * @return App\SUtils\SRegistryRow
+     * @return 'App\SUtils\SRegistryRow'
      */
     public static function determineSchedule($oRow, $sEndDate, $workshifts)
     {
