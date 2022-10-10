@@ -549,7 +549,7 @@
         window.onscroll = function() {scrollFunction()};
 
         function scrollFunction() {
-            if (reloadButton || mybutton || theNewButton) {
+            if (reloadButton == null || mybutton == null || theNewButton == null) {
                 return;
             }
 
