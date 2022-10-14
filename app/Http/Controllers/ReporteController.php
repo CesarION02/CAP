@@ -231,16 +231,16 @@ class ReporteController extends Controller
                 $register = $register->whereIn('e.id', $values)
                                     ->select('e.id', 'e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id', 'e.external_id')
                                     ->groupBy('e.name','date','type_id','e.num_employee')
-                                    ->orderBy('date')
                                     ->orderBy('e.name')
+                                    ->orderBy('date')
                                     ->orderBy('time');
                 break;
             case 5:
                 $register = $register->whereIn('e.id', $values)
                                     ->select('e.id', 'e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id', 'e.external_id')
                                     ->groupBy('e.name','date','type_id','e.num_employee')
-                                    ->orderBy('date')
                                     ->orderBy('e.name')
+                                    ->orderBy('date')
                                     ->orderBy('time');
                 
                 $reportType = 4;
@@ -610,8 +610,10 @@ class ReporteController extends Controller
         
         if(isset($request->wizard)){
             $wizard = $request->wizard;
+            $filter_employees = $request->filter_employee;
         }else{
             $wizard = 0;
+            $filter_employees = 0;
         }
 
         $lComments = \DB::table('comments')->where('is_delete', 0)->get();
@@ -866,6 +868,7 @@ class ReporteController extends Controller
                     ->with('isAdmin', $isAdmin)
                     ->with('lUsers', $lUsers)
                     ->with('wizard', $wizard )
+                    ->with('filter_employees',$filter_employees)
                     ->with('pay_way', $request->pay_way);
         }
         else {
@@ -901,6 +904,7 @@ class ReporteController extends Controller
                     ->with('isAdmin', $isAdmin)
                     ->with('lUsers', $lUsers)
                     ->with('wizard', $wizard )
+                    ->with('filter_employees',$filter_employees)
                     ->with('pay_way', $request->pay_way);
         }
         
@@ -2553,6 +2557,12 @@ class ReporteController extends Controller
                     $totRows[$key]->incapacidad = $incapacidad;
                     $totRows[$key]->onomastico = $onomastico;
             }
+            $subEmployees = [];
+            $dirEmpl = SPrepayrollUtils::getEmployeesByUser(auth()->user()->id, 0, true, null);
+            foreach ($dirEmpl as $data) {
+                    array_push($subEmployees, $data);
+            }
+            
 
             return view('report.reportIncidentsEmployeesView', [
                                                             'lRows' => $totRows,
@@ -2564,7 +2574,8 @@ class ReporteController extends Controller
                                                             'routeDelete' => $routeDelete,
                                                             'aDates' => $aDates,
                                                             'wizard' => $request->wizard,
-                                                            'payWay' => $payWay
+                                                            'payWay' => $payWay,
+                                                            'subEmployees' => $subEmployees
                                                         ]);
         }
 

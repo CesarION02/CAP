@@ -213,7 +213,11 @@
                                             <td>{{\App\SUtils\SDateTimeUtils::orderDate($lRegistries[$i]->date)}}</td>
                                             <td>{{$lRegistries[$i]->time}}</td>
                                             @if(($i+1) < count($lRegistries))
-                                                @if($lRegistries[$i]->num_employee == $lRegistries[$i+1]->num_employee && $lRegistries[$i+1]->type_id == 2)
+                                                <?php $diaActual = \Carbon\Carbon::parse($lRegistries[$i]->date)  ?>
+                                                <?php $diaAdelantado = \Carbon\Carbon::parse($lRegistries[$i+1]->date)  ?>
+                                                <?php $diferencia = $diaActual->diffInDays($diaAdelantado)  ?>
+                                              
+                                                @if($lRegistries[$i]->num_employee == $lRegistries[$i+1]->num_employee && $lRegistries[$i+1]->type_id == 2 && $diferencia < 1)
                                                     <?php $i++; ?>
                                                     <td>{{\App\SUtils\SDateTimeUtils::orderDate($lRegistries[$i]->date)}}</td>
                                                     <td>{{$lRegistries[$i]->time}}</td>
