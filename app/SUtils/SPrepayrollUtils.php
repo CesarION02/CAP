@@ -3,6 +3,8 @@
 use App\SUtils\SPayrollDelegationUtils;
 use DB;
 use Carbon\Carbon;
+use App\Models\prepayrollVoboSkipped;
+use App\Models\PrepayReportControl;
 class SPrepayrollUtils {
 
     /**
@@ -350,7 +352,7 @@ class SPrepayrollUtils {
      * 
      * @return boolean
      */
-    private static function isPayrollNumberFreeOfVobo($prepayrollNumber, $prepayrollYear, $payTypeId) {
+    public static function isPayrollNumberFreeOfVobo($prepayrollNumber, $prepayrollYear, $payTypeId) {
         $lVobos = \DB::table('prepayroll_report_auth_controls AS prac');
 
         if ($payTypeId == \SCons::PAY_W_Q) {

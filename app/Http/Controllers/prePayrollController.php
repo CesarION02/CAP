@@ -87,10 +87,11 @@ class prePayrollController extends Controller
                 $aEmployeeIds = explode(",", $aEmployeeIds);
             }
 
-            if (! PrepayrollReportController::isFreeVoboPrepayroll($startDate, $endDate, $payType)) {
+            $aIsFree = PrepayrollReportController::isFreeVoboPrepayroll($startDate, $endDate, $payType);
+            if (! $aIsFree[0]) {
                 $response = new \stdClass();
                 $response->code = $this->NOT_VOBO;
-                $response->message = "La prenómina no se ha autorizado para la fecha: ".$startDate;
+                $response->message = "La prenómina no se ha autorizado para la fecha: ".$aIsFree[1];
 
                 return response()->json($response);
             }

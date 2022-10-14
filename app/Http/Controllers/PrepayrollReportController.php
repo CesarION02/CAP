@@ -447,7 +447,7 @@ class PrepayrollReportController extends Controller
             $isFree = SPrepayrollUtils::isPayrollNumberFreeOfVobo($number, $oDate->year, $payTypeId);
 
             if ($isFree) {
-                $prepayrollAprovedd[] = $oDate->toDateString();
+                $prepayrollAprovedd[] = $number;
             }
             else {
                 return [false, $oDate->toDateString()];
