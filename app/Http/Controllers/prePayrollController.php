@@ -2,28 +2,30 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use DB;
-use Validator;
-use Carbon\Carbon;
-use App\SUtils\SInfoWithPolicy;
-use App\Models\employees;
-use App\Models\incident;
-use App\Models\prepayroll_control;
-use App\Models\cutCalendarQ;
-use App\SPayroll\SPrePayroll;
-use App\SPayroll\SPrePayrollRow;
-use App\SPayroll\SPrePayrollDay;
-use App\Models\prepayrollchange;
-use App\Models\prepayrollAuthControl;
-use App\Models\PrepayReportControl;
-use App\Models\prepayrollVoboSkipped;
 use App\Http\Controllers\PrepayrollReportController;
 use App\Http\Controllers\SyncController;
+use App\Models\cutCalendarQ;
+use App\Models\employees;
+use App\Models\PrepayReportControl;
+use App\Models\prepayrollchange;
+use App\Models\prepayrollVoboSkipped;
+use App\Models\prepayroll_control;
+use App\SPayroll\SPrePayroll;
+use App\SPayroll\SPrePayrollDay;
+use App\SPayroll\SPrePayrollRow;
+use App\SUtils\SInfoWithPolicy;
 use App\SUtils\SPrepayrollUtils;
+use Carbon\Carbon;
+use DB;
 use Illuminate\Database\QueryException;
+use Illuminate\Http\Request;
+use Validator;
 class prePayrollController extends Controller
 {
+    private $OK;
+    private $ERROR;
+    private $NOT_VOBO;
+
     public function __construct() {
         // Códigos de respuesta:
         $this->OK = "200";
@@ -36,7 +38,7 @@ class prePayrollController extends Controller
      *
      * @param Request $request
      * 
-     * @return JSON string 
+     * @return 'Illuminate\Http\JsonResponse' string 
      * {
      *	start_date: date,
      *	end_date: date,
@@ -85,7 +87,7 @@ class prePayrollController extends Controller
                 $aEmployeeIds = explode(",", $aEmployeeIds);
             }
 
-            if (! PrepayrollReportController::isFreeVoboPrepayroll($startDate, $payType)) {
+            if (! PrepayrollReportController::isFreeVoboPrepayroll($startDate, $endDate, $payType)) {
                 $response = new \stdClass();
                 $response->code = $this->NOT_VOBO;
                 $response->message = "La prenómina no se ha autorizado para la fecha: ".$startDate;
@@ -153,7 +155,7 @@ class prePayrollController extends Controller
          * Obtiene el reporte de horas extra, que contiene también domingos y festivos.
          */
         $info = SInfoWithPolicy::preProcessInfo($startDate, $oStartDate->year, $endDate, $payType);
-        $lExtras = \DB::table('processed_data')
+        $lExtras = DB::table('processed_data')
                                 ->join('employees','employees.id','=','processed_data.employee_id')
                                 ->whereIn('employees.id', $lCapEmployees)
                                 ->whereBetween('outDate',[$startDate, $endDate])
@@ -309,7 +311,7 @@ class prePayrollController extends Controller
      */
     public static function searchAbsence($idEmployee, $sDate)
     {
-        $lAbsences = \DB::table('incidents AS i')
+        $lAbsences = DB::table('incidents AS i')
             ->join('type_incidents AS ti', 'i.type_incidents_id', '=', 'ti.id')
             ->where('employee_id', $idEmployee)
             ->whereRaw("'" . $sDate . "' BETWEEN start_date AND end_date")
@@ -332,11 +334,11 @@ class prePayrollController extends Controller
      * @param int $idEmployee
      * @param String $sDate
      * 
-     * @return incident array
+     * @return '\App\Models\incident' array
      */
     public static function searchAbsenceByDay($idEmployee, $sDate)
     {
-        $lAbsences = \DB::table('incidents AS i')
+        $lAbsences = DB::table('incidents AS i')
             ->join('incidents_day AS iday', 'i.id', '=', 'iday.incidents_id')
             ->join('type_incidents AS ti', 'i.type_incidents_id', '=', 'ti.id')
             ->where('employee_id', $idEmployee)
@@ -412,29 +414,29 @@ class prePayrollController extends Controller
         $prepayroll->save();
     }
 
-    public function indexQ(){
-
+    public function indexQ(Request $request) {
         $start_date = null;
         $end_date = null;
         if ($request->start_date == null) {
             $now = Carbon::now();
             $start_date = $now->startOfMonth()->toDateString();
             $end_date = $now->endOfMonth()->toDateString();
-        }else {
+        }
+        else {
             $start_date = $request->start_date;
             $end_date = $request->end_date;
         }
-        
+
         $quincena = DB::table('prepayroll_control')
-                            ->join('hrs_prepay_cut','prepayroll_control.num_biweekly','=','hrs_prepay_cut.id')
-                            ->where('prepayroll_control.is_biweekly',1)
-                            ->orderBy('hrs_prepay_cut.dt_cut')
-                            ->get();  
+            ->join('hrs_prepay_cut', 'prepayroll_control.num_biweekly', '=', 'hrs_prepay_cut.id')
+            ->where('prepayroll_control.is_biweekly', 1)
+            ->orderBy('hrs_prepay_cut.dt_cut')
+            ->get();
 
         return view('prepayroll.indexQ', compact('quincena'));
     }
 
-    public function indexS(Request $request){
+    public function indexS(Request $request) {
         $start_date = null;
         $end_date = null;
         if ($request->start_date == null) {
@@ -528,7 +530,7 @@ class prePayrollController extends Controller
         return view('prepayrollcontrol.controlS',compact('semana'))->with('aFuera',$aFuera)->with('start_date',$start_date)->with('end_date',$end_date); 
     }
 
-    public function prepayrollQ(){
+    public function prepayrollQ(Request $request) {
         $start_date = null;
         $end_date = null;
         if ($request->start_date == null) {
@@ -607,7 +609,7 @@ class prePayrollController extends Controller
         
         switch ($idPreNomina) {
             case 'week':
-                $lControls = \DB::table('prepayroll_report_auth_controls AS prac')
+                $lControls = DB::table('prepayroll_report_auth_controls AS prac')
                             ->join('users AS u', 'prac.user_vobo_id', '=', 'u.id')
                             ->leftJoin('week_cut AS wc', function($join)
                             {
@@ -627,7 +629,7 @@ class prePayrollController extends Controller
 							->get();
                 break;
             case 'biweek':
-                $lControls = \DB::table('prepayroll_report_auth_controls AS prac')
+                $lControls = DB::table('prepayroll_report_auth_controls AS prac')
                             ->join('users AS u', 'prac.user_vobo_id', '=', 'u.id')
                             ->leftJoin('hrs_prepay_cut AS hpc', function($join)
                             {
@@ -641,7 +643,7 @@ class prePayrollController extends Controller
                                         ->where(function($query5) use ($startDate, $endDate){
                                             $query5->whereBetween('dt_cut', [$startDate, $endDate]);
                                             // ->orWhere(function($query6) use ($startDate, $endDate){
-                                            //     $query6->whereBetween(\DB::raw('DATE_SUB(dt_cut,INTERVAL 14 DAY)'), [$startDate, $endDate]);
+                                            //     $query6->whereBetween(DB::raw('DATE_SUB(dt_cut,INTERVAL 14 DAY)'), [$startDate, $endDate]);
                                             // });
                                         });
                                     });
@@ -650,7 +652,7 @@ class prePayrollController extends Controller
 							->get();
 
                 foreach($lControls as $cont){
-                    $dt_ini = \DB::table('hrs_prepay_cut')
+                    $dt_ini = DB::table('hrs_prepay_cut')
                                         ->where('year', Carbon::parse($startDate)->format('Y'))
                                         ->where('num', ($cont->num_biweek - 1))
                                         ->value('dt_cut');
@@ -659,7 +661,7 @@ class prePayrollController extends Controller
                 }
                 break;
             default:
-                $lControls = \DB::table('prepayroll_report_auth_controls AS prac')
+                $lControls = DB::table('prepayroll_report_auth_controls AS prac')
                             ->join('users AS u', 'prac.user_vobo_id', '=', 'u.id')
                             ->leftJoin('week_cut AS wc', function($join)
                             {
@@ -684,7 +686,7 @@ class prePayrollController extends Controller
                                         ->where(function($query5) use ($startDate, $endDate){
                                             $query5->whereBetween('dt_cut', [$startDate, $endDate])
                                             ->orWhere(function($query6) use ($startDate, $endDate){
-                                                $query6->whereBetween(\DB::raw('DATE_SUB(dt_cut,INTERVAL 14 DAY)'), [$startDate, $endDate]);
+                                                $query6->whereBetween(DB::raw('DATE_SUB(dt_cut,INTERVAL 14 DAY)'), [$startDate, $endDate]);
                                             });
                                         });
                                     });
@@ -694,7 +696,7 @@ class prePayrollController extends Controller
 
                 foreach($lControls as $cont){
                     if($cont->is_biweek){
-                        $dt_ini = \DB::table('hrs_prepay_cut')
+                        $dt_ini = DB::table('hrs_prepay_cut')
                                             ->where('year', Carbon::parse($startDate)->format('Y'))
                                             ->where('num', ($cont->num_biweek - 1))
                                             ->value('dt_cut');
@@ -723,7 +725,7 @@ class prePayrollController extends Controller
         $endDate = $request->end_date == null ? Carbon::now()->lastOfMonth()->toDateString() : $request->end_date;
         $config = \App\SUtils\SConfiguration::getConfigurations();
         
-        $lControls = \DB::table('prepayroll_report_auth_controls AS prac')
+        $lControls = DB::table('prepayroll_report_auth_controls AS prac')
                             ->join('users AS u', 'prac.user_vobo_id', '=', 'u.id')
                             ->leftJoin('week_cut AS wc', function($join)
                             {
@@ -760,14 +762,14 @@ class prePayrollController extends Controller
     public function saveRequire(Request $request){
         $result = 0;
         try{
-                $result = \DB::table('prepayroll_report_auth_controls')
+                $result = DB::table('prepayroll_report_auth_controls')
                             ->where('id_control', $request->idControl)
                             ->where('user_vobo_id', $request->user_id)
                             ->update([
                                 'is_required' => $request->require
                             ]);
                 
-                $value = \DB::table('prepayroll_report_auth_controls')
+                $value = DB::table('prepayroll_report_auth_controls')
                             ->where('id_control', $request->idControl)
                             ->where('user_vobo_id', $request->user_id)
                             ->value('is_required');
@@ -784,12 +786,12 @@ class prePayrollController extends Controller
     public function checkBoVoPrevius(Request $request) {
         if ($request->idprenomina == "week") {
 
-            $num = \DB::table('prepayroll_report_auth_controls')
+            $num = DB::table('prepayroll_report_auth_controls')
                         ->where('id_control', $request->id)
                         ->select('num_week', 'year')
                         ->first();
 
-            $anterior = \DB::table('prepayroll_report_auth_controls')
+            $anterior = DB::table('prepayroll_report_auth_controls')
                                 ->where('year', $num->year)
                                 ->where('is_delete', 0)
                                 ->where('num_week', $num->num_week - 1)
@@ -799,12 +801,12 @@ class prePayrollController extends Controller
         }
         else if ($request->idprenomina == "biweek") {
 
-            $num = \DB::table('prepayroll_report_auth_controls')
+            $num = DB::table('prepayroll_report_auth_controls')
                         ->where('id_control', $request->id)
                         ->select('num_biweek', 'year')
                         ->first();
 
-            $anterior = \DB::table('prepayroll_report_auth_controls')
+            $anterior = DB::table('prepayroll_report_auth_controls')
                             ->where('is_delete', 0)
                             ->where('year', $num->year)
                             ->where('num_biweek', $num->num_biweek - 1)
@@ -822,7 +824,7 @@ class prePayrollController extends Controller
         $usersNotVobo = [];
         $sectNum = "";
 
-        $oPpAuthCtrol = \DB::table('prepayroll_report_auth_controls')
+        $oPpAuthCtrol = DB::table('prepayroll_report_auth_controls')
                     ->where('id_control', $request->id)
                     ->select('num_'.$request->idprenomina, 'year', 'is_global', 'order_vobo')
                     ->first();
@@ -834,7 +836,7 @@ class prePayrollController extends Controller
             $sectNum = $oPpAuthCtrol->num_biweek;
         }
 
-        $groups = \DB::table('prepayroll_groups AS pg')
+        $groups = DB::table('prepayroll_groups AS pg')
                         ->join('prepayroll_groups_users AS pgu', 'pg.id_group', '=', 'pgu.group_id')
                         ->where('pgu.head_user_id', auth()->user()->id)
                         ->pluck('pg.id_group')
@@ -843,7 +845,7 @@ class prePayrollController extends Controller
         if (count($groups) > 0) {
             $lChildrenGroups = SPrepayrollUtils::getChildrenOfGroups($groups);
     
-            $lGroupsHeads = \DB::table('prepayroll_groups AS pg')
+            $lGroupsHeads = DB::table('prepayroll_groups AS pg')
                                     ->join('prepayroll_groups_users AS pgu', 'pg.id_group', '=', 'pgu.group_id')
                                     ->join('users AS u', 'pgu.head_user_id', '=', 'u.id')
                                     ->whereIn('pg.id_group', $lChildrenGroups)
@@ -852,7 +854,7 @@ class prePayrollController extends Controller
                                     ->get();
             
             foreach($lGroupsHeads as $group) {
-                $is_vobo = \DB::table('prepayroll_report_auth_controls')
+                $is_vobo = DB::table('prepayroll_report_auth_controls')
                                 ->where('year', $oPpAuthCtrol->year)
                                 ->where('num_'.$request->idprenomina, $sectNum)
                                 ->where('user_vobo_id', $group->head_user_id)
@@ -875,7 +877,7 @@ class prePayrollController extends Controller
             }
         }
         else if ($oPpAuthCtrol->is_global) {
-            $AllVobos = \DB::table('prepayroll_report_auth_controls AS prac')
+            $AllVobos = DB::table('prepayroll_report_auth_controls AS prac')
                                 ->join('users AS u', 'prac.user_vobo_id', '=', 'u.id')
                                 ->where('year', $oPpAuthCtrol->year)
                                 ->where('num_'.$request->idprenomina, $sectNum)
@@ -894,7 +896,7 @@ class prePayrollController extends Controller
 
         $bCanSkip = false;
         if (count($usersNotVobo) > 0) {
-            $vobosMajor = \DB::table('prepayroll_report_auth_controls AS prac')
+            $vobosMajor = DB::table('prepayroll_report_auth_controls AS prac')
                                 ->join('users AS u', 'prac.user_vobo_id', '=', 'u.id')
                                 ->where('year', $oPpAuthCtrol->year)
                                 ->where('num_'.$request->idprenomina, $sectNum)
@@ -966,7 +968,7 @@ class prePayrollController extends Controller
                 }
             }
 
-            $res = \DB::table('prepayroll_report_auth_controls')
+            $res = DB::table('prepayroll_report_auth_controls')
                         ->where('id_control', $idVobo)
                         ->where('user_vobo_id', auth()->user()->id)
                         ->update([
@@ -983,7 +985,7 @@ class prePayrollController extends Controller
         $msg = "Se dió el visto bueno correctamente";
         $icon = "success";
         
-        // $res = \DB::table('prepayroll_report_auth_controls')
+        // $res = DB::table('prepayroll_report_auth_controls')
         //             ->where('id_control', $id)
         //             ->update([
         //                 'is_vobo' => true, 
@@ -1112,7 +1114,7 @@ class prePayrollController extends Controller
      */
     public function rejBoVo($id, $idPreNomina = 1)
     {
-        $res = \DB::table('prepayroll_report_auth_controls')
+        $res = DB::table('prepayroll_report_auth_controls')
                     ->where('id_control', $id)
                     ->update([
                         'is_vobo' => false, 
@@ -1142,7 +1144,7 @@ class prePayrollController extends Controller
             $fecha = DB::table('week_cut')
                             ->where('id',$control->num_week)
                             ->get();
-            $res = \DB::table('prepayroll_report_auth_controls')
+            $res = DB::table('prepayroll_report_auth_controls')
                             ->where('num_week', $fecha[0]->num)
                             ->where('year', $fecha[0]->year)
                             ->update([
@@ -1158,7 +1160,7 @@ class prePayrollController extends Controller
                             ->where('id',$control->num_biweekly)
                             ->get();
             
-            $res = \DB::table('prepayroll_report_auth_controls')
+            $res = DB::table('prepayroll_report_auth_controls')
                             ->where('num_biweek', $fecha[0]->num)
                             ->where('year', $fecha[0]->year)
                             ->update([

@@ -340,5 +340,89 @@ class SPrepayrollUtils {
         return $mayor;
 
     }
+
+    /**
+     * Undocumented function
+     *
+     * @param integer $prepayrollNumber
+     * @param integer $prepayrollYear
+     * @param integer $payTypeId
+     * 
+     * @return boolean
+     */
+    private static function isPayrollNumberFreeOfVobo($prepayrollNumber, $prepayrollYear, $payTypeId) {
+        $lVobos = \DB::table('prepayroll_report_auth_controls AS prac');
+
+        if ($payTypeId == \SCons::PAY_W_Q) {
+            $lVobos = $lVobos->where('is_biweek', true)
+                            ->where('num_biweek', $prepayrollNumber);
+        }
+        else {
+            $lVobos = $lVobos->where('is_week', true)
+                            ->where('num_week', $prepayrollNumber);
+        }
+
+        $lVobos = $lVobos->where('is_delete', false)
+                            ->where('year', $prepayrollYear)
+                            ->orderBy('order_vobo', 'ASC');
+
+        $lVobosEmpty = clone $lVobos;
+
+        /**
+         * Si no hay vobos, se retorna true
+         */
+        $lVobosEmpty = $lVobosEmpty->get();
+        if (count($lVobosEmpty) == 0) {
+            return true;
+        }
+
+        $lVobosReq = clone $lVobos;
+        $lVobosReq = $lVobosReq->where('is_vobo', false)
+                                ->where('is_required', true)
+                                ->get();
+            
+        if (count($lVobosReq) > 0) {
+            $lSkipped = prepayrollVoboSkipped::where('year', $prepayrollYear)
+                                                ->where('is_delete', 0);
+
+            if ($payTypeId == \SCons::PAY_W_Q) {
+                $lSkipped = $lSkipped->where('is_biweek', true)
+                                    ->where('num_biweek', $prepayrollNumber);
+            }
+            else {
+                $lSkipped = $lSkipped->where('is_week', true)
+                                    ->where('num_week', $prepayrollNumber);
+            }
+            
+            $lSkipped = $lSkipped->orderBy('created_at', 'DESC')
+                                ->first();
+
+            if ($lSkipped != null) {
+                $voBo = PrepayReportControl::where('user_vobo_id', $lSkipped->skipped_by_id)
+                                    ->where('year', $prepayrollYear)
+                                    ->where('is_delete', 0)
+                                    ->where('is_vobo', true);
+
+                if ($payTypeId == \SCons::PAY_W_Q) {
+                    $voBo = $voBo->where('is_biweek', true)
+                                ->where('num_biweek', $prepayrollNumber);
+                }
+                else {
+                    $voBo = $voBo->where('is_week', true)
+                                ->where('num_week', $prepayrollNumber);
+                }
+
+                $voBo = $voBo->get();
+
+                if (count($voBo) > 0) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        
+        return true;
+    }
 }
         

@@ -1,6 +1,13 @@
 <?php namespace App\SPayroll;
 
 class SPrePayrollDay {
+    public $dt_date;
+    public $num_absences;
+    public $is_sunday;
+    public $n_days_off;
+    public $holiday_id;
+    public $events;
+
     public function __construct() {
         $this->dt_date = null;
         // $this->entry = [];

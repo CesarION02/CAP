@@ -420,144 +420,43 @@ class PrepayrollReportController extends Controller
     /**
      * Determina si la prenómina no tiene pendientes vistos buenos
      *
-     * @param [type] $dtDate
-     * @param [type] $payTypeId
-     * @return boolean
+     * @param string $dtDate
+     * @param string $dtDateEnd
+     * @param integer $payTypeId
+     * 
+     * @return array
      */
-    public static function isFreeVobo($dtDate, $payTypeId)
+    public static function isFreeVoboPrepayroll($dtDate, $dtDateEnd, $payTypeId)
     {
-        $number = SDateUtils::getNumberOfDate($dtDate, $payTypeId);
-        $oDate = Carbon::parse($dtDate);
-
-        $lVobos = \DB::table('prepayroll_report_auth_controls AS prac');
-
-        if ($payTypeId == \SCons::PAY_W_Q) {
-            $lVobos = $lVobos->where('is_biweek', true)
-                            ->where('num_biweek', $number);
-        }
-        else {
-            $lVobos = $lVobos->where('is_week', true)
-                            ->where('num_week', $number);
-        }
-
-        $lVobos = $lVobos->where('is_delete', false)
-                            ->where('year', $oDate->year)
-                            ->orderBy('order_vobo', 'ASC');
-
-        $lVobosEmpty = clone $lVobos;
+        $prepayrollAprovedd = [];
+        $oStartDate = Carbon::parse($dtDate);
+        $oEndDate = Carbon::parse($dtDateEnd);
+        $oDate = clone $oStartDate;
 
         /**
-         * Si no hay vobos, se retorna true
+         * crea un arreglo con los días a consultar
          */
-        $lVobosEmpty = $lVobosEmpty->get();
-        if (count($lVobosEmpty) == 0) {
-            return true;
-        }
+        while ($oDate->lessThanOrEqualTo($oEndDate)) {
+            $number = SDateUtils::getNumberOfDate($oDate->toDateString(), $payTypeId);
 
-        $lVoboUsr = clone $lVobos;
-        $oVoboUsr = $lVoboUsr->where('user_vobo_id', \Auth::user()->id)->first();
-
-        $lVobosMaj = clone $lVobos;
-        if ($oVoboUsr != null) {
-            $lVobosMaj = $lVobosMaj->where('order_vobo', '>', $oVoboUsr->order_vobo)
-                            ->where('is_vobo', true)
-                            ->where('user_vobo_id', '!=', \Auth::user()->id)
-                            ->get();
-            
-            if (count($lVobosMaj) > 0) {
-                return false;
+            if (in_array($number, $prepayrollAprovedd)) {
+                $oDate->addDay();
+                continue;
             }
 
-            return true;
-        }
+            $isFree = SPrepayrollUtils::isPayrollNumberFreeOfVobo($number, $oDate->year, $payTypeId);
 
-        $lVobosSome = clone $lVobos;
-        $lVobosSome = $lVobosSome->where('is_vobo', true)
-                                ->get();
-
-        if (count($lVobosSome) > 0) {
-            return false;
-        }
-        
-        return true;
-    }
-
-    public static function isFreeVoboPrepayroll($dtDate, $payTypeId)
-    {
-        $number = SDateUtils::getNumberOfDate($dtDate, $payTypeId);
-        $oDate = Carbon::parse($dtDate);
-
-        $lVobos = \DB::table('prepayroll_report_auth_controls AS prac');
-
-        if ($payTypeId == \SCons::PAY_W_Q) {
-            $lVobos = $lVobos->where('is_biweek', true)
-                            ->where('num_biweek', $number);
-        }
-        else {
-            $lVobos = $lVobos->where('is_week', true)
-                            ->where('num_week', $number);
-        }
-
-        $lVobos = $lVobos->where('is_delete', false)
-                            ->where('year', $oDate->year)
-                            ->orderBy('order_vobo', 'ASC');
-
-        $lVobosEmpty = clone $lVobos;
-
-        /**
-         * Si no hay vobos, se retorna true
-         */
-        $lVobosEmpty = $lVobosEmpty->get();
-        if (count($lVobosEmpty) == 0) {
-            return true;
-        }
-
-        $lVobosReq = clone $lVobos;
-        $lVobosReq = $lVobosReq->where('is_vobo', false)
-                                ->where('is_required', true)
-                                ->get();
-            
-        if (count($lVobosReq) > 0) {
-            $lSkipped = prepayrollVoboSkipped::where('year', $oDate->year)
-                                                ->where('is_delete', 0);
-
-            if ($payTypeId == \SCons::PAY_W_Q) {
-                $lSkipped = $lSkipped->where('is_biweek', true)
-                                    ->where('num_biweek', $number);
+            if ($isFree) {
+                $prepayrollAprovedd[] = $oDate->toDateString();
             }
             else {
-                $lSkipped = $lSkipped->where('is_week', true)
-                                    ->where('num_week', $number);
-            }
-            
-            $lSkipped = $lSkipped->orderBy('created_at', 'DESC')
-                                ->first();
-
-            if ($lSkipped != null) {
-                $voBo = PrepayReportControl::where('user_vobo_id', $lSkipped->skipped_by_id)
-                                    ->where('year', $oDate->year)
-                                    ->where('is_delete', 0)
-                                    ->where('is_vobo', true);
-
-                if ($payTypeId == \SCons::PAY_W_Q) {
-                    $voBo = $voBo->where('is_biweek', true)
-                                ->where('num_biweek', $number);
-                }
-                else {
-                    $voBo = $voBo->where('is_week', true)
-                                ->where('num_week', $number);
-                }
-
-                $voBo = $voBo->get();
-
-                if (count($voBo) > 0) {
-                    return true;
-                }
+                return [false, $oDate->toDateString()];
             }
 
-            return false;
+            $oDate->addDay();
         }
-        
-        return true;
+
+        return [true, $prepayrollAprovedd];
     }
+    
 }

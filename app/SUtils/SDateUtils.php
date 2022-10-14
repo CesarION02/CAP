@@ -224,8 +224,8 @@ class SDateUtils {
     /**
      * Undocumented function
      *
-     * @param [type] $dtDate
-     * @param [type] $payTypeId
+     * @param string $dtDate
+     * @param integer $payTypeId
      * @return void
      */
     public static function getNumberOfDate($dtDate, $payTypeId)
@@ -261,10 +261,11 @@ class SDateUtils {
     /**
      * Retorna un array con las fechas de inicio y fin de la semana o quincena
      *
-     * @param [type] $num
-     * @param [type] $year
-     * @param [type] $payTypeId
-     * @return void
+     * @param integer $num
+     * @param integer $year
+     * @param integer $payTypeId
+     * 
+     * @return array
      */
     public static function getDatesOfPayrollNumber($num, $year, $payTypeId)
     {
