@@ -231,16 +231,16 @@ class ReporteController extends Controller
                 $register = $register->whereIn('e.id', $values)
                                     ->select('e.id', 'e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id', 'e.external_id')
                                     ->groupBy('e.name','date','type_id','e.num_employee')
-                                    ->orderBy('date')
                                     ->orderBy('e.name')
+                                    ->orderBy('date')
                                     ->orderBy('time');
                 break;
             case 5:
                 $register = $register->whereIn('e.id', $values)
                                     ->select('e.id', 'e.num_employee', 'e.name', 'r.date', 'r.time', 'r.type_id', 'e.external_id')
                                     ->groupBy('e.name','date','type_id','e.num_employee')
-                                    ->orderBy('date')
                                     ->orderBy('e.name')
+                                    ->orderBy('date')
                                     ->orderBy('time');
                 
                 $reportType = 4;
@@ -610,8 +610,10 @@ class ReporteController extends Controller
         
         if(isset($request->wizard)){
             $wizard = $request->wizard;
+            $filter_employees = $request->filter_employee;
         }else{
             $wizard = 0;
+            $filter_employees = 0;
         }
 
         $lComments = \DB::table('comments')->where('is_delete', 0)->get();
@@ -866,6 +868,7 @@ class ReporteController extends Controller
                     ->with('isAdmin', $isAdmin)
                     ->with('lUsers', $lUsers)
                     ->with('wizard', $wizard )
+                    ->with('filter_employees',$filter_employees)
                     ->with('pay_way', $request->pay_way);
         }
         else {
@@ -901,6 +904,7 @@ class ReporteController extends Controller
                     ->with('isAdmin', $isAdmin)
                     ->with('lUsers', $lUsers)
                     ->with('wizard', $wizard )
+                    ->with('filter_employees',$filter_employees)
                     ->with('pay_way', $request->pay_way);
         }
         
@@ -2504,7 +2508,23 @@ class ReporteController extends Controller
                 $onomastico = 0;
                 // if(count($row) < count($aDates)){
                     for($i=0; $i<count($aDates); $i++){
-                        if($row[$i]->outDate != $aDates[$i]){
+                        if(isset($row[$i]) && isset($aDates[$i]) && $row[$i]->outDate != $aDates[$i]){
+                            $r = new \stdClass();
+                            $r->outDate = $aDates[$i];
+                            $r->incident_type = -1;
+                            $r->incident = null;
+                            $r->hasAbsence = null;
+                            if(isset($row[$i + 1])){
+                                $r->idEmployee = $row[$i+1]->idEmployee;
+                                $r->numEmployee = $row[$i+1]->numEmployee;
+                                $r->employee = $row[$i+1]->employee;
+                            } else if (isset($row[$i - 1])){
+                                $r->idEmployee = $row[$i-1]->idEmployee;
+                                $r->numEmployee = $row[$i-1]->numEmployee;
+                                $r->employee = $row[$i-1]->employee;
+                            }
+                            $row->splice($i, 0, [$r]);
+                        } else if (!isset($row[$i])) {
                             $r = new \stdClass();
                             $r->outDate = $aDates[$i];
                             $r->incident_type = -1;
@@ -2521,12 +2541,14 @@ class ReporteController extends Controller
                             }
                             $row->splice($i, 0, [$r]);
                         }
-                        $row[$i]->hasAbsence == true ? $faltas++ : '';
-                        $row[$i]->incident_type == 19 ? $descansos++ : '';
-                        $row[$i]->incident_type == 12 ? $vacaciones++ : '';
-                        $row[$i]->incident_type == 7 ? $onomastico++ : '';
-                        in_array($row[$i]->incident_type, [1,2,3,4,5,6,20]) == true ? $inasistencias++ : '';
-                        in_array($row[$i]->incident_type, [9,10,11,18,16]) == true ? $incapacidad++ : '';
+                        if( isset($row[$i]) ){
+                            $row[$i]->hasAbsence == true ? $faltas++ : '';
+                            $row[$i]->incident_type == 19 ? $descansos++ : '';
+                            $row[$i]->incident_type == 12 ? $vacaciones++ : '';
+                            $row[$i]->incident_type == 7 ? $onomastico++ : '';
+                            in_array($row[$i]->incident_type, [1,2,3,4,5,6,20]) == true ? $inasistencias++ : '';
+                            in_array($row[$i]->incident_type, [9,10,11,18,16]) == true ? $incapacidad++ : '';
+                        }
                     }
                     $totRows[$key]->faltas = $faltas;
                     $totRows[$key]->descansos = $descansos;
@@ -2535,6 +2557,12 @@ class ReporteController extends Controller
                     $totRows[$key]->incapacidad = $incapacidad;
                     $totRows[$key]->onomastico = $onomastico;
             }
+            $subEmployees = [];
+            $dirEmpl = SPrepayrollUtils::getEmployeesByUser(auth()->user()->id, 0, true, null);
+            foreach ($dirEmpl as $data) {
+                    array_push($subEmployees, $data);
+            }
+            
 
             return view('report.reportIncidentsEmployeesView', [
                                                             'lRows' => $totRows,
@@ -2546,7 +2574,8 @@ class ReporteController extends Controller
                                                             'routeDelete' => $routeDelete,
                                                             'aDates' => $aDates,
                                                             'wizard' => $request->wizard,
-                                                            'payWay' => $payWay
+                                                            'payWay' => $payWay,
+                                                            'subEmployees' => $subEmployees
                                                         ]);
         }
 

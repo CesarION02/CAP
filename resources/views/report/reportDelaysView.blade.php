@@ -549,6 +549,10 @@
         window.onscroll = function() {scrollFunction()};
 
         function scrollFunction() {
+            if (reloadButton == null || mybutton == null || theNewButton == null) {
+                return;
+            }
+
             if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
                 reloadButton.style.display = "block";
                 mybutton.style.display = "block";
