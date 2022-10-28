@@ -5,7 +5,77 @@
  * retardos y horas extras
  */
 class SRegistryRow {
-    function __construct() {
+    public $idEmployee;
+    public $numEmployee;
+    public $employee;
+    public $external_id;
+    public $employeeAreaId;
+    public $inDate;
+    public $inDateTime;
+    public $inDateTimeSch;
+    public $inDateTimeNoficial;
+    public $outDate;
+    public $outDateTime;
+    public $outDateTimeSch;
+    public $scheduleText;
+    public $outDateTimeNoficial;
+    public $entryDelayMinutes;
+    public $prematureOut;
+    public $diffMins;
+    public $delayMins;
+    public $overDefaultMins;
+    public $overScheduleMins;
+    public $overWorkedMins;
+    public $overMinsByAdjs;
+    public $adjusts;
+    public $overMinsTotal;
+    public $cutId;
+    public $extraHours;
+    public $hasAbsence;
+    public $workable;
+    public $isIncompleteTeJourney;
+    public $removeSunday;
+    public $isSunday;
+    public $isDayOff;
+    public $isHoliday;
+    public $extraDouble;
+    public $extraDoubleMins;
+    public $extraTriple;
+    public $extraTripleMins;
+    public $extraDoubleNoficial;
+    public $extraDoubleMinsNoficial;
+    public $extraTripleNoficial;
+    public $extraTripleMinsNoficial;
+    public $dayInhability;
+    public $dayVacations;
+    public $events;
+    public $hasAssign;
+    public $hasChecks;
+    public $hasSchedule;
+    public $isSpecialSchedule;
+    public $isOnSchedule;
+    public $workJourneyMins;
+    public $hasWorkedJourney8hr;
+    public $isOverJourney;
+    public $overtimeCheckPolicy;
+    public $isDayRepeated;
+    public $scheduleFrom;
+    public $hasCheckOut;
+    public $hasCheckIn;
+    public $isModifiedIn;
+    public $isModifiedOut;
+    public $isAtypicalIn;
+    public $isAtypicalOut;
+    public $isCheckSchedule;
+    public $isTypeDayChecked;
+    public $hasAdjust;
+    public $work_dayoff;
+    public $others;
+    public $comments;
+    public $isDayChecked;
+
+    function __construct()
+    {
         $this->idEmployee = 0;
         $this->numEmployee = 0;
         $this->employee = 0;
@@ -78,5 +148,3 @@ class SRegistryRow {
 }
 
 ?>
-
-
