@@ -66,6 +66,8 @@ class SDataProcess {
         // $lDataJ = SOverJourneyCore::overtimeByIncompleteJourney($sStartDate, $sEndDate, $lDataWSun, $aEmployeeOverTime);
         $lAllData = SOverJourneyCore::processOverTimeByOverJourney($lDataWSun, $sStartDate, $comments);
 
+        $lAllData = SDataProcess::putAdjustInRows($sStartDate, $sEndDate, $lAllData);
+
         return $lAllData;
     }
 
@@ -2069,5 +2071,64 @@ class SDataProcess {
         }
 
         return $checkDayBefore;
+    }
+
+    public static function putAdjustInRows($sStartDate, $sEndDate, $lRows){
+        $lAdjusts = \DB::table('prepayroll_adjusts AS pa')
+                        ->join('prepayroll_adjusts_types AS pat', 'pa.adjust_type_id', '=', 'pat.id')
+                        ->select('pa.employee_id',
+                                    'pa.dt_date',
+                                    'pa.dt_time',
+                                    'pa.minutes',
+                                    'pa.comments',
+                                    'pa.apply_to',
+                                    'pa.adjust_type_id',
+                                    'pat.type_code',
+                                    'pat.type_name',
+                                    'pa.id',
+                                    'pa.apply_time'
+                                    )
+                        ->whereBetween('dt_date', [$sStartDate, $sEndDate])
+                        ->where('is_delete', false)
+                        ->get();
+
+        foreach($lRows as $row) {
+            $inDate = Carbon::parse($row->inDateTime);
+            $outDate = Carbon::parse($row->outDateTime);
+
+            $adjs = $lAdjusts->where('employee_id', $row->idEmployee)
+                            ->whereBetween('dt_date', [$inDate->format('Y-m-d'), $outDate->format('Y-m-d')]);
+            
+            foreach($adjs as $adj){
+                if($adj->apply_to == 1){
+                    $tiime = $adj->dt_time != null ? (' '.$adj->dt_time) : '';
+                    if($adj->apply_time){
+                        $adj_date = Carbon::parse($adj->dt_date.$tiime);
+                        $row_date = Carbon::parse($row->inDateTime);
+                    }else{
+                        $adj_date = Carbon::parse($adj->dt_date);
+                        $row_date = Carbon::parse(is_null($row->inDate) ? $row->inDateTime : $row->inDate);
+                    }
+
+                    if($adj_date->eq($row_date)){
+                        array_push($row->adjusts, $adj);
+                    }
+                }else if($adj->apply_to == 2){
+                    $tiime = $adj->dt_time != null ? (' '.$adj->dt_time) : '';
+                    if($adj->apply_time){
+                        $adj_date = Carbon::parse($adj->dt_date.$tiime);
+                        $row_date = Carbon::parse($row->outDateTime);
+                    }else{
+                        $adj_date = Carbon::parse($adj->dt_date);
+                        $row_date = Carbon::parse($row->outDate);
+                    }
+                    if($adj_date->eq($row_date)){
+                        array_push($row->adjusts, $adj);
+                    }
+                }
+            }
+        }
+
+        return $lRows;
     }
 }
