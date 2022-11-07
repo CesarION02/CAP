@@ -176,12 +176,23 @@ class incidentController extends Controller
                 return redirect()->back()->withErrors('Debe llenar todos los campos del formulario');
             }
         }
+        $ini = $request->start_date;
+        $fin = $request->end_date;
         $incidents = DB::table('incidents')
                 ->where('employee_id','=',$request->employee_id)
-                ->whereIn('incidents.start_date',[$request->start_date,$request->end_date])
+                ->where(function ($query) use ($ini,$fin) {
+                    $query->whereIn('incidents.start_date',[$ini,$fin])
+                        ->orwhereIn('incidents.end_date',[$ini,$fin]);
+                })
                 ->where('is_delete',0)
                 ->get();
-        if(count($incidents) == 0){
+        
+        $holidays = DB::table('holidays')
+                ->whereIn('fecha',[$request->start_date,$request->end_date])
+                ->where('is_delete',0)
+                ->get();
+
+        if( count($incidents) == 0 && count($holidays) == 0 ){
             if($request->type_incidents_id == 17){
                 $holiday_worked = new holidayworked();
                 $holiday_worked->employee_id = $request->employee_id;
@@ -247,7 +258,16 @@ class incidentController extends Controller
                 return redirect('incidents')->with('mensaje', 'Incidente creado con éxito');
             }
         }else{
-            return redirect('/incidents/14')->with('mensaje','Ya existe un incidente para esta fecha');
+            // checar que clase de problema al tratar de meter incidencia. 
+
+            
+            if( count($incidents) > 0 ) {
+                return redirect('/incidents/14')->with('mensaje','Ya existe un incidente para esta fecha');
+            }else if( count($holidays) > 0 ) {
+                return redirect('/incidents/14')->with('mensaje','No se puede colocar una incidencia en día festivo');
+            }else {
+                return redirect('/incidents/14')->with('mensaje','Ya existe un incidente para esta fecha y no se puede poner una incidencia en día festivo');
+            }
         }
     }
 

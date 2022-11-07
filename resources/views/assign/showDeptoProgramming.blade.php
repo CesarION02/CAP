@@ -75,7 +75,7 @@ Plantilla horarios
     function deleteRegistry(form){
         event.preventDefault();
         (async () => {
-            if (await oGui.confirm('','Desea eliminar este registro?','warning')) {
+            if (await oGui.confirm('','Desea eliminar el registro?','warning')) {
                 form.submit();
             }
         })();
@@ -89,37 +89,36 @@ Plantilla horarios
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Asignar horario fijo Area</h3>
+                <h3 class="box-title">Asignar horario fijo departamento</h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:asignacionpordept"])
                 <div class="row">
                     <div class="col-md-3 col-md-offset-9">
                         <div class="row">
                             <div class="col-md-12">
-                                <a href="{{route('areaProgramming')}}" class="btn btn-block btn-info btn-sm">
+                                <a href="{{route('deptoProgramming')}}" class="btn btn-block btn-info btn-sm">
                                     <i class="fa fa-fw fa-plus-circle"></i> Asignar horario
                                 </a>
                             </div>
                         </div>
                         <br>
                         <div class="row">
-                            <form action="{{ route('index_areaProgramming') }}">
+                            <form action="{{ route('index_deptoProgramming') }}">
                                 <input type="hidden" id="ifilter" name="ifilter">
                                 <div class="col-md-16">
                                     <div class="btn-group" role="group" aria-label="Basic example">
                                         @switch($iFilter)
                                             @case(1)
-                                            <button onclick="filter(1)" type="submit" class="btn btn-secondary active">Area sin horario</button>
-                                            <button onclick="filter(2)" type="submit" class="btn btn-secondary">Area con horario</button>
+                                            <button onclick="filter(1)" type="submit" class="btn btn-secondary active">Depto. sin horario</button>
+                                            <button onclick="filter(2)" type="submit" class="btn btn-secondary">Depto. con horario</button>
                                             @break
                                             @case(2)
-                                            <button onclick="filter(1)" type="submit" class="btn btn-secondary">Area sin horario</button>
-                                            <button onclick="filter(2)" type="submit" class="btn btn-secondary active">Area con horario</button>
+                                            <button onclick="filter(1)" type="submit" class="btn btn-secondary">Depto. sin horario</button>
+                                            <button onclick="filter(2)" type="submit" class="btn btn-secondary active">Depto. con horario</button>
                                             @break
                                         @endswitch
                                     </div>
                                 </div>
                             </form>
-                
                         </div>
                     </div>
             </div>
@@ -127,7 +126,7 @@ Plantilla horarios
                 <table class="table table-striped table-bordered table-hover" id="myTable">
                     <thead>
                         <tr>
-                            <th>Area</th>
+                            <th>Departamento</th>
                             <th>Fecha inicial</th>
                             <th>Fecha final</th>
                             <th>Horario</th>
@@ -137,7 +136,7 @@ Plantilla horarios
                     <tbody>
                         @foreach ($assigns as $assign)
                             <tr>
-                                <td>{{$assign->area}}</td>
+                                <td>{{$assign->depto}}</td>
                                 @if ($iFilter == 1)
                                     <td></td>
                                     <td></td>
@@ -160,10 +159,10 @@ Plantilla horarios
                                     </td>
                                     <td>{{$assign->schedule}}</td>
                                     <td>
-                                        <a href="{{route('edit_areaProgramming', ['areaId' => $assign->areaId])}}" class="btn-accion-tabla tooltipsC" title="Ver/Modificar este registro">
+                                        <a href="{{route('edit_deptoProgramming', ['deptoId' => $assign->deptoId])}}" class="btn-accion-tabla tooltipsC" title="Ver/Modificar este registro">
                                             <i class="fa fa-fw fa-pencil"></i>
                                         </a>
-                                        <form action="{{route('delete_areaProgramming', ['areaId' => $assign->areaId])}}" class="d-inline form-eliminar" method="POST" onsubmit="deleteRegistry(this);">
+                                        <form action="{{route('delete_deptoProgramming', ['deptoId' => $assign->deptoId])}}" class="d-inline form-eliminar" method="POST" onsubmit="deleteRegistry(this);">
                                             @csrf @method("delete")
                                             <button class="btn-accion-tabla eliminar tooltipsC" title="Eliminar este registro" value="submit">
                                                 <i class="fa fa-fw fa-trash text-danger"></i>

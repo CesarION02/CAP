@@ -40,7 +40,6 @@ class userController extends Controller
                 break;
         }
         
-
         return view('user.index', compact('datas'))->with('iFilter',$iFilter);
     }
 
@@ -200,5 +199,34 @@ class userController extends Controller
         $data->updated_by = session()->get('user_id');
         $data->save();
         return redirect('/')->with('mensaje', 'Contraseña actualizado con exito');
+    }
+
+    public function storeCopyUser(Request $request){
+        try {
+            \DB::begintransaction();
+            $dataUser = \DB::table('prepayroll_groups_users')
+                            ->where('head_user_id', $request->destinationUserId)
+                            ->pluck('group_id');
+    
+            $dataOrigin = \DB::table('prepayroll_groups_users')
+                            ->where('head_user_id', $request->originUserId)
+                            ->whereNotIn('groupId', $dataUser)
+                            ->get();
+    
+            foreach($dataOrigin as $oData){
+                $data['group_id'] = $oData->group_id;
+                $data['head_user_id'] = $request->destinationUserId;
+                $data['user_by_id'] = \Auth::id();
+    
+                \DB::table('prepayroll_groups_users')
+                    ->insert($data);
+            }
+            \DB::commit();
+        } catch (\Throwable $th) {
+            \DB::rollback();
+            return json_encode(['success' => false, 'message' => 'Error al copiar el registro', 'icon' => 'error']);
+        }
+
+        return json_encode(['success' => true, 'message' => 'Registro copiado con exitó', 'icon' => 'success']);
     }
 }

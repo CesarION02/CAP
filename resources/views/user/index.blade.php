@@ -4,18 +4,22 @@ Usuarios
 @endsection
 
 @section("scripts")
+<script src="https://cdn.jsdelivr.net/npm/select2@4.0.12/dist/js/select2.min.js"></script>
+<script src="{{ asset("assets/pages/scripts/SGui.js") }}" type="text/javascript"></script>
 <script src="{{asset("assets/pages/scripts/admin/datatable/indexFingerActivar.js")}}" type="text/javascript"></script>
 <script src="{{asset("assets/pages/scripts/admin/datatable/index.js")}}" type="text/javascript"></script>
 <script src="{{asset("assets/pages/scripts/admin/datatable/index.js")}}" type="text/javascript"></script>
 <script src="{{asset("assets/pages/scripts/filter.js")}}" type="text/javascript"></script>
 <script src="{{ asset("dt/datatables.js") }}" type="text/javascript"></script>
 <script src="{{ asset('dt/dataTables.buttons.min.js') }}"></script>
-	<script src="{{ asset('dt/buttons.flash.min.js') }}"></script>
-	<script src="{{ asset('dt/jszip.min.js') }}"></script>
-	<script src="{{ asset('dt/pdfmake.min.js') }}"></script>
-	<script src="{{ asset('dt/vfs_fonts.js') }}"></script>
-	<script src="{{ asset('dt/buttons.html5.min.js') }}"></script>
-	<script src="{{ asset('dt/buttons.print.min.js') }}"></script>
+<script src="{{ asset('dt/buttons.flash.min.js') }}"></script>
+<script src="{{ asset('dt/jszip.min.js') }}"></script>
+<script src="{{ asset('dt/pdfmake.min.js') }}"></script>
+<script src="{{ asset('dt/vfs_fonts.js') }}"></script>
+<script src="{{ asset('dt/buttons.html5.min.js') }}"></script>
+<script src="{{ asset('dt/buttons.print.min.js') }}"></script>
+<script src="{{ asset("assets/js/axios.js") }}" type="text/javascript"></script>
+<script src="{{ asset("assets/js/vue.js") }}" type="text/javascript"></script>
 <script>
     $(document).ready( function () {
         $('#myTable').DataTable({
@@ -63,12 +67,22 @@ Usuarios
                     }
                 ]
         });
+        
+        $('.js-example-basic-multiple').select2();
     });
 </script>
+<script>
+    function GlobalData () {
+        this.routeCopyUser = <?php echo json_encode(route('store_copyUser')); ?>;
+    }
+    var oData = new GlobalData();
+    var oGui = new SGui();
+</script>
+<script src="{{ asset('assets/pages/scripts/user/vueUsers.js') }}"></script>
 @endsection
 
 @section('content')
-<div class="row">
+<div class="row" id="usersApp">
     <div class="col-lg-12">
         @include('includes.mensaje')
         <div class="box">
@@ -169,6 +183,9 @@ Usuarios
                                     </button>
                                 </form>
                                 @endif
+                                <a href="#" v-on:click="showCopyUser({{$data->id}}, '{{$data->name}}');" class="btn-accion-tabla tooltipsC" title="Copiar usuario en otro">
+                                    <i class="fa fa-fw fa-files-o"></i>
+                                </a>
                                 
                             </td>
                         </tr>
@@ -179,5 +196,6 @@ Usuarios
             </div>
         </div>
     </div>
+    @include('user.copyModal')
 </div>
 @endsection
