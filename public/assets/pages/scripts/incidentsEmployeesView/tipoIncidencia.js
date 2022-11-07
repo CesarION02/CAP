@@ -12,6 +12,8 @@ function tipo_incidencia(opcion) {
     }
     if (opcion.value == 17) {
         document.getElementById("holiday_id").disabled = false;
+    } else {
+        document.getElementById("holiday_id").disabled = true;
     }
 
     if (activar == 1) {
