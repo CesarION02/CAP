@@ -59,15 +59,15 @@ class AccessControlController extends Controller
             return $oData;
         }
 
-        $dtDateForDay = $dtDate;
         if ($time > '21:00') {
             $oDate = Carbon::parse($dtDate);
             $oDate->addDay();
-            $dtDateForDay = $oDate->toDateString();
+            $dtDate = $oDate->toDateString();
+            $time = "12:00";
         }
 
-        $oData->absences = SDataAccessControl::getAbsences($idEmp, $dtDateForDay);
-        $oData->events = SDataAccessControl::getEvents($idEmp, $dtDateForDay);
+        $oData->absences = SDataAccessControl::getAbsences($idEmp, $dtDate);
+        $oData->events = SDataAccessControl::getEvents($idEmp, $dtDate);
         $oData->schedule = SDataAccessControl::getSchedule($idEmp, $dtDate, $time);
         $oData->nextSchedule = SDataAccessControl::getNextSchedule($idEmp, $dtDate, $nextDays);
 

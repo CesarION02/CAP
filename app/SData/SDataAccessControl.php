@@ -300,12 +300,18 @@ class SDataAccessControl {
     public static function evaluateToSend($idEmployee, $dateTime, $sSource)
     {
         $dtDate = Carbon::parse($dateTime)->toDateString();
-        $dtDateTime = $dateTime;
 
         $oEmployee = SDataAccessControl::getEmployee($idEmployee);
         
         if ($oEmployee == null) {
             return;
+        }
+
+        $time = Carbon::parse($dateTime)->toTimeString();
+        if ($time > '21:00') {
+            $oDate = Carbon::parse($dtDate);
+            $oDate->addDay();
+            $dtDate = $oDate->toDateString();
         }
 
         $result = SDataAccessControl::checkSimpleAccess($oEmployee, $dtDate);
@@ -332,7 +338,8 @@ class SDataAccessControl {
      *
      * @param object $idEmployee
      * @param string $dateTime
-     * @return void
+     * 
+     * @return array
      */
     public static function checkSimpleAccess($oEmployee, string $dateTime)
     {

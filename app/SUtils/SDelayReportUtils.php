@@ -749,9 +749,17 @@ class SDelayReportUtils {
 
         $workshift = $lWEmployee[0];
 
-        $workshiftDate = $registry->date.' '.($mType == \SCons::REP_DELAY ? $workshift->entry : $workshift->departure);
+        $newDate = null;
+        if ($workshift->is_night) {
+            $newDate = Carbon::parse($registry->date)->subDay()->toDateString();
+            $workshiftDate = $newDate.' '.($mType == \SCons::REP_DELAY ? $workshift->entry : $workshift->departure);
+            $comparison = SDelayReportUtils::compareDates($workshiftDate, $newDate.' '.$registry->time);
+        }
+        else {
+            $workshiftDate = $registry->date.' '.($mType == \SCons::REP_DELAY ? $workshift->entry : $workshift->departure);
+            $comparison = SDelayReportUtils::compareDates($workshiftDate, $registry->date.' '.$registry->time);
+        }
 
-        $comparison = SDelayReportUtils::compareDates($workshiftDate, $registry->date.' '.$registry->time);
         $comparison->auxWorkshift = $workshift;
 
         $comparison->auxIsSpecialSchedule = $isSpecial;
