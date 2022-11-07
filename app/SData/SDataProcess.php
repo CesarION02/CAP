@@ -50,8 +50,8 @@ class SDataProcess {
         $aEmployees = $lEmployees->pluck('id');
         $lWorkshifts = SDelayReportUtils::getWorkshifts($sStartDate, $sEndDate, $payWay, $aEmployees);
         // Rutina para verificación de renglones completos
-        $lDataComplete = SDataProcess::completeDays($sStartDate, $sEndDate, $data53, $aEmployees, $lWorkshifts, $comments);
-        $lData53_2 = SDataProcess::addEventsDaysOffAndHolidays($lDataComplete, $lWorkshifts, $comments);
+        // $lDataComplete = SDataProcess::completeDays($sStartDate, $sEndDate, $data53, $aEmployees, $lWorkshifts, $comments);
+        $lData53_2 = SDataProcess::addEventsDaysOffAndHolidays($data53, $lWorkshifts, $comments);
         
         $aEmployeeBen = $lEmployees->pluck('ben_pol_id', 'id');
         $lDataWithAbs = SDataProcess::addAbsences($lData53_2, $aEmployeeBen, $comments);
