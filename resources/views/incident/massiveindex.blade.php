@@ -197,7 +197,6 @@ Incidencias
     };
 	
 oneTbody.addEventListener("click", seleccionar, false);
-twoTbody.addEventListener("click", seleccionar, false);
 copy.addEventListener("click", copiar, false);  
 todo.addEventListener("click", all, false);
 regreso.addEventListener("click", regresoall, false);
