@@ -748,7 +748,6 @@ class SDelayReportUtils {
         }
 
         $workshift = $lWEmployee[0];
-        
         $workshiftDate = $registry->date.' '.($mType == \SCons::REP_DELAY ? $workshift->entry : $workshift->departure);
         $comparison = SDelayReportUtils::compareDates($workshiftDate, $registry->date.' '.$registry->time);
 
