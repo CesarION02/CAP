@@ -1,14 +1,15 @@
 <?php namespace App\SData;
 
-use Carbon\Carbon;
-use App\SUtils\SDelayReportUtils;
-use App\SUtils\SDateTimeUtils;
-use App\SUtils\SRegistryRow;
-use App\SUtils\SPrepayrollAdjustUtils;
-use App\SUtils\SDateUtils;
-use App\SData\SOverJourneyCore;
 use App\Http\Controllers\prePayrollController;
 use App\Models\commentsControl;
+use App\SData\SOverJourneyCore;
+use App\SUtils\SDateTimeUtils;
+use App\SUtils\SDelayReportUtils;
+use App\SUtils\SPrepayrollAdjustUtils;
+use App\SUtils\SRegistryRow;
+use App\SUtils\SReportsUtils;
+use Carbon\Carbon;
+use App\SUtils\SDateUtils;
 
 class SDataProcess {
 
@@ -49,8 +50,8 @@ class SDataProcess {
         $aEmployees = $lEmployees->pluck('id');
         $lWorkshifts = SDelayReportUtils::getWorkshifts($sStartDate, $sEndDate, $payWay, $aEmployees);
         // Rutina para verificación de renglones completos
-        // $lDataComplete = SDataProcess::completeDays($sStartDate, $sEndDate, $data53, $aEmployees, $lWorkshifts, $comments);
-        $lData53_2 = SDataProcess::addEventsDaysOffAndHolidays($data53, $lWorkshifts, $comments);
+        $lDataComplete = SDataProcess::completeDays($sStartDate, $sEndDate, $data53, $aEmployees, $lWorkshifts, $comments);
+        $lData53_2 = SDataProcess::addEventsDaysOffAndHolidays($data53, $lDataComplete, $comments);
         
         $aEmployeeBen = $lEmployees->pluck('ben_pol_id', 'id');
         $lDataWithAbs = SDataProcess::addAbsences($lData53_2, $aEmployeeBen, $comments);
@@ -64,6 +65,8 @@ class SDataProcess {
         // Se comenta este método ya que se cambió el procesamiento para poder hacer ajustes
         // $lDataJ = SOverJourneyCore::overtimeByIncompleteJourney($sStartDate, $sEndDate, $lDataWSun, $aEmployeeOverTime);
         $lAllData = SOverJourneyCore::processOverTimeByOverJourney($lDataWSun, $sStartDate, $comments);
+
+        $lAllData = SDataProcess::putAdjustInRows($sStartDate, $sEndDate, $lAllData);
 
         return $lAllData;
     }
@@ -744,13 +747,13 @@ class SDataProcess {
      * Asigna los datos correspondientes a las fechas de entrada, salida,
      * horas extras, no laborable y sin horario.
      *
-     * @param App\SUtils\SDateComparison $result
+     * @param \App\SUtils\SDateComparison $result
      * @param Object $oRow
      * @param string $sDate
      * 
      * @return Object $oRow
      */
-    private static function setDates($result, $oRow, $sDate = null, $comments = null)
+    private static function setDates($result = null, $oRow = null, $sDate = null, $comments = null)
     {
         if ($result == null) {
             $oRow->outDate = $sDate;
@@ -786,13 +789,17 @@ class SDataProcess {
             }
             else {
                 $oRow->scheduleText = strtoupper($result->auxWorkshift->name);
-                $oRow->workJourneyMins = $result->auxWorkshift->work_time * 60;
+                if ($result->withRegistry) {
+                    $oRow->workJourneyMins = $result->auxWorkshift->work_time * 60;
+                }
             }
 
             if ($oRow->scheduleFrom == \SCons::FROM_ASSIGN && ! $result->auxScheduleDay->is_active) {
-                $oRow->outDate = $result->variableDateTime->toDateString();
-                $oRow->outDateTime = $result->variableDateTime->toDateTimeString();
-                $oRow->isModifiedOut = isset($result->registry->is_modified) ? $result->registry->is_modified : false;
+                if ($result->withRegistry) {
+                    $oRow->outDate = $result->variableDateTime->toDateString();
+                    $oRow->outDateTime = $result->variableDateTime->toDateTimeString();
+                    $oRow->isModifiedOut = isset($result->registry->is_modified) ? $result->registry->is_modified : false;
+                }
                 $oRow->comments = $oRow->comments."No laborable. ";
                 if ($comments != null) {
                     if ($comments->where('key_code','workable')->first()['value']) {
@@ -807,24 +814,29 @@ class SDataProcess {
             $sInSchedule = SDelayReportUtils::getScheduleIn($result, $oRow->inDateTime);
             $oRow->inDateTimeSch = $sInSchedule;
 
-            if (! SDelayReportUtils::isNight($result) && $oRow->inDateTime != null && $result->variableDateTime->toDateString() != $oRow->inDateTime) {
+            if (! SDelayReportUtils::isNight($result) && $oRow->inDateTime != null && 
+                ($result->withRegistry && $result->variableDateTime->toDateString() != $oRow->inDateTime)) {
                 $oRow->outDateTimeSch = $oRow->inDate.' '.$result->pinnedDateTime->toTimeString();
             }
             else {
                 $oRow->outDateTimeSch = $result->pinnedDateTime->toDateTimeString();
             }
             
-            $oRow->outDate = $result->variableDateTime->toDateString();
-            $oRow->outDateTime = $result->variableDateTime->toDateTimeString();
-            $oRow->isModifiedOut = isset($result->registry->is_modified) ? $result->registry->is_modified : false;
+            if ($result->withRegistry) {
+                $oRow->outDate = $result->variableDateTime->toDateString();
+                $oRow->outDateTime = $result->variableDateTime->toDateTimeString();
+                $oRow->isModifiedOut = isset($result->registry->is_modified) ? $result->registry->is_modified : false;
+            }
     
             $oRow->cutId = SDelayReportUtils::getCutId($result);
             $oRow->overtimeCheckPolicy = SDelayReportUtils::getOvertimePolicy($result);
-            // minutos configurados en la tabla
-            $oRow->overDefaultMins = SDelayReportUtils::getExtraTime($result);
-            // minutos por turnos de más de 8 horas
-            $oRow->overScheduleMins = SDelayReportUtils::getExtraTimeBySchedule($result, $oRow->inDateTime, $oRow->inDateTimeSch,
-                                                                                        $oRow->outDateTime, $oRow->outDateTimeSch);
+            if ($result->withRegistry) {
+                // minutos configurados en la tabla
+                $oRow->overDefaultMins = SDelayReportUtils::getExtraTime($result);
+                // minutos por turnos de más de 8 horas
+                $oRow->overScheduleMins = SDelayReportUtils::getExtraTimeBySchedule($result, $oRow->inDateTime, $oRow->inDateTimeSch,
+                                                                                    $oRow->outDateTime, $oRow->outDateTimeSch);
+            }
 
             if ((($oRow->overWorkedMins + $oRow->overMinsByAdjs) >= 20) || (($oRow->overScheduleMins + $oRow->overMinsByAdjs) >= 60)) {
                 if ($comments != null) {
@@ -844,7 +856,7 @@ class SDataProcess {
      * Retorna un valor dependiendo de donde fue obtenido el horario,
      * si desde los horarios asignados o los programados
      *
-     * @param App\SUtils\SDateComparison $result
+     * @param \App\SUtils\SDateComparison $result
      * 
      * @return int \SCons::FROM_WORKSH o \SCons::FROM_ASSIGN
      */
@@ -883,7 +895,7 @@ class SDataProcess {
     /**
      * Asigna al renglón en base al tipo de día si es un día festivo, descanso, etc.
      *
-     * @param App\SUtils\SDateComparison $result
+     * @param \App\SUtils\SDateComparison $result
      * @param Object $oRow
      * 
      * @return Object $oRow
@@ -1897,7 +1909,7 @@ class SDataProcess {
      * @param array $lData
      * @param array $aEmployees
      * 
-     * @return array
+     * @return \Illuminate\Support\Collection
      */
     public static function completeDays($sStartDate, $sEndDate, $lData, $aEmployees, $qWorkshifts, $comments = null)
     {
@@ -1938,6 +1950,9 @@ class SDataProcess {
                     if ($dayRows->count() > 0) {
                         continue;
                     }
+                    // if ($dayRows->count() > 0 && $sDate != $sEndDate) {
+                    //     continue;
+                    // }
 
                     // Se obtiene el primer elemento del arreglo
                     foreach ($lEmployeeRows as $refRow) { break; }
@@ -1959,25 +1974,29 @@ class SDataProcess {
                     if ($comments != null) {
                         if ($comments->where('key_code','hasChecks')->first()['value'] ||
                             $comments->where('key_code','hasCheckIn')->first()['value'] ||
-                            $comments->where('key_code','hasCheckOut')->first()['value']
-                        ) {
-                            if($oNewRow->isHoliday < 1){
+                            $comments->where('key_code','hasCheckOut')->first()['value']) {
+                            if ($oNewRow->isHoliday < 1) {
                                 $oNewRow->isDayChecked = true;
-                            }else{
+                            }
+                            else {
                                 $oNewRow->isDayChecked = false;
                             }
                         }
                     }
 
                     $registry = (object) [
-                                    'type_id' => \SCons::REG_OUT,
-                                    'time' => '18:00:00',
-                                    'date' => $sDate,
-                                    'employee_id' => $idEmployee,
-                                    'is_modified' => false
-                                ];
+                        'type_id' => \SCons::REG_OUT,
+                        'time' => '18:00:00',
+                        'date' => $sDate,
+                        'employee_id' => $idEmployee,
+                        'is_modified' => false
+                    ];
 
                     $result = SDelayReportUtils::getSchedule($sStartDate, $sEndDate, $idEmployee, $registry, clone $qWorkshifts, \SCons::REP_HR_EX);
+
+                    if (! is_null($result)) {
+                        $result->withRegistry = false;
+                    }
 
                     $oNewRow = SDataProcess::setDates($result, $oNewRow, $sDate, $comments);
                     
@@ -1991,11 +2010,13 @@ class SDataProcess {
         $lData = collect(array_merge($lData, $lRowsToAdd));
 
         // Se ordenan los renglones por empleado y fecha de entrada
-        $lData = $lData->sortBy('idEmployee')
-                        ->sortBy('inDate')
-                        ->sortBy('inDateTime')
-                        ->sortBy('outDate')
-                        ->sortBy('outDateTime');
+        $aSortInstructions = [
+                                ['column' => 'idEmployee', 'order' => 'asc'],
+                                ['column' => 'inDateTime', 'order' => 'asc'],
+                                ['column' => 'outDateTime', 'order' => 'asc'],
+                            ];
+
+        $lData = SReportsUtils::multiPropertySort($lData, $aSortInstructions);
 
         return $lData;
     }
@@ -2028,7 +2049,7 @@ class SDataProcess {
     private static function checkDayBefore ($sStartDate, $sDate, $idEmployee, $payWay, $chekHourEntry)
     {
         $checkDayBefore = null;
-        $num = sDateUtils::getNumberOfDate($sDate, $payWay);
+        // $num = SDateUtils::getNumberOfDate($sDate, $payWay);
         $date = Carbon::parse($sDate);
         $dateIni = Carbon::parse($sStartDate);
         if ($date->eq($dateIni)) {
@@ -2050,5 +2071,64 @@ class SDataProcess {
         }
 
         return $checkDayBefore;
+    }
+
+    public static function putAdjustInRows($sStartDate, $sEndDate, $lRows){
+        $lAdjusts = \DB::table('prepayroll_adjusts AS pa')
+                        ->join('prepayroll_adjusts_types AS pat', 'pa.adjust_type_id', '=', 'pat.id')
+                        ->select('pa.employee_id',
+                                    'pa.dt_date',
+                                    'pa.dt_time',
+                                    'pa.minutes',
+                                    'pa.comments',
+                                    'pa.apply_to',
+                                    'pa.adjust_type_id',
+                                    'pat.type_code',
+                                    'pat.type_name',
+                                    'pa.id',
+                                    'pa.apply_time'
+                                    )
+                        ->whereBetween('dt_date', [$sStartDate, $sEndDate])
+                        ->where('is_delete', false)
+                        ->get();
+
+        foreach($lRows as $row) {
+            $inDate = Carbon::parse($row->inDateTime);
+            $outDate = Carbon::parse($row->outDateTime);
+
+            $adjs = $lAdjusts->where('employee_id', $row->idEmployee)
+                            ->whereBetween('dt_date', [$inDate->format('Y-m-d'), $outDate->format('Y-m-d')]);
+            
+            foreach($adjs as $adj){
+                if($adj->apply_to == 1){
+                    $tiime = $adj->dt_time != null ? (' '.$adj->dt_time) : '';
+                    if($adj->apply_time){
+                        $adj_date = Carbon::parse($adj->dt_date.$tiime);
+                        $row_date = Carbon::parse($row->inDateTime);
+                    }else{
+                        $adj_date = Carbon::parse($adj->dt_date);
+                        $row_date = Carbon::parse(is_null($row->inDate) ? $row->inDateTime : $row->inDate);
+                    }
+
+                    if($adj_date->eq($row_date)){
+                        array_push($row->adjusts, $adj);
+                    }
+                }else if($adj->apply_to == 2){
+                    $tiime = $adj->dt_time != null ? (' '.$adj->dt_time) : '';
+                    if($adj->apply_time){
+                        $adj_date = Carbon::parse($adj->dt_date.$tiime);
+                        $row_date = Carbon::parse($row->outDateTime);
+                    }else{
+                        $adj_date = Carbon::parse($adj->dt_date);
+                        $row_date = Carbon::parse($row->outDate);
+                    }
+                    if($adj_date->eq($row_date)){
+                        array_push($row->adjusts, $adj);
+                    }
+                }
+            }
+        }
+
+        return $lRows;
     }
 }
