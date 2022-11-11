@@ -120,7 +120,7 @@
                                     </td>
                                     <td>@{{ row.entryDelayMinutes }}</td>
                                     <td>@{{ row.prematureOut }}</td>
-                                    <td>@{{ row.extraHours }}</td>
+                                    <td>@{{ vueGui.formatMinsToHHmm(row.extraHours == null || row.extraHours < 0 ? 0 : row.extraHours ) }}</td>
                                     <td>@{{ row.isSunday }}</td>
                                     <td>@{{ row.isDayOff }}</td>
                                     <td>@{{ row.hasAbsence }}</td>
@@ -258,38 +258,9 @@
         this.hiddenColExId = 14;
         this.hiddenCol = this.tReport == this.REP_DELAY ? 5 : 5;
         this.toExport = this.tReport == this.REP_DELAY ? [0, 1, 2, 3, 4, 6] : [0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12];
-
-        for(let i = 0; i<this.lEmployees.length; i++){
-            this.lEmployees[i].extraHours = convertToHoursMins(this.lEmployees[i].extraHours);
-        }
     }
     
     var oData = new GlobalData();
-
-    /**
-     * Convierte los minutos en entero a formato 00:00
-     *
-     * @param int time
-     * 
-     * @return string 00:00
-     */
-    function convertToHoursMins(time) 
-    {
-        if (time < 1) {
-            return "00:00";
-        }
-
-        let hours = Math.floor(time / 60);
-        if (hours < 10) {
-            hours = "0" + hours;
-        }
-        let minutes = time % 60;
-        if (minutes < 10) {
-            minutes = "0" + minutes;
-        }
-
-        return "" + hours + ":" + minutes;
-    }
 </script>
 
 <script src="{{asset("assets/pages/scripts/report/DelayReport.js")}}" type="text/javascript"></script>
