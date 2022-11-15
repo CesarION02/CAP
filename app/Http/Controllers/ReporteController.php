@@ -2,115 +2,38 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\PrepayrollReportController;
 use App\Http\Controllers\incidentController;
-use Illuminate\Http\Request;
-use App\Models\department;
-use App\Models\employees;
+use App\Http\Controllers\PrepayrollReportController;
 use App\Models\area;
+use App\Models\department;
+use App\Models\DepartmentRH;
+use App\Models\departmentsGroup;
+use App\Models\employees;
+use App\Models\incidentDay;
 use App\Models\prepayrollAdjType;
 use App\Models\prepayrollAdjust;
-use App\Models\DepartmentRH;
-use App\Models\typeincident;
-use App\Models\departmentsGroup;
 use App\Models\PrepayrollDelegation;
-use App\Models\incident;
-use App\Models\incidentDay;
+use App\Models\typeincident;
+use App\SData\SDataProcess;
+use App\SUtils\SDateTimeUtils;
+use App\SUtils\SDateUtils;
 use App\SUtils\SDelayReportUtils;
-use App\SUtils\SReportsUtils;
-use App\SUtils\SInfoWithPolicy;
-use App\SUtils\SHolidayWork;
 use App\SUtils\SGenUtils;
+use App\SUtils\SHolidayWork;
+use App\SUtils\SInfoWithPolicy;
+use App\SUtils\SPayrollDelegationUtils;
 use App\SUtils\SPermissions;
 use App\SUtils\SPrepayrollUtils;
-use App\SUtils\SDateUtils;
-use App\SUtils\SDateTimeUtils;
-use App\SUtils\SPayrollDelegationUtils;
-use App\SData\SDataProcess;
-use Illuminate\Support\Collection;
-use DB;
-use Carbon\Carbon;
 use App\SUtils\SReg;
+use App\SUtils\SReportsUtils;
+use Carbon\Carbon;
+use DB;
 use GuzzleHttp\Client as GuzzleClient;
+use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 class ReporteController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
-    }
-
     /**
      * Recibe el tipo de reporte y en base a este retorna una colección con los valores posibles
      *
@@ -346,7 +269,7 @@ class ReporteController extends Controller
      *
      * @param Request $request deberá contener el tipo de reporte, un arreglo con los valores a consultar, 
      *                  la fecha de inicio y la fecha final para consultar el rango de fechas de los registros (checadas)
-     * @return view report.reportRegsView
+     * @return \Illuminate\View\View report.reportRegsView
      */
     public function reporteRegistrosView(Request $request)
     {
@@ -500,7 +423,8 @@ class ReporteController extends Controller
      * Undocumented function
      *
      * @param Request $request
-     * @return void
+     * 
+     * @return \Illuminate\View\View, Illuminate\Http\RedirectResponse
      */
     public function delaysReport(Request $request)
     {
@@ -783,7 +707,7 @@ class ReporteController extends Controller
          */
         $isPrepayrollInspection = false;
         $lEmpVobos = [];
-        if (($payWay == \SCons::PAY_W_S || $payWay == \SCons::PAY_W_Q) && env('VOBO_BY_EMP_ENABLED', true)) {
+        if (($payWay == \SCons::PAY_W_S || $payWay == \SCons::PAY_W_Q) && env('VOBO_BY_EMP_ENABLED', true) && $wizard > 0) {
             $number = SDateUtils::getNumberOfDate($sStartDate, $payWay);
             $dates = SDateUtils::getDatesOfPayrollNumber($number, $oStartDate->year, $payWay);
             

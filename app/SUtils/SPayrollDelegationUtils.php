@@ -31,7 +31,8 @@ class SPayrollDelegationUtils {
      *
      * @param [type] $idUser
      * @param [type] $idDelegation
-     * @return void
+     * 
+     * @return array
      */
     public static function getGroupsOfDelegation($idUser, $idDelegation)
     {
@@ -51,10 +52,11 @@ class SPayrollDelegationUtils {
     }
 
     /**
-     * Undocumented function
+     * Retorna un objeto correspondiente a una delegación
      *
-     * @param [type] $idUser
-     * @return void
+     * @param integer $idUser
+     * 
+     * @return \stdClass
      */
     public static function getDelegationsPayrolls($idUser)
     {

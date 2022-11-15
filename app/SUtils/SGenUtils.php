@@ -1,15 +1,14 @@
 <?php namespace App\SUtils;
 
-use Carbon\Carbon;
-
 class SGenUtils {
 
     /**
-     * Undocumented function
+     * Regresa un array con los id de los empleados que cumplan con las condiciones recibidas
      *
      * @param integer $type
      * @param array $keys
-     * @return void
+     * 
+     * @return \Illuminate\Support\Collection
      */
     public static function toEmployeeIds($payWay, $type = 0, $keys = [], $aEmployees = [], $nocheca = 0)
     {
