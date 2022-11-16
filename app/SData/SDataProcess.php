@@ -42,8 +42,11 @@ class SDataProcess {
       */
     public static function process($sStartDate, $sEndDate, $payWay, $lEmployees)
     {
-        $events = SDataProcess::checkEvents();
+        SDataProcess::checkEvents();
         $comments = commentsControl::where('is_delete',0)->select('key_code','value')->get();
+
+        // Filtrar empleados, solo aparecerán aquellos que hayan sido dados de alta antes de la fecha de inicio
+        $lEmployees = SReportsUtils::filterEmployeesByAdmissionDate($lEmployees, $sStartDate);
 
         $data53 = SDataProcess::getSchedulesAndChecks($sStartDate, $sEndDate, $payWay, $lEmployees, $comments);
 

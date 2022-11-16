@@ -200,5 +200,35 @@ class SReportsUtils {
 
         })->values();
     }
+
+    /**
+     * Filtrar empleados, solo aparecerán aquellos que hayan sido dados de alta antes de la fecha de inicio
+     *
+     * @param \Illuminate\Support\Collection $lEmployees
+     * @param string $sStartDate en formato YYYY-mm-dd
+     * 
+     * @return \Illuminate\Support\Collection
+     */
+    public static function filterEmployeesByAdmissionDate($lEmployees, $sStartDate)
+    {
+        $aEmployees = $lEmployees->pluck('id')->toArray();
+
+        $empsByDates = \DB::select("SELECT
+                                     id
+                                    FROM
+                                     employees
+                                    WHERE
+                                     (admission_date > leave_date
+                                     OR leave_date IS NULL)
+                                     AND admission_date <= '".$sStartDate."'
+                                     AND id IN (".implode(",", $aEmployees).")
+                                ");
+
+        $aEmpsByDates = collect($empsByDates)->pluck('id')->toArray();
+
+        $lEmployees = $lEmployees->whereIn('id', $aEmpsByDates);
+
+        return $lEmployees;
+    }
 }
 
