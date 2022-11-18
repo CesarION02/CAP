@@ -204,23 +204,72 @@ class userController extends Controller
     public function storeCopyUser(Request $request){
         try {
             \DB::begintransaction();
-            $dataUser = \DB::table('prepayroll_groups_users')
+            $dataUserPGU = \DB::table('prepayroll_groups_users')
                             ->where('head_user_id', $request->destinationUserId)
                             ->pluck('group_id');
+
+            $dataUserGDU = \DB::table('group_dept_user')
+                            ->where('user_id', $request->destinationUserId)
+                            ->pluck('groupdept_id');
+
+            $dataUserRol = \DB::table('user_rol')
+                            ->where('user_id', $request->destinationUserId)
+                            ->pluck('rol_id');
     
-            $dataOrigin = \DB::table('prepayroll_groups_users')
+            $dataOriginPGU = \DB::table('prepayroll_groups_users')
                             ->where('head_user_id', $request->originUserId)
-                            ->whereNotIn('groupId', $dataUser)
+                            ->whereNotIn('group_id', $dataUserPGU)
+                            ->get();
+
+            $dataOriginGDU = \DB::table('group_dept_user')
+                            ->where('user_id', $request->originUserId)
+                            ->whereNotIn('groupdept_id', $dataUserGDU)
+                            ->get();
+
+            $dataOriginRol = \DB::table('user_rol')
+                            ->where('user_id', $request->originUserId)
+                            ->whereNotIn('rol_id', $dataUserRol)
                             ->get();
     
-            foreach($dataOrigin as $oData){
-                $data['group_id'] = $oData->group_id;
-                $data['head_user_id'] = $request->destinationUserId;
-                $data['user_by_id'] = \Auth::id();
+            foreach($dataOriginPGU as $oData){
+                $dataPGU['group_id'] = $oData->group_id;
+                $dataPGU['head_user_id'] = $request->destinationUserId;
+                $dataPGU['user_by_id'] = \Auth::id();
     
                 \DB::table('prepayroll_groups_users')
-                    ->insert($data);
+                    ->insert($dataPGU);
             }
+
+            foreach($dataOriginGDU as $oData){
+                $dataGDU['user_id'] = $request->destinationUserId;
+                $dataGDU['groupdept_id'] = $oData->groupdept_id;
+                $dataGDU['created_by'] = \Auth::id();
+                $dataGDU['updated_by'] = \Auth::id();
+                $dataGDU['is_delete'] = 0;
+    
+                \DB::table('group_dept_user')
+                    ->insert($dataGDU);
+            }
+
+            $result = \DB::table('user_rol')
+                        ->where('user_id', $request->destinationUserId)
+                        ->first();
+            
+            foreach($dataOriginRol as $oData){
+                $dataRol['state'] = 1;
+                $dataRol['rol_id'] = $oData->rol_id;
+                $dataRol['user_id'] = $request->destinationUserId;
+                if(is_null($result)){
+                    \DB::table('user_rol')
+                        ->insert($dataRol);
+                }else{
+                    \DB::table('user_rol')
+                        ->where('user_id', $dataRol['user_id'])
+                        ->update(['rol_id' => $dataRol['rol_id']]);
+                }
+    
+            }
+
             \DB::commit();
         } catch (\Throwable $th) {
             \DB::rollback();
