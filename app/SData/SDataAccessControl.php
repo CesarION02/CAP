@@ -1,10 +1,10 @@
 <?php namespace App\SData;
 
+use App\SUtils\SDateComparison;
 use Carbon\Carbon;
 use App\SUtils\SDelayReportUtils;
 use App\SUtils\SAuxEvent;
 use App\SUtils\SAuxSchedule;
-use App\Http\Controllers\prePayrollController;
 use Illuminate\Support\Facades\Mail;
 
 use App\Mail\BadCheckNotification;
@@ -139,6 +139,7 @@ class SDataAccessControl {
      * Determina la hora de entrada programada en base al objeto recibido
      *
      * @param SDateComparison $oComparison
+     * 
      * @return String "yyyy-MM-dd hh:mm:ss"
      */
     public static function getScheduleOut($oComparison) {
@@ -174,11 +175,11 @@ class SDataAccessControl {
      * Determina si el empleado tiene autorizado el ingreso al sistema
      *
      * @param 'App\SUtils\SAccessControlData' $oData
-     * @param [type] $id
-     * @param [type] $dtDate
-     * @param [type] $time
-     * @param [type] $inMins
-     * @param [type] $outMins
+     * @param int $id
+     * @param string $dtDate
+     * @param string $time
+     * @param int $inMins
+     * @param int $outMins
      * 
      * @return array [0] true or false, [1] text reason, [2] case to notification
      */
@@ -188,7 +189,7 @@ class SDataAccessControl {
         $reason = "";
 
         if (! $oData->employee->is_active || $oData->employee->is_delete) {
-            $reasons = "El empleado está desactivado en el sistema";
+            $reasons = "El empleado está dado de baja.";
             
             $result[0] = false;
             $result[1] = $reasons;
@@ -204,7 +205,7 @@ class SDataAccessControl {
                 $reason = $reason == "" ? $abs->type_name : ($reason . ", " . $abs->type_name);
             }
             
-            $reasons = "El empleado tiene incidencias: " . $reason . " para el día de hoy";
+            $reasons = "El empleado tiene incidencias: " . $reason . " para el día de hoy.";
             
             $result[0] = false;
             $result[1] = $reasons;
@@ -219,7 +220,7 @@ class SDataAccessControl {
                 $reason = $reason == "" ? $event->typeName : ($reason.", ".$event->typeName);
             }
 
-            $reasons = "El empleado tiene programado: " . $reason . " para el día de hoy";
+            $reasons = "El empleado tiene programado: " . $reason . " para el día de hoy.";
             $result[0] = false;
             $result[1] = $reasons;
             $result[2] = SDataAccessControl::OTHERS;
@@ -239,7 +240,7 @@ class SDataAccessControl {
             }
             else {
                 $result[0] = false;
-                $result[1] = "Fuera del horario permitido. Revise horario";
+                $result[1] = "Fuera del horario permitido. Revisar horario.";
                 $result[2] = SDataAccessControl::OTHERS;
             
                 return $result;
@@ -265,7 +266,7 @@ class SDataAccessControl {
             }
 
             $result[0] = false;
-            $result[1] = "El empleado no tiene horario asignado para el día de hoy";
+            $result[1] = "El empleado no tiene horario asignado para el día de hoy.";
             $result[2] = SDataAccessControl::OTHERS;
             
             return $result;
@@ -354,7 +355,7 @@ class SDataAccessControl {
         $oData->events = SDataAccessControl::getEvents($idEmployee, $dateTime);
 
         if (! $oData->employee->is_active || $oData->employee->is_delete) {
-            $reasons = "El empleado está desactivado en el sistema";
+            $reasons = "El empleado está dado de baja.";
             
             $result[0] = false;
             $result[1] = $reasons;
@@ -370,7 +371,7 @@ class SDataAccessControl {
                 $reason = $reason == "" ? $abs->type_name : ($reason . ", " . $abs->type_name);
             }
             
-            $reasons = "El empleado tiene incidencias: " . $reason . " para el día ".Carbon::parse($dateTime)->format('d-m-Y');
+            $reasons = "El empleado tiene incidencias: " . $reason . " para el día de hoy.";
             
             $result[0] = false;
             $result[1] = $reasons;
@@ -385,7 +386,7 @@ class SDataAccessControl {
                 $reason = $reason == "" ? $event->typeName : ($reason.", ".$event->typeName);
             }
 
-            $reasons = "El empleado tiene programado: " . $reason . " para el día de hoy";
+            $reasons = "El empleado tiene programado: " . $reason . " para el día de hoy.";
             $result[0] = false;
             $result[1] = $reasons;
             $result[2] = SDataAccessControl::INCIDENTS;

@@ -1,6 +1,8 @@
 <?php namespace App\SUtils;
 
 use Carbon\Carbon;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Collection;
 
 class SDelayReportUtils {
 
@@ -8,6 +10,7 @@ class SDelayReportUtils {
      * Determina la hora de entrada programada en base al objeto recibido
      *
      * @param SDateComparison $oComparison
+     * 
      * @return String "yyyy-MM-dd hh:mm:ss"
      */
     public static function getScheduleIn($oComparison, $inDateTime = null) {
@@ -258,7 +261,7 @@ class SDelayReportUtils {
      * @param array $lEmployees arreglo de ids de empleados
      * @param boolean $isArray si este parámetro es TRUE devuelve un arreglo, s es FALSE devuelve una query (sin get())
      * 
-     * @return array ('r.*', 'd.id AS dept_id', 'e.num_employee', 'e.name')
+     * @return Collection ('r.*', 'd.id AS dept_id', 'e.num_employee', 'e.name')
      */
     public static function getRegistries($startDate, $endDate, $payWay, $lEmployees, $isArray)
     {
@@ -376,7 +379,7 @@ class SDelayReportUtils {
      * @param int $payWay [ 1: QUINCENA, 2: SEMANA, 0: TODOS]
      * @param array $lEmployees arreglo de ids de empleados
      * 
-     * @return query ('wdd.date', 'w.name', 'w.entry', 'w.departure')
+     * @return Builder|Collection ('wdd.date', 'w.name', 'w.entry', 'w.departure')
      */
     public static function getWorkshifts($startDate, $endDate, $payWay, $lEmployees)
     {
@@ -613,10 +616,10 @@ class SDelayReportUtils {
      * Compara el registro recibido contra el template asociado al id recibido
      *
      * @param int $templateId
-     * @param query_registry $registry
+     * @param \stdClass $registry
      * @param int $tReport [\SCons::REP_DELAY, \SCons::REP_HR_EX]
      * 
-     * @return SDateComparison object
+     * @return SDateComparison|null object
      */
     public static function compareTemplate($templateId, $registry, $tReport)
     {
@@ -790,10 +793,11 @@ class SDelayReportUtils {
      * @param String $endDate
      * @param int $idEmployee
      * @param object $registry
-     * @param collection $lWorkshifts
+     * @param Collection $lWorkshifts
      * @param int $iRep [\SCons::REP_DELAY, \SCons::REP_HR_EX]
      * @param boolean $specialApproved
-     * @return void
+     * 
+     * @return SDateComparison
      */
     public static function getSchedule($startDate, $endDate, $idEmployee, $registry, $lWorkshifts, $iRep, $specialApproved = true) {
         // checar horario especial *******************************************************************
