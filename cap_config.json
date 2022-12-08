@@ -1,7 +1,7 @@
 {
-    "company" : "AETH",
-    "lastSyncDateTime": "2022-03-08 08:19:02",
-    "lastEventSyncDateTime": "2021-04-06 00:00:35",
+    "company": "AETH",
+    "lastSyncDateTime": "2022-12-02 08:19:02",
+    "lastEventSyncDateTime": "2022-12-08 08:23:55",
     "startOfWeek": 1,
     "policy": "1",
     "enabledAdjAuths": false,
@@ -10,6 +10,7 @@
     "maxGapSchedule": 90,
     "maxGapCheckSchedule": 120,
     "minMinsOverNextDay": 180,
+    "minMinsDayRepeated": 480,
     "dept_foraneo": 100,
     "job_foraneo": 25,
     "dept_pre": 99,
@@ -17,6 +18,19 @@
     "policy_cut": 1,
     "urlBiostar": "https://192.168.1.16:444",
     "maxOvertimeJourneyMinutes": 240,
+    "absenceWithOmissionOfChecks": false,
+    "absenceWithOmissionOfChecksAreas": [],
+    "idOverTimeMenuDel": 95,
+    "idVoboWeekMenu": 92,
+    "idVoboBiWeekMenu": 94,
+    "idAdjsPermission": 1,
+    "idRoleDefault": 15,
+    "rolesCanSeeAll": [
+        1,
+        3,
+        8,
+        11
+    ],
     "rec_plant": [
         {
             "email": "storres@aeth.mx",
