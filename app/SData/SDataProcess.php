@@ -1890,7 +1890,10 @@ class SDataProcess {
                     $comparison = SDelayReportUtils::compareDates($oFoundRegistry->date.' '.$oFoundRegistry->time, $oDateAux->toDateString().' 22:30:00');
 
                     if (abs($comparison->diffMinutes) <= $config->maxGapMinutes) {
-                        array_unshift($registries,$oFoundRegistry);
+                        if (! is_array($registries)) {
+                            $registries = (array) $registries;
+                        }
+                        array_unshift($registries, $oFoundRegistry);
                         return [0, $registries];
                     }
                     else {
