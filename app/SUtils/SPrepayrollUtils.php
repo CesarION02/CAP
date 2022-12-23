@@ -105,6 +105,7 @@ class SPrepayrollUtils {
         $aEmployees = \DB::table('prepayroll_groups AS pg')
                         ->join('prepayroll_group_employees AS pge', 'pg.id_group', '=', 'pge.group_id')
                         ->join('employees AS e', 'pge.employee_id', '=', 'e.id')
+                        ->where('e.is_delete', false)
                         ->where('e.is_active', true);
 
         if ($payType > 0) {
@@ -312,9 +313,12 @@ class SPrepayrollUtils {
                                     ->pluck('empvb.employee_id')
                                     ->toArray();
 
-        $aEmployeesNotOk = array_diff($aEmployees, $aEmployeesOk);
+        $lEmployees = collect($aEmployees);
+        $lEmployeesOk = collect($aEmployeesOk);
 
-        if (count($aEmployeesNotOk) > 0) {
+        $lEmployeesNotOk = $lEmployees->diff($lEmployeesOk);
+
+        if (count($lEmployeesNotOk) > 0) {
             return false;
         }
 

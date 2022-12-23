@@ -165,5 +165,70 @@ class SReportsUtils {
 
         return $lEmployees;
     }
+
+    /**
+     * Método de ordenamiento con varios parámetros
+     *
+     * @param \Illuminate\Support\Collection $collection
+     * @param array $sorting_instructions [
+     *                           ['column' => 'idEmployee', 'order' => 'asc'],
+     *                           ['column' => 'inDateTime', 'order' => 'asc'],
+     *                           ['column' => 'outDateTime', 'order' => 'asc'],
+     *                       ]
+     * 
+     * @return \Illuminate\Support\Collection
+     */
+    public static function multiPropertySort(\Illuminate\Support\Collection $collection, array $sorting_instructions) {
+        return $collection->sort(function ($a, $b) use ($sorting_instructions) {
+            foreach ($sorting_instructions as $sorting_instruction) {
+                $a->{$sorting_instruction['column']} = (isset($a->{$sorting_instruction['column']})) ? $a->{$sorting_instruction['column']} : '';
+                $b->{$sorting_instruction['column']} = (isset($b->{$sorting_instruction['column']})) ? $b->{$sorting_instruction['column']} : '';
+
+                if (empty($sorting_instruction['order']) or strtolower($sorting_instruction['order']) == 'asc') {
+                    $x = ($a->{$sorting_instruction['column']} <=> $b->{$sorting_instruction['column']});
+                }
+                else {
+                    $x = ($b->{$sorting_instruction['column']} <=> $a->{$sorting_instruction['column']});
+
+                }
+                if ($x != 0) {
+                    return $x;
+                }
+            }
+
+            return 0;
+
+        })->values();
+    }
+
+    /**
+     * Filtrar empleados, solo aparecerán aquellos que hayan sido dados de alta antes de la fecha de inicio
+     *
+     * @param \Illuminate\Support\Collection $lEmployees
+     * @param string $sStartDate en formato YYYY-mm-dd
+     * 
+     * @return \Illuminate\Support\Collection
+     */
+    public static function filterEmployeesByAdmissionDate($lEmployees, $sStartDate)
+    {
+        $aEmployees = $lEmployees->pluck('id')->toArray();
+
+        $empsByDates = \DB::select("SELECT
+                                     id
+                                    FROM
+                                     employees
+                                    WHERE
+                                     (admission_date > leave_date
+                                     OR leave_date IS NULL)
+                                     AND admission_date <= '".$sStartDate."'
+                                     AND id IN (".implode(",", $aEmployees).")
+                                ");
+
+        $aEmpsByDates = collect($empsByDates)->pluck('id')->toArray();
+
+        $lEmployees = $lEmployees->whereIn('id', $aEmpsByDates);
+
+        return $lEmployees;
+    }
 }
 
