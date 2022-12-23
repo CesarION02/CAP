@@ -111,6 +111,7 @@ class SDataProcess {
         foreach ($lEmployees as $oEmployee) {
             $newRow = null;
             $idEmployee = $oEmployee->id;
+            \Log::info($idEmployee);
             
             foreach ($aDates as $sDate) {
 
@@ -1891,7 +1892,7 @@ class SDataProcess {
 
                     if (abs($comparison->diffMinutes) <= $config->maxGapMinutes) {
                         if (! is_array($registries)) {
-                            $registries = (array) $registries;
+                            $registries = $registries->toArray();
                         }
                         array_unshift($registries, $oFoundRegistry);
                         return [0, $registries];
