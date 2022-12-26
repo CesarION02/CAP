@@ -213,16 +213,17 @@ class SReportsUtils {
     {
         $aEmployees = $lEmployees->pluck('id')->toArray();
 
-        $empsByDates = \DB::select("SELECT
-                                     id
-                                    FROM
-                                     employees
-                                    WHERE
-                                     (admission_date > leave_date
-                                     OR leave_date IS NULL)
-                                     AND admission_date <= '".$sStartDate."'
-                                     AND id IN (".implode(",", $aEmployees).")
-                                ");
+        $query = "SELECT
+                    id
+                FROM
+                    employees
+                WHERE
+                    (admission_date >= leave_date
+                    OR leave_date IS NULL)
+                    AND admission_date <= '".$sStartDate."'
+                    AND id IN (".implode(",", $aEmployees).")";
+
+        $empsByDates = \DB::select($query);
 
         $aEmpsByDates = collect($empsByDates)->pluck('id')->toArray();
 
