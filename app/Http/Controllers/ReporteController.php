@@ -13,6 +13,7 @@ use App\Models\incidentDay;
 use App\Models\prepayrollAdjType;
 use App\Models\prepayrollAdjust;
 use App\Models\PrepayrollDelegation;
+use App\Models\incident;
 use App\Models\typeincident;
 use App\SData\SDataProcess;
 use App\SUtils\SDateTimeUtils;
