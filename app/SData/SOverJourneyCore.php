@@ -83,7 +83,7 @@ class SOverJourneyCore {
                     $firstTime = false;
                 }
                 else {
-                    if ($isPreviousDay) {
+                    if (! $isPreviousDay) {
                         continue;
                     }
                     
@@ -130,7 +130,7 @@ class SOverJourneyCore {
                         }
                     }
 
-                    $oRow->isDayRepeated = !$isPreviousDay;
+                    $oRow->isDayRepeated = true;
                     if($oRow->isDayRepeated){
                         $oRow->comments = $oRow->comments.'Jornada doble. ';
                         if($comments != null){
