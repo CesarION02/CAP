@@ -46,7 +46,7 @@ class SDataProcess {
         $comments = commentsControl::where('is_delete',0)->select('key_code','value')->get();
 
         // Filtrar empleados, solo aparecerán aquellos que hayan sido dados de alta antes de la fecha de inicio
-        $lEmployees = SReportsUtils::filterEmployeesByAdmissionDate($lEmployees, $sStartDate);
+        $lEmployees = SReportsUtils::filterEmployeesByAdmissionDate($lEmployees, $sStartDate, 'id');
 
         $data53 = SDataProcess::getSchedulesAndChecks($sStartDate, $sEndDate, $payWay, $lEmployees, $comments);
 
@@ -111,7 +111,6 @@ class SDataProcess {
         foreach ($lEmployees as $oEmployee) {
             $newRow = null;
             $idEmployee = $oEmployee->id;
-            \Log::info($idEmployee);
             
             foreach ($aDates as $sDate) {
 

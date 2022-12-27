@@ -313,8 +313,11 @@ class SPrepayrollUtils {
                                     ->pluck('empvb.employee_id')
                                     ->toArray();
 
+        $dates = SDateUtils::getDatesOfPayrollNumber($number, $prepayroll->year, $payType);
         $lEmployees = collect($aEmployees);
+        $lEmployees = SReportsUtils::filterEmployeesByAdmissionDate($lEmployees, $dates[0], null);
         $lEmployeesOk = collect($aEmployeesOk);
+        $lEmployeesOk = SReportsUtils::filterEmployeesByAdmissionDate($lEmployeesOk, $dates[0], null);
 
         $lEmployeesNotOk = $lEmployees->diff($lEmployeesOk);
 

@@ -209,9 +209,14 @@ class SReportsUtils {
      * 
      * @return \Illuminate\Support\Collection
      */
-    public static function filterEmployeesByAdmissionDate($lEmployees, $sStartDate)
+    public static function filterEmployeesByAdmissionDate($lEmployees, $sStartDate, $key)
     {
-        $aEmployees = $lEmployees->pluck('id')->toArray();
+        if (is_null($key)) {
+            $aEmployees = $lEmployees->toArray();
+        }
+        else {
+            $aEmployees = $lEmployees->pluck($key)->toArray();
+        }
 
         $query = "SELECT
                     id
@@ -227,9 +232,12 @@ class SReportsUtils {
 
         $aEmpsByDates = collect($empsByDates)->pluck('id')->toArray();
 
-        $lEmployees = $lEmployees->whereIn('id', $aEmpsByDates);
-
-        return $lEmployees;
+        if (is_null($key)) {
+            return collect($aEmpsByDates);
+        }
+        else {
+            return $lEmployees->whereIn($key, $aEmpsByDates);
+        }
     }
 }
 
