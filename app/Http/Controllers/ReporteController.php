@@ -630,7 +630,15 @@ class ReporteController extends Controller
             }
         }
 
+        $lEmployees = SReportsUtils::filterEmployeesByAdmissionDate($lEmployees, $sStartDate, 'id');
+
+        /******************************************************************************************************** 
+         * Proceso de prenómina
+        */
+
         $lRows = SDataProcess::process($sStartDate, $sEndDate, $payWay, $lEmployees);
+
+        /******************************************************************************************************* */
 
         $aEmployees = $lEmployees->pluck('num_employee', 'id');
         $lEmpWrkdDays = SDelayReportUtils::getTheoreticalDaysOffBasedOnDaysWorked($lRows, $aEmployees, $sStartDate, $sEndDate);
@@ -760,9 +768,10 @@ class ReporteController extends Controller
                     ->with('pay_way', $request->pay_way);
         }
         else {
-            $lEmployees = SReportsUtils::resumeReportRows($lRows, $lEmployees);
+            $listaEmployees = SReportsUtils::resumeReportRows($lRows, $lEmployees);
             $col = collect($lRows);
-            foreach ($lEmployees as $emp) {
+
+            foreach ($listaEmployees as $emp) {
                 $oCom = $lAdjusts->where('employee_id', $emp->id)->all();
                 $arr = [];
                 foreach ($oCom as $com) {
@@ -787,7 +796,7 @@ class ReporteController extends Controller
                     ->with('registriesRoute', route('registro_ajuste'))
                     ->with('lRows', $lRows)
                     ->with('lComments', [])
-                    ->with('lEmployees', $lEmployees)
+                    ->with('lEmployees', $listaEmployees)
                     ->with('subEmployees', $subEmployees)
                     ->with('isAdmin', $isAdmin)
                     ->with('lUsers', $lUsers)

@@ -218,6 +218,10 @@ class SReportsUtils {
             $aEmployees = $lEmployees->pluck($key)->toArray();
         }
 
+        if (count($aEmployees) == 0) {
+            return collect([]);
+        }
+
         $query = "SELECT
                     id
                 FROM
