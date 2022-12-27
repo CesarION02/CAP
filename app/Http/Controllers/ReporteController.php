@@ -2333,6 +2333,25 @@ class ReporteController extends Controller
                 $lEmployees = SGenUtils::toEmployeeIds($payWay, $filterType, $ids, $aEmpl);
             }
             
+            $roles = Auth()->user()->roles()->get();
+            $config = \App\SUtils\SConfiguration::getConfigurations();
+            $seeAll = false;
+            foreach ($roles as $rol) {
+                if (in_array($rol->id, $config->rolesCanSeeAll)) {
+                    $seeAll = true;
+                    break;
+                }
+            }
+
+            $bDirect = false;
+            $subEmployees = SPrepayrollUtils::getEmployeesByUser(\Auth::user()->id, $payWay, $bDirect, null);
+            if (! is_null($subEmployees) && count($subEmployees) >= 0) {
+                $lColEmps = collect($lEmployees);
+                if(!$seeAll){
+                    $lEmployees = $lColEmps->whereIn('id', $subEmployees);
+                }
+            }
+
             // si es parte del wizard cambia la ruta
             if($request->wizard != 2){
                 $route = route('reporteIncidenciasEmpleados', "['id' => 1]");
