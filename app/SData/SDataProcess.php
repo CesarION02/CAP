@@ -10,6 +10,7 @@ use App\SUtils\SRegistryRow;
 use App\SUtils\SReportsUtils;
 use Carbon\Carbon;
 use App\SUtils\SDateUtils;
+use App\SUtils\Logger\SLogger;
 
 class SDataProcess {
 
@@ -42,6 +43,13 @@ class SDataProcess {
       */
     public static function process($sStartDate, $sEndDate, $payWay, $lEmployees)
     {
+        /**
+         * Guarda un objeto de la clase Logger, con esto durante el proceso se almacenarán 
+         * los logs generados en el proceso de prenómina.
+         */
+        $oLogger = new SLogger($sStartDate, $sEndDate, $payWay);
+        session(['logger' => $oLogger]);
+
         SDataProcess::checkEvents();
         $comments = commentsControl::where('is_delete',0)->select('key_code','value')->get();
 
@@ -70,6 +78,11 @@ class SDataProcess {
         $lAllData = SOverJourneyCore::processOverTimeByOverJourney($lDataWSun, $sStartDate, $comments);
 
         $lAllData = SDataProcess::putAdjustInRows($sStartDate, $sEndDate, $lAllData);
+
+        /**
+         * Remueve el objeto logger de la sesión actual
+         */
+        session()->forget('logger');
 
         return $lAllData;
     }
@@ -1562,6 +1575,15 @@ class SDataProcess {
                 $oRow->overDefaultMins = $workshift->overtimepershift > 0 ? $workshift->overtimepershift * 60 : 0;
                 $oRow->workJourneyMins = $workshift->work_time * 60;
 
+                $sScheduleProgrammed = $oRow->scheduleText;
+                $sScheduleDetected = $workshift->name;
+                $oRow->scheduleText = strtoupper($workshift->name)." (detectado)";
+
+                /**
+                 * Log del cambio en los horarios, programados vs detectados
+                 */
+                session('logger')->log($oRow->idEmployee, 'cambio_horario', null, null, $sScheduleProgrammed, $sScheduleDetected);
+
                 return $oRow;
             }
         }
@@ -1712,9 +1734,9 @@ class SDataProcess {
      * Procesa las checadas de un día en específico y determina si 
      * el empleado checó más de una vez en el momento
      *
-     * @param array[SRegistry] $lCheks
+     * @param \Illuminate\Database\Eloquent\Collection $lCheks
      * 
-     * @return array[SRegistry] con las checadas válidas
+     * @return array con las checadas válidas
      */
     public static function filterDoubleCheks($lCheks)
     {
@@ -1776,6 +1798,17 @@ class SDataProcess {
 
         if ($oCheckOut != null) {
             $lNewChecks[] = $oCheckOut;
+        }
+
+        /**
+         * Log de las checadas omitidas de los empleados que registran varias veces entrada o salida
+         */
+        if (count($lCheks) != count($lNewChecks)) {
+            foreach ($lCheks as $indexCheck) {
+                if (! in_array($indexCheck, $lNewChecks)) {
+                    session('logger')->log($indexCheck->employee_id, 'checada_omitida', $indexCheck->id, null, null, null);
+                }
+            }
         }
 
         return $lNewChecks;
@@ -1844,10 +1877,24 @@ class SDataProcess {
             }
 
             if (abs($comparisonIn->diffMinutes) <= $config->maxGapSchedule) {
+                if ($check->type_id != \SCons::REG_IN) {
+                    /**
+                     * Log de los empleados que checaron salida por entrada
+                     */
+                    session('logger')->log($check->employee_id, 'checada_cambio', $check->id, $check->type_id, null, null);
+                }
+
                 $check->type_id = \SCons::REG_IN;
             }
             else {
                 if (abs($comparisonOut->diffMinutes) <= $config->maxGapSchedule) {
+                    if ($check->type_id != \SCons::REG_OUT) {
+                        /**
+                         * Log de los empleados que checaron entrada por salida
+                         */
+                        session('logger')->log($check->employee_id, 'checada_cambio', $check->id, $check->type_id, null, null);
+                    }
+
                     $check->type_id = \SCons::REG_OUT;
                 }
             }
