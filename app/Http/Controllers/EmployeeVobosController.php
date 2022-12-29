@@ -28,7 +28,7 @@ class EmployeeVobosController extends Controller
     
             $oSDate = Carbon::parse($startDate);
             $number = SDateUtils::getNumberOfDate($startDate, $oEmployee->way_pay_id);
-            $dates = SDateUtils::getDatesOfPayrollNumber($number[0], $number[1], $oEmployee->way_pay_id);
+            $dates = SDateUtils::getDatesOfPayrollNumber($number, $oSDate->year, $oEmployee->way_pay_id);
             // \DB::enableQueryLog();
             if ($dates[0] != $startDate || $dates[1] != $endDate) {
                 return response()->json(['success' => false, 'title' => 'Error', 'message' => 'Las fechas no corresponen con el número de semana o quincena', 'icon' => 'error'], 500);
@@ -40,11 +40,11 @@ class EmployeeVobosController extends Controller
     
             if ($oEmployee->way_pay_id == \SCons::PAY_W_S) {
                 $qEmpVobo = $qEmpVobo->where('is_week', true)
-                                        ->where('num_week', $number[0]);
+                                        ->where('num_week', $number);
             }
             else {
                 $qEmpVobo = $qEmpVobo->where('is_biweek', true)
-                                        ->where('num_biweek', $number[0]);
+                                        ->where('num_biweek', $number);
             }
     
             $qEmpVobo = $qEmpVobo->first();
@@ -57,7 +57,7 @@ class EmployeeVobosController extends Controller
                 $oEmpVobo = new EmployeeVobo();
                 if ($oEmployee->way_pay_id == \SCons::PAY_W_S) {
                     $oEmpVobo->is_week = $oEmployee->way_pay_id == \SCons::PAY_W_S;
-                    $oEmpVobo->num_week = $number[0];
+                    $oEmpVobo->num_week = $number;
                     $oEmpVobo->is_biweek = false;
                     $oEmpVobo->num_biweek = null;
                 }
@@ -65,9 +65,9 @@ class EmployeeVobosController extends Controller
                     $oEmpVobo->is_week = false;
                     $oEmpVobo->num_week = null;
                     $oEmpVobo->is_biweek = $oEmployee->way_pay_id == \SCons::PAY_W_Q;
-                    $oEmpVobo->num_biweek = $number[0];
+                    $oEmpVobo->num_biweek = $number;
                 }
-                $oEmpVobo->year = $number[1];
+                $oEmpVobo->year = $oSDate->year;
                 $oEmpVobo->is_delete = false;
                 $oEmpVobo->employee_id = $oEmployee->id;
                 $oEmpVobo->vobo_by_id = auth()->user()->id;

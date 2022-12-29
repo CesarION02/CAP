@@ -552,7 +552,7 @@ class ReporteController extends Controller
         
         $numIni = sDateUtils::getNumberOfDate($sStartDate, $request->pay_way == null ? \SCons::PAY_W_S : $request->pay_way);
         $numFin = sDateUtils::getNumberOfDate($sEndDate, $request->pay_way == null ? \SCons::PAY_W_S : $request->pay_way);
-        if (($numIni[1] != $numFin[1]) || $numIni[0] > $numFin[0]) {
+        if ( ($oStartDate->year != $oEndDate->year) || $numIni > $numFin) {
             return \Redirect::back()->withErrors(['Error', 'No se puede generar un reporte que abarca más de un año']);
         }
 
@@ -718,23 +718,23 @@ class ReporteController extends Controller
         $lEmpVobos = [];
         if (($payWay == \SCons::PAY_W_S || $payWay == \SCons::PAY_W_Q) && env('VOBO_BY_EMP_ENABLED', true) && $wizard > 0) {
             $number = SDateUtils::getNumberOfDate($sStartDate, $payWay);
-            $dates = SDateUtils::getDatesOfPayrollNumber($number[0], $number[1], $payWay);
+            $dates = SDateUtils::getDatesOfPayrollNumber($number, $oStartDate->year, $payWay);
             
             if ($dates[0] == $sStartDate && $dates[1] == $sEndDate) {
                 $lEmpVobos = DB::table('prepayroll_report_emp_vobos AS evb')
                                     ->join('users AS u', 'evb.vobo_by_id', '=', 'u.id')
                                     ->join('employees AS e', 'evb.employee_id', '=', 'e.id')
                                     ->where('evb.is_delete', 0)
-                                    ->where('year', $number[1])
+                                    ->where('year', $oStartDate->year)
                                     ->select('u.name AS user_name', 'evb.employee_id', 'evb.vobo_by_id', 'e.num_employee');
 
                 if ($payWay == \SCons::PAY_W_Q) {
                     $lEmpVobos = $lEmpVobos->where('evb.is_biweek', true)
-                                            ->where('evb.num_biweek', $number[0]);
+                                            ->where('evb.num_biweek', $number);
                 }
                 else {
                     $lEmpVobos = $lEmpVobos->where('evb.is_week', true)
-                                            ->where('evb.num_week', $number[0]);
+                                            ->where('evb.num_week', $number);
                 }
 
                 $lEmpVobos = $lEmpVobos->get()->keyBy('num_employee')->toArray();
