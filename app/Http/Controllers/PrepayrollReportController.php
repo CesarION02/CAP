@@ -102,24 +102,24 @@ class PrepayrollReportController extends Controller
          * Semana
          */
         $number = PrepayrollReportController::process($sStartDate, \SCons::PAY_W_S, 0);
-        if ($number > 0) {
-            PrepayrollReportController::storePrepayReportControls(\SCons::PAY_W_S, $number, $oSDate->year);
+        if ($number[0] > 0) {
+            PrepayrollReportController::storePrepayReportControls(\SCons::PAY_W_S, $number[0], $number[1]);
         }
 
         $number = PrepayrollReportController::process($sEndDate, \SCons::PAY_W_S, 0);
-        if ($number > 0) {
-            PrepayrollReportController::storePrepayReportControls(\SCons::PAY_W_S, $number, $oEDate->year);
+        if ($number[0] > 0) {
+            PrepayrollReportController::storePrepayReportControls(\SCons::PAY_W_S, $number[0], $number[1]);
         }
 
         $oDate = (clone $oSDate)->addWeek();
         while ($oDate->lessThan($oEDate)) {
             $number = PrepayrollReportController::process($oDate->toDateString(), \SCons::PAY_W_S, 0);
-            if ($number > 0) {
-                PrepayrollReportController::storePrepayReportControls(\SCons::PAY_W_S, $number, $oDate->year);
+            if ($number[0] > 0) {
+                PrepayrollReportController::storePrepayReportControls(\SCons::PAY_W_S, $number[0], $number[1]);
             }
             $number = PrepayrollReportController::process($oDate->toDateString(), \SCons::PAY_W_Q, 0);
-            if ($number > 0) {
-                PrepayrollReportController::storePrepayReportControls(\SCons::PAY_W_Q, $number, $oDate->year);
+            if ($number[0] > 0) {
+                PrepayrollReportController::storePrepayReportControls(\SCons::PAY_W_Q, $number[0], $number[1]);
             }
             $oDate->addWeek();
         }
@@ -128,13 +128,13 @@ class PrepayrollReportController extends Controller
          * Quincena
          */
         $number = PrepayrollReportController::process($sStartDate, \SCons::PAY_W_Q, 0);
-        if ($number > 0) {
-            PrepayrollReportController::storePrepayReportControls(\SCons::PAY_W_Q, $number, $oSDate->year);
+        if ($number[0] > 0) {
+            PrepayrollReportController::storePrepayReportControls(\SCons::PAY_W_Q, $number[0], $number[1]);
         }
 
         $number = PrepayrollReportController::process($sEndDate, \SCons::PAY_W_Q, 0);
-        if ($number > 0) {
-            PrepayrollReportController::storePrepayReportControls(\SCons::PAY_W_Q, $number, $oEDate->year);
+        if ($number[0] > 0) {
+            PrepayrollReportController::storePrepayReportControls(\SCons::PAY_W_Q, $number[0], $number[1]);
         }
     }
 
@@ -144,7 +144,7 @@ class PrepayrollReportController extends Controller
      * @param string $dtDate [yyy-mm-yy]
      * @param int $payTypeId \SCons::PAY_W_Q | \SCons::PAY_W_S
      * @param int $idEmployee
-     * @return void
+     * @return array
      */
     public static function process($dtDate, $payTypeId, $idEmployee)
     {
@@ -313,15 +313,15 @@ class PrepayrollReportController extends Controller
 
         if ($payTypeId == \SCons::PAY_W_Q) {
             $lVobos = $lVobos->where('prac.is_biweek', true)
-                            ->where('prac.num_biweek', $number);
+                            ->where('prac.num_biweek', $number[0]);
         }
         else {
             $lVobos = $lVobos->where('prac.is_week', true)
-                            ->where('prac.num_week', $number);
+                            ->where('prac.num_week', $number[0]);
         }
 
         $lVobos = $lVobos->where('prac.is_delete', false)
-                            ->where('prac.year', $oDate->year)
+                            ->where('prac.year', $number[1])
                             ->orderBy('prac.order_vobo', 'ASC');
 
         $lVobosEmpty = clone $lVobos;
@@ -388,8 +388,6 @@ class PrepayrollReportController extends Controller
     public static function canMakeAdjustByEmployee($employee_id, $dtDate, $payTypeId){
         $number = SDateUtils::getNumberOfDate($dtDate, $payTypeId);
 
-        $oDate = Carbon::parse($dtDate);
-
         $lVobos = \DB::table('prepayroll_report_emp_vobos AS prev')
                         ->where('employee_id', $employee_id);
 
@@ -398,16 +396,16 @@ class PrepayrollReportController extends Controller
         if ($payTypeId == \SCons::PAY_W_Q) {
             $week_biWeek = "quincena";
             $lVobos = $lVobos->where('prev.is_biweek', true)
-                            ->where('prev.num_biweek', $number);
+                            ->where('prev.num_biweek', $number[0]);
         }
         else {
             $week_biWeek = "semana";
             $lVobos = $lVobos->where('prev.is_week', true)
-                            ->where('prev.num_week', $number);
+                            ->where('prev.num_week', $number[0]);
         }
 
         $lVobos = $lVobos->where('prev.is_delete', false)
-                            ->where('prev.year', $oDate->year)
+                            ->where('prev.year', $number[1])
                             ->get();
 
         if (count($lVobos) == 0) {
@@ -439,15 +437,15 @@ class PrepayrollReportController extends Controller
         while ($oDate->lessThanOrEqualTo($oEndDate)) {
             $number = SDateUtils::getNumberOfDate($oDate->toDateString(), $payTypeId);
 
-            if (in_array($number, $prepayrollAprovedd)) {
+            if (in_array($number[0], $prepayrollAprovedd)) {
                 $oDate->addDay();
                 continue;
             }
 
-            $isFree = SPrepayrollUtils::isPayrollNumberFreeOfVobo($number, $oDate->year, $payTypeId);
+            $isFree = SPrepayrollUtils::isPayrollNumberFreeOfVobo($number[0], $number[1], $payTypeId);
 
             if ($isFree) {
-                $prepayrollAprovedd[] = $number;
+                $prepayrollAprovedd[] = $number[0];
             }
             else {
                 return [false, $oDate->toDateString()];

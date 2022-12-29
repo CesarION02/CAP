@@ -226,7 +226,7 @@ class SDateUtils {
      *
      * @param string $dtDate
      * @param integer $payTypeId
-     * @return void
+     * @return array [número de quincena/semana, año]
      */
     public static function getNumberOfDate($dtDate, $payTypeId)
     {
@@ -255,7 +255,7 @@ class SDateUtils {
             $oNumber = $week[0];
         }
 
-        return $oNumber->num;
+        return [$oNumber->num, $oNumber->year];
     }
 
     /**
