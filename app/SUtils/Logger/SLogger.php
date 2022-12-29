@@ -18,7 +18,7 @@
             $this->startDate = $startDate;
             $this->endDate = $endDate;
             $this->wayPayId = $wayPayId;
-            $this->idGeneration = Hash::make($startDate.$endDate.$wayPayId.\Auth::user()->id);
+            $this->idGeneration = Hash::make($startDate.$endDate.$wayPayId.(isset(\Auth::user()->id) ? \Auth::user()->id : 1));
         }
 
         /**
@@ -46,7 +46,7 @@
             $obj->type_reg_orig_n_id = $checkOrigType;
             $obj->way_pay_id = $this->wayPayId;
             $obj->employee_id = $employeeId;
-            $obj->user_by_id = \Auth::user()->id;
+            $obj->user_by_id = (isset(\Auth::user()->id) ? \Auth::user()->id : 1);
 
             $obj->save();
         }

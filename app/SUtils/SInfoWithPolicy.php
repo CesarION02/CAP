@@ -1247,6 +1247,9 @@ class SInfoWithPolicy{
                 $haveDayoff = 0;
                 $missingAbsence = 0;
                 $diaAnteriorDescanso = 0;
+                if (count($lRows) == 0) {
+                    break;
+                }
                 $semanaBase = Carbon::parse($lRows[0]->inDate);
                 $primerAntes = Carbon::parse($lRows[0]->inDate);
                 $ultimoAntes = Carbon::parse($lRows[0]->inDate);
