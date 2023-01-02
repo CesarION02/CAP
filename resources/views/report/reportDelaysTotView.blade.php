@@ -146,11 +146,13 @@
                                 </tr>
                             </tbody>
                             @if( isset($wizard) )
-                                @if( $wizard != 2 )
+                                @if( $wizard != 2)
+                                    <button onclick="reloadFunction()" id="reloadBtn" title="Recargar reporte">Actualizar</button>
                                     <button onclick="topFunction()" id="myBtn" title="Ir arriba">Ir arriba</button>
                                     <a href="{{ route('generarreportetiemposextra') }}" target="_blank" id="newButton" title="Nuevo reporte">Nuevo reporte</a>
                                 @endif
                             @else
+                                <button onclick="reloadFunction()" id="reloadBtn" title="Recargar reporte">Actualizar</button>
                                 <button onclick="topFunction()" id="myBtn" title="Ir arriba">Ir arriba</button>
                                 <a href="{{ route('generarreportetiemposextra') }}" target="_blank" id="newButton" title="Nuevo reporte">Nuevo reporte</a>
                             @endif
@@ -169,6 +171,7 @@
                                                 <input type="hidden" name="delegation" value="0" >
                                                 <input type="hidden" name="pay_way" value={{ $pay_way }} >
                                                 <input type="hidden" name="wizard" value={{ $wizard }} >
+                                                <input type="hidden" name="filter_employees" id="filter_employees" value=0> 
                                                 <button type="submit" class="btn btn-primary" id="guardar">Anterior</button>
                                             </form>
                                         </div>
@@ -258,6 +261,11 @@
         this.hiddenColExId = 14;
         this.hiddenCol = this.tReport == this.REP_DELAY ? 5 : 5;
         this.toExport = this.tReport == this.REP_DELAY ? [0, 1, 2, 3, 4, 6] : [0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12];
+
+        for(let i = 0; i<this.lEmployees.length; i++){
+            this.lEmployees[i].extraHours = convertToHoursMins(this.lEmployees[i].extraHours);
+        }
+        this.filterEmployee = <?php echo json_encode($filter_employees) ?>;
     }
     
     var oData = new GlobalData();
@@ -298,7 +306,8 @@
             columnDefs: [
                     {
                         targets: [ oData.hiddenColEmId ],
-                        visible: false
+                        visible: false,
+                        searchable: true,
                     }
                 ],
             
@@ -354,7 +363,7 @@
                         searchValues = searchValues + '^' + oData.subEmployees[i] + '$' + (i < (oData.subEmployees.length-1) ? "|" : "");
                     }
                     console.log(searchValues, oData.subEmployees);
-                    oTable.column(9).search("(" + searchValues + ")", true, false).draw();
+                    oTable.column(15).search("(" + searchValues + ")", true, false).draw();
                 }
                 else {
                     oTable.columns().search('').draw();
@@ -367,6 +376,41 @@
                     elem.parentNode.removeChild(elem);
                 }
             }, 15000);
+
+            if(oData.filterEmployee == 0){
+                oTable.columns().search('').draw();  
+            }else{
+                var searchValues = "";
+                    for (let i = 0; i < oData.subEmployees.length; i++) {
+                        searchValues = searchValues + '^' + oData.subEmployees[i] + '$' + (i < (oData.subEmployees.length-1) ? "|" : "");
+                    }
+                    console.log(searchValues, oData.subEmployees);
+                    oTable.column(15).search("(" + searchValues + ")", true, false).draw();
+            }
+
+            if(oData.filterEmployee == 0){
+                $('#directos').val('0').trigger('change.select2');  
+                document.getElementById("filter_employees").value = 0; 
+                
+                $('#incidentsTable_filter').prepend('<label for="directos">Empleados: </label>' +
+                        '<select id="directos" class="select2-class" style="width: 25%">' +
+                            '<option selected value="0">Todos</option>' +
+                            '<option value="1">Directos</option>' +
+                        '</select>' +
+                        '&nbsp'
+                );
+            }else{
+                $('#directos').val('1').trigger('change.select2');
+                document.getElementById("filter_employees").value = 1; 
+
+                $('#incidentsTable_filter').prepend('<label for="directos">Empleados: </label>' +
+                        '<select id="directos" class="select2-class" style="width: 25%">' +
+                            '<option value="0">Todos</option>' +
+                            '<option selected value="1">Directos</option>' +
+                        '</select>' +
+                        '&nbsp'
+                );
+            }
         });
     </script>
     @if($isAdmin)
@@ -390,22 +434,7 @@
         </script>
     @endif
 <script>
-    //Get the button:
-    mybutton = document.getElementById("myBtn");
-    theNewButton = document.getElementById("newButton");
-
-    // When the user scrolls down 20px from the top of the document, show the button
-    window.onscroll = function() {scrollFunction()};
-
-    function scrollFunction() {
-        if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-            mybutton.style.display = "block";
-            theNewButton.style.display = "block";
-        } else {
-            mybutton.style.display = "none";
-            theNewButton.style.display = "none";
-        }
-    }
+    
 
     // When the user clicks on the button, scroll to the top of the document
     function topFunction() {
