@@ -45,12 +45,11 @@
                 $obj->adjust_by_system = $adjustBySystem;
                 $obj->register_n_id = $idCheck;
                 $obj->type_reg_orig_n_id = $checkOrigType;
-                $obj->way_pay_id = $this->wayPayId;
+                $obj->way_pay_id = $this->wayPayId > 0 ? $this->wayPayId : null;
                 $obj->employee_id = $employeeId;
                 $obj->user_by_id = (isset(\Auth::user()->id) ? \Auth::user()->id : 1);
     
                 $obj->save();
-
             }
             catch (\Throwable $th) {
                 \Log::error($th);
