@@ -31,6 +31,7 @@ class incidentController extends Controller
     {
         $start_date = null;
         $end_date = null;
+        $is_medical = 0;
         if ($request->start_date == null) {
             $now = Carbon::now();
             $start_date = $now->startOfMonth()->toDateString();
@@ -42,34 +43,54 @@ class incidentController extends Controller
         }
 
         if (session()->get('rol_id') != 1){
-            $numero = session()->get('name');
-            $usuario = DB::table('users')
-                    ->where('name',$numero)
-                    ->get();
-            $dgu = DB::table('group_dept_user')
-                    ->where('user_id',$usuario[0]->id)
-                    ->select('groupdept_id AS id')
-                    ->get();
-            $Adgu = [];
-            for($i=0;count($dgu)>$i;$i++){
-                $Adgu[$i]=$dgu[$i]->id;
-            }
-            
-            $datas = incident::orderBy('incidents.id')
+
+            if (session()->get('rol_id') == 16){
+                $datas = incident::orderBy('incidents.id')
                             ->join('type_incidents','incidents.type_incidents_id',"=",'type_incidents.id');
-            if ($incidentType > 0) {
-                $datas = $datas->where('is_agreement', 1);
+                if ($incidentType > 0) {
+                    $datas = $datas->where('is_agreement', 1);
+                }
+
+                $datas = $datas->whereBetween('start_date', [$start_date, $end_date])
+                            ->join('employees','employees.id','=','incidents.employee_id')
+                            ->join('departments','departments.id','=','employees.department_id')
+                            ->where('is_active', true)
+                            ->where('incidents.is_delete','0')
+                            ->where('type_incidents.id','22')
+                            ->select('incidents.id AS id','incidents.start_date AS ini','incidents.end_date AS fin','employees.name AS name','type_incidents.name AS tipo');
+                $datas = $datas->get();  
+                
+                $is_medical = 1;
+
+            }else{
+                $numero = session()->get('name');
+                $usuario = DB::table('users')
+                        ->where('name',$numero)
+                        ->get();
+                $dgu = DB::table('group_dept_user')
+                        ->where('user_id',$usuario[0]->id)
+                        ->select('groupdept_id AS id')
+                        ->get();
+                $Adgu = [];
+                for($i=0;count($dgu)>$i;$i++){
+                    $Adgu[$i]=$dgu[$i]->id;
+                }
+                
+                $datas = incident::orderBy('incidents.id')
+                                ->join('type_incidents','incidents.type_incidents_id',"=",'type_incidents.id');
+                if ($incidentType > 0) {
+                    $datas = $datas->where('is_agreement', 1);
+                }
+
+                $datas = $datas->whereBetween('start_date', [$start_date, $end_date])
+                            ->join('employees','employees.id','=','incidents.employee_id')
+                            ->join('departments','departments.id','=','employees.department_id')
+                            ->whereIn('departments.dept_group_id',$Adgu)
+                            ->where('is_active', true)
+                            ->where('incidents.is_delete','0')
+                            ->select('incidents.id AS id','incidents.start_date AS ini','incidents.end_date AS fin','employees.name AS name','type_incidents.name AS tipo');
+                $datas = $datas->get();
             }
-
-            $datas = $datas->whereBetween('start_date', [$start_date, $end_date])
-                        ->join('employees','employees.id','=','incidents.employee_id')
-                        ->join('departments','departments.id','=','employees.department_id')
-                        ->whereIn('departments.dept_group_id',$Adgu)
-                        ->where('is_active', true)
-                        ->where('incidents.is_delete','0')
-                        ->select('incidents.id AS id','incidents.start_date AS ini','incidents.end_date AS fin','employees.name AS name','type_incidents.name AS tipo');
-            $datas = $datas->get();
-
         }else{
             $datas = incident::orderBy('incidents.id')
                             ->join('type_incidents','incidents.type_incidents_id',"=",'type_incidents.id');
@@ -92,6 +113,7 @@ class incidentController extends Controller
                     ->with('incidentType', $incidentType)
                     ->with('datas', $datas)
                     ->with('sroute', $sroute)
+                    ->with('is_medical', $is_medical)
                     ->with('start_date', $start_date)
                     ->with('end_date', $end_date);
     }
@@ -104,34 +126,47 @@ class incidentController extends Controller
     public function create($incidentType = 0)
     {
         $incidents = typeincident::orderBy('name','ASC');
-
-        if ($incidentType > 0) {
-            $incidents = $incidents->where('is_agreement', 1);
+        $is_medical = 0;
+        if(session()->get('rol_id') == 16){
+            $incidents = $incidents->where('id',22); 
+        }else{
+            if ($incidentType > 0) {
+                $incidents = $incidents->where('is_agreement', 1);
+            }
         }
 
         $incidents = $incidents->pluck('id','name');
 
         if (session()->get('rol_id') != 1){
-            $numero = session()->get('name');
-            $usuario = DB::table('users')
-                    ->where('name',$numero)
-                    ->get();
-            $dgu = DB::table('group_dept_user')
-                    ->where('user_id',$usuario[0]->id)
-                    ->select('groupdept_id AS id')
-                    ->get();
-            $Adgu = [];
-            for($i=0;count($dgu)>$i;$i++){
-                $Adgu[$i]=$dgu[$i]->id;
-            }
-            
-            $employees = DB::table('employees')
+                if(session()->get('rol_id') != 16){
+                    $numero = session()->get('name');
+                    $usuario = DB::table('users')
+                            ->where('name',$numero)
+                            ->get();
+                    $dgu = DB::table('group_dept_user')
+                            ->where('user_id',$usuario[0]->id)
+                            ->select('groupdept_id AS id')
+                            ->get();
+                    $Adgu = [];
+                    for($i=0;count($dgu)>$i;$i++){
+                        $Adgu[$i]=$dgu[$i]->id;
+                    }
+                    
+                    $employees = DB::table('employees')
+                                        ->join('departments','departments.id','=','employees.department_id')
+                                        ->whereIn('departments.dept_group_id',$Adgu)
+                                        ->where('is_active', true)
+                                        ->orderBy('name','ASC')
+                                        ->select('employees.name AS name','employees.id AS num', 'employees.num_employee')
+                                        ->get();    
+                }else{
+                    $employees = DB::table('employees')
                                 ->join('departments','departments.id','=','employees.department_id')
-                                ->whereIn('departments.dept_group_id',$Adgu)
                                 ->where('is_active', true)
                                 ->orderBy('name','ASC')
                                 ->select('employees.name AS name','employees.id AS num', 'employees.num_employee')
-                                ->get();
+                                ->get();          
+                }
         }else{
             $employees = DB::table('employees')
                                 ->join('departments','departments.id','=','employees.department_id')

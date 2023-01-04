@@ -138,9 +138,11 @@ Incidencias
                                     <a href="{{ route('crear_incidente', $incidentType) }}" class="btn btn-block btn-success btn-sm">
                                         <i class="fa fa-fw fa-plus-circle"></i> Nuevo
                                     </a>
-                                    <a href="{{route('masiva')}}" class="btn btn-block btn btn-success btn-sm">
-                                        <i class="fa fa-fw fa-plus-circle"></i> Masiva
-                                    </a>
+                                    @if($is_medical == 0)
+                                        <a href="{{route('masiva')}}" class="btn btn-block btn btn-success btn-sm">
+                                            <i class="fa fa-fw fa-plus-circle"></i> Masiva
+                                        </a>
+                                    @endif
                                 </div>
                                 <br>
                                 
