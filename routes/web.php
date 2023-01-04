@@ -124,7 +124,7 @@ Route::get('report/generarreportepuertas','ReporteController@generarReportePuert
 Route::get('report/reporteIncidencias', 'ReporteController@incidentReportView')->name('reporteIncidencias');
 Route::get('report/reporteIncidenciasGenerar', 'ReporteController@incidentReportGenerar')->name('reporteIncidenciasGenerar');
 /* Reporte incidencias empleados ADRIAN*/
-Route::get('report/reporteIncidenciasEmpleados/{wizard}', 'ReporteController@reportIncidentsEmployees')->name('reporteIncidenciasEmpleados');
+Route::get('report/reporteIncidenciasEmpleados/{wizard}/{delagation?}', 'ReporteController@reportIncidentsEmployees')->name('reporteIncidenciasEmpleados');
 Route::get('report/reporteIncidenciasEmpleadosGenerar', 'ReporteController@reportIncidentsEmployeesGenerar')->name('reporteIncidenciasEmpleadosGenerar');
 Route::post('report/reporteIncidenciasEmpleadosStore', 'ReporteController@reportIncidentsEmployeesStore')->name('reporteIncidenciasEmpleadosStore');
 Route::post('report/reporteIncidenciasEmpleadosDelete', 'ReporteController@reportIncidentsEmployeesDelete')->name('reporteIncidenciasEmpleadosDelete');

@@ -168,6 +168,8 @@
                                                 <input type="hidden" name="report_mode" value="2" >
                                                 <input type="hidden" name="delegation" value="0" >
                                                 <input type="hidden" name="pay_way" value={{ $pay_way }} >
+                                                <input type="hidden" name="delegation" value="{{ $bDelegation }}" >
+                                                <input type="hidden" name="id_delegation" value="{{ $idDelegation }}" >
                                                 <input type="hidden" name="wizard" value={{ $wizard }} >
                                                 <button type="submit" class="btn btn-primary" id="guardar">Anterior</button>
                                             </form>

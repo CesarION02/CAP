@@ -530,8 +530,7 @@ class ReporteController extends Controller
         $iEmployee = $request->emp_id;
         $reportMode = $request->report_mode;
         $bDelegation = $request->delegation;
-        $iPayrollYear = $request->year;
-        $iPayrollNumber = $request->payroll_number;
+        $idDelegation = $request->id_delegation;
         
         if(isset($request->wizard)){
             $wizard = $request->wizard;
@@ -578,14 +577,8 @@ class ReporteController extends Controller
             $lEmployees = SGenUtils::toEmployeeIds($payWay, $filterType, $ids);
         }
 
-        $iDelegation = null;
         if ($bDelegation) {
-            $oDelegation = PrepayrollDelegation::where('number_prepayroll', $iPayrollNumber)
-                                                ->where('year', $iPayrollYear)
-                                                ->where('is_delete', false)
-                                                ->where('pay_way_id', $payWay)
-                                                ->where('user_delegated_id', \Auth::user()->id)
-                                                ->first();
+            $oDelegation = PrepayrollDelegation::find($idDelegation);
             if ($oDelegation == null) {
                 $roles = \Auth::user()->roles;
                 $config = \App\SUtils\SConfiguration::getConfigurations(); // Obtengo las configuraciones del sistema
@@ -603,12 +596,11 @@ class ReporteController extends Controller
                 }
             }
 
-            $dates = SDateUtils::getDatesOfPayrollNumber($iPayrollNumber, $iPayrollYear, $payWay);
+            $dates = SDateUtils::getDatesOfPayrollNumber($oDelegation->number_prepayroll, $oDelegation->year, $payWay);
             $sStartDate = $dates[0];
             $sEndDate = $dates[1];
             $oStartDate = Carbon::parse($sStartDate);
             $oEndDate = Carbon::parse($sEndDate);
-            $iDelegation = $oDelegation->id_delegation;
         }
 
         $roles = Auth()->user()->roles()->get();
@@ -622,7 +614,7 @@ class ReporteController extends Controller
         }
 
         $bDirect = false;
-        $subEmployees = SPrepayrollUtils::getEmployeesByUser(\Auth::user()->id, $payWay, $bDirect, $iDelegation);
+        $subEmployees = SPrepayrollUtils::getEmployeesByUser(\Auth::user()->id, $payWay, $bDirect, $idDelegation);
         if (! is_null($subEmployees) && count($subEmployees) >= 0) {
             $lColEmps = collect($lEmployees);
             if(!$seeAll){
@@ -765,7 +757,9 @@ class ReporteController extends Controller
                     ->with('lUsers', $lUsers)
                     ->with('wizard', $wizard )
                     ->with('filter_employees',$filter_employees)
-                    ->with('pay_way', $request->pay_way);
+                    ->with('pay_way', $request->pay_way)
+                    ->with('bDelegation', $bDelegation)
+                    ->with('idDelegation', $idDelegation);
         }
         else {
             $listaEmployees = SReportsUtils::resumeReportRows($lRows, $lEmployees);
@@ -802,7 +796,9 @@ class ReporteController extends Controller
                     ->with('lUsers', $lUsers)
                     ->with('wizard', $wizard )
                     ->with('filter_employees',$filter_employees)
-                    ->with('pay_way', $request->pay_way);
+                    ->with('pay_way', $request->pay_way)
+                    ->with('bDelegation', $bDelegation)
+                    ->with('idDelegation', $idDelegation);
         }
         
     }
@@ -2227,14 +2223,13 @@ class ReporteController extends Controller
             return view('report.reporteFaltasView',  ['data' => $merged, 'range' => $range, 'totEmployees' => $totEmployees, 'calendarStart' => $calendarStart]);
         }
 
-        public function reportIncidentsEmployees($wizard = 0){
+        public function reportIncidentsEmployees($wizard = 0, $bDelegation = null) {
             // wizard = 1 -> funcionamiento independiente de la vista.
             // wizard = 2 -> funcionamiento en conjunto de las vistas para hacer un wizard de revisión prenómina.
             $config = \App\SUtils\SConfiguration::getConfigurations();
 
             $bDirect = false;
             $payType = 0;
-            $bDelegation = null;
             $subEmployees = SPrepayrollUtils::getEmployeesByUser(\Auth::user()->id, $bDirect, $payType, $bDelegation);
             if ($subEmployees == null) {
                 $lEmployees = SGenUtils::toEmployeeIds(0, 0, []);
@@ -2247,18 +2242,35 @@ class ReporteController extends Controller
                                 ->get();
             }
 
-            return view('report.reportIncidentsEmployees')
-                        ->with('tReport', \SCons::REP_HR_EX)
-                        ->with('sRoute', 'reporteIncidenciasEmpleadosGenerar')
-                        ->with('lEmployees', $lEmployees)
-                        ->with('startOfWeek', $config->startOfWeek)
-                        ->with('wizard',$wizard );
+            $viewName = "report.reportIncidentsEmployees";
+            $oPayrolls = null;
+
+            if ($wizard == 2) {
+                $oPayrolls = SPayrollDelegationUtils::getDelegationsPayrolls(\Auth::user()->id);
+
+                if (count($oPayrolls->weeks) == 0 && count($oPayrolls->biweeks) == 0) {
+                    return redirect()->back()->withErrors(['No hay semanas o quincenas delegadas para ti.']);
+                }
+
+                $viewName = "report.reportWizardDelegation";
+            }
+
+            return view($viewName)
+                    ->with('tReport', \SCons::REP_HR_EX)
+                    ->with('sTitle', "Nóminas delegadas")
+                    ->with('sRoute', 'reporteIncidenciasEmpleadosGenerar')
+                    ->with('lEmployees', $lEmployees)
+                    ->with('oPayrolls', $oPayrolls)
+                    ->with('startOfWeek', $config->startOfWeek)
+                    ->with('wizard', $wizard);
         }
 
         public function reportIncidentsEmployeesGenerar(Request $request)
         {
             $sStartDate = $request->start_date;
             $sEndDate = $request->end_date;
+            $bDelegation = $request->delegation;
+            $iIdDelegation = $request->id_delegation;
             //si no es el wizard entra en esta parte
             if ( $request->wizard != 2 ){
                 $iEmployee = $request->emp_id;
@@ -2333,6 +2345,32 @@ class ReporteController extends Controller
                 $lEmployees = SGenUtils::toEmployeeIds($payWay, $filterType, $ids, $aEmpl);
             }
             
+            if ($bDelegation) {
+                $oDelegation = PrepayrollDelegation::find($iIdDelegation);
+                if ($oDelegation == null) {
+                    $roles = \Auth::user()->roles;
+                    $config = \App\SUtils\SConfiguration::getConfigurations(); // Obtengo las configuraciones del sistema
+
+                    $seeAll = false;
+                    foreach ($roles as $rol) {
+                        if (in_array($rol->id, $config->rolesCanSeeAll)) {
+                            $seeAll = true;
+                            break;
+                        }
+                    }
+
+                    if (! $seeAll) {
+                        return \Redirect::back()->withErrors(['Error', 'No tiene delegación para el número de prenómina seleccionado']);
+                    }
+                }
+
+                $dates = SDateUtils::getDatesOfPayrollNumber($oDelegation->number_prepayroll, $oDelegation->year, $oDelegation->pay_way_id);
+                $sStartDate = $dates[0];
+                $sEndDate = $dates[1];
+                $oStartDate = Carbon::parse($sStartDate);
+                $oEndDate = Carbon::parse($sEndDate);
+            }
+
             $roles = Auth()->user()->roles()->get();
             $config = \App\SUtils\SConfiguration::getConfigurations();
             $seeAll = false;
@@ -2344,13 +2382,15 @@ class ReporteController extends Controller
             }
 
             $bDirect = false;
-            $subEmployees = SPrepayrollUtils::getEmployeesByUser(\Auth::user()->id, $payWay, $bDirect, null);
+            $subEmployees = SPrepayrollUtils::getEmployeesByUser(\Auth::user()->id, $payWay, $bDirect, $iIdDelegation);
             if (! is_null($subEmployees) && count($subEmployees) >= 0) {
                 $lColEmps = collect($lEmployees);
                 if(!$seeAll){
                     $lEmployees = $lColEmps->whereIn('id', $subEmployees);
                 }
             }
+
+            $lEmployees = SReportsUtils::filterEmployeesByAdmissionDate($lEmployees, $sStartDate, 'id');
 
             // si es parte del wizard cambia la ruta
             if($request->wizard != 2){
@@ -2479,7 +2519,6 @@ class ReporteController extends Controller
                     array_push($subEmployees, $data);
             }
             
-
             return view('report.reportIncidentsEmployeesView', [
                                                             'lRows' => $totRows,
                                                             'sStartDate' => $sStartDate,
@@ -2491,7 +2530,9 @@ class ReporteController extends Controller
                                                             'aDates' => $aDates,
                                                             'wizard' => $request->wizard,
                                                             'payWay' => $payWay,
-                                                            'subEmployees' => $subEmployees
+                                                            'subEmployees' => $subEmployees,
+                                                            'bDelegation' => $bDelegation,
+                                                            'iIdDelegation' => $iIdDelegation
                                                         ]);
         }
 

@@ -167,7 +167,7 @@ class PrepayrollDelegationsController extends Controller
             $role = 0;
             // Menú de reporte de tiempo extra delegado
             $res = SPermissions::assignMenuByDefaultRol($oDelegation->user_delegated_id, $config->idOverTimeMenuDel);
-            if ($res == null) {
+            if (is_null($res)) {
                 throw new \Exception('No se pudo asignar el menú de reporte de tiempo extra delegado al usuario '.$oUserDelegated->name.'.');
             }
             else if ($res > 0) {
@@ -177,7 +177,7 @@ class PrepayrollDelegationsController extends Controller
             if ($role == 0) {
                 // Menú de vobos semanales
                 $res = SPermissions::assignMenuByDefaultRol($oDelegation->user_delegated_id, $config->idVoboWeekMenu);
-                if ($res == null) {
+                if (is_null($res)) {
                     throw new \Exception('No se pudo asignar el menú de vistos buenos semana al usuario '.$oUserDelegated->name.'.');
                 }
                 else if ($res > 0) {
@@ -187,7 +187,7 @@ class PrepayrollDelegationsController extends Controller
                 if ($role == 0) {
                     // Menú de vobos quincenales
                     $res = SPermissions::assignMenuByDefaultRol($oDelegation->user_delegated_id, $config->idVoboBiWeekMenu);
-                    if ($res == null) {
+                    if (is_null($res)) {
                         throw new \Exception('No se pudo asignar el menú de vistos buenos quincena al usuario '.$oUserDelegated->name.'.');
                     }
                     else if ($res > 0) {
@@ -227,6 +227,7 @@ class PrepayrollDelegationsController extends Controller
         }
         catch (\Exception $e) {
             \DB::rollBack();
+            \Log::error($e);
             return redirect()->back()->withErrors(['Error' => $e->getMessage()])->withInput();
         }
 
@@ -269,7 +270,7 @@ class PrepayrollDelegationsController extends Controller
                 \DB::table('user_rol')->where('rol_id', $oObjInsertions->role)->delete();
             }
             if ($oObjInsertions->user_permission_id > 0) {
-                \DB::table('user_permission')->where('id', $oObjInsertions->user_permission_id)->delete();
+                \DB::table('user_permissions')->where('id', $oObjInsertions->user_permission_id)->delete();
             }
     
             $oDelegation->is_active = false;
