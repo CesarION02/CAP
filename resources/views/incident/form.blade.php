@@ -1,13 +1,26 @@
 <div class="form-group">
     <label for="Tipoincidente" class="col-lg-3 control-label requerido">Tipo incidencia:</label>
     <div class="col-lg-8">
-        <select id="type_incidents_id" name="type_incidents_id" class="form-control" onchange="tipo_incidencia(this)">
+        @if(isset($datas))
+            <select id="type_incidents_id" name="type_incidents_id" disabled class="form-control" onchange="tipo_incidencia(this)">
+                    <option value="0">Elige una opción</option>
+                @foreach($incidents as $type => $index)
+                    @if ($datas[0]->tipo == $index)
+                        <option value="{{ $index }}" selected> {{$type}}</option>
+                    @else
+                        <option value="{{ $index }}" > {{$type}}</option>
+                    @endif
+                    
+                @endforeach
+            </select>
+        @else
+            <select id="type_incidents_id" name="type_incidents_id" class="form-control" onchange="tipo_incidencia(this)">
                 <option value="0">Elige una opción</option>
-            @foreach($incidents as $type => $index)
-                <option value="{{ $index }}" {{old('type_incidents_id') == $index ? 'selected' : '' }}> {{$type}}</option>
-            @endforeach
-        </select>
-
+                @foreach($incidents as $type => $index)
+                    <option value="{{ $index }}" {{old('type_incidents_id') == $index ? 'selected' : '' }}> {{$type}}</option>
+                @endforeach
+            </select>
+        @endif   
     </div>
 </div>
 <div class="form-group">
@@ -35,7 +48,8 @@
         <label for="employee_id" class="col-lg-3 control-label requerido">Empleado:</label>
         <div class="col-lg-8">
             @if(isset($datas))
-               <input type="text" class="form-control" value="{{$datas[0]->name}}" readonly>
+               <input type="text" class="form-control" value="{{$datas[0]->name}}"  readonly>
+               <input type="hidden" class="form-control" value="{{$datas[0]->id_employee}}" id="employee_id"  name="employee_id">
             @else
                 <select id="employee_id"  name="employee_id" class="form-control chosen-select">
                     @foreach($employees as $employee)
@@ -95,7 +109,11 @@
       
         @if(isset($datas))
             @if($activar == 1)
+                @if($hay_ajustes == 0)
+                    <textarea required id="comentarios" name="comentarios" title="Escribe el comentario que deseas que aparezca en el renglón."  class="form-control" style="resize: none; width: 350px; height: 115px;"></textarea>
+                @else
                 <textarea required id="comentarios" name="comentarios" title="Escribe el comentario que deseas que aparezca en el renglón."  class="form-control" style="resize: none; width: 350px; height: 115px;">{{$comment_adjust[0]->comments}}</textarea>
+                @endif
             @else
                 <textarea id="comentarios" name="comentarios" title="Escribe el comentario que deseas que aparezca en el renglón."  class="form-control" style="resize: none; width: 350px; height: 115px;" disabled></textarea>
             @endif
@@ -104,5 +122,8 @@
         @endif
     </div>
 </div>
-<input type="hidden" value="{{$incident_comment}}" id="atipos">
-<input type="hidden" id="sincomentarios" name="sincomentarios" value="0">
+@if(isset($is_medical))
+    <input type="hidden" id="is_medical" name="is_medical" value="{{$is_medical}}">
+@else
+    <input type="hidden" id="is_medical" name="is_medical" value="0" > 
+@endif

@@ -194,7 +194,7 @@ Incidencias
                             
                             <td>
                                 @if($incidentType == 14)
-                                    <a href="{{route('editar_incidente', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
+                                    <a href="{{route('editar_incidente', ['id' => $data->id , 'is_medical' => $is_medical])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
                                         <i class="fa fa-fw fa-pencil"></i>
                                     </a>
                                     <form action="{{route('eliminar_incidente', ['id' => $data->id])}}" class="d-inline form-eliminar" method="POST">
