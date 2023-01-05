@@ -159,6 +159,7 @@ class employeeController extends Controller
      */
     public function update(Request $request, $id)
     {
+
         $employee = employees::findOrFail($id);
         $employee->way_register_id = $request->way_register_id;
         $employee->is_overtime = $request->is_overtime;
@@ -167,6 +168,11 @@ class employeeController extends Controller
             $employee->job_id = $request->job_id;
         }else{
             $employee->job_id = 25;
+        }
+        if(isset($request->cambio)){
+            $employee->lock_depto = 1;
+        }else{
+            $employee->lock_depto = 0;
         }
         $employee->ben_pol_id = $request->ben_pol_id;
         $employee->policy_extratime_id = $request->policy_id;
@@ -426,7 +432,7 @@ class employeeController extends Controller
         $grupoPrenomina = DB::table('prepayroll_group_deptos')->where('department_id',$dept)->get();
         $oldEmp = employees::find($id);
 
-        if( $oldEmp->dept_rh_id == $jEmployee->dept_rh_id ){
+        if( $oldEmp->dept_rh_id == $jEmployee->dept_rh_id || $oldEmp->lock_depto == 1 ){
             employees::where('id', $id)
                     ->update(
                             [
@@ -436,7 +442,7 @@ class employeeController extends Controller
                             'first_name' => ucwords(mb_strtolower($jEmployee->lastname)),
                             'admission_date' => $jEmployee->admission_date,
                             'leave_date' => $jEmployee->leave_date,
-                            // 'is_overtime' => $jEmployee->extra_time,
+                            //'is_overtime' => $jEmployee->extra_time,
                             'ben_pol_id' => $jEmployee->checker_policy,
                             'job_rh_id' => $this->rhjobs[$jEmployee->siie_job_id],
                             'policy_extratime_id' => $jEmployee->overtime_policy + 1,
@@ -459,7 +465,7 @@ class employeeController extends Controller
                             'first_name' => ucwords(mb_strtolower($jEmployee->lastname)),
                             'admission_date' => $jEmployee->admission_date,
                             'leave_date' => $jEmployee->leave_date,
-                            // 'is_overtime' => $jEmployee->extra_time,
+                            //'is_overtime' => $jEmployee->extra_time,
                             'ben_pol_id' => $jEmployee->checker_policy,
                             'job_rh_id' => $this->rhjobs[$jEmployee->siie_job_id],
                             'policy_extratime_id' => $jEmployee->overtime_policy + 1,
