@@ -122,6 +122,8 @@
         @endif
     </div>
 </div>
+<input type="hidden" value="{{$incident_comment}}" id="atipos">
+<input type="hidden" id="sincomentarios" name="sincomentarios" value="0">
 @if(isset($is_medical))
     <input type="hidden" id="is_medical" name="is_medical" value="{{$is_medical}}">
 @else
