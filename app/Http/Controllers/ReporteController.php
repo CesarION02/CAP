@@ -640,7 +640,7 @@ class ReporteController extends Controller
             }
         }
 
-        $lEmployees = SReportsUtils::filterEmployeesByAdmissionDate($lEmployees, $sStartDate, 'id');
+        $lEmployees = SReportsUtils::filterEmployeesByAdmissionDate($lEmployees, $sEndDate, 'id');
 
         /******************************************************************************************************** 
          * Proceso de prenómina
