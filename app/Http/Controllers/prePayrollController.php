@@ -607,6 +607,7 @@ class prePayrollController extends Controller
         $startDate = $request->start_date == null ? Carbon::now()->firstOfMonth()->toDateString() : $request->start_date;
         $endDate = $request->end_date == null ? Carbon::now()->lastOfMonth()->toDateString() : $request->end_date;
         $config = \App\SUtils\SConfiguration::getConfigurations();
+        $year = Carbon::parse($endDate)->year;
         
         switch ($idPreNomina) {
             case 'week':
@@ -653,10 +654,21 @@ class prePayrollController extends Controller
 							->get();
 
                 foreach($lControls as $cont){
-                    $dt_ini = DB::table('hrs_prepay_cut')
+                    if($cont->num_biweek == 1){
+                        $year = Carbon::parse($endDate)->subYear()->year;
+
+                        $dt_ini = DB::table('hrs_prepay_cut')
+                                        ->where('year', $year)
+                                        ->orderBy('num','DESC')
+                                        ->where('is_delete',0)
+                                        ->value('dt_cut');
+                    }else{
+                        $dt_ini = DB::table('hrs_prepay_cut')
                                         ->where('year', Carbon::parse($startDate)->format('Y'))
                                         ->where('num', ($cont->num_biweek - 1))
-                                        ->value('dt_cut');
+                                        ->value('dt_cut');    
+                    }
+                    
 
                     $cont->dt_ini = Carbon::parse($dt_ini)->addDay()->toDateString();
                 }
@@ -697,11 +709,21 @@ class prePayrollController extends Controller
 
                 foreach($lControls as $cont){
                     if($cont->is_biweek){
-                        $dt_ini = DB::table('hrs_prepay_cut')
+                        if($cont->num_biweek == 1){
+                            $year = Carbon::parse($endDate)->subYear()->year;
+    
+                            $dt_ini = DB::table('hrs_prepay_cut')
+                                            ->where('year', $year)
+                                            ->orderBy('num','DESC')
+                                            ->where('is_delete',0)
+                                            ->value('dt_cut');
+                        }else{
+                            $dt_ini = DB::table('hrs_prepay_cut')
                                             ->where('year', Carbon::parse($startDate)->format('Y'))
                                             ->where('num', ($cont->num_biweek - 1))
-                                            ->value('dt_cut');
-    
+                                            ->value('dt_cut');    
+                        }
+
                         $cont->dt_ini = Carbon::parse($dt_ini)->addDay()->toDateString();
                     }
                 }
