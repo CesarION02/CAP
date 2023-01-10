@@ -77,6 +77,12 @@
         </div>
 </div>
 <div class="form-group">
+        <label for="cambio" class="col-lg-3 control-label">Mantener depto y puesto:</label>
+        <div class="col-lg-6">
+                <input type="checkbox" id="cambio" name="cambio"> 
+        </div>
+</div>
+<div class="form-group">
         <label for="dept_rh_id" class="col-lg-3 control-label">Departamento nominas:</label>
         <div class="col-lg-8">
                 <input type="text" name="dept_rh_id" id="dept_rh_id" class="form-control" value="{{$dept_rh}}" readonly>

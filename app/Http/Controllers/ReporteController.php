@@ -548,6 +548,16 @@ class ReporteController extends Controller
         if (! $oStartDate->lessThanOrEqualTo($oEndDate)) {
             return \Redirect::back()->withErrors(['Error', 'La fecha de inicio debe ser previa a la fecha final']);
         }
+
+        if($request->optradio == "employee"){
+            $oEmployee = \DB::table('employees')
+                            ->where('id', $iEmployee)
+                            ->first();
+
+            if(!is_null($oEmployee)){
+                $request->pay_way = $oEmployee->way_pay_id;
+            }
+        }
         
         $numIni = sDateUtils::getNumberOfDate($sStartDate, $request->pay_way == null ? \SCons::PAY_W_S : $request->pay_way);
         $numFin = sDateUtils::getNumberOfDate($sEndDate, $request->pay_way == null ? \SCons::PAY_W_S : $request->pay_way);
@@ -622,7 +632,7 @@ class ReporteController extends Controller
             }
         }
 
-        $lEmployees = SReportsUtils::filterEmployeesByAdmissionDate($lEmployees, $sStartDate, 'id');
+        $lEmployees = SReportsUtils::filterEmployeesByAdmissionDate($lEmployees, $sEndDate, 'id');
 
         /******************************************************************************************************** 
          * Proceso de prenómina

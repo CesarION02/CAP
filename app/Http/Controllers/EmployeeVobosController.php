@@ -25,8 +25,10 @@ class EmployeeVobosController extends Controller
     
             $startDate = $request->start_date;
             $endDate = $request->end_date;
-    
-            $oSDate = Carbon::parse($startDate);
+            //bug fix porque no encuentra el visto bueno porque agarra año anterior
+            //$oSDate = Carbon::parse($startDate);
+            $oSDate = Carbon::parse($endDate);
+            //
             $number = SDateUtils::getNumberOfDate($startDate, $oEmployee->way_pay_id);
             $dates = SDateUtils::getDatesOfPayrollNumber($number[0], $number[1], $oEmployee->way_pay_id);
             // \DB::enableQueryLog();

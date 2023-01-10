@@ -138,9 +138,11 @@ Incidencias
                                     <a href="{{ route('crear_incidente', $incidentType) }}" class="btn btn-block btn-success btn-sm">
                                         <i class="fa fa-fw fa-plus-circle"></i> Nuevo
                                     </a>
-                                    <a href="{{route('masiva')}}" class="btn btn-block btn btn-success btn-sm">
-                                        <i class="fa fa-fw fa-plus-circle"></i> Masiva
-                                    </a>
+                                    @if($is_medical == 0)
+                                        <a href="{{route('masiva')}}" class="btn btn-block btn btn-success btn-sm">
+                                            <i class="fa fa-fw fa-plus-circle"></i> Masiva
+                                        </a>
+                                    @endif
                                 </div>
                                 <br>
                                 
@@ -192,7 +194,7 @@ Incidencias
                             
                             <td>
                                 @if($incidentType == 14)
-                                    <a href="{{route('editar_incidente', ['id' => $data->id])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
+                                    <a href="{{route('editar_incidente', ['id' => $data->id , 'is_medical' => $is_medical])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
                                         <i class="fa fa-fw fa-pencil"></i>
                                     </a>
                                     <form action="{{route('eliminar_incidente', ['id' => $data->id])}}" class="d-inline form-eliminar" method="POST">

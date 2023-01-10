@@ -31,6 +31,7 @@ class incidentController extends Controller
     {
         $start_date = null;
         $end_date = null;
+        $is_medical = 0;
         if ($request->start_date == null) {
             $now = Carbon::now();
             $start_date = $now->startOfMonth()->toDateString();
@@ -42,34 +43,54 @@ class incidentController extends Controller
         }
 
         if (session()->get('rol_id') != 1){
-            $numero = session()->get('name');
-            $usuario = DB::table('users')
-                    ->where('name',$numero)
-                    ->get();
-            $dgu = DB::table('group_dept_user')
-                    ->where('user_id',$usuario[0]->id)
-                    ->select('groupdept_id AS id')
-                    ->get();
-            $Adgu = [];
-            for($i=0;count($dgu)>$i;$i++){
-                $Adgu[$i]=$dgu[$i]->id;
-            }
-            
-            $datas = incident::orderBy('incidents.id')
+
+            if (session()->get('rol_id') == 16){
+                $datas = incident::orderBy('incidents.id')
                             ->join('type_incidents','incidents.type_incidents_id',"=",'type_incidents.id');
-            if ($incidentType > 0) {
-                $datas = $datas->where('is_agreement', 1);
+                if ($incidentType > 0) {
+                    $datas = $datas->where('is_agreement', 1);
+                }
+
+                $datas = $datas->whereBetween('start_date', [$start_date, $end_date])
+                            ->join('employees','employees.id','=','incidents.employee_id')
+                            ->join('departments','departments.id','=','employees.department_id')
+                            ->where('is_active', true)
+                            ->where('incidents.is_delete','0')
+                            ->where('type_incidents.id','22')
+                            ->select('incidents.id AS id','incidents.start_date AS ini','incidents.end_date AS fin','employees.name AS name','type_incidents.name AS tipo');
+                $datas = $datas->get();  
+                
+                $is_medical = 1;
+
+            }else{
+                $numero = session()->get('name');
+                $usuario = DB::table('users')
+                        ->where('name',$numero)
+                        ->get();
+                $dgu = DB::table('group_dept_user')
+                        ->where('user_id',$usuario[0]->id)
+                        ->select('groupdept_id AS id')
+                        ->get();
+                $Adgu = [];
+                for($i=0;count($dgu)>$i;$i++){
+                    $Adgu[$i]=$dgu[$i]->id;
+                }
+                
+                $datas = incident::orderBy('incidents.id')
+                                ->join('type_incidents','incidents.type_incidents_id',"=",'type_incidents.id');
+                if ($incidentType > 0) {
+                    $datas = $datas->where('is_agreement', 1);
+                }
+
+                $datas = $datas->whereBetween('start_date', [$start_date, $end_date])
+                            ->join('employees','employees.id','=','incidents.employee_id')
+                            ->join('departments','departments.id','=','employees.department_id')
+                            ->whereIn('departments.dept_group_id',$Adgu)
+                            ->where('is_active', true)
+                            ->where('incidents.is_delete','0')
+                            ->select('incidents.id AS id','incidents.start_date AS ini','incidents.end_date AS fin','employees.name AS name','type_incidents.name AS tipo');
+                $datas = $datas->get();
             }
-
-            $datas = $datas->whereBetween('start_date', [$start_date, $end_date])
-                        ->join('employees','employees.id','=','incidents.employee_id')
-                        ->join('departments','departments.id','=','employees.department_id')
-                        ->whereIn('departments.dept_group_id',$Adgu)
-                        ->where('is_active', true)
-                        ->where('incidents.is_delete','0')
-                        ->select('incidents.id AS id','incidents.start_date AS ini','incidents.end_date AS fin','employees.name AS name','type_incidents.name AS tipo');
-            $datas = $datas->get();
-
         }else{
             $datas = incident::orderBy('incidents.id')
                             ->join('type_incidents','incidents.type_incidents_id',"=",'type_incidents.id');
@@ -92,6 +113,7 @@ class incidentController extends Controller
                     ->with('incidentType', $incidentType)
                     ->with('datas', $datas)
                     ->with('sroute', $sroute)
+                    ->with('is_medical', $is_medical)
                     ->with('start_date', $start_date)
                     ->with('end_date', $end_date);
     }
@@ -104,34 +126,47 @@ class incidentController extends Controller
     public function create($incidentType = 0)
     {
         $incidents = typeincident::orderBy('name','ASC');
-
-        if ($incidentType > 0) {
-            $incidents = $incidents->where('is_agreement', 1);
+        $is_medical = 0;
+        if(session()->get('rol_id') == 16){
+            $incidents = $incidents->where('id',22); 
+        }else{
+            if ($incidentType > 0) {
+                $incidents = $incidents->where('is_agreement', 1);
+            }
         }
 
         $incidents = $incidents->pluck('id','name');
 
         if (session()->get('rol_id') != 1){
-            $numero = session()->get('name');
-            $usuario = DB::table('users')
-                    ->where('name',$numero)
-                    ->get();
-            $dgu = DB::table('group_dept_user')
-                    ->where('user_id',$usuario[0]->id)
-                    ->select('groupdept_id AS id')
-                    ->get();
-            $Adgu = [];
-            for($i=0;count($dgu)>$i;$i++){
-                $Adgu[$i]=$dgu[$i]->id;
-            }
-            
-            $employees = DB::table('employees')
+                if(session()->get('rol_id') != 16){
+                    $numero = session()->get('name');
+                    $usuario = DB::table('users')
+                            ->where('name',$numero)
+                            ->get();
+                    $dgu = DB::table('group_dept_user')
+                            ->where('user_id',$usuario[0]->id)
+                            ->select('groupdept_id AS id')
+                            ->get();
+                    $Adgu = [];
+                    for($i=0;count($dgu)>$i;$i++){
+                        $Adgu[$i]=$dgu[$i]->id;
+                    }
+                    
+                    $employees = DB::table('employees')
+                                        ->join('departments','departments.id','=','employees.department_id')
+                                        ->whereIn('departments.dept_group_id',$Adgu)
+                                        ->where('is_active', true)
+                                        ->orderBy('name','ASC')
+                                        ->select('employees.name AS name','employees.id AS num', 'employees.num_employee')
+                                        ->get();    
+                }else{
+                    $employees = DB::table('employees')
                                 ->join('departments','departments.id','=','employees.department_id')
-                                ->whereIn('departments.dept_group_id',$Adgu)
                                 ->where('is_active', true)
                                 ->orderBy('name','ASC')
                                 ->select('employees.name AS name','employees.id AS num', 'employees.num_employee')
-                                ->get();
+                                ->get();          
+                }
         }else{
             $employees = DB::table('employees')
                                 ->join('departments','departments.id','=','employees.department_id')
@@ -288,13 +323,13 @@ class incidentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit($id, $is_medical = 0)
     {
         $incidents = typeincident::where('is_agreement', 1)->orderBy('name','ASC')->pluck('id','name');
         $datas = DB::table('incidents')
                         ->join('employees','employees.id',"=","incidents.employee_id")
                         ->where('incidents.id',$id)
-                        ->select('incidents.id AS id','employees.name AS name','incidents.start_date AS ini','incidents.end_date AS fin','type_incidents_id AS tipo')
+                        ->select('incidents.id AS id','incidents.employee_id AS id_employee','employees.name AS name','incidents.start_date AS ini','incidents.end_date AS fin','type_incidents_id AS tipo')
                         ->get();
         
         $lComments = \DB::table('comments')->where('is_delete', 0)->get();
@@ -318,12 +353,25 @@ class incidentController extends Controller
                 $activar = 1;
             }
         }
-        if( $activar != 0 ){
-            $comment_adjust = \DB::table('prepayroll_adjusts')->where('id',$adjust[0]->adjust_id)->get();
-        }else{
-            $comment_adjust = 0;
+        //activar comentarios si entra el rol de medico de planta
+        if ($is_medical == 1){
+            $activar = 1;
         }
-        return view('incident.edit', compact('datas'))->with('incidents',$incidents)->with('incident_comment',$cadenaComparacion)->with('lComments', $lComments)->with('adjust',$adjust)->with('activar',$activar)->with('comment_adjust',$comment_adjust);
+        //
+        $hay_ajustes = 0;
+        if( $activar != 0 ){
+            if(count($adjust) == 0){
+                $comment_adjust[0] = '';
+                $hay_ajustes = 0;
+            }else{
+                $comment_adjust = \DB::table('prepayroll_adjusts')->where('id',$adjust[0]->adjust_id)->get();
+                $hay_ajustes = 1;
+            }
+        }else{
+            $comment_adjust[0] = '';
+            $hay_ajustes = 0;
+        }
+        return view('incident.edit', compact('datas'))->with('incidents',$incidents)->with('incident_comment',$cadenaComparacion)->with('lComments', $lComments)->with('adjust',$adjust)->with('activar',$activar)->with('comment_adjust',$comment_adjust)->with('is_medical',$is_medical)->with('hay_ajustes',$hay_ajustes);
     }
 
     /**
@@ -346,10 +394,6 @@ class incidentController extends Controller
             $delete[0]->is_delete = 1;
             $delete[0]->save();
         }
-
-        $adjust_delete = DB::table('adjust_link')
-                ->where('incident_id',$incident->id)
-                ->delete();
 
         $dateI = Carbon::parse($request->start_date);
         $dateS = Carbon::parse($request->end_date);
@@ -374,7 +418,7 @@ class incidentController extends Controller
                 $link = new adjust_link();
                 $link->adjust_id = $adjust->id;
                 $link->is_incident = 1;
-                $link->incident_id = $incident->id;
+                $link->incident_id = $id;
                 $link->save();
             }
                     
@@ -382,7 +426,12 @@ class incidentController extends Controller
             $dateI->addDay();
         }
 
-        return redirect('incidents')->with('mensaje', 'Incidente actualizado con exito');
+        if ($request->is_medical == 1) {
+            return redirect()->route('incidentes', 14)->with('mensaje', 'Incidente modificado con éxito');
+        }
+        else {
+            return redirect('incidents')->with('mensaje', 'Incidente modificado con éxito');
+        }
     }
 
     /**

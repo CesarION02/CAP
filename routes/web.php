@@ -401,7 +401,7 @@ Route::post('incidents/massive','incidentController@massiveStore')->name('guarda
 Route::get('incidents/{type?}', 'incidentController@index')->name('incidentes');
 Route::get('incidents/create/{type?}', 'incidentController@create')->name('crear_incidente');
 Route::post('incidents', 'incidentController@store')->name('guardar_incidente');
-Route::get('incidents/{id}/edit', 'incidentController@edit')->name('editar_incidente');
+Route::get('incidents/{id}/{is_medical}/edit', 'incidentController@edit')->name('editar_incidente');
 Route::put('incidents/{id}', 'incidentController@update')->name('actualizar_incidente');
 Route::delete('incidents/{id}', 'incidentController@destroy')->name('eliminar_incidente');
 

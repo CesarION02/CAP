@@ -27,4 +27,17 @@ function tipo_incidencia(opcion) {
         document.getElementById("comentarios").required = false;
         document.getElementById("sincomentarios").value = 0;
     }
+
+    if (opcion.value == 22) {
+        document.getElementById("comentFrec").disabled = false;
+        document.getElementById("comentarios").disabled = false;
+        document.getElementById("comentarios").required = true;
+        document.getElementById("sincomentarios").value = 1;
+    } else {
+        document.getElementById("comentFrec").disabled = true;
+        document.getElementById("comentarios").disabled = true;
+        document.getElementById("comentarios").required = false;
+        document.getElementById("sincomentarios").value = 0;
+    }
+
 }

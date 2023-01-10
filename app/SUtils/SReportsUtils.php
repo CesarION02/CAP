@@ -229,7 +229,7 @@ class SReportsUtils {
                 WHERE
                     (admission_date >= leave_date
                     OR leave_date IS NULL)
-                    AND admission_date <= '".$sStartDate."'
+                    AND admission_date < '".$sStartDate."'
                     AND id IN (".implode(",", $aEmployees).")";
 
         $empsByDates = \DB::select($query);
