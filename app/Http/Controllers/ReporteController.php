@@ -10,6 +10,7 @@ use App\Models\DepartmentRH;
 use App\Models\departmentsGroup;
 use App\Models\employees;
 use App\Models\incidentDay;
+use App\Models\PrepayReportControl;
 use App\Models\prepayrollAdjType;
 use App\Models\prepayrollAdjust;
 use App\Models\PrepayrollDelegation;
@@ -718,25 +719,26 @@ class ReporteController extends Controller
          */
         $isPrepayrollInspection = false;
         $lEmpVobos = [];
+        $aNumber = [];
         if (($payWay == \SCons::PAY_W_S || $payWay == \SCons::PAY_W_Q) && env('VOBO_BY_EMP_ENABLED', true) && $wizard > 0) {
-            $number = SDateUtils::getNumberOfDate($sStartDate, $payWay);
-            $dates = SDateUtils::getDatesOfPayrollNumber($number[0], $number[1], $payWay);
+            $aNumber = SDateUtils::getNumberOfDate($sStartDate, $payWay);
+            $dates = SDateUtils::getDatesOfPayrollNumber($aNumber[0], $aNumber[1], $payWay);
             
             if ($dates[0] == $sStartDate && $dates[1] == $sEndDate) {
                 $lEmpVobos = DB::table('prepayroll_report_emp_vobos AS evb')
                                     ->join('users AS u', 'evb.vobo_by_id', '=', 'u.id')
                                     ->join('employees AS e', 'evb.employee_id', '=', 'e.id')
                                     ->where('evb.is_delete', 0)
-                                    ->where('year', $number[1])
+                                    ->where('year', $aNumber[1])
                                     ->select('u.name AS user_name', 'evb.employee_id', 'evb.vobo_by_id', 'e.num_employee');
 
                 if ($payWay == \SCons::PAY_W_Q) {
                     $lEmpVobos = $lEmpVobos->where('evb.is_biweek', true)
-                                            ->where('evb.num_biweek', $number[0]);
+                                            ->where('evb.num_biweek', $aNumber[0]);
                 }
                 else {
                     $lEmpVobos = $lEmpVobos->where('evb.is_week', true)
-                                            ->where('evb.num_week', $number[0]);
+                                            ->where('evb.num_week', $aNumber[0]);
                 }
 
                 $lEmpVobos = $lEmpVobos->get()->keyBy('num_employee')->toArray();
@@ -784,6 +786,19 @@ class ReporteController extends Controller
                 $emp->comments = $arr;
                 $emp->scheduleText = $col->where('idEmployee', $emp->id)->first()->scheduleText;
             }
+
+            $oPrepayrollCtrl = null;
+            if ($isPrepayrollInspection) {
+                $oPrepayrollCtrl =  DB::table('prepayroll_report_auth_controls AS prac')
+                                                ->join('users AS u', 'prac.user_vobo_id', '=', 'u.id')
+                                                ->select('prac.*', 'u.name AS username')
+                                                ->where('prac.user_vobo_id', \Auth::user()->id)
+                                                ->where('prac.year', $aNumber[1])
+                                                ->where(($payWay == \SCons::PAY_W_S ? 'prac.is_week' : 'prac.is_biweek'), true)
+                                                ->where(($payWay == \SCons::PAY_W_S ? 'prac.num_week' : 'prac.num_biweek'), $aNumber[0])
+                                                ->where('prac.is_delete', 0)
+                                                ->first();
+            }
             
             return view('report.reportDelaysTotView')
                     ->with('tReport', \SCons::REP_HR_EX_TOT)
@@ -807,6 +822,7 @@ class ReporteController extends Controller
                     ->with('wizard', $wizard )
                     ->with('filter_employees',$filter_employees)
                     ->with('pay_way', $request->pay_way)
+                    ->with('oPrepayrollCtrl', $oPrepayrollCtrl)
                     ->with('bDelegation', $bDelegation)
                     ->with('idDelegation', $idDelegation);
         }
@@ -2240,7 +2256,7 @@ class ReporteController extends Controller
 
             $bDirect = false;
             $payType = 0;
-            $subEmployees = SPrepayrollUtils::getEmployeesByUser(\Auth::user()->id, $bDirect, $payType, $bDelegation);
+            $subEmployees = SPrepayrollUtils::getEmployeesByUser(\Auth::user()->id, $bDirect, $payType, null);
             if ($subEmployees == null) {
                 $lEmployees = SGenUtils::toEmployeeIds(0, 0, []);
             }
@@ -2255,7 +2271,7 @@ class ReporteController extends Controller
             $viewName = "report.reportIncidentsEmployees";
             $oPayrolls = null;
 
-            if ($wizard == 2) {
+            if ($wizard == 2 && $bDelegation) {
                 $oPayrolls = SPayrollDelegationUtils::getDelegationsPayrolls(\Auth::user()->id);
 
                 if (count($oPayrolls->weeks) == 0 && count($oPayrolls->biweeks) == 0) {
@@ -2279,8 +2295,8 @@ class ReporteController extends Controller
         {
             $sStartDate = $request->start_date;
             $sEndDate = $request->end_date;
-            $bDelegation = $request->delegation;
-            $iIdDelegation = $request->id_delegation;
+            $bDelegation = ! isset($request->delegation) ? false : isset($request->delegation);
+            $iIdDelegation = isset($request->id_delegation) ? $request->id_delegation : null;
             //si no es el wizard entra en esta parte
             if ( $request->wizard != 2 ){
                 $iEmployee = $request->emp_id;

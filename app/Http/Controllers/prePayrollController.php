@@ -950,16 +950,17 @@ class prePayrollController extends Controller
      * 
      * @return redirect
      */
-    public function boVo(Request $request, $idVobo, $idPreNomina = 1) {
+    public function boVo(Request $request, $idVobo, $payType = 1) {
         $success = true;
+        $iDelegation = isset($request->id_delegation) && ! is_null($request->id_delegation) ? $request->id_delegation : null;
+        $sBackUrl = isset($request->back_url) && ! is_null($request->back_url) ? $request->back_url : null;
 
         try {
             if (! isset($request->can_skip) || $request->can_skip == 0) {
                 /**
                  * Determinar si ya se ha dado Vobo a los empleados directos del usuario en sesión
                 */
-
-                $isAllOk = SPrepayrollUtils::isAllEmployeesOk(auth()->user()->id, $idVobo);
+                $isAllOk = SPrepayrollUtils::isAllEmployeesOk(auth()->user()->id, $idVobo, $iDelegation);
 
                 if (! $isAllOk) {
                     $success = false;
@@ -1006,7 +1007,12 @@ class prePayrollController extends Controller
                         ]);
         }
         catch (\Exception $e) {
-            return redirect()->route('vobos', $idPreNomina)->with(['error' => $e->getMessage(), 'icon' => 'error']);
+            if (is_null($sBackUrl)) {
+                return redirect()->route('vobos', $payType)->with(['error' => $e->getMessage(), 'icon' => 'error']);
+            }
+            else {
+                return redirect($sBackUrl)->with(['error' => $e->getMessage(), 'icon' => 'error']);
+            }
         }
 
         $msg = "Se dió el visto bueno correctamente";
@@ -1130,17 +1136,25 @@ class prePayrollController extends Controller
         //     }
         // }
 
-        return redirect()->route('vobos',['idPreNomina' => $idPreNomina])->with(['mensaje' => $msg, 'icon' => $icon]);
+        if (is_null($sBackUrl)) {
+            return redirect()->route('vobos',['idPreNomina' => $payType])->with(['mensaje' => $msg, 'icon' => $icon]);
+        }
+        else {
+            return redirect($sBackUrl)->with(['mensaje' => $msg, 'icon' => $icon]);
+        }
     }
 
     /**
      * Rechazar visto bueno de prenómina
      *
      * @param [type] $id
-     * @return void
+     * 
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function rejBoVo($id, $idPreNomina = 1)
+    public function rejBoVo(Request $request, $id, $idPreNomina = 1)
     {
+        $sBackUrl = isset($request->back_url) && ! is_null($request->back_url) ? $request->back_url : null;
+
         $res = DB::table('prepayroll_report_auth_controls')
                     ->where('id_control', $id)
                     ->update([
@@ -1150,7 +1164,12 @@ class prePayrollController extends Controller
                         'dt_rejected' => Carbon::now()->toDateTimeString()
                     ]);
 
-        return redirect()->route('vobos', ['idPreNomina' => $idPreNomina]);
+        if (is_null($sBackUrl)) {
+            return redirect()->route('vobos', ['idPreNomina' => $idPreNomina]);
+        }
+        else {
+            return redirect($sBackUrl);
+        }
     }
     public function prepayrollAbrir($id){
         $control = prepayroll_control::find($id);

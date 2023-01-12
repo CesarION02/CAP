@@ -273,7 +273,7 @@ class SPrepayrollUtils {
         return true;
     }
 
-    public static function isAllEmployeesOk($idUser, $idVobo)
+    public static function isAllEmployeesOk($idUser, $idVobo, $iDelegation = null)
     {
         $prepayroll = \DB::table('prepayroll_report_auth_controls AS prac')
                             ->where('prac.user_vobo_id', $idUser)
@@ -292,7 +292,6 @@ class SPrepayrollUtils {
         $number = $prepayroll->is_week ? $prepayroll->num_week : $prepayroll->num_biweek;
         
         $bDirectEmployees = true;
-        $iDelegation = null;
         $aEmployees = SPrepayrollUtils::getEmployeesByUser($idUser, $payType, $bDirectEmployees, $iDelegation);
 
         $aEmployeesOk = \DB::table('prepayroll_report_emp_vobos AS empvb')
