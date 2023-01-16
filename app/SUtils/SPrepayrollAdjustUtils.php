@@ -130,7 +130,8 @@ class SPrepayrollAdjustUtils {
         if ($payTypeId == \SCons::PAY_W_Q) {
             $quin = \DB::table('hrs_prepay_cut AS hpc')
                         ->where('dt_cut', '>=', $date)
-                        ->where('year', $year)
+                        // se comenta para revisar si con eso queda resuelto
+                        //->where('year', $year)
                         ->where('is_delete', false)
                         ->orderBy('dt_cut', 'ASC')
                         ->take(1)
