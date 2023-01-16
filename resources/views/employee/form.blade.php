@@ -79,7 +79,16 @@
 <div class="form-group">
         <label for="cambio" class="col-lg-3 control-label">Mantener depto y puesto:</label>
         <div class="col-lg-6">
-                <input type="checkbox" id="cambio" name="cambio"> 
+                @if(isset($data))
+                        @if( $data->lock_depto == 1 )
+                                <input type="checkbox" checked id="cambio" name="cambio"> 
+                        @else
+                                <input type="checkbox" id="cambio" name="cambio"> 
+                        @endif
+                @else
+                        <input type="checkbox" id="cambio" name="cambio"> 
+                @endif
+                
         </div>
 </div>
 <div class="form-group">
