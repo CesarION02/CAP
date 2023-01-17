@@ -73,7 +73,8 @@ Checadas del empleado
                             extend: 'print',
                             text: 'Imprimir'
                         }
-                    ]
+                    ],
+                "bSort": false
             });
         });
     </script>
