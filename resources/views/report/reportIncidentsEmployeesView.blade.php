@@ -1,6 +1,5 @@
 @extends("theme.$theme.layout")
 @section('styles1')
-    <link rel="stylesheet" href="{{ asset("dt/nv/datatables.css") }}">
     <style>
         tr {
             font-size: 70%;
@@ -211,7 +210,6 @@
 @section("scripts")
     <script src="{{ asset("assets/js/axios.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/vue.js") }}" type="text/javascript"></script>
-    <script src="{{ asset("dt/nv/datatables.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/moment/moment.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/moment/datetime-moment.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/pages/scripts/SGui.js") }}" type="text/javascript"></script>

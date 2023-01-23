@@ -16,12 +16,14 @@ var app = new Vue({
         selComment: "",
         vRow: null,
         adjTypeEnabled: true,
-        lComments: oData.lComments,
+        lCommentsAdjsTypes: oData.lCommentsAdjsTypes,
+        lComments: [],
         haveComments: false,
         resumeComments: [],
         nameEmployee: "",
         indexRow: null,
-        checkEmployee: false,
+        isAdjustsDisabled: false,
+        isDisabledByComments: false,
         startDate: oData.startDate,
         endDate: oData.endDate,
         dateInit: null,
@@ -30,7 +32,7 @@ var app = new Vue({
         lUsers: oData.lUsers,
     },
     mounted() {
-        this.haveComments = this.lComments.length > 0;
+        this.haveComments = this.lCommentsAdjsTypes[this.adjType].length > 0;
         let self = this;
         $('#comentFrec').on('select2:select', function (e) {
             self.selComment = e.params.data.text;
@@ -49,7 +51,7 @@ var app = new Vue({
     },
     methods: {
         getCssClass(oRow, report) {
-            if ((oRow.hasAbsence || !oRow.hasCheckOut || !oRow.hasCheckIn) && (oRow.events.length == 0)) {
+            if ((oRow.hasAbsence || !oRow.hasCheckOut || !oRow.hasCheckIn) && (oRow.events.length == 0) && oRow.workable) {
                 return 'absence';
             }
             if (oRow.hasSchedule == false && oRow.hasChecks == false) {
@@ -141,7 +143,6 @@ var app = new Vue({
                     adjCategory: this.adjCategory,
                 })
                 .then(res => {
-                    console.log(res);
                     let oRes = res.data;
 
                     if (oRes.success) {
@@ -193,6 +194,26 @@ var app = new Vue({
         },
 
         validate() {
+            if (this.adjType == oData.ADJ_CONS.JE && this.vRow.hasCheckIn) {
+                oGui.showError("El renglón tiene checada de entrada, no es necesario justificarla");
+                return false;
+            }
+
+            if (this.adjType == oData.ADJ_CONS.JS && this.vRow.hasCheckOut) {
+                oGui.showError("El renglón tiene checada de salida, no es necesario justificarla");
+                return false;
+            }
+
+            if (this.adjType == oData.ADJ_CONS.OR && ! this.vRow.entryDelayMinutes > 0) {
+                oGui.showError("No existe retardo para este día, no es necesario el ajuste");
+                return false;
+            }
+
+            if (this.adjType == oData.ADJ_CONS.JF && ! this.vRow.hasAbsence) {
+                oGui.showError("El empleado no tiene falta este día, no es necesario justificarla");
+                return false;
+            }
+
             if (this.adjType == oData.ADJ_CONS.DHE || this.adjType == oData.ADJ_CONS.AHE) {
                 if (!Number.isInteger(parseInt(this.overMins, 10))) {
                     oGui.showError("El valor de minutos debe ser entero");
@@ -233,7 +254,6 @@ var app = new Vue({
 
             axios.delete(route)
                 .then(res => {
-                    console.log(res);
                     let oRes = res.data;
 
                     if (oRes.success) {
@@ -255,7 +275,7 @@ var app = new Vue({
                     console.log(error);
                 });
         },
-        showModal(oRow, index) {
+        showModal(oRow, index, isComment) {
             $('#comentFrec').val('').trigger('change');
             this.vRow = oRow;
             this.indexRow = index;
@@ -271,9 +291,16 @@ var app = new Vue({
             this.outDateTime = "";
             this.isModifIn = false;
             this.isModifOut = false;
-            this.checkEmployee = false;
+            this.isAdjustsDisabled = false;
+            this.isDisabledByComments = false;
             this.dateInit = null;
             this.dateEnd = null;
+
+            if (isComment) {
+                this.adjCategory = 2;
+                this.adjType = oData.ADJ_CONS.COM;
+                this.isDisabledByComments = true;
+            }
 
             let sIn = this.vRow.inDateTime.length == 10 ? this.vRow.inDateTime + " 00:00" : this.vRow.inDateTime.replace('   ', ' ');
             let sOut = this.vRow.outDateTime.length == 10 ? this.vRow.outDateTime + " 00:00" : this.vRow.outDateTime.replace('   ', ' ');
@@ -286,11 +313,12 @@ var app = new Vue({
 
             this.onAdjustChange();
 
-            if(this.vData.isPrepayrollInspection){
+            if (this.vData.isPrepayrollInspection) {
                 var checkVobo = document.getElementById('cb' + oRow.numEmployee);
-                this.checkEmployee = checkVobo.checked;
-            }else{
-                this.checkEmployee = false;
+                this.isAdjustsDisabled = checkVobo.checked;
+            }
+            else {
+                this.isAdjustsDisabled = false;
             }
 
             $('#adjustsModal').modal('show');
@@ -317,26 +345,7 @@ var app = new Vue({
         },
         getAdjToRow(oRow, index) {
             let labels = "";
-            for(const adj of oRow.adjusts){
-                // if (adj.apply_to == 1) {
-                //     let tiime = adj.dt_time != null ? (' ' + adj.dt_time) : '';
-                //     if ((adj.dt_date + tiime) == oRow.inDateTime) {
-                //         labels += adj.type_code + ' ';
-                //     }
-                // } else {
-                //     let tiime = adj.dt_time != null ? (' ' + adj.dt_time) : '';
-                //     if ((adj.dt_date + tiime) == oRow.outDateTime) {
-                //         if (adj.adjust_type_id == oData.ADJ_CONS.COM) {
-                //             labels += adj.comments + ' ';
-                //         } else {
-                //             labels += adj.type_code + ' ';
-                //         }
-                //         if (adj.adjust_type_id == oData.ADJ_CONS.AHE ||
-                //             adj.adjust_type_id == oData.ADJ_CONS.DHE) {
-                //             labels += adj.minutes + 'min ';
-                //         }
-                //     }
-                // }
+            for(const adj of oRow.adjusts) {
                 if (adj.adjust_type_id == oData.ADJ_CONS.COM) {
                     labels += adj.comments + ' ';
                 } else {
@@ -354,37 +363,49 @@ var app = new Vue({
             }
 
             if (oRow.isModifiedIn) {
-                labels += "Entrada modificada. ";
+                labels += "Entrada manual. ";
             }
 
             if (oRow.isModifiedOut) {
-                labels += "Salida modificada. ";
+                labels += "Salida manual. ";
             }
 
             return labels;
         },
         onAdjustChange() {
-                this.dateInit = null;
-                this.dateEnd = null;
+            this.dateInit = null;
+            this.dateEnd = null;
             if (this.adjCategory == "2") {
                 this.comments = "";
                 this.adjType = oData.ADJ_CONS.COM;
                 this.adjTypeEnabled = false;
-            } else {
+            }
+            else {
                 this.adjType = oData.ADJ_CONS.JE;
                 this.adjTypeEnabled = true;
                 this.comments = "";
             }
 
-            if (this.adjType == oData.ADJ_CONS.DHE || this.adjType == oData.ADJ_CONS.AHE) {
+            if (
+                this.adjType == oData.ADJ_CONS.DHE ||
+                this.adjType == oData.ADJ_CONS.AHE
+            ) {
                 this.minsEnabled = true;
-            } else {
+            }
+            else {
                 this.minsEnabled = false;
             }
+
+            this.lComments = this.lCommentsAdjsTypes[this.adjType];
+            this.selComment = "";
+            $("#comentFrec").val("").trigger("change");
         },
         onTypeChange() {
             this.minsEnabled = this.adjType == oData.ADJ_CONS.DHE || this.adjType == oData.ADJ_CONS.AHE;
             this.overMins = 0;
+            this.lComments = this.lCommentsAdjsTypes[this.adjType];
+            this.selComment = "";
+            $('#comentFrec').val('').trigger('change');
         },
         adjustTimes() {
             oGui.showLoading(3000);
@@ -399,9 +420,8 @@ var app = new Vue({
                     out_datetime: outDTime,
                     row: JSON.stringify(this.vRow)
                 })
-                .then(res => {
-                    console.log(res);
-                    this.vRow.tempLabels = "Entrada y/o salida modificadas.";
+                .then(res => {                    
+                    this.vRow.tempLabels = "Entrada y/o salida manuales.";
                     this.vData.lRows.push('refresh');
                     this.vData.lRows.pop();
                     oGui.showOk();
@@ -410,38 +430,59 @@ var app = new Vue({
                     console.log(error);
                 });
         },
-        addComment(){
-            this.comments = this.comments.length > 0 ? this.comments + ' ' + this.selComment : this.comments + this.selComment;
+        addComment() {
+            this.comments = this.comments.length > 0 ? this.comments + ' ' + this.selComment : this.selComment;
         },
-        addPreviusComment(){
+        addPreviusComment() {
             this.previusComment = "";
             var idEmployee = this.vData.lRows[this.indexRow].idEmployee;
-            if(this.indexRow != 0){
-                if(this.vData.lRows[this.indexRow - 1].idEmployee == idEmployee){
+            if (this.indexRow != 0) {
+                if (this.vData.lRows[this.indexRow - 1].idEmployee == idEmployee) {
                     var adjusts = this.vData.lRows[this.indexRow - 1].adjusts;
                     var previusComment = "";
                     var hasComment = false;
                     for (let i = 0; i < adjusts.length; i++) {
-                        if(adjusts[i].adjust_type_id == 7){
+                        if (adjusts[i].adjust_type_id == 7) {
                             hasComment = true;
-                            previusComment = previusComment.length > 0 ? previusComment + ' ' + adjusts[i].comments : previusComment + adjusts[i].comments;
+                            previusComment =
+                                previusComment.length > 0
+                                    ? previusComment + " " + adjusts[i].comments
+                                    : previusComment + adjusts[i].comments;
                         }
                     }
-                    if(previusComment.length > 0 && hasComment == true){
-                        this.comments = this.comments.length > 0 ? this.comments + ' ' + previusComment : this.comments + previusComment;
+                    if (previusComment.length > 0 && hasComment == true) {
+                        this.comments =
+                            this.comments.length > 0
+                                ? this.comments + " " + previusComment
+                                : this.comments + previusComment;
                         this.adjType = 7;
                         this.newAdjust();
                         this.adjType = 1;
                         this.adjCategory = 0;
                         this.selComment = "";
-                    }else{
-                        oGui.showMessage('','No existe comentario de tipo comentario en el dia anterior','warning');    
                     }
-                }else{
-                    oGui.showMessage('','No existe comentario de tipo comentario en el dia anterior','warning');
+                    else {
+                        oGui.showMessage(
+                            "",
+                            "No existe comentario de tipo comentario en el dia anterior",
+                            "warning"
+                        );
+                    }
                 }
-            }else{
-                oGui.showMessage('','No existe comentario de tipo comentario en el dia anterior','warning');
+                else {
+                    oGui.showMessage(
+                        "",
+                        "No existe comentario de tipo comentario en el dia anterior",
+                        "warning"
+                    );
+                }
+            }
+            else {
+                oGui.showMessage(
+                    "",
+                    "No existe comentario de tipo comentario en el dia anterior",
+                    "warning"
+                );
             }
         },
         getResumeComments(idEmployee){
