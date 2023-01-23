@@ -2293,22 +2293,23 @@ class ReporteController extends Controller
 
         public function reportIncidentsEmployeesGenerar(Request $request)
         {
-            $sStartDate = $request->start_date;
-            $sEndDate = $request->end_date;
             $bDelegation = ! isset($request->delegation) ? false : isset($request->delegation);
             $iIdDelegation = isset($request->id_delegation) ? $request->id_delegation : null;
             //si no es el wizard entra en esta parte
             if ( $request->wizard != 2 ){
                 $iEmployee = $request->emp_id;
             }
-            
-            $oStartDate = Carbon::parse($sStartDate);
-            $oEndDate = Carbon::parse($sEndDate);
 
-            $diff_days = $oStartDate->diffInDays($oEndDate);
+            if (! $bDelegation) {
+                $sStartDate = $request->start_date;
+                $sEndDate = $request->end_date;
 
-            if (! $oStartDate->lessThanOrEqualTo($oEndDate)) {
-                return \Redirect::back()->withErrors(['Error', 'La fecha de inicio debe ser previa a la fecha final']);
+                $oStartDate = Carbon::parse($sStartDate);
+                $oEndDate = Carbon::parse($sEndDate);
+
+                if (! $oStartDate->lessThanOrEqualTo($oEndDate)) {
+                    return \Redirect::back()->withErrors(['Error', 'La fecha de inicio debe ser previa a la fecha final']);
+                }
             }
 
             if ($request->optradio == "employee") {
@@ -2321,34 +2322,6 @@ class ReporteController extends Controller
                 }
             }
             else {
-                if (session()->get('rol_id') != 1){
-                    $dgu = DB::table('group_dept_user')
-                            ->where('user_id',auth()->user()->id)
-                            ->select('groupdept_id AS id')
-                            ->get();
-                    $Adgu = [];
-                    for($i=0;count($dgu)>$i;$i++){
-                        $Adgu[$i]=$dgu[$i]->id;
-                    }
-                    
-                    $employee = DB::table('employees')
-                            ->join('jobs','jobs.id','=','employees.job_id')
-                            ->join('departments','departments.id','=','employees.department_id')
-                            ->join('department_group','department_group.id','=','departments.dept_group_id')
-                            ->whereIn('departments.dept_group_id',$Adgu)
-                            ->where('employees.is_active',1)
-                            ->select('employees.id AS id')
-                            ->get();
-                }else{
-                    $employee = DB::table('employees')
-                            ->join('jobs','jobs.id','=','employees.job_id')
-                            ->join('departments','departments.id','=','employees.department_id')
-                            ->join('department_group','department_group.id','=','departments.dept_group_id')
-                            ->where('employees.is_active',1)
-                            ->orderBy('employees.name')
-                            ->select('employees.id AS id')
-                            ->get();
-                }
                 /**
                  * 1: quincena
                  * 2: semana
@@ -2356,19 +2329,9 @@ class ReporteController extends Controller
                  */
                 $payWay = $request->pay_way == null ? \SCons::PAY_W_S : $request->pay_way;
 
-                //si es parte del wizard se queda vacio
-                if($request->wizard != 2){
-                    $filterType = $request->i_filter;
-                    $ids = $request->elems;
-                }else{
-                    $filterType = 0;
-                    $ids = 0;   
-                }
-                $aEmpl = [];
-                foreach($employee as $emp){
-                    array_push($aEmpl, $emp->id);
-                }
-                $lEmployees = SGenUtils::toEmployeeIds($payWay, $filterType, $ids, $aEmpl);
+                $filterType = $request->i_filter;
+                $ids = $request->elems;
+                $lEmployees = SGenUtils::toEmployeeIds($payWay, $filterType, $ids);
             }
             
             if ($bDelegation) {
