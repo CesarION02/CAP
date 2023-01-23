@@ -136,15 +136,18 @@ class SDataProcess {
 
                 $bug = false;
                 if (sizeof($registries) == 1) {
-                    $res = SDataProcess::manageOneCheck($sDate, $idEmployee, $registries, $lWorkshifts);
+                    $res = SDataProcess::manageOneCheck($sDate, $idEmployee, $registries, $lWorkshifts, $sEndDate);
                     
-                    if(is_array($res)){
+                    if (is_array($res)) {
                         $registries = $res[1];
                     }
 
                     if ($res == 2) {
                         $regTemp = $registries;
                         $bug = true;
+                        $registries = [];
+                    }
+                    else if ($res == 3) {
                         $registries = [];
                     }
                 }
@@ -1905,24 +1908,41 @@ class SDataProcess {
         return $lNewChecks;
     }
 
-    private static function manageOneCheck($sDate, $idEmployee, $registries, $lWorkshifts)
+    private static function manageOneCheck($sDate, $idEmployee, $registries, $lWorkshifts, $sEndDate)
     {
         $oRegistry = $registries[0];
-        $result = SDelayReportUtils::getSchedule($sDate, $sDate, $idEmployee, $oRegistry, clone $lWorkshifts, \SCons::REP_HR_EX);
+        $config = \App\SUtils\SConfiguration::getConfigurations();
 
+        // Si la checada es una entrada del último día del rango y es después de la hora configurada
+        if ($sEndDate == $sDate && $oRegistry->type_id == \SCons::REG_IN && $sEndDate == $oRegistry->date && $oRegistry->time >= $config->time_last_check) {
+            // Consulta si no tiene horario el día siguiente o no es nocturno, deja la checada
+            $oNextDay = Carbon::parse($sEndDate);
+            $oNextDay->addDay();
+            $oAuxRegistry = new \stdClass();
+            $oAuxRegistry->date = $oNextDay->toDateString();
+            $oAuxRegistry->time = "12:00:00";
+            $oAuxRegistry->type_id = \SCons::REG_OUT;
+
+            $resultAux = SDelayReportUtils::getSchedule($oNextDay->toDateString(), $oNextDay->toDateString(), $idEmployee, $oAuxRegistry, clone $lWorkshifts, \SCons::REP_HR_EX);
+            if (is_null($resultAux) || (! is_null($resultAux) && SDelayReportUtils::isNight($resultAux))) {
+                return 3;
+            }
+        }
+        
+        $result = SDelayReportUtils::getSchedule($sDate, $sDate, $idEmployee, $oRegistry, clone $lWorkshifts, \SCons::REP_HR_EX);
         if ($result == null || ($result->auxScheduleDay != null && !$result->auxScheduleDay->is_active)) {
             return 0;
         }
 
-        $sdate = $registries[0]->date;
+        $sdate = $oRegistry->date;
         $comparison = null;
-        $config = \App\SUtils\SConfiguration::getConfigurations();
+        
         // if ($registries[0]->type_id == \SCons::REG_OUT) {
         //     $comparison = SDelayReportUtils::compareDates($sdate.' '.$oRegistry->time, $sdate.' 06:30:00');
 
         //     return (abs($comparison->diffMinutes) <= $config->maxGapMinutes) ? 1 : 0;
         // }
-        if ($registries[0]->type_id == \SCons::REG_IN) {
+        if ($oRegistry->type_id == \SCons::REG_IN) {
             $comparison = SDelayReportUtils::compareDates($sdate.' '.$oRegistry->time, $sdate.' 22:30:00');
             
             if (abs($comparison->diffMinutes) <= $config->maxGapMinutes) {

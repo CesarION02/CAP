@@ -192,7 +192,7 @@ class prepayrollAdjustController extends Controller
             }
             catch (\Throwable $th) {
                 \DB::rollBack();
-                return json_encode(['success' => false, 'msg' => $e->getMessage()]);
+                return json_encode(['success' => false, 'msg' => $th->getMessage()]);
             }
     
             SPrepayrollAdjustUtils::verifyProcessedData($oAdjust->employee_id, $oAdjust->dt_date);
@@ -205,7 +205,8 @@ class prepayrollAdjustController extends Controller
             $oAdjust->type_name = $type->type_name;
     
             return json_encode(['success' => true, 'msg' => 'Ajuste aplicado correctamente.', 'data' => $oAdjust, 'is_range' => false]);
-        }else if ((int)$request->adjCategory == 3) {
+        }
+        else if ((int)$request->adjCategory == 3) {
             $dateInit = Carbon::parse($request->dateInit);
             $dateEnd = Carbon::parse($request->dateEnd);
             $diff = $dateInit->diffInDays($dateEnd);
@@ -247,7 +248,7 @@ class prepayrollAdjustController extends Controller
                 }
                 catch (\Throwable $th) {
                     \DB::rollBack();
-                    return json_encode(['success' => false, 'msg' => $e->getMessage()]);
+                    return json_encode(['success' => false, 'msg' => $th->getMessage()]);
                 }
         
                 SPrepayrollAdjustUtils::verifyProcessedData($oAdjust->employee_id, $oAdjust->dt_date);

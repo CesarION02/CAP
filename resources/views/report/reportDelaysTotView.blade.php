@@ -189,14 +189,7 @@
                                     </div>
                                 </p>
                                 <p>
-                                    <div class="row">
-                                        <div class="col-md-1"><a href="{{ route('inicio') }}" class="btn btn-danger">Cancelar</a></div>
-                                        @if( $pay_way == 2 )
-                                            <div class="col-md-1"><a href="{{ route('vobos',['id'=> 'week']) }}" class="btn btn-primary">Terminar proceso</a></div>
-                                        @else
-                                            <div class="col-md-1"><a href="{{ route('vobos',['id'=> 'biweek']) }}" class="btn btn-primary">Terminar proceso</a></div>
-                                        @endif
-                                    </div>
+                                    @include('report.reportvobototal')
                                 </p>
                             @endif
                         @endif
@@ -245,6 +238,7 @@
         this.tReport = <?php echo json_encode($tReport) ?>;
         this.lEmpVobos = <?php echo json_encode($lEmpVobos) ?>;
         this.isPrepayrollInspection = <?php echo json_encode($isPrepayrollInspection) ?>;
+        this.oPrepayrollCtrl = <?php echo json_encode($oPrepayrollCtrl) ?>;
         this.registriesRoute = <?php echo json_encode($registriesRoute) ?>;
         this.REP_HR_EX = <?php echo json_encode(\SCons::REP_HR_EX) ?>;
         this.REP_DELAY = <?php echo json_encode(\SCons::REP_DELAY) ?>;
@@ -433,6 +427,14 @@
                     });
                 });
             })
+        </script>
+    @endif
+    @if ($isPrepayrollInspection && isset($oPrepayrollCtrl) && !is_null($oPrepayrollCtrl))
+        <script type="text/javascript">
+            $('#form_vobo').on('submit', function() {
+                oGui.showLoading(7000);
+                return true;
+            });    
         </script>
     @endif
 <script>

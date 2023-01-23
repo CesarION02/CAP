@@ -311,10 +311,11 @@ class SDelayReportUtils {
     /**
      * Undocumented function
      *
-     * @param [type] $sDate
-     * @param [type] $iEmployee
+     * @param string $sDate
+     * @param int $iEmployee
      * @param int \SCons::REG_OUT \SCons::REG_IN
-     * @return void
+     * 
+     * @return \stdClass|null $registry
      */
     public static function getRegistry($sDate, $iEmployee, $iType, $time = "")
     {
