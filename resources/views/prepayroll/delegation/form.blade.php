@@ -14,12 +14,12 @@
         <div class="form-group">
             <label for="">Num prenómina</label>
             <select v-if="payWayId == 1" class="form-control" name="number_prepayroll" required>
-                <option v-for="qCut in oDates.biweeks" :value="qCut.number + '_' + qCut.dt_start.substring(0,4)">
+                <option v-for="qCut in oDates.biweeks" :value="qCut.number + '_' + qCut.year">
                     @{{ "Qna " + qCut.number + " [" + qCut.dt_start + " - " + qCut.dt_end + "]" }}
                 </option>
             </select>
             <select v-else class="form-control" name="number_prepayroll" required>
-                <option v-for="wCut in oDates.weeks" :value="wCut.number + '_' + wCut.dt_start.substring(0,4)">
+                <option v-for="wCut in oDates.weeks" :value="wCut.number + '_' + wCut.year">
                     @{{ "Sem " + wCut.number + " [" + wCut.dt_start + " - " + wCut.dt_end + "]" }}
                 </option>
             </select>

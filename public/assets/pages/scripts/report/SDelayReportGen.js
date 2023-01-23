@@ -9,8 +9,10 @@ var app = new Vue({
         endDate: '',
         payrollNumber: 0,
         payrollYear: 0,
+        idDelegation: 0,
         picked: 'period',
-        idEmployee: null
+        idEmployee: null,
+        oDelegation: {}
     },
     methods: {
         setDates(sd, ed) {
@@ -21,11 +23,11 @@ var app = new Vue({
             this.iPayWay = 2;
         },
         onCutoffDateChange() {
-            let dates = this.coDates.split('_');
-            this.startDate = dates[0];
-            this.endDate = dates[1];
-            this.payrollNumber = dates[2];
-            this.payrollYear = dates[3];
+            this.startDate = this.oDelegation.start_date;
+            this.endDate = this.oDelegation.end_date;
+            this.payrollNumber = this.oDelegation.number;
+            this.payrollYear = this.oDelegation.year;
+            this.idDelegation = this.oDelegation.id_delegation;
         }
     },
 })

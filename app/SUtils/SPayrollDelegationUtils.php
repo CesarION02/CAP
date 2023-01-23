@@ -60,11 +60,15 @@ class SPayrollDelegationUtils {
      */
     public static function getDelegationsPayrolls($idUser)
     {
-        $delegations = \DB::table('prepayroll_report_delegations AS d')
+        $queryDelegations = \DB::table('prepayroll_report_delegations AS d')
+                            ->join('users AS u', 'd.user_delegation_id', '=', 'u.id')
+                            ->select('d.*', 'u.name AS user_delegation')
                             ->where('d.user_delegated_id', $idUser)
-                            ->where('d.is_delete', false)
-                            ->where('pay_way_id', \SCons::PAY_W_Q)
-                            ->get();
+                            ->where('d.is_delete', false);
+
+        $delegations = clone $queryDelegations;
+        $delegations = $delegations->where('pay_way_id', \SCons::PAY_W_Q)
+                                    ->get();
 
         $biweeks = [];
         foreach ($delegations as $delegation) {
@@ -75,27 +79,30 @@ class SPayrollDelegationUtils {
             $qCut->end_date = $dates[1];
             $qCut->year = $delegation->year;
             $qCut->number = $delegation->number_prepayroll;
+            $qCut->user_delegation = $delegation->user_delegation;
+            $qCut->id_delegation = $delegation->id_delegation;
 
             $biweeks[] = $qCut;
         }
 
-        $delegations = \DB::table('prepayroll_report_delegations AS d')
-                            ->where('d.user_delegated_id', $idUser)
-                            ->where('d.is_delete', false)
-                            ->where('pay_way_id', \SCons::PAY_W_S)
-                            ->get();
+        $delegations = clone $queryDelegations;
+
+        $delegations = $delegations->where('pay_way_id', \SCons::PAY_W_S)
+                                    ->get();
 
         $weeks = [];
         foreach ($delegations as $delegation) {
-            $qCut = new \stdClass();
+            $wCut = new \stdClass();
             
             $dates = SDateUtils::getDatesOfPayrollNumber($delegation->number_prepayroll, $delegation->year, \SCons::PAY_W_S);
-            $qCut->start_date = $dates[0];
-            $qCut->end_date = $dates[1];
-            $qCut->year = $delegation->year;
-            $qCut->number = $delegation->number_prepayroll;
+            $wCut->start_date = $dates[0];
+            $wCut->end_date = $dates[1];
+            $wCut->year = $delegation->year;
+            $wCut->number = $delegation->number_prepayroll;
+            $wCut->user_delegation = $delegation->user_delegation;
+            $wCut->id_delegation = $delegation->id_delegation;
 
-            $weeks[] = $qCut;
+            $weeks[] = $wCut;
         }
 
         $response = new \stdClass();

@@ -330,6 +330,7 @@ class SDateUtils {
             $cut->dt_start = $qweek->ini;
             $cut->dt_end = $qweek->fin;
             $cut->number = $qweek->num;
+            $cut->year = $qweek->year;
 
             $weeks[] = $cut;
         }
@@ -338,7 +339,7 @@ class SDateUtils {
          * Cortes de quincena
          */
         $biweeksQ = DB::table('hrs_prepay_cut')
-                    ->whereYear('dt_cut', $iYear)
+                    ->where('year', $iYear)
                     ->where('is_delete', 0)
                     ->select('year', 'dt_cut', 'num')
                     ->orderBy('dt_cut', 'ASC')
@@ -352,6 +353,7 @@ class SDateUtils {
                 $cut->dt_start = $dtCutPrev->addDays(1)->toDateString();
                 $cut->dt_end = $biweek->dt_cut;
                 $cut->number = $biweek->num;
+                $cut->year = $biweek->year;
                 $dtCutPrev = Carbon::parse($biweek->dt_cut);
 
                 $biweeks[] = $cut;

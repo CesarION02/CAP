@@ -187,7 +187,8 @@
                                             <input type="hidden" name="end_date" value={{ $sEndDate }} >
                                             <input type="hidden" name="emp_id" value="0" >
                                             <input type="hidden" name="report_mode" value="2" >
-                                            <input type="hidden" name="delegation" value="0" >
+                                            <input type="hidden" name="delegation" value="{{ $bDelegation }}" >
+                                            <input type="hidden" name="id_delegation" value="{{ $iIdDelegation }}" >
                                             <input type="hidden" name="pay_way" value={{ $payWay }} >
                                             <input type="hidden" name="wizard" value={{ $wizard }} >
                                             <button type="submit" class="btn btn-primary" id="guardar">Siguiente</button>

@@ -99,6 +99,8 @@ class prePayrollController extends Controller
             $oPrepayroll = $this->makePrepayroll($startDate, $endDate, $aEmployeeIds, $payType, $dataType);
         }
         catch (\Throwable $e) {
+            \Log::error($e);
+
             $response = (object) [
                 "code" => $this->ERROR,
                 "message" => $e->getMessage()
