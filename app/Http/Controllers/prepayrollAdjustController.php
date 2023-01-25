@@ -154,11 +154,15 @@ class prepayrollAdjustController extends Controller
      * Undocumented function
      *
      * @param Request $request
-     * @return void
+     * 
+     * @return \Illuminate\Http\JsonResponse encoded string on success or false on failure.
      */
     public function storeAdjust(Request $request)
     {
-        if((int)$request->adjCategory != 3){
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+
+        // Si la categoría del ajuste es diferente a ajuste para múltiples días
+        if ((int) $request->adjCategory != 3) {
             $oAdjust = new prepayrollAdjust($request->all());
             
             $oAdjust->is_delete = false;
@@ -166,12 +170,26 @@ class prepayrollAdjustController extends Controller
             $oAdjust->updated_by = \Auth::user()->id;
     
             $oEmployee = employees::find($oAdjust->employee_id);
-            $canMakeAdjust = PrepayrollReportController::canMakeAdjust($oAdjust->dt_date, $oEmployee->way_pay_id);
+
+            $adjustDate = $oAdjust->dt_date;
+            switch ($oAdjust->adjust_type_id) {
+                case \SCons::PP_TYPES['OR']:
+                    if ($oAdjust->dt_time >= "18:30") {
+                        $adjustDate = Carbon::parse($oAdjust->dt_date)->addDay()->toDateString();
+                    }
+                    break;
+                
+                default:
+                    # code...
+                    break;
+            }
+
+            $canMakeAdjust = PrepayrollReportController::canMakeAdjust($adjustDate, $oEmployee->way_pay_id);
             if (is_string($canMakeAdjust)) {
                 return json_encode(['success' => false, 'msg' => 'No se puede aplicar el ajuste, la prenómina tiene Vobo.'.$canMakeAdjust]);
             }
     
-            $canMakeAdjustByEmployee = PrepayrollReportController::canMakeAdjustByEmployee($oEmployee->id, $oAdjust->dt_date, $oEmployee->way_pay_id);
+            $canMakeAdjustByEmployee = PrepayrollReportController::canMakeAdjustByEmployee($oEmployee->id, $adjustDate, $oEmployee->way_pay_id);
     
             if (is_string($canMakeAdjustByEmployee)) {
                 return json_encode(['success' => false, 'msg' => 'No se puede aplicar el ajuste. '.$canMakeAdjustByEmployee]);
@@ -181,8 +199,6 @@ class prepayrollAdjustController extends Controller
                 \DB::beginTransaction();
     
                     $oAdjust->save();
-    
-                    $config = \App\SUtils\SConfiguration::getConfigurations();
     
                     if ($config->enabledAdjAuths) {
                         $this->storeAuthControl($oAdjust->employee_id, $oAdjust->id);
@@ -195,7 +211,7 @@ class prepayrollAdjustController extends Controller
                 return json_encode(['success' => false, 'msg' => $th->getMessage()]);
             }
     
-            SPrepayrollAdjustUtils::verifyProcessedData($oAdjust->employee_id, $oAdjust->dt_date);
+            SPrepayrollAdjustUtils::verifyProcessedData($oAdjust->employee_id, $adjustDate);
     
             $type = \DB::table('prepayroll_adjusts_types as pat')
                         ->where('id', $oAdjust->adjust_type_id)
@@ -206,18 +222,17 @@ class prepayrollAdjustController extends Controller
     
             return json_encode(['success' => true, 'msg' => 'Ajuste aplicado correctamente.', 'data' => $oAdjust, 'is_range' => false]);
         }
-        else if ((int)$request->adjCategory == 3) {
+        else if ((int) $request->adjCategory == 3) {
             $dateInit = Carbon::parse($request->dateInit);
             $dateEnd = Carbon::parse($request->dateEnd);
-            $diff = $dateInit->diffInDays($dateEnd);
             $arr_adjust = [];
-            for ($i=0; $i <= $diff; $i++) {
+            while ($dateEnd->greaterThanOrEqualTo($dateInit)) {
                 $oAdjust = new prepayrollAdjust($request->all());
             
                 $oAdjust->is_delete = false;
                 $oAdjust->created_by = \Auth::user()->id;
                 $oAdjust->updated_by = \Auth::user()->id;
-                $oAdjust->dt_date = $dateInit->format('Y-m-d');
+                $oAdjust->dt_date = $dateInit->toDateString();
                 $oAdjust->dt_time = null;
                 $oAdjust->apply_time = false;
         
@@ -237,8 +252,6 @@ class prepayrollAdjustController extends Controller
                     \DB::beginTransaction();
         
                         $oAdjust->save();
-        
-                        $config = \App\SUtils\SConfiguration::getConfigurations();
         
                         if ($config->enabledAdjAuths) {
                             $this->storeAuthControl($oAdjust->employee_id, $oAdjust->id);
@@ -264,8 +277,10 @@ class prepayrollAdjustController extends Controller
 
                 $dateInit->addDay();
             }
+
             return json_encode(['success' => true, 'msg' => 'Ajustes aplicados correctamente.', 'data' => $arr_adjust, 'is_range' => true]);
-        }else{
+        }
+        else {
             return json_encode(['success' => false, 'msg' => 'Error al guardar el ajuste, categoria desconocida']);
         }
     }
