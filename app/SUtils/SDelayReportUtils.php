@@ -11,28 +11,24 @@ class SDelayReportUtils {
      *
      * @param SDateComparison $oComparison
      * 
-     * @return String "yyyy-MM-dd hh:mm:ss"
+     * @return string "yyyy-MM-dd hh:mm:ss"
      */
     public static function getScheduleIn($oComparison, $inDateTime = null) {
-        $night = false;
         $sDate = "";
         if ($oComparison->auxScheduleDay != null) {
             $oAux = $oComparison->auxScheduleDay;
-            $night = $oAux->is_night;
         }
         else {
             if ($oComparison->auxWorkshift != null) {
                 $oAux = $oComparison->auxWorkshift;
-                if ($oAux->is_night) {
-                    $night = true;
-                }
             }
             else {
-                return 0;
+                return "";
             }
         }
 
         $time = $oAux->entry;
+        $night = SDelayReportUtils::isNight($oComparison);
         if ($night) {
             $oAuxDate = clone $oComparison->pinnedDateTime;
             $sDate = $oAuxDate->subDay()->toDateString();
@@ -59,18 +55,22 @@ class SDelayReportUtils {
      * Determina la hora de entrada programada en base al objeto recibido
      *
      * @param SDateComparison $oComparison
-     * @return String "yyyy-MM-dd hh:mm:ss"
+     * 
+     * @return boolean si el horario es nocturno
      */
     public static function isNight($oComparison) {
+        $oAux = null;
         if ($oComparison->auxScheduleDay != null) {
             $oAux = $oComparison->auxScheduleDay;
-            return $oAux->is_night;
         }
         else {
             if ($oComparison->auxWorkshift != null) {
                 $oAux = $oComparison->auxWorkshift;
-                return $oAux->is_night;
             }
+        }
+
+        if (! is_null($oAux)) {
+            return $oAux->is_night && $oAux->entry > $oAux->departure;
         }
 
         return false;
@@ -512,7 +512,7 @@ class SDelayReportUtils {
      * @param query_registry $registry
      * @param int $tReport [\SCons::REP_DELAY, \SCons::REP_HR_EX]
      * 
-     * @return SDateComparison object
+     * @return SDateComparison|null object
      */
     public static function processRegistry($lAassigns, $registry, $tReport)
     {
@@ -669,8 +669,8 @@ class SDelayReportUtils {
      * Compara las fechas recibidas y retorna el número de minutos de diferencia entre ellas,
      * cuando $sDateOne > $sDateTwo el valor retornado es negativo
      *
-     * @param String $sDateOne puede ser considerada como la fecha de referencia o fija.
-     * @param String $sDateTwo fecha variable (checada)
+     * @param string $sDateOne puede ser considerada como la fecha de referencia o fija.
+     * @param string $sDateTwo fecha variable (checada)
      * 
      * @return SDateComparison 
      * 
