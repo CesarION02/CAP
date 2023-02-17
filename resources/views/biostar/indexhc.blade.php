@@ -43,7 +43,7 @@
                             <td>@{{ userRow.user_name }}</td>
                             <td>@{{ userRow.has_fingerprint ? 'SÍ' : 'NO' }}</td>
                             <td>@{{ userRow.has_face ? 'SÍ' : 'NO' }}</td>
-                            <td>@{{ userRow.department }}</td>
+                            <td>@{{ userRow.dept_name }}</td>
                             <td>@{{ userRow.num_employee }}</td>
                             <td>@{{ userRow.is_active }}</td>
                             <td>@{{ userRow.is_delete }}</td>
