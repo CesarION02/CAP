@@ -238,7 +238,7 @@ class biostarController extends Controller
                   "column": "event_type_id.code",
                   "operator": 2,
                   "values": [
-                    "4865","4867","4097"
+                    "4865","4867","4097","542391960"
                   ]
                 },
                 {
