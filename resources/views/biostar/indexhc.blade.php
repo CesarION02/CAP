@@ -28,25 +28,25 @@
                     <thead>
                         <tr>
                             <th>ID BioStar</th>
+                            <th>Num Emp.</th>
                             <th>Empleado BioStar</th>
-                            <th>Huella</th>
                             <th>Rostro</th>
-                            <th>dept</th>
-                            <th>num</th>
-                            <th>activo</th>
-                            <th>borrado</th>
+                            <th>Huella</th>
+                            <th>Departamento</th>
+                            <th>Activo</th>
+                            <th>Eliminado</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="userRow in lVueUsers">
                             <td>@{{ userRow.id_user }}</td>
-                            <td>@{{ userRow.user_name }}</td>
-                            <td>@{{ userRow.has_fingerprint ? 'SÍ' : 'NO' }}</td>
-                            <td>@{{ userRow.has_face ? 'SÍ' : 'NO' }}</td>
-                            <td>@{{ userRow.dept_name }}</td>
                             <td>@{{ userRow.num_employee }}</td>
-                            <td>@{{ userRow.is_active }}</td>
-                            <td>@{{ userRow.is_delete }}</td>
+                            <td>@{{ userRow.user_name }}</td>
+                            <td>@{{ userRow.has_face ? 'SÍ' : 'NO' }}</td>
+                            <td>@{{ userRow.has_fingerprint ? 'SÍ' : 'NO' }}</td>
+                            <td>@{{ userRow.dept_name }}</td>
+                            <td>@{{ userRow.is_active ? 'SÍ' : 'NO' }}</td>
+                            <td>@{{ userRow.is_delete ? 'SÍ' : 'NO' }}</td>
                         </tr>
                     </tbody>
                 </table>
