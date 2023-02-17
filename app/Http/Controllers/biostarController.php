@@ -160,15 +160,24 @@ class biostarController extends Controller
 
         foreach ($lUsers as $usr) {
             $oEmployee = \DB::table('employees AS e')
-                    ->join('departments AS d', 'e.department_id', '=', 'd.id')
+                    ->leftJoin('departments AS d', 'e.department_id', '=', 'd.id')
                     ->where('e.biostar_id', $usr->id_user)
                     ->select('e.num_employee', 'd.name AS dept_name', 'e.is_active', 'e.is_delete')
                     ->first();
 
-            $usr->num_employee = $oEmployee->num_employee;
-            $usr->dept_name = $oEmployee->dept_name;
-            $usr->is_active = $oEmployee->is_active;
-            $usr->is_delete = $oEmployee->is_delete;
+            if (! is_null($oEmployee)) {
+                $usr->num_employee = $oEmployee->num_employee;
+                $usr->dept_name = $oEmployee->dept_name;
+                $usr->is_active = $oEmployee->is_active;
+                $usr->is_delete = $oEmployee->is_delete;
+            }
+            else {
+                $usr->num_employee = "";
+                $usr->dept_name = "";
+                $usr->is_active = "";
+                $usr->is_delete = "";
+            }
+
         }
 
         return view('biostar.indexhc')
