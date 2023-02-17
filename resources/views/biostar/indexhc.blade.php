@@ -39,8 +39,8 @@
                     </thead>
                     <tbody>
                         <tr v-for="userRow in lVueUsers">
-                            <td>@{{ userRow.id_user }}</td>
-                            <td>@{{ userRow.num_employee }}</td>
+                            <td>@{{ vueGui.pad(userRow.id_user, 6) }}</td>
+                            <td>@{{ vueGui.pad(userRow.num_employee, 6) }}</td>
                             <td>@{{ userRow.user_name }}</td>
                             <td>@{{ userRow.has_face ? 'SÍ' : 'NO' }}</td>
                             <td>@{{ userRow.has_fingerprint ? 'SÍ' : 'NO' }}</td>
@@ -118,6 +118,13 @@
         }
         
         var oData = new GlobalData();
+    </script>
+
+    <script src="{{ asset("assets/pages/scripts/SGui.js") }}" type="text/javascript"></script>
+
+    <script>
+        var oGui = new SGui();
+        oGui.showLoading(5000);
     </script>
 
     <script src="{{asset("assets/pages/scripts/biostar/VueHyR.js")}}" type="text/javascript"></script>

@@ -2,6 +2,7 @@ var app = new Vue({
     el: '#appHyR',
     data: {
       message: 'Hola!',
-      lVueUsers: oData.lUsers
+      lVueUsers: oData.lUsers,
+      vueGui: oGui,
     }
 })
