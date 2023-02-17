@@ -162,7 +162,7 @@ class biostarController extends Controller
             $oEmployee = \DB::table('employees AS e')
                     ->join('departments AS d', 'e.department_id', '=', 'd.id')
                     ->where('e.biostar_id', $usr->id_user)
-                    ->select('e.num_employee', 'd.name AS dept_name', 'is_active', 'is_delete')
+                    ->select('e.num_employee', 'd.name AS dept_name', 'e.is_active', 'e.is_delete')
                     ->first();
 
             $usr->num_employee = $oEmployee->num_employee;
