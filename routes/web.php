@@ -483,6 +483,11 @@ Route::get('/home', 'HomeController@index')->name('home');
 Route::get('requestWorkDay/{id?}', 'requestWorkDayController@index')->name('request_work_day');
 Route::post('requestWorkDay/generate', 'requestWorkDayController@generate')->name('request_work_day_generate');
 Route::post('requestWorkDay/getPDF', 'requestWorkDayController@getPDF')->name('request_work_day_getPDF');
+
+/* Cortes de prenómina */
+Route::get('prepayrollcut_week', 'prepayrollCutController@index')->name('cortes_semana');
+Route::get('prepayrollcut_biweek','prepayrollCutController@indexBiweek')->name('cortes_quincena');
+
 });
 
 

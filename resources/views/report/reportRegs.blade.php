@@ -74,7 +74,7 @@ Reporte Entradas/Salidas
                             <label for="cars">Elige empleado(s):</label>
                             
                             <select data-placeholder="Selecciona opciones..." style="width: 60%" class="chosen-select" id="cars" name="vals[]" multiple required>
-                                <option v-for="employee in oData.employees" :value="employee.id">@{{ employee.name + ' ' + employee.num_employee }}</option>
+                                <option v-for="employee in oData.employees" :value="employee.id">@{{ employee.name + ' - ' + employee.num_employee }}</option>
                             </select>
                         </div>
                     </div>
