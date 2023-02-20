@@ -16,7 +16,7 @@ var app = new Vue({
         selComment: "",
         vRow: null,
         adjTypeEnabled: true,
-        lCommentsAdjsTypes: oData.lCommentsAdjsTypes,
+        lCommentsAdjsTypes: [],
         lComments: [],
         haveComments: false,
         resumeComments: [],
