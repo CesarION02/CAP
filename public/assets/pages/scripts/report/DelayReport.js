@@ -32,7 +32,7 @@ var app = new Vue({
         lUsers: oData.lUsers,
     },
     mounted() {
-        this.haveComments = this.lCommentsAdjsTypes[this.adjType].length > 0;
+        this.haveComments = this.lCommentsAdjsTypes.length > 0 ? this.lCommentsAdjsTypes[this.adjType].length > 0 : false;
         let self = this;
         $('#comentFrec').on('select2:select', function (e) {
             self.selComment = e.params.data.text;
@@ -396,14 +396,14 @@ var app = new Vue({
                 this.minsEnabled = false;
             }
 
-            this.lComments = this.lCommentsAdjsTypes[this.adjType];
+            this.lComments = this.lCommentsAdjsTypes.length > 0 ? this.lCommentsAdjsTypes[this.adjType] : [];
             this.selComment = "";
             $("#comentFrec").val("").trigger("change");
         },
         onTypeChange() {
             this.minsEnabled = this.adjType == oData.ADJ_CONS.DHE || this.adjType == oData.ADJ_CONS.AHE;
             this.overMins = 0;
-            this.lComments = this.lCommentsAdjsTypes[this.adjType];
+            this.lComments = this.lCommentsAdjsTypes.length > 0 ? this.lCommentsAdjsTypes[this.adjType] : [];
             this.selComment = "";
             $('#comentFrec').val('').trigger('change');
         },
