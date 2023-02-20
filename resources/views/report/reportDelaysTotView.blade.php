@@ -259,7 +259,7 @@
         this.toExport = this.tReport == this.REP_DELAY ? [0, 1, 2, 3, 4, 6] : [0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12];
 
         for(let i = 0; i<this.lEmployees.length; i++){
-            this.lEmployees[i].extraHours = convertToHoursMins(this.lEmployees[i].extraHours);
+            // this.lEmployees[i].extraHours = convertToHoursMins(this.lEmployees[i].extraHours);
         }
         this.filterEmployee = <?php echo json_encode($filter_employees) ?>;
     }
