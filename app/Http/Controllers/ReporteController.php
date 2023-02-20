@@ -825,7 +825,7 @@ class ReporteController extends Controller
                     ->with('isPrepayrollInspection', $isPrepayrollInspection)
                     ->with('registriesRoute', route('registro_ajuste'))
                     ->with('lRows', $lRows)
-                    ->with('lCommentsAdjsTypes', [])
+                    ->with('lCommentsAdjsTypes', array())
                     ->with('lEmployees', $listaEmployees)
                     ->with('subEmployees', $subEmployees)
                     ->with('isAdmin', $isAdmin)
