@@ -124,8 +124,11 @@
                                     <td>@{{ row.comments }}</td>
                                     <td>
                                         @if ($bModify)
-                                            <button class="btn btn-primary btn-xs" v-on:click="showModal(row, index)">
+                                            <button title="Modificar prenómina" class="btn btn-primary btn-xs" v-on:click="showModal(row, index, false)">
                                                 <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+                                            </button>
+                                            <button title="Comentarios prenómina" class="btn btn-info btn-xs" v-on:click="showModal(row, index, true)">
+                                                <span class="glyphicon glyphicon-comment" aria-hidden="true"></span>
                                             </button>
                                         @endif
                                         <p>@{{ getAdjToRow(row, index) }}</p>
@@ -233,7 +236,7 @@
             this.REP_HR_EX = <?php echo json_encode(\SCons::REP_HR_EX) ?>;
             this.REP_DELAY = <?php echo json_encode(\SCons::REP_DELAY) ?>;
             this.ADJ_CONS = <?php echo json_encode(\SCons::PP_TYPES) ?>;
-            this.lComments = <?php echo json_encode($lComments) ?>;
+            this.lCommentsAdjsTypes = <?php echo json_encode($lCommentsAdjsTypes) ?>;
             this.startDate = <?php echo json_encode($sStartDate) ?>;
             this.endDate = <?php echo json_encode($sEndDate) ?>;
             this.subEmployees = <?php echo json_encode($subEmployees) ?>;
@@ -431,10 +434,6 @@
 
                         let isVobo = oVobo != undefined;
                         
-                        // return value_to_return + (oData.isPrepayrollInspection ? '     <label class="switch">' + 
-                        //                                 '<input onchange="handleChangeCheck(event, ' + parseInt(group, 10) + ')" type="checkbox" ' + (isVobo ? 'checked' : '') + '>' + 
-                        //                             '<span class="slider round"></span></label> ' + 
-                        //                             (isVobo ? '(Revisado por : ' + oVobo.user_name + ')' : '') : '');
                         return value_to_return + 
                                 (oData.isPrepayrollInspection ? '   <label class="container">' + 
                                     '<input id="cb'+parseInt(group, 10)+'" onchange="handleChangeCheck(event, ' + parseInt(group, 10) + ')" type="checkbox" ' + (isVobo ? 'checked' : '') + '>' + 

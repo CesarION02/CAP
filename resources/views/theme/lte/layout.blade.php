@@ -20,7 +20,8 @@
   <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/cap_reloj.png') }}">
   @yield('styles')
   <link rel="stylesheet" href="{{asset("assets/css/custom.css")}}">
-  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css">
+  {{-- <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css"> --}}
+  <link rel="stylesheet" href="{{ asset("dt/nv/datatables.css") }}">
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
   <link href="https://cdn.jsdelivr.net/npm/select2@4.0.12/dist/css/select2.min.css" rel="stylesheet" />
   
@@ -71,7 +72,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script src="{{asset("assets/js/scripts.js")}}"
     <script src="{{asset("assets/js/funciones.js")}}"></script>
-    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js"></script>
+    {{-- <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js"></script> --}}
+    <script src="{{ asset("dt/nv/datatables.js") }}" type="text/javascript"></script>
     <script src="{{asset("assets/js/jsPDF/dist/jspdf.min.js")}}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
 

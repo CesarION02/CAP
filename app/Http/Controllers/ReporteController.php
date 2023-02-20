@@ -541,7 +541,18 @@ class ReporteController extends Controller
             $filter_employees = 0;
         }
 
-        $lComments = \DB::table('comments')->where('is_delete', 0)->get();
+        $lCommentsppAdjsTypes = \DB::table('prepayroll_adjusts_types')
+                                    ->select('id')
+                                    ->get();
+        $lCommentsAdjsTypes = [];
+        foreach ($lCommentsppAdjsTypes as $adjType) {
+            $lCommentsAdjsTypes[$adjType->id] = \DB::table('prepayroll_adjusts_comments AS pac')
+                                            ->join('comments AS c', 'pac.comment_id', '=', 'c.id')
+                                            ->where('c.is_delete', 0)
+                                            ->where('pac.adjust_type_id', $adjType->id)
+                                            ->select('c.id', 'c.comment')
+                                            ->get();
+        }
 
         $oStartDate = Carbon::parse($sStartDate);
         $oEndDate = Carbon::parse($sEndDate);
@@ -763,7 +774,7 @@ class ReporteController extends Controller
                     ->with('bModify', $bModify)
                     ->with('registriesRoute', route('registro_ajuste'))
                     ->with('lRows', $lRows)
-                    ->with('lComments', $lComments)
+                    ->with('lCommentsAdjsTypes', $lCommentsAdjsTypes)
                     ->with('subEmployees', $subEmployees)
                     ->with('isAdmin', $isAdmin)
                     ->with('lUsers', $lUsers)
@@ -814,7 +825,7 @@ class ReporteController extends Controller
                     ->with('isPrepayrollInspection', $isPrepayrollInspection)
                     ->with('registriesRoute', route('registro_ajuste'))
                     ->with('lRows', $lRows)
-                    ->with('lComments', [])
+                    ->with('lCommentsAdjsTypes', [])
                     ->with('lEmployees', $listaEmployees)
                     ->with('subEmployees', $subEmployees)
                     ->with('isAdmin', $isAdmin)

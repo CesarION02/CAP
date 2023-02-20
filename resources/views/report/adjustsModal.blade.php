@@ -6,7 +6,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title">Ajustes de prenómina</h4>
+        <h4 class="modal-title">Modificación de prenómina</h4>
       </div>
       <div class="modal-body">
         <div class="row">
@@ -19,27 +19,27 @@
         <div class="row">
           <div class="col-xs-offset-1 col-xs-11">
             <div class="form-check">
-              <input :disabled="checkEmployee" class="form-check-input" type="radio" v-model="adjCategory" v-on:change="onAdjustChange()" value="2">
+              <input :disabled="isAdjustsDisabled || isDisabledByComments" class="form-check-input" type="radio" v-model="adjCategory" v-on:change="onAdjustChange()" value="2">
               <label title="Esta opción solo agrega un texto al renglón, no genera ninguna acción adicional."  class="form-check-label">
                 Crear comentario
               </label>
             </div>
             <div class="form-check">
-              <input :disabled="checkEmployee" class="form-check-input" type="radio" v-model="adjCategory" v-on:change="onAdjustChange()" value="0">
+              <input :disabled="isAdjustsDisabled || isDisabledByComments" class="form-check-input" type="radio" v-model="adjCategory" v-on:change="onAdjustChange()" value="0">
               <label title="En esta opción puedes crear ajustes de prenómina (necesario recargar el reporte para que se vean reflejados)."  class="form-check-label">
-                Ajustar prenómina
+                Modificar prenómina
               </label>
             </div>
             <div class="form-check">
-              <input :disabled="checkEmployee" class="form-check-input" type="radio" v-model="adjCategory" v-on:change="onAdjustChange()" value="3">
+              <input :disabled="isAdjustsDisabled || isDisabledByComments" class="form-check-input" type="radio" v-model="adjCategory" v-on:change="onAdjustChange()" value="3">
               <label title="Crear un ajuste y/o comentario que aplique a varios renglones a la vez." class="form-check-label">
-                Ajustar/comentar varios renglones
+                Modificar/comentar varios renglones
               </label>
             </div>
             <div class="form-check">
-              <input :disabled="checkEmployee" class="form-check-input" type="radio" v-model="adjCategory" v-on:change="onAdjustChange()" value="1">
+              <input :disabled="isAdjustsDisabled || isDisabledByComments" class="form-check-input" type="radio" v-model="adjCategory" v-on:change="onAdjustChange()" value="1">
               <label title="Modificar entrada y/o salida del renglón." class="form-check-label">
-                Ajustar entrada y/o salida
+                Modificar entrada y/o salida
               </label>
             </div>
           </div>
@@ -50,9 +50,9 @@
           <div class="row">
             <div class="col-md-offset-1 col-md-10">
               <div class="row">
-                <div class="col-md-4"><label for="">Tipo de ajuste:*</label></div>
+                <div class="col-md-4"><label for="">Tipo de modif.:*</label></div>
                 <div class="col-md-8">
-                  <select :disabled="!adjTypeEnabled || checkEmployee" v-model="adjType" class="form-control" v-on:change="onTypeChange()">
+                  <select :disabled="!adjTypeEnabled || isAdjustsDisabled || isDisabledByComments" v-model="adjType" class="form-control" v-on:change="onTypeChange()">
                     <option v-for="adjT in vData.adjTypes" :value="adjT.id">@{{ adjT.type_code + '-' + adjT.type_name }}</option>
                   </select>
                 </div>
@@ -82,7 +82,7 @@
               <div v-if="adjCategory != 3" class="row">
                 <div class="col-md-4"><label for="">Copiar comentario anterior:</label></div>
                 <div class="col-md-1">
-                  <button :disabled="checkEmployee" class="btn btn-success" 
+                  <button :disabled="isAdjustsDisabled" class="btn btn-success" 
                           title="Este botón copia únicamente el comentario del renglón anterior" 
                           v-on:click="addPreviusComment()"><span class="glyphicon glyphicon-copy"></span> Copiar anterior</button>
                 </div>
@@ -93,10 +93,10 @@
                 <div class="col-md-8">
                   <select class="form-control select2-class" id="comentFrec" style="width: 90%;" 
                           title="Lista de comentarios frecuentes." 
-                          v-model="selComment" :disabled="!haveComments || checkEmployee">
-                    <option v-for="comment in lComments">@{{comment.comment}}</option>
+                          v-model="selComment" :disabled="!haveComments || isAdjustsDisabled">
+                    <option v-for="comment in lComments" :value="comment.comment" >@{{ comment.comment }}</option>
                   </select>
-                  <button :disabled="checkEmployee" class="btn btn-success" 
+                  <button :disabled="isAdjustsDisabled" class="btn btn-success" 
                           title="Agregar texto."
                           style="border-radius: 50%; padding: 3px 6px; font-size: 10px;" 
                           v-on:click="addComment()" :disabled="!haveComments"><span class="glyphicon glyphicon-arrow-right"></span></button>
@@ -107,7 +107,7 @@
               <div class="row">
                 <div class="col-md-4"><label for="">Comentarios:</label></div>
                 <div class="col-md-8">
-                  <textarea :disabled="checkEmployee" 
+                  <textarea :disabled="isAdjustsDisabled" 
                             title="Escribe el comentario que deseas que aparezca en el renglón."
                             v-model="comments" class="form-control" 
                             style="resize: none; width: 350px; height: 115px;">@{{comments}}</textarea>
@@ -116,7 +116,7 @@
               <br>
               <div class="row">
                 <div class="col-md-offset-10 col-md-1">
-                  <button :disabled="checkEmployee" 
+                  <button :disabled="isAdjustsDisabled" 
                           title="Guardar ajuste/comentario"
                           type="button" v-on:click="newAdjust()" 
                           class="btn btn-success">Ajustar</button>
@@ -132,7 +132,7 @@
                       @{{ rowAdj.type_code + '-' + rowAdj.type_name + 
                         ((rowAdj.comments != null && rowAdj.comments.length > 0) ? (' / ' + rowAdj.comments) : '')
                         + (rowAdj.minutes > 0 ? (' / ' + rowAdj.minutes + ' min') : '') }}
-                    <button v-if="!checkEmployee" type="button" class="close" data-dismiss="alert" aria-label="Close" v-on:click="deleteAdjust(rowAdj)">
+                    <button v-if="!isAdjustsDisabled" type="button" class="close" data-dismiss="alert" aria-label="Close" v-on:click="deleteAdjust(rowAdj)">
                         <span aria-hidden="true">&times;</span>
                       </button>
                 </li>
