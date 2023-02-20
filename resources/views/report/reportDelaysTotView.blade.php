@@ -230,7 +230,7 @@
     function GlobalData () {
 
         this.lRows = <?php echo json_encode($lRows) ?>;
-        this.lComments = <?php echo json_encode($lComments) ?>;
+        this.lCommentsAdjsTypes = <?php echo json_encode($lCommentsAdjsTypes) ?>;
         this.lEmployees = <?php echo json_encode($lEmployees) ?>;
         this.lEmpWrkdDays = <?php echo json_encode($lEmpWrkdDays) ?>;
         this.adjTypes = <?php echo json_encode($adjTypes) ?>;
