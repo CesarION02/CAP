@@ -45,7 +45,7 @@ class ReporteController extends Controller
      *                  3  Reporte por departamentos
      *                  4  Reporte por empleados
      * 
-     * @return view('report.reportES')
+     * @return \Illuminate\View\View
      */
     public function esReport($type = 0){
         $lAreas = null;
@@ -203,7 +203,7 @@ class ReporteController extends Controller
      *                  3  Reporte por departamentos
      *                  4  Reporte por empleados
      * 
-     * @return view('report.reportRegs')
+     * @return \Illuminate\View\View
      */
     public function registriesReport($reportType = 0)
     {
@@ -426,7 +426,7 @@ class ReporteController extends Controller
      *
      * @param Request $request
      * 
-     * @return \Illuminate\View\View, Illuminate\Http\RedirectResponse
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
      */
     public function delaysReport(Request $request)
     {
@@ -522,7 +522,8 @@ class ReporteController extends Controller
      * Muestra reporte de tiempos extra
      *
      * @param Request $request
-     * @return void
+     * 
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
      */
     public function hrExtReport(Request $request)
     {
@@ -532,11 +533,11 @@ class ReporteController extends Controller
         $reportMode = $request->report_mode;
         $bDelegation = $request->delegation;
         $idDelegation = $request->id_delegation;
-        
-        if(isset($request->wizard)){
+
+        if (isset($request->wizard)) {
             $wizard = $request->wizard;
             $filter_employees = $request->filter_employee;
-        }else{
+        } else {
             $wizard = 0;
             $filter_employees = 0;
         }
@@ -566,7 +567,7 @@ class ReporteController extends Controller
                             ->where('id', $iEmployee)
                             ->first();
 
-            if(!is_null($oEmployee)){
+            if (! is_null($oEmployee)) {
                 $request->pay_way = $oEmployee->way_pay_id;
             }
         }
@@ -797,20 +798,22 @@ class ReporteController extends Controller
                 $emp->comments = $arr;
                 $emp->scheduleText = $col->where('idEmployee', $emp->id)->first()->scheduleText;
             }
-
+            
+            $routePrev = route('checkPrevius_vobos');
+            $routeChildren = route('checkChildrens_vobos');
             $oPrepayrollCtrl = null;
             if ($isPrepayrollInspection) {
                 $oPrepayrollCtrl =  DB::table('prepayroll_report_auth_controls AS prac')
-                                                ->join('users AS u', 'prac.user_vobo_id', '=', 'u.id')
-                                                ->select('prac.*', 'u.name AS username')
-                                                ->where('prac.user_vobo_id', \Auth::user()->id)
-                                                ->where('prac.year', $aNumber[1])
-                                                ->where(($payWay == \SCons::PAY_W_S ? 'prac.is_week' : 'prac.is_biweek'), true)
-                                                ->where(($payWay == \SCons::PAY_W_S ? 'prac.num_week' : 'prac.num_biweek'), $aNumber[0])
-                                                ->where('prac.is_delete', 0)
-                                                ->first();
+                                                    ->join('users AS u', 'prac.user_vobo_id', '=', 'u.id')
+                                                    ->select('prac.*', 'u.name AS username')
+                                                    ->where('prac.user_vobo_id', \Auth::user()->id)
+                                                    ->where('prac.year', $aNumber[1])
+                                                    ->where(($payWay == \SCons::PAY_W_S ? 'prac.is_week' : 'prac.is_biweek'), true)
+                                                    ->where(($payWay == \SCons::PAY_W_S ? 'prac.num_week' : 'prac.num_biweek'), $aNumber[0])
+                                                    ->where('prac.is_delete', 0)
+                                                    ->first();
             }
-            
+
             return view('report.reportDelaysTotView')
                     ->with('tReport', \SCons::REP_HR_EX_TOT)
                     ->with('sStartDate', $sStartDate)
@@ -823,6 +826,8 @@ class ReporteController extends Controller
                     ->with('bModify', $bModify)
                     ->with('lEmpVobos', $lEmpVobos)
                     ->with('isPrepayrollInspection', $isPrepayrollInspection)
+                    ->with('routeChildren', $routeChildren)
+                    ->with('routePrev', $routePrev)
                     ->with('registriesRoute', route('registro_ajuste'))
                     ->with('lRows', $lRows)
                     ->with('lCommentsAdjsTypes', array())
@@ -834,10 +839,10 @@ class ReporteController extends Controller
                     ->with('filter_employees',$filter_employees)
                     ->with('pay_way', $request->pay_way)
                     ->with('oPrepayrollCtrl', $oPrepayrollCtrl)
+                    ->with('idPreNomina', $payWay == \SCons::PAY_W_Q ? "biweek" : "week")
                     ->with('bDelegation', $bDelegation)
                     ->with('idDelegation', $idDelegation);
         }
-        
     }
 
     public function hrReport(Request $request)

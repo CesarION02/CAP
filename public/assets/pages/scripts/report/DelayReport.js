@@ -485,12 +485,18 @@ var app = new Vue({
                 );
             }
         },
-        getResumeComments(idEmployee){
+        /**
+         * Setea en el array global de comentarios, los comentarios hechos para el empleado actual
+         * 
+         * @param integer idEmployee 
+         */
+        getResumeComments(idEmployee) {
             this.resumeComments = [];
-            for (let index = 0; index < this.vData.lEmployees.length; index++) {
-                if(this.vData.lEmployees[index].id == idEmployee){
-                    this.resumeComments = this.vData.lEmployees[index].comments;
-                    this.nameEmployee = this.vData.lEmployees[index].name;
+            let lEmps = Object.values(this.vData.lEmployees);
+            for (const oEmployeeRow of lEmps) {
+                if (oEmployeeRow.id == idEmployee) {
+                    this.resumeComments = oEmployeeRow.comments;
+                    this.nameEmployee = oEmployeeRow.name;
                     break;
                 }
             }

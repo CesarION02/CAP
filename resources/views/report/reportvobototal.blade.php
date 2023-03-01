@@ -17,7 +17,7 @@
                         ?>
                         <input type="hidden" name="back_url" value="{{ $CurPageURL }}">
                         <input type="hidden" name="id_delegation" value="{{ $idDelegation }}" >
-                        <button style="background-color: rgb(37, 255, 135)" title="Visto bueno" type="submit" id="btnSubmit"><i class="fa fa-check" aria-hidden="true"></i></button>
+                        <button class="btn btn-success" onclick="checkPrevius({{$oPrepayrollCtrl->id_control}})" title="Dar visto bueno" type="button" id="btnSubmit"><i class="fa fa-check" aria-hidden="true"></i></button>
                     </form>
                 @else
                     <div style="text-align: center; background-color: rgb(37, 255, 135);">
@@ -46,7 +46,7 @@
                         ?>
                         <input type="hidden" name="back_url" value="{{ $CurPageURL }}">
                         <input type="hidden" name="id_delegation" value="{{ $idDelegation }}" >
-                        <button style="background-color: rgb(247, 76, 76)" title="Visto bueno" type="submit" id="btnSubmit">
+                        <button class="btn btn-danger" title="Cancelar visto bueno" type="submit" id="btnSubmit">
                             <i class="fa fa-ban" aria-hidden="true"></i>
                         </button>
                     </form>
