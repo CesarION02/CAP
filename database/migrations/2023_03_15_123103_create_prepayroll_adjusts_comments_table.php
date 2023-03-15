@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateTableAdjVsComments extends Migration
+class CreatePrepayrollAdjustsCommentsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -95,6 +95,6 @@ class CreateTableAdjVsComments extends Migration
             ->whereIn('id', [4, 8])
             ->update([
                 'is_delete' => '0',
-            ]); 
+            ]);
     }
 }
