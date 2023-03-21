@@ -32,21 +32,22 @@ var app = new Vue({
         lUsers: oData.lUsers,
     },
     mounted() {
-        this.haveComments = this.lCommentsAdjsTypes.length > 0 ? this.lCommentsAdjsTypes[this.adjType].length > 0 : false;
+        this.haveComments = Object.keys(this.vData.lCommentsAdjsTypes).length > 0 ? Object.keys(this.vData.lCommentsAdjsTypes[this.adjType.toString()]).length > 0 : false;
+        this.lComments = Object.keys(this.vData.lCommentsAdjsTypes).length > 0 ? this.vData.lCommentsAdjsTypes[this.adjType.toString()] : [];
         let self = this;
-        $('#comentFrec').on('select2:select', function (e) {
+        $('#comentFrec').on('select2:select', function(e) {
             self.selComment = e.params.data.text;
         });
 
         var horarios = [];
-        for(var i = 0; i<self.vData.lRows.length; i++){
+        for (var i = 0; i < self.vData.lRows.length; i++) {
             horarios.push(self.vData.lRows[i].scheduleText);
         }
 
         let unique = [...new Set(horarios)];
-        self.dataSchedules.push({id: 'NA', text: 'No aplica'});
+        self.dataSchedules.push({ id: 'NA', text: 'No aplica' });
         for (let i = 0; i < unique.length; i++) {
-            self.dataSchedules.push({id: unique[i], text: unique[i]});
+            self.dataSchedules.push({ id: unique[i], text: unique[i] });
         }
     },
     methods: {
@@ -89,13 +90,13 @@ var app = new Vue({
             let dtDate = "";
             let dtTime = "";
 
-            if(this.adjCategory == 3){
-                if(moment(this.dateInit) > moment(this.dateEnd)){
-                    oGui.showMessage('','La fecha final debe ser mayor a la fecha inicial','error');
+            if (this.adjCategory == 3) {
+                if (moment(this.dateInit) > moment(this.dateEnd)) {
+                    oGui.showMessage('', 'La fecha final debe ser mayor a la fecha inicial', 'error');
                     return;
                 }
-                if(this.dateInit == null || this.dateEnd == null){
-                    oGui.showMessage('','Debe seleccionar un rango de fecha','error');
+                if (this.dateInit == null || this.dateEnd == null) {
+                    oGui.showMessage('', 'Debe seleccionar un rango de fecha', 'error');
                     return;
                 }
             }
@@ -146,9 +147,9 @@ var app = new Vue({
                     let oRes = res.data;
 
                     if (oRes.success) {
-                        if(oRes.is_range){
+                        if (oRes.is_range) {
                             this.updateAdjRows(this.vRow.idEmployee, oRes.data);
-                        }else{
+                        } else {
                             this.vRow.labelUpd = true;
                             this.vRow.adjusts.push(res.data.data);
                             // this.setRowAdjusts();
@@ -173,21 +174,21 @@ var app = new Vue({
                 }
             })
             for (let adj of data) {
-                if(adj.apply_to == 1){
+                if (adj.apply_to == 1) {
                     for (let i = 0; i < arr_index.length; i++) {
                         var dt = moment(this.vData.lRows[arr_index[i]].inDateTime).format('YYYY-MM-DD');
-                        if(dt == adj.dt_date){
+                        if (dt == adj.dt_date) {
                             this.vData.lRows[arr_index[i]].adjusts.push(adj);
                             this.vData.lRows[arr_index[i]].labelUpd = true;
-                        }                
+                        }
                     }
-                }else{
+                } else {
                     for (let i = 0; i < arr_index.length; i++) {
                         var dt = moment(this.vData.lRows[arr_index[i]].outDateTime).format('YYYY-MM-DD');
-                        if(dt == adj.dt_date){
+                        if (dt == adj.dt_date) {
                             this.vData.lRows[arr_index[i]].adjusts.push(adj);
                             this.vData.lRows[arr_index[i]].labelUpd = true;
-                        }                
+                        }
                     }
                 }
             }
@@ -204,12 +205,12 @@ var app = new Vue({
                 return false;
             }
 
-            if (this.adjType == oData.ADJ_CONS.OR && ! this.vRow.entryDelayMinutes > 0) {
+            if (this.adjType == oData.ADJ_CONS.OR && !this.vRow.entryDelayMinutes > 0) {
                 oGui.showError("No existe retardo para este día, no es necesario el ajuste");
                 return false;
             }
 
-            if (this.adjType == oData.ADJ_CONS.JF && ! this.vRow.hasAbsence) {
+            if (this.adjType == oData.ADJ_CONS.JF && !this.vRow.hasAbsence) {
                 oGui.showError("El empleado no tiene falta este día, no es necesario justificarla");
                 return false;
             }
@@ -258,8 +259,8 @@ var app = new Vue({
 
                     if (oRes.success) {
                         this.vRow.labelUpd = true;
-                        for(var i = 0; i < this.vRow.adjusts.length; i++){
-                            if(this.vRow.adjusts[i].id == oRes.data.id){
+                        for (var i = 0; i < this.vRow.adjusts.length; i++) {
+                            if (this.vRow.adjusts[i].id == oRes.data.id) {
                                 this.vRow.adjusts.splice(i, 1);
                             }
                         }
@@ -316,8 +317,7 @@ var app = new Vue({
             if (this.vData.isPrepayrollInspection) {
                 var checkVobo = document.getElementById('cb' + oRow.numEmployee);
                 this.isAdjustsDisabled = checkVobo.checked;
-            }
-            else {
+            } else {
                 this.isAdjustsDisabled = false;
             }
 
@@ -345,7 +345,7 @@ var app = new Vue({
         },
         getAdjToRow(oRow, index) {
             let labels = "";
-            for(const adj of oRow.adjusts) {
+            for (const adj of oRow.adjusts) {
                 if (adj.adjust_type_id == oData.ADJ_CONS.COM) {
                     labels += adj.comments + ' ';
                 } else {
@@ -379,8 +379,7 @@ var app = new Vue({
                 this.comments = "";
                 this.adjType = oData.ADJ_CONS.COM;
                 this.adjTypeEnabled = false;
-            }
-            else {
+            } else {
                 this.adjType = oData.ADJ_CONS.JE;
                 this.adjTypeEnabled = true;
                 this.comments = "";
@@ -391,19 +390,18 @@ var app = new Vue({
                 this.adjType == oData.ADJ_CONS.AHE
             ) {
                 this.minsEnabled = true;
-            }
-            else {
+            } else {
                 this.minsEnabled = false;
             }
 
-            this.lComments = this.lCommentsAdjsTypes.length > 0 ? this.lCommentsAdjsTypes[this.adjType] : [];
+            this.lComments = Object.keys(this.vData.lCommentsAdjsTypes).length > 0 ? this.vData.lCommentsAdjsTypes[this.adjType.toString()] : [];
             this.selComment = "";
             $("#comentFrec").val("").trigger("change");
         },
         onTypeChange() {
             this.minsEnabled = this.adjType == oData.ADJ_CONS.DHE || this.adjType == oData.ADJ_CONS.AHE;
             this.overMins = 0;
-            this.lComments = this.lCommentsAdjsTypes.length > 0 ? this.lCommentsAdjsTypes[this.adjType] : [];
+            this.lComments = Object.keys(this.vData.lCommentsAdjsTypes).length > 0 ? this.vData.lCommentsAdjsTypes[this.adjType.toString()] : [];
             this.selComment = "";
             $('#comentFrec').val('').trigger('change');
         },
@@ -420,7 +418,7 @@ var app = new Vue({
                     out_datetime: outDTime,
                     row: JSON.stringify(this.vRow)
                 })
-                .then(res => {                    
+                .then(res => {
                     this.vRow.tempLabels = "Entrada y/o salida manuales.";
                     this.vData.lRows.push('refresh');
                     this.vData.lRows.pop();
@@ -445,39 +443,36 @@ var app = new Vue({
                         if (adjusts[i].adjust_type_id == 7) {
                             hasComment = true;
                             previusComment =
-                                previusComment.length > 0
-                                    ? previusComment + " " + adjusts[i].comments
-                                    : previusComment + adjusts[i].comments;
+                                previusComment.length > 0 ?
+                                previusComment + " " + adjusts[i].comments :
+                                previusComment + adjusts[i].comments;
                         }
                     }
                     if (previusComment.length > 0 && hasComment == true) {
                         this.comments =
-                            this.comments.length > 0
-                                ? this.comments + " " + previusComment
-                                : this.comments + previusComment;
+                            this.comments.length > 0 ?
+                            this.comments + " " + previusComment :
+                            this.comments + previusComment;
                         this.adjType = 7;
                         this.newAdjust();
                         this.adjType = 1;
                         this.adjCategory = 0;
                         this.selComment = "";
-                    }
-                    else {
+                    } else {
                         oGui.showMessage(
                             "",
                             "No existe comentario de tipo comentario en el dia anterior",
                             "warning"
                         );
                     }
-                }
-                else {
+                } else {
                     oGui.showMessage(
                         "",
                         "No existe comentario de tipo comentario en el dia anterior",
                         "warning"
                     );
                 }
-            }
-            else {
+            } else {
                 oGui.showMessage(
                     "",
                     "No existe comentario de tipo comentario en el dia anterior",
@@ -500,7 +495,7 @@ var app = new Vue({
                     break;
                 }
             }
-            
+
             $('#commentsModal').modal('show');
         },
         /**
