@@ -463,7 +463,8 @@ class SDelayReportUtils {
                     })
                     ->orderBy('start_date', 'DESC')
                     ->orderBy('group_schedules_id')
-                    ->orderBy('order_gs', 'ASC');
+                    ->orderBy('order_gs', 'ASC')
+                    ->orderBy('updated_at', 'DESC');
 
         $assings = clone $base;
                     
@@ -591,6 +592,7 @@ class SDelayReportUtils {
                             ->where('sa.is_delete', false)
                             ->where('sa.employee_id', $employeeId)
                             ->orderBy('sa.order_gs', 'ASC')
+                            ->orderBy('sa.updated_at', 'DESC')
                             ->get();
         
         $count = sizeof($schedules);

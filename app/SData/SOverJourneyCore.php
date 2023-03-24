@@ -62,6 +62,17 @@ class SOverJourneyCore {
                     $in = $oRow->inDateTime;
                 }
 
+                $time = Carbon::parse($in)->toTimeString();
+                $oPreviousDate = Carbon::parse($currentDate)->subDay();
+
+                /**
+                 * Si la checada corresponde al día anterior, es decir en su mayoría trabajó el día previo, 
+                 * este tiempo no es considerado
+                 */
+                if ($time < "17:30:00" && $oPreviousDate->toDateString() == Carbon::parse($in)->toDateString()) {
+                    continue;
+                }
+
                 $workedTime = SDelayReportUtils::compareDates($in, $oRow->outDateTime);
 
                 /**

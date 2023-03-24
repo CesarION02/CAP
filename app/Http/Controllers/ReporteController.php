@@ -2398,138 +2398,177 @@ class ReporteController extends Controller
             $lEmployees = SReportsUtils::filterEmployeesByAdmissionDate($lEmployees, $sStartDate, 'id');
 
             // si es parte del wizard cambia la ruta
-            if($request->wizard != 2){
+            if ($request->wizard != 2) {
                 $route = route('reporteIncidenciasEmpleados', "['id' => 1]");
-            }else{
+            }
+            else {
                 $route = route('reporteIncidenciasEmpleados', "['id' => 2]");
                 //$routeSiguiente = route('wizardSiguiente1') ;
             }
             $routeStore = route('reporteIncidenciasEmpleadosStore');
             $routeDelete = route('reporteIncidenciasEmpleadosDelete');
 
-            $typeIncidents = \DB::table('type_incidents')->where('is_agreement',1)->get();
-            $arrIncidents = \DB::table('type_incidents')->pluck('id')->toArray();
-            $siieIncidents = \DB::table('type_incidents')->where('is_agreement', 0)->pluck('id')->toArray();
+            $lTypeIncidents = \DB::table('type_incidents')->get();
+
             $lRows = SDataProcess::process($sStartDate, $sEndDate, $payWay, $lEmployees);
 
-            $faltas = 0;
-            $descanso = 0;
-            $inasistencia = 0;
-            $incapacidad = 0;
-            foreach($lRows as $key => $row){
-                $row->incident_type = null;
-                $row->incident  = null;
-                foreach($row->events as $ev){
-                    if(in_array($ev['type_id'], $arrIncidents)){
-                        $row->incident_type = $ev['type_id'];
-                        $row->incident = $ev['type_name'];
-                        $row->is_agreement = in_array($ev['type_id'], $siieIncidents);
-                    }
-                }
-
-                if($key > 0){
-                    if(isset($lRows[$key-1])){
-                        if(Carbon::parse($row->outDateTime)->toDateString() == Carbon::parse($lRows[$key-1]->outDateTime)->toDateString()){
-                            if($lRows[$key-1]->isDayRepeated){
-                                unset($lRows[$key-1]);
-                            } else if ($row->isDayRepeated){
-                                unset($lRows[$key]);
-                            } else if ($lRows[$key-1]->incident_type == null){
-                                unset($lRows[$key-1]);
-                            } else if ($row->incident_type == null){
-                                unset($lRows[$key]);
-                            } else if ($lRows[$key-1]->is_agreement == false){
-                                unset($lRows[$key-1]);
-                            } else {
-                                unset($lRows[$key]);
-                            }
-                        }
-                    }
-                }
+            /**
+             * Obtención de vobos de empleados
+             */
+            $isPrepayrollInspection = false;
+            $lEmpVobos = [];
+            $aNumber = [];
+            if (($payWay == \SCons::PAY_W_S || $payWay == \SCons::PAY_W_Q) && env('VOBO_BY_EMP_ENABLED', true) && $request->wizard > 0) {
+                $aNumber = SDateUtils::getNumberOfDate($sStartDate, $payWay);
+                $dates = SDateUtils::getDatesOfPayrollNumber($aNumber[0], $aNumber[1], $payWay);
                 
+                if ($dates[0] == $sStartDate && $dates[1] == $sEndDate) {
+                    $lEmpVobos = DB::table('prepayroll_report_emp_vobos AS evb')
+                                        ->join('users AS u', 'evb.vobo_by_id', '=', 'u.id')
+                                        ->join('employees AS e', 'evb.employee_id', '=', 'e.id')
+                                        ->where('evb.is_delete', 0)
+                                        ->where('year', $aNumber[1])
+                                        ->select('u.name AS user_name', 'evb.employee_id', 'evb.vobo_by_id', 'e.num_employee');
+
+                    if ($payWay == \SCons::PAY_W_Q) {
+                        $lEmpVobos = $lEmpVobos->where('evb.is_biweek', true)
+                                                ->where('evb.num_biweek', $aNumber[0]);
+                    }
+                    else {
+                        $lEmpVobos = $lEmpVobos->where('evb.is_week', true)
+                                                ->where('evb.num_week', $aNumber[0]);
+                    }
+
+                    $lEmpVobos = $lEmpVobos->get()->keyBy('employee_id')->toArray();
+
+                    $isPrepayrollInspection = true;
+                }
             }
 
             $aDates = [];
             $oDate = Carbon::parse($sStartDate);
             $oEndDate = Carbon::parse($sEndDate);
-
             while ($oDate->lessThanOrEqualTo($oEndDate)) {
                 $aDates[] = $oDate->toDateString();
                 $oDate->addDay();
             }
 
-            $totRows = collect($lRows)->groupBy('idEmployee');
+            $collRows = collect($lRows);
+            $lReportRows = [];
+            foreach ($lEmployees as $oEmployee) {
+                $oRepRow = new \stdClass();
+                $oRepRow->idEmployee = $oEmployee->id;
+                $oRepRow->numEmployee = $oEmployee->num_employee;
+                $oRepRow->nameEmployee = $oEmployee->name;
+                $oRepRow->isVobo = $isPrepayrollInspection && array_key_exists($oEmployee->id, $lEmpVobos);
+                $oRepRow->faltas = 0;
+                $oRepRow->descansos = 0;
+                $oRepRow->vacaciones = 0;
+                $oRepRow->inasistencias = 0;
+                $oRepRow->incapacidad = 0;
+                $oRepRow->onomastico = 0;
+                $oRepRow->days = [];
 
-            foreach($totRows as $key => $row){
-                $faltas = 0;
-                $descansos = 0;
-                $vacaciones = 0;
-                $inasistencias = 0;
-                $incapacidad = 0;
-                $onomastico = 0;
-                // if(count($row) < count($aDates)){
-                    for($i=0; $i<count($aDates); $i++){
-                        if(isset($row[$i]) && isset($aDates[$i]) && $row[$i]->outDate != $aDates[$i]){
-                            $r = new \stdClass();
-                            $r->outDate = $aDates[$i];
-                            $r->incident_type = -1;
-                            $r->incident = null;
-                            $r->hasAbsence = null;
-                            if(isset($row[$i + 1])){
-                                $r->idEmployee = $row[$i+1]->idEmployee;
-                                $r->numEmployee = $row[$i+1]->numEmployee;
-                                $r->employee = $row[$i+1]->employee;
-                            } else if (isset($row[$i - 1])){
-                                $r->idEmployee = $row[$i-1]->idEmployee;
-                                $r->numEmployee = $row[$i-1]->numEmployee;
-                                $r->employee = $row[$i-1]->employee;
-                            }
-                            $row->splice($i, 0, [$r]);
-                        } else if (!isset($row[$i])) {
-                            $r = new \stdClass();
-                            $r->outDate = $aDates[$i];
-                            $r->incident_type = -1;
-                            $r->incident = null;
-                            $r->hasAbsence = null;
-                            if(isset($row[$i + 1])){
-                                $r->idEmployee = $row[$i+1]->idEmployee;
-                                $r->numEmployee = $row[$i+1]->numEmployee;
-                                $r->employee = $row[$i+1]->employee;
-                            } else if (isset($row[$i - 1])){
-                                $r->idEmployee = $row[$i-1]->idEmployee;
-                                $r->numEmployee = $row[$i-1]->numEmployee;
-                                $r->employee = $row[$i-1]->employee;
-                            }
-                            $row->splice($i, 0, [$r]);
+                $lEmpRows = $collRows->where('idEmployee', $oEmployee->id);
+                foreach ($aDates as $sDate) {
+                    $lEmpRs = collect($lEmpRows);
+                    $lDay = $lEmpRs->where('outDate', $sDate);
+                    $oRepRow->days[$sDate] = new \stdClass();
+
+                    $events = [];
+                    foreach ($lDay as $oRowDay) {
+                        if ($oRowDay->hasAbsence) {
+                            $oRepRow->days[$sDate]->hasAbsence = true;
+                            $oRepRow->faltas++;
                         }
-                        if( isset($row[$i]) ){
-                            $row[$i]->hasAbsence == true ? $faltas++ : '';
-                            $row[$i]->incident_type == 19 ? $descansos++ : '';
-                            $row[$i]->incident_type == 12 ? $vacaciones++ : '';
-                            $row[$i]->incident_type == 7 ? $onomastico++ : '';
-                            in_array($row[$i]->incident_type, [1,2,3,4,5,6,20]) == true ? $inasistencias++ : '';
-                            in_array($row[$i]->incident_type, [9,10,11,18,16]) == true ? $incapacidad++ : '';
+
+                        if (count($oRowDay->events) > 0) {
+                            /**
+                             * id: name, is_agreement, is_allowed
+                             * 1: INASIST. S/PERMISO, [0][0]
+                                2: INASIST. C/PERMISO S/GOCE, [0][0]
+                                3: INASIST. C/PERMISO C/GOCE, [0][1]
+                                4: INASIST. ADMTIVA. RELOJ CHECADOR, [0][0]
+                                5: INASIST. ADMTIVA. SUSPENSIÓN, [0][0]
+                                6: INASIST. ADMTIVA. OTROS, [0][0]
+                                7: ONOMÁSTICO, [0][1]
+                                8: Riesgo de trabajo, [0][1]
+                                9: Enfermedad en general, [0][0]
+                                10: Maternidad, [0][1]
+                                11: Licencia por cuidados médicos de hijos diagnosticados con cáncer., [0][1]
+                                12: VACACIONES, [0][1]
+                                13: VACACIONES PENDIENTES, [0][1]
+                                14: CAPACITACIÓN, [1][1]
+                                15: TRABAJO FUERA PLANTA, [1][1]
+                                16: PATERNIDAD, [0][1]
+                                17: DIA OTORGADO, [1][1]
+                                18: INASIST. PRESCRIPCION MEDICA, [0][1]
+                                19: DESCANSO, [1][1]
+                                20: INASIST. TRABAJO FUERA DE PLANTA, [1][1]
+                                21: VACACIONES, [1][1]
+                                22: INCAPACIDAD, [1][1]
+                                23: ONOMÁSTICO, [1][1]
+                                24: PERMISO, [1][0]
+                             */ 
+                            foreach ($oRowDay->events as $evt) {
+                                $event = (object) $evt;
+                                switch ($event->type_id) {
+                                    case 1:
+                                    case 2:
+                                    case 3:
+                                    case 4:
+                                    case 5:
+                                    case 6:
+                                        $oRepRow->inasistencias++;
+                                        break;
+                                    case 12:
+                                    case 13:
+                                    case 21:
+                                        $oRepRow->vacaciones++;
+                                        break;
+                                    case 7:
+                                    case 23:
+                                        $oRepRow->onomastico++;
+                                        break;
+                                    case 19:
+                                        $oRepRow->descansos++;
+                                        break;
+                                    case 10:
+                                    case 11:
+                                    case 16:
+                                    case 18:
+                                    case 20:
+                                    case 22:
+                                        $oRepRow->incapacidad++;
+                                        break;
+                                    default:
+                                        break;
+                                }
+
+                                $events[] = $event;
+                            }
                         }
                     }
-                    $totRows[$key]->faltas = $faltas;
-                    $totRows[$key]->descansos = $descansos;
-                    $totRows[$key]->vacaciones = $vacaciones;
-                    $totRows[$key]->inasistencias = $inasistencias;
-                    $totRows[$key]->incapacidad = $incapacidad;
-                    $totRows[$key]->onomastico = $onomastico;
+
+                    $oRepRow->days[$sDate]->events = $events;
+                }
+
+                $lReportRows[] = $oRepRow;
             }
-            $subEmployees = [];
-            $dirEmpl = SPrepayrollUtils::getEmployeesByUser(auth()->user()->id, 0, true, null);
-            foreach ($dirEmpl as $data) {
-                    array_push($subEmployees, $data);
-            }
+
+            // Incidencias permitidas en CAP
+            $lTypeCapIncidents = \DB::table('type_incidents')
+                                        ->whereIn('id', [12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24])
+                                        ->orderBy('name', 'ASC')
+                                        ->get();
             
             return view('report.reportIncidentsEmployeesView', [
-                                                            'lRows' => $totRows,
+                                                            'lRows' => $lReportRows,
                                                             'sStartDate' => $sStartDate,
                                                             'sEndDate' => $sEndDate,
                                                             'route' => $route,
-                                                            'typeIncidents' => $typeIncidents,
+                                                            'lTypeIncidents' => $lTypeIncidents,
+                                                            'lTypeCapIncidents' => $lTypeCapIncidents,
                                                             'routeStore' => $routeStore,
                                                             'routeDelete' => $routeDelete,
                                                             'aDates' => $aDates,
@@ -2537,45 +2576,48 @@ class ReporteController extends Controller
                                                             'payWay' => $payWay,
                                                             'subEmployees' => $subEmployees,
                                                             'bDelegation' => $bDelegation,
-                                                            'iIdDelegation' => $iIdDelegation
+                                                            'iIdDelegation' => $iIdDelegation,
+                                                            'isPrepayrollInspection' => $isPrepayrollInspection
                                                         ]);
         }
 
-        public function reportIncidentsEmployeesStore(Request $request){
-            $incident = incident::where([
-                ['cls_inc_id', 1],
-                ['type_incidents_id', $request->oldIncident],
-                ['start_date', $request->date],
-                ['end_date', $request->date],
-                ['employee_id', $request->employee_id],
-                ['is_delete', 0],
-            ])->first();
+        public function reportIncidentsEmployeesStore(Request $request) {
+            $incident = null;
+            if (isset($request->id_incident) && $request->id_incident > 0) {
+                $incident = incident::find($request->id_incident);
+            }
             
             $incidentController = null;
-            if(is_null($incident)){
+            if (is_null($incident)) {
                 $incident = new incident();
-                $incidentController = new incidentController();
             }
+            $incidentController = new incidentController();
 
             try {
                 DB::transaction(function () use ($request, $incidentController, $incident) {
-                    $incident->external_key = "0_0";
-                    $incident->cls_inc_id = 1;
-                    $incident->created_by = session()->get('user_id');
                     $incident->updated_by = session()->get('user_id');
+                    $incident->nts = $request->comments;
                     $incident->type_incidents_id = $request->typeIncident;
-                    $incident->start_date = $request->date;
-                    $incident->end_date = $request->date;
-                    $incident->employee_id = $request->employee_id;
-                    
-                    if(!is_null($incidentController)){
-                        $incident->save();
-                        $incidentController->daysIncidents($incident->id,$incident->start_date,$incident->end_date,$incident->employee_id);
-                    }else {
+
+                    if ($incident->id > 0) {
                         $incident->update();
                     }
+                    else {
+                        $incident->external_key = "0_0";
+                        $incident->cls_inc_id = 1;
+                        $incident->created_by = session()->get('user_id');
+                        $incident->start_date = $request->date;
+                        $incident->end_date = $request->date;
+                        $incident->employee_id = $request->employee_id;
+                        
+                        $incident->save();
+                    }
+
+                    $incidentController->saveDays($incident);
                 });
-            } catch (\Throwable $e) {
+
+            }
+            catch (\Throwable $e) {
                 return redirect()->back()->with(['tittle' => 'Error', 'message' => 'Error al guardar el registro', 'icon' => 'error']);
             }
 
@@ -2583,26 +2625,19 @@ class ReporteController extends Controller
         }
 
         public function reportIncidentsEmployeesDelete(Request $request){
-            $incident = incident::where([
-                ['cls_inc_id', 1],
-                ['type_incidents_id', $request->typeIncident],
-                ['start_date', $request->date],
-                ['end_date', $request->date],
-                ['employee_id', $request->employee_id],
-                ['is_delete', 0],
-            ])->first();
+            $incident = null;
+            if (isset($request->id_incident) && $request->id_incident > 0) {
+                $incident = incident::find($request->id_incident);
+            }
 
             try {
                 DB::transaction(function () use ($request, $incident) {
-                    if(!is_null($incident)){
+                    if(! is_null($incident)) {
                         $incident->is_delete = 1;
                         $incident->update();
                         
-                        $incidentDay = incidentDay::where('incidents_id', $incident->id)->first();
-                        if(!is_null($incidentDay)){
-                            $incidentDay->is_delete = 1;
-                            $incidentDay->update();
-                        }
+                        $incidentController = new incidentController();
+                        $incidentController->saveDays($incident);
                     }
                 });
             } catch (\Throwable $e) {

@@ -308,7 +308,7 @@ class prePayrollController extends Controller
      * regresa un arreglo con las incidencias correspondientes
      *
      * @param int $idEmployee
-     * @param String $sDate
+     * @param string $sDate
      * 
      * @return 'Illuminate\Support\Collection' incident
      */

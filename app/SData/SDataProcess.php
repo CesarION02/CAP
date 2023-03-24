@@ -962,8 +962,10 @@ class SDataProcess {
                     $key = explode("_", $absence->external_key);
 
                     $abs = [];
+                    $abs['id'] = $absence->id;
                     $abs['id_emp'] = $key[0];
                     $abs['id_abs'] = $key[1];
+                    $abs['is_external'] = $absence->external_key != "0_0";
                     $abs['nts'] = $absence->nts;
                     $abs['type_name'] = $absence->type_name;
                     $abs['type_id'] = $absence->type_id;
@@ -1003,6 +1005,7 @@ class SDataProcess {
                 $oRow->isHoliday = $num;
                 $oRow->others = $oRow->others.'Festivo. ';
                 $oRow->isDayChecked = false;
+                $oRow->comments = str_replace("Sin checadas. ", "", $oRow->comments);
             }
 
             if ($oRow->isTypeDayChecked || $oRow->hasAssign) {

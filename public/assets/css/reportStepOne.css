@@ -1,0 +1,35 @@
+.inasistencia {
+    background-color: tomato;
+}
+
+.falta {
+    background-color: rgb(255, 138, 128);
+}
+
+.descanso {
+    background-color: rgb(178, 255, 89);
+}
+
+.vacaciones {
+    background-color: rgb(116, 145, 66);
+}
+
+.incapacidad {
+    background-color: rgb(128, 216, 255);
+}
+
+.onomastico {
+    background-color: cadetblue;
+}
+
+.permitida {
+    background-color: darkseagreen;
+}
+
+.no-permitida {
+    background-color: goldenrod;
+}
+
+.default {
+    background-color: rgb(179, 136, 255);
+}
