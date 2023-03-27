@@ -323,6 +323,7 @@ class SDelayReportUtils {
                                 ->join('employees AS e', 'e.id', '=', 'r.employee_id')
                                 ->leftJoin('jobs AS j', 'j.id', '=', 'e.job_id')
                                 ->leftJoin('departments AS d', 'd.id', '=', 'j.department_id')
+                                ->where('r.is_delete', 0)
                                 ->where('r.date', $sDate)
                                 ->where('e.id', $iEmployee)
                                 // ->select('r.*', 'e.num_employee', 'e.name', 'e.is_overtime')

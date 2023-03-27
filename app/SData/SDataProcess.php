@@ -1956,20 +1956,20 @@ class SDataProcess {
                 if ($oFoundRegistry == null) {
                     return 2;
                 }
-                else {
-                    $comparison = SDelayReportUtils::compareDates($oFoundRegistry->date.' '.$oFoundRegistry->time, $oDateAux->toDateString().' 22:30:00');
+                // else {
+                //     $comparison = SDelayReportUtils::compareDates($oFoundRegistry->date.' '.$oFoundRegistry->time, $oDateAux->toDateString().' 22:30:00');
 
-                    if (abs($comparison->diffMinutes) <= $config->maxGapMinutes) {
-                        if (! is_array($registries)) {
-                            $registries = $registries->toArray();
-                        }
-                        array_unshift($registries, $oFoundRegistry);
-                        return [0, $registries];
-                    }
-                    else {
-                        return 2;
-                    }
-                }
+                //     if (abs($comparison->diffMinutes) <= $config->maxGapMinutes) {
+                //         if (! is_array($registries)) {
+                //             $registries = $registries->toArray();
+                //         }
+                //         array_unshift($registries, $oFoundRegistry);
+                //         return [0, $registries];
+                //     }
+                //     else {
+                //         return 2;
+                //     }
+                // }
             }
         }
 
