@@ -2662,4 +2662,126 @@ class ReporteController extends Controller
 
             }
         }
+
+        public function AccesoPuertasDatos(){
+            $user = session()->get('id');
+            $user = 59;
+            // Query para sacar los devices asignados.
+            $lDevices = DB::table('user_vs_device')
+                            ->join('users','user_vs_device.user_id', '=', 'users.id')
+                            ->join('devices','user_vs_device.device_id', '=', 'devices.id')
+                            ->where('user_vs_device.is_delete',0)
+                            ->where('user_id',$user)
+                            ->orderBy('users.id')
+                            ->select('devices.name AS dn','devices.code AS di')
+                            ->get();
+
+            return view('report.datosAccesoPuerta')->with('lDevices',$lDevices);
+        }
+
+        public function AccesoPuertasGenerar(Request $request){
+            $rez = biostarController::login();
+            $Sdevice = "";
+            $Sempleados = "";
+            $fecha_ini = Carbon::parse($request->start_date);
+            $fecha_ini = $fecha_ini->toISOString();
+            $fecha_fin = Carbon::parse($request->end_date);
+            $fecha_fin->addHours(23);
+            $fecha_fin = $fecha_fin->toISOString();
+            if ($rez == null) {
+                return null;
+            }
+
+            for($i = 0 ; count($request->devices) > $i ; $i++){
+                if($i == 0){
+                    $Sdevice = $Sdevice.$request->devices[$i];
+                }else{
+                    $Sdevice = $Sdevice . '","' . $request->devices[$i];   
+                }
+            }
+
+
+            $employees = DB::table('employees')
+                            ->where('employees.is_active',1)
+                            ->where('employees.biostar_id','>',0)
+                            ->select('employees.biostar_id AS biostar')
+                            ->get();
+            
+            for($i = 0 ; count($employees) > $i ; $i++){
+                if($i == 0){
+                    $Sempleados = $Sempleados.$employees[$i]->biostar;
+                }else{
+                    $Sempleados = $Sempleados . '","' . $employees[$i]->biostar;   
+                }
+            }
+
+            $headers = [
+                'Content-Type' => 'application/json',
+                'bs-session-id' => $rez,
+                'Accept-Encoding' => 'gzip, deflate, br'
+            ];
+
+            $config = \App\SUtils\SConfiguration::getConfigurations(); 
+        
+        
+            $client = new GuzzleClient([
+                // Base URI is used with relative requests
+                'base_uri' => $config->urlBiostar."/api/",
+                // You can set any number of default request options.
+                'timeout'  => 5.0,
+                'headers' => $headers,
+                'verify' => false
+            ]);
+            
+            $body = '{
+                "Query": {
+                  "limit": 10000000,
+                  "conditions": [
+                    {
+                      "column": "event_type_id.code",
+                      "operator": 2,
+                      "values": [
+                        "4865"
+                      ]
+                    },
+                    {
+                      "column": "datetime",
+                      "operator": 3,
+                      "values": [
+                        "'.$fecha_ini.'", "'.$fecha_fin.'"
+                      ]
+                    },
+                    {
+                      "column":"device_id.id",
+                      "operator": 2,
+                      "values": [
+                        "'.$Sdevice.'"
+                      ]
+                    },
+                    {
+                        "column":"user_id.user_id",
+                        "operator": 2,
+                        "values": [
+                          "'.$Sempleados.'"
+                        ]
+                    }
+                  ],
+                  "orders": [
+                    {
+                      "column": "datetime",
+                      "descending": false
+                    }
+                  ]
+                }
+              }';
+            $r = $client->request('POST', 'events/search', [
+                'body' => $body
+            ]);
+            $response = $r;
+            $response = $r->getBody()->getContents();
+            $data = json_decode($response);
+            //$orden = $request->orden;
+
+            return view('report.accesoPuerta')->with('data',$data);
+        }
 }

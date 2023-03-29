@@ -487,6 +487,18 @@ Route::post('requestWorkDay/getPDF', 'requestWorkDayController@getPDF')->name('r
 /* Cortes de prenómina */
 Route::get('prepayrollcut_week', 'prepayrollCutController@index')->name('cortes_semana');
 Route::get('prepayrollcut_biweek','prepayrollCutController@indexBiweek')->name('cortes_quincena');
+/* usuarios vs dispositivos biometricos */
+Route::get('uservsdevice', 'userVsDevicesController@index')->name('usuariosvsdispositivos');
+Route::get('uservsdevice/create', 'userVsDevicesController@create')->name('crear_usuariosvsdispositivos');
+Route::post('uservsdevice', 'userVsDevicesController@store')->name('guardar_usuariosvsdispositivos');
+Route::get('uservsdevice/{id}/edit', 'userVsDevicesController@edit')->name('editar_usuariosvsdispositivos');
+Route::put('uservsdevice/{id}', 'userVsDevicesController@update')->name('actualizar_usuariosvsdispositivos');
+Route::delete('uservsdevice/{id}', 'userVsDevicesController@destroy')->name('eliminar_usuariosvsdispositivos');
+
+/* Reporte de accesos por dispositivo asignado */
+Route::get('reportaccessdata', 'ReporteController@AccesoPuertasDatos')->name('accesopuertasdatos');
+Route::get('accessdatatrigger', 'ReporteController@AccesoPuertasGenerar')->name('accesopuertasgenerar');
+
 
 });
 

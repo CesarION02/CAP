@@ -19,7 +19,8 @@ class SyncController extends Controller
         $resp = SCutoffDates::processCutoffDates($config->lastSyncDateTime);
 
         $sincronizado = \App\Http\Controllers\biostarController::insertEvents();
-        // $sincronizado = 1;
+        $sincronizado = \App\Http\Controllers\biostarController::insertDevices();
+        $sincronizado = 1;
         if ($sincronizado != 0) {
             return redirect()->back()->with('mensaje', 'Sincronizado BioStar');
         }
@@ -31,8 +32,10 @@ class SyncController extends Controller
     public static function syncronizeWithERP($lastSyncDate = "")
     {
         // $jsonString = file_get_contents(base_path('response_from_siie.json'));
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+
         $client = new Client([
-            'base_uri' => '192.168.1.233:9001',
+            'base_uri' => $config->urlSync,
             'timeout' => 10.0,
         ]);
 

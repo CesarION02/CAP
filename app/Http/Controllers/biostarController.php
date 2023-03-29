@@ -6,6 +6,7 @@ use GuzzleHttp\Client as GuzzleClient;
 use App\Jobs\ProcessCheckNotification;
 use Illuminate\Http\Request;
 use App\Models\register;
+use App\Models\device;
 use App\Models\employees;
 use Carbon\Carbon;
 use DB;
@@ -261,7 +262,7 @@ class biostarController extends Controller
                   "column":"device_id.id",
                   "operator": 2,
                   "values": [
-                    "545406209","542390428"
+                    "545406209","542390428","542391960"
                   ]
                 }
               ],
@@ -356,6 +357,71 @@ class biostarController extends Controller
             }
         }
         
+        return 1;
+    }
+    public static function getDevice(){
+        $rez = biostarController::login();
+
+            if ($rez == null) {
+                return null;
+            }
+
+            $headers = [
+                'Content-Type' => 'application/json',
+                'bs-session-id' => $rez,
+                'Accept-Encoding' => 'gzip, deflate, br'
+            ];
+
+            $config = \App\SUtils\SConfiguration::getConfigurations(); 
+        
+        
+            $client = new GuzzleClient([
+                // Base URI is used with relative requests
+                'base_uri' => $config->urlBiostar."/api/",
+                // You can set any number of default request options.
+                'timeout'  => 5.0,
+                'headers' => $headers,
+                'verify' => false
+            ]);
+            
+            $r = $client->request('GET', 'devices', []);
+            $response = $r;
+            $response = $r->getBody()->getContents();
+            $datas = json_decode($response);
+            
+            return $datas;
+    }
+
+    public static function insertDevices(){
+        // json que recupera los dispositivos conectados.
+        $datas = biostarController::getDevice();
+        //comienza la transacción para ingresar los dispositivos.
+        DB::beginTransaction();
+        try{
+            foreach($datas->DeviceCollection->rows as $data){
+                //checar si el dispositivo ya esta dado de alta.
+                $repetido = DB::table('devices')->where('code',$data->id)->get();
+                if(count($repetido) != 0){
+                    continue;
+                }
+
+                $device = new device();
+                $device->code = $data->id;
+                $device->name = $data->name;
+                $device->is_delete = 0;
+                $device->updated_by = session()->get('user_id');
+                $device->created_by = session()->get('user_id');
+                $device->save();  
+
+            }
+
+        } catch (\Exception $e) {
+            DB::rollback(); 
+            return 0;
+
+        }
+        DB::commit();
+        $lEvents = [];   
         return 1;
     }
 }
