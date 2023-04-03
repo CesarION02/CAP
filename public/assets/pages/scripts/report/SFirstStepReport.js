@@ -30,7 +30,7 @@ var app = new Vue({
          */
         showModal(idEmployee, name, date, aEvents, hasAbsence, isVobo) {
             if (hasAbsence) {
-                return;
+                // return;
             }
 
             this.employee = name;
