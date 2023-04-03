@@ -20,7 +20,6 @@ class SyncController extends Controller
 
         $sincronizado = \App\Http\Controllers\biostarController::insertEvents();
         $sincronizado = \App\Http\Controllers\biostarController::insertDevices();
-        $sincronizado = 1;
         if ($sincronizado != 0) {
             return redirect()->back()->with('mensaje', 'Sincronizado BioStar');
         }
@@ -35,7 +34,7 @@ class SyncController extends Controller
         $config = \App\SUtils\SConfiguration::getConfigurations();
 
         $client = new Client([
-            'base_uri' => $config->urlSync,
+            'base_uri' => $config->urlSyncCAPLink,
             'timeout' => 10.0,
         ]);
 
