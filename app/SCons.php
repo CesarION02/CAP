@@ -79,6 +79,10 @@ class SCons {
       'INC_CAP' => 22,// INCAPACIDAD
       'ONOM_CAP' => 23// ONOMÁSTICO
    ];
+
+   const TASK_TYPE_REPORT_JOURNEY = 1;
+   const TASK_TYPE_REPORT_OTHER = 2;
+   const TASK_TYPE_OTHER_ACTION = 3;
 }
 
 ?>

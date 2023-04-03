@@ -31,6 +31,7 @@ class SRegistryRow {
     public $overMinsTotal;
     public $cutId;
     public $extraHours;
+    public $workedTime;
     public $hasAbsence;
     public $workable;
     public $isIncompleteTeJourney;
@@ -73,6 +74,8 @@ class SRegistryRow {
     public $others;
     public $comments;
     public $isDayChecked;
+    public $departmentName;
+    
 
     function __construct()
     {
@@ -117,6 +120,7 @@ class SRegistryRow {
         $this->extraDoubleMinsNoficial = 0;
         $this->extraTripleNoficial = "00:00";
         $this->extraTripleMinsNoficial = 0;
+        $this->workedTime = 0;
         $this->dayInhability = 0;
         $this->dayVacations = 0;
         $this->events = [];
@@ -144,6 +148,7 @@ class SRegistryRow {
         $this->others = "";
         $this->comments = "";
         $this->isDayChecked = false;
+        $this->departmentName = "";
     }
 }
 

@@ -1588,7 +1588,9 @@ class SDataProcess {
                 /**
                  * Log del cambio en los horarios, programados vs detectados
                  */
-                session('logger')->log($oRow->idEmployee, 'cambio_horario', null, null, $sScheduleProgrammed, $sScheduleDetected);
+                if (session()->has('logger')) {
+                    session('logger')->log($oRow->idEmployee, 'cambio_horario', null, null, $sScheduleProgrammed, $sScheduleDetected);
+                }
 
                 return $oRow;
             }
@@ -1811,7 +1813,7 @@ class SDataProcess {
          */
         if (count($lCheks) != count($lNewChecks)) {
             foreach ($lCheks as $indexCheck) {
-                if (! in_array($indexCheck, $lNewChecks)) {
+                if (! in_array($indexCheck, $lNewChecks) && session()->has('logger')) {
                     session('logger')->log($indexCheck->employee_id, 'checada_omitida', $indexCheck->id, null, null, null);
                 }
             }
@@ -1883,7 +1885,7 @@ class SDataProcess {
             }
 
             if (abs($comparisonIn->diffMinutes) <= $config->maxGapSchedule) {
-                if ($check->type_id != \SCons::REG_IN) {
+                if ($check->type_id != \SCons::REG_IN && session()->has('logger')) {
                     /**
                      * Log de los empleados que checaron salida por entrada
                      */
@@ -1894,7 +1896,7 @@ class SDataProcess {
             }
             else {
                 if (abs($comparisonOut->diffMinutes) <= $config->maxGapSchedule) {
-                    if ($check->type_id != \SCons::REG_OUT) {
+                    if ($check->type_id != \SCons::REG_OUT && session()->has('logger')) {
                         /**
                          * Log de los empleados que checaron entrada por salida
                          */
