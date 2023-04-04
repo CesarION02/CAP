@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use App\Models\ProgrammedTask;
-use App\Models\ReportTask;
 use App\Models\TaskLog;
 use App\SReport\SJourneyReport;
 use Illuminate\Console\Command;
@@ -72,7 +71,7 @@ class TaskCommand extends Command
 
             switch ($oTask->task_type_id) {
                 case \SCons::TASK_TYPE_REPORT_JOURNEY:
-                    $response = SJourneyReport::manageTaskReport($oTask->cfg, $oTask->execute_on);
+                    $response = SJourneyReport::manageTaskReport($oTask->cfg, $oTask->reference_id);
                     break;
 
                 default:

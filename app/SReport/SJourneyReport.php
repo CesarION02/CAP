@@ -28,6 +28,12 @@ class SJourneyReport
             "back_prepayroll": {
             "type": "integer"
             },
+            "companies": {
+            "type": "array",
+            "items": {
+                "type": "integer"
+            }
+            },
             "areas": {
             "type": "array",
             "items": false
@@ -40,19 +46,31 @@ class SJourneyReport
             },
             "departments_siie": {
             "type": "array",
+            "items": {
+                "type": "integer"
+            }
+            },
+            "employees": {
+            "type": "array",
+            "items": false
+            },
+            "benefit_policies": {
+            "type": "array",
             "items": false
             },
             "mails": {
             "type": "object",
             "properties": {
                 "to": {
-                "type": "string"
+                "type": "string",
+                "format": "email"
                 },
                 "cc": {
-                "type": "string"
+                "type": "string",
+                "format": "email"
                 },
                 "cco": {
-                "type": "string"
+                "type": "email"
                 }
             },
             "required": [
@@ -65,24 +83,29 @@ class SJourneyReport
         "required": [
             "pay_type",
             "back_prepayroll",
+            "companies",
             "areas",
             "departments_cap",
             "departments_siie",
+            "employees",
+            "benefit_policies",
             "mails"
         ]
         }
-     * @param string $sDate fecha en la que estaba programada la tarea
+     * @param string $sReference fecha en la que estaba programada la tarea
      * 
      * @return string con el error si ocurrió alguno o vacío si todo salió OK
      */
-    public static function manageTaskReport($sConfiguration, $sDate)
+    public static function manageTaskReport($sConfiguration, $sReference)
     {
+        // Validar si la cadena recibida es un JSON
         if (! SJourneyReport::isJson($sConfiguration)) {
             return "Error, la configuración recibida no es un string JSON.";
         }
 
         $oConfiguration = json_decode($sConfiguration);
 
+        // Si la configuración de tipo de pago no es correcta, retorna error
         if ($oConfiguration->pay_type == 0 || $oConfiguration->pay_type == "") {
             return "Error, el tipo de pago en la configuración no es válido.";
         }
@@ -95,8 +118,14 @@ class SJourneyReport
         $sEndDate = "";
         $sPayTypeText = "";
         try {
-            $oDate = Carbon::parse($sDate);
+            // La referencia es un string con el tipo de pago _ id de corte (Ejem: Q_456)
+            $numPP = substr($sReference, 2);
             if ($oConfiguration->pay_type == \SCons::PAY_W_Q) {
+                $oCut = cutCalendarQ::find($numPP);
+                if (is_null($oCut)) {
+                    return "Error, no se encontró fecha de corte con la referencia: " . $sReference;
+                }
+                $oDate = Carbon::parse($oCut->dt_cut);
                 if ($oConfiguration->back_prepayroll > 0) {
                     $oDate->subDays(15 * $oConfiguration->back_prepayroll);
                 }
@@ -116,6 +145,11 @@ class SJourneyReport
                 $sPayTypeText = "Quincena";
             }
             else {
+                $oCut = week_cut::find($numPP);
+                if (is_null($oCut)) {
+                    return "Error, no se encontró fecha de corte con la referencia: " . $sReference;
+                }
+                $oDate = Carbon::parse($oCut->fin);
                 if ($oConfiguration->back_prepayroll > 0) {
                     $oDate->subDays(7 * $oConfiguration->back_prepayroll);
                 }
@@ -133,14 +167,13 @@ class SJourneyReport
                 $sPayTypeText = "Semana";
             }
 
-            if (! (is_array($oConfiguration->departments_cap) && count($oConfiguration->departments_cap) > 0)) {
-                return "Error, el filtro de departamentos CAP no está definido en la configuración.";
-            }
-
-            $byDept = 2;
-            $aDepts = $oConfiguration->departments_cap;
-
-            $lData = SJourneyReport::getJourneyData($sStartDate, $sEndDate, $oConfiguration->pay_type, $byDept, $aDepts);
+            $lData = SJourneyReport::getJourneyData($sStartDate, $sEndDate, $oConfiguration->pay_type, 
+                                                    $oConfiguration->companies, 
+                                                    $oConfiguration->areas, 
+                                                    $oConfiguration->departments_cap, 
+                                                    $oConfiguration->departments_siie, 
+                                                    $oConfiguration->employees, 
+                                                    $oConfiguration->benefit_policies);
             
             $tos = explode(";", $oConfiguration->mails->to);
             $oMail = Mail::to($tos);
@@ -169,12 +202,12 @@ class SJourneyReport
         return json_last_error() === JSON_ERROR_NONE;
      }
 
-    private static function getJourneyData($sStartDate, $sEndDate, $payWay, $filterBy, $aElems)
+    private static function getJourneyData($sStartDate, $sEndDate, $iPayType, $aCompanies, $aAreas, $aDeptosCap, $aDeptosSiie, $aEmployees, $aBenPolicy)
     {
-        $lEmployees = SGenUtils::toEmployeeIds($payWay, $filterBy, $aElems, [], 0);
+        $lEmployees = SGenUtils::getEmployeesByCfg($iPayType, $aCompanies, $aAreas, $aDeptosCap, $aDeptosSiie, $aEmployees, $aBenPolicy);
         $lEmployees = SReportsUtils::filterEmployeesByAdmissionDate($lEmployees, $sEndDate, 'id');
         $comments = null;
-        $data53 = SDataProcess::getSchedulesAndChecks($sStartDate, $sEndDate, $payWay, $lEmployees, $comments);
+        $data53 = SDataProcess::getSchedulesAndChecks($sStartDate, $sEndDate, $iPayType, $lEmployees, $comments);
         $aEmployeeOverTime = $lEmployees->pluck('policy_extratime_id', 'id');
         $lData = SDataProcess::addDelaysAndOverTime($data53, $aEmployeeOverTime, $sEndDate, $comments);
         $lData = SJourneyReport::addWorkedTime($lData);
