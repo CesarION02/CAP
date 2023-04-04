@@ -680,6 +680,8 @@ class SDelayReportUtils {
      */
     public static function compareDates($sDateOne, $sDateTwo)
     {
+        date_default_timezone_set("America/New_York");
+
         $oDate1 = Carbon::parse($sDateOne);
         $oDate2 = Carbon::parse($sDateTwo);
 
