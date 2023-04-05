@@ -61,7 +61,7 @@ class JourneyReportNotification extends Mailable implements ShouldQueue
      */
     public function build()
     {
-        return $this->from('cap@swaplicado.com.mx')
+        return $this->from('cap@aeth.mx')
                         ->subject($this->sSubject)
                         ->view('mails.journeyreport')
                         ->with('sPeriod', $this->sPeriod)
