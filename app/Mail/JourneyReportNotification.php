@@ -29,8 +29,8 @@ class JourneyReportNotification extends Mailable implements ShouldQueue
         $oStartDate = Carbon::parse($startDate)->locale('es');
         $oEndDate = Carbon::parse($endDate)->locale('es');
 
-        $this->startDate = $oStartDate->format('D/M/y');
-        $this->endDate = $oEndDate->format('D/M/y');
+        $this->startDate = $oStartDate->format('dd/M/y');
+        $this->endDate = $oEndDate->format('dd/M/y');
         $this->typePay = $typePay;
         $this->lData = $lData;
 
@@ -38,16 +38,16 @@ class JourneyReportNotification extends Mailable implements ShouldQueue
         $this->sPeriod = "";
         // Configurar periodo para cuando las fechas sean del mismo mes
         if ($oStartDate->month == $oEndDate->month) {
-            $this->sPeriod = $oStartDate->isoFormat('D') . " al "
-                            . $oEndDate->isoFormat('D') . " "
+            $this->sPeriod = $oStartDate->format('dd') . " al "
+                            . $oEndDate->format('dd') . " "
                             . $oStartDate->shortMonthName . ". "
                             . $oStartDate->year;
             $this->sSubject .= $this->sPeriod;
         }
         else {
-            $this->sPeriod = $oStartDate->isoFormat('D') . " " . $oStartDate->shortMonthName . ". "
+            $this->sPeriod = $oStartDate->format('dd') . " " . $oStartDate->shortMonthName . ". "
                         . $oStartDate->year. " al "
-                        . $oEndDate->isoFormat('D') . " " . $oEndDate->shortMonthName . ". "
+                        . $oEndDate->format('dd') . " " . $oEndDate->shortMonthName . ". "
                         . $oEndDate->year;
                         
             $this->sSubject .= $this->sPeriod;

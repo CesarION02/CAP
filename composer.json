@@ -16,7 +16,7 @@
         "laravel/passport": "^7.5",
         "laravel/tinker": "^1.0",
         "mpdf/mpdf": "^8.0",
-        "nesbot/carbon": "^1.39"
+        "nesbot/carbon": "^2.64.0"
     },
     "require-dev": {
         "beyondcode/laravel-dump-server": "^1.0",
