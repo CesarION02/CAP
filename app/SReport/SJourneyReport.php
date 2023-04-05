@@ -193,6 +193,7 @@ class SJourneyReport
             return "";
         }
         catch (\Throwable $th) {
+            \Log::error($th);
             return $th->getMessage();    
         }
     }
