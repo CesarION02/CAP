@@ -38,16 +38,16 @@ class JourneyReportNotification extends Mailable implements ShouldQueue
         $this->sPeriod = "";
         // Configurar periodo para cuando las fechas sean del mismo mes
         if ($oStartDate->month == $oEndDate->month) {
-            $this->sPeriod = $oStartDate->format('dd') . " al "
-                            . $oEndDate->format('dd') . " "
+            $this->sPeriod = $oStartDate->format('d') . " al "
+                            . $oEndDate->format('d') . " "
                             . $oStartDate->shortMonthName . ". "
                             . $oStartDate->year;
             $this->sSubject .= $this->sPeriod;
         }
         else {
-            $this->sPeriod = $oStartDate->format('dd') . " " . $oStartDate->shortMonthName . ". "
+            $this->sPeriod = $oStartDate->format('d') . " " . $oStartDate->shortMonthName . ". "
                         . $oStartDate->year. " al "
-                        . $oEndDate->format('dd') . " " . $oEndDate->shortMonthName . ". "
+                        . $oEndDate->format('d') . " " . $oEndDate->shortMonthName . ". "
                         . $oEndDate->year;
                         
             $this->sSubject .= $this->sPeriod;
