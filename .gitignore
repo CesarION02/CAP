@@ -15,3 +15,4 @@ composer.lock
 cap_config.json
 .vscode/launch.json
 .tmp.driveupload/
+tasks/report_journey_cfg.json

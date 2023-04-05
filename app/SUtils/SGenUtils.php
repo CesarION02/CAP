@@ -15,7 +15,7 @@ class SGenUtils {
         $employees = \DB::table('employees AS e')
                             ->leftJoin('jobs AS j', 'j.id', '=', 'e.job_id')
                             ->leftJoin('departments AS d', 'd.id', '=', 'j.department_id')
-                            ->select('e.id', 'd.id AS dept_id', 'e.num_employee', 'e.way_pay_id',
+                            ->select('e.id', 'd.id AS dept_id', 'e.num_employee', 'e.way_pay_id', 'd.name AS dept_name',
                                         // 'e.name', 'e.is_overtime', 'e.ben_pol_id', 'external_id')
                                         'e.name', 'e.policy_extratime_id', 'e.ben_pol_id', 'e.external_id', 'd.area_id AS employee_area_id')
                             ->where('e.is_delete', false)
@@ -61,6 +61,76 @@ class SGenUtils {
             
             default:
                 break;
+        }
+
+        $employees = $employees->orderBy('e.name', 'ASC')->get();
+
+        return $employees;
+    }
+
+    /**
+     * Summary of getEmployeesByCfg
+     * 
+     * @param int $iPayType
+     * @param array $aCompanies
+     * @param array $aAreas
+     * @param array $aDeptosCap
+     * @param array $aDeptosSiie
+     * @param array $aEmployees
+     * @param array $aBenPolicy
+     * 
+     * @return \Illuminate\Support\Collection
+     */
+    public static function getEmployeesByCfg($iPayType, $aCompanies, $aAreas, $aDeptosCap, $aDeptosSiie, $aEmployees, $aBenPolicy)
+    {
+        
+        $employees = \DB::table('employees AS e')
+                            ->leftJoin('jobs AS j', 'j.id', '=', 'e.job_id')
+                            ->leftJoin('departments AS d', 'd.id', '=', 'j.department_id')
+                            ->select('e.id', 'd.id AS dept_id', 'e.num_employee', 'e.way_pay_id', 'd.name AS dept_name',
+                                        // 'e.name', 'e.is_overtime', 'e.ben_pol_id', 'external_id')
+                                        'e.name', 'e.policy_extratime_id', 'e.ben_pol_id', 'e.external_id', 'd.area_id AS employee_area_id')
+                            ->where('e.is_delete', false)
+                            // ->where('e.id', 67)
+                            ->where('e.is_active', true);
+                            
+        if (count($aEmployees) > 0) {
+            $employees = $employees->whereIn('e.id', $aEmployees);
+        }
+                            
+        switch ($iPayType) {
+            case \SCons::PAY_W_Q:
+                $employees = $employees->where('e.way_pay_id', \SCons::PAY_W_Q);
+                break;
+            case \SCons::PAY_W_S:
+                $employees = $employees->where('e.way_pay_id', \SCons::PAY_W_S);
+                break;
+            
+            default:
+                # code...
+                break;
+        }
+
+        if (count($aCompanies) > 0) {
+            $employees = $employees->whereIn('e.company_id', $aCompanies);
+        }
+
+        if (count($aAreas) > 0) {
+            $employees = $employees->leftJoin('areas AS a', 'd.area_id', '=', 'a.id')
+                                    ->where('a.is_delete', false)
+                                    ->whereIn('a.id', $aAreas);
+        }
+
+        if (count($aDeptosCap) > 0) {
+            $employees = $employees->whereIn('e.department_id', $aDeptosCap);
+        }
+
+        if (count($aDeptosSiie) > 0) {
+            $employees = $employees->whereIn('e.dept_rh_id', $aDeptosSiie);
+        }
+
+        if (count($aBenPolicy) > 0) {
+            $employees = $employees->whereIn('e.ben_pol_id', $aBenPolicy);
         }
 
         $employees = $employees->orderBy('e.name', 'ASC')->get();
