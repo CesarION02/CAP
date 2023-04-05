@@ -169,7 +169,7 @@ class TestController extends Controller
 
                         if (! $isScheduled) {
                             $oTask = new ProgrammedTask();
-                            $oTask->execute_on = Carbon::parse($oS->dt_cut)->addDay()->toDateString();
+                            $oTask->execute_on = Carbon::parse($oS->fin)->addDay()->toDateString();
                             $oTask->apply_time = false;
                             $oTask->cfg = json_encode($oReport->configuration, JSON_PRETTY_PRINT);
                             $oTask->reference_id = 'S_'.$oS->id;
