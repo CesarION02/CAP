@@ -2558,7 +2558,7 @@ class ReporteController extends Controller
 
             // Incidencias permitidas en CAP
             $lTypeCapIncidents = \DB::table('type_incidents')
-                                        ->whereIn('id', [12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24])
+                                        ->whereIn('id', [12, 14, 15, 16, 17, 18, 19, 20, 22, 23, 24, 25])
                                         ->orderBy('name', 'ASC')
                                         ->get();
             
