@@ -41,7 +41,7 @@
                                 <input type="hidden" name="oldIncident" :value="oldIncident">
                             </div>
                         </div>
-                        <br>
+                        {{-- <br>
                         <div class="row">
                             <div class="col-md-3">
                                 <label for="incidentComments">Comentarios:</label>
@@ -49,7 +49,8 @@
                             <div class="col-md-9">
                                 <input type="text" name="comments" v-model="oEvent.nts" class="form-control" maxlength="254" :disabled="isDisabled">
                             </div>
-                        </div>
+                        </div> --}}
+                        <input type="hidden" name="comments" value="">
                     </div>
                     <div class="modal-footer">
                         <div class="row">
