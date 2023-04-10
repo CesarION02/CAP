@@ -2596,7 +2596,7 @@ class ReporteController extends Controller
             try {
                 DB::transaction(function () use ($request, $incidentController, $incident) {
                     $incident->updated_by = session()->get('user_id');
-                    $incident->nts = $request->comments;
+                    // $incident->nts = $request->comments;
                     $incident->type_incidents_id = $request->typeIncident;
 
                     if ($incident->id > 0) {
