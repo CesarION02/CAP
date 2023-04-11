@@ -248,7 +248,7 @@ class biostarController extends Controller
                   "column": "event_type_id.code",
                   "operator": 2,
                   "values": [
-                    "4865","4867","4097","542391960"
+                    "4865","4867","4097"
                   ]
                 },
                 {
@@ -288,12 +288,18 @@ class biostarController extends Controller
         $data = biostarController::getEvents();
         // $jsonString = file_get_contents(base_path('response_from_biostar.json'));
         // $data = json_decode($jsonString);
-        
         $lEvents = [];
         if($data->EventCollection->rows == ""){return 1;}
         foreach ($data->EventCollection->rows as $row) {
-            $fecha = Carbon::parse($row->datetime);
-            $fecha->setTimezone('America/Mexico_City');
+            $fecha = Carbon::parse($row->datetime, 'UTC');
+            if($row->timezone->negative == 1){
+                $timezone = '-'.$row->timezone->hour;
+            }else{
+                $timezone = $row->timezone->hour;   
+            }
+            
+            //$fecha->setTimezone('America/New_York');
+            $fecha->tz = new \DateTimeZone($timezone);
 
             $checada = (object) [
                 'user_id' => $row->user_id->user_id,
@@ -301,6 +307,7 @@ class biostarController extends Controller
                 'date' => Carbon::parse($fecha)->toDateString(),
                 'time' => Carbon::parse($fecha)->toTimeString(),
                 'tna_key' => $row->tna_key,
+                'tz_hour' => $timezone,
                 'biostar_id'=> $row->id
             ];
 
@@ -329,6 +336,7 @@ class biostarController extends Controller
                 $register->time_original = $lEvents[$i]->time;
                 $register->type_original = $lEvents[$i]->tna_key;
                 $register->form_creation_id = 4;
+                $register->tz_hours = $lEvents[$i]->tz_hour;
                 $register->biostar_id = $lEvents[$i]->biostar_id;
                 $register->save();  
 
