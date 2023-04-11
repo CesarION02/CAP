@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\STasks\SReportTasks;
 use Illuminate\Http\Request;
 use DB;
 
@@ -13,23 +14,18 @@ class inicioController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index()
-    {   
-
+    {
         \App\Http\Controllers\SyncController::toSyncronize();
+        SReportTasks::scheduleTasks();
         $rol = session()->get('rol_id');
         $datas = DB::table('home_menus_rol')
-                        ->join('menu','menu.id','=','home_menus_rol.menu_id')
-                        ->where('home_menus_rol.rol_id',$rol)
-                        ->select('menu.name AS nombreMenu', 'menu.url AS url', 'home_menus_rol.icono AS icono')
-                        ->orderBy('home_menus_rol.order')
-                        ->get();
-        
-            return view('inicio')->with('datas',$datas);
-        
-            
-        
-        
-        
+            ->join('menu', 'menu.id', '=', 'home_menus_rol.menu_id')
+            ->where('home_menus_rol.rol_id', $rol)
+            ->select('menu.name AS nombreMenu', 'menu.url AS url', 'home_menus_rol.icono AS icono')
+            ->orderBy('home_menus_rol.order')
+            ->get();
+
+        return view('inicio')->with('datas', $datas);
     }
 
     /**
