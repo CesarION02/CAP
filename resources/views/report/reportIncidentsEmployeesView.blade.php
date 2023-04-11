@@ -28,7 +28,7 @@
                     <div class="modal-body">
                         @csrf
                         <div class="row">
-                            <div class="col-md-3"><label for="typeIncident">Incidente:</label></div>
+                            <div class="col-md-3"><label for="typeIncident">Tipo incidecia*:</label></div>
                             <div class="col-md-9">
                                 <select id="typeIncident" name="typeIncident" v-model="oEvent.type_id" class="form-control" :disabled="isDisabled"
                                     required>

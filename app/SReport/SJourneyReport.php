@@ -167,6 +167,11 @@ class SJourneyReport
                 $sPayTypeText = "Semana";
             }
 
+            $aColumns = null;
+            if (isset($oConfiguration->order_columns)) {
+                $aColumns = $oConfiguration->order_columns;
+            }
+
             $lData = SJourneyReport::getJourneyData($sStartDate, $sEndDate, $oConfiguration->pay_type, 
                                                     $oConfiguration->companies, 
                                                     $oConfiguration->areas, 
@@ -174,6 +179,13 @@ class SJourneyReport
                                                     $oConfiguration->departments_siie, 
                                                     $oConfiguration->employees, 
                                                     $oConfiguration->benefit_policies);
+
+            // return view('mails.journeyreport')->with('sStartDate', $sStartDate)
+            //                                 ->with('sEndDate', $sEndDate)
+            //                                 ->with('sPayTypeText', $sPayTypeText)
+            //                                 ->with('sPeriod', $sPeriod)
+            //                                 ->with('aColumns', $aColumns)
+            //                                 ->with('lData', $lData);
             
             $tos = explode(";", $oConfiguration->mails->to);
             $oMail = Mail::to($tos);
@@ -188,7 +200,7 @@ class SJourneyReport
                 $oMail->bcc($cco);
             }
 
-            $oMail->send(new JourneyReportNotification($sStartDate, $sEndDate, $sPayTypeText, $lData));
+            $oMail->send(new JourneyReportNotification($sStartDate, $sEndDate, $sPayTypeText, $lData, $aColumns));
 
             return "";
         }

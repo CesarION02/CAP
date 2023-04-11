@@ -126,8 +126,6 @@ Route::get('report/reporteIncidenciasGenerar', 'ReporteController@incidentReport
 /* Reporte incidencias empleados ADRIAN*/
 Route::get('report/reporteIncidenciasEmpleados/{wizard}/{delagation?}', 'ReporteController@reportIncidentsEmployees')->name('reporteIncidenciasEmpleados');
 Route::get('report/reporteIncidenciasEmpleadosGenerar', 'ReporteController@reportIncidentsEmployeesGenerar')->name('reporteIncidenciasEmpleadosGenerar');
-Route::post('report/reporteIncidenciasEmpleadosStore', 'ReporteController@reportIncidentsEmployeesStore')->name('reporteIncidenciasEmpleadosStore');
-Route::post('report/reporteIncidenciasEmpleadosDelete', 'ReporteController@reportIncidentsEmployeesDelete')->name('reporteIncidenciasEmpleadosDelete');
 /* Botones wizard prenómina */
 Route::get('report/botonSiguiente/{pagina}', 'ReporteController@wizardSiguiente')->name('boton_siguiente');
 Route::get('report/botonAtras/{pagina}', 'ReporteController@wizardAtras')->name('boton_atras');
@@ -404,6 +402,8 @@ Route::post('incidents', 'incidentController@store')->name('guardar_incidente');
 Route::get('incidents/{id}/{is_medical}/edit', 'incidentController@edit')->name('editar_incidente');
 Route::put('incidents/{id}', 'incidentController@update')->name('actualizar_incidente');
 Route::delete('incidents/{id}', 'incidentController@destroy')->name('eliminar_incidente');
+Route::post('report/reporteIncidenciasEmpleadosStore', 'incidentController@reportIncidentsEmployeesStore')->name('reporteIncidenciasEmpleadosStore');
+Route::post('report/reporteIncidenciasEmpleadosDelete', 'incidentController@reportIncidentsEmployeesDelete')->name('reporteIncidenciasEmpleadosDelete');
 
 /* DIAS OTORGADOS */
 Route::get('daygranted', 'daygrantedController@index')->name('diaotorgado');
@@ -499,9 +499,7 @@ Route::delete('uservsdevice/{id}', 'userVsDevicesController@destroy')->name('eli
 Route::get('reportaccessdata', 'ReporteController@AccesoPuertasDatos')->name('accesopuertasdatos');
 Route::get('accessdatatrigger', 'ReporteController@AccesoPuertasGenerar')->name('accesopuertasgenerar');
 
+Route::get('reportejornadas', 'TestController@report')->name('test_report');
+Route::get('reportejornadasschedule', 'TestController@scheduleTasks')->name('test_sche');
 
 });
-
-
-
-

@@ -4,7 +4,7 @@
         @if(isset($datas))
             <select id="type_incidents_id" name="type_incidents_id" disabled class="form-control" onchange="tipo_incidencia(this)">
                     <option value="0">Elige una opción</option>
-                @foreach($incidents as $type => $index)
+                @foreach($lIncidentTypes as $type => $index)
                     @if ($datas[0]->tipo == $index)
                         <option value="{{ $index }}" selected> {{$type}}</option>
                     @else
@@ -16,7 +16,7 @@
         @else
             <select id="type_incidents_id" name="type_incidents_id" class="form-control" onchange="tipo_incidencia(this)">
                 <option value="0">Elige una opción</option>
-                @foreach($incidents as $type => $index)
+                @foreach($lIncidentTypes as $type => $index)
                     <option value="{{ $index }}" {{old('type_incidents_id') == $index ? 'selected' : '' }}> {{$type}}</option>
                 @endforeach
             </select>
@@ -79,13 +79,13 @@
         @if(isset($datas))
             @if($activar == 1)
                 <select class="form-control select2-class" id="comentFrec" style="width: 80%;" title="Lista de comentarios frecuentes.">
-                    @foreach ($lComments as $comment)
+                    @foreach ($lFrecuentComments as $comment)
                         <option ="comment in lComments">{{$comment->comment}}</option>   
                     @endforeach  
                 </select>
             @else
                 <select disabled class="form-control select2-class" id="comentFrec" style="width: 80%;" title="Lista de comentarios frecuentes.">
-                    @foreach ($lComments as $comment)
+                    @foreach ($lFrecuentComments as $comment)
                         <option ="comment in lComments">{{$comment->comment}}</option>   
                     @endforeach  
                 </select>
@@ -93,7 +93,7 @@
         
         @else
             <select disabled class="form-control select2-class" id="comentFrec" style="width: 80%;" title="Lista de comentarios frecuentes.">
-                @foreach ($lComments as $comment)
+                @foreach ($lFrecuentComments as $comment)
                     <option ="comment in lComments">{{$comment->comment}}</option>   
                 @endforeach  
             </select>
@@ -122,7 +122,6 @@
         @endif
     </div>
 </div>
-<input type="hidden" value="{{$incident_comment}}" id="atipos">
 <input type="hidden" id="sincomentarios" name="sincomentarios" value="0">
 @if(isset($is_medical))
     <input type="hidden" id="is_medical" name="is_medical" value="{{$is_medical}}">

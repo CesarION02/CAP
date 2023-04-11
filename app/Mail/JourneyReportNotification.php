@@ -18,13 +18,14 @@ class JourneyReportNotification extends Mailable implements ShouldQueue
     private $lData;
     private $sSubject;
     private $sPeriod;
+    private $aColumns;
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($startDate, $endDate, $typePay, $lData)
+    public function __construct($startDate, $endDate, $typePay, $lData, $aColumns)
     {
         $oStartDate = Carbon::parse($startDate)->locale('es');
         $oEndDate = Carbon::parse($endDate)->locale('es');
@@ -33,6 +34,7 @@ class JourneyReportNotification extends Mailable implements ShouldQueue
         $this->endDate = $oEndDate->format('dd/M/y');
         $this->typePay = $typePay;
         $this->lData = $lData;
+        $this->aColumns = $aColumns;
 
         $this->sSubject = "[CAP] Reporte E/S ";
         $this->sPeriod = "";
@@ -68,6 +70,7 @@ class JourneyReportNotification extends Mailable implements ShouldQueue
                         ->with('startDate', $this->startDate)
                         ->with('endDate', $this->endDate)
                         ->with('typePay', $this->typePay)
+                        ->with('aColumns', $this->aColumns)
                         ->with('lData', $this->lData);
     }
 }
