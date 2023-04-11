@@ -27,71 +27,171 @@
 
                     <table>
                         <thead>
-                            <tr>
-                                <th>Fecha E.</th>
-                                <th>Entrada</th>
-                                <th>Fecha S.</th>
-                                <th>Salida</th>
-                                <th>T. trabajado</th>
-                                <th>T. retardo</th>
-                            </tr>
+                            @if (is_null($aColumns))
+                                <tr>
+                                    <th>Fecha E.</th>
+                                    <th>Entrada</th>
+                                    <th>Fecha S.</th>
+                                    <th>Salida</th>
+                                    <th>T. trabajado</th>
+                                    <th>T. retardo</th>
+                                </tr>
+                            @else
+                                <tr>
+                                    @foreach ($aColumns as $columElem)
+                                        @switch($columElem)
+                                            @case("date_in")
+                                                <th>Fecha E.</th>
+                                                @break
+                                            @case("time_in")
+                                                <th>Entrada</th>
+                                                @break
+                                            @case("date_out")
+                                                <th>Fecha S.</th>
+                                                @break
+                                            @case("time_out")
+                                                <th>Salida</th>
+                                                @break
+                                            @case("worked")
+                                                <th>T. trabajado</th>
+                                                @break
+                                            @case("delay")
+                                                <th>T. retardo</th>
+                                                @break
+                                            @default
+                                                @break
+                                        @endswitch
+                                    @endforeach
+                                </tr>
+                            @endif
                         </thead>
                         <tbody>
                             @foreach ($oEmp->lRows as $oRow)
-                            <tr>
-                                <td style="padding-left: 8px; padding-right: 8px; 
-                                    @if ($i % 2 == 0)
-                                        background-color: rgb(217, 217, 217)
-                                    @endif
-                                ">
-                                    {{ \Carbon\Carbon::parse($oRow->inDateTime)->format('d-m-Y') }}
-                                </td>
-                                <td style="padding-left: 8px; padding-right: 8px; 
-                                    @if ($i % 2 == 0)
-                                        background-color: rgb(217, 217, 217)
-                                    @endif
-                                ">
-                                    {{ strlen($oRow->inDateTime) > 11 ? (\Carbon\Carbon::parse($oRow->inDateTime)->format('H:i:s')) : "--" }}
-                                </td>
-                                <td style="padding-left: 8px; padding-right: 8px; 
-                                    @if ($i % 2 == 0)
-                                        background-color: rgb(217, 217, 217)
-                                    @endif
-                                ">
-                                    {{ \Carbon\Carbon::parse($oRow->outDateTime)->format('d-m-Y') }}
-                                </td>
-                                <td style="padding-left: 8px; padding-right: 8px; 
-                                    @if ($i % 2 == 0)
-                                        background-color: rgb(217, 217, 217)
-                                    @endif
-                                ">
-                                    {{ strlen($oRow->outDateTime) > 11 ? \Carbon\Carbon::parse($oRow->outDateTime)->format('H:i:s') : "--" }}
-                                </td>
-                                <td style="text-align: right; padding-left: 8px; padding-right: 8px; 
-                                    @if ($i % 2 == 0)
-                                        background-color: rgb(217, 217, 217)
-                                    @endif
-                                ">
-                                    {{ \App\SUtils\SDelayReportUtils::convertToHoursMins($oRow->workedTime) }}
-                                </td>
-                                <td style="text-align: right; padding-left: 8px; padding-right: 8px; 
-                                    @if ($i % 2 == 0)
-                                        background-color: rgb(217, 217, 217)
-                                    @endif
-                                ">
-                                    {{ \App\SUtils\SDelayReportUtils::convertToHoursMins($oRow->entryDelayMinutes) }}
-                                </td>
-                            </tr>
-                            <?php
-                                $i++;
-                            ?>
+                            @if (is_null($aColumns))
+                                <tr>
+                                    <td style="padding-left: 8px; padding-right: 8px; 
+                                        @if ($i % 2 == 0)
+                                            background-color: rgb(217, 217, 217)
+                                        @endif
+                                    ">
+                                        {{ \Carbon\Carbon::parse($oRow->inDateTime)->format('d-m-Y') }}
+                                    </td>
+                                    <td style="padding-left: 8px; padding-right: 8px; 
+                                        @if ($i % 2 == 0)
+                                            background-color: rgb(217, 217, 217)
+                                        @endif
+                                    ">
+                                        {{ strlen($oRow->inDateTime) > 11 ? (\Carbon\Carbon::parse($oRow->inDateTime)->format('H:i:s')) : "--" }}
+                                    </td>
+                                    <td style="padding-left: 8px; padding-right: 8px; 
+                                        @if ($i % 2 == 0)
+                                            background-color: rgb(217, 217, 217)
+                                        @endif
+                                    ">
+                                        {{ \Carbon\Carbon::parse($oRow->outDateTime)->format('d-m-Y') }}
+                                    </td>
+                                    <td style="padding-left: 8px; padding-right: 8px; 
+                                        @if ($i % 2 == 0)
+                                            background-color: rgb(217, 217, 217)
+                                        @endif
+                                    ">
+                                        {{ strlen($oRow->outDateTime) > 11 ? \Carbon\Carbon::parse($oRow->outDateTime)->format('H:i:s') : "--" }}
+                                    </td>
+                                    <td style="text-align: right; padding-left: 8px; padding-right: 8px; 
+                                        @if ($i % 2 == 0)
+                                            background-color: rgb(217, 217, 217)
+                                        @endif
+                                    ">
+                                        {{ \App\SUtils\SDelayReportUtils::convertToHoursMins($oRow->workedTime) }}
+                                    </td>
+                                    <td style="text-align: right; padding-left: 8px; padding-right: 8px; 
+                                        @if ($i % 2 == 0)
+                                            background-color: rgb(217, 217, 217)
+                                        @endif
+                                    ">
+                                        {{ \App\SUtils\SDelayReportUtils::convertToHoursMins($oRow->entryDelayMinutes) }}
+                                    </td>
+                                </tr>
+                            @else
+                                <tr>
+                                @foreach ($aColumns as $columElem)
+                                    @switch($columElem)
+                                        @case("date_in")
+                                            <td style="padding-left: 8px; padding-right: 8px; 
+                                                @if ($i % 2 == 0)
+                                                    background-color: rgb(217, 217, 217)
+                                                @endif
+                                            ">
+                                                {{ \Carbon\Carbon::parse($oRow->inDateTime)->format('d-m-Y') }}
+                                            </td>
+                                            @break
+                                        @case("time_in")
+                                            <td style="padding-left: 8px; padding-right: 8px; 
+                                                @if ($i % 2 == 0)
+                                                    background-color: rgb(217, 217, 217)
+                                                @endif
+                                            ">
+                                                {{ strlen($oRow->inDateTime) > 11 ? (\Carbon\Carbon::parse($oRow->inDateTime)->format('H:i:s')) : "--" }}
+                                            </td>
+                                            @break
+                                        @case("date_out")
+                                            <td style="padding-left: 8px; padding-right: 8px; 
+                                                @if ($i % 2 == 0)
+                                                    background-color: rgb(217, 217, 217)
+                                                @endif
+                                            ">
+                                                {{ \Carbon\Carbon::parse($oRow->outDateTime)->format('d-m-Y') }}
+                                            </td>
+                                            @break
+                                        @case("time_out")
+                                            <td style="padding-left: 8px; padding-right: 8px; 
+                                                @if ($i % 2 == 0)
+                                                    background-color: rgb(217, 217, 217)
+                                                @endif
+                                            ">
+                                                {{ strlen($oRow->outDateTime) > 11 ? \Carbon\Carbon::parse($oRow->outDateTime)->format('H:i:s') : "--" }}
+                                            </td>
+                                            @break
+                                        @case("worked")
+                                            <td style="text-align: right; padding-left: 8px; padding-right: 8px; 
+                                                @if ($i % 2 == 0)
+                                                    background-color: rgb(217, 217, 217)
+                                                @endif
+                                            ">
+                                                {{ \App\SUtils\SDelayReportUtils::convertToHoursMins($oRow->workedTime) }}
+                                            </td>
+                                            @break
+                                        @case("delay")
+                                            <td style="text-align: right; padding-left: 8px; padding-right: 8px; 
+                                                @if ($i % 2 == 0)
+                                                    background-color: rgb(217, 217, 217)
+                                                @endif
+                                            ">
+                                                {{ \App\SUtils\SDelayReportUtils::convertToHoursMins($oRow->entryDelayMinutes) }}
+                                            </td>
+                                            @break
+                                        @default
+                                            @break
+                                    @endswitch
+                                @endforeach
+                                </tr>
+                            @endif
+                                <?php
+                                    $i++;
+                                ?>
                             @endforeach
-                            <tr>
-                                <td colspan="5"><b>{{ ($oEmp->numEmployee." - ".$oEmp->employee) }}</b></td>
-                                <td style="text-align: right; padding-left: 8px; padding-right: 8px; "">
-                                    <b>{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($oEmp->totalDelay) }}</b>
-                                </td>
-                            </tr>
+                            @if (is_null($aColumns))
+                                <tr>
+                                    <td colspan="5"><b>{{ ($oEmp->numEmployee." - ".$oEmp->employee) }}</b></td>
+                                    <td style="text-align: right; padding-left: 8px; padding-right: 8px; "">
+                                        <b>{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($oEmp->totalDelay) }}</b>
+                                    </td>
+                                </tr>
+                            @else
+                                <tr style="background-color: #acbbc9">
+                                    <td colspan="6"><b>{{ ($oEmp->numEmployee." - ".$oEmp->employee) . " / Total retardo: " . \App\SUtils\SDelayReportUtils::convertToHoursMins($oEmp->totalDelay) }}</b></td>
+                                </tr>
+                            @endif
                             <?php
                                 $i++;
                             ?>

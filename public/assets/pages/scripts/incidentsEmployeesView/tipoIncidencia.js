@@ -12,7 +12,8 @@ function tipo_incidencia(opcion) {
     }
     if (opcion.value == 17) {
         document.getElementById("holiday_id").disabled = false;
-    } else {
+    }
+    else {
         document.getElementById("holiday_id").disabled = true;
     }
 
@@ -21,7 +22,8 @@ function tipo_incidencia(opcion) {
         document.getElementById("comentarios").disabled = false;
         document.getElementById("comentarios").required = true;
         document.getElementById("sincomentarios").value = 1;
-    } else {
+    }
+    else {
         document.getElementById("comentFrec").disabled = true;
         document.getElementById("comentarios").disabled = true;
         document.getElementById("comentarios").required = false;
@@ -33,11 +35,11 @@ function tipo_incidencia(opcion) {
         document.getElementById("comentarios").disabled = false;
         document.getElementById("comentarios").required = true;
         document.getElementById("sincomentarios").value = 1;
-    } else {
+    }
+    else {
         document.getElementById("comentFrec").disabled = true;
         document.getElementById("comentarios").disabled = true;
         document.getElementById("comentarios").required = false;
         document.getElementById("sincomentarios").value = 0;
     }
-
 }

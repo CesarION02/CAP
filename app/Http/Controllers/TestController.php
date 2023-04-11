@@ -17,6 +17,8 @@ class TestController extends Controller
         $lPendingTasks = ProgrammedTask::where('is_done', false)
                                 ->where('is_delete', 0)
                                 ->where('execute_on', '<=', $oCurrentDateTime->toDateString())
+                                ->orderBy('execute_on', 'ASC')
+                                ->orderBy('execute_at', 'ASC')
                                 ->get();
 
         foreach ($lPendingTasks as $oTask) {
@@ -43,10 +45,11 @@ class TestController extends Controller
 
             switch ($oTask->task_type_id) {
                 case \SCons::TASK_TYPE_REPORT_JOURNEY:
-                    $response = SJourneyReport::manageTaskReport($oTask->cfg, $oTask->execute_on);
+                    $response = SJourneyReport::manageTaskReport($oTask->cfg, $oTask->reference_id);
                     break;
-                
+
                 default:
+                    $response = "Tipo de tarea desconocido.";
                     break;
             }
 

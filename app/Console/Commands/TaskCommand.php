@@ -45,6 +45,8 @@ class TaskCommand extends Command
         $lPendingTasks = ProgrammedTask::where('is_done', false)
                                 ->where('is_delete', 0)
                                 ->where('execute_on', '<=', $oCurrentDateTime->toDateString())
+                                ->orderBy('execute_on', 'ASC')
+                                ->orderBy('execute_at', 'ASC')
                                 ->get();
 
         foreach ($lPendingTasks as $oTask) {

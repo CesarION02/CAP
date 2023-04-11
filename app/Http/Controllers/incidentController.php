@@ -121,81 +121,84 @@ class incidentController extends Controller
     /**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Response|\Illuminate\View\View
      */
     public function create($incidentType = 0)
     {
-        $incidents = typeincident::orderBy('name','ASC');
-        $is_medical = 0;
-        if(session()->get('rol_id') == 16){
-            $incidents = $incidents->where('id',22); 
-        }else{
-            if ($incidentType > 0) {
-                $incidents = $incidents->where('is_agreement', 1);
-            }
-        }
-
-        $incidents = $incidents->pluck('id','name');
-
-        if (session()->get('rol_id') != 1){
-                if(session()->get('rol_id') != 16){
-                    $numero = session()->get('name');
-                    $usuario = DB::table('users')
-                            ->where('name',$numero)
-                            ->get();
-                    $dgu = DB::table('group_dept_user')
-                            ->where('user_id',$usuario[0]->id)
-                            ->select('groupdept_id AS id')
-                            ->get();
-                    $Adgu = [];
-                    for($i=0;count($dgu)>$i;$i++){
-                        $Adgu[$i]=$dgu[$i]->id;
-                    }
-                    
-                    $employees = DB::table('employees')
-                                        ->join('departments','departments.id','=','employees.department_id')
-                                        ->whereIn('departments.dept_group_id',$Adgu)
-                                        ->where('is_active', true)
-                                        ->orderBy('name','ASC')
-                                        ->select('employees.name AS name','employees.id AS num', 'employees.num_employee')
-                                        ->get();    
-                }else{
-                    $employees = DB::table('employees')
-                                ->join('departments','departments.id','=','employees.department_id')
-                                ->where('is_active', true)
-                                ->orderBy('name','ASC')
-                                ->select('employees.name AS name','employees.id AS num', 'employees.num_employee')
-                                ->get();          
+        if (session()->get('rol_id') != 1) {
+            if (session()->get('rol_id') != 16) {
+                $numero = session()->get('name');
+                $usuario = DB::table('users')
+                    ->where('name', $numero)
+                    ->get();
+                $dgu = DB::table('group_dept_user')
+                    ->where('user_id', $usuario[0]->id)
+                    ->select('groupdept_id AS id')
+                    ->get();
+                $Adgu = [];
+                for ($i = 0; count($dgu) > $i; $i++) {
+                    $Adgu[$i] = $dgu[$i]->id;
                 }
-        }else{
-            $employees = DB::table('employees')
-                                ->join('departments','departments.id','=','employees.department_id')
-                                ->where('is_active', true)
-                                ->orderBy('name','ASC')
-                                ->select('employees.name AS name','employees.id AS num', 'employees.num_employee')
-                                ->get();    
-        }
-        $lComments = \DB::table('comments')->where('is_delete', 0)->get();
 
-        $incident_comment = \DB::table('comments_control')->where('value',1)->select('key_code')->get();
-        $cadenaComparacion = "";
-        for( $i = 0 ; count($incident_comment) > $i ; $i++ ){
-            if($cadenaComparacion == ''){
-                $cadenaComparacion = $incident_comment[$i]->key_code;
-            }else{
-                $cadenaComparacion = $cadenaComparacion.','.$incident_comment[$i]->key_code;
+                $employees = DB::table('employees')
+                    ->join('departments', 'departments.id', '=', 'employees.department_id')
+                    ->whereIn('departments.dept_group_id', $Adgu)
+                    ->where('is_active', true)
+                    ->orderBy('name', 'ASC')
+                    ->select('employees.name AS name', 'employees.id AS num', 'employees.num_employee')
+                    ->get();
+            }
+            else {
+                $employees = DB::table('employees')
+                    ->join('departments', 'departments.id', '=', 'employees.department_id')
+                    ->where('is_active', true)
+                    ->orderBy('name', 'ASC')
+                    ->select('employees.name AS name', 'employees.id AS num', 'employees.num_employee')
+                    ->get();
+            }
+        }
+        else {
+            $employees = DB::table('employees')
+                ->join('departments', 'departments.id', '=', 'employees.department_id')
+                ->where('is_active', true)
+                ->orderBy('name', 'ASC')
+                ->select('employees.name AS name', 'employees.id AS num', 'employees.num_employee')
+                ->get();
+        }
+
+        $lCommControl = \DB::table('comments_control')->where('value', 1)
+                                                        ->select('id_commentControl AS id')
+                                                        ->pluck('id');
+        
+        // Obtiene los días festivos
+        $holidays = \DB::table('holidays')->where('is_delete', 0)
+                                        ->orderBy('fecha', 'DESC')
+                                        ->get();
+
+        // Obtiene los comentarios frecuentes
+        $lFrecuentComments = \DB::table('comments')->where('is_delete', 0)
+                                                    ->orderBy('comment', 'ASC')
+                                                    ->get();
+
+        $lIncidentTypes = typeincident::orderBy('name', 'ASC');
+        if (session()->get('rol_id') == 16) {
+            $lIncidentTypes = $lIncidentTypes->where('id', 22);
+        }
+        else {
+            if ($incidentType > 0) {
+                $lIncidentTypes = $lIncidentTypes->where('is_agreement', 1);
             }
         }
 
-        $holidays = \DB::table('holidays')->where('is_delete',0)->get();                                                                        
+        $lIncidentTypes = $lIncidentTypes->pluck('id', 'name');
 
         return view('incident.create')
                         ->with('incidentType', $incidentType)
-                        ->with('incidents', $incidents)
+                        ->with('lIncidentTypes', $lIncidentTypes)
                         ->with('employees', $employees)
-                        ->with('incident_comment',$cadenaComparacion)
+                        ->with('lCommControl', $lCommControl)
                         ->with('holidays', $holidays)
-                        ->with('lComments', $lComments);
+                        ->with('lFrecuentComments', $lFrecuentComments);
     }
 
     /**
@@ -734,5 +737,133 @@ class incidentController extends Controller
         
         return redirect()->route('incidentes', [14])->with('mensaje', 'Incidente creado con éxito');  
     }
+    /**
+     * 
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function reportIncidentsEmployeesStore(Request $request) {
+        $incident = null;
+        if (isset($request->id_incident) && $request->id_incident > 0) {
+            $incident = incident::find($request->id_incident);
+        }
+        
+        $incidentController = null;
+        if (is_null($incident)) {
+            $incident = new incident();
+        }
+        $incidentController = new incidentController();
 
+        try {
+            DB::transaction(function () use ($request, $incidentController, $incident) {
+                $incident->updated_by = session()->get('user_id');
+                $incident->nts = $request->comments;
+                $incident->type_incidents_id = $request->typeIncident;
+
+                if ($incident->id > 0) {
+                    $incident->update();
+                }
+                else {
+                    $incident->external_key = "0_0";
+                    $incident->cls_inc_id = 1;
+                    $incident->created_by = session()->get('user_id');
+                    $incident->start_date = $request->date;
+                    $incident->end_date = $request->date;
+                    $incident->employee_id = $request->employee_id;
+                    
+                    $incident->save();
+                }
+
+                $incidentController->saveDays($incident);
+
+                if (isset($request->comments) && ! is_null($request->comments) && strlen($request->comments) > 0) {
+                    $aAdjustIds = adjust_link::where('incident_id', $incident->id)
+                                        ->join('prepayroll_adjusts AS adjs', 'adjust_link.adjust_id', '=', 'adjs.id')
+                                        ->where('adjust_type_id', 7)
+                                        ->select('adjust_id')
+                                        ->get()
+                                        ->toArray();
+
+                    if (count($aAdjustIds) > 0) {
+                        $lAdjusts = prepayrollAdjust::whereIn('id', $aAdjustIds)
+                                        ->where('is_delete', 0)
+                                        ->get();
+
+                        foreach ($lAdjusts as $oAdjust) {
+                            $oAdjust->comments = $request->comments;
+                            $oAdjust->save();
+                        }
+                    }
+                    else {
+                        $adjust = new prepayrollAdjust();
+                        $adjust->employee_id = $request->employee_id;
+                        $adjust->dt_date = $request->date;
+                        $adjust->minutes = 0;
+                        $adjust->apply_to = 2;
+                        $adjust->comments = $request->comments;
+                        $adjust->is_delete = 0;
+                        $adjust->adjust_type_id = 7;
+                        $adjust->apply_time = 0;
+                        $adjust->created_by = session()->get('user_id');
+                        $adjust->updated_by = session()->get('user_id');
+                        $adjust->save();
+    
+                        $link = new adjust_link();
+                        $link->adjust_id = $adjust->id;
+                        $link->is_incident = 1;
+                        $link->incident_id = $incident->id;
+                        $link->save();
+                    }
+                }
+            });
+
+        }
+        catch (\Throwable $e) {
+            return redirect()->back()->with(['tittle' => 'Error', 'message' => 'Error al guardar el registro', 'icon' => 'error']);
+        }
+
+        return redirect()->back()->with(['tittle' => 'Realizado', 'message' => 'Registro guardado con exito', 'icon' => 'success']);
+    }
+
+    /**
+     * 
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function reportIncidentsEmployeesDelete(Request $request){
+        $incident = null;
+        if (isset($request->id_incident) && $request->id_incident > 0) {
+            $incident = incident::find($request->id_incident);
+        }
+
+        try {
+            DB::transaction(function () use ($request, $incident) {
+                if(! is_null($incident)) {
+                    $incident->is_delete = 1;
+                    $incident->update();
+                    
+                    $incidentController = new incidentController();
+                    $incidentController->saveDays($incident);
+
+                    $aAdjustIds = adjust_link::where('incident_id', $incident->id)
+                                        ->join('prepayroll_adjusts AS adjs', 'adjust_link.adjust_id', '=', 'adjs.id')
+                                        ->where('adjs.is_delete', 0)
+                                        ->select('adjust_id')
+                                        ->get()
+                                        ->toArray();
+
+                    if (count($aAdjustIds) > 0) {
+                        prepayrollAdjust::whereIn('id', $aAdjustIds)
+                                        ->update(['is_delete' => 1]);
+                    }
+                }
+            });
+        } catch (\Throwable $e) {
+            return redirect()->back()->with(['tittle' => 'Error', 'message' => 'Error al guardar el registro', 'icon' => 'error']);
+        }
+
+        return redirect()->back()->with(['tittle' => 'Realizado', 'message' => 'Registro guardado con exito', 'icon' => 'success']);
+    }
 }
