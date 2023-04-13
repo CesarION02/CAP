@@ -542,306 +542,312 @@ class ReporteController extends Controller
             $filter_employees = 0;
         }
 
-        $lCommentsppAdjsTypes = \DB::table('prepayroll_adjusts_types')
-                                    ->select('id')
-                                    ->get();
-        $lCommentsAdjsTypes = [];
-        foreach ($lCommentsppAdjsTypes as $adjType) {
-            $lCommentsAdjsTypes[$adjType->id] = \DB::table('prepayroll_adjusts_comments AS pac')
-                                            ->join('comments AS c', 'pac.comment_id', '=', 'c.id')
-                                            ->where('c.is_delete', 0)
-                                            ->where('pac.adjust_type_id', $adjType->id)
-                                            ->select('c.id', 'c.comment')
-                                            ->get();
-        }
-
-        $oStartDate = Carbon::parse($sStartDate);
-        $oEndDate = Carbon::parse($sEndDate);
-
-        if (! $oStartDate->lessThanOrEqualTo($oEndDate)) {
-            return \Redirect::back()->withErrors(['Error', 'La fecha de inicio debe ser previa a la fecha final']);
-        }
-
-        if($request->optradio == "employee"){
-            $oEmployee = \DB::table('employees')
-                            ->where('id', $iEmployee)
-                            ->first();
-
-            if (! is_null($oEmployee)) {
-                $request->pay_way = $oEmployee->way_pay_id;
+        try {
+            $lCommentsppAdjsTypes = \DB::table('prepayroll_adjusts_types')
+                                        ->select('id')
+                                        ->get();
+            $lCommentsAdjsTypes = [];
+            foreach ($lCommentsppAdjsTypes as $adjType) {
+                $lCommentsAdjsTypes[$adjType->id] = \DB::table('prepayroll_adjusts_comments AS pac')
+                                                ->join('comments AS c', 'pac.comment_id', '=', 'c.id')
+                                                ->where('c.is_delete', 0)
+                                                ->where('pac.adjust_type_id', $adjType->id)
+                                                ->select('c.id', 'c.comment')
+                                                ->get();
             }
-        }
-        
-        $numIni = sDateUtils::getNumberOfDate($sStartDate, $request->pay_way == null ? \SCons::PAY_W_S : $request->pay_way);
-        $numFin = sDateUtils::getNumberOfDate($sEndDate, $request->pay_way == null ? \SCons::PAY_W_S : $request->pay_way);
-        if (($numIni[1] != $numFin[1]) || $numIni[0] > $numFin[0]) {
-            return \Redirect::back()->withErrors(['Error', 'No se puede generar un reporte que abarca más de un año']);
-        }
 
-        if ($request->optradio == "employee") {
-            if ($iEmployee > 0) {
-                $lEmployees = SGenUtils::toEmployeeIds(0, 0, 0, [$iEmployee]);
-                $payWay = $lEmployees[0]->way_pay_id;
+            $oStartDate = Carbon::parse($sStartDate);
+            $oEndDate = Carbon::parse($sEndDate);
+
+            if (! $oStartDate->lessThanOrEqualTo($oEndDate)) {
+                return \Redirect::back()->withErrors(['Error', 'La fecha de inicio debe ser previa a la fecha final']);
+            }
+
+            if($request->optradio == "employee"){
+                $oEmployee = \DB::table('employees')
+                                ->where('id', $iEmployee)
+                                ->first();
+
+                if (! is_null($oEmployee)) {
+                    $request->pay_way = $oEmployee->way_pay_id;
+                }
+            }
+            
+            $numIni = sDateUtils::getNumberOfDate($sStartDate, $request->pay_way == null ? \SCons::PAY_W_S : $request->pay_way);
+            $numFin = sDateUtils::getNumberOfDate($sEndDate, $request->pay_way == null ? \SCons::PAY_W_S : $request->pay_way);
+            if (($numIni[1] != $numFin[1]) || $numIni[0] > $numFin[0]) {
+                return \Redirect::back()->withErrors(['Error', 'No se puede generar un reporte que abarca más de un año']);
+            }
+
+            if ($request->optradio == "employee") {
+                if ($iEmployee > 0) {
+                    $lEmployees = SGenUtils::toEmployeeIds(0, 0, 0, [$iEmployee]);
+                    $payWay = $lEmployees[0]->way_pay_id;
+                }
+                else {
+                    return \Redirect::back()->withErrors(['Error', 'Debe seleccionar empleado']);
+                }
             }
             else {
-                return \Redirect::back()->withErrors(['Error', 'Debe seleccionar empleado']);
+                /**
+                 * 1: quincena
+                 * 2: semana
+                 * 3: todos
+                 */
+                $payWay = $request->pay_way == null ? \SCons::PAY_W_S : $request->pay_way;
+
+                $filterType = $request->i_filter;
+                $ids = $request->elems;
+                $lEmployees = SGenUtils::toEmployeeIds($payWay, $filterType, $ids);
             }
-        }
-        else {
-            /**
-             * 1: quincena
-             * 2: semana
-             * 3: todos
-             */
-            $payWay = $request->pay_way == null ? \SCons::PAY_W_S : $request->pay_way;
 
-            $filterType = $request->i_filter;
-            $ids = $request->elems;
-            $lEmployees = SGenUtils::toEmployeeIds($payWay, $filterType, $ids);
-        }
+            if ($bDelegation) {
+                $oDelegation = PrepayrollDelegation::find($idDelegation);
+                if ($oDelegation == null) {
+                    $roles = \Auth::user()->roles;
+                    $config = \App\SUtils\SConfiguration::getConfigurations(); // Obtengo las configuraciones del sistema
 
-        if ($bDelegation) {
-            $oDelegation = PrepayrollDelegation::find($idDelegation);
-            if ($oDelegation == null) {
-                $roles = \Auth::user()->roles;
-                $config = \App\SUtils\SConfiguration::getConfigurations(); // Obtengo las configuraciones del sistema
+                    $seeAll = false;
+                    foreach ($roles as $rol) {
+                        if (in_array($rol->id, $config->rolesCanSeeAll)) {
+                            $seeAll = true;
+                            break;
+                        }
+                    }
 
-                $seeAll = false;
-                foreach ($roles as $rol) {
-                    if (in_array($rol->id, $config->rolesCanSeeAll)) {
-                        $seeAll = true;
-                        break;
+                    if (! $seeAll) {
+                        return \Redirect::back()->withErrors(['Error', 'No tiene delegación para el número de prenómina seleccionado']);
                     }
                 }
 
-                if (! $seeAll) {
-                    return \Redirect::back()->withErrors(['Error', 'No tiene delegación para el número de prenómina seleccionado']);
+                $dates = SDateUtils::getDatesOfPayrollNumber($oDelegation->number_prepayroll, $oDelegation->year, $payWay);
+                $sStartDate = $dates[0];
+                $sEndDate = $dates[1];
+                $oStartDate = Carbon::parse($sStartDate);
+                $oEndDate = Carbon::parse($sEndDate);
+            }
+
+            $roles = Auth()->user()->roles()->get();
+            $config = \App\SUtils\SConfiguration::getConfigurations();
+            $seeAll = false;
+            foreach ($roles as $rol) {
+                if (in_array($rol->id, $config->rolesCanSeeAll)) {
+                    $seeAll = true;
+                    break;
                 }
             }
 
-            $dates = SDateUtils::getDatesOfPayrollNumber($oDelegation->number_prepayroll, $oDelegation->year, $payWay);
-            $sStartDate = $dates[0];
-            $sEndDate = $dates[1];
-            $oStartDate = Carbon::parse($sStartDate);
-            $oEndDate = Carbon::parse($sEndDate);
-        }
-
-        $roles = Auth()->user()->roles()->get();
-        $config = \App\SUtils\SConfiguration::getConfigurations();
-        $seeAll = false;
-        foreach ($roles as $rol) {
-            if (in_array($rol->id, $config->rolesCanSeeAll)) {
-                $seeAll = true;
-                break;
-            }
-        }
-
-        $bDirect = false;
-        $subEmployees = SPrepayrollUtils::getEmployeesByUser(\Auth::user()->id, $payWay, $bDirect, $idDelegation);
-        if (! is_null($subEmployees) && count($subEmployees) >= 0) {
-            $lColEmps = collect($lEmployees);
-            if(!$seeAll){
-                $lEmployees = $lColEmps->whereIn('id', $subEmployees);
-            }
-        }
-
-        $lEmployees = SReportsUtils::filterEmployeesByAdmissionDate($lEmployees, $sEndDate, 'id');
-
-        /******************************************************************************************************** 
-         * Proceso de prenómina
-        */
-
-        $lRows = SDataProcess::process($sStartDate, $sEndDate, $payWay, $lEmployees);
-
-        /******************************************************************************************************* */
-
-        $aEmployees = $lEmployees->pluck('num_employee', 'id');
-        $lEmpWrkdDays = SDelayReportUtils::getTheoreticalDaysOffBasedOnDaysWorked($lRows, $aEmployees, $sStartDate, $sEndDate);
-
-        $sPayWay = "";
-        switch ($payWay) {
-            case \SCons::PAY_W_Q :
-                $sPayWay = "Quincena";
-                break;
-            case \SCons::PAY_W_S :
-                $sPayWay = "Semana";
-                break;
-            default:
-                $sPayWay = "Todos";
-                break;
-        }
-
-        $adjTypes = prepayrollAdjType::get()->toArray();
-
-        $lAdjusts = DB::table('prepayroll_adjusts AS pa')
-                        ->join('prepayroll_adjusts_types AS pat', 'pa.adjust_type_id', '=', 'pat.id')
-                        ->select('pa.employee_id',
-                                    'pa.dt_date',
-                                    'pa.dt_time',
-                                    'pa.minutes',
-                                    'pa.comments',
-                                    'pa.apply_to',
-                                    'pa.adjust_type_id',
-                                    'pat.type_code',
-                                    'pat.type_name',
-                                    'pa.id',
-                                    'pa.apply_time'
-                                    )
-                        ->whereBetween('dt_date', [$sStartDate, $sEndDate])
-                        ->where('is_delete', false)
-                        ->get();
-
-        $bModify = SPermissions::hasPermission(\Auth::user()->id, 'ajustes_rep_te');
-
-        PrepayrollReportController::prepayrollReportVobos($sStartDate, $sEndDate);
-
-        $lDeptJobs = DB::table('employees AS e')
-                        ->join('departments AS d', 'e.department_id', '=', 'd.id')
-                        ->join('jobs AS j', 'e.job_id', '=', 'j.id')
-                        ->selectRaw('e.num_employee, CONCAT("DEPTO.: ", d.name, ", PUESTO: ", j.name) AS dept_job')
-                        ->pluck('dept_job', 'num_employee');
-
-        $isAdmin = false;
-        foreach (auth()->user()->roles()->get() as $rol) {
-            $result = in_array($rol->id, $config->rolesCanSeeAll);
-            if ($result) {
-                $isAdmin = true;
-                break;
-            }
-        }
-
-        $subEmployees = [];
-        if (!$isAdmin) {
-            $dirEmpl = SPrepayrollUtils::getEmployeesByUser(auth()->user()->id, 0, true, null);
-            foreach ($dirEmpl as $data) {
-                array_push($subEmployees, $data);
-            }
-            $lUsers = null;
-        }
-        else {
-            $lUsers = DB::table('users')
-                ->join('prepayroll_groups_users as pru','pru.head_user_id','=','users.id')
-                ->select('users.id','users.name')
-                ->orderBy('users.name')
-                ->get();
-        }
-        
-        /**
-         * Obtención de vobos de empleados
-         */
-        $isPrepayrollInspection = false;
-        $lEmpVobos = [];
-        $aNumber = [];
-        if (($payWay == \SCons::PAY_W_S || $payWay == \SCons::PAY_W_Q) && env('VOBO_BY_EMP_ENABLED', true) && $wizard > 0) {
-            $aNumber = SDateUtils::getNumberOfDate($sStartDate, $payWay);
-            $dates = SDateUtils::getDatesOfPayrollNumber($aNumber[0], $aNumber[1], $payWay);
-            
-            if ($dates[0] == $sStartDate && $dates[1] == $sEndDate) {
-                $lEmpVobos = DB::table('prepayroll_report_emp_vobos AS evb')
-                                    ->join('users AS u', 'evb.vobo_by_id', '=', 'u.id')
-                                    ->join('employees AS e', 'evb.employee_id', '=', 'e.id')
-                                    ->where('evb.is_delete', 0)
-                                    ->where('year', $aNumber[1])
-                                    ->select('u.name AS user_name', 'evb.employee_id', 'evb.vobo_by_id', 'e.num_employee');
-
-                if ($payWay == \SCons::PAY_W_Q) {
-                    $lEmpVobos = $lEmpVobos->where('evb.is_biweek', true)
-                                            ->where('evb.num_biweek', $aNumber[0]);
+            $bDirect = false;
+            $subEmployees = SPrepayrollUtils::getEmployeesByUser(\Auth::user()->id, $payWay, $bDirect, $idDelegation);
+            if (! is_null($subEmployees) && count($subEmployees) >= 0) {
+                $lColEmps = collect($lEmployees);
+                if(!$seeAll){
+                    $lEmployees = $lColEmps->whereIn('id', $subEmployees);
                 }
-                else {
-                    $lEmpVobos = $lEmpVobos->where('evb.is_week', true)
-                                            ->where('evb.num_week', $aNumber[0]);
-                }
-
-                $lEmpVobos = $lEmpVobos->get()->keyBy('num_employee')->toArray();
-
-                $isPrepayrollInspection = true;
             }
-        }
 
-        if ($reportMode == \SCons::REP_HR_EX) {
-            return view('report.reportDelaysView')
-                    ->with('tReport', \SCons::REP_HR_EX)
-                    ->with('sStartDate', $sStartDate)
-                    ->with('sEndDate', $sEndDate)
-                    ->with('sPayWay', $sPayWay)
-                    ->with('sTitle', 'Reporte de tiempos extra')
-                    ->with('adjTypes', $adjTypes)
-                    ->with('lAdjusts', $lAdjusts)
-                    ->with('lEmpVobos', $lEmpVobos)
-                    ->with('lDeptJobs', $lDeptJobs)
-                    ->with('isPrepayrollInspection', $isPrepayrollInspection)
-                    ->with('lEmpWrkdDays', $lEmpWrkdDays)
-                    ->with('bModify', $bModify)
-                    ->with('registriesRoute', route('registro_ajuste'))
-                    ->with('lRows', $lRows)
-                    ->with('lCommentsAdjsTypes', $lCommentsAdjsTypes)
-                    ->with('subEmployees', $subEmployees)
-                    ->with('isAdmin', $isAdmin)
-                    ->with('lUsers', $lUsers)
-                    ->with('wizard', $wizard )
-                    ->with('filter_employees',$filter_employees)
-                    ->with('pay_way', $request->pay_way)
-                    ->with('bDelegation', $bDelegation)
-                    ->with('idDelegation', $idDelegation);
-        }
-        else {
-            $listaEmployees = SReportsUtils::resumeReportRows($lRows, $lEmployees);
-            $col = collect($lRows);
+            $lEmployees = SReportsUtils::filterEmployeesByAdmissionDate($lEmployees, $sEndDate, 'id');
 
-            foreach ($listaEmployees as $emp) {
-                $oCom = $lAdjusts->where('employee_id', $emp->id)->all();
-                $arr = [];
-                foreach ($oCom as $com) {
-                    array_push($arr, $com->dt_date . ", " . $com->comments);
+            /******************************************************************************************************** 
+             * Proceso de prenómina
+            */
+
+            $lRows = SDataProcess::process($sStartDate, $sEndDate, $payWay, $lEmployees);
+
+            /******************************************************************************************************* */
+
+            $aEmployees = $lEmployees->pluck('num_employee', 'id');
+            $lEmpWrkdDays = SDelayReportUtils::getTheoreticalDaysOffBasedOnDaysWorked($lRows, $aEmployees, $sStartDate, $sEndDate);
+
+            $sPayWay = "";
+            switch ($payWay) {
+                case \SCons::PAY_W_Q :
+                    $sPayWay = "Quincena";
+                    break;
+                case \SCons::PAY_W_S :
+                    $sPayWay = "Semana";
+                    break;
+                default:
+                    $sPayWay = "Todos";
+                    break;
+            }
+
+            $adjTypes = prepayrollAdjType::get()->toArray();
+
+            $lAdjusts = DB::table('prepayroll_adjusts AS pa')
+                            ->join('prepayroll_adjusts_types AS pat', 'pa.adjust_type_id', '=', 'pat.id')
+                            ->select('pa.employee_id',
+                                        'pa.dt_date',
+                                        'pa.dt_time',
+                                        'pa.minutes',
+                                        'pa.comments',
+                                        'pa.apply_to',
+                                        'pa.adjust_type_id',
+                                        'pat.type_code',
+                                        'pat.type_name',
+                                        'pa.id',
+                                        'pa.apply_time'
+                                        )
+                            ->whereBetween('dt_date', [$sStartDate, $sEndDate])
+                            ->where('is_delete', false)
+                            ->get();
+
+            $bModify = SPermissions::hasPermission(\Auth::user()->id, 'ajustes_rep_te');
+
+            PrepayrollReportController::prepayrollReportVobos($sStartDate, $sEndDate);
+
+            $lDeptJobs = DB::table('employees AS e')
+                            ->join('departments AS d', 'e.department_id', '=', 'd.id')
+                            ->join('jobs AS j', 'e.job_id', '=', 'j.id')
+                            ->selectRaw('e.num_employee, CONCAT("DEPTO.: ", d.name, ", PUESTO: ", j.name) AS dept_job')
+                            ->pluck('dept_job', 'num_employee');
+
+            $isAdmin = false;
+            foreach (auth()->user()->roles()->get() as $rol) {
+                $result = in_array($rol->id, $config->rolesCanSeeAll);
+                if ($result) {
+                    $isAdmin = true;
+                    break;
                 }
-                $emp->comments = $arr;
-                $emp->scheduleText = $col->where('idEmployee', $emp->id)->first()->scheduleText;
+            }
+
+            $subEmployees = [];
+            if (!$isAdmin) {
+                $dirEmpl = SPrepayrollUtils::getEmployeesByUser(auth()->user()->id, 0, true, null);
+                foreach ($dirEmpl as $data) {
+                    array_push($subEmployees, $data);
+                }
+                $lUsers = null;
+            }
+            else {
+                $lUsers = DB::table('users')
+                    ->join('prepayroll_groups_users as pru','pru.head_user_id','=','users.id')
+                    ->select('users.id','users.name')
+                    ->orderBy('users.name')
+                    ->get();
             }
             
-            $routePrev = route('checkPrevius_vobos');
-            $routeChildren = route('checkChildrens_vobos');
-            $oPrepayrollCtrl = null;
-            if ($isPrepayrollInspection) {
-                $oPrepayrollCtrl =  DB::table('prepayroll_report_auth_controls AS prac')
-                                                    ->join('users AS u', 'prac.user_vobo_id', '=', 'u.id')
-                                                    ->select('prac.*', 'u.name AS username')
-                                                    ->where('prac.user_vobo_id', \Auth::user()->id)
-                                                    ->where('prac.year', $aNumber[1])
-                                                    ->where(($payWay == \SCons::PAY_W_S ? 'prac.is_week' : 'prac.is_biweek'), true)
-                                                    ->where(($payWay == \SCons::PAY_W_S ? 'prac.num_week' : 'prac.num_biweek'), $aNumber[0])
-                                                    ->where('prac.is_delete', 0)
-                                                    ->first();
+            /**
+             * Obtención de vobos de empleados
+             */
+            $isPrepayrollInspection = false;
+            $lEmpVobos = [];
+            $aNumber = [];
+            if (($payWay == \SCons::PAY_W_S || $payWay == \SCons::PAY_W_Q) && env('VOBO_BY_EMP_ENABLED', true) && $wizard > 0) {
+                $aNumber = SDateUtils::getNumberOfDate($sStartDate, $payWay);
+                $dates = SDateUtils::getDatesOfPayrollNumber($aNumber[0], $aNumber[1], $payWay);
+                
+                if ($dates[0] == $sStartDate && $dates[1] == $sEndDate) {
+                    $lEmpVobos = DB::table('prepayroll_report_emp_vobos AS evb')
+                                        ->join('users AS u', 'evb.vobo_by_id', '=', 'u.id')
+                                        ->join('employees AS e', 'evb.employee_id', '=', 'e.id')
+                                        ->where('evb.is_delete', 0)
+                                        ->where('year', $aNumber[1])
+                                        ->select('u.name AS user_name', 'evb.employee_id', 'evb.vobo_by_id', 'e.num_employee');
+
+                    if ($payWay == \SCons::PAY_W_Q) {
+                        $lEmpVobos = $lEmpVobos->where('evb.is_biweek', true)
+                                                ->where('evb.num_biweek', $aNumber[0]);
+                    }
+                    else {
+                        $lEmpVobos = $lEmpVobos->where('evb.is_week', true)
+                                                ->where('evb.num_week', $aNumber[0]);
+                    }
+
+                    $lEmpVobos = $lEmpVobos->get()->keyBy('num_employee')->toArray();
+
+                    $isPrepayrollInspection = true;
+                }
             }
 
-            return view('report.reportDelaysTotView')
-                    ->with('tReport', \SCons::REP_HR_EX_TOT)
-                    ->with('sStartDate', $sStartDate)
-                    ->with('sEndDate', $sEndDate)
-                    ->with('sPayWay', $sPayWay)
-                    ->with('sTitle', 'Reporte de tiempos extra')
-                    ->with('adjTypes', $adjTypes)
-                    ->with('lAdjusts', $lAdjusts)
-                    ->with('lEmpWrkdDays', $lEmpWrkdDays)
-                    ->with('bModify', $bModify)
-                    ->with('lEmpVobos', $lEmpVobos)
-                    ->with('isPrepayrollInspection', $isPrepayrollInspection)
-                    ->with('routeChildren', $routeChildren)
-                    ->with('routePrev', $routePrev)
-                    ->with('registriesRoute', route('registro_ajuste'))
-                    ->with('lRows', $lRows)
-                    ->with('lCommentsAdjsTypes', array())
-                    ->with('lEmployees', $listaEmployees)
-                    ->with('subEmployees', $subEmployees)
-                    ->with('isAdmin', $isAdmin)
-                    ->with('lUsers', $lUsers)
-                    ->with('wizard', $wizard )
-                    ->with('filter_employees',$filter_employees)
-                    ->with('pay_way', $request->pay_way)
-                    ->with('oPrepayrollCtrl', $oPrepayrollCtrl)
-                    ->with('idPreNomina', $payWay == \SCons::PAY_W_Q ? "biweek" : "week")
-                    ->with('bDelegation', $bDelegation)
-                    ->with('idDelegation', $idDelegation);
+            if ($reportMode == \SCons::REP_HR_EX) {
+                return view('report.reportDelaysView')
+                        ->with('tReport', \SCons::REP_HR_EX)
+                        ->with('sStartDate', $sStartDate)
+                        ->with('sEndDate', $sEndDate)
+                        ->with('sPayWay', $sPayWay)
+                        ->with('sTitle', 'Reporte de tiempos extra')
+                        ->with('adjTypes', $adjTypes)
+                        ->with('lAdjusts', $lAdjusts)
+                        ->with('lEmpVobos', $lEmpVobos)
+                        ->with('lDeptJobs', $lDeptJobs)
+                        ->with('isPrepayrollInspection', $isPrepayrollInspection)
+                        ->with('lEmpWrkdDays', $lEmpWrkdDays)
+                        ->with('bModify', $bModify)
+                        ->with('registriesRoute', route('registro_ajuste'))
+                        ->with('lRows', $lRows)
+                        ->with('lCommentsAdjsTypes', $lCommentsAdjsTypes)
+                        ->with('subEmployees', $subEmployees)
+                        ->with('isAdmin', $isAdmin)
+                        ->with('lUsers', $lUsers)
+                        ->with('wizard', $wizard )
+                        ->with('filter_employees',$filter_employees)
+                        ->with('pay_way', $request->pay_way)
+                        ->with('bDelegation', $bDelegation)
+                        ->with('idDelegation', $idDelegation);
+            }
+            else {
+                $listaEmployees = SReportsUtils::resumeReportRows($lRows, $lEmployees);
+                $col = collect($lRows);
+
+                foreach ($listaEmployees as $emp) {
+                    $oCom = $lAdjusts->where('employee_id', $emp->id)->all();
+                    $arr = [];
+                    foreach ($oCom as $com) {
+                        array_push($arr, $com->dt_date . ", " . $com->comments);
+                    }
+                    $emp->comments = $arr;
+                    $emp->scheduleText = $col->where('idEmployee', $emp->id)->first()->scheduleText;
+                }
+                
+                $routePrev = route('checkPrevius_vobos');
+                $routeChildren = route('checkChildrens_vobos');
+                $oPrepayrollCtrl = null;
+                if ($isPrepayrollInspection) {
+                    $oPrepayrollCtrl =  DB::table('prepayroll_report_auth_controls AS prac')
+                                                        ->join('users AS u', 'prac.user_vobo_id', '=', 'u.id')
+                                                        ->select('prac.*', 'u.name AS username')
+                                                        ->where('prac.user_vobo_id', \Auth::user()->id)
+                                                        ->where('prac.year', $aNumber[1])
+                                                        ->where(($payWay == \SCons::PAY_W_S ? 'prac.is_week' : 'prac.is_biweek'), true)
+                                                        ->where(($payWay == \SCons::PAY_W_S ? 'prac.num_week' : 'prac.num_biweek'), $aNumber[0])
+                                                        ->where('prac.is_delete', 0)
+                                                        ->first();
+                }
+
+                return view('report.reportDelaysTotView')
+                        ->with('tReport', \SCons::REP_HR_EX_TOT)
+                        ->with('sStartDate', $sStartDate)
+                        ->with('sEndDate', $sEndDate)
+                        ->with('sPayWay', $sPayWay)
+                        ->with('sTitle', 'Reporte de tiempos extra')
+                        ->with('adjTypes', $adjTypes)
+                        ->with('lAdjusts', $lAdjusts)
+                        ->with('lEmpWrkdDays', $lEmpWrkdDays)
+                        ->with('bModify', $bModify)
+                        ->with('lEmpVobos', $lEmpVobos)
+                        ->with('isPrepayrollInspection', $isPrepayrollInspection)
+                        ->with('routeChildren', $routeChildren)
+                        ->with('routePrev', $routePrev)
+                        ->with('registriesRoute', route('registro_ajuste'))
+                        ->with('lRows', $lRows)
+                        ->with('lCommentsAdjsTypes', array())
+                        ->with('lEmployees', $listaEmployees)
+                        ->with('subEmployees', $subEmployees)
+                        ->with('isAdmin', $isAdmin)
+                        ->with('lUsers', $lUsers)
+                        ->with('wizard', $wizard )
+                        ->with('filter_employees',$filter_employees)
+                        ->with('pay_way', $request->pay_way)
+                        ->with('oPrepayrollCtrl', $oPrepayrollCtrl)
+                        ->with('idPreNomina', $payWay == \SCons::PAY_W_Q ? "biweek" : "week")
+                        ->with('bDelegation', $bDelegation)
+                        ->with('idDelegation', $idDelegation);
+            }
+        }
+        catch (\Throwable $th) {
+            \Log::error($th);
+            return redirect()->route('generarreportetiemposextra')->withErrors(['Error', $th->getMessage()]);
         }
     }
 
@@ -2561,6 +2567,8 @@ class ReporteController extends Controller
                                         ->whereIn('id', [12, 14, 15, 16, 17, 18, 19, 20, 22, 23, 24, 25])
                                         ->orderBy('name', 'ASC')
                                         ->get();
+
+            $sIncidentsRoute = route('crear_incidente', [14]);
             
             return view('report.reportIncidentsEmployeesView', [
                                                             'lRows' => $lReportRows,
@@ -2571,6 +2579,7 @@ class ReporteController extends Controller
                                                             'lTypeCapIncidents' => $lTypeCapIncidents,
                                                             'routeStore' => $routeStore,
                                                             'routeDelete' => $routeDelete,
+                                                            'sIncidentsRoute' => $sIncidentsRoute,
                                                             'aDates' => $aDates,
                                                             'wizard' => $request->wizard,
                                                             'payWay' => $payWay,

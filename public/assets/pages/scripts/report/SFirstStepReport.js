@@ -8,6 +8,7 @@ var app = new Vue({
         lTypeIncidentsList: [],
         vRows: oServerData.lRows,
         vDates: oServerData.aDates,
+        sIncidentsRoute: oServerData.sIncidentsRoute,
         oEvent: {},
         employee: null,
         date: null,
@@ -16,7 +17,10 @@ var app = new Vue({
         oldIncident: null,
         onSubmit: false,
         canDelete: false,
-        isDisabled: false
+        isDisabled: false,
+        showHelp: false,
+        sHelp: "",
+        isDisabledByType: false
     },
     mounted() {
     },
@@ -65,7 +69,23 @@ var app = new Vue({
                 this.lTypeIncidentsList = this.lTypeCapIncidents;
             }
 
+            this.bSavedStatus = this.isDisabled;
             $("#incidentsModal").modal("show");
+        },
+        onTypeChange() {
+            switch (this.oEvent.type_id) {
+                case 17:
+                    this.isDisabledByType = true;
+                    this.showHelp = true;
+                    this.sHelp = "Para agregar un DÍA OTORGADO tiene que dirigirse a ";
+                    break;
+            
+                default:
+                    this.isDisabledByType = false;
+                    this.showHelp = false;
+                    this.sHelp = "";
+                    break;
+            }
         },
         store() {
             if (this.oEvent.type_id != null && this.oEvent.type_id != 0) {

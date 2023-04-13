@@ -30,8 +30,7 @@
                         <div class="row">
                             <div class="col-md-3"><label for="typeIncident">Tipo incidecia*:</label></div>
                             <div class="col-md-9">
-                                <select id="typeIncident" name="typeIncident" v-model="oEvent.type_id" class="form-control" :disabled="isDisabled"
-                                    required>
+                                <select id="typeIncident" name="typeIncident" v-model="oEvent.type_id" class="form-control" :disabled="isDisabled" v-on:change="onTypeChange()" required>
                                     <option v-for="incidentType in lTypeIncidentsList" :value="incidentType.id">@{{incidentType.name}}
                                     </option>
                                 </select>
@@ -41,16 +40,16 @@
                                 <input type="hidden" name="oldIncident" :value="oldIncident">
                             </div>
                         </div>
-                        {{-- <br>
+                        <br>
                         <div class="row">
                             <div class="col-md-3">
-                                <label for="incidentComments">Comentarios:</label>
+                                <label for="comments">Comentarios:</label>
                             </div>
                             <div class="col-md-9">
                                 <input type="text" name="comments" v-model="oEvent.nts" class="form-control" maxlength="254" :disabled="isDisabled">
                             </div>
-                        </div> --}}
-                        <input type="hidden" name="comments" value="">
+                        </div>
+                        <small v-if="showHelp" class="text-muted">@{{ sHelp }}<u><b><a target="_blank" :href="sIncidentsRoute">Incidencias</a></b></u></small>
                     </div>
                     <div class="modal-footer">
                         <div class="row">
@@ -60,7 +59,7 @@
                             </div>
                             <div class="col-md-4" style="float: right;">
                                 <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-                                <button v-if="! isDisabled" type="button" id="btnSubmit" class="btn btn-primary" data-dismiss="modal"
+                                <button v-if="! isDisabled && ! isDisabledByType" type="button" id="btnSubmit" class="btn btn-primary" data-dismiss="modal"
                                     :disabled="onSubmit" v-on:click="store();">Guardar</button>
                             </div>
                         </div>
@@ -189,6 +188,7 @@
         this.lTypeCapIncidents = <?php echo json_encode($lTypeCapIncidents) ?>;
         this.routeDelete = <?php echo json_encode($routeDelete) ?>;
         this.routeStore = <?php echo json_encode($routeStore) ?>;
+        this.sIncidentsRoute = <?php echo json_encode($sIncidentsRoute) ?>;
         this.lRows = <?php echo json_encode($lRows) ?>;
         this.aDates = <?php echo json_encode($aDates) ?>;
     }
