@@ -787,7 +787,7 @@ class ReporteController extends Controller
                         ->with('idDelegation', $idDelegation);
             }
             else {
-                $listaEmployees = SReportsUtils::resumeReportRows($lRows, $lEmployees);
+                $listaEmployees = SReportsUtils::resumeReportRows($lRows, $lEmployees, $sStartDate, $sEndDate);
                 $col = collect($lRows);
 
                 foreach ($listaEmployees as $emp) {
@@ -820,7 +820,7 @@ class ReporteController extends Controller
                         ->with('sStartDate', $sStartDate)
                         ->with('sEndDate', $sEndDate)
                         ->with('sPayWay', $sPayWay)
-                        ->with('sTitle', 'Reporte de tiempos extra')
+                        ->with('sTitle', 'Resumen reporte de tiempos extra')
                         ->with('adjTypes', $adjTypes)
                         ->with('lAdjusts', $lAdjusts)
                         ->with('lEmpWrkdDays', $lEmpWrkdDays)

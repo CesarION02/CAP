@@ -5,7 +5,7 @@
     <link href="{{ asset("select2js/css/select2.min.css") }}" rel="stylesheet" />
     <style>
         tr {
-            font-size: 70%;
+            font-size: 65%;
         }
         span.nobr { white-space: nowrap; }
     </style>
@@ -76,8 +76,9 @@
                                     <th title="Vacaciones">Vac.</th>
                                     <th title="Inasistencia por incidencia">Inasis.</th>
                                     <th title="Incapacidad">Incap.</th>
-                                    <th title="Incidencias que se van a pagar">Incid. c/pago</th>
-                                    <th title="Incidencias sin pago (días descontados)">Incid. s/pago</th>
+                                    {{-- <th title="Incidencias que se van a pagar">Incid. c/pago</th> --}}
+                                    {{-- <th title="Incidencias sin pago (días descontados)">Incid. s/pago</th> --}}
+                                    <th title="Días de prenómina, - faltas, - incidencias sin pago.">Días a pagar</th>
                                     <th title="Visto bueno individual">Vobo</th>
                                     <th>-</th>
                                 </tr>
@@ -86,8 +87,14 @@
                                 <tr v-for="row in vData.lEmployees">
                                     <td>@{{ vueGui.pad(row.num_employee, 6) }}</td>
                                     <td>
-                                        <form action="{{route('reportetiemposextra')}}" target="_blank">
-                                            <a href='#' onclick='this.parentNode.submit(); return false;' title="Presiona para ver reporte a detalle">@{{ row.name }}</a>
+                                    {{-- <td style="color: rgb(12, 135, 206);"> --}}
+                                        <form action="{{ route('reportetiemposextra') }}" target="_blank">
+                                            <a href='#' onclick='this.parentNode.submit(); return false;' title="Presiona para ver reporte a detalle">
+                                                <span class="nobr">
+                                                    <u>@{{ row.name }}</u>
+                                                    <span aria-hidden="true" class="glyphicon glyphicon-eye-open" style="color:rgb(12, 135, 206);"></span>
+                                                </span>
+                                            </a>
                                             <input type="hidden" name="start_date" value="{{$sStartDate}}">
                                             <input type="hidden" name="end_date" value="{{$sEndDate}}">
                                             <input type="hidden" name="emp_id" :value="row.id">
@@ -110,8 +117,9 @@
                                     <td :title="row.vacations">@{{ row.countVacations }}</td>
                                     <td :title="row.absenceByEvent">@{{ row.countAbsenceByEvent }}</td>
                                     <td :title="row.inability">@{{ row.countInability }}</td>
-                                    <td :title="row.payableEvents">@{{ row.countPayableEvents }}</td>
-                                    <td :title="row.noPayableEvents">@{{ row.countNoPayableEvents }}</td>
+                                    {{-- <td :title="row.payableEvents">@{{ row.countPayableEvents }}</td> --}}
+                                    {{-- <td :title="row.noPayableEvents">@{{ row.countNoPayableEvents }}</td> --}}
+                                    <td :title="(row.noPayableEvents)">@{{ row.countDaysToPay }}</td>
                                     <td v-if="vData.isPrepayrollInspection">
                                         <label class='container'>
                                             <input :checked="isVoboResume(row.num_employee) != undefined" id='cb31' v-on:change="onChangeVoboResume($event, row.num_employee)" type='checkbox'>
@@ -236,7 +244,7 @@
         this.minsDelayCol = this.tReport == this.REP_DELAY ? 4 : 7;
         this.sunCol = 9;
         this.dayoffCol = 10;
-        this.hiddenColEmId = 15;
+        this.hiddenColEmId = 14;
         this.hiddenColExId = 14;
         this.hiddenCol = this.tReport == this.REP_DELAY ? 5 : 5;
         this.toExport = this.tReport == this.REP_DELAY ? [0, 1, 2, 3, 4, 6] : [0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12];

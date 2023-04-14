@@ -2,7 +2,7 @@
 @section('styles1')
 <style>
     tr {
-        font-size: 70%;
+        font-size: 60%;
     }
 
     span.nobr {
@@ -112,9 +112,10 @@
                                     <td style="border: solid 1px rgb(86, 86, 86); text-align: center;">
                                         @{{ vueGui.pad(vRow.numEmployee, 6) }}
                                     </td>
-                                    <td style="border: solid 1px rgb(86, 86, 86); text-align: center; font-weight: bold;">
-                                        @{{ vRow.nameEmployee }}
-                                        <span v-if="vRow.isVobo" aria-hidden="true" class="glyphicon glyphicon-ok" style="color:green;"></span>
+                                    <td style="border: solid 1px rgb(86, 86, 86); text-align: left; font-weight: bold;">
+                                        <span class="nobr">@{{ vRow.nameEmployee }}
+                                            <span v-if="vRow.isVobo" aria-hidden="true" class="glyphicon glyphicon-ok" style="color:green;"></span>
+                                        </span>
                                     </td>
                                     {{-- <td v-for="date in vDates" style="border: solid 1px rgb(86, 86, 86); text-align: center; font-weight: bold;">
                                         <label for="">1</label>
