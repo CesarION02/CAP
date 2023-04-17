@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\incident;
 use Illuminate\Http\Request;
 use App\Models\typeincident;
 use App\Http\Requests\ValidacionTypeincident;
@@ -35,12 +36,12 @@ class typeincidentController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(ValidacionTypeincident $request)
     {
         typeincident::create($request->all());
-        return redirect('type_incidents')->with('mensaje', 'Tipo Incidente creado con exito');
+        return redirect()->route('tipos_index')->with('mensaje', 'Tipo Incidente creado con exito');
     }
 
     /**
@@ -76,7 +77,7 @@ class typeincidentController extends Controller
     public function update(Request $request, $id)
     {
         typeincident::findOrFail($id)->update($request->all());
-        return redirect('type_incidents')->with('mensaje', 'Tipo de Incidente actualizado con exito');
+        return redirect('tipos_index')->with('mensaje', 'Tipo de Incidente actualizado con exito');
     }
 
     /**
@@ -95,5 +96,22 @@ class typeincidentController extends Controller
         } else {
             abort(404);
         }
+    }
+
+    public function updateIncident(Request $request)
+    {
+        $oIncident = typeincident::find($request->id_inc_type);
+        $oIncident->{$request->attribute_nm} = $request->new_value;
+        try {
+            $oIncident->save();
+        }
+        catch (\Throwable $th) {
+            \Log::error($th);
+            return json_encode($th);
+        }
+
+        $lIncidentTypes = \DB::table('type_incidents')->get();
+
+        return json_encode($lIncidentTypes);
     }
 }

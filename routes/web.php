@@ -436,7 +436,17 @@ Route::get('type_incidents/create', 'typeincidentController@create')->name('crea
 Route::post('type_incidents', 'typeincidentController@store')->name('guardar_tipoincidente');
 Route::get('type_incidents/{id}/edit', 'typeincidentController@edit')->name('editar_tipoincidente');
 Route::put('type_incidents/{id}', 'typeincidentController@update')->name('actualizar_tipoincidente');
+Route::put('type_incidents', 'typeincidentController@updateIncident')->name('actualizar_atributo');
 Route::delete('type_incidents/{id}', 'typeincidentController@destroy')->name('eliminar_tipoincidente');
+
+/* RUTAS SUBTIPOS INCIDENTES */
+Route::get('sub_type_incidents', 'SubTypeIncidentController@indexIncidentTypes')->name('tipos_index');
+Route::get('sub_type_incidents/{id_type}', 'SubTypeIncidentController@indexIncidentSubTypes')->name('subtipos_index');
+Route::get('sub_type_incidents/{id_type}/create', 'SubTypeIncidentController@create')->name('subtipos_create');
+Route::post('sub_type_incidents/store', 'SubTypeIncidentController@store')->name('subtipos_store');
+Route::get('sub_type_incidents/edit/{id_subtype}', 'SubTypeIncidentController@edit')->name('subtipos_edit');
+Route::put('sub_type_incidents/update/{id_subtype}', 'SubTypeIncidentController@update')->name('subtipos_update');
+Route::delete('sub_type_incidents/delete/{id}', 'SubTypeIncidentController@delete')->name('subtipos_delete');
 
 /* RUTAS PERMISO */
 Route::get('permission', 'permissionController@index')->name('permiso');
