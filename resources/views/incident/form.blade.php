@@ -19,22 +19,31 @@
         @if(isset($datas))
             <select id="type_incidents_id" name="type_incidents_id" disabled class="form-control">
                     <option value="0">Elige una opción</option>
-                @foreach($lIncidentTypes as $type => $index)
-                    @if ($datas->tipo == $index)
-                        <option value="{{ $index }}" selected>{{ $type }}</option>
+                @foreach($lIncidentTypes as $type)
+                    @if ($datas->tipo == $type->id)
+                        <option value="{{ $type->id }}" selected>{{ $type->name }}</option>
                     @else
-                        <option value="{{ $index }}"> {{$type}}</option>
+                        <option value="{{ $type->id }}">{{ $type->name }}</option>
                     @endif
                 @endforeach
             </select>
         @else
             <select id="type_incidents_id" name="type_incidents_id" class="form-control" v-on:change="onChangeIncidentType($event)" required>
                 <option value="0">Elige una opción</option>
-                @foreach($lIncidentTypes as $type => $index)
-                    <option value="{{ $index }}" {{ old('type_incidents_id') == $index ? 'selected' : '' }}> {{ $type }} </option>
+                @foreach($lIncidentTypes as $type)
+                    <option value="{{ $type->id }}"> {{ $type->name }} </option>
                 @endforeach
             </select>
         @endif   
+    </div>
+</div>
+<div v-if="showSubtypes && lCurrentSubtypes.length > 0" class="form-group">
+    <label for="type_sub_inc_id" class="col-lg-3 control-label requerido">Subtipo incidencia:</label>
+    <div class="col-lg-8">
+        <select id="type_sub_inc_id" name="type_sub_inc_id" class="form-control" required>
+            <option value="0">Elige una opción</option>
+            <option v-for="oType in lCurrentSubtypes" :selected="iSubTypeId == oType.id_sub_incident" :value="oType.id_sub_incident">@{{ oType.name }}</option>
+        </select>
     </div>
 </div>
 <div v-if="showHoliday" class="form-group">
@@ -50,21 +59,13 @@
 <div class="form-group">
     <label for="start_date" class="col-lg-3 control-label requerido">Fecha inicial:</label>
     <div class="col-lg-8">
-        @if(isset($datas))
-            <input type="date" class="form-control" name="start_date" id="start_date" value="{{ $datas->ini }}" class="form-control" required>
-        @else
-            <input type="date" class="form-control" name="start_date" id="start_date" value="" class="form-control" required>
-        @endif
+        <input type="date" class="form-control" name="start_date" id="start_date" value="{{ isset($datas) ? $datas->ini : "" }}" class="form-control" required>
     </div>
 </div>
 <div class="form-group">
         <label for="end_date" class="col-lg-3 control-label requerido">Fecha final:</label>
         <div class="col-lg-8">
-            @if(isset($datas))
-                <input type="date" class="form-control" name="end_date" id="end_date" value="{{$datas->fin}}" class="form-control" required>
-            @else
-                <input type="date" class="form-control" name="end_date" id="end_date" value="" class="form-control" required>
-            @endif
+            <input type="date" class="form-control" name="end_date" id="end_date" value="{{ isset($datas) ? $datas->fin : "" }}" class="form-control" required>
         </div>
 </div>
 <div class="form-group">

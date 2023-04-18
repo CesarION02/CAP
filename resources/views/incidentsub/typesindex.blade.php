@@ -106,7 +106,7 @@ span.nobr { white-space: nowrap; }
                                 <!-- Rounded switch -->
                                 <label class="switch">
                                     <input type="checkbox" v-model="oIncType.is_agreement" 
-                                        v-on:change="onToggleChange(oIncType.id, 'is_agreement', !oIncType.is_agreement)">
+                                        v-on:change="onToggleChange(oIncType.id, 'is_agreement', oIncType.is_agreement)">
                                     <span class="slider round"></span>
                                 </label>
                             </td>                        
@@ -114,7 +114,7 @@ span.nobr { white-space: nowrap; }
                                 <!-- Rounded switch -->
                                 <label class="switch">
                                     <input type="checkbox" v-model="oIncType.is_allowed" 
-                                    v-on:change="onToggleChange(oIncType.id, 'is_allowed', !oIncType.is_allowed)">
+                                    v-on:change="onToggleChange(oIncType.id, 'is_allowed', oIncType.is_allowed)">
                                     <span class="slider round"></span>
                                 </label>
                             </td>                        
@@ -122,7 +122,7 @@ span.nobr { white-space: nowrap; }
                                 <!-- Rounded switch -->
                                 <label class="switch">
                                     <input type="checkbox" v-model="oIncType.is_cap_edit" 
-                                    v-on:change="onToggleChange(oIncType.id, 'is_cap_edit', !oIncType.is_cap_edit)">
+                                    v-on:change="onToggleChange(oIncType.id, 'is_cap_edit', oIncType.is_cap_edit)">
                                     <span class="slider round"></span>
                                 </label>
                             </td>                        
@@ -130,7 +130,7 @@ span.nobr { white-space: nowrap; }
                                 <!-- Rounded switch -->
                                 <label class="switch">
                                     <input type="checkbox" v-model="oIncType.is_payable" 
-                                    v-on:change="onToggleChange(oIncType.id, 'is_payable', !oIncType.is_payable)">
+                                    v-on:change="onToggleChange(oIncType.id, 'is_payable', oIncType.is_payable)">
                                     <span class="slider round"></span>
                                 </label>
                             </td>                        
@@ -138,7 +138,7 @@ span.nobr { white-space: nowrap; }
                                 <!-- Rounded switch -->
                                 <label class="switch">
                                     <input type="checkbox" v-model="oIncType.has_subtypes" 
-                                    v-on:change="onToggleChange(oIncType.id, 'has_subtypes', !oIncType.has_subtypes)">
+                                    v-on:change="onToggleChange(oIncType.id, 'has_subtypes', oIncType.has_subtypes)">
                                     <span class="slider round"></span>
                                 </label>
                             </td>                      

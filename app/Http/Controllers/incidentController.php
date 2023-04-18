@@ -179,11 +179,19 @@ class incidentController extends Controller
             $lIncidentTypes = $lIncidentTypes->where('id', 22);
         }
 
-        $lIncidentTypes = $lIncidentTypes->pluck('id', 'name');
+        $lIncidentTypes = $lIncidentTypes->select('id', 'name', 'has_subtypes')
+                                        ->get();
+
+        $lSubTypes = \DB::table('type_sub_incidents')
+                        ->where('is_delete', 0)
+                        ->select('id_sub_incident', 'name', 'is_default', 'incident_type_id')
+                        ->orderBy('name', 'ASC')
+                        ->get();
 
         return view('incident.create')
                         ->with('incidentType', $incidentType)
                         ->with('lIncidentTypes', $lIncidentTypes)
+                        ->with('lSubTypes', $lSubTypes)
                         ->with('employees', $employees)
                         ->with('lCommControl', $lCommControl)
                         ->with('holidays', $holidays)
@@ -242,7 +250,32 @@ class incidentController extends Controller
                 }
                 $incident->created_by = session()->get('user_id');
                 $incident->updated_by = session()->get('user_id');
+                if (! isset($incident->type_sub_inc_id) || is_null($incident->type_sub_inc_id)) {
+                    $oSubType = typeincident::find($request->type_incidents_id);
+                    if ($oSubType->has_subtypes) {
+                        $lSubTypes = DB::table('type_sub_incidents')->where('incident_type_id', $request->type_incidents_id)
+                                        ->where('is_delete', 0)
+                                        ->orderBy('updated_at', 'DESC')
+                                        ->get();
 
+                        if (count($lSubTypes) > 0) {
+                            $default = 0;
+                            foreach ($lSubTypes as $oSubType) {
+                                if ($oSubType->is_default) {
+                                    $default = $oSubType->id_sub_incident;
+                                    break;
+                                }
+                            }
+                            if ($default == 0) {
+                                $default = $lSubTypes[0]->id_sub_incident;
+                            }
+                            $incident->type_sub_inc_id = $default;
+                        }
+                        else {
+                            $incident->type_sub_inc_id = null;
+                        }
+                    }
+                }
 
                 $incident->save();
 
@@ -332,7 +365,14 @@ class incidentController extends Controller
             $lIncidentTypes = $lIncidentTypes->where('id', 22);
         }
 
-        $lIncidentTypes = $lIncidentTypes->pluck('id', 'name');
+        $lIncidentTypes = $lIncidentTypes->select('id', 'name', 'has_subtypes')
+                                        ->get();
+
+        $lSubTypes = \DB::table('type_sub_incidents')
+                        ->where('is_delete', 0)
+                        ->select('id_sub_incident', 'name', 'is_default', 'incident_type_id')
+                        ->orderBy('name', 'ASC')
+                        ->get();
 
         $datas = DB::table('incidents')
             ->join('employees', 'employees.id', "=", "incidents.employee_id")
@@ -344,7 +384,8 @@ class incidentController extends Controller
                     'incidents.start_date AS ini', 
                     'incidents.end_date AS fin', 
                     'incidents.holiday_worked_id', 
-                    'type_incidents_id AS tipo')
+                    'type_incidents_id AS tipo',
+                    'type_sub_inc_id AS subtipo')
             ->first();
 
         $oAdjust = adjust_link::where('incident_id', $datas->id)
@@ -386,6 +427,7 @@ class incidentController extends Controller
                         ->with('idIncidence', $idIncidence)
                         ->with('incidentTypeId', $incidentTypeId)
                         ->with('lIncidentTypes', $lIncidentTypes)
+                        ->with('lSubTypes', $lSubTypes)
                         ->with('lCommControl', $lCommControl)
                         ->with('holidays', $holidays)
                         ->with('iIdHoliday', $iIdHoliday)
@@ -409,11 +451,40 @@ class incidentController extends Controller
                                 ->where('incident_id', $id)
                                 ->pluck('adjust_id');
 
+            DB::beginTransaction();
+            
             prepayrollAdjust::whereIn('id', $adjust_delete)
                         ->where('is_delete', 0)
                         ->update(['is_delete' => 1]);
 
-            \DB::beginTransaction();
+            if (! isset($oIncident->type_sub_inc_id) || is_null($oIncident->type_sub_inc_id)) {
+                $oType = typeincident::find($oIncident->type_incidents_id);
+                if ($oType->has_subtypes) {
+                    $lSubTypes = DB::table('type_sub_incidents')->where('incident_type_id', $oType->id)
+                                    ->where('is_delete', 0)
+                                    ->orderBy('updated_at', 'DESC')
+                                    ->get();
+
+                    if (count($lSubTypes) > 0) {
+                        $default = 0;
+                        foreach ($lSubTypes as $oSubType) {
+                            if ($oSubType->is_default) {
+                                $default = $oSubType->id_sub_incident;
+                                break;
+                            }
+                        }
+                        if ($default == 0) {
+                            $default = $lSubTypes[0]->id_sub_incident;
+                        }
+                        $oIncident->type_sub_inc_id = $default;
+                    }
+                    else {
+                        $oIncident->type_sub_inc_id = null;
+                    }
+                }
+
+                $oIncident->save();
+            }
 
             if ($oIncident->type_incidents_id == 17) {
                 if (! is_null($oIncident->holiday_worked_id)) {
@@ -806,6 +877,33 @@ class incidentController extends Controller
                 $incident->updated_by = session()->get('user_id');
                 $incident->nts = $request->comments;
                 $incident->type_incidents_id = $request->typeIncident;
+                $incident->type_sub_inc_id = $request->type_sub_inc_id;
+                if (! isset($incident->type_sub_inc_id) || is_null($incident->type_sub_inc_id)) {
+                    $oSubType = typeincident::find($request->typeIncident);
+                    if ($oSubType->has_subtypes) {
+                        $lSubTypes = DB::table('type_sub_incidents')->where('incident_type_id', $request->typeIncident)
+                                        ->where('is_delete', 0)
+                                        ->orderBy('updated_at', 'DESC')
+                                        ->get();
+
+                        if (count($lSubTypes) > 0) {
+                            $default = 0;
+                            foreach ($lSubTypes as $oSubType) {
+                                if ($oSubType->is_default) {
+                                    $default = $oSubType->id_sub_incident;
+                                    break;
+                                }
+                            }
+                            if ($default == 0) {
+                                $default = $lSubTypes[0]->id_sub_incident;
+                            }
+                            $incident->type_sub_inc_id = $default;
+                        }
+                        else {
+                            $incident->type_sub_inc_id = null;
+                        }
+                    }
+                }
 
                 if ($incident->id > 0) {
                     $incident->update();

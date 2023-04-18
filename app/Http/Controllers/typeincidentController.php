@@ -72,12 +72,12 @@ class typeincidentController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function update(Request $request, $id)
     {
         typeincident::findOrFail($id)->update($request->all());
-        return redirect('tipos_index')->with('mensaje', 'Tipo de Incidente actualizado con exito');
+        return redirect()->route('tipos_index')->with('mensaje', 'Tipo de Incidente actualizado con exito');
     }
 
     /**
@@ -99,11 +99,12 @@ class typeincidentController extends Controller
     }
 
     public function updateIncident(Request $request)
-    {
-        $oIncident = typeincident::find($request->id_inc_type);
-        $oIncident->{$request->attribute_nm} = $request->new_value;
+    {        
         try {
-            $oIncident->save();
+            typeincident::where('id', $request->id_inc_type)->update([
+                                $request->attribute_nm => $request->new_value,
+                                'updated_at' => date('Y-m-d H:i:s')
+                            ]);
         }
         catch (\Throwable $th) {
             \Log::error($th);

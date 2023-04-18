@@ -4,8 +4,10 @@ var app = new Vue({
         vueData: oServerData,
         vueGui: oGui,
         lTypeIncidents: oServerData.lTypeIncidents,
+        lSubTypeIncidents: oServerData.lSubTypeIncidents,
         lTypeCapIncidents: oServerData.lTypeCapIncidents,
         lTypeIncidentsList: [],
+        lSubTypeIncidentsList: [],
         vRows: oServerData.lRows,
         vDates: oServerData.aDates,
         sIncidentsRoute: oServerData.sIncidentsRoute,
@@ -19,6 +21,7 @@ var app = new Vue({
         canDelete: false,
         isDisabled: false,
         showHelp: false,
+        showSubtype: false,
         sHelp: "",
         isDisabledByType: false
     },
@@ -55,7 +58,8 @@ var app = new Vue({
                                 employee_id: idEmployee,
                                 start_date: date,
                                 id: 0,
-                                is_external: false
+                                is_external: false,
+                                type_sub_inc_id: null
                             };
                 this.oldIncident = null;
                 this.canDelete = false;
@@ -70,6 +74,7 @@ var app = new Vue({
             }
 
             this.bSavedStatus = this.isDisabled;
+            this.onTypeChange();
             $("#incidentsModal").modal("show");
         },
         onTypeChange() {
@@ -85,6 +90,20 @@ var app = new Vue({
                     this.showHelp = false;
                     this.sHelp = "";
                     break;
+            }
+
+            this.lSubTypeIncidentsList = [];
+            this.showSubtype = false;
+            for (const oType of this.lTypeIncidents) {
+                if (oType.id == this.oEvent.type_id && oType.has_subtypes) {
+                    for (const oSubType of this.lSubTypeIncidents) {
+                        if (oSubType.incident_type_id == oType.id) {
+                            this.lSubTypeIncidentsList.push(oSubType);
+                            this.showSubtype = true;
+                        }
+                    }
+                    break;
+                }
             }
         },
         store() {

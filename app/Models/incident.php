@@ -8,7 +8,7 @@ class incident extends Model
 {
     protected $table = 'incidents';
     protected $primaryKey = 'id';
-    protected $fillable = ['type_incidents_id','start_date','end_date','employee_id','is_delete'];
+    protected $fillable = ['type_incidents_id','start_date','end_date','employee_id','is_delete', 'type_sub_inc_id'];
     
     public function typeincident(){
         return $this->belongsTo('App\Models\typeincident','type_incidents_id');

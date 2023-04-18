@@ -55,7 +55,10 @@
     <script>
         function GlobalData () {
             this.incidentTypeId = 0;
+            this.lIncidentTypes = <?php echo json_encode($lIncidentTypes) ?>;
+            this.lSubTypes = <?php echo json_encode($lSubTypes) ?>;
             this.lCommControl = <?php echo json_encode($lCommControl) ?>;
+            this.iSubTypeId = 0;
             this.isEditing = false;
         }
 

@@ -2564,7 +2564,12 @@ class ReporteController extends Controller
 
             // Incidencias permitidas en CAP
             $lTypeCapIncidents = \DB::table('type_incidents')
-                                        ->whereIn('id', [12, 14, 15, 16, 17, 18, 19, 20, 22, 23, 24, 25])
+                                        ->where('is_cap_edit', true)
+                                        ->orderBy('name', 'ASC')
+                                        ->get();
+
+            $lSubTypeIncidents = \DB::table('type_sub_incidents')
+                                        ->where('is_delete', false)
                                         ->orderBy('name', 'ASC')
                                         ->get();
 
@@ -2576,6 +2581,7 @@ class ReporteController extends Controller
                                                             'sEndDate' => $sEndDate,
                                                             'route' => $route,
                                                             'lTypeIncidents' => $lTypeIncidents,
+                                                            'lSubTypeIncidents' => $lSubTypeIncidents,
                                                             'lTypeCapIncidents' => $lTypeCapIncidents,
                                                             'routeStore' => $routeStore,
                                                             'routeDelete' => $routeDelete,
