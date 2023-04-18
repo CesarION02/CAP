@@ -202,13 +202,17 @@ class incidentController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
      */
     public function store(Request $request)
     {
         foreach ($request->all() as $elem) {
             if (is_null($elem)) {
                 return redirect()->back()->withErrors('Debe llenar todos los campos del formulario');
+            }
+
+            if ($request->type_incidents_id == 0 || is_null($request->type_incidents_id) || !isset($request->type_incidents_id)) {
+                return redirect()->back()->withErrors('Debe seleccionar un tipo de incidencia');
             }
         }
 
