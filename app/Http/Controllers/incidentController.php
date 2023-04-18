@@ -254,7 +254,7 @@ class incidentController extends Controller
                 }
                 $incident->created_by = session()->get('user_id');
                 $incident->updated_by = session()->get('user_id');
-                if (! isset($incident->type_sub_inc_id) || is_null($incident->type_sub_inc_id)) {
+                if (! isset($incident->type_sub_inc_id) || is_null($incident->type_sub_inc_id) || $incident->type_sub_inc_id == 0) {
                     $oSubType = typeincident::find($request->type_incidents_id);
                     if ($oSubType->has_subtypes) {
                         $lSubTypes = DB::table('type_sub_incidents')->where('incident_type_id', $request->type_incidents_id)
@@ -882,7 +882,7 @@ class incidentController extends Controller
                 $incident->nts = $request->comments;
                 $incident->type_incidents_id = $request->typeIncident;
                 $incident->type_sub_inc_id = $request->type_sub_inc_id;
-                if (! isset($incident->type_sub_inc_id) || is_null($incident->type_sub_inc_id)) {
+                if (! isset($incident->type_sub_inc_id) || is_null($incident->type_sub_inc_id) || $incident->type_sub_inc_id == 0) {
                     $oSubType = typeincident::find($request->typeIncident);
                     if ($oSubType->has_subtypes) {
                         $lSubTypes = DB::table('type_sub_incidents')->where('incident_type_id', $request->typeIncident)
