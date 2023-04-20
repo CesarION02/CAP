@@ -5,6 +5,7 @@ use App\Models\commentsControl;
 use App\SData\SOverJourneyCore;
 use App\SUtils\SDateTimeUtils;
 use App\SUtils\SDelayReportUtils;
+use App\SUtils\SIncidentsUtils;
 use App\SUtils\SPrepayrollAdjustUtils;
 use App\SUtils\SRegistryRow;
 use App\SUtils\SReportsUtils;
@@ -959,14 +960,23 @@ class SDataProcess {
             if (sizeof($lAbsences) > 0) {
                 // $incidentsType = \DB::table('type_incidents')->get();
                 foreach ($lAbsences as $absence) {
-                    $key = explode("_", $absence->external_key);
-
+                    
                     $abs = [];
                     $abs['id'] = $absence->id;
-                    $abs['id_emp'] = $key[0];
-                    $abs['id_abs'] = $key[1];
-                    $abs['is_external'] = $absence->external_key != "0_0";
+                    if ($absence->is_external) {
+                        $key = explode("_", $absence->external_key);
+
+                        $abs['id_emp'] = $key[0];
+                        $abs['id_abs'] = $key[1];
+                    }
+                    else {
+                        $abs['id_emp'] = 0;
+                        $abs['id_abs'] = 0;
+                    }
+                    
+                    $abs['is_external'] = $absence->is_external;
                     $abs['nts'] = $absence->nts;
+                    $abs['adj_comments'] = null;
                     $abs['type_name'] = $absence->type_name;
                     $abs['type_id'] = $absence->type_id;
                     $abs['is_allowed'] = $absence->is_allowed;
@@ -976,6 +986,15 @@ class SDataProcess {
                     $oRow->others = $oRow->others."".$absence->type_name.(! is_null($absence->type_sub_inc_id) ? (" (" . $absence->sub_type_name . ")") : "").". ";
 
                     // $incident = $incidentsType->where('id',$absence->type_id)->first();
+                    $lIncAdjusts = SIncidentsUtils::getIncidentAdjusts($absence->id);
+                    if (count($lIncAdjusts) > 0) {
+                        $oAdjust = $lIncAdjusts->where('adjust_type_id', \SCons::PP_TYPES['COM'])
+                                    ->first();
+
+                        if (! is_null($oAdjust)) {
+                            $abs['adj_comments'] = $oAdjust->comments;
+                        }
+                    }
 
                     if ($comments != null) {
                         if ($comments->where('key_code',$absence->type_id)->first()['value']) {

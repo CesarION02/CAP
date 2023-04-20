@@ -57,3 +57,18 @@ Route::group(['middleware' => 'auth:api'], function() {
         'uses' => 'AccessControlController@getAllInfoById'
     ]);
 });
+
+Route::group(['middleware' => 'auth:api'], function() {
+
+    /**
+     * API External Incidents
+    */
+
+    /*
+    * save incidents
+    **/
+    Route::post('saveincident', [
+        'uses' => 'api\\ExternalIncidentsController@saveIncident'
+    ]);
+});
+

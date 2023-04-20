@@ -316,10 +316,13 @@ class prePayrollController extends Controller
     {
         $lAbsences = DB::table('incidents AS i')
             ->join('type_incidents AS ti', 'i.type_incidents_id', '=', 'ti.id')
+            ->leftJoin('incident_ext_sys_links AS iel', 'i.id', '=', 'iel.incident_id')
             ->leftJoin('type_sub_incidents AS tsi', 'i.type_sub_inc_id', '=', 'tsi.id_sub_incident')
             ->where('employee_id', $idEmployee)
             ->whereRaw("'" . $sDate . "' BETWEEN start_date AND end_date")
-            ->select('i.external_key', 
+            ->select('iel.external_key', 
+                    'iel.external_system',
+                    'i.is_external',
                     'i.nts', 
                     'ti.name AS type_name', 
                     'i.id', 
@@ -354,9 +357,10 @@ class prePayrollController extends Controller
         $lAbsences = DB::table('incidents AS i')
             ->join('incidents_day AS iday', 'i.id', '=', 'iday.incidents_id')
             ->join('type_incidents AS ti', 'i.type_incidents_id', '=', 'ti.id')
+            ->leftJoin('incident_ext_sys_links AS iel', 'i.id', '=', 'iel.incident_id')
             ->where('employee_id', $idEmployee)
             ->where('iday.date', $sDate)
-            ->select('i.external_key', 'i.nts', 'ti.name AS type_name', 'i.id', 'ti.id AS type_id', 'ti.is_allowed')
+            ->select('iel.external_key', 'i.nts', 'ti.name AS type_name', 'i.id', 'ti.id AS type_id', 'ti.is_allowed')
             ->where('i.is_delete', false)
             ->orderBy('ti.is_agreement', 'ASC')
             ->orderBy('created_by', 'DESC')

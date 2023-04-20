@@ -45,6 +45,11 @@ var app = new Vue({
 
             if (Array.isArray(aEvents) && aEvents.length > 0) {
                 this.oEvent = aEvents[0];
+                this.oEvent.employee_id = idEmployee;
+                this.oEvent.start_date = date;
+                if (!! this.oEvent.adj_comments) {
+                    this.oEvent.nts = this.oEvent.adj_comments;
+                }
                 this.oldIncident = this.oEvent.type_id;
                 this.canDelete = true;
             }
@@ -58,6 +63,7 @@ var app = new Vue({
                                 employee_id: idEmployee,
                                 start_date: date,
                                 id: 0,
+                                nts: "",
                                 is_external: false,
                                 type_sub_inc_id: null
                             };
