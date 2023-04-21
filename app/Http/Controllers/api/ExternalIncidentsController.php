@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\api;
 
+use App\Http\Controllers\Controller;
 use App\Http\Controllers\SyncController;
 use App\Models\employees;
 use App\Models\incident;
@@ -9,7 +10,6 @@ use App\Models\incidentDay;
 use App\Models\IncidentExtSysLink;
 use App\SValidations\SIncidentValidations;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 
 class ExternalIncidentsController extends Controller

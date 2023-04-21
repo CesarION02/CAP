@@ -70,5 +70,12 @@ Route::group(['middleware' => 'auth:api'], function() {
     Route::post('saveincident', [
         'uses' => 'api\\ExternalIncidentsController@saveIncident'
     ]);
+
+    /*
+    * save adjust
+    **/
+    Route::post('saveadjust', [
+        'uses' => 'api\\ExternalAdjustsController@saveAdjust'
+    ]);
 });
 

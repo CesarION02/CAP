@@ -1214,8 +1214,8 @@ class SDataProcess {
                     $date = $oRow->inDate == null ? $oRow->inDateTime : $oRow->inDate;
                     $time = strlen($oRow->inDateTime) > 10 ? substr($oRow->inDateTime, -8) : null;
                     $adjs = SPrepayrollAdjustUtils::getAdjustsOfRow($date, $date, $oRow->idEmployee, \SCons::PP_TYPES['OR']);
-
-                    if (count($adjs) > 0) {
+                    $normalAdjusts = count(collect($adjs)->where('minutes', 0));
+                    if ($normalAdjusts > 0) {
                         foreach ($adjs as $adj) {
                             if (! in_array($adj->id, $consumAdjs)) {
                                 if ($adj->apply_to == 1) {
@@ -1228,6 +1228,24 @@ class SDataProcess {
                                 }
                             }
                         }
+                    }
+                    else {
+                        $specialAdjusts = count(collect($adjs)->where('minutes', '>', 0));
+                        $justifiedMins = 0;
+                        if ($specialAdjusts > 0) {
+                            foreach ($adjs as $adj) {
+                                if ($adj->apply_to == 1) {
+                                    if ($adj->dt_date == $date) {
+                                        if ($time == $adj->dt_time) {
+                                            $justifiedMins += $adj->minutes;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        $mins = $justifiedMins > $mins ? 0 : $mins - $justifiedMins;
+                        $hasDelay = $mins > 0;
                     }
 
                     if ($hasDelay) {
@@ -1246,7 +1264,17 @@ class SDataProcess {
 
                 // minutos de salida anticipada
                 if ($oRow->hasCheckOut) {
-                    $oRow->prematureOut = SDataProcess::getPrematureTime($oRow->outDateTime, $oRow->outDateTimeSch);
+                    $minsPrematureOut = SDataProcess::getPrematureTime($oRow->outDateTime, $oRow->outDateTimeSch);
+                    $justifiedMins = 0;
+                    $date = $oRow->outDate == null ? $oRow->outDateTime : $oRow->outDate;
+                    $time = strlen($oRow->outDateTime) > 10 ? substr($oRow->outDateTime, -8) : null;
+                    $adjs = SPrepayrollAdjustUtils::getAdjustForCase($oRow->outDate, $time, 2, \SCons::PP_TYPES['JSA'], $oRow->idEmployee);
+                    if (count($adjs) > 0) {
+                        foreach ($adjs as $adj) {
+                            $justifiedMins += $adj->minutes;
+                        }
+                    }
+                    $oRow->prematureOut = $justifiedMins > $minsPrematureOut ? 0 : ($minsPrematureOut - $justifiedMins);
                 }
                 else {
                     $oRow->prematureOut = null; 

@@ -268,6 +268,7 @@ class incidentController extends Controller
                     $adjust->apply_to = 2;
                     $adjust->comments = $request->comentarios;
                     $adjust->is_delete = 0;
+                    $adjust->is_external = 0;
                     $adjust->adjust_type_id = \SCons::PP_TYPES['COM'];
                     $adjust->apply_time = 0;
                     $adjust->created_by = session()->get('user_id');
@@ -482,6 +483,7 @@ class incidentController extends Controller
                     $adjust->apply_to = 2;
                     $adjust->comments = $request->comentarios;
                     $adjust->is_delete = 0;
+                    $adjust->is_external = 0;
                     $adjust->adjust_type_id = \SCons::PP_TYPES['COM'];
                     $adjust->apply_time = 0;
                     $adjust->created_by = session()->get('user_id');
@@ -904,6 +906,7 @@ class incidentController extends Controller
                         $adjust->apply_to = 2;
                         $adjust->comments = $request->comments;
                         $adjust->is_delete = 0;
+                        $adjust->is_external = 0;
                         $adjust->adjust_type_id = \SCons::PP_TYPES['COM'];
                         $adjust->apply_time = 0;
                         $adjust->created_by = session()->get('user_id');
