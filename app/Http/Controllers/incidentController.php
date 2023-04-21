@@ -248,7 +248,7 @@ class incidentController extends Controller
             $incident = new incident($request->all());
             $incident = SIncidentValidations::manageIncident($incident, $request->comentarios, $idHolidayWorked);
             $incident->is_external = false;
-            $incident->cls_inc_id = 1;
+            $incident->is_delete = 0;
             $incident->created_by = session()->get('user_id');
             $incident->updated_by = session()->get('user_id');
 
@@ -690,8 +690,6 @@ class incidentController extends Controller
 
     public function daysIncidents($incident_id,$ini,$fin,$employee_id)
     {
-        
-
         $oStartDate = Carbon::parse($ini.' 00:00:00');
         $oEndDate = Carbon::parse($fin.' 00:00:00');
         $oDate = clone $oStartDate;
@@ -710,7 +708,6 @@ class incidentController extends Controller
             $dayCounter++;
             $oDate->addDay();
         }
-
     }
 
     public function saveDays($oIncident)
@@ -723,7 +720,7 @@ class incidentController extends Controller
 
         $days = [];
         $dayCounter = 1;
-        while ($oDate->lessThanOrEqualTo($oEndDate) && $dayCounter <= $oIncident->eff_day) {
+        while ($oDate->lessThanOrEqualTo($oEndDate) && ($dayCounter <= $oIncident->eff_day || ($oIncident->cls_inc_id == \SCons::CL_VACATIONS && ! $oIncident->is_external))) {
             $sDate = $oDate->toDateString();
 
             switch ($oIncident->cls_inc_id) {
@@ -737,8 +734,7 @@ class incidentController extends Controller
                     ];
 
                     $result = SDelayReportUtils::getSchedule($sDate, $sDate, $oIncident->employee_id, $registryAux, clone $qWorkshifts, \SCons::REP_HR_EX);
-
-                    if ($result == null || ($result->auxScheduleDay != null && !$result->auxScheduleDay->is_active)) {
+                    if (is_null($result) || (!is_null($result->auxScheduleDay) && !$result->auxScheduleDay->is_active)) {
                         break;
                     }
 
@@ -758,6 +754,11 @@ class incidentController extends Controller
 
             // SPrepayrollAdjustUtils::verifyProcessedData($oIncident->employee_id, $sDate);
             $oDate->addDay();
+        }
+
+        if ($oIncident->cls_inc_id == \SCons::CL_VACATIONS && ! $oIncident->is_external && $oIncident->eff_days == 0) {
+            $oIncident->eff_day = $dayCounter - 1;
+            $oIncident->save();
         }
 
         if (sizeof($days) > 0) {
@@ -868,6 +869,7 @@ class incidentController extends Controller
                 }
                 else {
                     $incident->is_external = false;
+                    $incident->is_delete = 0;
                     $incident->cls_inc_id = 1;
                     $incident->employee_id = $request->employee_id;
                     $incident->created_by = session()->get('user_id');

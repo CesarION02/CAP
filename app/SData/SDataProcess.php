@@ -955,7 +955,7 @@ class SDataProcess {
                 $sDt = Carbon::parse($oRow->outDateTimeSch);
             }
 
-            $lAbsences = prePayrollController::searchAbsence($oRow->idEmployee, $sDt->toDateString());
+            $lAbsences = prePayrollController::searchAbsenceByDay($oRow->idEmployee, $sDt->toDateString());
                     
             if (sizeof($lAbsences) > 0) {
                 // $incidentsType = \DB::table('type_incidents')->get();

@@ -19,6 +19,7 @@ use Carbon\Carbon;
 use DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Mpdf\Tag\Pre;
 use Validator;
 class prePayrollController extends Controller
 {
@@ -334,7 +335,7 @@ class prePayrollController extends Controller
                 )
             ->where('i.is_delete', false)
             ->orderBy('ti.is_agreement', 'ASC')
-            ->orderBy('created_by', 'DESC')
+            ->orderBy('i.created_at', 'DESC')
             ->orderBy('i.id', 'ASC')
             // Se determinó en algún momento que solo podría haber una incidencia por día
             ->take(1)
@@ -348,23 +349,61 @@ class prePayrollController extends Controller
      * regresa un arreglo con las incidencias correspondientes
      *
      * @param int $idEmployee
-     * @param String $sDate
+     * @param string $sDate
      * 
      * @return '\App\Models\incident' array
      */
     public static function searchAbsenceByDay($idEmployee, $sDate)
     {
         $lAbsences = DB::table('incidents AS i')
+                        ->where('employee_id', $idEmployee)
+                        ->whereRaw("'" . $sDate . "' BETWEEN start_date AND end_date")
+                        ->where('i.is_delete', false)
+                        ->orderBy('created_at', 'DESC')
+                        ->orderBy('i.id', 'ASC')
+                        // Se determinó en algún momento que solo podría haber una incidencia por día
+                        ->take(1)
+                        ->get();
+        
+        if (count($lAbsences) == 0) {
+            return $lAbsences;
+        }
+
+        $lAbsences = DB::table('incidents_day')
+                            ->where('incidents_id', $lAbsences[0]->id)
+                            ->where('is_delete', 0)
+                            ->get();
+
+        if (count($lAbsences) == 0) {
+            return prePayrollController::searchAbsence($idEmployee, $sDate);
+        }
+
+        $lAbsences = DB::table('incidents AS i')
             ->join('incidents_day AS iday', 'i.id', '=', 'iday.incidents_id')
             ->join('type_incidents AS ti', 'i.type_incidents_id', '=', 'ti.id')
             ->leftJoin('incident_ext_sys_links AS iel', 'i.id', '=', 'iel.incident_id')
+            ->leftJoin('type_sub_incidents AS tsi', 'i.type_sub_inc_id', '=', 'tsi.id_sub_incident')
             ->where('employee_id', $idEmployee)
             ->where('iday.date', $sDate)
-            ->select('iel.external_key', 'i.nts', 'ti.name AS type_name', 'i.id', 'ti.id AS type_id', 'ti.is_allowed')
+            ->select('iel.external_key', 
+                    'iel.external_system',
+                    'i.is_external',
+                    'i.nts', 
+                    'ti.name AS type_name', 
+                    'i.id', 
+                    'i.type_sub_inc_id',
+                    'ti.id AS type_id', 
+                    'ti.is_allowed', 
+                    'ti.is_payable',
+                    'tsi.name AS sub_type_name'
+                )
             ->where('i.is_delete', false)
+            ->where('iday.is_delete', false)
             ->orderBy('ti.is_agreement', 'ASC')
-            ->orderBy('created_by', 'DESC')
+            ->orderBy('i.created_at', 'DESC')
             ->orderBy('i.id', 'ASC')
+            // Se determinó en algún momento que solo podría haber una incidencia por día
+            ->take(1)
             ->get();
 
         return $lAbsences;

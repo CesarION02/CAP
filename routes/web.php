@@ -512,4 +512,6 @@ Route::get('accessdatatrigger', 'ReporteController@AccesoPuertasGenerar')->name(
 Route::get('reportejornadas', 'TestController@report')->name('test_report');
 Route::get('reportejornadasschedule', 'TestController@scheduleTasks')->name('test_sche');
 
+Route::get('resavedays', 'TestController@reSaveDays')->name('resave_days');
+
 });
