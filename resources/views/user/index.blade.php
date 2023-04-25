@@ -7,8 +7,7 @@ Usuarios
 <script src="https://cdn.jsdelivr.net/npm/select2@4.0.12/dist/js/select2.min.js"></script>
 <script src="{{ asset("assets/pages/scripts/SGui.js") }}" type="text/javascript"></script>
 <script src="{{asset("assets/pages/scripts/admin/datatable/indexFingerActivar.js")}}" type="text/javascript"></script>
-<script src="{{asset("assets/pages/scripts/admin/datatable/index.js")}}" type="text/javascript"></script>
-<script src="{{asset("assets/pages/scripts/admin/datatable/index.js")}}" type="text/javascript"></script>
+
 <script src="{{asset("assets/pages/scripts/filter.js")}}" type="text/javascript"></script>
 <script src="{{ asset("dt/datatables.js") }}" type="text/javascript"></script>
 <script src="{{ asset('dt/dataTables.buttons.min.js') }}"></script>
@@ -69,6 +68,46 @@ Usuarios
         });
         
         $('.js-example-basic-multiple').select2();
+    });
+</script>
+<script>
+    $(document).ready(function() {
+        $("#myTable").on('submit', '.form-eliminar', function() {
+            event.preventDefault();
+            const form = $(this);
+            swal({
+                title: '¿Está seguro que desea desactivar el registro?',
+                text: "¡Esta acción se puede deshacer!",
+                icon: 'warning',
+                buttons: {
+                    cancel: "Cancelar",
+                    confirm: "Aceptar"
+                },
+            }).then((value) => {
+                if (value) {
+                    ajaxRequest(form);
+                }
+            });
+        });
+    
+        function ajaxRequest(form) {
+            $.ajax({
+                url: form.attr('action'),
+                type: 'POST',
+                data: form.serialize(),
+                success: function(respuesta) {
+                    if (respuesta.mensaje == "ok") {
+                        form.parents('tr').remove();
+                        Checador.notificaciones('El registro fue eliminado correctamente', 'Checador', 'success');
+                    } else {
+                        Checador.notificaciones('El registro no pudo ser eliminado, hay recursos usandolo', 'Checador', 'error');
+                    }
+                },
+                error: function() {
+    
+                }
+            });
+        }
     });
 </script>
 <script>
@@ -178,7 +217,7 @@ Usuarios
                                 @elseif($iFilter == 1)
                                 <form action="{{route('eliminar_usuario', ['id' => $data->id])}}" class="d-inline form-eliminar" method="POST">
                                     @csrf @method("delete")
-                                    <button type="submit" class="btn-accion-tabla eliminar tooltipsC" title="Eliminar este registro">
+                                    <button type="submit" class="btn-accion-tabla eliminar tooltipsC" title="Descactivar este registro">
                                         <i class="fa fa-fw fa-trash text-danger"></i>
                                     </button>
                                 </form>

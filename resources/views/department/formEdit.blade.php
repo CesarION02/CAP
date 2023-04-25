@@ -49,6 +49,16 @@
 </div>
 </div>
 <div class="form-group">
+    <label for="employee_id" class="col-lg-3 control-label requerido">Grupo departamento:</label>
+    <div class="col-lg-8">
+        <select id="group_dept_id" name="group_dept_id" class="form-control select2-class" required>
+            @foreach($groupDept as $group)
+                        <option selected value="{{ $group->id }}"  > {{$group->name}}</option>
+            @endforeach
+        </select>
+    </div>
+</div>
+<div class="form-group">
 <label for="name" class="col-lg-3 control-label requerido">Encargado:</label>
 <div class="col-lg-8">
     @if(isset($data))
