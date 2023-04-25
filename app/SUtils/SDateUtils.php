@@ -241,18 +241,25 @@ class SDateUtils {
                         // ->where('year', $oDate->year)
                         ->where('is_delete', false)
                         ->orderBy('dt_cut', 'ASC')
-                        ->take(1)
-                        ->get();
+                        ->first();
 
-            $oNumber = $quin[0];
+            if (is_null($quin)) {
+                throw new \Exception("No existe un corte de quincena para la fecha ". $dtDate . ", contacte al encargado de nóminas.", 501);
+            }
+
+            $oNumber = $quin;
         }
         else {
             $week = \DB::table('week_cut AS wc')
                         ->whereRaw("'".$oDate->toDateString()."' BETWEEN ini AND fin")
                         // ->where('year', $oDate->year)
-                        ->get();
+                        ->first();
 
-            $oNumber = $week[0];
+            if (is_null($week)) {
+                throw new \Exception("No existe un corte de semana para la fecha ". $dtDate . ", contacte al encargado de nóminas.", 501);
+            }
+
+            $oNumber = $week;
         }
 
         return [$oNumber->num, $oNumber->year];

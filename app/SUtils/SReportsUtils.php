@@ -3,6 +3,7 @@
 use App\Http\Controllers\prePayrollController;
 use App\SData\SDataProcess;
 use App\SUtils\SDateTimeUtils;
+use Carbon\Carbon;
 
 class SReportsUtils {
 
@@ -50,12 +51,16 @@ class SReportsUtils {
      * de los atributos que se tienen que mostrar.
      *
      * @param array $lRows
-     * @param array $lEmployees
+     * @param \Illuminate\Support\Collection $lEmployees
+     * @param string $startDate
+     * @param string $endDate
      * 
-     * @return array
+     * @return \Illuminate\Support\Collection
      */
-    public static function resumeReportRows($lRows, $lEmployees)
+    public static function resumeReportRows($lRows, $lEmployees, $startDate, $endDate)
     {
+        $iDaysInPeriod = Carbon::parse($startDate)->diffInDays(Carbon::parse($endDate)) + 1;
+
         foreach ($lEmployees as $lEmployee) {
             $delayTot = 0;
             $prematureOutTot = 0;
@@ -71,8 +76,9 @@ class SReportsUtils {
             $countVacations = 0;
             $countAbsenceByEvent = 0;
             $countInability = 0;
-            $countPayableEvents = 0;
-            $countNoPayableEvents = 0;
+            // $countPayableEvents = 0;
+            // $countNoPayableEvents = 0;
+            $countDaysToPay = $iDaysInPeriod;
 
             $lEmpRows = clone collect($lRows);
             $lRowsOfEmployee = $lEmpRows->where('idEmployee', $lEmployee->id);
@@ -87,6 +93,8 @@ class SReportsUtils {
 
                 if ($oRow->hasAbsence) {
                     $absences++;
+                    $countDaysToPay--;
+                    $noPayableEvents .= (strlen($noPayableEvents) > 0 ? "-" : "") . "Falta";
                 }
 
                 foreach ($oRow->events as $aEvent) {
@@ -95,6 +103,7 @@ class SReportsUtils {
                         case \SCons::INC_TYPE['INA_S_PER']: // INASIST. S/PERMISO
                             $absenceByEvent .= $oEvent->type_name.(!is_null($oEvent->nts) && !empty($oEvent->nts) ? ("-".$oEvent->nts) : "").", ";
                             $countAbsenceByEvent++;
+                            $noPayableEvents .= $oEvent->type_name.(! is_null($oEvent->nts) && !empty($oEvent->nts) ? ("-".$oEvent->nts) : "").", ";
                             break;
 
                         case \SCons::INC_TYPE['INA_C_PER_SG']: // INASIST. C/PERMISO S/GOCE
@@ -102,7 +111,7 @@ class SReportsUtils {
                         case \SCons::INC_TYPE['INA_AD_SUSP']: // INASIST. ADMTIVA. SUSPENSIÓN
                         case \SCons::INC_TYPE['INA_AD_OT']: // INASIST. ADMTIVA. OTROS
                             $noPayableEvents .= $oEvent->type_name.(! is_null($oEvent->nts) && !empty($oEvent->nts) ? ("-".$oEvent->nts) : "").", ";
-                            $countNoPayableEvents++;
+                            // $countNoPayableEvents++;
                             break;
 
                         case \SCons::INC_TYPE['DESCANSO']: // DESCANSO
@@ -123,12 +132,13 @@ class SReportsUtils {
                         case \SCons::INC_TYPE['ONOM_CAP']: // ONOMÁSTICO
                         case \SCons::INC_TYPE['ONOM_EXT']: // ONOMÁSTICO
                             $payableEvents .= $oEvent->type_name.(! is_null($oEvent->nts) && !empty($oEvent->nts) ? ("-".$oEvent->nts) : "").", ";
-                            $countPayableEvents++;
+                            // $countPayableEvents++;
                             break;
 
                         case \SCons::INC_TYPE['INC_CAP']: // INCAPACIDAD
                             $inability .= $oEvent->type_name.(! is_null($oEvent->nts) && !empty($oEvent->nts) ? ("-".$oEvent->nts) : "").", ";
                             $countInability++;
+                            $noPayableEvents .= $oEvent->type_name.(! is_null($oEvent->nts) && !empty($oEvent->nts) ? ("-".$oEvent->nts) : "").", ";
                             break;
 
                         case \SCons::INC_TYPE['VAC']: // VACACIONES
@@ -141,6 +151,10 @@ class SReportsUtils {
                         default:
                             # code...
                             break;
+                    }
+
+                    if (! $oEvent->is_payable) {
+                        $countDaysToPay--;
                     }
                 }
             }
@@ -159,8 +173,9 @@ class SReportsUtils {
             $lEmployee->countVacations = $countVacations;
             $lEmployee->countAbsenceByEvent = $countAbsenceByEvent;
             $lEmployee->countInability = $countInability;
-            $lEmployee->countPayableEvents = $countPayableEvents;
-            $lEmployee->countNoPayableEvents = $countNoPayableEvents;
+            // $lEmployee->countPayableEvents = $countPayableEvents;
+            // $lEmployee->countNoPayableEvents = $countNoPayableEvents;
+            $lEmployee->countDaysToPay = $countDaysToPay;
         }
 
         return $lEmployees;

@@ -970,6 +970,7 @@ class SDataProcess {
                     $abs['type_name'] = $absence->type_name;
                     $abs['type_id'] = $absence->type_id;
                     $abs['is_allowed'] = $absence->is_allowed;
+                    $abs['is_payable'] = $absence->is_payable;
                     $oRow->others = $oRow->others."".$absence->type_name.". ";
 
                     // $incident = $incidentsType->where('id',$absence->type_id)->first();

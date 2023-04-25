@@ -2,20 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Carbon\Carbon;
+use App\Http\Requests\ValidacionTypeincident;
+use App\Models\adjust_link;
+use App\Models\company;
+use App\Models\employees;
+use App\Models\holidayworked;
 use App\Models\incident;
 use App\Models\incidentDay;
-use App\SUtils\SDelayReportUtils;
-use App\Models\typeincident;
-use App\Models\employees;
-use App\Models\company;
-use App\Http\Requests\ValidacionTypeincident;
-use App\SUtils\SPrepayrollAdjustUtils;
-use DB;
 use App\Models\prepayrollAdjust;
-use App\Models\adjust_link;
-use App\Models\holidayworked;
+use App\Models\typeincident;
+use App\SUtils\SDelayReportUtils;
+use App\SUtils\SPrepayrollAdjustUtils;
+use Carbon\Carbon;
+use DB;
+use Illuminate\Http\Request;
 
 class incidentController extends Controller
 {
@@ -125,6 +125,12 @@ class incidentController extends Controller
      */
     public function create($incidentType = 0)
     {
+        $employees = DB::table('employees')
+                        ->join('departments', 'departments.id', '=', 'employees.department_id')
+                        ->where('is_active', true)
+                        ->select('employees.name AS name', 'employees.id AS num', 'employees.num_employee')
+                        ->orderBy('name', 'ASC');
+
         if (session()->get('rol_id') != 1) {
             if (session()->get('rol_id') != 16) {
                 $numero = session()->get('name');
@@ -140,34 +146,20 @@ class incidentController extends Controller
                     $Adgu[$i] = $dgu[$i]->id;
                 }
 
-                $employees = DB::table('employees')
-                    ->join('departments', 'departments.id', '=', 'employees.department_id')
-                    ->whereIn('departments.dept_group_id', $Adgu)
-                    ->where('is_active', true)
-                    ->orderBy('name', 'ASC')
-                    ->select('employees.name AS name', 'employees.id AS num', 'employees.num_employee')
-                    ->get();
+                $employees = $employees->whereIn('departments.dept_group_id', $Adgu)->get();
             }
             else {
-                $employees = DB::table('employees')
-                    ->join('departments', 'departments.id', '=', 'employees.department_id')
-                    ->where('is_active', true)
-                    ->orderBy('name', 'ASC')
-                    ->select('employees.name AS name', 'employees.id AS num', 'employees.num_employee')
-                    ->get();
+                $employees = $employees->get();
             }
         }
         else {
-            $employees = DB::table('employees')
-                ->join('departments', 'departments.id', '=', 'employees.department_id')
-                ->where('is_active', true)
-                ->orderBy('name', 'ASC')
-                ->select('employees.name AS name', 'employees.id AS num', 'employees.num_employee')
-                ->get();
+            $employees = $employees->get();
         }
 
+        // Obtiene la configuración de las incidencias que deben ingresar un comentario obligatorio
         $lCommControl = \DB::table('comments_control')->where('value', 1)
-                                                        ->select('id_commentControl AS id')
+                                                        ->select('key_code AS id')
+                                                        ->whereRaw('key_code REGEXP "^[0-9]+$"')
                                                         ->pluck('id');
         
         // Obtiene los días festivos
@@ -180,14 +172,11 @@ class incidentController extends Controller
                                                     ->orderBy('comment', 'ASC')
                                                     ->get();
 
-        $lIncidentTypes = typeincident::orderBy('name', 'ASC');
+        $lIncidentTypes = typeincident::orderBy('name', 'ASC')
+                                        ->where('is_cap_edit', true);
+
         if (session()->get('rol_id') == 16) {
             $lIncidentTypes = $lIncidentTypes->where('id', 22);
-        }
-        else {
-            if ($incidentType > 0) {
-                $lIncidentTypes = $lIncidentTypes->where('is_agreement', 1);
-            }
         }
 
         $lIncidentTypes = $lIncidentTypes->pluck('id', 'name');
@@ -205,107 +194,119 @@ class incidentController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
      */
     public function store(Request $request)
     {
-        foreach($request->all() as $elem){
-            if(is_null($elem)){
+        foreach ($request->all() as $elem) {
+            if (is_null($elem)) {
                 return redirect()->back()->withErrors('Debe llenar todos los campos del formulario');
             }
+
+            if ($request->type_incidents_id == 0 || is_null($request->type_incidents_id) || !isset($request->type_incidents_id)) {
+                return redirect()->back()->withErrors('Debe seleccionar un tipo de incidencia');
+            }
         }
-        $ini = $request->start_date;
-        $fin = $request->end_date;
-        $incidents = DB::table('incidents')
-                ->where('employee_id','=',$request->employee_id)
-                ->where(function ($query) use ($ini,$fin) {
-                    $query->whereIn('incidents.start_date',[$ini,$fin])
-                        ->orwhereIn('incidents.end_date',[$ini,$fin]);
+
+        try {
+            \DB::beginTransaction();
+
+            $ini = $request->start_date;
+            $fin = $request->end_date;
+            $incidents = DB::table('incidents')
+                ->where('employee_id', '=', $request->employee_id)
+                ->where(function ($query) use ($ini, $fin) {
+                    $query->whereIn('incidents.start_date', [$ini, $fin])
+                        ->orwhereIn('incidents.end_date', [$ini, $fin]);
                 })
-                ->where('is_delete',0)
-                ->get();
-        
-        $holidays = DB::table('holidays')
-                ->whereIn('fecha',[$request->start_date,$request->end_date])
-                ->where('is_delete',0)
+                ->where('is_delete', 0)
                 ->get();
 
-        if( count($incidents) == 0 && count($holidays) == 0 ){
-            if($request->type_incidents_id == 17){
-                $holiday_worked = new holidayworked();
-                $holiday_worked->employee_id = $request->employee_id;
-                $holiday_worked->holiday_id = $request->holiday_id;
-                $holiday_worked->number_assignments = 0;
-                $holiday_worked->is_delete = 0;
-                $holiday_worked->save();
-            }
+            $holidays = DB::table('holidays')
+                ->whereIn('fecha', [$request->start_date, $request->end_date])
+                ->where('is_delete', 0)
+                ->get();
 
-            $incident = new incident($request->all());
-            $incident->external_key = "0_0";
-            $incident->cls_inc_id = 1;
-            if($request->type_incidents_id == 17){
-                $incident->holiday_worked_id = $holiday_worked->id;
-            }
-            $incident->created_by = session()->get('user_id');
-            $incident->updated_by = session()->get('user_id');
-
-
-            $incident->save();
-
-            //inserción de comentarios
-
-            $dateI = Carbon::parse($request->start_date);
-            $dateS = Carbon::parse($request->end_date);
-
-            $diferencia = ($dateI->diffInDays($dateS));
-
-            
-
-            for($i = 0 ; $diferencia >= $i ; $i++){
-                $adjust = new prepayrollAdjust();
-                $adjust->employee_id = $request->employee_id;
-                $adjust->dt_date = $dateI->toDateString();
-                $adjust->minutes = 0;
-                $adjust->apply_to = 2;
-                $adjust->comments = $request->comentarios;
-                $adjust->is_delete = 0;
-                $adjust->adjust_type_id = 7;
-                $adjust->apply_time = 0;
-                $adjust->created_by = session()->get('user_id');
-                $adjust->updated_by = session()->get('user_id');
-                $adjust->save();
-
-                if($request->sincomentarios == 1){
-                    $link = new adjust_link();
-                    $link->adjust_id = $adjust->id;
-                    $link->is_incident = 1;
-                    $link->incident_id = $incident->id;
-                    $link->save();
+            if (count($incidents) == 0 && count($holidays) == 0) {
+                if ($request->type_incidents_id == 17) {
+                    $holiday_worked = new holidayworked();
+                    $holiday_worked->employee_id = $request->employee_id;
+                    $holiday_worked->holiday_id = $request->holiday_id;
+                    $holiday_worked->number_assignments = 0;
+                    $holiday_worked->is_delete = 0;
+                    $holiday_worked->save();
                 }
-                
 
-                $dateI->addDay();
-            }
+                $incident = new incident($request->all());
+                $incident->external_key = "0_0";
+                $incident->nts = $request->comentarios;
+                $incident->cls_inc_id = 1;
+                if ($request->type_incidents_id == 17) {
+                    $incident->holiday_worked_id = $holiday_worked->id;
+                }
+                $incident->created_by = session()->get('user_id');
+                $incident->updated_by = session()->get('user_id');
 
-            $this->daysIncidents($incident->id,$incident->start_date,$incident->end_date,$incident->employee_id);
 
-            if ($request->incident_type > 0) {
-                return redirect()->route('incidentes', [$request->incident_type])->with('mensaje', 'Incidente creado con éxito');
+                $incident->save();
+
+                //inserción de comentarios
+                if (isset($request->comentarios) && !is_null($request->comentarios) && strlen($request->comentarios) > 0) {
+                    $dateI = Carbon::parse($request->start_date);
+                    $dateS = Carbon::parse($request->end_date);
+
+                    $diferencia = ($dateI->diffInDays($dateS));
+                    for ($i = 0; $diferencia >= $i; $i++) {
+                        $adjust = new prepayrollAdjust();
+                        $adjust->employee_id = $request->employee_id;
+                        $adjust->dt_date = $dateI->toDateString();
+                        $adjust->minutes = 0;
+                        $adjust->apply_to = 2;
+                        $adjust->comments = $request->comentarios;
+                        $adjust->is_delete = 0;
+                        $adjust->adjust_type_id = \SCons::PP_TYPES['COM'];
+                        $adjust->apply_time = 0;
+                        $adjust->created_by = session()->get('user_id');
+                        $adjust->updated_by = session()->get('user_id');
+                        $adjust->save();
+
+                        $link = new adjust_link();
+                        $link->adjust_id = $adjust->id;
+                        $link->is_incident = 1;
+                        $link->incident_id = $incident->id;
+                        $link->save();
+
+                        $dateI->addDay();
+                    }
+                }
+
+                $incidentController = new incidentController();
+                $incidentController->saveDays($incident);
+
+                \DB::commit();
+            
+                if ($request->incident_type > 0) {
+                    return redirect()->route('incidentes', [$request->incident_type])->with('mensaje', 'Incidente creado con éxito');
+                } else {
+                    return redirect('incidents')->with('mensaje', 'Incidente creado con éxito');
+                }
             }
             else {
-                return redirect('incidents')->with('mensaje', 'Incidente creado con éxito');
+                // checar que clase de problema al tratar de meter incidencia.
+                if (count($incidents) > 0) {
+                    return redirect('/incidents/14')->with('mensaje', 'Ya existe un incidente para esta fecha');
+                } else if (count($holidays) > 0) {
+                    return redirect('/incidents/14')->with('mensaje', 'No se puede colocar una incidencia en día festivo');
+                } else {
+                    return redirect('/incidents/14')->with('mensaje', 'Ya existe un incidente para esta fecha y no se puede poner una incidencia en día festivo');
+                }
             }
-        }else{
-            // checar que clase de problema al tratar de meter incidencia. 
+        }
+        catch (\Throwable $th) {
+            \DB::rollBack();
+            \Log::error($th);
 
-            
-            if( count($incidents) > 0 ) {
-                return redirect('/incidents/14')->with('mensaje','Ya existe un incidente para esta fecha');
-            }else if( count($holidays) > 0 ) {
-                return redirect('/incidents/14')->with('mensaje','No se puede colocar una incidencia en día festivo');
-            }else {
-                return redirect('/incidents/14')->with('mensaje','Ya existe un incidente para esta fecha y no se puede poner una incidencia en día festivo');
-            }
+            return redirect()->back()->withErrors($th->getMessage())->withInput($request->input());
         }
     }
 
@@ -324,57 +325,75 @@ class incidentController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Response|\Illuminate\View\View
      */
-    public function edit($id, $is_medical = 0)
+    public function edit($idIncidence, $is_medical = 0)
     {
-        $incidents = typeincident::where('is_agreement', 1)->orderBy('name','ASC')->pluck('id','name');
+        $lIncidentTypes = typeincident::orderBy('name', 'ASC')
+                            ->where('is_cap_edit', true);
+
+        if (session()->get('rol_id') == 16) {
+            $lIncidentTypes = $lIncidentTypes->where('id', 22);
+        }
+
+        $lIncidentTypes = $lIncidentTypes->pluck('id', 'name');
+
         $datas = DB::table('incidents')
-                        ->join('employees','employees.id',"=","incidents.employee_id")
-                        ->where('incidents.id',$id)
-                        ->select('incidents.id AS id','incidents.employee_id AS id_employee','employees.name AS name','incidents.start_date AS ini','incidents.end_date AS fin','type_incidents_id AS tipo')
-                        ->get();
-        
-        $lComments = \DB::table('comments')->where('is_delete', 0)->get();
+            ->join('employees', 'employees.id', "=", "incidents.employee_id")
+            ->where('incidents.id', $idIncidence)
+            ->select('incidents.id AS id', 
+                    'incidents.employee_id AS id_employee', 
+                    'employees.name AS name', 
+                    'employees.num_employee', 
+                    'incidents.start_date AS ini', 
+                    'incidents.end_date AS fin', 
+                    'incidents.holiday_worked_id', 
+                    'type_incidents_id AS tipo')
+            ->first();
 
-        $incident_comment = \DB::table('comments_control')->where('value',1)->select('key_code')->get();
-        $cadenaComparacion = "";
-        for( $i = 0 ; count($incident_comment) > $i ; $i++ ){
-            if($cadenaComparacion == ''){
-                $cadenaComparacion = $incident_comment[$i]->key_code;
-            }else{
-                $cadenaComparacion = $cadenaComparacion.','.$incident_comment[$i]->key_code;
-            }
+        $oAdjust = adjust_link::where('incident_id', $datas->id)
+                                    ->join('prepayroll_adjusts AS adjs', 'adjust_link.adjust_id', '=', 'adjs.id')
+                                    ->where('adjs.is_delete', 0)
+                                    ->where('adjust_type_id', \SCons::PP_TYPES['COM'])
+                                    ->select('adjust_link.*', 'adjs.comments')
+                                    ->orderBy('updated_by', 'DESC')
+                                    ->first();
+
+        // Obtiene la configuración de las incidencias que deben ingresar un comentario obligatorio
+        $lCommControl = \DB::table('comments_control')->where('value', 1)
+            ->select('key_code AS id')
+            // filtro para los id de las incidencias que requieren comentario (son numéricas)
+            ->whereRaw('key_code REGEXP "^[0-9]+$"')
+            ->pluck('id');
+
+        // Obtiene los días festivos
+        $holidays = \DB::table('holidays')->where('is_delete', 0)
+            ->orderBy('fecha', 'DESC')
+            ->get();
+
+        // Obtiene los comentarios frecuentes
+        $lFrecuentComments = \DB::table('comments')->where('is_delete', 0)
+            ->orderBy('comment', 'ASC')
+            ->get();
+
+        $incidentTypeId = $datas->tipo;
+        $iIdHoliday = 0;
+        if (! is_null($datas->holiday_worked_id)) {
+            $oHW = holidayworked::find($datas->holiday_worked_id);
+            $iIdHoliday = $oHW->holiday_id;
         }
 
-        $adjust = \DB::table('adjust_link')
-                    ->where('incident_id',$datas[0]->id)
-                    ->get();
-        $activar = 0;
-        for ($i = 0; count($incident_comment) > $i; $i++) {
-            if ($datas[0]->tipo == $incident_comment[$i]->key_code) {
-                $activar = 1;
-            }
-        }
-        //activar comentarios si entra el rol de medico de planta
-        if ($is_medical == 1){
-            $activar = 1;
-        }
-        //
-        $hay_ajustes = 0;
-        if( $activar != 0 ){
-            if(count($adjust) == 0){
-                $comment_adjust[0] = '';
-                $hay_ajustes = 0;
-            }else{
-                $comment_adjust = \DB::table('prepayroll_adjusts')->where('id',$adjust[0]->adjust_id)->get();
-                $hay_ajustes = 1;
-            }
-        }else{
-            $comment_adjust[0] = '';
-            $hay_ajustes = 0;
-        }
-        return view('incident.edit', compact('datas'))->with('incidents',$incidents)->with('incident_comment',$cadenaComparacion)->with('lComments', $lComments)->with('adjust',$adjust)->with('activar',$activar)->with('comment_adjust',$comment_adjust)->with('is_medical',$is_medical)->with('hay_ajustes',$hay_ajustes);
+        return view('incident.edit')
+                        ->with('datas', $datas)
+                        ->with('oAdjust', $oAdjust)
+                        ->with('is_medical', $is_medical)
+                        ->with('idIncidence', $idIncidence)
+                        ->with('incidentTypeId', $incidentTypeId)
+                        ->with('lIncidentTypes', $lIncidentTypes)
+                        ->with('lCommControl', $lCommControl)
+                        ->with('holidays', $holidays)
+                        ->with('iIdHoliday', $iIdHoliday)
+                        ->with('lFrecuentComments', $lFrecuentComments);
     }
 
     /**
@@ -382,58 +401,89 @@ class incidentController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
      */
     public function update(Request $request, $id)
     {
-        incident::findOrFail($id)->update($request->all());
+        try {
+            incident::findOrFail($id)->update($request->all());
+            $oIncident = incident::find($id);
 
-        $adjust_delete = DB::table('adjust_link')
-                    ->where('incident_id',$id)
-                    ->get();
+            $adjust_delete = DB::table('adjust_link')
+                                ->where('incident_id', $id)
+                                ->pluck('adjust_id');
 
-        for( $i = 0 ; count($adjust_delete) > $i ; $i++ ){
-            $delete = prepayrollAdjust::where('id',$adjust_delete[$i]->adjust_id)->get();
-            $delete[0]->is_delete = 1;
-            $delete[0]->save();
-        }
+            prepayrollAdjust::whereIn('id', $adjust_delete)
+                        ->where('is_delete', 0)
+                        ->update(['is_delete' => 1]);
 
-        $dateI = Carbon::parse($request->start_date);
-        $dateS = Carbon::parse($request->end_date);
-    
-        $diferencia = ($dateI->diffInDays($dateS));
-    
-        for($i = 0 ; $diferencia >= $i ; $i++){
-            $adjust = new prepayrollAdjust();
-            $adjust->employee_id = $request->employee_id;
-            $adjust->dt_date = $dateI->toDateString();
-            $adjust->minutes = 0;
-            $adjust->apply_to = 2;
-            $adjust->comments = $request->comentarios;
-            $adjust->is_delete = 0;
-            $adjust->adjust_type_id = 7;
-            $adjust->apply_time = 0;
-            $adjust->created_by = session()->get('user_id');
-            $adjust->updated_by = session()->get('user_id');
-            $adjust->save();
-    
-            if($request->sincomentarios == 1){
-                $link = new adjust_link();
-                $link->adjust_id = $adjust->id;
-                $link->is_incident = 1;
-                $link->incident_id = $id;
-                $link->save();
+            \DB::beginTransaction();
+
+            if ($oIncident->type_incidents_id == 17) {
+                if (! is_null($oIncident->holiday_worked_id)) {
+                    $oWH = holidayworked::find($oIncident->holiday_worked_id);
+
+                    if ($request->holiday_id != $oWH->holiday_id) {
+                        $oWH->holiday_id = $request->holiday_id;
+                        $oWH->save();
+                    }
+                }
+                else {
+                    $holiday_worked = new holidayworked();
+                    $holiday_worked->employee_id = $request->employee_id;
+                    $holiday_worked->holiday_id = $request->holiday_id;
+                    $holiday_worked->number_assignments = 0;
+                    $holiday_worked->is_delete = 0;
+                    $holiday_worked->save();
+                }
             }
-                    
-    
-            $dateI->addDay();
-        }
 
-        if ($request->is_medical == 1) {
-            return redirect()->route('incidentes', 14)->with('mensaje', 'Incidente modificado con éxito');
+            if (isset($request->comentarios) && ! is_null($request->comentarios) && strlen($request->comentarios) > 0) {
+                $dateI = Carbon::parse($request->start_date);
+                $dateS = Carbon::parse($request->end_date);
+        
+                $diferencia = ($dateI->diffInDays($dateS));
+                for ($i = 0; $diferencia >= $i; $i++) {
+                    $adjust = new prepayrollAdjust();
+                    $adjust->employee_id = $request->employee_id;
+                    $adjust->dt_date = $dateI->toDateString();
+                    $adjust->minutes = 0;
+                    $adjust->apply_to = 2;
+                    $adjust->comments = $request->comentarios;
+                    $adjust->is_delete = 0;
+                    $adjust->adjust_type_id = \SCons::PP_TYPES['COM'];
+                    $adjust->apply_time = 0;
+                    $adjust->created_by = session()->get('user_id');
+                    $adjust->updated_by = session()->get('user_id');
+                    $adjust->save();
+        
+                    $link = new adjust_link();
+                    $link->adjust_id = $adjust->id;
+                    $link->is_incident = 1;
+                    $link->incident_id = $id;
+                    $link->save();
+        
+                    $dateI->addDay();
+                }
+            }
+
+            $incidentController = new incidentController();
+            $incidentController->saveDays($oIncident);
+
+            \DB::commit();
+
+            if ($request->is_medical == 1) {
+                return redirect()->route('incidentes', 14)->with('mensaje', 'Incidencia modificada con éxito');
+            }
+            else {
+                return redirect('incidents')->with('mensaje', 'Incidencia modificada con éxito');
+            }
         }
-        else {
-            return redirect('incidents')->with('mensaje', 'Incidente modificado con éxito');
+        catch (\Throwable $th) {
+            \DB::rollBack();
+            \Log::error($th);
+
+            return redirect()->back()->withErrors($th->getMessage())->withInput($request->input());
         }
     }
 
@@ -780,7 +830,7 @@ class incidentController extends Controller
                 if (isset($request->comments) && ! is_null($request->comments) && strlen($request->comments) > 0) {
                     $aAdjustIds = adjust_link::where('incident_id', $incident->id)
                                         ->join('prepayroll_adjusts AS adjs', 'adjust_link.adjust_id', '=', 'adjs.id')
-                                        ->where('adjust_type_id', 7)
+                                        ->where('adjust_type_id', \SCons::PP_TYPES['COM'])
                                         ->select('adjust_id')
                                         ->get()
                                         ->toArray();
@@ -803,7 +853,7 @@ class incidentController extends Controller
                         $adjust->apply_to = 2;
                         $adjust->comments = $request->comments;
                         $adjust->is_delete = 0;
-                        $adjust->adjust_type_id = 7;
+                        $adjust->adjust_type_id = \SCons::PP_TYPES['COM'];
                         $adjust->apply_time = 0;
                         $adjust->created_by = session()->get('user_id');
                         $adjust->updated_by = session()->get('user_id');
