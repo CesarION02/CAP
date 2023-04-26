@@ -107,6 +107,7 @@ class ReporteController extends Controller
 
     public function reporteESView(Request $request){
         $reportType = $request->reportType;
+        $routeType = $reportType;
         $values = $request->vals;
         $startDate = $request->start_date;
         $endDate = $request->end_date;
@@ -129,6 +130,7 @@ class ReporteController extends Controller
                                     ->orderBy('time')
                                     ->orderBy('a.id');
                 break;
+                
             case 2:
                 $register = $register->join('jobs AS j', 'j.id', '=', 'e.job_id')
                                     ->join('departments AS d', 'd.id', '=', 'j.department_id')
@@ -150,7 +152,7 @@ class ReporteController extends Controller
                                     ->orderBy('e.name')
                                     ->orderBy('date')
                                     ->orderBy('time')
-                                    ->orderBy('d.id');;
+                                    ->orderBy('d.id');
                 break;
             case 4:
                 $register = $register->whereIn('e.id', $values)
@@ -189,6 +191,7 @@ class ReporteController extends Controller
 
         return view('report.reporteESView')
                         ->with('reportType', $reportType)
+                        ->with('routeType', $routeType)
                         ->with('lRegistries', $register);
     
 
@@ -276,6 +279,7 @@ class ReporteController extends Controller
     public function reporteRegistrosView(Request $request)
     {
         $reportType = $request->reportType;
+        $routeType = $reportType;
         $values = $request->vals;
         $startDate = $request->start_date;
         $endDate = $request->end_date;
@@ -355,6 +359,7 @@ class ReporteController extends Controller
 
         return view('report.reportRegsView')
                         ->with('reportType', $reportType)
+                        ->with('routeType', $routeType)
                         ->with('lRegistries', $register);
     }
 

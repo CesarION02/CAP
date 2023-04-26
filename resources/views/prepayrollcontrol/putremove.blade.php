@@ -26,8 +26,6 @@
     <script src="{{ asset("daterangepicker/daterangepicker.js") }}" type="text/javascript"></script>
     <script src="{{asset("assets/pages/scripts/SGui.js")}}" type="text/javascript"></script>
     
-@include('prepayrollcontrol.checkgroup')
-@include('prepayrollcontrol.checkprevious')
 <script>
     function checkGroup(id) {
         var value = '<?php echo $idPreNomina; ?>';
@@ -240,7 +238,7 @@
                             <div class="col-md-7 col-md-offset-1">
                             {{-- <input type="date" name="start_date" class="form-control" required>
                             <input type="date" name="end_date" class="form-control" required> --}}
-                            <form action="{{ route('vobos', ['id' => $idPreNomina])}}">
+                            <form action="{{ route('poner_quitar_vobo', ['id' => $idPreNomina])}}">
                                 <div class="input-group">
                                     @include('controls.calendar', ['start_date' => $start_date, 'end_date' => $end_date,
                                                         'start_date_name' => 'start_date', 'end_date_name' => 'end_date']) 
@@ -294,7 +292,6 @@
                                 <td>{{ $oCtrl->is_rejected ? "RECHAZADO" : "-" }}</td>
                                 <td>{{ $oCtrl->dt_rejected }}</td>
                                 <td>
-                                    @if(\Auth::user()->id == $oCtrl->user_vobo_id)
                                         @if(! $oCtrl->is_vobo)
                                             <form id="form_vobo" action="{{ route('dar_vobo', [$oCtrl->id_control, $idPreNomina]) }}" method="POST">
                                                 @csrf
@@ -303,12 +300,11 @@
                                             </form>
                                         @endif
                                         @if(! $oCtrl->is_rejected)
-                                            <form action="{{ route('rechazar_vobo', [$oCtrl->id_control, $idPreNomina]) }}" method="POST">
+                                            <form action="{{ route('quitar_vobo', [$oCtrl->id_control, $idPreNomina]) }}" method="POST">
                                                 @csrf
                                                 <button title="Rechazar" type="submit"><i class="fa fa-ban" aria-hidden="true"></i></button>
                                             </form>
                                         @endif
-                                    @endif
                                 </td>
                             </tr>
                         @endforeach

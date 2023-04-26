@@ -111,7 +111,7 @@ class departmentController extends Controller
         $policyh = policyHoliday::orderBy('id','ASC')->pluck('id','name');
         
         $id = session()->get('user_id');
-        
+        $Adgu = [];
         if (session()->get('rol_id') != 1){
             $dgu = DB::table('group_dept_user')
                     ->where('user_id',$id)
@@ -122,11 +122,18 @@ class departmentController extends Controller
                 $Adgu[$i]=$dgu[$i]->id;
             }
             $grupo = $Adgu[0];
+
+            $groupDept = DB::table('department_group')
+                        ->where('is_delete','0')
+                        ->whereIn('id',$Adgu)
+                        ->get();
         }else{
-            $grupo = 0;
+            $groupDept = DB::table('department_group')
+                        ->where('is_delete','0')
+                        ->get();
         }
 
-        return view('department.create')->with('areas',$area)->with('deptrhs',$deptrhs)->with('employees',$employees)->with('policyh',$policyh)->with('grupo',$grupo);
+        return view('department.create')->with('areas',$area)->with('deptrhs',$deptrhs)->with('employees',$employees)->with('policyh',$policyh)->with('grupo',$grupo)->with('groupDept', $groupDept);
     }
 
     /**
@@ -138,15 +145,18 @@ class departmentController extends Controller
     public function store(Request $request)
     {
         foreach($request->all() as $elem){
-            if(is_null($elem)){
-                return redirect()->back()->withErrors('Debe llenar todos los campos del formulario');
+            if(is_null($elem))
+            {
+                //return redirect()->back()->withErrors('Debe llenar todos los campos del formulario');
             }
         }
-        $department = department::create($request->all());
+        $department = new department();
+        $department->name = $request->name;
         $department->rh_department_id = $request->rh_department_id;
         $department->boss_id = $request->boss_id;
         $department->policy_holiday_id = $request->policy_holiday_id;
-        $department->dept_group_id = $request->grupo;
+        $department->dept_group_id = $request->group_dept_id;
+        $department->area_id = $request->area_id;
         $department->updated_by = session()->get('user_id');
         $department->created_by = session()->get('user_id');
         $department->save();
@@ -195,7 +205,31 @@ class departmentController extends Controller
         $deptrhs = DepartmentRH::where('is_delete',0)->orderBy('name', 'ASC')->pluck('id','name');
         $employees = employees::where('is_active','1')->orderBy('name','ASC')->pluck('id','name');
         $policyh = policyHoliday::orderBy('id','ASC')->pluck('id','name');
-        return view('department.edit', compact('data'))->with('areas',$area)->with('deptrhs',$deptrhs)->with('employees',$employees)->with('policyh',$policyh);
+
+        $id = session()->get('user_id');
+        $Adgu = [];
+        if (session()->get('rol_id') != 1){
+            $dgu = DB::table('group_dept_user')
+                    ->where('user_id',$id)
+                    ->select('groupdept_id AS id')
+                    ->get();
+            $Adgu = [];
+            for($i=0;count($dgu)>$i;$i++){
+                $Adgu[$i]=$dgu[$i]->id;
+            }
+            $grupo = $Adgu[0];
+
+            $groupDept = DB::table('department_group')
+                        ->where('is_delete','0')
+                        ->whereIn('id',$Adgu)
+                        ->get();
+        }else{
+            $groupDept = DB::table('department_group')
+                        ->where('is_delete','0')
+                        ->get();
+        }
+
+        return view('department.edit', compact('data'))->with('areas',$area)->with('deptrhs',$deptrhs)->with('employees',$employees)->with('policyh',$policyh)->with('groupDept', $groupDept);
     }
 
     /**
@@ -216,6 +250,7 @@ class departmentController extends Controller
         $department->rh_department_id = $request->rh_department_id;
         $department->boss_id = $request->boss_id;
         $department->policy_holiday_id = $request->policy_holiday_id;
+        $department->dept_group_id = $request->group_dept_id;
         $department->updated_by = session()->get('user_id');
         $department->update($request->all());
         return redirect('department')->with('mensaje', 'Departamento actualizado con éxito');
@@ -235,6 +270,16 @@ class departmentController extends Controller
             $department->is_delete = 1;
             $department->updated_by = session()->get('user_id');
             $department->save();
+
+            $job = DB::table('jobs')
+                        ->where('department_id',$id)
+                        ->get();
+
+            for($i = 0 ; count($job) > $i ; $i++){
+                $job->is_delete = 1;
+                $job->save();
+            }
+            
             return response()->json(['mensaje' => 'ok']);
         } else {
             abort(404);
@@ -247,6 +292,15 @@ class departmentController extends Controller
             $department->is_delete = 0;
             $department->updated_by = session()->get('user_id');
             $department->save();
+
+            $job = DB::table('jobs')
+                        ->where('department_id',$id)
+                        ->get();
+
+            for($i = 0 ; count($job) > $i ; $i++){
+                $job->is_delete = 1;
+                $job->save();
+            }
             return response()->json(['mensaje' => 'ok']);
         } else {
             abort(404);

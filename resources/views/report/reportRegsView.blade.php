@@ -71,7 +71,7 @@ Reporte Entradas/Salidas
                             </tbody>
                         </table>
                         <button onclick="topFunction()" id="myBtn" title="Ir arriba">Ir arriba</button>
-                        <a href="{{route('generarreporteRegs', ['id' => $reportType])}}" target="_blank" id="newButton" title="Nuevo reporte">Nuevo reporte</a>
+                        <a href="{{route('generarreporteRegs', ['id' => $routeType])}}" target="_blank" id="newButton" title="Nuevo reporte">Nuevo reporte</a>
                     </div>
                 </div>
             </div>

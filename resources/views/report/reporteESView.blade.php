@@ -196,6 +196,8 @@
                                             @break
                                             @case(4)
                                             @break
+                                            @default
+                                            @break
                                     @endswitch
                                     <th>Obser.</th>
                                     <th>external_id</th>
@@ -250,6 +252,8 @@
                                             @break
                                             @case(4)
                                             @break
+                                            @default
+                                            @break
                                         @endswitch
                                         <td>{{ isset($lRegistries[$i]->others) ? $lRegistries[$i]->others : '' }}</td>
                                         <td>{{ $lRegistries[$i]->external_id }}</td>
@@ -258,7 +262,7 @@
                             </tbody>
                         </table>
                         <button onclick="topFunction()" id="myBtn" title="Ir arriba">Ir arriba</button>
-                        <a href="{{route('reporteES', ['id' => $reportType])}}" target="_blank" id="newButton" title="Nuevo reporte">Nuevo reporte</a>
+                        <a href="{{route('reporteES', ['id' => $routeType])}}" target="_blank" id="newButton" title="Nuevo reporte">Nuevo reporte</a>
                     </div>
                 </div>
             </div>
