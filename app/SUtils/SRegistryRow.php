@@ -50,6 +50,7 @@ class SRegistryRow {
     public $dayInhability;
     public $dayVacations;
     public $events;
+    public $eventsText;
     public $hasAssign;
     public $hasChecks;
     public $hasSchedule;
@@ -124,6 +125,7 @@ class SRegistryRow {
         $this->dayInhability = 0;
         $this->dayVacations = 0;
         $this->events = [];
+        $this->eventsText = "";
         $this->hasAssign = false;
         $this->hasChecks = true;
         $this->hasSchedule = true;

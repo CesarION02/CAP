@@ -935,7 +935,7 @@ class SDataProcess {
      * Agrega eventos, descansos y festivos al renglón
      *
      * @param array App\SUtils\SRegistryRow $lData53
-     * @param query $qWorkshifts
+     * @param \Illuminate\Database\Query\Builder|\Illuminate\Support\Collection $qWorkshifts
      * 
      * @return array App\SUtils\SRegistryRow
      */

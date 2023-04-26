@@ -23,8 +23,10 @@
                 $i = 1;
             ?>
             @foreach ($lData as $oEmp)
-                    <h4><b>{{ ($oEmp->numEmployee." - ".$oEmp->employee) }}</b> - {{ (ucfirst($oEmp->departmentName)) }}</h4>
-
+                    <div style="line-height: 75%">
+                        <h3><b>{{ ($oEmp->numEmployee." - ".$oEmp->employee) }}</b> - {{ (ucfirst($oEmp->departmentName)) }}</h4>
+                        <h4>Horario: <b>{{ $oEmp->schedule }}</b></h5>
+                    </div>
                     <table>
                         <thead>
                             @if (is_null($aColumns))
@@ -35,6 +37,7 @@
                                     <th>Salida</th>
                                     <th>T. trabajado</th>
                                     <th>T. retardo</th>
+                                    <th>Incidencias</th>
                                 </tr>
                             @else
                                 <tr>
@@ -57,6 +60,9 @@
                                                 @break
                                             @case("delay")
                                                 <th>T. retardo</th>
+                                                @break
+                                            @case("events")
+                                                <th>Incidencias</th>
                                                 @break
                                             @default
                                                 @break
@@ -110,6 +116,13 @@
                                         @endif
                                     ">
                                         {{ \App\SUtils\SDelayReportUtils::convertToHoursMins($oRow->entryDelayMinutes) }}
+                                    </td>
+                                    <td style="padding-left: 8px; padding-right: 8px; 
+                                        @if ($i % 2 == 0)
+                                            background-color: rgb(217, 217, 217)
+                                        @endif
+                                    ">
+                                        {{ $oRow->eventsText }}
                                     </td>
                                 </tr>
                             @else
@@ -168,6 +181,15 @@
                                                 @endif
                                             ">
                                                 {{ \App\SUtils\SDelayReportUtils::convertToHoursMins($oRow->entryDelayMinutes) }}
+                                            </td>
+                                            @break
+                                        @case("events")
+                                            <td style="padding-left: 8px; padding-right: 8px; 
+                                                @if ($i % 2 == 0)
+                                                    background-color: rgb(217, 217, 217)
+                                                @endif
+                                            ">
+                                                {{ $oRow->eventsText }}
                                             </td>
                                             @break
                                         @default

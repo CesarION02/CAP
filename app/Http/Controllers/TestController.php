@@ -48,8 +48,7 @@ class TestController extends Controller
 
             switch ($oTask->task_type_id) {
                 case \SCons::TASK_TYPE_REPORT_JOURNEY:
-                    $response = SJourneyReport::manageTaskReport($oTask->cfg, $oTask->reference_id);
-                    break;
+                    return SJourneyReport::manageTaskReport($oTask->cfg, $oTask->reference_id);
 
                 default:
                     $response = "Tipo de tarea desconocido.";
