@@ -366,7 +366,7 @@ class SJourneyReport
 
             $oEmpRow->lRows[] = $oRow;
             $totalDelay += $oRow->entryDelayMinutes;
-            if (! $bWithSchedule && ($oRow->hasCheckOut || !$oRow->hasChecks)) {
+            if (! $bWithSchedule && (strlen($oRow->outDateTime) > 11 || (strlen($oRow->inDateTime) == 10 && strlen($oRow->outDateTime) == 10))) {
                 if ($oRow->workable && SDateTimeUtils::dayOfWeek($oRow->outDateTimeSch) != Carbon::SUNDAY && SDateTimeUtils::dayOfWeek($oRow->outDateTimeSch) != Carbon::SATURDAY) {
                     $oEmpRow->schedule = (! strlen($oRow->inDateTimeSch) > 11 || ! strlen($oRow->outDateTimeSch) > 11) ? 
                                             "Sin horario" : 

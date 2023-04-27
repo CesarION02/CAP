@@ -687,16 +687,16 @@ class SDataProcess {
                     if (! $bFound) {
                         $result = SDelayReportUtils::getSchedule($sStartDate, $sEndDate, $idEmployee, $registry, clone $qWorkshifts, \SCons::REP_HR_EX);
 
-                        if ($result != null) {
+                        if (! is_null($result)) {
                             // $newRow->inDate = $result->variableDateTime->toDateString();
                             // $newRow->inDateTime = $result->variableDateTime->toDateTimeString();
                             $night = false;
-                            if ($result->auxScheduleDay != null) {
+                            if (! is_null($result->auxScheduleDay)) {
                                 $oAux = $result->auxScheduleDay;
                                 $night = $oAux->is_night;
                             }
                             else {
-                                if ($result->auxWorkshift != null) {
+                                if (! is_null($result->auxWorkshift)) {
                                     $oAux = $result->auxWorkshift;
                                     if ($oAux->is_night) {
                                         $night = true;
