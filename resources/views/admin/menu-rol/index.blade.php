@@ -1,6 +1,5 @@
 @extends("theme.$theme.layout")
 @section('styles1')
-    <link rel="stylesheet" href="{{ asset("dt/datatables.css") }}">
     <link rel="stylesheet" href="{{ asset("assets/css/reportD.css") }}">
     <style>
         tr {
@@ -107,7 +106,6 @@ Menú - Rol
 
 @section('scripts')
     <script src="{{asset("assets/pages/scripts/admin/menu-rol/index.js")}}" type="text/javascript"></script>
-    <script src="{{ asset("dt/datatables.js") }}" type="text/javascript"></script>
     <script>
         $(document).ready(function() {
             table = $('#tabla-data').DataTable({

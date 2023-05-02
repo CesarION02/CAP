@@ -1,6 +1,6 @@
 @extends("theme.$theme.layoutcustom")
 @section('styles1')
-    <link rel="stylesheet" href="{{ asset("dt/datatables.css") }}">
+    <link rel="stylesheet" href="{{ asset("dt/nv/datatables.css") }}">
     <link rel="stylesheet" href="{{ asset("assets/css/reportD.css") }}">
     <link href="{{ asset("select2js/css/select2.min.css") }}" rel="stylesheet" />
     <style>
@@ -203,14 +203,7 @@
 <script src="{{ asset("assets/js/chosen.jquery.min.js") }}" type="text/javascript"></script>
 <script src="{{ asset("assets/js/axios.js") }}" type="text/javascript"></script>
 <script src="{{ asset("assets/js/vue.js") }}" type="text/javascript"></script>
-<script src="{{ asset("dt/datatables.js") }}" type="text/javascript"></script>
-<script src="{{ asset('dt/dataTables.buttons.min.js') }}"></script>
-<script src="{{ asset('dt/buttons.flash.min.js') }}"></script>
-<script src="{{ asset('dt/jszip.min.js') }}"></script>
-<script src="{{ asset('dt/pdfmake.min.js') }}"></script>
-<script src="{{ asset('dt/vfs_fonts.js') }}"></script>
-<script src="{{ asset('dt/buttons.html5.min.js') }}"></script>
-<script src="{{ asset('dt/buttons.print.min.js') }}"></script>
+<script src="{{ asset("dt/nv/datatables.js") }}" type="text/javascript"></script>
 <script src="{{ asset("js/excel/xlsx.full.min.js") }}" type="text/javascript"></script>
 <script src="{{ asset("js/excel/FileSaver.min.js") }}" type="text/javascript"></script>
 <script src="{{ asset("assets/js/moment/moment.js") }}" type="text/javascript"></script>

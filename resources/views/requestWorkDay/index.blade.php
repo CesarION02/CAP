@@ -108,7 +108,7 @@ Formato de domingo
 
 @section("scripts")
     <script src="{{ asset("assets/js/axios.js") }}" type="text/javascript"></script>
-    <script src="{{ asset("dt/datatables.js") }}" type="text/javascript"></script>
+    
     <script src="{{ asset("assets/pages/scripts/SGui.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/chosen.jquery.min.js") }}" type="text/javascript"></script>
     <script>
