@@ -33,6 +33,7 @@ class SRegistryRow {
     public $extraHours;
     public $workedTime;
     public $hasAbsence;
+    public $hasAbsenceAndDayOffWorked;
     public $workable;
     public $isIncompleteTeJourney;
     public $removeSunday;
@@ -107,6 +108,7 @@ class SRegistryRow {
         $this->cutId = null;
         $this->extraHours = "00:00";
         $this->hasAbsence = false;
+        $this->hasAbsenceAndDayOffWorked = false;
         $this->workable = true;
         $this->isIncompleteTeJourney = false;
         $this->removeSunday = false;
