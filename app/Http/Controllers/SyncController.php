@@ -65,7 +65,8 @@ class SyncController extends Controller
             $prepayCont = new prePayrollController();
             $prepayCont->saveCutCalendarFromJSON($data->cuts);
 
-            $newDate = Carbon::now();
+            $newDate = Carbon::now('UTC');
+            $newDate->tz = new \DateTimeZone('-6:00');
             $newDate->subMinutes(30);
 
             \App\SUtils\SConfiguration::setConfiguration('lastSyncDateTime', $newDate->toDateTimeString());
