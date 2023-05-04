@@ -40,6 +40,15 @@
                                 <input type="hidden" name="oldIncident" :value="oldIncident">
                             </div>
                         </div>
+                        <br v-if="showSubtype">
+                        <div v-if="showSubtype" class="row">
+                            <div class="col-md-3"><label for="type_sub_inc_id">Subtipo incidencia*:</label></div>
+                            <div class="col-md-9">
+                                  <select class="form-control" name="type_sub_inc_id" id="type_sub_inc_id" v-model="oEvent.type_sub_inc_id" :disabled="isDisabled">
+                                    <option v-for="subType in lSubTypeIncidentsList" :value="subType.id_sub_incident">@{{ subType.name }}</option>
+                                  </select>
+                            </div>
+                        </div>
                         <br>
                         <div class="row">
                             <div class="col-md-3">
@@ -60,7 +69,7 @@
                             <div class="col-md-4" style="float: right;">
                                 <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
                                 <button v-if="! isDisabled && ! isDisabledByType" type="button" id="btnSubmit" class="btn btn-primary" data-dismiss="modal"
-                                    :disabled="onSubmit" v-on:click="store();">Guardar</button>
+                                    :disabled="onSubmit" v-on:click="store()">Guardar</button>
                             </div>
                         </div>
                     </div>
@@ -184,8 +193,12 @@
 <script src="{{ asset("assets/js/moment/datetime-moment.js") }}" type="text/javascript"></script>
 <script src="{{ asset("assets/pages/scripts/SGui.js") }}" type="text/javascript"></script>
 <script>
+    var oGui = new SGui();
+    oGui.showLoading(5000);
+
     function ServerData () {
         this.lTypeIncidents = <?php echo json_encode($lTypeIncidents) ?>;
+        this.lSubTypeIncidents = <?php echo json_encode($lSubTypeIncidents) ?>;
         this.lTypeCapIncidents = <?php echo json_encode($lTypeCapIncidents) ?>;
         this.routeDelete = <?php echo json_encode($routeDelete) ?>;
         this.routeStore = <?php echo json_encode($routeStore) ?>;
@@ -195,12 +208,6 @@
     }
         
     var oServerData = new ServerData();
-    var oGui = new SGui();
-    console.log(oServerData.lRows);
-
-    for (const row of oServerData.lRows) {
-        console.log(row);
-    }
 </script>
 <script src="{{ asset("assets/pages/scripts/report/SFirstStepReport.js") }}" type="text/javascript"></script>
 <script>

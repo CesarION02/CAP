@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\incidentController;
 use App\Http\Controllers\PrepayrollReportController;
 use App\Models\area;
+use App\Models\commentsControl;
 use App\Models\department;
 use App\Models\DepartmentRH;
 use App\Models\departmentsGroup;
@@ -738,7 +739,7 @@ class ReporteController extends Controller
             $isPrepayrollInspection = false;
             $lEmpVobos = [];
             $aNumber = [];
-            if (($payWay == \SCons::PAY_W_S || $payWay == \SCons::PAY_W_Q) && env('VOBO_BY_EMP_ENABLED', true) && $wizard > 0) {
+            if (($payWay == \SCons::PAY_W_S || $payWay == \SCons::PAY_W_Q) && env('VOBO_BY_EMP_ENABLED', true)) {
                 $aNumber = SDateUtils::getNumberOfDate($sStartDate, $payWay);
                 $dates = SDateUtils::getDatesOfPayrollNumber($aNumber[0], $aNumber[1], $payWay);
                 
@@ -761,6 +762,15 @@ class ReporteController extends Controller
 
                     $lEmpVobos = $lEmpVobos->get()->keyBy('num_employee')->toArray();
 
+                    $checkAbsenceAndDayOffWorked = commentsControl::where('is_delete', 0)
+                                    ->where('key_code', 'hasAbsenceAndDayOffWorked')
+                                    ->pluck('value')
+                                    ->first();
+        
+                    if ($checkAbsenceAndDayOffWorked) {
+                        $lRows = SReportsUtils::checkAbsencesAndDaysOff($lEmployees, $lRows, $sStartDate, $sEndDate, $payWay);
+                    }
+                    
                     $isPrepayrollInspection = true;
                 }
             }
@@ -852,7 +862,7 @@ class ReporteController extends Controller
         }
         catch (\Throwable $th) {
             \Log::error($th);
-            return redirect()->route('generarreportetiemposextra')->withErrors(['Error', $th->getMessage()]);
+            return redirect()->route('generarreportetiemposextra')->withErrors(['Error', $th->getMessage()."Reporte a soporte técnico. "]);
         }
     }
 
@@ -2569,7 +2579,12 @@ class ReporteController extends Controller
 
             // Incidencias permitidas en CAP
             $lTypeCapIncidents = \DB::table('type_incidents')
-                                        ->whereIn('id', [12, 14, 15, 16, 17, 18, 19, 20, 22, 23, 24, 25])
+                                        ->where('is_cap_edit', true)
+                                        ->orderBy('name', 'ASC')
+                                        ->get();
+
+            $lSubTypeIncidents = \DB::table('type_sub_incidents')
+                                        ->where('is_delete', false)
                                         ->orderBy('name', 'ASC')
                                         ->get();
 
@@ -2581,6 +2596,7 @@ class ReporteController extends Controller
                                                             'sEndDate' => $sEndDate,
                                                             'route' => $route,
                                                             'lTypeIncidents' => $lTypeIncidents,
+                                                            'lSubTypeIncidents' => $lSubTypeIncidents,
                                                             'lTypeCapIncidents' => $lTypeCapIncidents,
                                                             'routeStore' => $routeStore,
                                                             'routeDelete' => $routeDelete,

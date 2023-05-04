@@ -3,6 +3,7 @@
 use App\Models\cutCalendarQ;
 use App\Models\week_cut;
 use App\SData\SDataProcess;
+use App\SUtils\SDateTimeUtils;
 use App\SUtils\SDelayReportUtils;
 use App\SUtils\SGenUtils;
 use App\SUtils\SRegistryRow;
@@ -180,12 +181,36 @@ class SJourneyReport
                                                     $oConfiguration->employees, 
                                                     $oConfiguration->benefit_policies);
 
+            /**
+             * ***********************************************************************************************************
+             * Sección para pruebas
+             */
+            // $oStartDate = Carbon::parse($sStartDate)->locale('es');
+            // $oEndDate = Carbon::parse($sEndDate)->locale('es');
+            // $sPeriod = "";
+            // // Configurar periodo para cuando las fechas sean del mismo mes
+            // if ($oStartDate->month == $oEndDate->month) {
+            //     $sPeriod = $oStartDate->format('d') . " al "
+            //                     . $oEndDate->format('d') . " "
+            //                     . $oStartDate->shortMonthName . ". "
+            //                     . $oStartDate->year;
+            // }
+            // else {
+            //     $sPeriod = $oStartDate->format('d') . " " . $oStartDate->shortMonthName . ". "
+            //                 . $oStartDate->year. " al "
+            //                 . $oEndDate->format('d') . " " . $oEndDate->shortMonthName . ". "
+            //                 . $oEndDate->year;
+            // }
+
             // return view('mails.journeyreport')->with('sStartDate', $sStartDate)
             //                                 ->with('sEndDate', $sEndDate)
             //                                 ->with('sPayTypeText', $sPayTypeText)
             //                                 ->with('sPeriod', $sPeriod)
             //                                 ->with('aColumns', $aColumns)
             //                                 ->with('lData', $lData);
+            /**
+             * ***********************************************************************************************************
+             */
             
             $tos = explode(";", $oConfiguration->mails->to);
             $oMail = Mail::to($tos);
@@ -221,15 +246,19 @@ class SJourneyReport
         $lEmployees = SReportsUtils::filterEmployeesByAdmissionDate($lEmployees, $sEndDate, 'id');
         $comments = null;
         $data53 = SDataProcess::getSchedulesAndChecks($sStartDate, $sEndDate, $iPayType, $lEmployees, $comments);
+        $aEmps = $lEmployees->pluck('id');
+        $lWorkshifts = SDelayReportUtils::getWorkshifts($sStartDate, $sEndDate, $iPayType, $aEmps);
+        $lData53_2 = SDataProcess::addEventsDaysOffAndHolidays($data53, $lWorkshifts, $comments);
         $aEmployeeOverTime = $lEmployees->pluck('policy_extratime_id', 'id');
-        $lData = SDataProcess::addDelaysAndOverTime($data53, $aEmployeeOverTime, $sEndDate, $comments);
-        $lData = SJourneyReport::addWorkedTime($lData);
+        $lData = SDataProcess::addDelaysAndOverTime($lData53_2, $aEmployeeOverTime, $sEndDate, $comments);
+        $lDataWkd = SJourneyReport::addWorkedTime($lData);
+        $lDataTxts = SJourneyReport::addEventsText($lDataWkd);
         $lEmpDept = $lEmployees->pluck('dept_name', 'id');
-        $lData = SJourneyReport::addDepartmentName($lData, $lEmpDept);
-        $lData = SJourneyReport::groupData($lData);
+        $lDataDept = SJourneyReport::addDepartmentName($lDataTxts, $lEmpDept);
+        $lDataFinal = SJourneyReport::groupData($lDataDept);
 
         // dd($lData);
-        return $lData;
+        return $lDataFinal;
     }
 
     /**
@@ -246,6 +275,34 @@ class SJourneyReport
             if (strlen($oRow->inDateTime) > 11 && strlen($oRow->outDateTime) > 11) {
                 $oComp = SDelayReportUtils::compareDates($oRow->inDateTime, $oRow->outDateTime);
                 $oRow->workedTime = $oComp->diffMinutes;
+            }
+        }
+
+        return $lData;
+    }
+
+    /**
+     * Determina los comentarios que se mostrarán en el reporte.
+     * 
+     * @param \Illuminate\Database\Eloquent\Collection $lData
+     * 
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public static function addEventsText($lData)
+    {
+        foreach ($lData as $oRow) {
+            if (! $oRow->hasCheckIn || ! $oRow->hasCheckOut) {
+                $text = "";
+                if ($oRow->others == "") {
+                    $text = $oRow->comments;
+                }
+                else {
+                    $text = $oRow->others;
+                }
+
+                $text = str_replace("Salida atípica. ", "", $text);
+                $text = str_replace("Revisar horario. ", "", $text);
+                $oRow->eventsText = utf8_encode(ucfirst(strtolower($text)));
             }
         }
 
@@ -287,6 +344,7 @@ class SJourneyReport
         $lEmpRows = [];
         $oEmpRow = null;
         $totalDelay = 0;
+        $bWithSchedule = false;
         foreach ($lData as $oRow) {
             if ($oRow->idEmployee != $idEmployee) {
                 $idEmployee = $oRow->idEmployee;
@@ -302,13 +360,24 @@ class SJourneyReport
                 $oEmpRow->departmentName = $oRow->departmentName;
                 $oEmpRow->lRows = [];
                 $totalDelay = 0;
+                $bWithSchedule = false;
+                $oEmpRow->schedule = "Sin horario";
             }
 
             $oEmpRow->lRows[] = $oRow;
             $totalDelay += $oRow->entryDelayMinutes;
+            if (! $bWithSchedule && (strlen($oRow->outDateTime) > 11 || (strlen($oRow->inDateTime) == 10 && strlen($oRow->outDateTime) == 10))) {
+                if ($oRow->workable && SDateTimeUtils::dayOfWeek($oRow->outDateTimeSch) != Carbon::SUNDAY && SDateTimeUtils::dayOfWeek($oRow->outDateTimeSch) != Carbon::SATURDAY) {
+                    $oEmpRow->schedule = (! strlen($oRow->inDateTimeSch) > 11 || ! strlen($oRow->outDateTimeSch) > 11) ? 
+                                            "Sin horario" : 
+                                            Carbon::parse($oRow->inDateTimeSch)->toTimeString() . " - " . Carbon::parse($oRow->outDateTimeSch)->toTimeString();
+                    $bWithSchedule = true;
+                }
+            }
         }
 
         if (! is_null($oEmpRow)) {
+            // dd($oEmpRow);
             $oEmpRow->totalDelay = $totalDelay;
             $lEmpRows[] = $oEmpRow;
         }

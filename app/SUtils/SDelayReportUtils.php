@@ -904,17 +904,6 @@ class SDelayReportUtils {
      */
     private static function isSunday($oRow)
     {
-        // if ($oRow->inDate != null) {
-        //     if (SDateTimeUtils::dayOfWeek($oRow->inDate) == Carbon::SUNDAY) {
-        //         return true;
-        //     }
-        //     else {
-        //         if ($oRow->inDate == $oRow->outDate) {
-        //             return false;
-        //         }
-        //     }
-        // }
-
         if ($oRow->outDate != null) {
             return SDateTimeUtils::dayOfWeek($oRow->outDate) == Carbon::SUNDAY;
         }

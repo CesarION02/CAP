@@ -91,7 +91,7 @@ class SGenUtils {
                                         // 'e.name', 'e.is_overtime', 'e.ben_pol_id', 'external_id')
                                         'e.name', 'e.policy_extratime_id', 'e.ben_pol_id', 'e.external_id', 'd.area_id AS employee_area_id')
                             ->where('e.is_delete', false)
-                            // ->where('e.id', 67)
+                            // ->where('e.id', 10)
                             ->where('e.is_active', true);
                             
         if (count($aEmployees) > 0) {
@@ -122,7 +122,10 @@ class SGenUtils {
         }
 
         if (count($aDeptosCap) > 0) {
-            $employees = $employees->whereIn('e.department_id', $aDeptosCap);
+            $employees = $employees->whereIn('e.department_id', 
+                                                $aDeptosCap
+                                                // [15]
+                                            );  
         }
 
         if (count($aDeptosSiie) > 0) {

@@ -5,6 +5,7 @@ use App\Models\commentsControl;
 use App\SData\SOverJourneyCore;
 use App\SUtils\SDateTimeUtils;
 use App\SUtils\SDelayReportUtils;
+use App\SUtils\SIncidentsUtils;
 use App\SUtils\SPrepayrollAdjustUtils;
 use App\SUtils\SRegistryRow;
 use App\SUtils\SReportsUtils;
@@ -686,16 +687,16 @@ class SDataProcess {
                     if (! $bFound) {
                         $result = SDelayReportUtils::getSchedule($sStartDate, $sEndDate, $idEmployee, $registry, clone $qWorkshifts, \SCons::REP_HR_EX);
 
-                        if ($result != null) {
+                        if (! is_null($result)) {
                             // $newRow->inDate = $result->variableDateTime->toDateString();
                             // $newRow->inDateTime = $result->variableDateTime->toDateTimeString();
                             $night = false;
-                            if ($result->auxScheduleDay != null) {
+                            if (! is_null($result->auxScheduleDay)) {
                                 $oAux = $result->auxScheduleDay;
                                 $night = $oAux->is_night;
                             }
                             else {
-                                if ($result->auxWorkshift != null) {
+                                if (! is_null($result->auxWorkshift)) {
                                     $oAux = $result->auxWorkshift;
                                     if ($oAux->is_night) {
                                         $night = true;
@@ -934,7 +935,7 @@ class SDataProcess {
      * Agrega eventos, descansos y festivos al renglón
      *
      * @param array App\SUtils\SRegistryRow $lData53
-     * @param query $qWorkshifts
+     * @param \Illuminate\Database\Query\Builder|\Illuminate\Support\Collection $qWorkshifts
      * 
      * @return array App\SUtils\SRegistryRow
      */
@@ -954,26 +955,46 @@ class SDataProcess {
                 $sDt = Carbon::parse($oRow->outDateTimeSch);
             }
 
-            $lAbsences = prePayrollController::searchAbsence($oRow->idEmployee, $sDt->toDateString());
+            $lAbsences = prePayrollController::searchAbsenceByDay($oRow->idEmployee, $sDt->toDateString());
                     
             if (sizeof($lAbsences) > 0) {
                 // $incidentsType = \DB::table('type_incidents')->get();
                 foreach ($lAbsences as $absence) {
-                    $key = explode("_", $absence->external_key);
-
+                    
                     $abs = [];
                     $abs['id'] = $absence->id;
-                    $abs['id_emp'] = $key[0];
-                    $abs['id_abs'] = $key[1];
-                    $abs['is_external'] = $absence->external_key != "0_0";
+                    if ($absence->is_external) {
+                        $key = explode("_", $absence->external_key);
+
+                        $abs['id_emp'] = $key[0];
+                        $abs['id_abs'] = $key[1];
+                    }
+                    else {
+                        $abs['id_emp'] = 0;
+                        $abs['id_abs'] = 0;
+                    }
+                    
+                    $abs['is_external'] = $absence->is_external;
                     $abs['nts'] = $absence->nts;
+                    $abs['adj_comments'] = null;
                     $abs['type_name'] = $absence->type_name;
                     $abs['type_id'] = $absence->type_id;
                     $abs['is_allowed'] = $absence->is_allowed;
                     $abs['is_payable'] = $absence->is_payable;
-                    $oRow->others = $oRow->others."".$absence->type_name.". ";
+                    $abs['type_sub_inc_id'] = $absence->type_sub_inc_id;
+                    $abs['sub_type_name'] = $absence->sub_type_name;
+                    $oRow->others = $oRow->others."".$absence->type_name.(! is_null($absence->type_sub_inc_id) ? (" (" . $absence->sub_type_name . ")") : "").". ";
 
                     // $incident = $incidentsType->where('id',$absence->type_id)->first();
+                    $lIncAdjusts = SIncidentsUtils::getIncidentAdjusts($absence->id);
+                    if (count($lIncAdjusts) > 0) {
+                        $oAdjust = $lIncAdjusts->where('adjust_type_id', \SCons::PP_TYPES['COM'])
+                                    ->first();
+
+                        if (! is_null($oAdjust)) {
+                            $abs['adj_comments'] = $oAdjust->comments;
+                        }
+                    }
 
                     if ($comments != null) {
                         if ($comments->where('key_code',$absence->type_id)->first()['value']) {
@@ -1193,8 +1214,8 @@ class SDataProcess {
                     $date = $oRow->inDate == null ? $oRow->inDateTime : $oRow->inDate;
                     $time = strlen($oRow->inDateTime) > 10 ? substr($oRow->inDateTime, -8) : null;
                     $adjs = SPrepayrollAdjustUtils::getAdjustsOfRow($date, $date, $oRow->idEmployee, \SCons::PP_TYPES['OR']);
-
-                    if (count($adjs) > 0) {
+                    $normalAdjusts = count(collect($adjs)->where('minutes', 0));
+                    if ($normalAdjusts > 0) {
                         foreach ($adjs as $adj) {
                             if (! in_array($adj->id, $consumAdjs)) {
                                 if ($adj->apply_to == 1) {
@@ -1207,6 +1228,24 @@ class SDataProcess {
                                 }
                             }
                         }
+                    }
+                    else {
+                        $specialAdjusts = count(collect($adjs)->where('minutes', '>', 0));
+                        $justifiedMins = 0;
+                        if ($specialAdjusts > 0) {
+                            foreach ($adjs as $adj) {
+                                if ($adj->apply_to == 1) {
+                                    if ($adj->dt_date == $date) {
+                                        if ($time == $adj->dt_time) {
+                                            $justifiedMins += $adj->minutes;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        $mins = $justifiedMins > $mins ? 0 : $mins - $justifiedMins;
+                        $hasDelay = $mins > 0;
                     }
 
                     if ($hasDelay) {
@@ -1225,7 +1264,17 @@ class SDataProcess {
 
                 // minutos de salida anticipada
                 if ($oRow->hasCheckOut) {
-                    $oRow->prematureOut = SDataProcess::getPrematureTime($oRow->outDateTime, $oRow->outDateTimeSch);
+                    $minsPrematureOut = SDataProcess::getPrematureTime($oRow->outDateTime, $oRow->outDateTimeSch);
+                    $justifiedMins = 0;
+                    $date = $oRow->outDate == null ? $oRow->outDateTime : $oRow->outDate;
+                    $time = strlen($oRow->outDateTime) > 10 ? substr($oRow->outDateTime, -8) : null;
+                    $adjs = SPrepayrollAdjustUtils::getAdjustForCase($oRow->outDate, $time, 2, \SCons::PP_TYPES['JSA'], $oRow->idEmployee);
+                    if (count($adjs) > 0) {
+                        foreach ($adjs as $adj) {
+                            $justifiedMins += $adj->minutes;
+                        }
+                    }
+                    $oRow->prematureOut = $justifiedMins > $minsPrematureOut ? 0 : ($minsPrematureOut - $justifiedMins);
                 }
                 else {
                     $oRow->prematureOut = null; 

@@ -44,9 +44,10 @@ class SDataAccessControl {
     {
         $lAbsences = \DB::table('incidents AS i')
                         ->join('type_incidents AS ti', 'i.type_incidents_id', '=', 'ti.id')
+                        ->leftJoin('incident_ext_sys_links AS iel', 'iel.incident_id', '=', 'i.id')
                         ->where('employee_id', $id)
                         ->whereRaw("'" . $dtDate . "' BETWEEN start_date AND end_date")
-                        ->select('i.external_key', 'i.nts', 'ti.name AS type_name')
+                        ->select('iel.external_key', 'iel.external_system', 'i.nts', 'ti.name AS type_name')
                         ->where('i.is_delete', false)
                         ->whereNotIn('ti.id', [14, 15])
                         ->orderBy('i.id', 'ASC')
@@ -59,9 +60,10 @@ class SDataAccessControl {
     {
         $lAbsences = \DB::table('incidents AS i')
                         ->join('type_incidents AS ti', 'i.type_incidents_id', '=', 'ti.id')
+                        ->leftJoin('incident_ext_sys_links AS iel', 'iel.incident_id', '=', 'i.id')
                         ->where('employee_id', $id)
                         ->whereRaw("'" . $dtDate . "' BETWEEN start_date AND end_date")
-                        ->select('i.external_key', 'i.nts', 'ti.name AS type_name')
+                        ->select('iel.external_key', 'iel.external_system', 'i.nts', 'ti.name AS type_name')
                         ->where('i.is_delete', false)
                         ->whereIn('ti.id', [14, 15])
                         ->orderBy('i.id', 'ASC')

@@ -258,5 +258,153 @@ class SReportsUtils {
             return $lEmployees->whereIn($key, $aEmpsByDates);
         }
     }
+
+    /**
+     * Determinar en la colección de empleados, si se tiene faltas y días de descanso trabajados
+     *
+     * @param \Illuminate\Database\Eloquent\Collection $lEmployees
+     * @param \Illuminate\Database\Eloquent\Collection $lData
+     * @param string $startDate
+     * @param string $endDate
+     * @param int $payWay
+     * 
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public static function checkAbsencesAndDaysOff($lEmployees, $lData, $startDate, $endDate, $payWay)
+    {
+        if ($payWay == \SCons::PAY_W_Q) {
+            $config = \App\SUtils\SConfiguration::getConfigurations();
+            $cutDay = $config->startOfWeek;
+
+            // Si el primer día de la semana no es lunes, busca hacia atrás el primer lunes
+            $oStartDate = Carbon::parse($startDate);
+            $oDate = Carbon::parse($startDate);
+            if ($oStartDate->dayOfWeek != $cutDay) {
+                $oDate->subDays($oStartDate->dayOfWeek - $cutDay);
+            }
+    
+            // obtiene el rango del primer lunes al domingo
+            $oFDate = Carbon::parse($oDate->format('Y-m-d'))->addDays(6);
+
+            $lAdded = self::addWarningToCollection($lEmployees, $lData, $oDate->format('Y-m-d'), $oFDate->format('Y-m-d'), $payWay);
+
+            // se hace el mismo proceso con la siguiente semana hasta que la fecha final de la semana esté fuera del rango de la quincena
+            $oDate->addDays(7);
+            $oFDate->addDays(7);
+            while ($oFDate->lte($endDate)) {
+                $lAdded = self::addWarningToCollection($lEmployees, $lAdded, $oDate->format('Y-m-d'), $oFDate->format('Y-m-d'), $payWay);
+                $oDate->addDays(7);
+                $oFDate->addDays(7);
+            }
+
+            return $lAdded;
+        }
+        else {
+            return self::addWarningToCollection($lEmployees, $lData, $startDate, $endDate, $payWay);
+        }
+    }
+
+    /**
+     * Determinar en la colección de empleados, si se tiene faltas y días de descanso trabajados
+     *
+     * @param \Illuminate\Database\Eloquent\Collection $lEmployees
+     * @param \Illuminate\Database\Eloquent\Collection $lData
+     * @param string $weekStartDate
+     * @param string $weekEndDate
+     * @param int $payWay
+     * 
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    private static function addWarningToCollection($lEmployees, $lData, $weekStartDate, $weekEndDate, $payWay)
+    {
+        // obtiene el reporte de tiempos extra del periodo calculado y determina los días de descanso y las faltas
+        $lRows = SDataProcess::process($weekStartDate, $weekEndDate, $payWay, $lEmployees);
+        $aDatesDayOff = self::getDaysOffDates($lRows, $lEmployees);
+        $lDatesDayOff = collect($aDatesDayOff);
+        $filtered = $lDatesDayOff->filter(function ($item) {
+                                                return !is_null($item->dateDayOffWorked);
+                                            })->values();
+
+        if (count($filtered) > 0) {
+            foreach ($lDatesDayOff as $oDateOff) {
+                if (is_null($oDateOff->dateDayOffWorked)) {
+                    continue;
+                }
+
+                $oRow = $lData->where('idEmployee', $oDateOff->idEmployee)
+                        ->where('outDate', $oDateOff->dateDayOffWorked)
+                        ->filter(function ($item) {
+                            if (count($item->events) > 0) {
+                                foreach ($item->events as $oEvent) {
+                                    if ($oEvent['type_id'] == \SCons::INC_TYPE['DESCANSO']) {
+                                        return true;
+                                    }
+                                }
+                            }
+                        })->first();
+
+                if (is_null($oRow)) {
+                    continue;
+                }
+                
+                $oRow->isDayChecked = true;
+                $oRow->others = $oRow->others."Falta y descanso trabajado en la misma semana (detectado). ";
+            }
+        }
+
+        return $lData;
+    }
+
+    /**
+     * Obtener los días de descanso trabajados
+     *
+     * @param \Illuminate\Database\Eloquent\Collection $lData
+     * @param \Illuminate\Database\Eloquent\Collection $lEmployees
+     * 
+     * @return array
+     */
+    private static function getDaysOffDates($lData, $lEmployees)
+    {
+        $lDatesDayOff = [];
+        foreach ($lEmployees as $oEmp) {
+            $lRangeRows = (clone $lData)->where('idEmployee', $oEmp->id);
+            $hasAbsence = false;
+            $hasDayOff = false;
+            $hasDayOffWorked = false;
+            $dateDayOffWorked = null;
+            foreach ($lRangeRows as $oRow) {
+                if ($oRow->hasAbsence) {
+                    $hasAbsence = true;
+                }
+    
+                if (count($oRow->events) > 0) {
+                    foreach ($oRow->events as $oEvent) {
+                        if ($oEvent['type_id'] == \SCons::INC_TYPE['DESCANSO']) {
+                            $hasDayOff = true;
+                            break;
+                        }
+                    }
+                    if ($hasDayOff && $oRow->hasChecks) {
+                        $hasDayOffWorked = true;
+                        $dateDayOffWorked = $oRow->outDate;
+                    }
+                }
+            }
+
+            $oEmpObj = new \stdClass();
+            $oEmpObj->idEmployee = $oEmp->id;
+            // si no tiene faltas o no tiene descansos trabajados
+            if ($hasAbsence && $hasDayOffWorked) {
+                $oEmpObj->dateDayOffWorked = $dateDayOffWorked;
+            }
+            else {
+                $oEmpObj->dateDayOffWorked = null;
+            }
+
+            $lDatesDayOff[] = $oEmpObj;
+        }
+
+        return $lDatesDayOff;
+    }
 }
 

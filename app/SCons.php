@@ -44,7 +44,8 @@ class SCons {
                      'OF' => 4,
                      'DHE' => 5,
                      'AHE' => 6,
-                     'COM' => 7
+                     'COM' => 7,
+                     'JSA' => 8
                   ];
 
    const FROM_ASSIGN = 2;
@@ -77,7 +78,8 @@ class SCons {
       'INA_TR_F_PL' => 20,// INASIST. TRABAJO FUERA DE PLANTA
       'VAC_CAP' => 21,// VACACIONES
       'INC_CAP' => 22,// INCAPACIDAD
-      'ONOM_CAP' => 23// ONOMÁSTICO
+      'ONOM_CAP' => 23,// ONOMÁSTICO
+      'PERM' => 24// PERMISO
    ];
 
    const TASK_TYPE_REPORT_JOURNEY = 1;

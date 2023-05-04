@@ -166,6 +166,7 @@ class prepayrollAdjustController extends Controller
             $oAdjust = new prepayrollAdjust($request->all());
             
             $oAdjust->is_delete = false;
+            $oAdjust->is_external = false;
             $oAdjust->created_by = \Auth::user()->id;
             $oAdjust->updated_by = \Auth::user()->id;
     
@@ -186,13 +187,13 @@ class prepayrollAdjustController extends Controller
 
             $canMakeAdjust = PrepayrollReportController::canMakeAdjust($adjustDate, $oEmployee->way_pay_id);
             if (is_string($canMakeAdjust)) {
-                return json_encode(['success' => false, 'msg' => 'No se puede aplicar el ajuste, la prenómina tiene Vobo.'.$canMakeAdjust]);
+                return response()->json(['success' => false, 'msg' => 'No se puede aplicar el ajuste, la prenómina tiene Vobo.'.$canMakeAdjust]);
             }
     
             $canMakeAdjustByEmployee = PrepayrollReportController::canMakeAdjustByEmployee($oEmployee->id, $adjustDate, $oEmployee->way_pay_id);
     
             if (is_string($canMakeAdjustByEmployee)) {
-                return json_encode(['success' => false, 'msg' => 'No se puede aplicar el ajuste. '.$canMakeAdjustByEmployee]);
+                return response()->json(['success' => false, 'msg' => 'No se puede aplicar el ajuste. '.$canMakeAdjustByEmployee]);
             }
     
             try {
@@ -208,7 +209,7 @@ class prepayrollAdjustController extends Controller
             }
             catch (\Throwable $th) {
                 \DB::rollBack();
-                return json_encode(['success' => false, 'msg' => $th->getMessage()]);
+                return response()->json(['success' => false, 'msg' => $th->getMessage()]);
             }
     
             SPrepayrollAdjustUtils::verifyProcessedData($oAdjust->employee_id, $adjustDate);
@@ -220,7 +221,7 @@ class prepayrollAdjustController extends Controller
             $oAdjust->type_code = $type->type_code;
             $oAdjust->type_name = $type->type_name;
     
-            return json_encode(['success' => true, 'msg' => 'Ajuste aplicado correctamente.', 'data' => $oAdjust, 'is_range' => false]);
+            return response()->json(['success' => true, 'msg' => 'Ajuste aplicado correctamente.', 'data' => $oAdjust, 'is_range' => false]);
         }
         else if ((int) $request->adjCategory == 3) {
             $dateInit = Carbon::parse($request->dateInit);
@@ -230,6 +231,7 @@ class prepayrollAdjustController extends Controller
                 $oAdjust = new prepayrollAdjust($request->all());
             
                 $oAdjust->is_delete = false;
+                $oAdjust->is_external = false;
                 $oAdjust->created_by = \Auth::user()->id;
                 $oAdjust->updated_by = \Auth::user()->id;
                 $oAdjust->dt_date = $dateInit->toDateString();
@@ -239,13 +241,13 @@ class prepayrollAdjustController extends Controller
                 $oEmployee = employees::find($oAdjust->employee_id);
                 $canMakeAdjust = PrepayrollReportController::canMakeAdjust($oAdjust->dt_date, $oEmployee->way_pay_id);
                 if (is_string($canMakeAdjust)) {
-                    return json_encode(['success' => false, 'msg' => 'No se puede aplicar el ajuste, la prenómina tiene Vobo.'.$canMakeAdjust]);
+                    return response()->json(['success' => false, 'msg' => 'No se puede aplicar el ajuste, la prenómina tiene Vobo.'.$canMakeAdjust]);
                 }
         
                 $canMakeAdjustByEmployee = PrepayrollReportController::canMakeAdjustByEmployee($oEmployee->id, $oAdjust->dt_date, $oEmployee->way_pay_id);
         
                 if (is_string($canMakeAdjustByEmployee)) {
-                    return json_encode(['success' => false, 'msg' => 'No se puede aplicar el ajuste. '.$canMakeAdjustByEmployee]);
+                    return response()->json(['success' => false, 'msg' => 'No se puede aplicar el ajuste. '.$canMakeAdjustByEmployee]);
                 }
 
                 try {
@@ -261,7 +263,7 @@ class prepayrollAdjustController extends Controller
                 }
                 catch (\Throwable $th) {
                     \DB::rollBack();
-                    return json_encode(['success' => false, 'msg' => $th->getMessage()]);
+                    return response()->json(['success' => false, 'msg' => $th->getMessage()]);
                 }
         
                 SPrepayrollAdjustUtils::verifyProcessedData($oAdjust->employee_id, $oAdjust->dt_date);
@@ -278,10 +280,10 @@ class prepayrollAdjustController extends Controller
                 $dateInit->addDay();
             }
 
-            return json_encode(['success' => true, 'msg' => 'Ajustes aplicados correctamente.', 'data' => $arr_adjust, 'is_range' => true]);
+            return response()->json(['success' => true, 'msg' => 'Ajustes aplicados correctamente.', 'data' => $arr_adjust, 'is_range' => true]);
         }
         else {
-            return json_encode(['success' => false, 'msg' => 'Error al guardar el ajuste, categoria desconocida']);
+            return response()->json(['success' => false, 'msg' => 'Error al guardar el ajuste, categoria desconocida']);
         }
     }
 

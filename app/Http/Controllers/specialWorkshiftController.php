@@ -306,6 +306,7 @@ class specialWorkshiftController extends Controller
             $adjust->minutes = 0;
             $adjust->apply_to = 2;
             $adjust->comments = $request->comentarios;
+            $adjust->is_external = 0;
             $adjust->is_delete = 0;
             $adjust->adjust_type_id = 7;
             $adjust->apply_time = 0;
@@ -493,6 +494,7 @@ class specialWorkshiftController extends Controller
             $adjust->apply_to = 2;
             $adjust->comments = $request->comentarios;
             $adjust->is_delete = 0;
+            $adjust->is_external = 0;
             $adjust->adjust_type_id = 7;
             $adjust->apply_time = 0;
             $adjust->created_by = session()->get('user_id');

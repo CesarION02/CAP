@@ -6,17 +6,9 @@ Plantilla horarios
 @section("scripts")
     <script src="{{asset("assets/pages/scripts/admin/funciones.js")}}" type="text/javascript"></script>
     <script src="{{asset("assets/pages/scripts/admin/datatable/index.js")}}" type="text/javascript"></script>
-    <script src="{{ asset("dt/datatables.js") }}" type="text/javascript"></script>
     <script src="{{asset("assets/pages/scripts/filter.js")}}" type="text/javascript"></script>
-    <script src="{{ asset('dt/dataTables.buttons.min.js') }}"></script>
     <script src="{{ asset("assets/js/moment/moment.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/moment/datetime-moment.js") }}" type="text/javascript"></script>
-	<script src="{{ asset('dt/buttons.flash.min.js') }}"></script>
-	<script src="{{ asset('dt/jszip.min.js') }}"></script>
-	<script src="{{ asset('dt/pdfmake.min.js') }}"></script>
-	<script src="{{ asset('dt/vfs_fonts.js') }}"></script>
-	<script src="{{ asset('dt/buttons.html5.min.js') }}"></script>
-	<script src="{{ asset('dt/buttons.print.min.js') }}"></script>
 <script>
     $(document).ready( function () {
         $.fn.dataTable.moment('DD/MM/YYYY');

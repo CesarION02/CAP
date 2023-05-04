@@ -77,7 +77,7 @@ class SHolidayWork{
                             $config = \App\SUtils\SConfiguration::getConfigurations();
                             for( $j = 0 ; $config->days_granted > $j ; $j++ ){
                                 $incident = new incident();
-                                $incident->external_key = "0_0";
+                                $incident->is_external = false;
                                 $incident->num = 0;
                                 $incident->type_incidents_id = 17;
                                 $incident->cls_inc_id = 1;

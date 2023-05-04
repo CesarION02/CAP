@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\incident;
 use Illuminate\Http\Request;
 use App\Models\typeincident;
 use App\Http\Requests\ValidacionTypeincident;
@@ -35,12 +36,12 @@ class typeincidentController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(ValidacionTypeincident $request)
     {
         typeincident::create($request->all());
-        return redirect('type_incidents')->with('mensaje', 'Tipo Incidente creado con exito');
+        return redirect()->route('tipos_index')->with('mensaje', 'Tipo Incidente creado con exito');
     }
 
     /**
@@ -71,12 +72,12 @@ class typeincidentController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function update(Request $request, $id)
     {
         typeincident::findOrFail($id)->update($request->all());
-        return redirect('type_incidents')->with('mensaje', 'Tipo de Incidente actualizado con exito');
+        return redirect()->route('tipos_index')->with('mensaje', 'Tipo de Incidente actualizado con exito');
     }
 
     /**
@@ -95,5 +96,23 @@ class typeincidentController extends Controller
         } else {
             abort(404);
         }
+    }
+
+    public function updateIncident(Request $request)
+    {        
+        try {
+            typeincident::where('id', $request->id_inc_type)->update([
+                                $request->attribute_nm => $request->new_value,
+                                'updated_at' => date('Y-m-d H:i:s')
+                            ]);
+        }
+        catch (\Throwable $th) {
+            \Log::error($th);
+            return json_encode($th);
+        }
+
+        $lIncidentTypes = \DB::table('type_incidents')->get();
+
+        return json_encode($lIncidentTypes);
     }
 }

@@ -15,6 +15,7 @@ class prepayrollAdjust extends Model
                             'apply_to',
                             'comments',
                             'is_delete',
+                            'is_external',
                             'adjust_type_id',
                             'created_by',
                             'updated_by'];

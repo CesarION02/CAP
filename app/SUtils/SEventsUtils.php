@@ -77,9 +77,10 @@ class SEventsUtils {
         $lIncidents = \DB::table('incidents AS i')
                         ->join('type_incidents AS ti', 'i.type_incidents_id', '=', 'ti.id')
                         ->join('incidents_day AS inday', 'i.id', '=', 'inday.incidents_id')
+                        ->leftJoin('incident_ext_sys_links AS iext', 'i.id', '=', 'iext.incident_id')
                         ->whereIn('employee_id', $employees)
                         ->whereRaw("'".$date."' = inday.date")
-                        ->select('i.external_key', 'i.nts', 'ti.name AS type_name', 'inday.date', 'inday.num_day')
+                        ->select('iext.external_key', 'i.is_external', 'i.nts', 'ti.name AS type_name', 'inday.date', 'inday.num_day')
                         ->where('i.is_delete', false)
                         ->orderBy('i.id', 'ASC')
                         ->get();

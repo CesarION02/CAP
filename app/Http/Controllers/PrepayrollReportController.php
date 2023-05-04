@@ -411,7 +411,7 @@ class PrepayrollReportController extends Controller
         if (count($lVobos) == 0) {
             return true;
         }else{
-            return "La ".$week_biWeek." tiene visto bueno.";
+            return "La ".$week_biWeek." tiene visto bueno para el empleado.";
         }
     }
 
