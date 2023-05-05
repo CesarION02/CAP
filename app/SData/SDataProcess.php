@@ -80,6 +80,15 @@ class SDataProcess {
 
         $lAllData = SDataProcess::putAdjustInRows($sStartDate, $sEndDate, $lAllData);
 
+        // Verifica si la configuración de entradas y salidas manuales está activa y marca los renglones para ser validados
+        $checkManualRegs = commentsControl::where('is_delete', 0)
+                                    ->where('key_code', 'hasCheckManual')
+                                    ->pluck('value')
+                                    ->first();
+        if (!is_null($checkManualRegs) && $checkManualRegs) {
+            $lAllData = SReportsUtils::checkManualCheck($lAllData);
+        }
+
         /**
          * Remueve el objeto logger de la sesión actual
          */
@@ -245,7 +254,11 @@ class SDataProcess {
                             $newRow->outDateTime = $sDate;
                             $newRow->hasCheckOut = false;
                             $newRow->comments = $newRow->comments."Sin salida. ";
-                            $newRow->isDayChecked = true;
+                            if ($comments != null) {
+                                if ($comments->where('key_code', 'hasCheckOut')->first()['value']) {
+                                    $newRow->isDayChecked = true;
+                                }
+                            }
                             $newRow->scheduleText = strtoupper($scheduleName);
                             $lRows[] = $newRow;
                         }
@@ -1003,6 +1016,9 @@ class SDataProcess {
                             $oRow->isDayChecked = false;
                         }
                     }
+
+                    // Solicitud de Edgar Barrón para omitir el comentario de "Sin checadas" cuando se trata de una incidencia
+                    $oRow->comments = str_replace("Sin checadas. ", "", $oRow->comments);
 
                     $oRow->events[] = $abs;
                 }
