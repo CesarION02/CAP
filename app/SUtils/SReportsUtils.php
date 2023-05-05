@@ -406,5 +406,20 @@ class SReportsUtils {
 
         return $lDatesDayOff;
     }
+
+    public static function checkManualCheck($lRows)
+    {
+        $lWithManualChecks = $lRows->filter(function ($item) {
+            return $item->isModifiedIn || $item->isModifiedOut;
+        })->values();
+
+        if (count($lWithManualChecks) > 0) {
+            foreach ($lWithManualChecks as $oRow) {
+                $oRow->isDayChecked = true;
+            }
+        }
+
+        return $lRows;
+    }
 }
 

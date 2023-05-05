@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddAbsAndDayoffRule extends Migration
+class AddAbsManualCheckControl extends Migration
 {
     /**
      * Run the migrations.
@@ -15,9 +15,9 @@ class AddAbsAndDayoffRule extends Migration
     {
         // Agregar registro(regla) a la tabla de comments_control
         DB::table('comments_control')->insert([
-            'id_commentControl' => '48',
-            'key_code' => 'hasAbsenceAndDayOffWorked',
-            'Comment' => 'Falta y descanso trabajado',
+            'id_commentControl' => '49',
+            'key_code' => 'hasCheckManual',
+            'Comment' => 'Checadas modificadas manualmente',
             'value' => '1',
             'is_delete' => '0',
             'created_by' => '1',
@@ -33,7 +33,7 @@ class AddAbsAndDayoffRule extends Migration
     public function down()
     {
         // Eliminar registro(regla) a la tabla de comments_control
-        DB::table('comments_control')->where('id_commentControl', '=', '48')
+        DB::table('comments_control')->whereIn('id_commentControl', ['49'])
                                     ->delete();
     }
 }
