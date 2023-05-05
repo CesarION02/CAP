@@ -10,7 +10,6 @@ Turno especial
 
 @section("scripts")
     <script src="{{asset("assets/pages/scripts/admin/datatable/index.js")}}" type="text/javascript"></script>
-    
     <script src="{{ asset("assets/js/moment/moment.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/moment/datetime-moment.js") }}" type="text/javascript"></script>
     <script src="{{ asset("daterangepicker/daterangepicker.js") }}" type="text/javascript"></script>
