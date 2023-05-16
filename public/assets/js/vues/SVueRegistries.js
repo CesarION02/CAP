@@ -1,9 +1,9 @@
 var app = new Vue({
-    el: '#divRegistries',
+    el: "#divRegistries",
     data: {
-        message: 'Hello Vue!',
+        message: "Hello Vue!",
         isSingle: true,
-        picked: 'single',
+        picked: "single",
         employee: 0,
         date: null,
         time: null,
@@ -12,62 +12,81 @@ var app = new Vue({
         lIncidents: [],
         canCheck: false,
         messageChecks: "",
+        comments: "",
     },
-    monuted() {
-        
-    },
+    monuted() {},
     methods: {
         onTypeChange() {
-            this.isSingle = this.picked == 'single';
+            this.isSingle = this.picked == "single";
         },
-        getChecks(route){
+        getChecks(route) {
             this.messageChecks = "";
-            if(this.employee != 0 && this.date != null){
-                axios.post(route, {
-                    employee_id: this.employee,
-                    date: this.date
-                })
-                .then(response => {
-                    this.lRegistries = response.data.lRegistries;
-                    this.lIncidents = response.data.lIncidents;
-                    var haveEntry = false;
-                    var haveDeparture = false;
-                    for (let i = (this.lRegistries.length - 1); i >= 0; i--) {
-                        this.lRegistries[i].type_id == 1 ? haveEntry = true : '';
-                        this.lRegistries[i].type_id == 2 ? haveDeparture = true : '';
-                    }
-                    if(!haveEntry && !haveDeparture){
-                        this.messageChecks = "No existen checadas del dia";
-                    }else if(!haveEntry){
-                        this.messageChecks = "Falta entrada para completar el dia";
-                    }else if(!haveDeparture){
-                        this.messageChecks = "Falta salida para completar el dia";
-                    }
-                    this.canCheck = (this.date != null && this.employee != 0) ? true : false;
-                    if(this.lRegistries.length > 0){
-                        oGui.showOk();
-                    }else{
-                        oGui.showMessage('Realizado','No se encontraron registros','success');
-                    }
-                })
-                .catch(function (error) {
-                    oGui.showError('Error al consultar los registros');
-                });
-            }else{
-                oGui.showError('Debe seleccionar empleado y fecha');
+            if (this.employee != 0 && this.date != null) {
+                axios
+                    .post(route, {
+                        employee_id: this.employee,
+                        date: this.date,
+                    })
+                    .then((response) => {
+                        this.lRegistries = response.data.lRegistries;
+                        this.lIncidents = response.data.lIncidents;
+                        var haveEntry = false;
+                        var haveDeparture = false;
+                        for (let i = this.lRegistries.length - 1; i >= 0; i--) {
+                            this.lRegistries[i].type_id == 1
+                                ? (haveEntry = true)
+                                : "";
+                            this.lRegistries[i].type_id == 2
+                                ? (haveDeparture = true)
+                                : "";
+                        }
+                        if (!haveEntry && !haveDeparture) {
+                            this.messageChecks = "No existen checadas del dia";
+                        } else if (!haveEntry) {
+                            this.messageChecks =
+                                "Falta entrada para completar el dia";
+                        } else if (!haveDeparture) {
+                            this.messageChecks =
+                                "Falta salida para completar el dia";
+                        }
+                        this.canCheck =
+                            this.date != null && this.employee != 0
+                                ? true
+                                : false;
+                        if (this.lRegistries.length > 0) {
+                            oGui.showOk();
+                        } else {
+                            oGui.showMessage(
+                                "Realizado",
+                                "No se encontraron registros",
+                                "success"
+                            );
+                        }
+                    })
+                    .catch(function (error) {
+                        oGui.showError("Error al consultar los registros");
+                    });
+            } else {
+                oGui.showError("Debe seleccionar empleado y fecha");
             }
         },
-        store(){
-            if(this.employee != 0){
-                if(this.date != null){
-                    if(this.time != null){
-                        if(this.picked == 'single'){
-                            var checkType = "";
+        store() {
+            if (this.employee != 0) {
+                if (this.date != null) {
+                    if (this.time != null) {
+                        if (this.picked == "single") {
+                            let checkType = "";
                             switch (parseInt(this.type)) {
                                 case 1:
-                                    if(this.lRegistries.length > 0){
-                                        for (let i = (this.lRegistries.length - 1); i >= 0; i--) {
-                                            if(this.lRegistries[i].type_id == 1){
+                                    if (this.lRegistries.length > 0) {
+                                        for (
+                                            let i = this.lRegistries.length - 1;
+                                            i >= 0;
+                                            i--
+                                        ) {
+                                            if (
+                                                this.lRegistries[i].type_id == 1
+                                            ) {
                                                 checkType = "entrada";
                                                 break;
                                             }
@@ -75,9 +94,15 @@ var app = new Vue({
                                     }
                                     break;
                                 case 2:
-                                    if(this.lRegistries.length > 0){
-                                        for (let i = (this.lRegistries.length - 1); i >= 0; i--) {
-                                            if(this.lRegistries[i].type_id == 1){
+                                    if (this.lRegistries.length > 0) {
+                                        for (
+                                            let i = this.lRegistries.length - 1;
+                                            i >= 0;
+                                            i--
+                                        ) {
+                                            if (
+                                                this.lRegistries[i].type_id == 1
+                                            ) {
                                                 checkType = "salida";
                                                 break;
                                             }
@@ -89,33 +114,39 @@ var app = new Vue({
                                 default:
                                     break;
                             }
-                            if(checkType != ""){
+                            if (checkType != "") {
                                 (async () => {
-                                    if (await oGui.confirm('Ya existe una '+ checkType,'Desea agregar una nueva?','warning')) {
-                                        $('#form-general').submit();
+                                    if (
+                                        await oGui.confirm(
+                                            "Ya existe una " + checkType,
+                                            "Desea agregar una nueva?",
+                                            "warning"
+                                        )
+                                    ) {
+                                        $("#form-general").submit();
                                     }
                                 })();
-                            }else if(parseInt(this.type) != 0){
-                                $('#form-general').submit();
-                            }else{
-                                oGui.showError('Debe seleccionar tipo checada');
+                            } else if (parseInt(this.type) != 0) {
+                                $("#form-general").submit();
+                            } else {
+                                oGui.showError("Debe seleccionar tipo checada");
                             }
-                        }else{
-                            $('#form-general').submit();
+                        } else {
+                            $("#form-general").submit();
                         }
-                    }else{
-                        oGui.showError('Debe seleccionar una hora');    
+                    } else {
+                        oGui.showError("Debe seleccionar una hora");
                     }
-                }else{
-                    oGui.showError('Debe seleccionar una fecha');    
+                } else {
+                    oGui.showError("Debe seleccionar una fecha");
                 }
-            }else{
-                oGui.showError('Debe seleccionar un empleado');
+            } else {
+                oGui.showError("Debe seleccionar un empleado");
             }
         },
-        resetCreate(){
+        resetCreate() {
             this.isSingle = true;
-            this.picked = 'single';
+            this.picked = "single";
             this.employee = 0;
             this.date = null;
             this.time = null;
@@ -123,7 +154,7 @@ var app = new Vue({
             this.lRegistries = [];
             this.canCheck = false;
             this.messageChecks = "";
-            $('#selEmployee').val(0).trigger('chosen:updated');
-        }
+            $("#selEmployee").val(0).trigger("chosen:updated");
+        },
     },
-  })
+});

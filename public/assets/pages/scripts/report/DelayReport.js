@@ -318,9 +318,20 @@ var app = new Vue({
             this.onAdjustChange();
 
             if (this.vData.isPrepayrollInspection) {
-                var checkVobo = document.getElementById('cb' + oRow.numEmployee);
-                this.isAdjustsDisabled = checkVobo.checked;
-            } else {
+                if (this.vData.lEmpVobos[oRow.numEmployee] == undefined || this.vData.lEmpVobos[oRow.numEmployee] == null) {
+                    this.isAdjustsDisabled = false;
+                }
+                else {
+                    let oVobo = this.vData.lEmpVobos[oRow.numEmployee];
+                    if (oVobo.is_vobo) {
+                        this.isAdjustsDisabled = true;
+                    }
+                    else {
+                        this.isAdjustsDisabled = false;
+                    }
+                }
+            }
+            else {
                 this.isAdjustsDisabled = false;
             }
 
@@ -419,9 +430,15 @@ var app = new Vue({
                     modif_out: this.isModifOut,
                     in_datetime: inDTime,
                     out_datetime: outDTime,
+                    comments: this.comments,
                     row: JSON.stringify(this.vRow)
                 })
                 .then(res => {
+                    if ((typeof res.data === 'string') || (res.data instanceof String)) {
+                        oGui.showError(res.data);
+                        return;
+                    }
+
                     this.vRow.tempLabels = "Entrada y/o salida manuales.";
                     this.vData.lRows.push('refresh');
                     this.vData.lRows.pop();
@@ -507,8 +524,8 @@ var app = new Vue({
          * @param $event event 
          * @param integer num 
          */
-        onChangeVoboResume(event, num) {
-            handleChangeCheck(event, num);
+        onChangeVoboResume(event, num, sOperation) {
+            handleChangeCheck(event, num, sOperation);
         },
         /**
          * Determina si el empleado ya ha sido revisado en la nómina actual.
@@ -523,6 +540,9 @@ var app = new Vue({
             let vobo = this.vData.lEmpVobos[parseInt(numEmployee, 10)];
 
             return vobo;
+        },
+        onTest() {
+            alert("test");
         }
     },
 })

@@ -123,7 +123,8 @@
                                     </td>
                                     <td style="border: solid 1px rgb(86, 86, 86); text-align: left; font-weight: bold;">
                                         <span class="nobr">@{{ vRow.nameEmployee }}
-                                            <span v-if="vRow.isVobo" aria-hidden="true" class="glyphicon glyphicon-ok" style="color:green;"></span>
+                                            <span v-if="vRow.oVobo != null && vRow.oVobo.is_vobo" aria-hidden="true" class="fa fa-check fa-lg" style="color:green;"></span>
+                                            <span v-if="vRow.oVobo != null && vRow.oVobo.is_rejected" aria-hidden="true" class="fa fa-times fa-lg" style="color:red;"></span>
                                         </span>
                                     </td>
                                     {{-- <td v-for="date in vDates" style="border: solid 1px rgb(86, 86, 86); text-align: center; font-weight: bold;">
