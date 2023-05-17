@@ -745,11 +745,19 @@ class ReporteController extends Controller
                 
                 if ($dates[0] == $sStartDate && $dates[1] == $sEndDate) {
                     $lEmpVobos = DB::table('prepayroll_report_emp_vobos AS evb')
-                                        ->join('users AS u', 'evb.vobo_by_id', '=', 'u.id')
+                                        ->leftJoin('users AS u', 'evb.vobo_by_id', '=', 'u.id')
+                                        ->leftJoin('users AS ur', 'evb.rejected_by_id', '=', 'ur.id')
                                         ->join('employees AS e', 'evb.employee_id', '=', 'e.id')
                                         ->where('evb.is_delete', 0)
                                         ->where('year', $aNumber[1])
-                                        ->select('u.name AS user_name', 'evb.employee_id', 'evb.vobo_by_id', 'e.num_employee');
+                                        ->select('u.name AS user_vobo_name',
+                                                'ur.name AS user_rejected_name',
+                                                'evb.employee_id', 
+                                                'evb.vobo_by_id', 
+                                                'evb.is_vobo',
+                                                'evb.is_rejected',
+                                                'evb.comments',
+                                                'e.num_employee');
 
                     if ($payWay == \SCons::PAY_W_Q) {
                         $lEmpVobos = $lEmpVobos->where('evb.is_biweek', true)
@@ -852,7 +860,7 @@ class ReporteController extends Controller
                         ->with('isAdmin', $isAdmin)
                         ->with('lUsers', $lUsers)
                         ->with('wizard', $wizard )
-                        ->with('filter_employees',$filter_employees)
+                        ->with('filter_employees', $filter_employees)
                         ->with('pay_way', $request->pay_way)
                         ->with('oPrepayrollCtrl', $oPrepayrollCtrl)
                         ->with('idPreNomina', $payWay == \SCons::PAY_W_Q ? "biweek" : "week")
@@ -2445,11 +2453,19 @@ class ReporteController extends Controller
                 
                 if ($dates[0] == $sStartDate && $dates[1] == $sEndDate) {
                     $lEmpVobos = DB::table('prepayroll_report_emp_vobos AS evb')
-                                        ->join('users AS u', 'evb.vobo_by_id', '=', 'u.id')
+                                        ->leftJoin('users AS u', 'evb.vobo_by_id', '=', 'u.id')
+                                        ->leftJoin('users AS ur', 'evb.rejected_by_id', '=', 'ur.id')
                                         ->join('employees AS e', 'evb.employee_id', '=', 'e.id')
                                         ->where('evb.is_delete', 0)
                                         ->where('year', $aNumber[1])
-                                        ->select('u.name AS user_name', 'evb.employee_id', 'evb.vobo_by_id', 'e.num_employee');
+                                        ->select('u.name AS user_vobo_name',
+                                                'ur.name AS user_rejected_name',
+                                                'evb.employee_id', 
+                                                'evb.vobo_by_id', 
+                                                'evb.is_vobo',
+                                                'evb.is_rejected',
+                                                'evb.comments',
+                                                'e.num_employee');
 
                     if ($payWay == \SCons::PAY_W_Q) {
                         $lEmpVobos = $lEmpVobos->where('evb.is_biweek', true)
@@ -2481,7 +2497,14 @@ class ReporteController extends Controller
                 $oRepRow->idEmployee = $oEmployee->id;
                 $oRepRow->numEmployee = $oEmployee->num_employee;
                 $oRepRow->nameEmployee = $oEmployee->name;
-                $oRepRow->isVobo = $isPrepayrollInspection && array_key_exists($oEmployee->id, $lEmpVobos);
+                
+                if ($isPrepayrollInspection) {
+                    $oRepRow->oVobo = array_key_exists($oEmployee->id, $lEmpVobos) ? $lEmpVobos[$oEmployee->id] : null;
+                }
+                else {
+                    $oRepRow->oVobo = null;
+                }
+
                 $oRepRow->faltas = 0;
                 $oRepRow->descansos = 0;
                 $oRepRow->vacaciones = 0;

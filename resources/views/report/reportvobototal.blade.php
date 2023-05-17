@@ -33,7 +33,7 @@
             <div class="col-md-2">
                 @if ($oPrepayrollCtrl->is_rejected)
                     <div style="background-color: rgb(247, 76, 76); border-radius: 12px; text-align: center;">
-                        {{ "Rechazado: ".$oPrepayrollCtrl->dt_rejected }}
+                        {{ "Rechazado: ".$oPrepayrollCtrl->dt_rejected . "." }}
                     </div>
                 @else
                     <form id="form_vobo" action="{{ route('rechazar_vobo', [$oPrepayrollCtrl->id_control, $sPayWay == \SCons::PAY_W_S ? "week" : "biweek"]) }}" method="POST">
@@ -46,7 +46,8 @@
                         ?>
                         <input type="hidden" name="back_url" value="{{ $CurPageURL }}">
                         <input type="hidden" name="id_delegation" value="{{ $idDelegation }}" >
-                        <button class="btn btn-danger" title="Cancelar visto bueno" type="submit" id="btnSubmit">
+                        <input type="hidden" name="reject_reason" id="reject_reason">
+                        <button class="btn btn-danger" title="Cancelar visto bueno" type="button" onclick="onRejectSubmit()" id="btnSubmit">
                             <i class="fa fa-ban" aria-hidden="true"></i>
                         </button>
                     </form>
@@ -54,5 +55,14 @@
             </div>
         </div>
     </div>
+    @if($oPrepayrollCtrl->is_rejected && strlen($oPrepayrollCtrl->comments) > 0) 
+        <div class="row">
+            <div class="col-md-offset-7 col-md-5">
+                <div style="background-color: rgb(247, 76, 76); border-radius: 12px; text-align: center;">
+                    {{ $oPrepayrollCtrl->comments }}
+                </div>
+            </div>
+        </div>
+    @endif
     <br>
 @endif

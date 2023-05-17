@@ -158,6 +158,18 @@
             </div>
           </div>
           <div class="row">
+            <div class="col-xs-8 col-xs-offset-1">
+              <div class="form-group">
+                <label>Comentarios</label>
+                <textarea title="Escribe el comentario que deseas que aparezca en el renglón."
+                          placeholder="Escribe el comentario que deseas que aparezca en el renglón."
+                          v-model="comments" 
+                          :readonly="!isModifOut && !isModifIn"
+                          class="form-control" style="resize: none; width: 370px; height: 115px;"></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="row">
             <div class="col-xs-3 col-xs-offset-9">
               <button :disabled="!isModifOut && !isModifIn" type="button" class="btn btn-success" v-on:click="adjustTimes()">Ajustar</button>
             </div>

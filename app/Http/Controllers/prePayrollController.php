@@ -655,7 +655,7 @@ class prePayrollController extends Controller
      * Undocumented function
      *
      * @param Request $request
-     * @return void
+     * @return \Illuminate\View\View
      */
     public function indexVobos(Request $request, $idPreNomina = 3)
     {
@@ -863,7 +863,6 @@ class prePayrollController extends Controller
                                         ->where('num', ($cont->num_biweek - 1))
                                         ->value('dt_cut');    
                     }
-                    
 
                     $cont->dt_ini = Carbon::parse($dt_ini)->addDay()->toDateString();
                 }
@@ -1141,7 +1140,7 @@ class prePayrollController extends Controller
      *
      * @param int $id
      * 
-     * @return redirect
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function boVo(Request $request, $idVobo, $payType = 1) {
         $success = true;
@@ -1167,8 +1166,6 @@ class prePayrollController extends Controller
                     $success = false;
                     throw new \Exception('No se puede dar Vobo, fecha de corte aun no a pasado.');
                 }
-
-                
             }
             else {
                 $oAuthCtrl = PrepayReportControl::find($idVobo);
@@ -1347,6 +1344,7 @@ class prePayrollController extends Controller
     public function rejBoVo(Request $request, $id, $idPreNomina = 1)
     {
         $sBackUrl = isset($request->back_url) && ! is_null($request->back_url) ? $request->back_url : null;
+        $rejectReason = isset($request->reject_reason) && ! is_null($request->reject_reason) ? $request->reject_reason : "";
 
         $res = DB::table('prepayroll_report_auth_controls')
                     ->where('id_control', $id)
@@ -1354,8 +1352,13 @@ class prePayrollController extends Controller
                         'is_vobo' => false, 
                         'dt_vobo' => null,
                         'is_rejected' => true,
-                        'dt_rejected' => Carbon::now()->toDateTimeString()
+                        'comments' => $rejectReason,
+                        'dt_rejected' => Carbon::now()->toDateTimeString(),
+                        'updated_by' => session()->get('user_id'),
+                        'updated_at' => Carbon::now()->toDateTimeString(),
                     ]);
+
+        SPrepayrollUtils::notifyToUsers($id, session()->get('user_id'), $rejectReason);
 
         if (is_null($sBackUrl)) {
             return redirect()->route('vobos', ['idPreNomina' => $idPreNomina]);
