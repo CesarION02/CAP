@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PrepayReportControl;
 use Illuminate\Http\Request;
 
 use Carbon\Carbon;
@@ -17,7 +18,7 @@ class EmployeeVobosController extends Controller
             $oEmployee = employees::where('num_employee', $request->num_employee)->first();
             $hasVobo = $this->haveVoboSupervisor($request->num_employee, $request->is_vobo, $request->start_date, $request->end_date, $oEmployee->way_pay_id);
 
-            if (!$hasVobo[0] || $request->is_vobo) {
+            if (!$hasVobo[0] || $request->is_vobo || $request->is_reject) {
                 if (is_null($oEmployee)) {
                     return response()->json(['success' => false, 'title' => 'Error', 'message' => 'No se encontró el empleado', 'icon' => 'error'], 500);
                 }
@@ -119,6 +120,44 @@ class EmployeeVobosController extends Controller
                             $qEmpVobo->dt_rejected = null;
                         }
                         $qEmpVobo->save();
+                    }
+                }
+
+                if ($request->is_reject) {
+                    $lVobos = $this->getVobosOfEmployee($oEmployee->id, $number[0], $number[1], $oEmployee->way_pay_id);
+
+                    foreach ($lVobos as $oVoboAuth) {
+                        $oVoboAuth->is_vobo = false;
+                        $oVoboAuth->dt_vobo = null;
+                        $oVoboAuth->is_rejected = true;
+                        $oVoboAuth->dt_rejected = Carbon::now()->toDateTimeString();
+                        $oVoboAuth->comments = !isset($request->comments) || is_null($request->comments) ? "" : $request->comments;
+                        
+                        $oVoboAuth->save();
+                    }
+
+                    $oMyVobo = PrepayReportControl::where('is_vobo', true)
+                                        ->where('user_vobo_id', auth()->user()->id)
+                                        ->where('is_delete', 0)
+                                        ->where('year', $number[1]);
+                    if ($oEmployee->way_pay_id == \SCons::PAY_W_Q) {
+                        $oMyVobo = $oMyVobo->where('is_biweek', true)
+                                                ->where('num_biweek', $number[0]);
+                    }
+                    else {
+                        $oMyVobo = $oMyVobo->where('is_week', true)
+                                                ->where('num_week', $number[0]);
+                    }
+                    $oMyVobo = $oMyVobo->first();
+
+                    if (! is_null($oMyVobo)) {
+                        $oMyVobo->is_vobo = false;
+                        $oMyVobo->dt_vobo = null;
+                        $oMyVobo->is_rejected = true;
+                        $oMyVobo->dt_rejected = Carbon::now()->toDateTimeString();
+                        $oMyVobo->comments = !isset($request->comments) || is_null($request->comments) ? "" : $request->comments;
+                        
+                        $oMyVobo->save();
                     }
                 }
 
@@ -233,5 +272,63 @@ class EmployeeVobosController extends Controller
         else {
             return [false, null];
         }
+    }
+
+    /**
+     * Retorna los vobos de los usuarios que revisan al empleado recibido
+     *
+     * @param int $id_employee
+     * @param int $ppNumber prepayroll number
+     * @param int $ppYear prepayroll year
+     * @param int $pay_way 1: quincenal, 2: semanal
+     * 
+     * @return array [con vobo, id de usuario]
+     */
+    public function getVobosOfEmployee($id_employee, $ppNumber, $ppYear, $pay_way) {
+        $headUsers = \DB::table('prepayroll_group_employees as pge')
+                            ->join('prepayroll_groups_users as pgu', 'pgu.group_id', '=', 'pge.group_id')
+                            ->where('pge.employee_id', $id_employee)
+                            ->where('pge.is_delete', 0)
+                            ->pluck('pgu.head_user_id')
+                            ->toArray();
+
+        if (count($headUsers) == 0) {
+            $headUsers = \DB::table('employees as e')
+                            ->join('prepayroll_group_deptos as pgd', 'pgd.department_id', '=', 'e.department_id')
+                            ->join('prepayroll_groups_users as pgu', 'pgu.group_id', '=', 'pgd.group_id')
+                            ->where('e.id', $id_employee)
+                            ->pluck('pgu.head_user_id')
+                            ->toArray();
+        }
+
+        if (count($headUsers) == 0) {
+            return [];
+        }
+
+        $lVobosIds = [];
+        if ($pay_way == \SCons::PAY_W_S) {
+            $lVobosIds = \DB::table('prepayroll_report_auth_controls as prac')
+                ->select('prac.id_control')
+                ->where('prac.is_delete', 0)
+                ->where('prac.is_vobo', true)
+                ->whereIn('prac.user_vobo_id', $headUsers)
+                ->where([['year', $ppYear], ['num_week', $ppNumber]])
+                ->pluck('prac.id_control')
+                ->toArray();
+        }
+        else if ($pay_way == \SCons::PAY_W_Q) {
+            $lVobosIds = \DB::table('prepayroll_report_auth_controls as prac')
+                ->select('prac.id_control')
+                ->where('prac.is_delete', 0)
+                ->where('prac.is_vobo', true)
+                ->whereIn('prac.user_vobo_id', $headUsers)
+                ->where([['year', $ppYear], ['num_biweek', $ppNumber]])
+                ->pluck('prac.id_control')
+                ->toArray();
+        }
+
+        $lVobos = PrepayReportControl::whereIn('id_control', $lVobosIds)->get();
+
+        return $lVobos;
     }
 }
