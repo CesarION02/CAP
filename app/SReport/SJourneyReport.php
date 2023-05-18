@@ -235,10 +235,10 @@ class SJourneyReport
         }
     }
 
-    private static function isJson($string) {
+    public static function isJson($string) {
         json_decode($string);
         return json_last_error() === JSON_ERROR_NONE;
-     }
+    }
 
     private static function getJourneyData($sStartDate, $sEndDate, $iPayType, $aCompanies, $aAreas, $aDeptosCap, $aDeptosSiie, $aEmployees, $aBenPolicy)
     {

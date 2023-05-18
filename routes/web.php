@@ -517,4 +517,6 @@ Route::get('reportejornadasschedule', 'TestController@scheduleTasks')->name('tes
 
 Route::get('resavedays', 'TestController@reSaveDays')->name('resave_days');
 
+Route::get('testpostadj', 'TestController@testAdjustPost')->name('test_post_adj');
+
 });
