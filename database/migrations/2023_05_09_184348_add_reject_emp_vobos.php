@@ -28,17 +28,17 @@ class AddRejectEmpVobos extends Migration
             $table->foreign('rejected_by_id')->references('id')->on('users');
         });
 
-        DB::statement('ALTER TABLE prepayroll_report_emp_vobos 
-                DROP FOREIGN KEY prepayroll_report_emp_vobos_vobo_by_id_foreign;
-                ALTER TABLE prepayroll_report_emp_vobos 
-                CHANGE COLUMN vobo_by_id vobo_by_id INT(10) UNSIGNED NULL;
-                ALTER TABLE prepayroll_report_emp_vobos 
-                ADD CONSTRAINT prepayroll_report_emp_vobos_vobo_by_id_foreign
-                FOREIGN KEY (vobo_by_id)
-                REFERENCES users (id);');
+        DB::statement('ALTER TABLE `checador`.`prepayroll_report_emp_vobos` 
+                        DROP FOREIGN KEY `prepayroll_report_emp_vobos_vobo_by_id_foreign`;
+                        ALTER TABLE `checador`.`prepayroll_report_emp_vobos` 
+                        CHANGE COLUMN `vobo_by_id` `vobo_by_id` INT(10) UNSIGNED NULL ;
+                        ALTER TABLE `checador`.`prepayroll_report_emp_vobos` 
+                        ADD CONSTRAINT `prepayroll_report_emp_vobos_vobo_by_id_foreign`
+                        FOREIGN KEY (`vobo_by_id`)
+                        REFERENCES `checador`.`users` (`id`);');
 
-        DB::statement('ALTER TABLE prepayroll_report_emp_vobos 
-                        CHANGE COLUMN dt_vobo dt_vobo DATETIME NULL; ');
+        DB::statement('ALTER TABLE `checador`.`prepayroll_report_emp_vobos` 
+                        CHANGE COLUMN `dt_vobo` `dt_vobo` DATETIME NULL ;');
 
         \App\Models\EmployeeVobo::where('is_delete', 0)
                                 ->whereNotNull('dt_vobo')->update([
