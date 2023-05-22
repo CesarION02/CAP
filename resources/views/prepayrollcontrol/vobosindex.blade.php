@@ -249,7 +249,7 @@
         <div class="box">
             <div class="box-header with-border">
                 <h3 class="box-title">Prenóminas V.º B.º</h3>
-                @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:darvoboprenomina"])
+                @include('layouts.usermanual', ['link' => "http://192.168.1.251/dokuwiki/doku.php?id=wiki:darvoboprenomina"])
                 <div class="row">
                     <div class="col-md-8 col-md-offset-4">
                         <div class="row">

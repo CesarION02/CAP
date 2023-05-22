@@ -67,10 +67,10 @@ Empleados
                 @if(isset($foraneos))
                 
                     <h3 class="box-title">Empleados fóraneos</h3>
-                    @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:empleadoforaneo"])
+                    @include('layouts.usermanual', ['link' => "http://192.168.1.251/dokuwiki/doku.php?id=wiki:empleadoforaneo"])
                 @else
                     <h3 class="box-title">Empleados vs. departamentos CAP</h3>
-                    @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:asignacionpstoydeptopen"])
+                    @include('layouts.usermanual', ['link' => "http://192.168.1.251/dokuwiki/doku.php?id=wiki:asignacionpstoydeptopen"])
                 @endif
                 
                 <div class="box-tools pull-right">

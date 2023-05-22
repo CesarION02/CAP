@@ -128,7 +128,7 @@ Incidencias
                             Incidencias
                     @endswitch
                 </h3>
-                @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:nolaborables"])
+                @include('layouts.usermanual', ['link' => "http://192.168.1.251/dokuwiki/doku.php?id=wiki:nolaborables"])
                 <div class="row">
                     <div class="col-md-5 col-md-offset-7">
                         @if($incidentType == 14)

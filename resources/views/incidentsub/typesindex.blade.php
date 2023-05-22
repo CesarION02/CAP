@@ -81,7 +81,7 @@ span.nobr { white-space: nowrap; }
                 <h3 class="box-title">
                     Gestión de tipos de incidencia
                 </h3>
-                @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:nolaborables"])
+                @include('layouts.usermanual', ['link' => "http://192.168.1.251/dokuwiki/doku.php?id=wiki:nolaborables"])
                 <div class="row">
                     
                 </div>

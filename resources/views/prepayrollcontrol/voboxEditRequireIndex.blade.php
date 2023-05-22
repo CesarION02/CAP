@@ -220,7 +220,7 @@
         <div class="box">
             <div class="box-header with-border">
                 <h3 class="box-title">Editar Prenóminas VoBos</h3>
-                @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php"])
+                @include('layouts.usermanual', ['link' => "http://192.168.1.251/dokuwiki/doku.php"])
                 <div class="row">
                     <div class="col-md-8 col-md-offset-4">
                         <div class="row">

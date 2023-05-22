@@ -90,7 +90,7 @@
         <div class="box">
             <div class="box-header with-border">
                 <h3 class="box-title">Grupos de prenómina</h3>
-                @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:grupoprenempleados"])
+                @include('layouts.usermanual', ['link' => "http://192.168.1.251/dokuwiki/doku.php?id=wiki:grupoprenempleados"])
                 <div class="row">
                     <div class="col-md-5 col-md-offset-7">
                         <div class="row">

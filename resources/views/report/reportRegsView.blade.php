@@ -23,16 +23,16 @@ Reporte Entradas/Salidas
                 <div class="col-md-10">
                     @if ($reportType == 1)
                         <h3 class="box-title">Reporte entrada/salida a 2 línea por área</h3>
-                        @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:reporte2"])
+                        @include('layouts.usermanual', ['link' => "http://192.168.1.251/dokuwiki/doku.php?id=wiki:reporte2"])
                     @elseif($reportType == 2)
                         <h3 class="box-title">Reporte entrada/salida a 2 línea por grupo depto.</h3>
-                        @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:reporte2"])
+                        @include('layouts.usermanual', ['link' => "http://192.168.1.251/dokuwiki/doku.php?id=wiki:reporte2"])
                     @elseif($reportType == 3)
                         <h3 class="box-title">Reporte entrada/salida a 2 línea por depto. CAP</h3>
-                        @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:reporte2"])
+                        @include('layouts.usermanual', ['link' => "http://192.168.1.251/dokuwiki/doku.php?id=wiki:reporte2"])
                     @else
                         <h3 class="box-title">Reporte entrada/salida a 2 línea por empleado</h3>
-                        @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:reporte2"])
+                        @include('layouts.usermanual', ['link' => "http://192.168.1.251/dokuwiki/doku.php?id=wiki:reporte2"])
                     @endif
                 </div>
                 <div class="col-md-2">

@@ -82,7 +82,7 @@ Plantilla horarios
         <div class="box">
             <div class="box-header with-border">
                 <h3 class="box-title">Asignar horario fijo Area</h3>
-                @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:asignacionpordept"])
+                @include('layouts.usermanual', ['link' => "http://192.168.1.251/dokuwiki/doku.php?id=wiki:asignacionpordept"])
                 <div class="row">
                     <div class="col-md-3 col-md-offset-9">
                         <div class="row">

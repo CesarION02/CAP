@@ -22,7 +22,7 @@
             <div class="box-header with-border row">
                 <div class="col-md-10">
                         <h3 class="box-title">Reporte acceso de puertas</h3>
-                        @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:registroaccesopuerta"])
+                        @include('layouts.usermanual', ['link' => "http://192.168.1.251/dokuwiki/doku.php?id=wiki:registroaccesopuerta"])
                         <div class="box-tools pull-right">
                         </div>
                 </div>
