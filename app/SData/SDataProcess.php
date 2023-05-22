@@ -78,6 +78,8 @@ class SDataProcess {
         // $lDataJ = SOverJourneyCore::overtimeByIncompleteJourney($sStartDate, $sEndDate, $lDataWSun, $aEmployeeOverTime);
         $lAllData = SOverJourneyCore::processOverTimeByOverJourney($lDataWSun, $sStartDate, $comments);
 
+        $lAllData = SDataProcess::discountExtraHours($lAllData);
+
         $lAllData = SDataProcess::putAdjustInRows($sStartDate, $sEndDate, $lAllData);
 
         // Verifica si la configuración de entradas y salidas manuales está activa y marca los renglones para ser validados
@@ -864,11 +866,18 @@ class SDataProcess {
             $oRow->cutId = SDelayReportUtils::getCutId($result);
             $oRow->overtimeCheckPolicy = SDelayReportUtils::getOvertimePolicy($result);
             if ($result->withRegistry) {
+                $config = \App\SUtils\SConfiguration::getConfigurations();
                 // minutos configurados en la tabla
                 $oRow->overDefaultMins = SDelayReportUtils::getExtraTime($result);
                 // minutos por turnos de más de 8 horas
-                $oRow->overScheduleMins = SDelayReportUtils::getExtraTimeBySchedule($result, $oRow->inDateTime, $oRow->inDateTimeSch,
+                if (!! $config->discountOverTimeJourneyExt) {
+                    $oRow->overWorkedMins += SDelayReportUtils::getExtraTimeBySchedule($result, $oRow->inDateTime, $oRow->inDateTimeSch,
                                                                                     $oRow->outDateTime, $oRow->outDateTimeSch);
+                }
+                else {
+                    $oRow->overScheduleMins = SDelayReportUtils::getExtraTimeBySchedule($result, $oRow->inDateTime, $oRow->inDateTimeSch,
+                                                                                    $oRow->outDateTime, $oRow->outDateTimeSch);
+                }
             }
 
             if ((($oRow->overWorkedMins + $oRow->overMinsByAdjs) >= 20) || (($oRow->overScheduleMins + $oRow->overMinsByAdjs) >= 60)) {
@@ -1304,27 +1313,7 @@ class SDataProcess {
                     $extendJourney = SDelayReportUtils::compareDates($oRow->inDateTimeSch, $oRow->outDateTimeSch);
                     if ($aEmployeeOverTime[$oRow->idEmployee] == 2 || ($aEmployeeOverTime[$oRow->idEmployee] == 3 && $extendJourney->diffMinutes > 480)) {
                         // minutos extra trabajados y filtrados por bandera de "genera horas extra"
-                        // Ajuste de prenómina
-                        $date = $oRow->outDate == null ? $oRow->outDateTime : $oRow->outDate;
-                        $time = strlen($oRow->outDateTime) > 10 ? substr($oRow->outDateTime, -8) : null;
-                        
-                        $oRow->overWorkedMins = SDataProcess::getOverTime($oRow->inDateTime, $oRow->inDateTimeSch, $oRow->outDateTime, $oRow->outDateTimeSch);
-                        if ($oRow->overWorkedMins > 0) {
-                            $adjs = SPrepayrollAdjustUtils::getAdjustForCase($date, $time, 2, \SCons::PP_TYPES['DHE'], $oRow->idEmployee);
-                            $discountMins = 0;
-                            if (count($adjs) > 0) {
-                                foreach ($adjs as $adj) {
-                                    $discountMins += $adj->minutes;
-                                }
-                            }
-
-                            if ($oRow->overWorkedMins >= $discountMins) {
-                                $oRow->overMinsByAdjs = - $discountMins;
-                            }
-                            else {
-                                $oRow->overMinsByAdjs = - $oRow->overWorkedMins;
-                            }
-                        }
+                        $oRow->overWorkedMins += SDataProcess::getOverTime($oRow->inDateTime, $oRow->inDateTimeSch, $oRow->outDateTime, $oRow->outDateTimeSch);
                     }
                 }
                 else {
@@ -1470,6 +1459,42 @@ class SDataProcess {
 
             // suma de minutos extra totales.
             $oRow->overMinsTotal = $oRow->overWorkedMins + $oRow->overDefaultMins + $oRow->overScheduleMins + $oRow->overMinsByAdjs;
+        }
+
+        return $lData;
+    }
+
+    /**
+     * Descontar tiempo extra que viene de los ajustes
+     *
+     * @param array $lData
+     * @return \Illuminate\Support\Collection
+     */
+    private static function discountExtraHours($lData)
+    {
+        foreach ($lData as $oRow) {
+            if ($oRow->overWorkedMins > 0) {
+                // Ajuste de prenómina
+                $date = $oRow->outDate == null ? $oRow->outDateTime : $oRow->outDate;
+                $time = strlen($oRow->outDateTime) > 10 ? substr($oRow->outDateTime, -8) : null;
+                $adjs = SPrepayrollAdjustUtils::getAdjustForCase($date, $time, 2, \SCons::PP_TYPES['DHE'], $oRow->idEmployee);
+                $discountMins = 0;
+                if (count($adjs) > 0) {
+                    foreach ($adjs as $adj) {
+                        $discountMins += $adj->minutes;
+                    }
+                }
+
+                if ($oRow->overWorkedMins >= $discountMins) {
+                    $oRow->overMinsByAdjs = - $discountMins;
+                }
+                else {
+                    $oRow->overMinsByAdjs = - $oRow->overWorkedMins;
+                }
+
+                // suma de minutos extra totales.
+                $oRow->overMinsTotal = $oRow->overWorkedMins + $oRow->overDefaultMins + $oRow->overScheduleMins + $oRow->overMinsByAdjs;
+            }
         }
 
         return $lData;

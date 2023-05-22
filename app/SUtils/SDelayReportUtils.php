@@ -147,7 +147,7 @@ class SDelayReportUtils {
     }
 
     /**
-     * Devuelve los minutos extra que le corresponden al empleado su tiene un
+     * Devuelve los minutos extra que le corresponden al empleado si tiene un
      * turno de más de 8 horas
      *
      * @param SDateComparison $oComparison
