@@ -110,7 +110,12 @@ class SOverJourneyCore {
                         $oRow->overMinsTotal -= $oRow->overDefaultMins;
                         $oRow->overDefaultMins = 0;
 
-                        $oRow->overScheduleMins += $workedTime->diffMinutes;
+                        if (!! $config->discountOverTimeJourneyDouble) {
+                            $oRow->overWorkedMins += $workedTime->diffMinutes;
+                        }
+                        else {
+                            $oRow->overScheduleMins += $workedTime->diffMinutes;
+                        }
                         $oRow->overMinsTotal += $workedTime->diffMinutes;
                         $oRow->isOverJourney = true;
                         // quitar retardos en segundo turno
@@ -125,7 +130,12 @@ class SOverJourneyCore {
                         if ($journeyMin + $workedTime->diffMinutes > 480) {
                             $toRest = 480 - $journeyMin;
                             $extra = $workedTime->diffMinutes - $toRest;
-                            $oRow->overScheduleMins += $extra;
+                            if (!! $config->discountOverTimeJourneyDouble) {
+                                $oRow->overWorkedMins += $extra;
+                            }
+                            else {
+                                $oRow->overScheduleMins += $extra;
+                            }
                             $oRow->overMinsTotal += $extra;
                             $journeyMin = 480;
 
