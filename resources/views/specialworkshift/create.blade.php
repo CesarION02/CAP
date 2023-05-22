@@ -47,7 +47,7 @@
     <script src="{{ asset("assets/js/axios.js") }}" type="text/javascript"></script>
     <script>
         var routeValSch = <?php echo json_encode($route_validate_schedule); ?>;
-        var isSpecialW = null;
+        var idSpecialW = null;
         var oGui = new SGui();
     </script>
     <script src="{{ asset("assets/pages/scripts/specialw/specialw.js")}}" type="text/javascript"></script>
