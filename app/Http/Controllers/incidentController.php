@@ -500,6 +500,9 @@ class incidentController extends Controller
                 }
             }
 
+            $oIncident->eff_day = Carbon::parse($oIncident->start_date)->diffInDays($oIncident->end_date) + 1;
+            $oIncident->save();
+
             $incidentController = new incidentController();
             $incidentController->saveDays($oIncident);
 
