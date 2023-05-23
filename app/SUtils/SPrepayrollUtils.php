@@ -167,7 +167,7 @@ class SPrepayrollUtils {
      * Obtiene los grupos dependientes de los grupos recibidos.
      *
      * @param array $groups
-     * @return void
+     * @return array
      */
     public static function getChildrenOfGroups($groups) {
         $lGroups = [];
@@ -204,7 +204,7 @@ class SPrepayrollUtils {
      * Obtiene los grupos dependientes del grupo recibido.
      *
      * @param int $group
-     * @return void
+     * @return array
      */
     private static function getChildren($idGroup) {
         $children = \DB::table('prepayroll_groups AS pg')
