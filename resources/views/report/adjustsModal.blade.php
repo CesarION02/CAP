@@ -1,6 +1,7 @@
 <!-- Modal -->
 <div id="adjustsModal" class="modal fade" role="dialog">
-  <div class="modal-dialog">
+  <div class="modal-dialog" style="width: 55%; margin: auto;">
+  {{-- <div class="modal-dialog"> --}}
 
     <!-- Modal content-->
     <div class="modal-content">
