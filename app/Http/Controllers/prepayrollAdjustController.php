@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\SUtils\SDateUtils;
 use Illuminate\Http\Request;
 
 use Carbon\Carbon;
@@ -185,6 +186,12 @@ class prepayrollAdjustController extends Controller
                     break;
             }
 
+            $aNumPp = SDateUtils::getNumberOfDate($adjustDate, $oEmployee->way_pay_id);
+            $isClosed = PrepayrollReportController::prepayrollIsClosed($aNumPp[0], $aNumPp[1], $oEmployee->way_pay_id);
+            if ($isClosed) {
+                return response()->json(['success' => false, 'msg' => 'No se puede aplicar el ajuste, la prenómina está cerrada.']);
+            }
+
             $canMakeAdjust = PrepayrollReportController::canMakeAdjust($adjustDate, $oEmployee->way_pay_id);
             if (is_string($canMakeAdjust)) {
                 return response()->json(['success' => false, 'msg' => 'No se puede aplicar el ajuste, la prenómina tiene Vobo.'.$canMakeAdjust]);
@@ -292,6 +299,12 @@ class prepayrollAdjustController extends Controller
         $oAdjust = prepayrollAdjust::find($idAjust);
 
         $oEmployee = employees::find($oAdjust->employee_id);
+        $aNumPp = SDateUtils::getNumberOfDate($oAdjust->dt_date, $oEmployee->way_pay_id);
+        $isClosed = PrepayrollReportController::prepayrollIsClosed($aNumPp[0], $aNumPp[1], $oEmployee->way_pay_id);
+        if ($isClosed) {
+            return response()->json(['success' => false, 'msg' => 'No se puede eliminar el ajuste, la prenómina está cerrada.']);
+        }
+        
         $canMakeAdjustByEmployee = PrepayrollReportController::canMakeAdjustByEmployee($oEmployee->id, $oAdjust->dt_date, $oEmployee->way_pay_id);
 
         if (is_string($canMakeAdjustByEmployee)) {
