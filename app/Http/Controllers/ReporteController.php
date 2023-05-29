@@ -678,7 +678,9 @@ class ReporteController extends Controller
                     break;
             }
 
-            $adjTypes = prepayrollAdjType::get()->toArray();
+            $adjTypes = prepayrollAdjType::whereNotIn('id', [8])
+                                            ->get()
+                                            ->toArray();
 
             $lAdjusts = DB::table('prepayroll_adjusts AS pa')
                             ->join('prepayroll_adjusts_types AS pat', 'pa.adjust_type_id', '=', 'pat.id')

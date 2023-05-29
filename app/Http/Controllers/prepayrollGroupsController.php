@@ -48,6 +48,7 @@ class prepayrollGroupsController extends Controller
         $lHeadUsers = \DB::table('users AS u')
                         ->select('u.id', 'u.name AS usr_name')
                         ->where('u.is_delete', 0)
+                        ->orderBy('u.name', 'ASC')
                         ->get();
 
         return view('prepayroll.groups.create', ['lGroups' => $lGroups, 'lHeadUsers' => $lHeadUsers]);
@@ -204,6 +205,7 @@ class prepayrollGroupsController extends Controller
         $groups = \DB::table('prepayroll_groups')
                             ->select('id_group', 'group_name')
                             ->where('is_delete', 0)
+                            ->orderBy('group_name', 'ASC')
                             ->get();
 
         return view('prepayroll.indexgr')->with('lEmployees', $lEmployees)
@@ -224,6 +226,7 @@ class prepayrollGroupsController extends Controller
         $groups = \DB::table('prepayroll_groups')
                             ->select('id_group', 'group_name')
                             ->where('is_delete', 0)
+                            ->orderBy('group_name', 'ASC')
                             ->get();
 
         return view('prepayroll.indexgrdepts')->with('lDepartments', $lDepartments)
