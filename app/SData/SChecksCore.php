@@ -4,99 +4,7 @@ use App\SUtils\SDelayReportUtils;
 
 class SChecksCore
 {
-    /**
-     * Filtra las checadas repetidas ya sea de entrada o de salida que estén juntas y arma pares de checadas
-     *
-     * @param \Illuminate\Support\Collection $lChecks
-     * 
-     * @return \Illuminate\Support\Collection
-     */
-    public static function filterRepeatedChecks($lChecks)
-    {
-        $oConfig = \App\SUtils\SConfiguration::getConfigurations();
-        $lNewChecks = [];
-        $oCheckIn = null;
-        $oCheckOut = null;
-
-        foreach ($lChecks as $check) {
-            $check->type_id === \SCons::REG_IN ?
-                self::handleCheckIn($oCheckOut, $oCheckIn, $lNewChecks, $check, $oConfig) :
-                self::handleCheckOut($oCheckIn, $oCheckOut, $lNewChecks, $check, $oConfig);
-        }
-
-        if ($oCheckIn !== null) {
-            $lNewChecks[] = $oCheckIn;
-        }
-
-        if ($oCheckOut !== null) {
-            $lNewChecks[] = $oCheckOut;
-        }
-
-        /**
-         * Log de las checadas omitidas de los empleados que registran varias veces entrada o salida
-         */
-        if (count($lChecks) !== count($lNewChecks)) {
-            foreach ($lChecks as $indexCheck) {
-                if (! in_array($indexCheck, $lNewChecks) && session()->has('logger')) {
-                    session('logger')->log($indexCheck->employee_id, 'checada_omitida', $indexCheck->id, null, null, null);
-                }
-            }
-        }
-
-        return collect($lNewChecks);
-    }
-
-    private static function handleCheckIn(
-        $oCheckOut,
-        &$oCheckIn,
-        array &$lNewChecks,
-        $check,
-        $oConfig
-    ): void {
-        if ($oCheckOut !== null) {
-            $lNewChecks[] = $oCheckOut;
-            $oCheckOut = null;
-        }
-
-        if ($oCheckIn === null) {
-            $oCheckIn = $check;
-        } else {
-            $chekDate = "$check->date $check->time";
-            $chekODate = "$oCheckIn->date $oCheckIn->time";
-            $comparison = SDelayReportUtils::compareDates($chekDate, $chekODate);
-            if (abs($comparison->diffMinutes) >= $oConfig->maxGapBetweenChecks) {
-                $lNewChecks[] = $oCheckIn;
-                $oCheckIn = $check;
-            }
-        }
-    }
-
-    private static function handleCheckOut(
-        &$oCheckIn,
-        &$oCheckOut,
-        &$lNewChecks,
-        $check,
-        $oConfig
-    ): void {
-        if ($oCheckIn !== null) {
-            $lNewChecks[] = $oCheckIn;
-            $oCheckIn = null;
-        }
-
-        if ($oCheckOut !== null) {
-            $chekDate = "$check->date $check->time";
-            $chekODate = "$oCheckOut->date $oCheckOut->time";
-            $comparison = SDelayReportUtils::compareDates($chekDate, $chekODate);
-            if (abs($comparison->diffMinutes) >= $oConfig->maxGapBetweenChecks) {
-                $lNewChecks[] = $oCheckOut;
-                $oCheckOut = $check;
-            }
-        }
-        else {
-            $oCheckOut = $check;
-        }
-    }
-
+    
     /**
      * En base al horario del empleado determina si la checada
      * es de entrada o salida y retorna el arreglo con el tipo modificado
@@ -125,7 +33,7 @@ class SChecksCore
         $result = SDelayReportUtils::getSchedule($sDate, $sDate, $auxCheck->employee_id, $registry, clone $lWorkshifts, \SCons::REP_HR_EX);
 
         if (is_null($result) || (! is_null($result->auxScheduleDay) && !$result->auxScheduleDay->is_active)) {
-            return self::filterRepeatedChecks($lCheks);
+            return self::filterDoubleCheks($lCheks);
         }
 
         $config = \App\SUtils\SConfiguration::getConfigurations();
@@ -141,7 +49,7 @@ class SChecksCore
             $outTime = $result->auxScheduleDay->departure;
         }
 
-        $lRegistries = self::filterRepeatedChecks($lCheks);
+        $lRegistries = self::filterDoubleCheks($lCheks);
 
         $inDateTimeSch = $sDate.' '.$inTime;
         $outDateTimeSch = $sDate.' '.$outTime;
@@ -194,6 +102,92 @@ class SChecksCore
             $lNewChecks[] = $check;
         }
 
-        return self::filterRepeatedChecks($lNewChecks);
+        return self::filterDoubleCheks($lNewChecks);
+    }
+
+     /**
+     * Procesa las checadas de un día en específico y determina si 
+     * el empleado checó más de una vez en el momento.
+     * Filtra las checadas repetidas ya sea de entrada o de salida que estén juntas y arma pares de checadas
+     *
+     * @param \Illuminate\Database\Eloquent\Collection $lCheks
+     * 
+     * @return \Illuminate\Support\Collection con las checadas válidas
+     */
+    public static function filterDoubleCheks($lCheks)
+    {
+        if (sizeof($lCheks) == 0) {
+            return $lCheks;
+        }
+
+        $oConfig = \App\SUtils\SConfiguration::getConfigurations();
+        $lNewChecks = array();
+
+        $oCheckIn = null;
+        $oCheckOut = null;
+        foreach ($lCheks as $check) {
+            if ($check->type_id == \SCons::REG_IN) {
+                if (! is_null($oCheckOut)) {
+                    $lNewChecks[] = $oCheckOut;
+                }
+                $oCheckOut = null;
+                if (is_null($oCheckIn)) {
+                    $oCheckIn = $check;
+                }
+                else {
+                    // diferencia entre checkIns es mucha se agregan las 2
+                    $chekDate = $check->date.' '.$check->time;
+                    $chekODate = $oCheckIn->date.' '.$oCheckIn->time;
+                    $comparison = SDelayReportUtils::compareDates($chekDate, $chekODate);
+                    if (abs($comparison->diffMinutes) >= $oConfig->maxGapBetweenChecks) {
+                        $lNewChecks[] = $oCheckIn;
+                        $oCheckIn = $check;
+                    }
+                }
+            }
+            else {
+                if (! is_null($oCheckIn)) {
+                    $lNewChecks[] = $oCheckIn;
+                }
+                $oCheckIn = null;
+
+                if (! is_null($oCheckOut)) {
+                    $chekDate = $check->date.' '.$check->time;
+                    $chekODate = $oCheckOut->date.' '.$oCheckOut->time;
+                    $comparison = SDelayReportUtils::compareDates($chekDate, $chekODate);
+                    if (abs($comparison->diffMinutes) >= $oConfig->maxGapBetweenChecks) {
+                        $lNewChecks[] = $oCheckOut;
+                        $oCheckOut = $check;
+                    }
+                    else {
+                        $oCheckOut = $check;
+                    }
+                }
+                else {
+                    $oCheckOut = $check;
+                }
+            }
+        }
+
+        if (! is_null($oCheckIn)) {
+            $lNewChecks[] = $oCheckIn;
+        }
+
+        if (! is_null($oCheckOut)) {
+            $lNewChecks[] = $oCheckOut;
+        }
+
+        /**
+         * Log de las checadas omitidas de los empleados que registran varias veces entrada o salida
+         */
+        if (count($lCheks) != count($lNewChecks)) {
+            foreach ($lCheks as $indexCheck) {
+                if (! in_array($indexCheck, $lNewChecks) && session()->has('logger')) {
+                    session('logger')->log($indexCheck->employee_id, 'checada_omitida', $indexCheck->id, null, null, null);
+                }
+            }
+        }
+
+        return collect($lNewChecks);
     }
 }
