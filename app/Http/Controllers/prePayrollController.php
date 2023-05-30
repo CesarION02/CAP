@@ -1346,6 +1346,9 @@ class prePayrollController extends Controller
         $sBackUrl = isset($request->back_url) && ! is_null($request->back_url) ? $request->back_url : null;
         $rejectReason = isset($request->reject_reason) && ! is_null($request->reject_reason) ? $request->reject_reason : "";
 
+        /**
+         * Rechazar Vobo
+         */
         $res = DB::table('prepayroll_report_auth_controls')
                     ->where('id_control', $id)
                     ->update([
@@ -1358,6 +1361,41 @@ class prePayrollController extends Controller
                         'updated_at' => Carbon::now()->toDateTimeString(),
                     ]);
 
+        $oPpCtrl = PrepayReportControl::find($id);
+        if (is_null($oPpCtrl)) {
+            if (is_null($sBackUrl)) {
+                return redirect()->route('vobos', ['idPreNomina' => $idPreNomina])->with(['error' => 'No se encontró el Visto Bueno', 'icon' => 'error']);
+            }
+            else {
+                return redirect($sBackUrl)->with(['error' => 'No se encontró el Visto Bueno', 'icon' => 'error']);
+            }
+        }
+        
+        /**
+         * Revisar si el usuario que está dando VoBo ha autorizado una omisión de la nómina
+         */
+        $oPpSkp = prepayrollVoboSkipped::where('skipped_by_id', session()->get('user_id'))
+                                ->where('year', $oPpCtrl->year);
+        if ($oPpCtrl->is_week) {
+            $oPpSkp = $oPpSkp->where('is_week', true)
+                            ->where('num_week', $oPpCtrl->num_week);
+        }
+        else {
+            $oPpSkp = $oPpSkp->where('is_biweek', true)
+                            ->where('num_biweek', $oPpCtrl->num_biweek);
+        }
+
+        $oPpSkp = $oPpSkp->where('is_delete', 0)->first();
+
+        if (! is_null($oPpSkp)) {
+            $dateTime = Carbon::now(new \DateTimeZone('-6:00'));
+            $oPpSkp->update(['is_delete' => 1, 
+                            'updated_at' => $dateTime->toDateTimeString()]);
+        }
+
+        /**
+         * Notificar a usuarios dependientes que se ha rechazado la prenómina
+         */
         SPrepayrollUtils::notifyToUsers($id, session()->get('user_id'), $rejectReason);
 
         if (is_null($sBackUrl)) {

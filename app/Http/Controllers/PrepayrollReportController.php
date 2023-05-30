@@ -425,6 +425,36 @@ class PrepayrollReportController extends Controller
     }
 
     /**
+     * Determinar si la nómina ha sido omitida y si es el caso marcarla como cerrada
+     *
+     * @param int $numPp
+     * @param int $yearPp
+     * @param int $tpPay
+     * 
+     * @return boolean
+     */
+    public static function prepayrollIsClosed($numPp, $yearPp, $tpPay)
+    {
+        /**
+         * Revisar si el usuario que está dando VoBo ha autorizado una omisión de la nómina
+         */
+        $oPpSkp = prepayrollVoboSkipped::where('year', $yearPp);
+
+        if ($tpPay == \SCons::PAY_W_S) {
+            $oPpSkp = $oPpSkp->where('is_week', true)
+                            ->where('num_week', $numPp);
+        }
+        else {
+            $oPpSkp = $oPpSkp->where('is_biweek', true)
+                            ->where('num_biweek', $numPp);
+        }
+
+        $oPpSkp = $oPpSkp->where('is_delete', 0)->first();
+
+        return ! is_null($oPpSkp);
+    }
+
+    /**
      * Determina si la prenómina no tiene pendientes vistos buenos
      *
      * @param string $dtDate
