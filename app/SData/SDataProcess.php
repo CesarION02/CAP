@@ -1486,10 +1486,10 @@ class SDataProcess {
                 }
 
                 if ($oRow->overWorkedMins >= $discountMins) {
-                    $oRow->overMinsByAdjs = - $discountMins;
+                    $oRow->overMinsByAdjs -= $discountMins;
                 }
                 else {
-                    $oRow->overMinsByAdjs = - $oRow->overWorkedMins;
+                    $oRow->overMinsByAdjs -= $oRow->overWorkedMins;
                 }
 
                 // suma de minutos extra totales.
