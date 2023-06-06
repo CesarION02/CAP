@@ -4,7 +4,7 @@
 @endsection
 
 @section('styles1')
-    <link href="{{ asset("select2js/css/select2.min.css") }}" rel="stylesheet" />
+    <link rel="stylesheet" href="{{asset("assets/css/chosen.min.css")}}">   
 @endsection
 
 @section('content')
@@ -39,10 +39,8 @@
 @endsection
 
 @section("scripts")
-    <script src="{{ asset('select2js/js/select2.min.js') }}"></script>
+    <script src="{{ asset("assets/js/chosen.jquery.min.js") }}" type="text/javascript"></script>
     <script>
-        $(document).ready(function() {
-            $('.head-users').select2();
-        });
+        $(".chosen-select").chosen();
     </script>
 @endsection

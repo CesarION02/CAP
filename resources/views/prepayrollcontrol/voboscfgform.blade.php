@@ -5,6 +5,10 @@
             <input type="date" class="form-control" name="since_date" value="{{ isset($oCfg) ? $oCfg->since_date : date('Y-m-d') }}" id="since_date">
         </div>
         <div class="form-group">
+            <label for="since_date">Concluye en:</label>
+            <input type="date" class="form-control" name="until_date" value="{{ isset($oCfg) ? $oCfg->until : "" }}" id="until_date">
+        </div>
+        <div class="form-group">
             <label for="type_pay">Tipo</label>
             <select class="form-control" id="type_pay" name="type_pay">
                 <option value="1" {{ isset($oCfg) && $oCfg->is_week ? 'selected' : '' }}>Semana</option>

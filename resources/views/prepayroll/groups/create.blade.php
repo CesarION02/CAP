@@ -4,7 +4,8 @@
 @endsection
 
 @section('styles1')
-    <link href="{{ asset("select2js/css/select2.min.css") }}" rel="stylesheet" />
+    <link rel="stylesheet" href="{{asset("assets/css/chosen.min.css")}}">   
+    
 @endsection
 
 @section('content')
@@ -14,7 +15,7 @@
         @include('includes.mensaje')
         <div class="box box-danger">
             <div class="box-header with-border">
-                <h3 class="box-title">Modificar grupo de prenómina</h3>
+                <h3 class="box-title">Crear grupo de prenómina</h3>
                 <div class="box-tools pull-right">
                     <a href="{{ route('prepayroll_groups') }}" class="btn btn-block btn-info btn-sm">
                         <i class="fa fa-fw fa-reply-all"></i> Regresar
@@ -39,10 +40,8 @@
 @endsection
 
 @section("scripts")
-    <script src="{{ asset('select2js/js/select2.min.js') }}"></script>
+    <script src="{{ asset("assets/js/chosen.jquery.min.js") }}" type="text/javascript"></script>
     <script>
-        $(document).ready(function() {
-            $('.head-users').select2();
-        });
+        $(".chosen-select").chosen();
     </script>
 @endsection

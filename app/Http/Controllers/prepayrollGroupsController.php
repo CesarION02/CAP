@@ -19,7 +19,7 @@ class prepayrollGroupsController extends Controller
                         ->leftJoin('prepayroll_groups AS pgf', 'pg.father_group_n_id', '=', 'pgf.id_group')
                         ->where('pg.is_delete', 0)
                         ->select('pg.id_group', 'pg.group_name', 'pg.father_group_n_id', 'pgf.group_name AS father_group_name')
-                        ->orderBy('pg.id_group', 'ASC')
+                        ->orderBy('pg.group_name', 'ASC')
                         ->get();
 
         foreach ($lGroups as $group) {
@@ -37,7 +37,7 @@ class prepayrollGroupsController extends Controller
 
     public function create(Request $request)
     {
-        $lGroups = prepayrollGroup::where('is_delete', 0)->get();
+        $lGroups = prepayrollGroup::where('is_delete', 0)->orderBy('group_name')->get();
         
         $oBlank = new prepayrollGroup();
         $oBlank->id_group = null;
@@ -48,6 +48,7 @@ class prepayrollGroupsController extends Controller
         $lHeadUsers = \DB::table('users AS u')
                         ->select('u.id', 'u.name AS usr_name')
                         ->where('u.is_delete', 0)
+                        ->orderBy('u.name')
                         ->get();
 
         return view('prepayroll.groups.create', ['lGroups' => $lGroups, 'lHeadUsers' => $lHeadUsers]);

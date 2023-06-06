@@ -31,6 +31,7 @@ class PrepayrollReportController extends Controller
         $users = \DB::table('users')
                         ->select(['id', 'name'])
                         ->where('is_delete', 0)
+                        ->orderBy('name')
                         ->get();
 
         return view('prepayrollcontrol.voboscfgcreate', [
@@ -43,6 +44,7 @@ class PrepayrollReportController extends Controller
         $oCfg = new PrepayReportConfig();
 
         $oCfg->since_date = $request->since_date;
+        $oCfg->until_date = $request->until_date;
         $oCfg->is_week = $request->type_pay == 1;
         $oCfg->is_biweek = $request->type_pay == 2;
         $oCfg->is_required = isset($request->is_required);
@@ -66,6 +68,7 @@ class PrepayrollReportController extends Controller
         $users = \DB::table('users')
                         ->select(['id', 'name'])
                         ->where('is_delete', 0)
+                        ->orderBy('name')
                         ->get();
     
         return view('prepayrollcontrol.voboscfgedit', [
@@ -79,6 +82,7 @@ class PrepayrollReportController extends Controller
         $oCfg = PrepayReportConfig::find($request->id_configuration);
 
         $oCfg->since_date = $request->since_date;
+        $oCfg->until_date = $request->until_date;
         $oCfg->is_week = $request->type_pay == 1;
         $oCfg->is_biweek = $request->type_pay == 2;
         $oCfg->is_required = isset($request->is_required);

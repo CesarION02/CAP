@@ -20,13 +20,13 @@ class userController extends Controller
 
         switch ($iFilter) {
             case 1:
-                $datas = User::where('is_delete','0')->orderBy('id')->get();
+                $datas = User::where('is_delete','0')->orderBy('name')->get();
                 $datas->each(function($datas){
                     $datas->employee;
                 });
                 break;
             case 2:
-                $datas = User::where('is_delete','1')->orderBy('id')->get();
+                $datas = User::where('is_delete','1')->orderBy('name')->get();
                 $datas->each(function($datas){
                     $datas->employee;
                 });
