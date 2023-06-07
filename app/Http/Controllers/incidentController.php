@@ -587,39 +587,75 @@ class incidentController extends Controller
                                 '1_9' => '18',
                                 '1_10' => '20',
                             ];
-        
+
         foreach ($lAbsences as $jAbs) {
             $this->employees = employees::select('id', 'external_id')
-                            ->pluck('id', 'external_id');
-            $lCapAbss = incident::select('incidents.id AS idincident', 'iesl.external_key','companies.id AS idcompany')
-                                ->join('companies','companies.id','=','incidents.company_id')
-                                ->join('incident_ext_sys_links AS iesl','iesl.incident_id','=','incidents.id')
-                                ->where('iesl.external_key', "".$jAbs->id_emp."_".$jAbs->id_abs."")
-                                ->where('companies.db_name',$jAbs->company)
+                                        ->pluck('id', 'external_id');
+            $lCapAbss = incident::select('incidents.id AS idincident', 'iesl.external_key', 'companies.id AS idcompany')
+                                ->join('companies', 'companies.id', '=', 'incidents.company_id')
+                                ->join('incident_ext_sys_links AS iesl', 'iesl.incident_id', '=', 'incidents.id')
+                                ->where('iesl.external_key', "" . $jAbs->id_emp . "_" . $jAbs->id_abs . "")
+                                ->where('companies.db_name', $jAbs->company)
                                 ->where('iesl.external_system', 'siie')
                                 ->get();
+
             try {
-                if(count($lCapAbss) >= 1){
-                        $id = $lCapAbss[0]->idincident;
-                        $company = $lCapAbss[0]->idcompany;
-                        $oIncident = $this->updIncident($jAbs, $id, $company);
-                }else{
+                if (count($lCapAbss) >= 1) {
+                    $id = $lCapAbss[0]->idincident;
+                    $company = $lCapAbss[0]->idcompany;
+                    $oIncident = $this->updIncident($jAbs, $id, $company);
+                }
+                else {
                     $lCapAbss = company::select('companies.id AS idcompany')
-                                ->where('companies.db_name',$jAbs->company)
-                                ->get();
-                    $company = $lCapAbss[0]->idcompany;    
-                    $oIncident = $this->insertIncident($jAbs,$company);
+                                        ->where('companies.db_name', $jAbs->company)
+                                        ->get();
+                    $company = $lCapAbss[0]->idcompany;
+                    $oIncident = $this->insertIncident($jAbs, $company);
                 }
 
                 $this->saveDays($oIncident);
-            }catch (\Throwable $th) {
+
+                if ($oIncident->is_external) {
+                    $aAdjustIds = adjust_link::where('incident_id', $oIncident->id)
+                        ->join('prepayroll_adjusts AS adjs', 'adjust_link.adjust_id', '=', 'adjs.id')
+                        ->where('adjs.is_delete', 0)
+                        ->select('adjust_id')
+                        ->get()
+                        ->toArray();
+
+                    if (count($aAdjustIds) > 0) {
+                        prepayrollAdjust::whereIn('id', $aAdjustIds)
+                            ->update(['is_delete' => 1]);
+                    }
+
+                    foreach ($oIncident->incidentDays as $day) {
+                        $adjust = new prepayrollAdjust();
+                        $adjust->employee_id = $oIncident->employee_id;
+                        $adjust->dt_date = $day->date;
+                        $adjust->minutes = 0;
+                        $adjust->apply_to = 2;
+                        $adjust->comments = "Sistema externo";
+                        $adjust->is_delete = 0;
+                        $adjust->is_external = 0;
+                        $adjust->adjust_type_id = \SCons::PP_TYPES['COM'];
+                        $adjust->apply_time = 0;
+                        $adjust->created_by = session()->get('user_id');
+                        $adjust->updated_by = session()->get('user_id');
+                        $adjust->save();
+
+                        $link = new adjust_link();
+                        $link->adjust_id = $adjust->id;
+                        $link->is_incident = 1;
+                        $link->incident_id = $oIncident->id;
+                        $link->save();
+                    }
+                }
+            }
+            catch (\Throwable $th) {
                 \Log::error($th->getMessage());
                 $error = $th;
             }
-            
         }
-        
-        
     }
 
     /**
@@ -762,34 +798,6 @@ class incidentController extends Controller
         if ($oIncident->cls_inc_id == \SCons::CL_VACATIONS && ! $oIncident->is_external && $oIncident->eff_days == 0) {
             $oIncident->eff_day = $dayCounter - 1;
             $oIncident->save();
-        }
-
-        if (sizeof($days) > 0) {
-            $oIncident->incidentDays()->saveMany($days);
-
-            if ($oIncident->is_external) {
-                foreach ($days as $day) {
-                    $adjust = new prepayrollAdjust();
-                    $adjust->employee_id = $oIncident->employee_id;
-                    $adjust->dt_date = $day->date;
-                    $adjust->minutes = 0;
-                    $adjust->apply_to = 2;
-                    $adjust->comments = "Sistema externo";
-                    $adjust->is_delete = 0;
-                    $adjust->is_external = 0;
-                    $adjust->adjust_type_id = \SCons::PP_TYPES['COM'];
-                    $adjust->apply_time = 0;
-                    $adjust->created_by = session()->get('user_id');
-                    $adjust->updated_by = session()->get('user_id');
-                    $adjust->save();
-
-                    $link = new adjust_link();
-                    $link->adjust_id = $adjust->id;
-                    $link->is_incident = 1;
-                    $link->incident_id = $oIncident->id;
-                    $link->save();
-                }
-            }
         }
     }
 
