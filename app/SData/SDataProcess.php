@@ -1231,9 +1231,10 @@ class SDataProcess {
                 }
 
                 // minutos de retardo
-                $mins = SDataProcess::getDelayMins($oRow->inDateTime, $oRow->inDateTimeSch);
-                if ($mins > 0) {
+                $delayMins = SDataProcess::getDelayMins($oRow->inDateTime, $oRow->inDateTimeSch);
+                if ($delayMins > 0) {
                     $hasDelay = true;
+                    $minsAfterAdjs = $delayMins;
 
                     // Ajuste de prenómina
                     $date = $oRow->inDate == null ? $oRow->inDateTime : $oRow->inDate;
@@ -1248,6 +1249,7 @@ class SDataProcess {
                                         if ($time == $adj->dt_time) {
                                             $hasDelay = false;
                                             $consumAdjs[] = $adj->id;
+                                            $minsAfterAdjs = 0;
                                         }
                                     }
                                 }
@@ -1269,18 +1271,22 @@ class SDataProcess {
                             }
                         }
 
-                        $mins = $justifiedMins > $mins ? 0 : $mins - $justifiedMins;
-                        $hasDelay = $mins > 0;
+                        $minsAfterAdjs = $justifiedMins > $delayMins ? 0 : $delayMins - $justifiedMins;
+                        $hasDelay = $minsAfterAdjs > 0;
                     }
 
                     if ($hasDelay) {
-                        $oRow->entryDelayMinutes = $mins;
+                        $oRow->entryDelayMinutes = $minsAfterAdjs;
                         $oRow->comments = $oRow->comments."Retardo. ";
                         if ($comments != null) {
                             if ($comments->where('key_code','entryDelayMinutes')->first()['value']) {
                                 $oRow->isDayChecked = true;
                             }
                         }
+                    }
+
+                    if ($delayMins != $minsAfterAdjs) {
+                        $oRow->justifiedDelayMins = $delayMins - $minsAfterAdjs;
                     }
                 }
                 else {

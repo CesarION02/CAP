@@ -105,12 +105,11 @@
                                                 {{ $date }}</th>
                                             </span>
                                     @endforeach
-                                    <th style="border: solid 1px rgb(86, 86, 86);">Faltas</th>
+                                    <th style="border: solid 1px rgb(86, 86, 86);">Faltas (cap)</th>
                                     <th style="border: solid 1px rgb(86, 86, 86);">Descansos</th>
                                     <th style="border: solid 1px rgb(86, 86, 86);">Vacaciones</th>
-                                    <th style="border: solid 1px rgb(86, 86, 86);">Inasistencias</th>
+                                    <th style="border: solid 1px rgb(86, 86, 86);">Inasis. (siie)</th>
                                     <th style="border: solid 1px rgb(86, 86, 86);">Incapacidad</th>
-                                    <th style="border: solid 1px rgb(86, 86, 86);">Onomastico</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -142,7 +141,6 @@
                                     <td style="border: solid 1px rgb(86, 86, 86);">@{{ vRow.vacaciones }}</td>
                                     <td style="border: solid 1px rgb(86, 86, 86);">@{{ vRow.inasistencias }}</td>
                                     <td style="border: solid 1px rgb(86, 86, 86);">@{{ vRow.incapacidad }}</td>
-                                    <td style="border: solid 1px rgb(86, 86, 86);">@{{ vRow.onomastico }}</td>
                                 </tr>
                             </tbody>
                         </table>

@@ -68,14 +68,14 @@
                                     <th title="Número de Colaborador">Num. Col.</th>
                                     <th title="Nombre del colaborador">Empleado</th>
                                     <th title="Comentarios">Com.</th>
-                                    <th>Retardo (min)</th>
+                                    <th title="Minutos de retardo a reportarse / Minutos justificados">Retardo | Just (min)</th>
                                     <th title="Salida anticipada (minutos)">Antic. (min)</th>
                                     <th title="Total tiempo extra por pagar">TE p/pagar (hr)</th>
                                     <th title="Prima dominical">Pr. Dom.</th>
                                     <th title="Descansos">Desc.</th>
-                                    <th title="Falta por ausencia de quecadas sin eventos">Faltas</th>
+                                    <th title="Falta por ausencia de quecadas sin eventos">Faltas (cap)</th>
                                     <th title="Vacaciones">Vac.</th>
-                                    <th title="Inasistencia por incidencia">Inasis.</th>
+                                    <th title="Inasistencia por incidencia">Inasis. (siie)</th>
                                     <th title="Incapacidad">Incap.</th>
                                     {{-- <th title="Incidencias que se van a pagar">Incid. c/pago</th> --}}
                                     {{-- <th title="Incidencias sin pago (días descontados)">Incid. s/pago</th> --}}
@@ -109,7 +109,7 @@
                                             <span class="glyphicon glyphicon-list-alt"></span>
                                         </button>
                                     </td>
-                                    <td>@{{ row.entryDelayMinutes }}</td>
+                                    <td title="Minutos de retardo a reportarse | Minutos justificados">@{{ row.entryDelayMinutes + " | " + row.entryJustDelayMinutes }}</td>
                                     <td>@{{ row.prematureOut }}</td>
                                     <td>@{{ vueGui.formatMinsToHHmm(row.extraHours == null || row.extraHours < 0 ? 0 : row.extraHours ) }}</td>
                                     <td>@{{ row.isSunday }}</td>

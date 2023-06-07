@@ -63,6 +63,7 @@ class SReportsUtils {
 
         foreach ($lEmployees as $lEmployee) {
             $delayTot = 0;
+            $delayJustTot = 0;
             $prematureOutTot = 0;
             $extraHoursTot = 0;
             $sundays = 0;
@@ -85,6 +86,7 @@ class SReportsUtils {
 
             foreach ($lRowsOfEmployee as $oRow) {
                 $delayTot = $delayTot + $oRow->entryDelayMinutes;
+                $delayJustTot = $delayJustTot + $oRow->justifiedDelayMins;
                 $mins = SDateTimeUtils::getExtraTimeByRules($oRow->overMinsTotal);
                 $extraHoursTot += $mins;
                 $prematureOutTot += $oRow->prematureOut;
@@ -160,6 +162,7 @@ class SReportsUtils {
             }
 
             $lEmployee->entryDelayMinutes = $delayTot;
+            $lEmployee->entryJustDelayMinutes = $delayJustTot;
             $lEmployee->extraHours = $extraHoursTot;
             $lEmployee->prematureOut = $prematureOutTot;
             $lEmployee->isSunday = $sundays;

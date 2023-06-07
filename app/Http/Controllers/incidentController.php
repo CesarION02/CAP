@@ -766,6 +766,30 @@ class incidentController extends Controller
 
         if (sizeof($days) > 0) {
             $oIncident->incidentDays()->saveMany($days);
+
+            if ($oIncident->is_external) {
+                foreach ($days as $day) {
+                    $adjust = new prepayrollAdjust();
+                    $adjust->employee_id = $oIncident->employee_id;
+                    $adjust->dt_date = $day->date;
+                    $adjust->minutes = 0;
+                    $adjust->apply_to = 2;
+                    $adjust->comments = "Sistema externo";
+                    $adjust->is_delete = 0;
+                    $adjust->is_external = 0;
+                    $adjust->adjust_type_id = \SCons::PP_TYPES['COM'];
+                    $adjust->apply_time = 0;
+                    $adjust->created_by = session()->get('user_id');
+                    $adjust->updated_by = session()->get('user_id');
+                    $adjust->save();
+
+                    $link = new adjust_link();
+                    $link->adjust_id = $adjust->id;
+                    $link->is_incident = 1;
+                    $link->incident_id = $oIncident->id;
+                    $link->save();
+                }
+            }
         }
     }
 
