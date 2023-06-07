@@ -628,7 +628,9 @@ class incidentController extends Controller
                             ->update(['is_delete' => 1]);
                     }
 
-                    foreach ($oIncident->incidentDays as $day) {
+                    $lDays = incidentDay::where('incidents_id', $oIncident->id)->get();
+
+                    foreach ($lDays as $day) {
                         $adjust = new prepayrollAdjust();
                         $adjust->employee_id = $oIncident->employee_id;
                         $adjust->dt_date = $day->date;
@@ -793,6 +795,10 @@ class incidentController extends Controller
 
             // SPrepayrollAdjustUtils::verifyProcessedData($oIncident->employee_id, $sDate);
             $oDate->addDay();
+        }
+
+        if (sizeof($days) > 0) {
+            $oIncident->incidentDays()->saveMany($days);
         }
 
         if ($oIncident->cls_inc_id == \SCons::CL_VACATIONS && ! $oIncident->is_external && $oIncident->eff_days == 0) {
