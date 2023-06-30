@@ -108,7 +108,7 @@
                                     <th style="border: solid 1px rgb(86, 86, 86);">Faltas (cap)</th>
                                     <th style="border: solid 1px rgb(86, 86, 86);">Descansos</th>
                                     <th style="border: solid 1px rgb(86, 86, 86);">Vacaciones</th>
-                                    <th style="border: solid 1px rgb(86, 86, 86);">Inasis. (siie)</th>
+                                    <th style="border: solid 1px rgb(86, 86, 86);">Inasis. (externo)</th>
                                     <th style="border: solid 1px rgb(86, 86, 86);">Incapacidad</th>
                                 </tr>
                             </thead>

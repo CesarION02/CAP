@@ -75,7 +75,7 @@
                                     <th title="Descansos">Desc.</th>
                                     <th title="Falta por ausencia de quecadas sin eventos">Faltas (cap)</th>
                                     <th title="Vacaciones">Vac.</th>
-                                    <th title="Inasistencia por incidencia">Inasis. (siie)</th>
+                                    <th title="Inasistencia por incidencia">Inasis. (externo)</th>
                                     <th title="Incapacidad">Incap.</th>
                                     {{-- <th title="Incidencias que se van a pagar">Incid. c/pago</th> --}}
                                     {{-- <th title="Incidencias sin pago (días descontados)">Incid. s/pago</th> --}}

@@ -986,10 +986,16 @@ class SDataProcess {
                     $abs = [];
                     $abs['id'] = $absence->id;
                     if ($absence->is_external) {
-                        $key = explode("_", $absence->external_key);
-
-                        $abs['id_emp'] = $key[0];
-                        $abs['id_abs'] = $key[1];
+                        if (str_contains($absence->external_key, "_")) {
+                            $key = explode("_", $absence->external_key);
+    
+                            $abs['id_emp'] = $key[0];
+                            $abs['id_abs'] = $key[1];
+                        }
+                        else {
+                            $abs['id_emp'] = $oRow->idEmployee;
+                            $abs['id_abs'] = $absence->external_key;
+                        }
                     }
                     else {
                         $abs['id_emp'] = 0;
