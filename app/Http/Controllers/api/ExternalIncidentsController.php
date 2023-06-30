@@ -55,8 +55,8 @@ class ExternalIncidentsController extends Controller
         $type_sub_inc_id = $request->input('type_sub_inc_id');
         // $ben_year = $request->input('ben_year');
         // $ben_ann = $request->input('ben_ann');
-        $emp_comments = $request->input('emp_comments');
-        $sup_comments = $request->input('sup_comments');
+        $emp_comments = !!$request->input('emp_comments') ? "" : $request->input('emp_comments');
+        $sup_comments = !!$request->input('sup_comments') ? "" : $request->input('sup_comments');
         $employee_id = $request->input('employee_id');
         $inc_dates = $request->input('inc_dates');
 
@@ -76,7 +76,7 @@ class ExternalIncidentsController extends Controller
         $oIncident->created_at = date('Y-m-d H:i:s');
         $oIncident->updated_at = date('Y-m-d H:i:s');
         $oIncident->holiday_worked_id = 0;
-        $oIncident->comment = $emp_comments;
+        $comments = $sup_comments . (strlen($sup_comments) > 0 ? " " : "") . $emp_comments;
 
         try {
             // inicia transacción
@@ -118,7 +118,7 @@ class ExternalIncidentsController extends Controller
             $oIncident->eff_day = count($lDays);
 
             $idHolidayWorked = 0;
-            $oIncident = SIncidentValidations::manageIncident($oIncident, $sup_comments, $idHolidayWorked);
+            $oIncident = SIncidentValidations::manageIncident($oIncident, $comments, $idHolidayWorked);
 
             $oIncident->save();
 
