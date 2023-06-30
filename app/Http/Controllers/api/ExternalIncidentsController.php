@@ -4,10 +4,12 @@ namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\SyncController;
+use App\Models\adjust_link;
 use App\Models\employees;
 use App\Models\incident;
 use App\Models\incidentDay;
 use App\Models\IncidentExtSysLink;
+use App\Models\prepayrollAdjust;
 use App\SValidations\SIncidentValidations;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -71,8 +73,8 @@ class ExternalIncidentsController extends Controller
         $oIncident->ben_year = 0;
         $oIncident->ben_ann = 0;
         $oIncident->is_delete = 0;
-        $oIncident->created_by = 1;
-        $oIncident->updated_by = 1;
+        $oIncident->created_by = auth('api')->user()->id;
+        $oIncident->updated_by = auth('api')->user()->id;
         $oIncident->created_at = date('Y-m-d H:i:s');
         $oIncident->updated_at = date('Y-m-d H:i:s');
         $oIncident->holiday_worked_id = 0;
@@ -123,6 +125,42 @@ class ExternalIncidentsController extends Controller
             $oIncident->save();
 
             ExternalIncidentsController::saveDays($lDays, $oIncident);
+
+            $aAdjustIds = adjust_link::where('incident_id', $oIncident->id)
+                                    ->join('prepayroll_adjusts AS adjs', 'adjust_link.adjust_id', '=', 'adjs.id')
+                                    ->where('adjs.is_delete', 0)
+                                    ->select('adjust_id')
+                                    ->get()
+                                    ->toArray();
+
+            if (count($aAdjustIds) > 0) {
+                prepayrollAdjust::whereIn('id', $aAdjustIds)
+                    ->update(['is_delete' => 1]);
+            }
+
+            $lDays = incidentDay::where('incidents_id', $oIncident->id)->get();
+
+            foreach ($lDays as $day) {
+                $adjust = new prepayrollAdjust();
+                $adjust->employee_id = $oIncident->employee_id;
+                $adjust->dt_date = $day->date;
+                $adjust->minutes = 0;
+                $adjust->apply_to = 2;
+                $adjust->comments = strlen($comments) > 0 ? $comments : "Sistema externo";
+                $adjust->is_delete = 0;
+                $adjust->is_external = 0;
+                $adjust->adjust_type_id = \SCons::PP_TYPES['COM'];
+                $adjust->apply_time = 0;
+                $adjust->created_by = auth('api')->user()->id;
+                $adjust->updated_by = auth('api')->user()->id;
+                $adjust->save();
+
+                $link = new adjust_link();
+                $link->adjust_id = $adjust->id;
+                $link->is_incident = 1;
+                $link->incident_id = $oIncident->id;
+                $link->save();
+            }
 
             $oLink = new IncidentExtSysLink();
             $oLink->incident_id = $oIncident->id;
