@@ -2292,7 +2292,12 @@ class SInfoWithPolicy{
                                         if( sizeof($lRows[$i]->events) >= 1 ){
                                             if( $lRows[$i]->events[0]['type_id'] == 19 ){
                                                 $lRows[$i]->isDayOff = 1; 
-                                                $haveDayoff = 1;       
+                                                $haveDayoff = 1;  
+                                                if($lRows[$i]->overtimeCheckPolicy != 1){
+                                                    $lRows[$i]->work_dayoff = 1;
+                                                }else{
+                                                    $lRows[$i]->work_dayoff = 0;   
+                                                }       
                                             }else{
                                                 if(SDateTimeUtils::dayOfWeek($lRows[$i]->outDate) == Carbon::SUNDAY){
                                                     $descansoImpl = 1;
