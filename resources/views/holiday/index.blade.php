@@ -113,7 +113,7 @@ Dias festivos
         <div class="box">
             <div class="box-header with-border">
                 <h3 class="box-title">Días festivos</h3>
-                @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:diasfestivos"])
+                @include('layouts.usermanual', ['link' => "http://192.168.1.251/dokuwiki/doku.php?id=wiki:diasfestivos"])
                 <div class="row">
                     <div class="col-md-6 col-md-offset-6">
                         <form action="{{ route('festivo') }}">

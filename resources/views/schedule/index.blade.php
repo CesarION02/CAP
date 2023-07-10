@@ -66,7 +66,7 @@ Plantilla horarios fijos
         <div class="box">
             <div class="box-header with-border">
                 <h3 class="box-title">Plantillas horarios fijos</h3>
-                @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:platillahorario"])
+                @include('layouts.usermanual', ['link' => "http://192.168.1.251/dokuwiki/doku.php?id=wiki:platillahorario"])
                 <div class="box-tools pull-right">
                     <a href="{{route('crear_plantilla')}}" class="btn btn-block btn-success btn-sm">
                         <i class="fa fa-fw fa-plus-circle"></i> Nuevo

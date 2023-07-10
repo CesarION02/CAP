@@ -23,6 +23,7 @@ class SRegistryRow {
     public $prematureOut;
     public $diffMins;
     public $delayMins;
+    public $justifiedDelayMins;
     public $overDefaultMins;
     public $overScheduleMins;
     public $overWorkedMins;
@@ -99,6 +100,7 @@ class SRegistryRow {
         $this->prematureOut = null;
         $this->diffMins = null;
         $this->delayMins = 0;
+        $this->justifiedDelayMins = 0;
         $this->overDefaultMins = 0;
         $this->overScheduleMins = 0;
         $this->overWorkedMins = 0;

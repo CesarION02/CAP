@@ -78,7 +78,18 @@ class SDataProcess {
         // $lDataJ = SOverJourneyCore::overtimeByIncompleteJourney($sStartDate, $sEndDate, $lDataWSun, $aEmployeeOverTime);
         $lAllData = SOverJourneyCore::processOverTimeByOverJourney($lDataWSun, $sStartDate, $comments);
 
+        $lAllData = SDataProcess::discountExtraHours($lAllData);
+
         $lAllData = SDataProcess::putAdjustInRows($sStartDate, $sEndDate, $lAllData);
+
+        // Verifica si la configuración de entradas y salidas manuales está activa y marca los renglones para ser validados
+        $checkManualRegs = commentsControl::where('is_delete', 0)
+                                    ->where('key_code', 'hasCheckManual')
+                                    ->pluck('value')
+                                    ->first();
+        if (!is_null($checkManualRegs) && $checkManualRegs) {
+            $lAllData = SReportsUtils::checkManualCheck($lAllData);
+        }
 
         /**
          * Remueve el objeto logger de la sesión actual
@@ -133,7 +144,7 @@ class SDataProcess {
                                         ->where('employee_id', $idEmployee);
 
                 //filtrar checadas repetidas
-                $registries = SDataProcess::manageCheks($registries, $sDate);
+                $registries = SChecksCore::manageCheks($registries, $sDate);
 
                 $bug = false;
                 if (sizeof($registries) == 1) {
@@ -245,7 +256,11 @@ class SDataProcess {
                             $newRow->outDateTime = $sDate;
                             $newRow->hasCheckOut = false;
                             $newRow->comments = $newRow->comments."Sin salida. ";
-                            $newRow->isDayChecked = true;
+                            if ($comments != null) {
+                                if ($comments->where('key_code', 'hasCheckOut')->first()['value']) {
+                                    $newRow->isDayChecked = true;
+                                }
+                            }
                             $newRow->scheduleText = strtoupper($scheduleName);
                             $lRows[] = $newRow;
                         }
@@ -851,11 +866,18 @@ class SDataProcess {
             $oRow->cutId = SDelayReportUtils::getCutId($result);
             $oRow->overtimeCheckPolicy = SDelayReportUtils::getOvertimePolicy($result);
             if ($result->withRegistry) {
+                $config = \App\SUtils\SConfiguration::getConfigurations();
                 // minutos configurados en la tabla
                 $oRow->overDefaultMins = SDelayReportUtils::getExtraTime($result);
                 // minutos por turnos de más de 8 horas
-                $oRow->overScheduleMins = SDelayReportUtils::getExtraTimeBySchedule($result, $oRow->inDateTime, $oRow->inDateTimeSch,
+                if (!! $config->discountOverTimeJourneyExt) {
+                    $oRow->overWorkedMins += SDelayReportUtils::getExtraTimeBySchedule($result, $oRow->inDateTime, $oRow->inDateTimeSch,
                                                                                     $oRow->outDateTime, $oRow->outDateTimeSch);
+                }
+                else {
+                    $oRow->overScheduleMins = SDelayReportUtils::getExtraTimeBySchedule($result, $oRow->inDateTime, $oRow->inDateTimeSch,
+                                                                                    $oRow->outDateTime, $oRow->outDateTimeSch);
+                }
             }
 
             if ((($oRow->overWorkedMins + $oRow->overMinsByAdjs) >= 20) || (($oRow->overScheduleMins + $oRow->overMinsByAdjs) >= 60)) {
@@ -964,10 +986,16 @@ class SDataProcess {
                     $abs = [];
                     $abs['id'] = $absence->id;
                     if ($absence->is_external) {
-                        $key = explode("_", $absence->external_key);
-
-                        $abs['id_emp'] = $key[0];
-                        $abs['id_abs'] = $key[1];
+                        if (str_contains($absence->external_key, "_")) {
+                            $key = explode("_", $absence->external_key);
+    
+                            $abs['id_emp'] = $key[0];
+                            $abs['id_abs'] = $key[1];
+                        }
+                        else {
+                            $abs['id_emp'] = $oRow->idEmployee;
+                            $abs['id_abs'] = $absence->external_key;
+                        }
                     }
                     else {
                         $abs['id_emp'] = 0;
@@ -1003,6 +1031,9 @@ class SDataProcess {
                             $oRow->isDayChecked = false;
                         }
                     }
+
+                    // Solicitud de Edgar Barrón para omitir el comentario de "Sin checadas" cuando se trata de una incidencia
+                    $oRow->comments = str_replace("Sin checadas. ", "", $oRow->comments);
 
                     $oRow->events[] = $abs;
                 }
@@ -1206,9 +1237,10 @@ class SDataProcess {
                 }
 
                 // minutos de retardo
-                $mins = SDataProcess::getDelayMins($oRow->inDateTime, $oRow->inDateTimeSch);
-                if ($mins > 0) {
+                $delayMins = SDataProcess::getDelayMins($oRow->inDateTime, $oRow->inDateTimeSch);
+                if ($delayMins > 0) {
                     $hasDelay = true;
+                    $minsAfterAdjs = $delayMins;
 
                     // Ajuste de prenómina
                     $date = $oRow->inDate == null ? $oRow->inDateTime : $oRow->inDate;
@@ -1223,6 +1255,7 @@ class SDataProcess {
                                         if ($time == $adj->dt_time) {
                                             $hasDelay = false;
                                             $consumAdjs[] = $adj->id;
+                                            $minsAfterAdjs = 0;
                                         }
                                     }
                                 }
@@ -1244,18 +1277,22 @@ class SDataProcess {
                             }
                         }
 
-                        $mins = $justifiedMins > $mins ? 0 : $mins - $justifiedMins;
-                        $hasDelay = $mins > 0;
+                        $minsAfterAdjs = $justifiedMins > $delayMins ? 0 : $delayMins - $justifiedMins;
+                        $hasDelay = $minsAfterAdjs > 0;
                     }
 
                     if ($hasDelay) {
-                        $oRow->entryDelayMinutes = $mins;
+                        $oRow->entryDelayMinutes = $minsAfterAdjs;
                         $oRow->comments = $oRow->comments."Retardo. ";
                         if ($comments != null) {
                             if ($comments->where('key_code','entryDelayMinutes')->first()['value']) {
                                 $oRow->isDayChecked = true;
                             }
                         }
+                    }
+
+                    if ($delayMins != $minsAfterAdjs) {
+                        $oRow->justifiedDelayMins = $delayMins - $minsAfterAdjs;
                     }
                 }
                 else {
@@ -1288,27 +1325,7 @@ class SDataProcess {
                     $extendJourney = SDelayReportUtils::compareDates($oRow->inDateTimeSch, $oRow->outDateTimeSch);
                     if ($aEmployeeOverTime[$oRow->idEmployee] == 2 || ($aEmployeeOverTime[$oRow->idEmployee] == 3 && $extendJourney->diffMinutes > 480)) {
                         // minutos extra trabajados y filtrados por bandera de "genera horas extra"
-                        // Ajuste de prenómina
-                        $date = $oRow->outDate == null ? $oRow->outDateTime : $oRow->outDate;
-                        $time = strlen($oRow->outDateTime) > 10 ? substr($oRow->outDateTime, -8) : null;
-                        
-                        $oRow->overWorkedMins = SDataProcess::getOverTime($oRow->inDateTime, $oRow->inDateTimeSch, $oRow->outDateTime, $oRow->outDateTimeSch);
-                        if ($oRow->overWorkedMins > 0) {
-                            $adjs = SPrepayrollAdjustUtils::getAdjustForCase($date, $time, 2, \SCons::PP_TYPES['DHE'], $oRow->idEmployee);
-                            $discountMins = 0;
-                            if (count($adjs) > 0) {
-                                foreach ($adjs as $adj) {
-                                    $discountMins += $adj->minutes;
-                                }
-                            }
-
-                            if ($oRow->overWorkedMins >= $discountMins) {
-                                $oRow->overMinsByAdjs = - $discountMins;
-                            }
-                            else {
-                                $oRow->overMinsByAdjs = - $oRow->overWorkedMins;
-                            }
-                        }
+                        $oRow->overWorkedMins += SDataProcess::getOverTime($oRow->inDateTime, $oRow->inDateTimeSch, $oRow->outDateTime, $oRow->outDateTimeSch);
                     }
                 }
                 else {
@@ -1454,6 +1471,42 @@ class SDataProcess {
 
             // suma de minutos extra totales.
             $oRow->overMinsTotal = $oRow->overWorkedMins + $oRow->overDefaultMins + $oRow->overScheduleMins + $oRow->overMinsByAdjs;
+        }
+
+        return $lData;
+    }
+
+    /**
+     * Descontar tiempo extra que viene de los ajustes
+     *
+     * @param array $lData
+     * @return \Illuminate\Support\Collection
+     */
+    private static function discountExtraHours($lData)
+    {
+        foreach ($lData as $oRow) {
+            if ($oRow->overWorkedMins > 0) {
+                // Ajuste de prenómina
+                $date = $oRow->outDate == null ? $oRow->outDateTime : $oRow->outDate;
+                $time = strlen($oRow->outDateTime) > 10 ? substr($oRow->outDateTime, -8) : null;
+                $adjs = SPrepayrollAdjustUtils::getAdjustForCase($date, $time, 2, \SCons::PP_TYPES['DHE'], $oRow->idEmployee);
+                $discountMins = 0;
+                if (count($adjs) > 0) {
+                    foreach ($adjs as $adj) {
+                        $discountMins += $adj->minutes;
+                    }
+                }
+
+                if ($oRow->overWorkedMins >= $discountMins) {
+                    $oRow->overMinsByAdjs -= $discountMins;
+                }
+                else {
+                    $oRow->overMinsByAdjs -= $oRow->overWorkedMins;
+                }
+
+                // suma de minutos extra totales.
+                $oRow->overMinsTotal = $oRow->overWorkedMins + $oRow->overDefaultMins + $oRow->overScheduleMins + $oRow->overMinsByAdjs;
+            }
         }
 
         return $lData;
@@ -1786,181 +1839,6 @@ class SDataProcess {
         }
 
         return $lData;
-    }
-
-    /**
-     * Procesa las checadas de un día en específico y determina si 
-     * el empleado checó más de una vez en el momento
-     *
-     * @param \Illuminate\Database\Eloquent\Collection $lCheks
-     * 
-     * @return array con las checadas válidas
-     */
-    public static function filterDoubleCheks($lCheks)
-    {
-        if (sizeof($lCheks) == 0) {
-            return $lCheks;
-        }
-
-        $lNewChecks = array();
-
-        $oCheckIn = null;
-        $oCheckOut = null;
-        foreach ($lCheks as $check) {
-            if ($check->type_id == \SCons::REG_IN) {
-                if ($oCheckOut != null) {
-                    $lNewChecks[] = $oCheckOut;
-                }
-                $oCheckOut = null;
-                if ($oCheckIn == null) {
-                    $oCheckIn = $check;
-                }
-                else {
-                    // diferencia entre checkIns es mucha se agregan las 2
-                    $chekDate = $check->date.' '.$check->time;
-                    $chekODate = $oCheckIn->date.' '.$oCheckIn->time;
-                    $comparison = SDelayReportUtils::compareDates($chekDate, $chekODate);
-                    if (abs($comparison->diffMinutes) >= 360) {
-                        $lNewChecks[] = $oCheckIn;
-                    }
-                    $oCheckIn = $check;
-                }
-            }
-            else {
-                if ($oCheckIn != null) {
-                    $lNewChecks[] = $oCheckIn;
-                }
-                $oCheckIn = null;
-
-                if ($oCheckOut != null) {
-                    $chekDate = $check->date.' '.$check->time;
-                    $chekODate = $oCheckOut->date.' '.$oCheckOut->time;
-                    $comparison = SDelayReportUtils::compareDates($chekDate, $chekODate);
-                    if (abs($comparison->diffMinutes) >= 360) {
-                        $lNewChecks[] = $oCheckOut;
-                        $oCheckOut = $check;
-                    }
-                    else {
-                        $oCheckOut = $check;
-                    }
-                }
-                else {
-                    $oCheckOut = $check;
-                }
-            }
-        }
-
-        if ($oCheckIn != null) {
-            $lNewChecks[] = $oCheckIn;
-        }
-
-        if ($oCheckOut != null) {
-            $lNewChecks[] = $oCheckOut;
-        }
-
-        /**
-         * Log de las checadas omitidas de los empleados que registran varias veces entrada o salida
-         */
-        if (count($lCheks) != count($lNewChecks)) {
-            foreach ($lCheks as $indexCheck) {
-                if (! in_array($indexCheck, $lNewChecks) && session()->has('logger')) {
-                    session('logger')->log($indexCheck->employee_id, 'checada_omitida', $indexCheck->id, null, null, null);
-                }
-            }
-        }
-
-        return $lNewChecks;
-    }
-
-    /**
-     * En base al horario del empleado determina si la checada
-     * es de entrada o salida y retorna el arreglo con el tipo modificado
-     *
-     * @param array[SRegistry] $lCheks
-     * @param string $sDate
-     * 
-     * @return array[SRegistry]
-     */
-    public static function manageCheks($lCheks, $sDate)
-    {
-        if (sizeof($lCheks) == 0) {
-            return $lCheks;
-        }
-
-        $lNewChecks = array();
-
-        $registry = (object) [
-            'date' => $sDate,
-            'time' => '12:00:00',
-            'type_id' => 1
-        ];
-
-        $lWorkshifts = SDelayReportUtils::getWorkshifts($sDate, $sDate, 0, []);
-        foreach($lCheks as $auxCheck) break;
-        $result = SDelayReportUtils::getSchedule($sDate, $sDate, $auxCheck->employee_id, $registry, clone $lWorkshifts, \SCons::REP_HR_EX);
-
-        if ($result == null || ($result->auxScheduleDay != null && !$result->auxScheduleDay->is_active)) {
-            return SDataProcess::filterDoubleCheks($lCheks);
-        }
-
-        $config = \App\SUtils\SConfiguration::getConfigurations();
-
-        $inTime = "";
-        $outTime = "";
-        if ($result->auxWorkshift != null) {
-            $inTime = $result->auxWorkshift->entry;
-            $outTime = $result->auxWorkshift->departure;
-        }
-        else {
-            $inTime = $result->auxScheduleDay->entry;
-            $outTime = $result->auxScheduleDay->departure;
-        }
-
-        $lRegistries = SDataProcess::filterDoubleCheks($lCheks);
-
-        $inDateTime = $sDate.' '.$inTime;
-        $outDateTime = $sDate.' '.$outTime;
-        $originalChecks = clone collect($lRegistries);
-        foreach ($lRegistries as $oCheck) {
-            $check = clone $oCheck;
-            $checkDateTime = $check->date.' '.$check->time;
-
-            $comparisonIn = SDelayReportUtils::compareDates($inDateTime, $checkDateTime);
-            $comparisonOut = SDelayReportUtils::compareDates($outDateTime, $checkDateTime);
-
-            // si ni entrada ni salida coinciden con el horario regresa las checadas originales
-            if (abs($comparisonIn->diffMinutes) > $config->maxGapSchedule && abs($comparisonOut->diffMinutes) > $config->maxGapSchedule) {
-                $lNewChecks = $originalChecks;
-                break;
-            }
-
-            if (abs($comparisonIn->diffMinutes) <= $config->maxGapSchedule) {
-                if ($check->type_id != \SCons::REG_IN && session()->has('logger')) {
-                    /**
-                     * Log de los empleados que checaron salida por entrada
-                     */
-                    session('logger')->log($check->employee_id, 'checada_cambio', $check->id, $check->type_id, null, null);
-                }
-
-                $check->type_id = \SCons::REG_IN;
-            }
-            else {
-                if (abs($comparisonOut->diffMinutes) <= $config->maxGapSchedule) {
-                    if ($check->type_id != \SCons::REG_OUT && session()->has('logger')) {
-                        /**
-                         * Log de los empleados que checaron entrada por salida
-                         */
-                        session('logger')->log($check->employee_id, 'checada_cambio', $check->id, $check->type_id, null, null);
-                    }
-
-                    $check->type_id = \SCons::REG_OUT;
-                }
-            }
-
-            $lNewChecks[] = $check;
-        }
-
-        return $lNewChecks;
     }
 
     private static function manageOneCheck($sDate, $idEmployee, $registries, $lWorkshifts, $sEndDate)

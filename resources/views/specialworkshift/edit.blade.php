@@ -7,14 +7,6 @@
     turno especial
 @endsection
 
-@section("scripts")
-    <script src="{{ asset("assets/js/chosen.jquery.min.js") }}" type="text/javascript"></script>
-    <script>
-        $(".chosen-select").chosen();
-    </script>
-    <script src="{{ asset("assets/pages/scripts/specialw/specialw.js")}}" type="text/javascript"></script>
-@endsection
-
 @section('content')
 <div class="row">
     <div class="col-lg-12">
@@ -29,7 +21,7 @@
                     </a>
                 </div>
             </div>
-            <form action="{{route('actualizar_turno_especial', ['id' => $datas[0]->id])}}" id="form-general" class="form-horizontal" method="POST" autocomplete="off">
+            <form id="specialWFormId" action="{{route('actualizar_turno_especial', ['id' => $datas[0]->id])}}" id="form-general" class="form-horizontal" method="POST" autocomplete="off">
                 @csrf @method("put")
                 <div class="box-body">
                     @include('specialworkshift.form')
@@ -44,4 +36,20 @@
         </div>
     </div>
 </div> 
+@endsection
+
+@section("scripts")
+    <script src="{{ asset("assets/js/chosen.jquery.min.js") }}" type="text/javascript"></script>
+    <script>
+        $(".chosen-select").chosen();
+    </script>
+    <script src="{{ asset("assets/js/axios.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/pages/scripts/SGui.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/pages/scripts/SValidations.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/pages/scripts/specialw/specialw.js")}}" type="text/javascript"></script>
+    <script>
+        var routeValSch = <?php echo json_encode($route_validate_schedule); ?>;
+        var idSpecialW = <?php echo json_encode($idSpecialW); ?>;
+        var oGui = new SGui();
+    </script>
 @endsection

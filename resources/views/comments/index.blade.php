@@ -11,7 +11,7 @@
         <div class="box">
             <div class="box-header with-border">
                 <h3 class="box-title">Comentarios frecuentes</h3>
-                @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:comentariosfrecuentes"])
+                @include('layouts.usermanual', ['link' => "http://192.168.1.251/dokuwiki/doku.php?id=wiki:comentariosfrecuentes"])
             </div>
             <div class="box-body">
                 <div class="col-sm-2" style="float: right;">

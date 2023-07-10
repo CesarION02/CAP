@@ -9,7 +9,7 @@ $(document).on('change', '#semana', function() {
         success: function(data) {
             var idWeek = data.week_id;
             var name = data.url;
-            var cadenaPDF = '<iframe width="800" height="600" src="http://192.168.1.233:8080/cap/storage/app/public/' + name + '" frameborder="0"></iframe>';
+            var cadenaPDF = '<iframe width="800" height="600" src="http://192.168.1.251/cap/storage/app/public/' + name + '" frameborder="0"></iframe>';
 
             //$("#Antigua").empty(" ");
             $("#mostrarPdf").empty("");

@@ -83,7 +83,7 @@
         <div class="box box-danger">
             <div class="box-header with-border">
                 <h3 class="box-title">Reporte prenómina de {{$sStartDate}} a {{$sEndDate}}</h3>
-                @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:reporteincidenciasempleado"])
+                @include('layouts.usermanual', ['link' => "http://192.168.1.251/dokuwiki/doku.php?id=wiki:reporteincidenciasempleado"])
                 @if ($wizard != 2)
                     <div class="box-tools pull-right">
                         <a class="btn btn-success" href="{{$route}}">Nuevo reporte</a>
@@ -105,12 +105,11 @@
                                                 {{ $date }}</th>
                                             </span>
                                     @endforeach
-                                    <th style="border: solid 1px rgb(86, 86, 86);">Faltas</th>
+                                    <th style="border: solid 1px rgb(86, 86, 86);">Faltas (cap)</th>
                                     <th style="border: solid 1px rgb(86, 86, 86);">Descansos</th>
                                     <th style="border: solid 1px rgb(86, 86, 86);">Vacaciones</th>
-                                    <th style="border: solid 1px rgb(86, 86, 86);">Inasistencias</th>
+                                    <th style="border: solid 1px rgb(86, 86, 86);">Inasis. (externo)</th>
                                     <th style="border: solid 1px rgb(86, 86, 86);">Incapacidad</th>
-                                    <th style="border: solid 1px rgb(86, 86, 86);">Onomastico</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -123,7 +122,8 @@
                                     </td>
                                     <td style="border: solid 1px rgb(86, 86, 86); text-align: left; font-weight: bold;">
                                         <span class="nobr">@{{ vRow.nameEmployee }}
-                                            <span v-if="vRow.isVobo" aria-hidden="true" class="glyphicon glyphicon-ok" style="color:green;"></span>
+                                            <span v-if="vRow.oVobo != null && vRow.oVobo.is_vobo" aria-hidden="true" class="fa fa-check fa-lg" style="color:green;"></span>
+                                            <span v-if="vRow.oVobo != null && vRow.oVobo.is_rejected" aria-hidden="true" class="fa fa-times fa-lg" style="color:red;"></span>
                                         </span>
                                     </td>
                                     {{-- <td v-for="date in vDates" style="border: solid 1px rgb(86, 86, 86); text-align: center; font-weight: bold;">
@@ -141,7 +141,6 @@
                                     <td style="border: solid 1px rgb(86, 86, 86);">@{{ vRow.vacaciones }}</td>
                                     <td style="border: solid 1px rgb(86, 86, 86);">@{{ vRow.inasistencias }}</td>
                                     <td style="border: solid 1px rgb(86, 86, 86);">@{{ vRow.incapacidad }}</td>
-                                    <td style="border: solid 1px rgb(86, 86, 86);">@{{ vRow.onomastico }}</td>
                                 </tr>
                             </tbody>
                         </table>

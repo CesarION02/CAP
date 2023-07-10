@@ -136,7 +136,7 @@ Usuarios
                     <h3 class="box-title">Usuarios (todos)</h3>
                 @break
             @endswitch
-                @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:user"])
+                @include('layouts.usermanual', ['link' => "http://192.168.1.251/dokuwiki/doku.php?id=wiki:user"])
                 <div class="row">
                     <div class="col-md-3 col-md-offset-9">
                         <div class="row">

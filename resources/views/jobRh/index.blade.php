@@ -67,7 +67,7 @@ Puestos nominas
                         <h3 class="box-title">Puestos nominas (todos)</h3>
                     @break
                 @endswitch
-                @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:puestos"])
+                @include('layouts.usermanual', ['link' => "http://192.168.1.251/dokuwiki/doku.php?id=wiki:puestos"])
                 <div class="row">
                     <div class="col-md-3 col-md-offset-9">
                         <div class="row">

@@ -1,6 +1,7 @@
 <!-- Modal -->
 <div id="adjustsModal" class="modal fade" role="dialog">
-  <div class="modal-dialog">
+  <div class="modal-dialog" style="width: 55%; margin: auto;">
+  {{-- <div class="modal-dialog"> --}}
 
     <!-- Modal content-->
     <div class="modal-content">
@@ -154,6 +155,18 @@
               <div class="form-group">
                 <label for="outDateTime">Salida</label>&nbsp;<input type="checkbox" v-model="isModifOut">(Modificar)
                 <input :readonly="! isModifOut" type="datetime-local" class="form-control" id="outDateTime" v-model="outDateTime" placeholder="2021-10-01 13:03">
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-xs-8 col-xs-offset-1">
+              <div class="form-group">
+                <label>Comentarios</label>
+                <textarea title="Escribe el comentario que deseas que aparezca en el renglón."
+                          placeholder="Escribe el comentario que deseas que aparezca en el renglón."
+                          v-model="comments" 
+                          :readonly="!isModifOut && !isModifIn"
+                          class="form-control" style="resize: none; width: 370px; height: 115px;"></textarea>
               </div>
             </div>
           </div>

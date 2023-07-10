@@ -6,6 +6,11 @@
     "policy": "1",
     "enabledAdjAuths": false,
     "toleranceMinutes": 20,
+    "maxGapBetweenChecks": 10,
+    "maxGapScheTolerancePreIn": 90,
+    "maxGapScheTolerancePosIn": 30,
+    "maxGapScheTolerancePreOut": 30,
+    "maxGapScheTolerancePosOut": 90,
     "maxGapMinutes": 60,
     "maxGapSchedule": 90,
     "maxGapCheckSchedule": 120,
@@ -17,6 +22,7 @@
     "admin_rol": 1,
     "policy_cut": 1,
     "urlBiostar": "https://192.168.1.16:444",
+    "urlSyncCAPLink": "https://192.168.1.251:9001",
     "maxOvertimeJourneyMinutes": 240,
     "absenceWithOmissionOfChecks": false,
     "absenceWithOmissionOfChecksAreas": [],
@@ -25,6 +31,7 @@
     "idVoboBiWeekMenu": 94,
     "idAdjsPermission": 1,
     "idRoleDefault": 15,
+    "time_last_check": "22:00",
     "rolesCanSeeAll": [
         1,
         3,
@@ -47,10 +54,6 @@
         {
             "email": "dtinoco@aeth.mx",
             "name": "Daru00edo Tinoco"
-        },
-        {
-            "email": "jlozano@aeth.mx",
-            "name": "Jesu00fas Lozano"
         },
         {
             "email": "sflores@swaplicado.com.mx",
@@ -108,5 +111,7 @@
         }
     ],
     "stps_days": 3,
-    "prepayroll_policy": 2
+    "prepayroll_policy": 2,
+    "discountOverTimeJourneyDouble": true,
+    "discountOverTimeJourneyExt": true 
 }

@@ -1,10 +1,13 @@
 <?php namespace App\SUtils;
 
+use App\Mail\RejectedVoboNotification;
+use App\Models\User;
 use App\SUtils\SPayrollDelegationUtils;
 use DB;
 use Carbon\Carbon;
 use App\Models\prepayrollVoboSkipped;
 use App\Models\PrepayReportControl;
+use Illuminate\Support\Facades\Mail;
 class SPrepayrollUtils {
 
     /**
@@ -164,7 +167,7 @@ class SPrepayrollUtils {
      * Obtiene los grupos dependientes de los grupos recibidos.
      *
      * @param array $groups
-     * @return void
+     * @return array
      */
     public static function getChildrenOfGroups($groups) {
         $lGroups = [];
@@ -201,7 +204,7 @@ class SPrepayrollUtils {
      * Obtiene los grupos dependientes del grupo recibido.
      *
      * @param int $group
-     * @return void
+     * @return array
      */
     private static function getChildren($idGroup) {
         $children = \DB::table('prepayroll_groups AS pg')
@@ -309,6 +312,7 @@ class SPrepayrollUtils {
         }
 
         $aEmployeesOk = $aEmployeesOk->where('empvb.is_delete', false)
+                                    ->where('empvb.is_vobo', true)
                                     ->pluck('empvb.employee_id')
                                     ->toArray();
 
@@ -431,6 +435,56 @@ class SPrepayrollUtils {
         }
         
         return true;
+    }
+
+    public static function getUsersOfUser($idUser)
+    {
+        // obtiene los grupos del usuario
+        $groups = SPrepayrollUtils::getUserGroups($idUser);
+        // obtiene los usuarios dependientes del usuario recibido
+        $lChildrenGroups = SPrepayrollUtils::getChildrenOfGroups($groups->toArray());
+
+        $lChildrenGroups = array_diff($lChildrenGroups, $groups->toArray());
+    
+        $lGroupsHeads = DB::table('prepayroll_groups AS pg')
+                                    ->join('prepayroll_groups_users AS pgu', 'pg.id_group', '=', 'pgu.group_id')
+                                    ->join('users AS u', 'pgu.head_user_id', '=', 'u.id')
+                                    ->whereIn('pg.id_group', $lChildrenGroups)
+                                    ->where('pgu.head_user_id', '<>', auth()->user()->id)
+                                    ->select('pgu.head_user_id')
+                                    ->distinct()
+                                    ->pluck('pgu.head_user_id');
+        
+        return $lGroupsHeads;
+    }
+
+    public static function notifyToUsers($idPrepayrollCtrl, $idUser, $reason)
+    {
+        $users = self::getUsersOfUser($idUser);
+
+        // obtiene los correos de los usuarios recibidos
+        $lMails = User::whereIn('id', $users)->where('email', '!=', "")
+                                            ->whereNotNull('email')
+                                            ->where('is_delete', 0)
+                                            ->pluck('email');
+
+        // Enviar correo a los usuarios
+        $userReject = User::find($idUser)->name;
+        $oCtrl = PrepayReportControl::find($idPrepayrollCtrl);
+        $wayPay = $oCtrl->is_week ? "Semana" : "Quincena";
+        $iWayPay = $oCtrl->is_week ? \SCons::PAY_W_S : \SCons::PAY_W_Q;
+        $prepayrollNum = $oCtrl->is_week ? $oCtrl->num_week : $oCtrl->num_biweek;
+        $aDates = SDateUtils::getDatesOfPayrollNumber($prepayrollNum, $oCtrl->year, $iWayPay);
+        $startDate = $aDates[0];
+        $endDate = $aDates[1];
+
+        try {
+            // Mail::to($lMails)->send(new RejectedVoboNotification($userReject, $wayPay, $prepayrollNum, $startDate, $endDate, $reason));
+            $g = $lMails;
+        }
+        catch (\Throwable $th) {
+            \Log::error($th);
+        }
     }
 }
         

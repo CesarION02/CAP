@@ -88,6 +88,7 @@ Route::post('specialworkshift', 'specialWorkshiftController@store')->name('guard
 Route::get('specialworkshift/{id}/edit', 'specialWorkshiftController@edit')->name('editar_turno_especial');
 Route::put('specialworkshift/{id}', 'specialWorkshiftController@update')->name('actualizar_turno_especial');
 Route::delete('specialworkshift/{id}', 'specialWorkshiftController@destroy')->name('eliminar_turno_especial');
+Route::get('validateschedule', 'specialWorkshiftController@validateSchedule')->name('validate_schedule');
 
 /* RUTAS DE CONTROL DE COMENTARIOS */
 Route::get('commentsControl', 'commentsControlController@index')->name('commentsControl');
@@ -515,5 +516,7 @@ Route::get('reportejornadas', 'TestController@report')->name('test_report');
 Route::get('reportejornadasschedule', 'TestController@scheduleTasks')->name('test_sche');
 
 Route::get('resavedays', 'TestController@reSaveDays')->name('resave_days');
+
+Route::get('testpostadj', 'TestController@testAdjustPost')->name('test_post_adj');
 
 });

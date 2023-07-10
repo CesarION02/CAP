@@ -34,8 +34,6 @@ class AddAbsAndDayoffRule extends Migration
     {
         // Eliminar registro(regla) a la tabla de comments_control
         DB::table('comments_control')->where('id_commentControl', '=', '48')
-                                    ->update(['is_delete' => '1',
-                                            'value' => '0'
-                                        ]);
+                                    ->delete();
     }
 }

@@ -12,22 +12,15 @@
 @section("scripts")
     <script src="{{ asset("assets/js/axios.js") }}" type="text/javascript"></script>
     <script src="{{asset("assets/pages/scripts/admin/datatable/index.js")}}" type="text/javascript"></script>
-    
-    
     <script src="{{ asset("assets/js/moment/moment.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/moment/moment-with-locales.min.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/moment/datetime-moment.js") }}" type="text/javascript"></script>
-	
-	
-	
-	
-	
-    
     <script src="{{ asset("daterangepicker/daterangepicker.js") }}" type="text/javascript"></script>
     <script src="{{asset("assets/pages/scripts/SGui.js")}}" type="text/javascript"></script>
     
 @include('prepayrollcontrol.checkgroup')
 @include('prepayrollcontrol.checkprevious')
+@include('report.reportRejectVoboModal')
 <script>
     function checkGroup(id) {
         var value = '<?php echo $idPreNomina; ?>';
@@ -119,16 +112,17 @@
     $(document).ready( function () {
         var select = document.getElementById("pay-type");
         var value = '<?php echo $idPreNomina; ?>';
-        
+        let colWeek = 0;
+        let colBiweek = 1;
         var columns = [];
-        if(value == "week"){
+        if (value == "week") {
             select.value = 1;
-            columns = [1];
-        }else if(value == "biweek"){
-            select.value = 2;
-            columns = [0];
+            columns = [colBiweek]; // columna a ocultarse
         }
-
+        else if(value == "biweek") {
+            select.value = 2;
+            columns = [colWeek]; // columna a ocultarse
+        }
 
         $.fn.dataTable.moment('DD/MM/YYYY');
 
@@ -221,8 +215,30 @@
 
 
 </script>
-<script>
-    
+<script type="text/javascript">
+    function onRejectSubmit(isVobo, isRejected) {
+        if (isVobo || (!isRejected && !isVobo)) {
+            $('#rejectModalId').modal('show');
+        }
+    }
+
+    // al hacer click en el boton de rechazar
+    $('#idRejectButton').on('click', function() {
+        // se obtiene el comentario
+        let rejectReason = $('#rejectReason').val();
+        // se valida que el comentario
+
+        $('#rejectModalId').modal('hide');
+
+        // set de comentario en el formulario
+        $('#form_rej_vobo').find('#reject_reason').val(rejectReason);
+
+        let ogui = new SGui();
+        ogui.showLoading(10000);
+
+        // submit de formulario
+        $('#form_rej_vobo').submit();
+    });
 </script>
 @endsection
 
@@ -233,7 +249,7 @@
         <div class="box">
             <div class="box-header with-border">
                 <h3 class="box-title">Prenóminas V.º B.º</h3>
-                @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:darvoboprenomina"])
+                @include('layouts.usermanual', ['link' => "http://192.168.1.251/dokuwiki/doku.php?id=wiki:darvoboprenomina"])
                 <div class="row">
                     <div class="col-md-8 col-md-offset-4">
                         <div class="row">
@@ -291,7 +307,7 @@
                                 <td>{{ $oCtrl->is_required ? "SÍ" : "NO" }}</td>
                                 <td>{{ $oCtrl->is_vobo ? "SÍ" : "NO" }}</td>
                                 <td>{{ $oCtrl->dt_vobo }}</td>
-                                <td>{{ $oCtrl->is_rejected ? "RECHAZADO" : "-" }}</td>
+                                <td title="{{ $oCtrl->is_rejected ? $oCtrl->comments : "" }}">{{ $oCtrl->is_rejected ? "RECHAZADO" : "-" }}</td>
                                 <td>{{ $oCtrl->dt_rejected }}</td>
                                 <td>
                                     @if(\Auth::user()->id == $oCtrl->user_vobo_id)
@@ -303,9 +319,10 @@
                                             </form>
                                         @endif
                                         @if(! $oCtrl->is_rejected)
-                                            <form action="{{ route('rechazar_vobo', [$oCtrl->id_control, $idPreNomina]) }}" method="POST">
+                                            <form id="form_rej_vobo" action="{{ route('rechazar_vobo', [$oCtrl->id_control, $idPreNomina]) }}" method="POST">
                                                 @csrf
-                                                <button title="Rechazar" type="submit"><i class="fa fa-ban" aria-hidden="true"></i></button>
+                                                <input type="hidden" name="reject_reason" id="reject_reason">
+                                                <button onclick="onRejectSubmit({{ $oCtrl->is_vobo }}, {{ $oCtrl->is_rejected }})" title="Rechazar" type="button"><i class="fa fa-ban" aria-hidden="true"></i></button>
                                             </form>
                                         @endif
                                     @endif

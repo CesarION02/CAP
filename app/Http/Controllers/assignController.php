@@ -34,7 +34,7 @@ class assignController extends Controller
         
         $datas = DB::select("SELECT a.fecha_inicio, a.fecha_fin, b.name AS nombreEmpleado, s.name AS nombreHorario, a.group_assign_id, a.id
         FROM (
-            SELECT start_date as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE is_delete = 0 AND schedule_template_id != ".$iTemplateId." ORDER BY p.employee_id, start_date DESC
+            SELECT start_date as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE is_delete = 0 AND schedule_template_id != ".$iTemplateId." ORDER BY p.employee_id, start_date DESC, created_at DESC
         ) a
         INNER JOIN employees b ON a.employee_id = b.id
         INNER JOIN schedule_template s ON a.schedule_template_id = s.id
@@ -42,7 +42,7 @@ class assignController extends Controller
 
         $datasDept = DB::select("SELECT a.fecha_inicio, a.fecha_fin, b.name AS nombreEmpleado, s.name AS nombreHorario, a.group_assign_id, a.id
         FROM (
-            SELECT start_date as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE is_delete = 0 AND schedule_template_id != ".$iTemplateId." ORDER BY p.employee_id, start_date DESC
+            SELECT start_date as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE is_delete = 0 AND schedule_template_id != ".$iTemplateId." ORDER BY p.employee_id, start_date DESC, created_at DESC
         ) a
         INNER JOIN employees b ON a.employee_id = b.id
         INNER JOIN departments c ON b.department_id = c.id
@@ -150,34 +150,44 @@ class assignController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Response|\Illuminate\View\View
      */
     public function edit($id)
-    {   
+    {
         $iTemplateId = env('TMPLTE_SATURDAYS', 1);
-        $employee = employees::where('is_delete','0')->where('is_active', true)->orderBy('name','ASC')->pluck('id','name');
-        $department = department::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
-        $schedule_template = schedule_template::where('is_delete','0')->where('id','!=',$iTemplateId)->orderBy('name','ASC')->pluck('id','name');
+        $employee = employees::where('is_delete', '0')->where('is_active', true)->orderBy('name', 'ASC')->pluck('id', 'name');
+        $department = department::where('is_delete', '0')->orderBy('name', 'ASC')->pluck('id', 'name');
+        $schedule_template = schedule_template::where('is_delete', '0')->where('id', '!=', $iTemplateId)->orderBy('name', 'ASC')->pluck('id', 'name');
         $datas = assign_schedule::find($id);
         $auxiliar = 0;
         $empleados = 0;
-        if($datas->employee_id == 0){
+        if ($datas->employee_id == 0) {
             $tipo = 2;
-        }else{
+        }
+        else {
             $tipo = 1;
         }
+
         $flag = 0;
-        if($datas->group_assign_id != null){
+        if ($datas->group_assign_id != null) {
             $auxiliar = $datas->group_assign_id;
             $empleados = DB::table('schedule_assign')
-                        ->join('group_assign','schedule_assign.group_assign_id','=','group_assign.id')
-                        ->where('group_assign_id',$auxiliar)
-                        ->select('employee_id AS idEmp','schedule_template_id AS idTemplate','department_id AS idDepartment','schedule_assign.id AS id')
-                        ->get();
+                ->join('group_assign', 'schedule_assign.group_assign_id', '=', 'group_assign.id')
+                ->where('group_assign_id', $auxiliar)
+                ->select('employee_id AS idEmp', 'schedule_template_id AS idTemplate', 'department_id AS idDepartment', 'schedule_assign.id AS id')
+                ->get();
             $flag = 1;
         }
 
-        return view('assign.edit', compact('datas'))->with('schedule_template',$schedule_template)->with('department',$department)->with('employee',$employee)->with('flag',$flag)->with('tipo',$tipo)->with('empleados',$empleados)->with('auxiliar',$auxiliar);
+        return view('assign.edit', compact('datas'))->with('schedule_template', $schedule_template)
+                                                    ->with('department', $department)
+                                                    ->with('route_validate_schedule', route('validate_schedule'))
+                                                    ->with('idAssign', $id)
+                                                    ->with('employee', $employee)
+                                                    ->with('flag', $flag)
+                                                    ->with('tipo', $tipo)
+                                                    ->with('empleados', $empleados)
+                                                    ->with('auxiliar', $auxiliar);
     }
 
     /**
@@ -576,40 +586,44 @@ class assignController extends Controller
     public function programming($id, $withEmp = 0) {
         if (session()->get('rol_id') != 1) {
             $dgu = DB::table('group_dept_user')
-                    ->where('user_id', \Auth::user()->id)
-                    ->select('groupdept_id AS id')
-                    ->get();
+                ->where('user_id', \Auth::user()->id)
+                ->select('groupdept_id AS id')
+                ->get();
             $Adgu = [];
-            for($i=0;count($dgu)>$i;$i++){
-                $Adgu[$i]=$dgu[$i]->id;
+            for ($i = 0; count($dgu) > $i; $i++) {
+                $Adgu[$i] = $dgu[$i]->id;
             }
             $employee = DB::table('employees')
-                    // ->join('jobs','jobs.id','=','employees.job_id')
-                    ->join('departments','departments.id','=','employees.department_id')
-                    ->join('department_group','department_group.id','=','departments.dept_group_id')
-                    ->whereIn('departments.dept_group_id',$Adgu)
-                    ->where('employees.is_active',1)
-                    ->select('employees.id AS id','employees.name AS name','employees.num_employee','department_group.name AS nameGroup')
-                    ->get();
+                // ->join('jobs','jobs.id','=','employees.job_id')
+                ->join('departments', 'departments.id', '=', 'employees.department_id')
+                ->join('department_group', 'department_group.id', '=', 'departments.dept_group_id')
+                ->whereIn('departments.dept_group_id', $Adgu)
+                ->where('employees.is_active', 1)
+                ->select('employees.id AS id', 'employees.name AS name', 'employees.num_employee', 'department_group.name AS nameGroup')
+                ->get();
         }
         else {
             $employee = DB::table('employees')
-                    // ->join('jobs','jobs.id','=','employees.job_id')
-                    ->join('departments','departments.id','=','employees.department_id')
-                    ->join('department_group','department_group.id','=','departments.dept_group_id')
-                    ->where('employees.is_active',1)
-                    ->orderBy('employees.name')
-                    ->select('employees.id AS id','employees.name AS name','employees.num_employee','department_group.name AS nameGroup')
-                    ->get();    
+                // ->join('jobs','jobs.id','=','employees.job_id')
+                ->join('departments', 'departments.id', '=', 'employees.department_id')
+                ->join('department_group', 'department_group.id', '=', 'departments.dept_group_id')
+                ->where('employees.is_active', 1)
+                ->orderBy('employees.name')
+                ->select('employees.id AS id', 'employees.name AS name', 'employees.num_employee', 'department_group.name AS nameGroup')
+                ->get();
         }
 
         $iTemplateId = env('TMPLTE_SATURDAYS', 1);
         $schedule_template = schedule_template::where('is_delete', 0)
-                                                ->where('id', '!=', $iTemplateId)
-                                                ->orderBy('name','ASC')
-                                                ->pluck('id','name');
+            ->where('id', '!=', $iTemplateId)
+            ->orderBy('name', 'ASC')
+            ->pluck('id', 'name');
 
-        return view('assign.programming')->with('employees',$employee)->with('schedule_template',$schedule_template)->with('idGroup',$id)->with('withEmp', $withEmp);   
+        return view('assign.programming')->with('employees', $employee)
+            ->with('schedule_template', $schedule_template)
+            ->with('route_validate_schedule', route('validate_schedule'))
+            ->with('idGroup', $id)
+            ->with('withEmp', $withEmp);
     }
 
     public function dayProgramming($id){
@@ -852,6 +866,7 @@ class assignController extends Controller
                                 ->where('schedule_assign.schedule_template_id',"!=",$iTemplateId)
                                 ->whereIn('department_group.id',$Adgu)
                                 ->select('employees.id AS idEmployee')
+                                ->orderBy('schedule_assign.created_at', 'DESC')
                                 ->get();
                 
                 $employees = [];
@@ -872,7 +887,7 @@ class assignController extends Controller
                 if( count($assigns) == 0){
                     $assigns = DB::select("SELECT a.fecha_inicio, a.fecha_fin, b.name AS nombreEmpleado, s.name AS nombreHorario, a.group_assign_id, a.id, b.id AS idEmployee
                     FROM (
-                        SELECT start_date as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE is_delete = 0 AND schedule_template_id != ".$iTemplateId." ORDER BY p.employee_id, start_date DESC
+                        SELECT start_date as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE is_delete = 0 AND schedule_template_id != ".$iTemplateId." ORDER BY p.employee_id, start_date DESC, created_at DESC
                     ) a
                     INNER JOIN employees b ON a.employee_id = b.id
                     INNER JOIN schedule_template s ON a.schedule_template_id = s.id
@@ -892,7 +907,7 @@ class assignController extends Controller
                 
                 $assigns = DB::select("SELECT a.fecha_inicio, a.fecha_fin, b.name AS nombreEmpleado, s.name AS nombreHorario, a.group_assign_id, a.id, b.id AS idEmployee
                 FROM (
-                    SELECT start_date as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE is_delete = 0 AND schedule_template_id != ".$iTemplateId." ORDER BY p.employee_id, start_date DESC
+                    SELECT start_date as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE is_delete = 0 AND schedule_template_id != ".$iTemplateId." ORDER BY p.employee_id, start_date DESC, created_at DESC
                 ) a
                 INNER JOIN employees b ON a.employee_id = b.id
                 INNER JOIN schedule_template s ON a.schedule_template_id = s.id
@@ -919,6 +934,7 @@ class assignController extends Controller
                                         ->where('schedule_assign.is_delete',0)
                                         ->where('schedule_assign.schedule_template_id',"!=",$iTemplateId)
                                         ->select('employees.id AS idEmployee')
+                                        ->orderBy('schedule_assign.created_at', 'DESC')
                                         ->get();
                         
                         $employees = [];
@@ -937,7 +953,7 @@ class assignController extends Controller
                         if( count($assigns) == 0){
                             $assigns = DB::select("SELECT a.fecha_inicio, a.fecha_fin, b.name AS nombreEmpleado, s.name AS nombreHorario, a.group_assign_id, a.id, b.id AS idEmployee
                             FROM (
-                                SELECT start_date as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE is_delete = 0 AND schedule_template_id != ".$iTemplateId." ORDER BY p.employee_id, start_date DESC
+                                SELECT start_date as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE is_delete = 0 AND schedule_template_id != ".$iTemplateId." ORDER BY p.employee_id, start_date DESC, created_at DESC
                             ) a
                             INNER JOIN employees b ON a.employee_id = b.id
                             INNER JOIN schedule_template s ON a.schedule_template_id = s.id
@@ -956,7 +972,7 @@ class assignController extends Controller
                         
                         $assigns = DB::select("SELECT a.fecha_inicio, a.fecha_fin, b.name AS nombreEmpleado, s.name AS nombreHorario, a.group_assign_id, a.id, b.id AS idEmployee
                         FROM (
-                            SELECT start_date as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE is_delete = 0 AND schedule_template_id != ".$iTemplateId." ORDER BY p.employee_id, start_date DESC
+                            SELECT start_date as fecha_inicio, end_date as fecha_fin ,p.employee_id, schedule_template_id, group_assign_id,id FROM schedule_assign p WHERE is_delete = 0 AND schedule_template_id != ".$iTemplateId." ORDER BY p.employee_id, start_date DESC, created_at DESC
                         ) a
                         INNER JOIN employees b ON a.employee_id = b.id
                         INNER JOIN schedule_template s ON a.schedule_template_id = s.id

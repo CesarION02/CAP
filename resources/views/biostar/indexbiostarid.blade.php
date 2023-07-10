@@ -13,7 +13,7 @@
         <div class="box">
             <div class="box-header with-border">
                 <h3 class="box-title">Empleados vs BioStar</h3>
-                @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php"])
+                @include('layouts.usermanual', ['link' => "http://192.168.1.251/dokuwiki/doku.php"])
             </div>
             <div class="box-body" id="appEmpVsBiostar">
                 <div class="row">

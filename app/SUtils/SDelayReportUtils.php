@@ -147,7 +147,7 @@ class SDelayReportUtils {
     }
 
     /**
-     * Devuelve los minutos extra que le corresponden al empleado su tiene un
+     * Devuelve los minutos extra que le corresponden al empleado si tiene un
      * turno de más de 8 horas
      *
      * @param SDateComparison $oComparison
@@ -392,6 +392,7 @@ class SDelayReportUtils {
                             ->join('type_day AS td', 'dwe.type_day_id', '=', 'td.id')
                             ->join('employees AS e', 'dwe.employee_id', '=', 'e.id')
                             ->select('wdd.date', 
+                                        'w.id AS workshift_id',
                                         'w.name', 
                                         'w.entry', 
                                         'w.overtimepershift',
@@ -451,7 +452,7 @@ class SDelayReportUtils {
          * al periodo de consulta del reporte
          */
         $base = \DB::table('schedule_assign AS sa')
-                    ->where('is_delete', false)
+                    ->where('is_delete', 0)
                     ->where(function ($query) use ($startDate, $endDate) {
                         $query->where(function ($query) use ($startDate, $endDate) {
                             $query->where('start_date', '<=', $endDate)
@@ -526,7 +527,7 @@ class SDelayReportUtils {
             //si el grupo de horarios es nullo significa que solo tiene asignado un horario
             // por lo que la comparación se hace directa con el día
             if ($lAassigns[0]->group_schedules_id == null) {
-                return SDelayReportUtils::compareTemplate($lAassigns[0]->schedule_template_id, $registry, $tReport);
+                return SDelayReportUtils::compareTemplate($lAassigns[0]->schedule_template_id, $registry, $tReport, $lAassigns[0]->id);
             }
             else {
                 /**
@@ -549,7 +550,7 @@ class SDelayReportUtils {
                 //recorrido de los horarios que el empleado tiene asignados
                 //cuando no tiene fecha de inicio y existen asigandos más de un template
                 foreach ($assignsTemplates as $ass_template) {
-                    $comparisons[] = SDelayReportUtils::compareTemplate($ass_template->schedule_template_id, $registry, $tReport);
+                    $comparisons[] = SDelayReportUtils::compareTemplate($ass_template->schedule_template_id, $registry, $tReport, $ass_template->id);
                 }
 
                 // ordenar las asignaciones en base al tiempo de retardo
@@ -567,15 +568,15 @@ class SDelayReportUtils {
                     (($assign->end_date != null &&  $assign->end_date >= $registry->date) ||
                     $assign->end_date == null)) {
                         if ($assign->group_schedules_id == null) {
-                            return SDelayReportUtils::compareTemplate($assign->schedule_template_id, $registry, $tReport);
+                            return SDelayReportUtils::compareTemplate($assign->schedule_template_id, $registry, $tReport, $assign->id);
                         }
                         else if (isset($assign->employee_id) && $assign->employee_id > 0) {
                             $res = SDelayReportUtils::getScheduleAssignGrouped($assign->group_schedules_id, $registry->date, $assign->employee_id);
-                            if ($res == null) {
+                            if (is_null($res)) {
                                 continue;
                             }
                             else {
-                                return SDelayReportUtils::compareTemplate($res, $registry, $tReport);
+                                return SDelayReportUtils::compareTemplate($res, $registry, $tReport, null);
                             }
                         }
                 }
@@ -625,7 +626,7 @@ class SDelayReportUtils {
      * 
      * @return SDateComparison|null object
      */
-    public static function compareTemplate($templateId, $registry, $tReport)
+    public static function compareTemplate($templateId, $registry, $tReport, $idAssign)
     {
         $oDate = Carbon::parse($registry->date.' '.$registry->time);
         // Carbon::setWeekStartsAt(Carbon::FRIDAY);
@@ -652,6 +653,7 @@ class SDelayReportUtils {
                                     'st.overtimepershift')
                             ->where('schedule_template_id', $templateId)
                             ->where('day_num', $day)
+                            ->where('st.is_delete', 0)
                             // ->where('is_active', true)
                             ->get();
         
@@ -660,6 +662,9 @@ class SDelayReportUtils {
         }
 
         $oScheduleDay = $templateDay[0];
+        if ($idAssign > 0) {
+            $oScheduleDay->idAssign = $idAssign;
+        }
 
         $scheduleDate = $registry->date.' '.($tReport == \SCons::REP_DELAY ? $oScheduleDay->entry : $oScheduleDay->departure);
 
@@ -795,8 +800,8 @@ class SDelayReportUtils {
      * Busca un horario asignado al empleado para la fecha seleccionada, tanto en assigns como en 
      * workshifts
      *
-     * @param String $startDate
-     * @param String $endDate
+     * @param string $startDate
+     * @param string $endDate
      * @param int $idEmployee
      * @param object $registry
      * @param Collection $lWorkshifts

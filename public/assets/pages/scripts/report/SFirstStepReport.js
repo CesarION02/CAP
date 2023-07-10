@@ -218,7 +218,7 @@ var app = new Vue({
             if (Array.isArray(aEvents)) {
                 if (aEvents.length > 0) {
                     let oEvent = aEvents[0];
-                    let sExternal = oEvent.is_external ? "\n(siie)" : "";
+                    let sExternal = oEvent.is_external ? "\n(externo)" : "";
                     switch (oEvent.type_id) {
                         case 1:
                         case 2:

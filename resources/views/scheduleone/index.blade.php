@@ -15,7 +15,7 @@
         <div class="box" id="assingOneApp">
             <div class="box-header with-border">
                 <h3 class="box-title">Guardias sabatinas</h3>
-                @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:guardiassabatinas"])
+                @include('layouts.usermanual', ['link' => "http://192.168.1.251/dokuwiki/doku.php?id=wiki:guardiassabatinas"])
                 <div class="row">
                     <div class="col-md-5 col-md-offset-7">
                         <div class="row">

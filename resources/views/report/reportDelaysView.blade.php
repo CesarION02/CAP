@@ -1,6 +1,7 @@
 @extends("theme.$theme.layoutcustom")
 @section('styles1')
     <link rel="stylesheet" href="{{ asset("dt/nv/datatables.css") }}">
+    <link rel="stylesheet" href="{{ asset("assets/css/button3d.css") }}">
     <link rel="stylesheet" href="{{ asset("assets/css/reportD.css") }}">
     <link href="{{ asset("select2js/css/select2.min.css") }}" rel="stylesheet" />
     <style>
@@ -25,7 +26,7 @@
         <div class="box box-danger">
             <div class="box-header with-border">
                 <h3 class="box-title">{{ $sTitle }}</h3>
-                @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:reportetiemposextra"])
+                @include('layouts.usermanual', ['link' => "http://192.168.1.251/dokuwiki/doku.php?id=wiki:reportetiemposextra"])
                 <div id="sugerencia" class="box-tools pull-right" style="background-color: #555; text-align: center;
                 border-radius: 6px; padding: 8px 0; bottom: 125%; left: 50%; margin-left: -80px;">
                     <small style="color: white" class="text-muted">&nbsp;<b>Sugerencia:</b> Haz click en el botón <span class="glyphicon glyphicon-menu-hamburger"></span> para modificar la vista.&nbsp;</small>
@@ -34,6 +35,7 @@
             </div>
             <div class="box-body" id="reportDelayApp">
                 @include('report.adjustsModal')
+                @include('report.reportRejectVoboModal')
                 <div class="row">
                     @if ($isAdmin)
                         <div class="col-md-5">
@@ -433,15 +435,39 @@
                         let oVobo = oData.isPrepayrollInspection ? oData.lEmpVobos[parseInt(group, 10)] : undefined;
 
                         let isVobo = oVobo != undefined;
-                        
-                        return value_to_return + 
-                                (oData.isPrepayrollInspection ? '   <label class="container">' + 
-                                    '<input id="cb'+parseInt(group, 10)+'" onchange="handleChangeCheck(event, ' + parseInt(group, 10) + ')" type="checkbox" ' + (isVobo ? 'checked' : '') + '>' + 
-                                ' <span class="checkmark"></span>' +
-                                '</label>' +
-                                (isVobo ? '(Revisado por : ' + oVobo.user_name + ')' : 'Dar OK') : '')
-                                + '<br>' +
-                                ('<label>' + oData.lDeptJobs[parseInt(group, 10)] + '</label>');
+
+                        value_to_return += 
+                                    '<br>' +
+                                    ('<label>' + 
+                                        oData.lDeptJobs[parseInt(group, 10)] + 
+                                    '</label>');
+
+                        if (oData.isPrepayrollInspection) {
+                            value_to_return += 
+                                '<br>' +
+                                '<span class="nobr">';
+                            if (!isVobo | (isVobo )) {
+                                if (! isVobo || (isVobo && oVobo.is_rejected)) {
+                                    value_to_return += '<button onclick="handleChangeCheck(event, ' + parseInt(group, 10) + ', \'vobo\')" title="Aprobar Vobo" class="btn btn-success btn-xs btn3d"><i class="fa fa-thumbs-up"></i></button>';
+                                }
+                                if (! isVobo || (isVobo && oVobo.is_vobo)) {
+                                    value_to_return += '<button onclick="handleChangeCheck(event, ' + parseInt(group, 10) + ', \'rejectM\')" title="Rechazar Vobo" class="btn btn-danger btn-xs btn3d"><i class="fa fa-thumbs-down"></i></button>';
+                                }
+                            }
+
+                            value_to_return += '</span>';
+
+                            if (isVobo) {
+                                value_to_return += '<label>[' + 
+                                        (oVobo.is_vobo ? ('Revisado por <b>' + oVobo.user_vobo_name) : ('Rechazado por <b>' + oVobo.user_rejected_name)) + '</b>' +
+                                        (oVobo.is_vobo ? ('&nbsp;<span title="Vobo aprobado" style="color: green;" class="fa fa-check fa-lg"></span>&nbsp;') : '') +
+                                        (oVobo.is_rejected ? ('&nbsp;<span title="Vobo rechazado" style="color: red;" class="fa fa-times fa-lg"></span>&nbsp;') : '') +
+                                        (oVobo.is_rejected && oVobo.comments.length > 0 ? ('<span>(' + oVobo.comments + ')</span>') : '') +
+                                    ']</label>';
+                            }
+                        }
+
+                        return value_to_return;
                     },
                     dataSrc: 0
                 },
@@ -598,40 +624,58 @@
             return [true,null,null];
         }
 
+        var iNumEmployee = 0;
+        // onclick idRejectButton
+        $('#idRejectButton').click(function() {
+            // cerrar modal
+            $('#rejectModalId').modal('hide');
+            handleChangeCheck(null, iNumEmployee, 'reject');
+        });
+
         /**
          * 
          * 
          * @param {*} event 
          * @param {*} id 
          */
-        function handleChangeCheck(event, numEmployee) {
+        function handleChangeCheck(event, numEmployee, sOperation) {
             var dataEmployee = getRowsInNumEmployee(numEmployee);
-            let checked = event.target;
             let url = "{{ route('employee_vobo') }}";
-            let vobo = checked.checked ? 1 : 0;
-            var result = vobo == 1 ? checkAdjust(dataEmployee) : new Array(true);
+            var result = sOperation == 'vobo' ? checkAdjust(dataEmployee) : new Array(true);
+            if (sOperation == 'rejectM') {
+                // show modal
+                iNumEmployee = numEmployee;
+                $('#rejectReason').val('');
+                $('#rejectModalId').modal('show');
+                return;
+            }
+
             if (result[0]) {
                 oGui.showLoading(3000);
                 axios.post(url, {
                     _token: "{{ csrf_token() }}",
                     num_employee: numEmployee,
-                    is_vobo: vobo,
+                    is_vobo: sOperation == 'vobo',
+                    is_reject: sOperation == 'reject',
                     start_date: "{{ $sStartDate }}",
-                    end_date: "{{ $sEndDate }}"
+                    end_date: "{{ $sEndDate }}",
+                    comments: sOperation == 'reject' ? $('#rejectReason').val() : ''
                 })
                 .then(res => {
-                    console.log(res);
-                    if (!res.data.success) {
-                        checked.checked = !vobo;
+                    if (res.data.success) {
+                        oData.lEmpVobos = res.data.lvobos;
+                        oGui.showMessage(res.data.title, res.data.message, res.data.icon);
+                        oTable.draw();
                     }
-                    oGui.showMessage(res.data.title, res.data.message, res.data.icon);
+                    else {
+                        oGui.showMessage(res.data.title, res.data.message, res.data.icon);
+                    }
                 })
                 .catch(function(error) {
                     oGui.showError(error);
                 });
             }
             else {
-                checked.checked = false;
                 oGui.showError('Falta comentario para la fecha:\n' + 'Entrada: ' + app.vueGui.formatDate(result[1]) + ' Salida: ' +app.vueGui.formatDate(result[2]));
             }
         }

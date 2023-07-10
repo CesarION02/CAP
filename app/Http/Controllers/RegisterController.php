@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\adjust_link;
+use App\Models\prepayrollAdjust;
 use Illuminate\Http\Request;
 use App\Models\register;
 use App\Models\Dateregister;
@@ -150,11 +152,18 @@ class RegisterController extends Controller
         $dateregister->created_by = session()->get('user_id');
         $dateregister->is_delete = 0;
 
-        
+        $sComments = null;
+        if (!! $request->comments) {
+            $sComments = $request->comments;
+        }
 
         // si solo se va a insertar una checada
         if ($request->optradio == "single") {
             $register->save();
+
+            if (! is_null($sComments)) {
+                self::createRegistryAdjAndLink($register->id, $register->employee_id, $register->date, $sComments);
+            }
 
             $dateregister->register_id = $register->id;
             $dateregister->save();
@@ -168,11 +177,21 @@ class RegisterController extends Controller
             $register->type_id = 2;
             $register->save();
 
+            if (! is_null($sComments)) {
+                self::createRegistryAdjAndLink($register->id, $register->employee_id, $register->date, $sComments);
+            }
+
             $oDate->addSecond();
             $register1->date = $oDate->toDateString();
             $register1->time = $oDate->toTimeString();
             $register1->type_id = 1;
             $register1->save();
+
+            if ($register->date != $register1->date) {
+                if (! is_null($sComments)) {
+                    self::createRegistryAdjAndLink($register1->id, $register1->employee_id, $register1->date, $sComments);
+                }
+            }
 
             $dateregister1 = clone $dateregister;
 
@@ -208,8 +227,23 @@ class RegisterController extends Controller
                         ->orderBy('employees.name')
                         ->select('employees.name AS nameEmployee','employees.id AS id', 'employees.num_employee AS numEmployee')
                         ->get();
+        
+        // consultar ajustes del registro de checada
+        $aAdjusts = DB::table('adjust_link')->where('register_id', $id)
+                                                        ->pluck('adjust_id')
+                                                        ->toArray();
+        $comments = "";
+        if (count($aAdjusts) > 0) {
+            $aAdjusts = DB::table('prepayroll_adjusts')->whereIn('id', $aAdjusts)
+                                                        ->where('is_delete', 0)
+                                                        ->get();
+            foreach ($aAdjusts as $adjust) {
+                $comments .= $adjust->comments;
+            }
+        }
 
         return view('register.edit', compact('datas'))
+                                        ->with('comments', $comments)
                                         ->with('employees',$employees);
     }
 
@@ -225,6 +259,10 @@ class RegisterController extends Controller
         $register->user_id = session()->get('user_id');
         $register->save();
 
+        if (!! $request->comments) {
+            self::createRegistryAdjAndLink($register->id, $register->employee_id, $register->date, $request->comments);
+        }
+
         $iddateregister = Dateregister::where('register_id','=',$id)->get();
         $dateregister = Dateregister::find($iddateregister[0]->id);
         $dateregister->updated_by = session()->get('user_id');
@@ -239,7 +277,6 @@ class RegisterController extends Controller
 
         $dateregister->save();
 
-
         return redirect('register')->with('mensaje', 'Checador actualizado con éxito');
     }
 
@@ -250,6 +287,17 @@ class RegisterController extends Controller
             $employee->is_delete = 1;
             $employee->is_modified = true;
             $employee->save();
+            $aAdjusts = DB::table('adjust_link')->where('register_id', $employee->id)
+                                                        ->pluck('adjust_id')
+                                                        ->toArray();
+            if (count($aAdjusts) > 0) {
+                $aAdjusts = prepayrollAdjust::whereIn('id', $aAdjusts)->get();
+
+                foreach ($aAdjusts as $oAdjust) {
+                    $oAdjust->is_delete = 1;
+                    $oAdjust->save();
+                }
+            }
             $iddateregister = Dateregister::where('register_id','=',$id)->get();
             $dateregister = Dateregister::find($iddateregister[0]->id);
             $dateregister->is_delete = 1;
@@ -369,8 +417,24 @@ class RegisterController extends Controller
                     ->where('registers.id',$id)
                     ->select('employees.name AS nombre','registers.date AS fecha','registers.time AS hora','registers.type_id AS tipo','registers.id AS id','employees.id AS idemployee')
                     ->get();
+
+        // consultar ajustes del registro de checada
+        $aAdjusts = DB::table('adjust_link')->where('register_id', $id)
+                                            ->pluck('adjust_id')
+                                            ->toArray();
+        $comments = "";
+        if (count($aAdjusts) > 0) {
+            $aAdjusts = DB::table('prepayroll_adjusts')->whereIn('id', $aAdjusts)
+                ->where('is_delete', 0)
+                ->get();
+            foreach ($aAdjusts as $adjust) {
+                $comments .= $adjust->comments;
+            }
+        }
         
-        return view('register.editregister')->with('registros',$registros)->with('id',$registros[0]->idemployee);
+        return view('register.editregister')->with('registros',$registros)
+                                            ->with('id',$registros[0]->idemployee)
+                                            ->with('comments', $comments);
 
     }
 
@@ -382,6 +446,10 @@ class RegisterController extends Controller
         $register->is_modified = true;
         $register->user_id = session()->get('user_id');
         $register->save();
+
+        if (!! $request->comments) {
+            self::createRegistryAdjAndLink($register->id, $register->employee_id, $register->date, $request->comments);
+        }
         
         $bitacora = new Bitacora();
         $bitacora->tipo = "Modificar";
@@ -403,6 +471,19 @@ class RegisterController extends Controller
             $employee->is_delete = 1;
             $employee->is_modified = true;
             $employee->save();
+
+            $aAdjusts = DB::table('adjust_link')->where('register_id', $employee->id)
+                                                        ->pluck('adjust_id')
+                                                        ->toArray();
+
+            if (count($aAdjusts) > 0) {
+                $aAdjusts = prepayrollAdjust::whereIn('id', $aAdjusts)->get();
+
+                foreach ($aAdjusts as $oAdjust) {
+                    $oAdjust->is_delete = 1;
+                    $oAdjust->save();
+                }
+            }
 
             $bitacora = new Bitacora();
             $bitacora->tipo = "Desactivar";
@@ -441,85 +522,134 @@ class RegisterController extends Controller
 
     public function adjustRegistries(Request $request)
     {
-        $bMIn = $request->modif_in;
-        $bMOut = $request->modif_out;
-        $oInDateTime = Carbon::parse($request->in_datetime);
-        $oOutDateTime = Carbon::parse($request->out_datetime);
+        try {
+            $bMIn = $request->modif_in;
+            $bMOut = $request->modif_out;
+            $oInDateTime = Carbon::parse($request->in_datetime);
+            $oOutDateTime = Carbon::parse($request->out_datetime);
 
-        $oRow = json_decode($request->row);
+            $oRow = json_decode($request->row);
 
-        $oInRegistry = null;
-        $oOutRegistry = null;
+            $oInRegistry = null;
+            $oOutRegistry = null;
+            $aAdjustsIn = [];
+            $aAdjustsOut = [];
 
-        if ($bMIn) {
-            if ($oRow->hasCheckIn) {
-                $oOrigDate = Carbon::parse($oRow->inDateTime);
+            // iniciar transaccion
+            DB::beginTransaction();
+            if ($bMIn) {
+                if ($oRow->hasCheckIn) {
+                    $oOrigDate = Carbon::parse($oRow->inDateTime);
 
-                $oInRegistry = register::where('employee_id', $oRow->idEmployee)
-                                        ->where('date', $oOrigDate->toDateString())
-                                        ->where('time', $oOrigDate->toTimeString())
-                                        // ->where('type_id', 1)
-                                        ->first();
+                    $oInRegistry = register::where('employee_id', $oRow->idEmployee)
+                                            ->where('date', $oOrigDate->toDateString())
+                                            ->where('time', $oOrigDate->toTimeString())
+                                            // ->where('type_id', 1)
+                                            ->first();
+                }
+                else {
+                    $oInRegistry = new register();
+                    
+                    $oInRegistry->employee_id = $oRow->idEmployee;
+                    $oInRegistry->type_system = null;
+                    $oInRegistry->form_creation_id = null;
+                    $oInRegistry->is_delete = 0;
+                    $oInRegistry->biostar_id = 0;
+                    $oInRegistry->date_original = null;
+                    $oInRegistry->time_original = null;
+                    $oInRegistry->type_original = 1;
+                }
+
+                if ($oInRegistry != null) {
+                    $oInRegistry->date = $oInDateTime->toDateString();
+                    $oInRegistry->time = $oInDateTime->toTimeString();
+                    $oInRegistry->type_id = 1;
+                    $oInRegistry->is_modified = true;
+                    $oInRegistry->user_id = session()->get('user_id');
+        
+                    $oInRegistry->save();
+
+                    // obtener ajustes asociados al registro de checada
+                    $aAdjustsIn = \DB::table('adjust_link')->where('register_id', $oInRegistry->id)
+                                                        ->pluck('adjust_id')
+                                                        ->toArray();
+                }
             }
-            else {
-                $oInRegistry = new register();
-                
-                $oInRegistry->employee_id = $oRow->idEmployee;
-                $oInRegistry->type_system = null;
-                $oInRegistry->form_creation_id = null;
-                $oInRegistry->is_delete = 0;
-                $oInRegistry->biostar_id = 0;
-                $oInRegistry->date_original = null;
-                $oInRegistry->time_original = null;
-                $oInRegistry->type_original = 1;
+
+            if ($bMOut) {
+                if ($oRow->hasCheckOut) {
+                    $oOrigDate = Carbon::parse($oRow->outDateTime);
+
+                    $oOutRegistry = register::where('employee_id', $oRow->idEmployee)
+                                            ->where('date', $oOrigDate->toDateString())
+                                            ->where('time', $oOrigDate->toTimeString())
+                                            // ->where('type_id', 2)
+                                            ->first();
+                }
+                else {
+                    $oOutRegistry = new register();
+                    
+                    $oOutRegistry->employee_id = $oRow->idEmployee;
+                    $oOutRegistry->type_system = null;
+                    $oOutRegistry->form_creation_id = null;
+                    $oOutRegistry->is_delete = 0;
+                    $oOutRegistry->biostar_id = 0;
+                    $oOutRegistry->date_original = null;
+                    $oOutRegistry->time_original = null;
+                    $oOutRegistry->type_original = 1;
+                }
+
+                if ($oOutRegistry != null) {
+                    $oOutRegistry->date = $oOutDateTime->toDateString();
+                    $oOutRegistry->time = $oOutDateTime->toTimeString();
+                    $oOutRegistry->type_id = 2;
+                    $oOutRegistry->is_modified = true;
+                    $oOutRegistry->user_id = session()->get('user_id');
+        
+                    $oOutRegistry->save();
+
+                    $aAdjustsOut = \DB::table('adjust_link')->where('register_id', $oOutRegistry->id)
+                                                        ->pluck('adjust_id')
+                                                        ->toArray();
+                }
             }
 
-            if ($oInRegistry != null) {
-                $oInRegistry->date = $oInDateTime->toDateString();
-                $oInRegistry->time = $oInDateTime->toTimeString();
-                $oInRegistry->type_id = 1;
-                $oInRegistry->is_modified = true;
-                $oInRegistry->user_id = session()->get('user_id');
-    
-                $oInRegistry->save();
+            $aAdjusts = array_merge($aAdjustsIn, $aAdjustsOut);
+            if (count($aAdjusts) > 0) {
+                $aAdjusts = array_unique($aAdjusts);
+                $aAdjusts = array_values($aAdjusts);
+
+                $aAdjusts = prepayrollAdjust::whereIn('id', $aAdjusts)->where('is_delete', 0)->get();
+
+                foreach ($aAdjusts as $oAdjust) {
+                    $oAdjust->is_delete = 1;
+                    $oAdjust->save();
+                }
             }
+
+            if (($bMIn || $bMOut) && !!$request->comments) {
+                $oReg = null;
+                if ($bMOut) {
+                    $oReg = $oOutRegistry;
+                }
+                else {
+                    $oReg = $oInRegistry;
+                }
+
+                // crear ajuste tipo comentario
+                self::createRegistryAdjAndLink($oReg->id, $oReg->employee_id, $oReg->date, $request->comments);
+            }
+
+            // commit transaction
+            DB::commit();
+            return json_encode([$oInRegistry, $oOutRegistry]);
         }
-
-        if ($bMOut) {
-            if ($oRow->hasCheckOut) {
-                $oOrigDate = Carbon::parse($oRow->outDateTime);
-
-                $oOutRegistry = register::where('employee_id', $oRow->idEmployee)
-                                        ->where('date', $oOrigDate->toDateString())
-                                        ->where('time', $oOrigDate->toTimeString())
-                                        // ->where('type_id', 2)
-                                        ->first();
-            }
-            else {
-                $oOutRegistry = new register();
-                
-                $oOutRegistry->employee_id = $oRow->idEmployee;
-                $oOutRegistry->type_system = null;
-                $oOutRegistry->form_creation_id = null;
-                $oOutRegistry->is_delete = 0;
-                $oOutRegistry->biostar_id = 0;
-                $oOutRegistry->date_original = null;
-                $oOutRegistry->time_original = null;
-                $oOutRegistry->type_original = 1;
-            }
-
-            if ($oOutRegistry != null) {
-                $oOutRegistry->date = $oOutDateTime->toDateString();
-                $oOutRegistry->time = $oOutDateTime->toTimeString();
-                $oOutRegistry->type_id = 2;
-                $oOutRegistry->is_modified = true;
-                $oOutRegistry->user_id = session()->get('user_id');
-    
-                $oOutRegistry->save();
-            }
+        catch (\Throwable $th) {
+            // rollback transaction
+            DB::rollBack();
+            \Log::error($th);
+            return json_encode($th->getMessage());
         }
-
-        return json_encode([$oInRegistry, $oOutRegistry]);
     }
 
     public function indexGenRegisters(){
@@ -681,5 +811,49 @@ class RegisterController extends Controller
         });
 
         return response()->json(array('result' => true, 'redirectRoute' => route('registro_index_generate')), 200);
+    }
+
+    public static function createRegistryAdjAndLink($idRegistry, $idEmployee, $date, $comments)
+    {
+        $aAdjusts = DB::table('adjust_link')->where('register_id', $idRegistry)
+                                                        ->pluck('adjust_id')
+                                                        ->toArray();
+
+        if (count($aAdjusts) > 0) {
+            $aAdjusts = prepayrollAdjust::whereIn('id', $aAdjusts)->where('is_delete', 0)->get();
+
+            foreach ($aAdjusts as $oAdjust) {
+                $oAdjust->is_delete = 1;
+                $oAdjust->save();
+            }
+        }
+
+        // crear ajuste tipo comentario
+        $oAdjust = new prepayrollAdjust();
+        $oAdjust->employee_id = $idEmployee;
+        $oAdjust->dt_date = $date;
+        $oAdjust->dt_time = null;
+        $oAdjust->minutes = 0;
+        $oAdjust->apply_to = 2;
+        $oAdjust->comments = $comments;
+        $oAdjust->is_delete = 0;
+        $oAdjust->is_external = false;
+        $oAdjust->adjust_type_id = \SCons::PP_TYPES['COM'];
+        $oAdjust->apply_time = false;
+        $oAdjust->created_by = session()->get('user_id');
+        $oAdjust->updated_by = session()->get('user_id');
+
+        $oAdjust->save();
+
+        // crear enlace entre ajuste y registro
+        $oLink = new adjust_link();
+        $oLink->adjust_id = $oAdjust->id;
+        $oLink->register_id = $idRegistry;
+        $oLink->is_special = null;
+        $oLink->special_id = null;
+        $oLink->is_incident = false;
+        $oLink->incident_id = null;
+
+        $oLink->save();
     }
 }

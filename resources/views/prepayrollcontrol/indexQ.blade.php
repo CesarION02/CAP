@@ -9,16 +9,8 @@ Prenóminas
 
 @section("scripts")
     <script src="{{asset("assets/pages/scripts/admin/datatable/index.js")}}" type="text/javascript"></script>
-    
-    
     <script src="{{ asset("assets/js/moment/moment.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/moment/datetime-moment.js") }}" type="text/javascript"></script>
-	
-	
-	
-	
-	
-    
     <script src="{{ asset("daterangepicker/daterangepicker.js") }}" type="text/javascript"></script>
 <script>
     $(document).ready( function () {
@@ -111,7 +103,7 @@ Prenóminas
         <div class="box">
             <div class="box-header with-border">
                 <h3 class="box-title">Prenóminas</h3>
-                @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:periodos"])
+                @include('layouts.usermanual', ['link' => "http://192.168.1.251/dokuwiki/doku.php?id=wiki:periodos"])
                 <div class="row">
                     <div class="col-md-8 col-md-offset-4">
                         <div class="row">

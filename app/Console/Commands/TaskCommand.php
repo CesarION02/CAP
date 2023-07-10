@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\ProgrammedTask;
 use App\Models\TaskLog;
 use App\SReport\SJourneyReport;
+use App\STasks\SAdjustsPgh;
 use Illuminate\Console\Command;
 use Carbon\Carbon;
 
@@ -72,8 +73,18 @@ class TaskCommand extends Command
             }
 
             switch ($oTask->task_type_id) {
+                /**
+                 * Reportes programados de prenómina
+                 */
                 case \SCons::TASK_TYPE_REPORT_JOURNEY:
                     $response = SJourneyReport::manageTaskReport($oTask->cfg, $oTask->reference_id);
+                    break;
+
+                /**
+                 * Inserción de ajustes pendientes desde PGH
+                 */
+                case \SCons::TASK_TYPE_ADJUST_PGH:
+                    $response = SAdjustsPgh::processAdjustTask($oTask->cfg);
                     break;
 
                 default:

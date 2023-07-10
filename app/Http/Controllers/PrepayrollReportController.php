@@ -408,15 +408,54 @@ class PrepayrollReportController extends Controller
                             ->where('prev.num_week', $number[0]);
         }
 
-        $lVobos = $lVobos->where('prev.is_delete', false)
+        $oVobo = $lVobos->where('prev.is_delete', false)
                             ->where('prev.year', $number[1])
-                            ->get();
+                            ->orderBy('updated_at', 'DESC')
+                            ->first();
 
-        if (count($lVobos) == 0) {
+        if (is_null($oVobo)) {
             return true;
-        }else{
-            return "La ".$week_biWeek." tiene visto bueno para el empleado.";
         }
+        else {
+            if ($oVobo->is_vobo) {
+                return "La ".$week_biWeek." tiene visto bueno para el empleado.";
+            }
+            else {
+                // return "La ".$week_biWeek." tiene visto bueno rechazado para el empleado.";
+                return true;
+            }
+
+        }
+    }
+
+    /**
+     * Determinar si la nómina ha sido omitida y si es el caso marcarla como cerrada
+     *
+     * @param int $numPp
+     * @param int $yearPp
+     * @param int $tpPay
+     * 
+     * @return boolean
+     */
+    public static function prepayrollIsClosed($numPp, $yearPp, $tpPay)
+    {
+        /**
+         * Revisar si el usuario que está dando VoBo ha autorizado una omisión de la nómina
+         */
+        $oPpSkp = prepayrollVoboSkipped::where('year', $yearPp);
+
+        if ($tpPay == \SCons::PAY_W_S) {
+            $oPpSkp = $oPpSkp->where('is_week', true)
+                            ->where('num_week', $numPp);
+        }
+        else {
+            $oPpSkp = $oPpSkp->where('is_biweek', true)
+                            ->where('num_biweek', $numPp);
+        }
+
+        $oPpSkp = $oPpSkp->where('is_delete', 0)->first();
+
+        return ! is_null($oPpSkp);
     }
 
     /**

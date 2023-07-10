@@ -36,24 +36,13 @@ class SReportTasks {
                                     ->orderBy('dt_cut', 'ASC');
 
                     $lQCuts = $lQCuts->get();
-            
-                    
-                    // if (count($lProgrammedTasks) > 0) {
-                    //     $sTasks = implode("','", $lProgrammedTasks);
-                    //     $whereRaw = "CONCAT('Q', '_', id) NOT IN ('" . $sTasks . "')";
-                    //     $lQCuts = $lQCuts->whereRaw($whereRaw);
-                    // }
 
-                    // \DB::enableQueryLog();
-
-                    // preparar el filtro de las tareas programadas con ese número de quincena
+                    // preparar el filtro de las tareas programadas con ese ID de quincena
                     $lProgrammedTasksQ = ProgrammedTask::where('task_type_id', \SCons::TASK_TYPE_REPORT_JOURNEY)
                                             ->where('is_delete', false)
                                             ->whereRaw('SUBSTRING(reference_id, 1, 1) = "Q"')
                                             ->where('execute_on', '>=', $oReport->since_date)
                                             ->get();
-
-                    // dd(\DB::getQueryLog());
 
                     // programar una tarea por cada configuración de reporte
                     foreach ($lQCuts as $oQ) {
@@ -81,15 +70,14 @@ class SReportTasks {
                         }
                     }
                 }
-
                 /**
                  * Programación de reportes semanales
-                 */else {
+                 */
+                else {
                     // consultar fechas de corte para semana
                     $lWCuts = week_cut::where('fin', '>=', $oReport->since_date);
 
-                    // preparar el filtro de las tareas programadas con ese número de semana
-                    // preparar el filtro de las tareas programadas con ese número de quincena
+                    // preparar el filtro de las tareas programadas con ese ID de semana
                     $lProgrammedTasksS = ProgrammedTask::where('task_type_id', \SCons::TASK_TYPE_REPORT_JOURNEY)
                                             ->where('is_delete', false)
                                             ->whereRaw('SUBSTRING(reference_id, 1, 1) = "S"')

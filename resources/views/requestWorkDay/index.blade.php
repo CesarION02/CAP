@@ -15,7 +15,7 @@ Formato de domingo
         <div class="box box-danger">
             <div class="box-header with-border">
                 <h3 class="box-title">Generación solicitud para presentarse a laborar</h3>
-                @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:formatodomingo"])
+                @include('layouts.usermanual', ['link' => "http://192.168.1.251/dokuwiki/doku.php?id=wiki:formatodomingo"])
                 <div class="box-tools pull-right">
                 </div>
             </div>

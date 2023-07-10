@@ -655,7 +655,7 @@ class prePayrollController extends Controller
      * Undocumented function
      *
      * @param Request $request
-     * @return void
+     * @return \Illuminate\View\View
      */
     public function indexVobos(Request $request, $idPreNomina = 3)
     {
@@ -863,7 +863,6 @@ class prePayrollController extends Controller
                                         ->where('num', ($cont->num_biweek - 1))
                                         ->value('dt_cut');    
                     }
-                    
 
                     $cont->dt_ini = Carbon::parse($dt_ini)->addDay()->toDateString();
                 }
@@ -1141,7 +1140,7 @@ class prePayrollController extends Controller
      *
      * @param int $id
      * 
-     * @return redirect
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function boVo(Request $request, $idVobo, $payType = 1) {
         $success = true;
@@ -1167,8 +1166,6 @@ class prePayrollController extends Controller
                     $success = false;
                     throw new \Exception('No se puede dar Vobo, fecha de corte aun no a pasado.');
                 }
-
-                
             }
             else {
                 $oAuthCtrl = PrepayReportControl::find($idVobo);
@@ -1347,15 +1344,59 @@ class prePayrollController extends Controller
     public function rejBoVo(Request $request, $id, $idPreNomina = 1)
     {
         $sBackUrl = isset($request->back_url) && ! is_null($request->back_url) ? $request->back_url : null;
+        $rejectReason = isset($request->reject_reason) && ! is_null($request->reject_reason) ? $request->reject_reason : "";
 
+        /**
+         * Rechazar Vobo
+         */
         $res = DB::table('prepayroll_report_auth_controls')
                     ->where('id_control', $id)
                     ->update([
                         'is_vobo' => false, 
                         'dt_vobo' => null,
                         'is_rejected' => true,
-                        'dt_rejected' => Carbon::now()->toDateTimeString()
+                        'comments' => $rejectReason,
+                        'dt_rejected' => Carbon::now()->toDateTimeString(),
+                        'updated_by' => session()->get('user_id'),
+                        'updated_at' => Carbon::now()->toDateTimeString(),
                     ]);
+
+        $oPpCtrl = PrepayReportControl::find($id);
+        if (is_null($oPpCtrl)) {
+            if (is_null($sBackUrl)) {
+                return redirect()->route('vobos', ['idPreNomina' => $idPreNomina])->with(['error' => 'No se encontró el Visto Bueno', 'icon' => 'error']);
+            }
+            else {
+                return redirect($sBackUrl)->with(['error' => 'No se encontró el Visto Bueno', 'icon' => 'error']);
+            }
+        }
+        
+        /**
+         * Revisar si el usuario que está dando VoBo ha autorizado una omisión de la nómina
+         */
+        $oPpSkp = prepayrollVoboSkipped::where('skipped_by_id', session()->get('user_id'))
+                                ->where('year', $oPpCtrl->year);
+        if ($oPpCtrl->is_week) {
+            $oPpSkp = $oPpSkp->where('is_week', true)
+                            ->where('num_week', $oPpCtrl->num_week);
+        }
+        else {
+            $oPpSkp = $oPpSkp->where('is_biweek', true)
+                            ->where('num_biweek', $oPpCtrl->num_biweek);
+        }
+
+        $oPpSkp = $oPpSkp->where('is_delete', 0)->first();
+
+        if (! is_null($oPpSkp)) {
+            $dateTime = Carbon::now(new \DateTimeZone('-6:00'));
+            $oPpSkp->update(['is_delete' => 1, 
+                            'updated_at' => $dateTime->toDateTimeString()]);
+        }
+
+        /**
+         * Notificar a usuarios dependientes que se ha rechazado la prenómina
+         */
+        SPrepayrollUtils::notifyToUsers($id, session()->get('user_id'), $rejectReason);
 
         if (is_null($sBackUrl)) {
             return redirect()->route('vobos', ['idPreNomina' => $idPreNomina]);

@@ -103,7 +103,7 @@ Turno
         <div class="box">
             <div class="box-header with-border">
                 <h3 class="box-title">Reporte revisión entrada / salida</h3>
-                @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:reporterevisionentradasalida"])
+                @include('layouts.usermanual', ['link' => "http://192.168.1.251/dokuwiki/doku.php?id=wiki:reporterevisionentradasalida"])
                 <div class="box-tools pull-right">
                 </div>
             </div>

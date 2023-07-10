@@ -15,9 +15,19 @@ class EmployeeVobo extends Model
         'is_biweek',
         'num_biweek',
         'year',
+        'comments',
         'is_delete',
         'employee_id',
+        'is_vobo',
         'vobo_by_id',
+        'dt_vobo',
+        'is_rejected',
+        'rejected_by_id',
+        'dt_rejected',
+        'deleted_by_id',
+        'dt_deleted',
+        'created_at',
+        'updated_at'
     ];
 
     public function employee()

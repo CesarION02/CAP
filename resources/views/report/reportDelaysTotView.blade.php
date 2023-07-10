@@ -2,6 +2,7 @@
 @section('styles1')
     <link rel="stylesheet" href="{{ asset("dt/nv/datatables.css") }}">
     <link rel="stylesheet" href="{{ asset("assets/css/reportD.css") }}">
+    <link rel="stylesheet" href="{{ asset("assets/css/button3d.css") }}">
     <link href="{{ asset("select2js/css/select2.min.css") }}" rel="stylesheet" />
     <style>
         tr {
@@ -25,7 +26,7 @@
         <div class="box box-danger">
             <div class="box-header with-border">
                 <h3 class="box-title">{{ $sTitle }}</h3>
-                @include('layouts.usermanual', ['link' => "http://192.168.1.233:8080/dokuwiki/doku.php?id=wiki:reportetiemposextra"])
+                @include('layouts.usermanual', ['link' => "http://192.168.1.251/dokuwiki/doku.php?id=wiki:reportetiemposextra"])
                 <div class="box-tools pull-right">
                 </div>
             </div>
@@ -67,14 +68,14 @@
                                     <th title="Número de Colaborador">Num. Col.</th>
                                     <th title="Nombre del colaborador">Empleado</th>
                                     <th title="Comentarios">Com.</th>
-                                    <th>Retardo (min)</th>
+                                    <th title="Minutos de retardo a reportarse / Minutos justificados">Retardo | Just (min)</th>
                                     <th title="Salida anticipada (minutos)">Antic. (min)</th>
                                     <th title="Total tiempo extra por pagar">TE p/pagar (hr)</th>
                                     <th title="Prima dominical">Pr. Dom.</th>
                                     <th title="Descansos">Desc.</th>
-                                    <th title="Falta por ausencia de quecadas sin eventos">Faltas</th>
+                                    <th title="Falta por ausencia de quecadas sin eventos">Faltas (cap)</th>
                                     <th title="Vacaciones">Vac.</th>
-                                    <th title="Inasistencia por incidencia">Inasis.</th>
+                                    <th title="Inasistencia por incidencia">Inasis. (externo)</th>
                                     <th title="Incapacidad">Incap.</th>
                                     {{-- <th title="Incidencias que se van a pagar">Incid. c/pago</th> --}}
                                     {{-- <th title="Incidencias sin pago (días descontados)">Incid. s/pago</th> --}}
@@ -108,7 +109,7 @@
                                             <span class="glyphicon glyphicon-list-alt"></span>
                                         </button>
                                     </td>
-                                    <td>@{{ row.entryDelayMinutes }}</td>
+                                    <td title="Minutos de retardo a reportarse | Minutos justificados">@{{ row.entryDelayMinutes + " | " + row.entryJustDelayMinutes }}</td>
                                     <td>@{{ row.prematureOut }}</td>
                                     <td>@{{ vueGui.formatMinsToHHmm(row.extraHours == null || row.extraHours < 0 ? 0 : row.extraHours ) }}</td>
                                     <td>@{{ row.isSunday }}</td>
@@ -122,14 +123,21 @@
                                     <td :title="(row.noPayableEvents)">@{{ row.countDaysToPay }}</td>
                                     <td v-if="vData.isPrepayrollInspection">
                                         <label class='container'>
-                                            <input :checked="isVoboResume(row.num_employee) != undefined" id='cb31' v-on:change="onChangeVoboResume($event, row.num_employee)" type='checkbox'>
-                                            <span class='checkmark'></span>
-                                            <br>
-                                            <div v-if="isVoboResume(row.num_employee) != undefined" style="font-size: 35%">
-                                                <span class="nobr">
-                                                    (Revisado por: <b>@{{ isVoboResume(row.num_employee).user_name }})</b>
-                                                </span>
-                                            </div>
+                                            <span class="nobr">
+                                                <span v-if="isVoboResume(row.num_employee) != undefined && isVoboResume(row.num_employee).is_vobo" title="Vobo aprobado" style="color: green" class="fa fa-check"></span>
+                                                <span v-if="isVoboResume(row.num_employee) != undefined && isVoboResume(row.num_employee).is_rejected" title="Vobo rechazado" style="color: red;" class="fa fa-times"></span>
+                                                <button v-if="isVoboResume(row.num_employee) === undefined || isVoboResume(row.num_employee).is_rejected" title="Aprobar Vobo" v-on:click="onChangeVoboResume($event, row.num_employee, 'vobo')" class="btn btn-success btn-sm btn3d"><i class="fa fa-thumbs-up fa-xs"></i></button>
+                                                <button v-if="isVoboResume(row.num_employee) === undefined || isVoboResume(row.num_employee).is_vobo" title="Rechazar Vobo" v-on:click="onChangeVoboResume($event, row.num_employee, 'rejectM')" class="btn btn-danger btn-sm btn3d"><i class="fa fa-thumbs-down fa-xs"></i></button>
+                                                <br>
+                                                <div v-if="isVoboResume(row.num_employee) != undefined" style="font-size: 35%">
+                                                    <span v-if="isVoboResume(row.num_employee).is_vobo">(Revisado por: <b>@{{ isVoboResume(row.num_employee).user_vobo_name }})</b></span>
+                                                    <span v-if="isVoboResume(row.num_employee).is_rejected">(Rechazado por: <b>@{{ isVoboResume(row.num_employee).user_rejected_name }})</b></span>
+                                                    <br v-if="isVoboResume(row.num_employee).is_rejected && isVoboResume(row.num_employee).comments.length > 0">
+                                                    <span v-if="isVoboResume(row.num_employee).is_rejected && isVoboResume(row.num_employee).comments.length > 0">
+                                                        @{{ isVoboResume(row.num_employee).comments }}
+                                                    </span>
+                                                </div>
+                                            </span>
                                         </label>
                                     </td>
                                     <td v-else></td>
@@ -180,6 +188,7 @@
                                     </div>
                                 </p>
                                 <p>
+                                    @include('report.reportRejectVoboModal')
                                     @include('report.reportvobototal')
                                 </p>
                             @endif
@@ -415,10 +424,34 @@
     @endif
     @if ($isPrepayrollInspection && isset($oPrepayrollCtrl) && !is_null($oPrepayrollCtrl))
         <script type="text/javascript">
-            $('#form_vobo').on('submit', function() {
-                oGui.showLoading(7000);
-                return true;
-            });    
+            var isIndividualVobo = false;
+            function onRejectSubmit() {
+                if (oData.oPrepayrollCtrl.is_vobo || (!oData.oPrepayrollCtrl.is_rejected && !oData.oPrepayrollCtrl.is_vobo)) {
+                    $('#rejectReason').val('');
+                    $('#rejectModalId').modal('show');
+                    isIndividualVobo = false;
+                }
+            }
+            // al hacer click en el boton de rechazar
+            $('#idRejectButton').on('click', function() {
+                if (isIndividualVobo) {
+                    return;
+                }
+
+                // se obtiene el comentario
+                let rejectReason = $('#rejectReason').val();
+                // se valida que el comentario
+
+                $('#rejectModalId').modal('hide');
+
+                // set de comentario en el formulario
+                $('#form_vobo').find('#reject_reason').val(rejectReason);
+
+                oGui.showLoading(10000);
+
+                // submit de formulario
+                $('#form_vobo').submit();
+            });
         </script>
     @endif
 <script>
@@ -453,38 +486,61 @@
         return [true,null,null];
     }
 
+    var iNumEmployee = 0;
+    // onclick idRejectButton
+    $('#idRejectButton').click(function() {
+        // cerrar modal
+        $('#rejectModalId').modal('hide');
+        if (isIndividualVobo) {
+            handleChangeCheck(null, iNumEmployee, 'reject');
+            isIndividualVobo = false;
+        }
+    });
+
     /**
-     * @param {*} event 
-     * @param {*} id 
+     * @param event event 
+     * @param int numEmployee
+     * @param string sOperation
      */
-    function handleChangeCheck(event, numEmployee) {
+    function handleChangeCheck(event, numEmployee, sOperation) {
         var dataEmployee = getRowsInNumEmployee(numEmployee);
-        let checked = event.target;
         let url = "{{ route('employee_vobo') }}";
-        let vobo = checked.checked ? 1 : 0;
-        var result = vobo == 1 ? checkAdjust(dataEmployee) : new Array(true);
+
+        if (sOperation == 'rejectM') {
+            // show modal
+            iNumEmployee = numEmployee;
+            isIndividualVobo = true;
+            $('#rejectReason').val('');
+            $('#rejectModalId').modal('show');
+            return;
+        }
+
+        var result = sOperation == 'vobo' ? checkAdjust(dataEmployee) : new Array(true);
         if (result[0]) {
             oGui.showLoading(3000);
             axios.post(url, {
                 _token: "{{ csrf_token() }}",
                 num_employee: numEmployee,
-                is_vobo: vobo,
+                is_vobo: sOperation == 'vobo',
+                is_reject: sOperation == 'reject',
                 start_date: "{{ $sStartDate }}",
-                end_date: "{{ $sEndDate }}"
+                end_date: "{{ $sEndDate }}",
+                comments: sOperation == 'reject' ? $('#rejectReason').val() : ''
             })
             .then(res => {
-                console.log(res);
-                if (!res.data.success) {
-                    checked.checked = !vobo;
+                if (res.data.success) {
+                    app.vData.lEmpVobos = res.data.lvobos;
+                    oGui.showMessage(res.data.title, res.data.message, res.data.icon);
                 }
-                oGui.showMessage(res.data.title, res.data.message, res.data.icon);
+                else {
+                    oGui.showMessage(res.data.title, res.data.message, res.data.icon);
+                }
             })
             .catch(function(error) {
                 oGui.showError(error);
             });
         }
         else {
-            checked.checked = false;
             oGui.showError('Falta comentario para la fecha:\n' + 'Entrada: ' + app.vueGui.formatDate(result[1]) + ' Salida: ' +app.vueGui.formatDate(result[2]));
         }
     }
