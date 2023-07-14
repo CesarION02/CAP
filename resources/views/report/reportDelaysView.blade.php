@@ -257,7 +257,7 @@
             this.hiddenColEmId = 18;
             this.hiddenColExId = 17;
             this.hiddenCol = this.tReport == this.REP_DELAY ? 5 : 5;
-            this.toExport = this.tReport == this.REP_DELAY ? [0, 1, 2, 3, 4, 6] : [0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12];
+            this.toExport = this.tReport == this.REP_DELAY ? [0, 1, 2, 3, 4, 6] : [0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12,13,14,15,16];
         }
         
         var oData = new GlobalData();
@@ -681,7 +681,7 @@
         }
     </script>
 
-    <script src="{{asset("assets/pages/scripts/report/SReportRow.js")}}" type="text/javascript"></script>
+    <script src="{{asset("assets/pages/scripts/report/SRow.js")}}" type="text/javascript"></script>
     <script src="{{asset("assets/pages/scripts/report/SExportExcel.js")}}" type="text/javascript"></script>
     <script>
         $(document).ready(function() {

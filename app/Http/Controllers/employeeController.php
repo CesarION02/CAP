@@ -174,8 +174,6 @@ class employeeController extends Controller
         }else{
             $employee->lock_depto = 0;
         }
-        $employee->ben_pol_id = $request->ben_pol_id;
-        $employee->policy_extratime_id = $request->policy_id;
         $employee->updated_by = session()->get('user_id');
         $employee->save();
 
@@ -286,7 +284,6 @@ class employeeController extends Controller
                                 ->orderBy('employees.job_id')
                                 ->where('employees.is_delete','0')
                                 ->where('employees.is_active','1')
-                                ->whereIn('departments.dept_group_id',$Adgu)
                                 ->orderBy('employees.name')
                                 ->select('employees.name AS nameEmployee','employees.num_employee AS numEmployee','employees.short_name AS shortName','employees.id AS idEmployee','jobs.name AS nameJob','departments.name AS nameDepartment','benefit_policies.name AS politica')
                                 ->get();

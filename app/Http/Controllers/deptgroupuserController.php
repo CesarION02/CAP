@@ -68,7 +68,18 @@ class deptgroupuserController extends Controller
      */
     public function create()
     {
-        $user = User::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
+        $userWithGroup = DB::table('group_dept_user')
+                                ->where('is_delete',0)
+                                ->groupBy('user_id')
+                                ->get();
+
+        $arrUser = [];
+
+        for( $i = 0 ; count($userWithGroup) > $i ; $i++ ){
+            $arrUser[$i] = $userWithGroup[$i]->user_id;
+        }
+
+        $user = User::where('is_delete','0')->whereNotIn('id',$arrUser)->orderBy('name','ASC')->pluck('id','name');
         $department = departmentsGroup::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
 
         return view('groupdeptuser.create')->with('users',$user)->with('departments',$department);

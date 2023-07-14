@@ -50,6 +50,16 @@ class rolUserController extends Controller
      */
     public function store(Request $request)
     {
+        $user = DB::table('user_rol')
+                    ->where('user_id',$request->usuario_id)
+                    ->get();
+        
+        if (count($user) > 0){
+            DB::table('user_rol')
+                ->where('user_id',$request->usuario_id)
+                ->delete();
+        }
+        
         $roluser = new roluser();
         $roluser->user_id = $request->usuario_id;
         $roluser->rol_id = $request->rol_id;
@@ -103,9 +113,11 @@ class rolUserController extends Controller
     {
         if ($request->ajax()) {
             $roluser = roluser::find($id);
-            $roluser->fill($request->all());
-            $roluser->state = 0;
-            $roluser->save();
+            
+            DB::table('user_rol')
+                ->where('id',$id)
+                ->delete();
+
             return response()->json(['mensaje' => 'ok']);
         } else {
             abort(404);

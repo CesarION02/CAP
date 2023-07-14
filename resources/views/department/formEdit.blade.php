@@ -51,11 +51,24 @@
 <div class="form-group">
     <label for="employee_id" class="col-lg-3 control-label requerido">Grupo departamento:</label>
     <div class="col-lg-8">
-        <select id="group_dept_id" name="group_dept_id" class="form-control select2-class" required>
-            @foreach($groupDept as $group)
+        
+        @if(isset($data))
+            <select id="group_dept_id" name="group_dept_id" class="form-control select2-class" required>
+                @foreach($groupDept as $group)
+                    @if($data->dept_group_id == $group->id)
                         <option selected value="{{ $group->id }}"  > {{$group->name}}</option>
-            @endforeach
-        </select>
+                    @else
+                        <option value="{{ $group->id }}"  > {{$group->name}}</option>
+                    @endif
+                @endforeach
+            </select>   
+        @else
+            <select id="group_dept_id" name="group_dept_id" class="form-control select2-class" required>
+                @foreach($groupDept as $group)
+                            <option selected value="{{ $group->id }}"  > {{$group->name}}</option>
+                @endforeach
+            </select>
+        @endif
     </div>
 </div>
 <div class="form-group">
@@ -63,7 +76,9 @@
 <div class="col-lg-8">
     @if(isset($data))
             <select id="boss_id" name="boss_id" class="form-control select2-class" required>
+                <option>Seleccione encargado</option>
                 @foreach($employees as $employee => $index)
+                
                     @if($data->boss_id == $index)
                         <option selected value="{{ $index }}"  > {{$employee}}</option>
                     @else
@@ -73,6 +88,7 @@
             </select>   
         @else
             <select id="boss_id" name="boss_id" class="form-control select2-class" required>
+                    <option>Seleccione encargado</option>
                 @foreach($employees as $employee => $index)
                     <option value="{{ $index }}" {{old('boss_id') == $index ? 'selected' : '' }} > {{$employee}}</option>
                 @endforeach
