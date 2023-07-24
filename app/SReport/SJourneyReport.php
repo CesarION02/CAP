@@ -367,7 +367,8 @@ class SJourneyReport
             $oEmpRow->lRows[] = $oRow;
             $totalDelay += $oRow->entryDelayMinutes;
             if (! $bWithSchedule && (strlen($oRow->outDateTime) > 11 || (strlen($oRow->inDateTime) == 10 && strlen($oRow->outDateTime) == 10))) {
-                if ($oRow->workable && SDateTimeUtils::dayOfWeek($oRow->outDateTimeSch) != Carbon::SUNDAY && SDateTimeUtils::dayOfWeek($oRow->outDateTimeSch) != Carbon::SATURDAY) {
+                $date = is_null($oRow->outDateTimeSch) ? (is_null($oRow->outDate) ? null : $oRow->outDate) : $oRow->outDateTimeSch;
+                if (! is_null($date) && $oRow->workable && SDateTimeUtils::dayOfWeek($date) != Carbon::SUNDAY && SDateTimeUtils::dayOfWeek($date) != Carbon::SATURDAY) {
                     $oEmpRow->schedule = (! strlen($oRow->inDateTimeSch) > 11 || ! strlen($oRow->outDateTimeSch) > 11) ? 
                                             "Sin horario" : 
                                             Carbon::parse($oRow->inDateTimeSch)->toTimeString() . " - " . Carbon::parse($oRow->outDateTimeSch)->toTimeString();
