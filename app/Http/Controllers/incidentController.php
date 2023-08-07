@@ -178,7 +178,7 @@ class incidentController extends Controller
                                         ->where('is_cap_edit', true);
 
         if (session()->get('rol_id') == 16) {
-            $lIncidentTypes = $lIncidentTypes->where('id', 22);
+            $lIncidentTypes = $lIncidentTypes->where('id', 18);
         }
 
         $lIncidentTypes = $lIncidentTypes->select('id', 'name', 'has_subtypes')
@@ -586,6 +586,7 @@ class incidentController extends Controller
                                 '1_8' => '16',
                                 '1_9' => '18',
                                 '1_10' => '20',
+                                '1_11' => '26'
                             ];
 
         foreach ($lAbsences as $jAbs) {
