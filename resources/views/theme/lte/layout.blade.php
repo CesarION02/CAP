@@ -6,6 +6,12 @@
   <title>@yield('title','Checador')</title>
   <!-- Tell the browser to be responsive to screen width -->
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+  <meta http-equiv="cache-control" content="max-age=0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="expires" content="0"/>
+  <meta http-equiv="pragma" content="no-cache"/>
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  
   <!-- Bootstrap 3.3.7 -->
   <link rel="stylesheet" href="{{asset("assets/$theme/bower_components/bootstrap/dist/css/bootstrap.min.css")}}">
   <!-- Font Awesome -->
@@ -80,5 +86,7 @@
     @yield('scripts');
 
     @yield('last_scripts')
+
+    <script> axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');</script>
 </body>
 </html>
