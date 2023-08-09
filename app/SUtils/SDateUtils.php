@@ -403,5 +403,28 @@ class SDateUtils {
 
         return $response;
     }
+
+    public static function getInfoDates($ini, $fin,$typePay){
+        switch($typePay){
+            case 2:
+                $dates = DB::table('week_cut')
+                            ->whereBetween('ini', [$ini,$fin])
+                            ->OrwhereBetween('fin', [$ini,$fin])
+                            ->get();
+            break;
+            case 1:
+                $dates = DB::table('hrs_prepay_cut')
+                            ->whereBetween('dt_cut', [$ini,$fin])
+                            ->get();
+                if( $fin > $dates[count($dates)-1]->dt_cut ){
+                    $dateAux = DB::table('hrs_prepay_cut')
+                            ->where('dt_cut', '>', $fin )
+                            ->get();
+                    array_push( $dates, $dateAux[0]);    
+                }
+            break;
+        } 
+        return $dates;   
+    }
 }
 

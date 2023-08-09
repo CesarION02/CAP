@@ -10,7 +10,10 @@ use App\Models\incident;
 use App\Models\incidentDay;
 use App\Models\IncidentExtSysLink;
 use App\Models\prepayrollAdjust;
+use App\SUtils\SDateUtils;
 use App\SValidations\SIncidentValidations;
+use Carbon\Carbon;
+use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -217,4 +220,99 @@ class ExternalIncidentsController extends Controller
             $oIncident->incidentDays()->saveMany($aDays);
         }
     }
+
+    public function cancelIncidents(Request $request){
+        $numEmployee = $request->input('num_employee');
+        $incidentId = $request->input('incident_id');
+
+        $employee = DB::table('employees')
+                        ->where('num_employee',$numEmployee)
+                        ->get();
+        
+        $incident = DB::table('incidents')
+                        ->join('incident_ext_sys_links','incident_ext_sys_links.incident_id', '=', 'incidents.id')
+                        ->where('incident_ext_sys_links.external_key',$incidentId)
+                        ->where('is_delete',0)
+                        ->get();
+        
+        if(count($incident) > 0){
+            
+            switch($employee[0]->way_pay_id){
+                // Quincena
+                case 1:
+                    $quincenas = SDateUtils::getInfoDates($incident[0]->start_date,$incident[0]->end_date,$employee[0]->way_pay_id);
+
+                    for( $i = 0 ; $i < count($quincenas) ; $i++ ){
+                        $vobo = DB::table('prepayroll_report_emp_vobos')
+                                    ->where('num_biweek',$quincenas[$i]->num)
+                                    ->where('year',$quincenas[$i]->year)
+                                    ->where('employee_id',$employee[0]->id)
+                                    ->where('is_vobo',1)
+                                    ->where('is_delete',0)
+                                    ->get();
+                        if( count($vobo) > 0 ){
+                            return response()->json([
+                                'code' => 500,
+                                'message' => 'La incidencia ya tiene visto bueno no se puede borrar',
+                            ]);
+                        }
+                    }
+                    
+                    DB::table('incidents')
+                        ->where('id', $incident[0]->id)
+                        ->update(['is_delete',1]);
+                    
+                    DB::table('incidents_day')
+                        ->where('id', $incident[0]->id)
+                        ->update(['is_delete',1]);
+
+                    return response()->json([
+                        'code' => 200,
+                        'message' => 'La incidencia se borro con exito',
+                    ]);
+
+                    break;
+                // Semana
+                case 2:
+                    $semanas = SDateUtils::getInfoDates($incident[0]->start_date,$incident[0]->end_date,$employee[0]->way_pay_id);
+                    for( $i = 0 ; $i < count($semanas) ; $i++ ){
+
+                        $vobo = DB::table('prepayroll_report_emp_vobos')
+                                    ->where('num_week',$semanas[$i]->num)
+                                    ->where('year',$semanas[$i]->year)
+                                    ->where('employee_id',$employee[0]->id)
+                                    ->where('is_vobo',1)
+                                    ->where('is_delete',0)
+                                    ->get();
+                        if( count($vobo) > 0 ){
+                            return response()->json([
+                                'code' => 500,
+                                'message' => 'La incidencia ya tiene visto bueno no se puede borrar',
+                            ]);
+                        }
+                    }
+                    
+                    DB::table('incidents')
+                        ->where('id', $incident[0]->id)
+                        ->update(['is_delete',1]);
+                    
+                    DB::table('incidents_day')
+                        ->where('id', $incident[0]->id)
+                        ->update(['is_delete',1]);
+
+                    return response()->json([
+                        'code' => 200,
+                        'message' => 'La incidencia se borro con exito',
+                    ]);
+                    break;    
+            }
+        }else{
+            return response()->json([
+                'code' => 550,
+                'message' => 'La incidencia no existe',
+            ]);
+        }
+    }
+
+    
 }

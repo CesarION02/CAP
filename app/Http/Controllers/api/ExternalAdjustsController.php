@@ -231,4 +231,8 @@ class ExternalAdjustsController extends Controller
                                     ], 500);
         }
     }
+
+    public function cancelPermisson(Request $request){
+        
+    }
 }
