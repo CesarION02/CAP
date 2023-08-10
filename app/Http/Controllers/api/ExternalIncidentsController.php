@@ -260,11 +260,11 @@ class ExternalIncidentsController extends Controller
                     
                     DB::table('incidents')
                         ->where('id', $incident[0]->id)
-                        ->update(['is_delete',1]);
+                        ->update(['is_delete' => 1]);
                     
                     DB::table('incidents_day')
                         ->where('id', $incident[0]->id)
-                        ->update(['is_delete',1]);
+                        ->update(['is_delete' => 1]);
 
                     return response()->json([
                         'code' => 200,
