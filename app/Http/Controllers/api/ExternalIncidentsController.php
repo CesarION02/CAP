@@ -232,7 +232,7 @@ class ExternalIncidentsController extends Controller
         $incident = DB::table('incidents')
                         ->join('incident_ext_sys_links','incident_ext_sys_links.incident_id', '=', 'incidents.id')
                         ->where('incident_ext_sys_links.external_key',$incidentId)
-                        ->where('is_delete',0)
+                        ->where('incidents.is_delete',0)
                         ->get();
         
         if(count($incident) > 0){
