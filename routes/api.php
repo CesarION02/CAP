@@ -85,5 +85,12 @@ Route::group(['middleware' => 'auth:api'], function() {
         'uses' => 'api\\ExternalIncidentsController@cancelIncidents'
     ]);
 
+    /*
+    * cancel adjust
+    **/
+    Route::post('canceladjust', [
+        'uses' => 'api\\ExternalAdjustsController@cancelAdjust'
+    ]);
+
 });
 

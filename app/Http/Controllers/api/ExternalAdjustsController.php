@@ -8,8 +8,10 @@ use App\Models\prepayrollAdjust;
 use App\Models\prepayrollAdjustExtLink;
 use App\Models\ProgrammedTask;
 use App\SData\SDataProcess;
+use App\SUtils\SDateUtils;
 use App\SUtils\SGenUtils;
 use Carbon\Carbon;
+use DB;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
@@ -201,7 +203,7 @@ class ExternalAdjustsController extends Controller
                 $oTask->execute_on = $dateTime->toDateString();
                 $oTask->apply_time = false;
                 $oTask->cfg = json_encode($oJson, JSON_PRETTY_PRINT);
-                $oTask->reference_id = "";
+                $oTask->reference_id = $ext_key;
                 $oTask->is_done = false;
                 $oTask->is_delete = false;
                 $oTask->task_type_id = \SCons::TASK_TYPE_ADJUST_PGH;
@@ -233,6 +235,104 @@ class ExternalAdjustsController extends Controller
     }
 
     public function cancelPermisson(Request $request){
+        $numEmployee = $request->input('num_employee');
+        $adjustId = $request->input('adjust_id'); 
+        
+        $employee = DB::table('employees')
+                        ->where('num_employee',$numEmployee)
+                        ->get();
+        // revisar si se tiene una tarea programada                 
+        $programmedTask = DB::table('programmed_tasks')
+                        ->where('reference_id', $adjustId)
+                        ->where('is_delete', 0)
+                        ->where('is_done', 0)
+                        ->get();
+
+        if( count($programmedTask) > 0){
+            
+            DB::table('programmed_tasks')
+                ->where('id', $programmedTask[0]->id_task)
+                ->update(['is_delete' => 1]);
+
+        }else{
+            $adjust = DB::table('prepayroll_adjusts')
+                        ->join('prepayroll_adjust_ext_links','prepayroll_adjust_ext_links.prepayroll_adjust_id', '=', 'prepayroll_adjusts.id')
+                        ->where('prepayroll_adjust_ext_links.external_key',$adjustId)
+                        ->where('is_delete',0)
+                        ->get();
+        
+            if(count($adjust) > 0){
+                
+                switch($employee[0]->way_pay_id){
+                // Quincena
+                    case 1:
+                        $quincenas = SDateUtils::getInfoDates($adjust[0]->start_date,$adjust[0]->end_date,$employee[0]->way_pay_id);
+                    
+                        for( $i = 0 ; $i < count($quincenas) ; $i++ ){
+                            $vobo = DB::table('prepayroll_report_emp_vobos')
+                                        ->where('num_biweek',$quincenas[$i]->num)
+                                        ->where('year',$quincenas[$i]->year)
+                                        ->where('employee_id',$employee[0]->id)
+                                        ->where('is_vobo',1)
+                                        ->where('is_delete',0)
+                                        ->get();
+                            if( count($vobo) > 0 ){
+                                return response()->json([
+                                    'code' => 500,
+                                    'message' => 'El permiso ya tiene visto bueno no se puede borrar',
+                                ]);
+                            }
+                        }
+                                        
+                        DB::table('prepayroll_adjust')
+                            ->where('id', $adjust[0]->id)
+                            ->update(['is_delete' => 1]);
+
+                                        
+                        return response()->json([
+                            'code' => 200,
+                            'message' => 'El permiso se borro con exito',
+                        ]);
+                    
+                        break;
+                        // Semana
+                    case 2:
+                        $semanas = SDateUtils::getInfoDates($adjust[0]->start_date,$adjust[0]->end_date,$employee[0]->way_pay_id);
+                        for( $i = 0 ; $i < count($semanas) ; $i++ ){
+                    
+                            $vobo = DB::table('prepayroll_report_emp_vobos')
+                                        ->where('num_week',$semanas[$i]->num)
+                                        ->where('year',$semanas[$i]->year)
+                                        ->where('employee_id',$employee[0]->id)
+                                        ->where('is_vobo',1)
+                                        ->where('is_delete',0)
+                                        ->get();
+                            if( count($vobo) > 0 ){
+                                return response()->json([
+                                    'code' => 500,
+                                    'message' => 'El ajuste ya tiene visto bueno no se puede borrar',
+                                ]);
+                            }
+                        }
+                                        
+                        DB::table('prepayroll_adjust')
+                            ->where('id', $adjust[0]->id)
+                            ->update(['is_delete' => 1]);
+                    
+                        return response()->json([
+                            'code' => 200,
+                            'message' => 'El permiso se borro con exito',
+                        ]);
+                        break;    
+                }
+            }else{
+                return response()->json([
+                    'code' => 550,
+                    'message' => 'El permiso no existe',
+                ]);
+            }
+        }
+
         
     }
 }
