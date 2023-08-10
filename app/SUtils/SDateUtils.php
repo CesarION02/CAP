@@ -416,7 +416,14 @@ class SDateUtils {
                 $dates = DB::table('hrs_prepay_cut')
                             ->whereBetween('dt_cut', [$ini,$fin])
                             ->get();
-                if( $fin > $dates[count($dates)-1]->dt_cut ){
+                if( count($dates) = 0){
+                    $dateAux = DB::table('hrs_prepay_cut')
+                            ->where('dt_cut', '>', $fin )
+                            ->first();
+                            
+                    // array_push( $dates, (array)$dateAux[0]);    
+                    $dates = $dates->push($dateAux);
+                }else if( $fin > $dates[count($dates)-1]->dt_cut ){
                     $dateAux = DB::table('hrs_prepay_cut')
                             ->where('dt_cut', '>', $fin )
                             ->first();
