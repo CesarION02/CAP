@@ -234,7 +234,7 @@ class ExternalAdjustsController extends Controller
         }
     }
 
-    public function cancelPermisson(Request $request){
+    public function cancelAdjust(Request $request){
         $numEmployee = $request->input('num_employee');
         $adjustId = $request->input('adjust_id'); 
         
@@ -251,13 +251,18 @@ class ExternalAdjustsController extends Controller
         if( count($programmedTask) > 0){
             
             DB::table('programmed_tasks')
-                ->where('id', $programmedTask[0]->id_task)
+                ->where('id_task', $programmedTask[0]->id_task)
                 ->update(['is_delete' => 1]);
+
+            return response()->json([
+                'code' => 200,
+                'message' => 'El permiso fue borrado con éxito',
+            ]);
 
         }else{
             $adjust = DB::table('prepayroll_adjusts')
-                        ->join('prepayroll_adjust_ext_links','prepayroll_adjust_ext_links.prepayroll_adjust_id', '=', 'prepayroll_adjusts.id')
-                        ->where('prepayroll_adjust_ext_links.external_key',$adjustId)
+                        ->join('prepayroll_adjusts_ext_links','prepayroll_adjusts_ext_links.prepayroll_adjust_id', '=', 'prepayroll_adjusts.id')
+                        ->where('prepayroll_adjusts_ext_links.external_key',$adjustId)
                         ->where('is_delete',0)
                         ->get();
         
@@ -266,7 +271,7 @@ class ExternalAdjustsController extends Controller
                 switch($employee[0]->way_pay_id){
                 // Quincena
                     case 1:
-                        $quincenas = SDateUtils::getInfoDates($adjust[0]->start_date,$adjust[0]->end_date,$employee[0]->way_pay_id);
+                        $quincenas = SDateUtils::getInfoDates($adjust[0]->dt_date,$adjust[0]->dt_date,$employee[0]->way_pay_id);
                     
                         for( $i = 0 ; $i < count($quincenas) ; $i++ ){
                             $vobo = DB::table('prepayroll_report_emp_vobos')
@@ -284,8 +289,8 @@ class ExternalAdjustsController extends Controller
                             }
                         }
                                         
-                        DB::table('prepayroll_adjust')
-                            ->where('id', $adjust[0]->id)
+                        DB::table('prepayroll_adjusts')
+                            ->where('id', $adjust[0]->prepayroll_adjust_id)
                             ->update(['is_delete' => 1]);
 
                                         
