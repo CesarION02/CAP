@@ -58,7 +58,10 @@ class incidentController extends Controller
                             ->join('departments','departments.id','=','employees.department_id')
                             ->where('is_active', true)
                             ->where('incidents.is_delete','0')
-                            ->where('type_incidents.id','22')
+                            ->where(function($query){
+                                $query->where('type_incidents.id','22')
+                                    ->orwhere('type_incidents.id','18');
+                            })
                             ->select('incidents.id AS id','incidents.start_date AS ini','incidents.end_date AS fin','employees.name AS name','type_incidents.name AS tipo');
                 $datas = $datas->get();  
                 
