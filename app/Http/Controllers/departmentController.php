@@ -20,9 +20,10 @@ class departmentController extends Controller
      */
     public function index(Request $request)
     {
+        $config = \App\SUtils\SConfiguration::getConfigurations();
         $iFilter = $request->ifilter == 0 ? 1 : $request->ifilter;
         $id = session()->get('user_id');
-        if (session()->get('rol_id') != 1){
+        if (!in_array(session()->get('rol_id'), $config->rolesCanSeeAll)) {
             $dgu = DB::table('group_dept_user')
                     ->where('user_id',$id)
                     ->select('groupdept_id AS id')
@@ -105,6 +106,7 @@ class departmentController extends Controller
      */
     public function create()
     {
+        $config = \App\SUtils\SConfiguration::getConfigurations();
         $area = area::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
         $deptrhs = DepartmentRH::where('is_delete',0)->orderBy('name', 'ASC')->pluck('id','name');
         $employees = employees::where('is_active','1')->orderBy('name','ASC')->pluck('id','name');
@@ -112,7 +114,7 @@ class departmentController extends Controller
         
         $id = session()->get('user_id');
         $Adgu = [];
-        if (session()->get('rol_id') != 1){
+        if (!in_array(session()->get('rol_id'), $config->rolesCanSeeAll)) {
             $dgu = DB::table('group_dept_user')
                     ->where('user_id',$id)
                     ->select('groupdept_id AS id')
@@ -121,7 +123,6 @@ class departmentController extends Controller
             for($i=0;count($dgu)>$i;$i++){
                 $Adgu[$i]=$dgu[$i]->id;
             }
-            $grupo = $Adgu[0];
 
             $groupDept = DB::table('department_group')
                         ->where('is_delete','0')
@@ -133,7 +134,7 @@ class departmentController extends Controller
                         ->get();
         }
 
-        return view('department.create')->with('areas',$area)->with('deptrhs',$deptrhs)->with('employees',$employees)->with('policyh',$policyh)->with('grupo',$grupo)->with('groupDept', $groupDept);
+        return view('department.create')->with('areas',$area)->with('deptrhs',$deptrhs)->with('employees',$employees)->with('policyh',$policyh)->with('groupDept', $groupDept);
     }
 
     /**
@@ -200,6 +201,7 @@ class departmentController extends Controller
      */
     public function edit($id)
     {
+        $config = \App\SUtils\SConfiguration::getConfigurations();
         $area = area::where('is_delete','0')->orderBy('name','ASC')->pluck('id','name');
         $data = department::findOrFail($id);
         $deptrhs = DepartmentRH::where('is_delete',0)->orderBy('name', 'ASC')->pluck('id','name');
@@ -208,7 +210,7 @@ class departmentController extends Controller
 
         $id = session()->get('user_id');
         $Adgu = [];
-        if (session()->get('rol_id') != 1){
+        if (!in_array(session()->get('rol_id'), $config->rolesCanSeeAll)) {
             $dgu = DB::table('group_dept_user')
                     ->where('user_id',$id)
                     ->select('groupdept_id AS id')
@@ -217,7 +219,6 @@ class departmentController extends Controller
             for($i=0;count($dgu)>$i;$i++){
                 $Adgu[$i]=$dgu[$i]->id;
             }
-            $grupo = $Adgu[0];
 
             $groupDept = DB::table('department_group')
                         ->where('is_delete','0')

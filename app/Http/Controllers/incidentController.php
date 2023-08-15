@@ -62,6 +62,7 @@ class incidentController extends Controller
                                 $query->where('type_incidents.id','22')
                                     ->orwhere('type_incidents.id','18');
                             })
+                            ->orderBy('start_date')
                             ->select('incidents.id AS id','incidents.start_date AS ini','incidents.end_date AS fin','employees.name AS name','type_incidents.name AS tipo');
                 $datas = $datas->get();  
                 

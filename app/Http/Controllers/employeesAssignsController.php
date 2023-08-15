@@ -211,7 +211,7 @@ class employeesAssignsController extends Controller
             $schedules = \DB::table('schedule_assign AS sa')
                         ->join('schedule_template as st', 'sa.schedule_template_id', '=', 'st.id')
                         ->where('sa.is_delete', 0)
-                        ->where('st.id', '!=', 1)
+                        //->where('st.id', '!=', 1)
                         ->where('sa.employee_id', $request->selEmployee)
                         ->select('sa.employee_id', 'sa.start_date', 'sa.end_date', 'st.name', 'sa.employee_id', 'sa.id as schedule_id', 'st.id as st_id')
                         ->orderBy('start_date')
