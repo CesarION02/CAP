@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use DB;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -51,6 +52,7 @@ class PrepayrollReportController extends Controller
         $oCfg->order_vobo = $request->order_vobo;
         $oCfg->rol_n_name = $request->rol_n_name;
         $oCfg->user_n_id = $request->user_n_id;
+        $oCfg->branch = "";
         $oCfg->is_global = isset($request->is_global);
         $oCfg->is_delete = 0;
         $oCfg->created_by = \Auth::user()->id;
@@ -246,6 +248,7 @@ class PrepayrollReportController extends Controller
                     $prac->dt_rejected = null;
                     $prac->order_vobo = $orderBovo;
                     $prac->is_global = $cfg->is_global;
+                    $prac->branch = $cfg->branch;
                     $prac->is_delete = false;
                     $prac->cfg_id = $cfg->id_configuration;
                     $prac->user_vobo_id = $cfg->user_n_id;
@@ -280,6 +283,7 @@ class PrepayrollReportController extends Controller
                         $prac->order_vobo = $orderBovo;
                         $prac->is_global = $cfg->is_global;
                         $prac->is_delete = false;
+                        $prac->branch = $cfg->branch;
                         $prac->cfg_id = $cfg->id_configuration;
                         $prac->user_vobo_id = $user->id;
                         $prac->created_by = \Auth::user()->id;
@@ -498,6 +502,128 @@ class PrepayrollReportController extends Controller
         }
 
         return [true, $prepayrollAprovedd];
+    }
+
+    function getConfigsOfUser($idUser, $idGroup) {
+        $cfgs = \DB::table('prepayroll_report_configs AS prc')
+                    ->where('is_delete', false)
+                    ->where('user_n_id', $idUser)
+                    ->where('group_n_id', $idGroup)
+                    ->get();
+
+        return json_encode(count($cfgs) > 0 ? $cfgs : []);
+    }
+
+    function savePrepayrollConfigs(Request $request) {
+        $lCfgs = json_decode($request->l_user_cfg_prepayroll);
+
+        try {
+            DB::beginTransaction();
+            
+            foreach ($lCfgs as $oCfgUser) {
+                // Quincena
+                if ($oCfgUser->oCfgPrepayroll->oBiweekCfg->isChecked) {
+                    $oBiweek = $oCfgUser->oCfgPrepayroll->oBiweekCfg;
+                    if ($oCfgUser->oCfgPrepayroll->oBiweekCfg->idConfig > 0) {
+                        $oPprConfig = PrepayReportConfig::find($oBiweek->idConfig);
+                        $oPprConfig->since_date = $oBiweek->sinceDate;
+                        $oPprConfig->until_date = $oBiweek->untilDate;
+                        $oPprConfig->is_required = $oBiweek->isRequired;
+                        $oPprConfig->branch = $oBiweek->branch;
+                        $oPprConfig->group_n_id = $oCfgUser->oCfgPrepayroll->idGroup;
+                        $oPprConfig->is_global = $oBiweek->isGlobal;
+                        $oPprConfig->updated_by = \Auth::user()->id;
+        
+                        $oPprConfig->save();
+                    }
+                    else {
+                        $oPprConfig = new PrepayReportConfig();
+        
+                        $oPprConfig->since_date = $oBiweek->sinceDate;
+                        $oPprConfig->until_date = $oBiweek->untilDate;
+                        $oPprConfig->is_week = false;
+                        $oPprConfig->is_biweek = true;
+                        $oPprConfig->is_required = $oBiweek->isRequired;
+                        $oPprConfig->order_vobo = 0;
+                        $oPprConfig->branch = 0;
+                        $oPprConfig->rol_n_name = null;
+                        $oPprConfig->user_n_id = $oCfgUser->oCfgPrepayroll->idUser;
+                        $oPprConfig->group_n_id = $oCfgUser->oCfgPrepayroll->idGroup;
+                        $oPprConfig->is_global = $oBiweek->isGlobal;
+                        $oPprConfig->is_delete = 0;
+                        $oPprConfig->created_by = \Auth::user()->id;
+                        $oPprConfig->updated_by = \Auth::user()->id;
+                        
+                        $oPprConfig->save();
+                    }
+                }
+                else {
+                    if ($oCfgUser->oCfgPrepayroll->oBiweekCfg->idConfig > 0) {
+                        $oPprConfig = PrepayReportConfig::find($oCfgUser->oCfgPrepayroll->oBiweekCfg->idConfig);
+                        $oPprConfig->is_delete = 1;
+                        $oPprConfig->updated_by = \Auth::user()->id;
+                        $oPprConfig->save();
+                    }
+                }
+
+                // Semana
+                if ($oCfgUser->oCfgPrepayroll->oWeekCfg->isChecked) {
+                    $oWeekCfg = $oCfgUser->oCfgPrepayroll->oWeekCfg;
+                    if ($oCfgUser->oCfgPrepayroll->oWeekCfg->idConfig > 0) {
+                        $oPprConfig = PrepayReportConfig::find($oWeekCfg->idConfig);
+                        $oPprConfig->since_date = $oWeekCfg->sinceDate;
+                        $oPprConfig->until_date = $oWeekCfg->untilDate;
+                        $oPprConfig->is_required = $oWeekCfg->isRequired;
+                        $oPprConfig->branch = $oWeekCfg->branch;
+                        $oPprConfig->group_n_id = $oCfgUser->oCfgPrepayroll->idGroup;
+                        $oPprConfig->is_global = $oWeekCfg->isGlobal;
+                        $oPprConfig->updated_by = \Auth::user()->id;
+        
+                        $oPprConfig->save();
+                    }
+                    else {
+                        $oPprConfig = new PrepayReportConfig();
+        
+                        $oPprConfig->since_date = $oWeekCfg->sinceDate;
+                        $oPprConfig->until_date = $oWeekCfg->untilDate;
+                        $oPprConfig->is_week = true;
+                        $oPprConfig->is_biweek = false;
+                        $oPprConfig->is_required = $oWeekCfg->isRequired;
+                        $oPprConfig->order_vobo = 0;
+                        $oPprConfig->branch = 0;
+                        $oPprConfig->rol_n_name = null;
+                        $oPprConfig->user_n_id = $oCfgUser->oCfgPrepayroll->idUser;
+                        $oPprConfig->group_n_id = $oCfgUser->oCfgPrepayroll->idGroup;
+                        $oPprConfig->is_global = $oWeekCfg->isGlobal;
+                        $oPprConfig->is_delete = 0;
+                        $oPprConfig->created_by = \Auth::user()->id;
+                        $oPprConfig->updated_by = \Auth::user()->id;
+                        
+                        $oPprConfig->save();
+                    }
+                }
+                else {
+                    if ($oCfgUser->oCfgPrepayroll->oWeekCfg->idConfig > 0) {
+                        $oPprConfig = PrepayReportConfig::find($oCfgUser->oCfgPrepayroll->oWeekCfg->idConfig);
+                        $oPprConfig->is_delete = 1;
+                        $oPprConfig->updated_by = \Auth::user()->id;
+                        $oPprConfig->save();
+                    }
+                }
+            }
+
+            SPrepayrollUtils::setBranchAndLevelByGroup();
+
+            DB::commit();
+        }
+        catch (\Throwable $th) {
+            DB::rollBack();
+            \Log::error($th);
+        }
+    }
+
+    function makeConfigsTree() {
+        SPrepayrollUtils::setBranchAndLevelByGroup();
     }
     
 }

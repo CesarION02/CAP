@@ -1,12 +1,14 @@
 <?php namespace App\SUtils;
 
 use App\Mail\RejectedVoboNotification;
+use App\Models\PrepayReportConfig;
 use App\Models\User;
 use App\SUtils\SPayrollDelegationUtils;
 use DB;
 use Carbon\Carbon;
 use App\Models\prepayrollVoboSkipped;
 use App\Models\PrepayReportControl;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Mail;
 class SPrepayrollUtils {
 
@@ -485,6 +487,146 @@ class SPrepayrollUtils {
         catch (\Throwable $th) {
             \Log::error($th);
         }
+    }
+
+    private static function findDepth($node) {
+        if (empty($node->lGroups)) {
+            return 1; // El nodo hoja tiene profundidad 1
+        }
+        else {
+            $maxDepth = 0;
+            foreach ($node->lGroups as $child) {
+                $childDepth = SPrepayrollUtils::findDepth($child);
+                $maxDepth = max($maxDepth, $childDepth);
+            }
+            return $maxDepth + 1; // La profundidad del nodo actual es la máxima profundidad de sus hijos + 1
+        }
+    }
+
+    public static function setBranchAndLevelByGroup() {
+        $lTree = SPrepayrollUtils::buildTree();
+        
+        // Quincena
+        $branch = 1;
+        foreach ($lTree as $oTree) {
+            $maxLevel = SPrepayrollUtils::findDepth($oTree);
+            $oTree = SPrepayrollUtils::setLevelAndBranch($oTree, $branch, \SCons::PAY_W_Q, $maxLevel);
+            $branch++;
+        }
+
+        // Semana
+        $branch = 1;
+        foreach ($lTree as $oTree) {
+            $maxLevel = SPrepayrollUtils::findDepth($oTree);
+            $oTree = SPrepayrollUtils::setLevelAndBranch($oTree, $branch, \SCons::PAY_W_S, $maxLevel);
+            $branch++;
+        }
+    }
+
+    private static function setLevelAndBranch($oTree, $branch, $payType, $level) {
+        $lConfigs = SPrepayrollUtils::getPrepayrollConfigByGroup($oTree->id_group, $payType);
+        foreach ($lConfigs as $oConfig) {
+            $oConfig->order_vobo = $level;
+            $oConfig->branch = $branch;
+            
+            $oPprConfig = PrepayReportConfig::find($oConfig->id_configuration);
+
+            $oPprConfig->order_vobo = $level;
+            $oPprConfig->branch = $branch;
+
+            $oPprConfig->save();
+        }
+        $oTree->lConfigs = $lConfigs;
+
+        $level--;
+        foreach ($oTree->lGroups as $oSonGroup) {
+            $oSonGroup = SPrepayrollUtils::setLevelAndBranch($oSonGroup, $branch, $payType, $level);
+        }
+
+        $oTree->branch = $branch;
+        return $oTree;
+    }
+
+    public static function buildBranch($branch) : Collection {
+        $oFatherGroup = DB::table('prepayroll_groups AS pg')
+                            ->where('pg.is_delete', 0)
+                            ->where('branch', $branch)
+                            ->whereNull('pg.father_group_n_id')
+                            ->select('pg.id_group')
+                            ->orderBy('pg.group_name', 'ASC')
+                            ->orderBy('pg.id_group', 'ASC')
+                            ->first();
+        
+        if (is_null($oFatherGroup)) {
+            return collect([]);
+        }
+        
+        return SPrepayrollUtils::buildTree($oFatherGroup->id_group);
+    }
+
+    public static function buildTree($idGroup = null) : Collection {
+        $lFathersGroups = DB::table('prepayroll_groups AS pg')
+                        ->leftJoin('prepayroll_groups AS pgf', 'pg.father_group_n_id', '=', 'pgf.id_group')
+                        ->where('pg.is_delete', 0);
+
+        if (is_null($idGroup)) {
+            $lFathersGroups = $lFathersGroups->whereNull('pg.father_group_n_id');
+        }
+        else {
+            $lFathersGroups = $lFathersGroups->where('pg.id_group', $idGroup);
+        }
+
+        $lFathersGroups = $lFathersGroups->select('pg.id_group', 'pg.group_name', 'pg.father_group_n_id', 'pgf.group_name AS father_group_name')
+                        ->orderBy('pg.group_name', 'ASC')
+                        ->orderBy('pg.id_group', 'ASC')
+                        ->get();
+
+        foreach ($lFathersGroups as $fGroup) {
+            $fGroup->level = 0;
+            $fGroup = SPrepayrollUtils::getChildrenOfGroup($fGroup);
+        }
+
+        return $lFathersGroups;
+    }
+
+    private static function getChildrenOfGroup($oGroup) : Object {
+        $aChildrens = SPrepayrollUtils::getChildren($oGroup->id_group);
+
+        $lChildren = DB::table('prepayroll_groups AS pg')
+                            ->leftJoin('prepayroll_groups AS pgf', 'pg.father_group_n_id', '=', 'pgf.id_group')
+                            ->where('pg.is_delete', 0)
+                            ->whereIn('pg.id_group', $aChildrens)
+                            ->select('pg.id_group', 'pg.group_name', 'pg.father_group_n_id', 'pgf.group_name AS father_group_name')
+                            ->orderBy('pg.father_group_n_id', 'ASC')
+                            ->orderBy('pg.id_group', 'ASC')
+                            ->get();
+
+        $level = $oGroup->level + 1;
+        foreach ($lChildren as $group) {
+            $users = DB::table('prepayroll_groups_users AS pgu')
+                        ->join('users AS u', 'pgu.head_user_id', '=', 'u.id')
+                        ->where('group_id', $group->id_group)
+                        ->select('u.*')
+                        ->get();
+        
+            $group->head_users = $users;
+            $group->level = $level;
+            $group = SPrepayrollUtils::getChildrenOfGroup($group);
+        }
+
+        $oGroup->lGroups = $lChildren;
+
+        return $oGroup;
+    }
+
+    private static function getPrepayrollConfigByGroup($idGroup, $payType) {
+        $lCfgs = DB::table('prepayroll_report_configs AS prc')
+                    ->where('prc.is_delete', false)
+                    ->where('prc.group_n_id', $idGroup)
+                    ->where($payType == \SCons::PAY_W_Q ? 'prc.is_biweek' : 'prc.is_week', true)
+                    ->get();
+
+        return $lCfgs;
     }
 }
         

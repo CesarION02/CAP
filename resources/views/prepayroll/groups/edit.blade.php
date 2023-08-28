@@ -16,7 +16,7 @@
             <div class="box-header with-border">
                 <h3 class="box-title">Modificar grupo de prenómina</h3>
                 <div class="box-tools pull-right">
-                    <a href="{{ route('prepayroll_groups') }}" class="btn btn-block btn-info btn-sm">
+                    <a href="{{ !!$toShow ? route('prepayroll_groups_show') : route('prepayroll_groups') }}" class="btn btn-block btn-info btn-sm">
                         <i class="fa fa-fw fa-reply-all"></i> Regresar
                     </a>
                 </div>
@@ -32,6 +32,7 @@
                         @include('includes.button-form-edit')
                     </div>
                 </div>
+                <input type="hidden" name="to_show" value="{{ !!$toShow ? 1 : 0 }}">
             </form>
         </div>
     </div>
