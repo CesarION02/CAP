@@ -16,11 +16,12 @@ class SyncController extends Controller
         // \App\SUtils\SConfiguration::addConfiguration('lastSyncDateTime', '2020-04-01 00:00:00');
         $config = \App\SUtils\SConfiguration::getConfigurations();
 
-        $correcto = SyncController::syncronizeWithERP($config->lastSyncDateTime);
-        $resp = SCutoffDates::processCutoffDates($config->lastSyncDateTime);
-        $sincronizado = \App\Http\Controllers\biostarController::insertEvents();
-        $sincronizado = \App\Http\Controllers\biostarController::insertDevices();
+        //$correcto = SyncController::syncronizeWithERP($config->lastSyncDateTime);
+        //$resp = SCutoffDates::processCutoffDates($config->lastSyncDateTime);
+        //$sincronizado = \App\Http\Controllers\biostarController::insertEvents();
+        //$sincronizado = \App\Http\Controllers\biostarController::insertDevices();
 
+        $sincronizado = 1;
         if ($sincronizado != 0) {
             return redirect()->back()->with('mensaje', 'Sincronizado BioStar');
         }

@@ -2421,12 +2421,39 @@ class SInfoWithPolicy{
                         return $contador;
                     }else{
                         if( $haveDayoff == 0){
-                            $lRows[0]->isDayOff = 1 ;
-                            if($lRows[0]->overtimeCheckPolicy != 1){
-                                $lRows[0]->work_dayoff = 1;
+                            $lRows[0]->isDayOff = 1;
+                            if($lRows[0]->workable == 1){
+                                if(sizeof($lRows[0]->events)>=1){
+                                    if($lRows[0]->events[0]['type_id'] == 19){
+                                        if($lRows[0]->hasChecks == 1){
+                                            $lRows[0]->work_dayoff = 1;
+                                        }else{
+                                            $lRows[0]->work_dayoff = 0;    
+                                        }       
+                                    }else{
+                                        if($lRows[0]->hasChecks == 1){
+                                            $lRows[0]->work_dayoff = 1;
+                                        }else{
+                                            $lRows[0]->work_dayoff = 0;
+                                        }
+                                    }
+                                }else{
+                                    $lRows[$i]->isDayOff = 1; 
+                                    if($lRows[0]->hasChecks == 1){
+                                        $lRows[0]->work_dayoff = 1;
+                                    }else{
+                                        $lRows[0]->work_dayoff = 0;
+                                    }
+                                }    
                             }else{
-                                $lRows[$i]->work_dayoff = 0;   
-                            }  
+                                $lRows[0]->isDayOff = 1 ;
+                                if($lRows[0]->overtimeCheckPolicy != 1 && $lRows[0]->hasChecks == 1){
+                                    $lRows[0]->work_dayoff = 1;
+                                }else{
+                                    $lRows[0]->work_dayoff = 0;   
+                                }      
+                            }
+                            
                             
                             $contador[0] = 1;
                             $contador[1] = $lRows[0]->extraDoubleMins;
@@ -2773,8 +2800,8 @@ class SInfoWithPolicy{
                                 if(isset($lRows[$i]->events[0])){
                                     if($lRows[$i]->events[0]['type_id'] == 19){
                                         $lRows[$i]->isDayOff = 1; 
-                                        $haveDayoff = 1;
-                                        if($lRows[$i]->overtimeCheckPolicy != 1){
+                                        
+                                        if( $lRows[$i]->overtimeCheckPolicy != 1 && $lRows[$i]->hasChecks == true ){
                                             $lRows[$i]->work_dayoff = 1;
                                         }else{
                                             $lRows[$i]->work_dayoff = 0;   
@@ -2848,7 +2875,7 @@ class SInfoWithPolicy{
                 $empleados = DB::table('employees')
                                 ->where('is_active','=',1)
                                 ->where('way_pay_id','=',1)
-                                //->where('id',1326)
+                                //->where('id',37)
                                 ->where('department_id','!=',$config->dept_foraneo)
                                 ->orderBy('id')
                                 ->select('id AS id','policy_extratime_id AS extratime')
