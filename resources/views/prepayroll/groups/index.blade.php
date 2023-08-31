@@ -23,9 +23,21 @@
                     <h3 class="box-title">Grupos de prenómina</h3>
                     @include('layouts.usermanual', ['link' => "http://192.168.1.251/dokuwiki/doku.php"])
                     <div class="row">
-                        <div class="col-md-5 col-md-offset-7">
+                        <div class="col-md-8 col-md-offset-4">
                             <div class="row">
-                                <div style="text-align: right" class="col-md-12">
+                                <div class="col-md-3 col-md-offset-1">
+                                    <a href="{{ route('prepayroll_groups_show') }}" class="btn btn-info btn-sm">
+                                        <i class="fa fa-users"></i> Mapa de prenómina
+                                    </a>
+                                </div>
+                                <div class="col-md-3">
+                                    <select name="deleted-type" id="deleted-type" class="form-control">
+                                        <option value="1">Eliminados</option>
+                                        <option value="2">Todos</option>
+                                        <option value="0"selected>Activos</option>
+                                    </select>
+                                </div>
+                                <div style="text-align: right" class="col-md-1">
                                     <a href="{{ route('create_prepayroll_group') }}" class="btn btn-success btn-sm" id="btn_create">
                                         <i class="fa fa-plus-circle"></i> Nuevo
                                     </a>
@@ -35,9 +47,10 @@
                     </div>
                 </div>
                 <div class="box-body">
-                    <table style="display: none" class="table table-striped table-bordered table-hover" id="prepayroll_groups_table_id">
+                    <table style="display: none; width: 100%" class="table table-striped table-bordered table-hover" id="prepayroll_groups_table_id">
                         <thead>
                             <tr>
+                                <th>Borrado</th>
                                 <th>Grupo prenómina</th>
                                 <th>Grupo prenómina padre</th>
                                 <th>Usrs encargados</th>
@@ -47,19 +60,30 @@
                         <tbody>
                             @foreach ($lGroups as $group)
                                 <tr>
-                                    <td>{{ $group->group_name }}</td>
-                                    <td>{{ $group->father_group_name }}</td>
+                                    <td>{{ $group->is_delete }}</td>
+                                    <td>{{ strtoupper($group->group_name) }}</td>
+                                    <td>{{ strtoupper($group->father_group_name) }}</td>
                                     <td>{{ $group->head_users }}</td>
                                     <td>
                                         <a href="{{ route('edit_prepayroll_group', $group->id_group) }}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
                                             <i class="fa fa-fw fa-pencil"></i>
                                         </a>
-                                        <form action="{{route('destroy_prepayroll_group', ['id' => $group->id_group])}}" class="d-inline form-eliminar" method="POST">
-                                            @csrf @method("delete")
-                                            <button type="submit" class="btn-accion-tabla eliminar tooltipsC" title="Eliminar este registro">
-                                                <i class="fa fa-fw fa-trash text-danger"></i>
-                                            </button>
-                                        </form>
+                                        @if (! $group->is_delete)
+                                            <form action="{{route('destroy_prepayroll_group', ['id' => $group->id_group])}}" class="d-inline form-eliminar" method="POST">
+                                                @csrf @method("delete")
+                                                <button type="submit" class="btn-accion-tabla eliminar tooltipsC" title="Eliminar este registro">
+                                                    <i class="fa fa-fw fa-trash text-danger"></i>
+                                                </button>
+                                            </form>
+                                        @else
+                                            <form action="{{route('destroy_prepayroll_group', ['id' => $group->id_group])}}" class="d-inline form-eliminar" method="POST">
+                                                @csrf @method("delete")
+                                                <button type="submit" class="btn-accion-tabla eliminar tooltipsC" title="Activar este registro">
+                                                    <i class="fa fa-fw fa-check text-success" aria-hidden="true"></i>
+                                                </button>
+                                            </form>
+                                        @endif
+                                        
                                     </td>
                                 </tr>
                             @endforeach
@@ -75,19 +99,10 @@
     <script src="{{ asset("assets/pages/scripts/admin/datatable/indexFingerActivar.js")}}" type="text/javascript"></script>
     <script src="{{ asset("assets/pages/scripts/admin/datatable/index.js")}}" type="text/javascript"></script>
     <script src="{{ asset("assets/pages/scripts/filter.js")}}" type="text/javascript"></script>
-    
-    
-    
-	
-	
-	
-	
-    
-
     <script>
         $(document).ready( function () {
             // $.fn.dataTable.moment('DD/MM/YYYY');
-            $('#prepayroll_groups_table_id').DataTable({
+            let oTable = $('#prepayroll_groups_table_id').DataTable({
                 "language": {
                     "sProcessing":     "Procesando...",
                     "sLengthMenu":     "Mostrar _MENU_ registros",
@@ -112,6 +127,12 @@
                         "sSortDescending": ": Activar para ordenar la columna de manera descendente"
                     }
                 },
+                "columnDefs": [
+                        {
+                            targets: [ 0 ],
+                            visible: false
+                        }
+                ],
                 "order": [[ 1, 'asc' ]],
                 "colReorder": true,
                 "initComplete": function() { 
@@ -137,6 +158,31 @@
                     ],
             });
 
+            $('#deleted-type').change( function() {
+                oTable.draw();
+            });
+    
+            $.fn.dataTable.ext.search.push(
+                function( settings, data, dataIndex ) {
+                    let deletedTypeVal = parseInt( $('#deleted-type').val(), 10 );
+    
+                    if (deletedTypeVal == 2) {
+                        return true;
+                    }
+    
+                    let rowDeleted = parseInt( data[0], 10 );
+                    return deletedTypeVal == rowDeleted;
+                }
+            );
+
+            // Obtener el elemento al que deseas disparar el evento 'change'
+            const inputElement = document.getElementById('deleted-type'); // Reemplaza 'miInput' con el ID de tu elemento
+
+            // Crear un nuevo evento 'change'
+            const changeEvent = new Event('change');
+
+            // Lanzar el evento 'change'
+            inputElement.dispatchEvent(changeEvent);
         });
 
 

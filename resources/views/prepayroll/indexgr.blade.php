@@ -89,12 +89,15 @@
         @include('includes.mensaje')
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Grupos de prenómina</h3>
+                <h3 class="box-title">Empleados y grupos de prenómina</h3>
                 @include('layouts.usermanual', ['link' => "http://192.168.1.251/dokuwiki/doku.php?id=wiki:grupoprenempleados"])
                 <div class="row">
                     <div class="col-md-5 col-md-offset-7">
                         <div class="row">
-                            <div style="text-align: right" class="col-md-12">
+                            <div style="text-align: right" class="col-md-11">
+                                <a href="{{ route('prepayroll_groups_show') }}" class="btn btn-info btn-sm">
+                                    <i class="fa fa-users"></i> Mapa de prenómina
+                                </a>
                             </div>
                         </div>
                     </div>

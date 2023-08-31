@@ -17,8 +17,7 @@ class prepayrollGroupsController extends Controller
     {
         $lGroups = \DB::table('prepayroll_groups AS pg')
                         ->leftJoin('prepayroll_groups AS pgf', 'pg.father_group_n_id', '=', 'pgf.id_group')
-                        ->where('pg.is_delete', 0)
-                        ->select('pg.id_group', 'pg.group_name', 'pg.father_group_n_id', 'pgf.group_name AS father_group_name')
+                        ->select('pg.id_group', 'pg.group_name', 'pg.father_group_n_id', 'pgf.group_name AS father_group_name', 'pg.is_delete')
                         ->orderBy('pg.group_name', 'ASC')
                         ->get();
 
@@ -35,9 +34,61 @@ class prepayrollGroupsController extends Controller
         return view('prepayroll.groups.index', compact('lGroups'));
     }
 
+    /**
+     * Consulta la estructura de grupos de prenómina y muestra la vista que contiene la gestión visual de prenómina
+     *
+     * @param Request $request
+     * 
+     * @return \Illuminate\View\View
+     */
+    public function show(Request $request) {
+        // Consulta los grupos de prenómina que no tienen un grupo superior (es decir, grupos padre o raíz)
+        $lFathersGroups = \DB::table('prepayroll_groups AS pg')
+                        ->leftJoin('prepayroll_groups AS pgf', 'pg.father_group_n_id', '=', 'pgf.id_group')
+                        ->where('pg.is_delete', 0)
+                        ->whereNull('pg.father_group_n_id')
+                        // ->where('pg.id_group', 51)
+                        ->select('pg.id_group', 'pg.group_name', 'pg.father_group_n_id', 'pgf.group_name AS father_group_name')
+                        ->orderBy('pg.group_name', 'ASC')
+                        ->orderBy('pg.id_group', 'ASC')
+                        ->get();
+
+        foreach ($lFathersGroups as $fGroup) {
+            $aChildrens = SPrepayrollUtils::getChildrenOfGroups([$fGroup->id_group]);
+
+            $fGroup->lGroups = \DB::table('prepayroll_groups AS pg')
+                                ->leftJoin('prepayroll_groups AS pgf', 'pg.father_group_n_id', '=', 'pgf.id_group')
+                                ->where('pg.is_delete', 0)
+                                ->whereIn('pg.id_group', $aChildrens)
+                                ->select('pg.id_group', 'pg.group_name', 'pg.father_group_n_id', 'pgf.group_name AS father_group_name')
+                                ->selectRaw('IF (pg.father_group_n_id IS NULL, 1, 0) AS fg')
+                                ->orderBy('fg', 'DESC')
+                                ->orderBy('pg.id_group', 'ASC')
+                                ->get();
+
+            foreach ($fGroup->lGroups as $group) {
+                $users = \DB::table('prepayroll_groups_users AS pgu')
+                            ->join('users AS u', 'pgu.head_user_id', '=', 'u.id')
+                            ->where('group_id', $group->id_group)
+                            ->select('u.*', 'pgu.cfg_prepayroll')
+                            ->get();
+            
+                $group->head_users = $users;
+                $group->emp_grp_route = route('gr_emps_index', $group->id_group);
+                $toShow = 1;
+                $group->edit_grp_route = route('edit_prepayroll_group', [$group->id_group, $toShow]);
+                $group->delete_grp_route = route('destroy_prepayroll_group', [$group->id_group]);
+            }
+        }
+
+        return view('prepayroll.groups.show')->with('lFathersGroups', $lFathersGroups)
+                                            ->with('getCfgsRoute', route('cfg_vobos_usr'))
+                                            ->with('saveCfgsRoute', route('save_cfgs_usr'));
+    }
+
     public function create(Request $request)
     {
-        $lGroups = prepayrollGroup::where('is_delete', 0)->orderBy('group_name')->get();
+        $lGroups = prepayrollGroup::where('is_delete', 0)->orderBy('group_name', 'asc')->get();
         
         $oBlank = new prepayrollGroup();
         $oBlank->id_group = null;
@@ -79,14 +130,16 @@ class prepayrollGroupsController extends Controller
 
             $oPpGroup->save();
 
-            foreach ($request->head_users as $usr_id) {
-                $usrGp = new UserPPGroup();
-
-                $usrGp->group_id = $oPpGroup->id_group;
-                $usrGp->head_user_id = $usr_id;
-                $usrGp->user_by_id = \Auth::user()->id;
-
-                $usrGp->save();
+            if (!! $request->head_users) {
+                foreach ($request->head_users as $usr_id) {
+                    $usrGp = new UserPPGroup();
+    
+                    $usrGp->group_id = $oPpGroup->id_group;
+                    $usrGp->head_user_id = $usr_id;
+                    $usrGp->user_by_id = \Auth::user()->id;
+    
+                    $usrGp->save();
+                }
             }
 
             \DB::commit();
@@ -99,14 +152,16 @@ class prepayrollGroupsController extends Controller
         return redirect()->route('prepayroll_groups')->with('mensaje', 'Grupo de prenómina creado.');
     }
 
-    public function edit(Request $request, $id)
+    public function edit(Request $request, $id, $show = 0)
     {
+        $toShow = $show > 0;
         $oPpGroup = prepayrollGroup::find($id);
 
         $lGroups = \DB::table('prepayroll_groups AS pg')
                             ->where('pg.is_delete', 0)
                             ->where('pg.id_group', '!=', $id)
                             ->select('id_group', 'group_name')
+                            ->orderBy('group_name', 'asc')
                             ->get();
 
         $oBlank = new prepayrollGroup();
@@ -126,13 +181,15 @@ class prepayrollGroupsController extends Controller
         $lHeadUsers = \DB::table('users AS u')
                                 ->select('u.id', 'u.name AS usr_name')
                                 ->where('u.is_delete', 0)
+                                ->orderBy('u.name', 'ASC')
                                 ->get();
 
         return view('prepayroll.groups.edit')->with([
                                                         'oPpGroup' => $oPpGroup,
                                                         'lGroups' => $lGroups,
                                                         'lHeadUsers' => $lHeadUsers,
-                                                        'lHeadUsersSelected' => $lHeadUsersSelected
+                                                        'lHeadUsersSelected' => $lHeadUsersSelected,
+                                                        'toShow' => $toShow
                                                     ]);
     }
 
@@ -158,17 +215,22 @@ class prepayrollGroupsController extends Controller
 
             $oPpGroup->save();
 
-            UserPPGroup::where('group_id', $oPpGroup->id_group)->delete();
-            foreach ($request->head_users as $usr_id) {
-                $usrGp = new UserPPGroup();
+            if (!! $request->head_users) {
+                UserPPGroup::where('group_id', $oPpGroup->id_group)->delete();
+                foreach ($request->head_users as $usr_id) {
+                    $usrGp = new UserPPGroup();
 
-                $usrGp->group_id = $oPpGroup->id_group;
-                $usrGp->head_user_id = $usr_id;
-                $usrGp->user_by_id = \Auth::user()->id;
+                    $usrGp->group_id = $oPpGroup->id_group;
+                    $usrGp->head_user_id = $usr_id;
+                    $usrGp->user_by_id = \Auth::user()->id;
 
-                $usrGp->save();
+                    $usrGp->save();
+                }
             }
-
+            else {
+                UserPPGroup::where('group_id', $oPpGroup->id_group)->delete();
+            }
+            
             \DB::commit();
         }
         catch (\Throwable $th) {
@@ -176,7 +238,14 @@ class prepayrollGroupsController extends Controller
             return redirect()->back()->withErrors(['error' => $th->getMessage(), $request->all()]);
         }
 
-        return redirect()->route('prepayroll_groups')->with('mensaje', 'Grupo de prenómina actualizado.');
+        if (!!$request->to_show) {
+            $route = "prepayroll_groups_show";
+        }
+        else {
+            $route = "prepayroll_groups";
+        }
+
+        return redirect()->route($route)->with('mensaje', 'Grupo de prenómina actualizado.');
     }
 
     public function destroy(Request $request, $id)
@@ -184,14 +253,29 @@ class prepayrollGroupsController extends Controller
         $oPpGroup = prepayrollGroup::find($id);
 
         $oPpGroup->updated_by = \Auth::user()->id;
-        $oPpGroup->is_delete = 1;
+
+        if ($oPpGroup->is_delete) {
+            $oPpGroup->is_delete = 0;
+        }
+        else {
+            $oPpGroup->is_delete = 1;
+        }
         $oPpGroup->save();
 
-        return redirect()->route('prepayroll_groups')->with('mensaje', 'Grupo de prenómina borrado.');
+        if (!!$request->to_show) {
+            return json_encode($oPpGroup);
+        }
+        else {
+            $route = "prepayroll_groups";
+            return redirect()->route($route)->with('mensaje', 'Grupo de prenómina modificado.');
+        }
+
     }
 
     public function employeesVsGroups(Request $request)
     {
+        $filterGroup = !!$request->grp ? $request->grp : 0;
+
         $lEmployees = \DB::table('employees AS e')
                             ->leftJoin('prepayroll_group_employees AS pge', 'e.id', '=', 'pge.employee_id')
                             ->leftJoin('prepayroll_groups AS pg', 'pge.group_id', '=', 'pg.id_group')
@@ -199,8 +283,13 @@ class prepayrollGroupsController extends Controller
                             ->leftJoin('users AS u', 'pgu.head_user_id', '=', 'u.id')
                             ->select('e.*', 'pge.*', 'pg.*', 'u.name AS gr_titular')
                             ->where('e.is_delete', 0)
-                            ->where('e.is_active', 1)
-                            ->get();
+                            ->where('e.is_active', 1);
+
+        if ($filterGroup > 0) {
+            $lEmployees = $lEmployees->where('pge.group_id', $filterGroup);
+        }
+
+        $lEmployees = $lEmployees->get();
 
         $groups = \DB::table('prepayroll_groups')
                             ->select('id_group', 'group_name')
@@ -209,6 +298,7 @@ class prepayrollGroupsController extends Controller
                             ->get();
 
         return view('prepayroll.indexgr')->with('lEmployees', $lEmployees)
+                                            ->with('filterGroup', $filterGroup)
                                             ->with('groups', $groups);
     }
 

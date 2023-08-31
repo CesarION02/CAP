@@ -2,7 +2,7 @@
         <div class="form-group">
           <label for="" class="col-lg-3 control-label">Nombre gpo de prenómina:</label>
           <div class="col-md-5 ">
-            <input type="text" value="{{ isset($oPpGroup) ? $oPpGroup->group_name : '' }}" name="group_name" class="form-control" placeholder="Grupo de prenómina" required>
+            <input type="text" value="{{ isset($oPpGroup) ? strtoupper($oPpGroup->group_name) : '' }}" name="group_name" class="form-control" placeholder="Grupo de prenómina" required>
           </div>
         </div>
 </div>
@@ -13,7 +13,7 @@
             <select class="chosen-select" class="form-control" name="father_group_n_id">
               @foreach ($lGroups as $group)
                 <option value="{{ $group->id_group }}" {{ (isset($oPpGroup) && $oPpGroup->father_group_n_id == $group->id_group) || (!isset($oPpGroup) && $group->id_group == null) ? 'selected' : '' }} required>
-                    {{ $group->group_name }}
+                    {{ strtoupper($group->group_name) }}
                 </option>
               @endforeach
             </select>

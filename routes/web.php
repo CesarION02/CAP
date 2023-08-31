@@ -146,12 +146,13 @@ Route::get('prepayrolladjusts/reject/{id}', 'prepayrollAdjustController@rejectAd
 Route::get('prepayrolladjusts/log', 'prepayrollAdjustController@indexLog')->name('ajustes_log');
 /** GRUPOS DE PRENÓMINA*/
 Route::get('prepayrollgroups/index', 'prepayrollGroupsController@index')->name('prepayroll_groups');
+Route::get('prepayrollgroups/show', 'prepayrollGroupsController@show')->name('prepayroll_groups_show');
 Route::get('prepayrollgroups/create', 'prepayrollGroupsController@create')->name('create_prepayroll_group');
 Route::post('prepayrollgroups/store', 'prepayrollGroupsController@store')->name('store_prepayroll_group');
-Route::get('prepayrollgroups/edit/{id}', 'prepayrollGroupsController@edit')->name('edit_prepayroll_group');
+Route::get('prepayrollgroups/edit/{id}/{show?}', 'prepayrollGroupsController@edit')->name('edit_prepayroll_group');
 Route::put('prepayrollgroups/update/{id}', 'prepayrollGroupsController@update')->name('update_prepayroll_group');
 Route::delete('prepayrollgroups/{id}', 'prepayrollGroupsController@destroy')->name('destroy_prepayroll_group');
-Route::get('prepayrollempgroup/index', 'prepayrollGroupsController@employeesVsGroups')->name('gr_emps_index');
+Route::get('prepayrollempgroup/index/{grp?}', 'prepayrollGroupsController@employeesVsGroups')->name('gr_emps_index');
 Route::get('prepayrollgroupdept/index', 'prepayrollGroupsController@departmentsVsGroups')->name('gr_depts_index');
 Route::post('prepayrollempgroup/change', 'prepayrollGroupsController@changeGroup')->name('cambiar_grupo');
 Route::post('prepayrollempgroupdept/change', 'prepayrollGroupsController@changeGroupDept')->name('cambiar_grupo_dept');
@@ -182,6 +183,9 @@ Route::get('prepayrollcfgvobos/create', 'PrepayrollReportController@create')->na
 Route::post('prepayrollcfgvobos/store', 'PrepayrollReportController@store')->name('save_cfg');
 Route::get('prepayrollcfgvobos/edit/{id}', 'PrepayrollReportController@edit')->name('edit_cfg');
 Route::put('prepayrollcfgvobos/update', 'PrepayrollReportController@update')->name('update_cfg');
+Route::get('prepayrollcfgvobosusr/{usr?}/{brach?}', 'PrepayrollReportController@getConfigsOfUser')->name('cfg_vobos_usr');
+Route::post('prepayrollcfgvobosusr/save', 'PrepayrollReportController@savePrepayrollConfigs')->name('save_cfgs_usr');
+Route::get('prepayrollcfgtree', 'PrepayrollReportController@makeConfigsTree')->name('make_configs_tree');
 /** RUTAS DE DELEGACIÓN DE PRENÓMINA */
 Route::get('prepayrolldelegation', 'PrepayrollDelegationsController@index')->name('prepayrolldelegation.index');
 Route::get('prepayrolldelegation/create', 'PrepayrollDelegationsController@create')->name('prepayrolldelegation.create');
