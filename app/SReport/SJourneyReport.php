@@ -291,19 +291,16 @@ class SJourneyReport
     public static function addEventsText($lData)
     {
         foreach ($lData as $oRow) {
-            if (! $oRow->hasCheckIn || ! $oRow->hasCheckOut) {
-                $text = "";
-                if ($oRow->others == "") {
-                    $text = $oRow->comments;
-                }
-                else {
-                    $text = $oRow->others;
-                }
-
-                $text = str_replace("Salida atípica. ", "", $text);
-                $text = str_replace("Revisar horario. ", "", $text);
-                $oRow->eventsText = utf8_encode(ucfirst(strtolower($text)));
+            $text = "";
+            if ($oRow->others == "") {
+                $text = $oRow->comments;
             }
+            else {
+                $text = $oRow->others;
+            }
+
+            $text = str_replace("Revisar horario. ", "", $text);
+            $oRow->eventsText = SJourneyReport::toMayusCase(strtolower($text));
         }
 
         return $lData;
@@ -369,10 +366,14 @@ class SJourneyReport
             if (! $bWithSchedule && (strlen($oRow->outDateTime) > 11 || (strlen($oRow->inDateTime) == 10 && strlen($oRow->outDateTime) == 10))) {
                 $date = is_null($oRow->outDateTimeSch) ? (is_null($oRow->outDate) ? null : $oRow->outDate) : $oRow->outDateTimeSch;
                 if (! is_null($date) && $oRow->workable && SDateTimeUtils::dayOfWeek($date) != Carbon::SUNDAY && SDateTimeUtils::dayOfWeek($date) != Carbon::SATURDAY) {
-                    $oEmpRow->schedule = (! strlen($oRow->inDateTimeSch) > 11 || ! strlen($oRow->outDateTimeSch) > 11) ? 
-                                            "Sin horario" : 
-                                            Carbon::parse($oRow->inDateTimeSch)->toTimeString() . " - " . Carbon::parse($oRow->outDateTimeSch)->toTimeString();
-                    $bWithSchedule = true;
+                    $pos = strpos($oRow->eventsText, "Sin horario");
+                    // Comparación especial por el tipo de retorno de la función strpos
+                    if ($pos === false) {
+                        if (! is_null($oRow->inDateTimeSch) && ! is_null($oRow->outDateTimeSch) && strlen($oRow->inDateTimeSch) > 11 && strlen($oRow->outDateTimeSch) > 11) {
+                            $oEmpRow->schedule = Carbon::parse($oRow->inDateTimeSch)->toTimeString() . " - " . Carbon::parse($oRow->outDateTimeSch)->toTimeString();
+                            $bWithSchedule = true;
+                        }
+                    }
                 }
             }
         }
@@ -384,5 +385,34 @@ class SJourneyReport
         }
 
         return $lEmpRows;
+    }
+
+    /**
+     * Pone en mayúscula la primera letra después de cada punto y quita caracteres especiales
+     *
+     * @param string $string
+     * @return string
+     */
+    private static function toMayusCase($string) {
+        if ($string === "") {
+            return "";
+        }
+
+        $text = trim($string);
+        $last = substr($text, -1);
+        $bPoint = $last === ".";
+
+        if ($bPoint) {
+            $text = substr($text, 0, -1);
+        }
+
+        $frases = explode(".", $text);
+        $result = "";
+
+        foreach ($frases as $frase) {
+            $result .= ucfirst(trim($frase)) . ". ";
+        }
+
+        return htmlspecialchars($result, ENT_QUOTES, 'UTF-8');
     }
 }

@@ -80,7 +80,7 @@
                                             background-color: rgb(217, 217, 217)
                                         @endif
                                     ">
-                                        {{ \Carbon\Carbon::parse($oRow->inDateTime)->format('d-m-Y') }}
+                                        {{ \Carbon\Carbon::parse($oRow->inDateTime)->format('d/m/Y') }}
                                     </td>
                                     <td style="padding-left: 8px; padding-right: 8px; 
                                         @if ($i % 2 == 0)
@@ -94,7 +94,7 @@
                                             background-color: rgb(217, 217, 217)
                                         @endif
                                     ">
-                                        {{ \Carbon\Carbon::parse($oRow->outDateTime)->format('d-m-Y') }}
+                                        {{ \Carbon\Carbon::parse($oRow->outDateTime)->format('d/m/Y') }}
                                     </td>
                                     <td style="padding-left: 8px; padding-right: 8px; 
                                         @if ($i % 2 == 0)

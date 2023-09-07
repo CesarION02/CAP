@@ -1164,7 +1164,7 @@ class prePayrollController extends Controller
 
                 if ($greaterThan == false) {
                     $success = false;
-                    throw new \Exception('No se puede dar Vobo, fecha de corte aun no a pasado.');
+                    throw new \Exception('No se puede dar Vobo, fecha de corte aun no ha pasado.');
                 }
             }
             else {
