@@ -117,8 +117,8 @@ class ExternalAdjustsController extends Controller
                             return response()->json([
                                                         'data' => null,
                                                         'status' => 'Error',
-                                                        'message' => "El empleado no tiene entrada registrada para la fecha $dt_date",
-                                                    ], 400);
+                                                        'message' => "El empleado no tiene entrada registrada para la fecha ". Carbon::parse($dt_date)->format('d-m-Y') ." (no checo)",
+                                                    ], 200);
                         }
                         $bForLater = true;
                     }
@@ -146,9 +146,9 @@ class ExternalAdjustsController extends Controller
                         if ($oNow->toDateString() > $dt_date) {
                             return response()->json([
                                                     'status' => 'Error',
-                                                    'message' => "El empleado no tiene salida registrada para la fecha $dt_date",
+                                                    'message' => "El empleado no tiene salida registrada para la fecha ". Carbon::parse($dt_date)->format('d-m-Y') ." (no checo)",
                                                     'data' => null
-                                                ], 400);
+                                                ],200);
                         }
                         $bForLater = true;
                     }
