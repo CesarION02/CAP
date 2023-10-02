@@ -88,6 +88,8 @@ class SIncidentValidations
                 case \SCons::INC_TYPE['INA_TR_F_PL']:
                 case \SCons::INC_TYPE['ONOM_CAP']:
                 case \SCons::INC_TYPE['PERM']:
+                case \SCons::INC_TYPE['DAY_HOLIDAY']:
+                case \SCons::INC_TYPE['PERM_BY_GONE']:
                     // determina los días efectivos de la incidencia
                     $oIncident->eff_day = Carbon::parse($oIncident->start_date)->diffInDays(Carbon::parse($oIncident->end_date)) + 1;
                     $oIncident->cls_inc_id = 1;
