@@ -79,7 +79,9 @@ class SCons {
       'VAC_CAP' => 21,// VACACIONES
       'INC_CAP' => 22,// INCAPACIDAD
       'ONOM_CAP' => 23,// ONOMÁSTICO
-      'PERM' => 24// PERMISO
+      'PERM' => 24,// PERMISO
+      'DAY_HOLIDAY' => 25,// PERMISO
+      'PERM_BY_GONE' => 26// PERMISO
    ];
 
    const TASK_TYPE_REPORT_JOURNEY = 1;
