@@ -10,6 +10,14 @@
     }
 </style>
 <link rel="stylesheet" href="{{ asset("assets/css/reportStepOne.css") }}">
+    <link rel="stylesheet" href="{{ asset("dt/nv/datatables.css") }}">
+    <link href="{{ asset("select2js/css/select2.min.css") }}" rel="stylesheet" />
+    <style>
+        tr {
+            font-size: 70%;
+        }
+        span.nobr { white-space: nowrap; }
+    </style>
 @endsection
 
 @section('content')
@@ -146,10 +154,30 @@
                         </table>
                         @if( $wizard == 2)
                             <p>
-                            <div class="row">
-                                <div class="col-md-2"><b>Estatus proceso:</b> </div>
-                                <div class="col-md-1">
-                                    <button type="submit" class="btn btn-primary" id="guardar" disabled>Anterior</button>
+                                <div class="row">
+                                    <div class="col-md-2"><b>Estatus proceso:</b> </div>
+                                    <div class="col-md-1">
+                                        <button type="submit" class="btn btn-primary" id="guardar" disabled>Anterior</button>
+                                    </div>
+                                    &nbsp;
+                                    <div class="col-md-2" style="font-size:20px;">
+                                        &nbsp;<span class="label label-primary"> 1 </span> 
+                                        &nbsp;<span class="label label-default"> 2 </span> 
+                                        &nbsp;<span class="label label-default"> 3 </span>&nbsp;    
+                                    </div>        
+                                    <div class="col-md-1">
+                                        <form action="{{route('reportetiemposextra')}}" autocomplete="off">
+                                            <input type="hidden" name="start_date" value={{ $sStartDate }} >
+                                            <input type="hidden" name="end_date" value={{ $sEndDate }} >
+                                            <input type="hidden" name="emp_id" value="0" >
+                                            <input type="hidden" name="report_mode" value="2" >
+                                            <input type="hidden" name="delegation" value="0" >
+                                            <input type="hidden" name="pay_way" value={{ $payWay }} >
+                                            <input type="hidden" name="wizard" value={{ $wizard }} >
+                                            <input type="hidden" name="filter_employees" id="filter_employees" value=0> 
+                                            <button type="submit" class="btn btn-primary" id="guardar">Siguiente</button>
+                                        </form>
+                                    </div>
                                 </div>
                                 &nbsp;
                                 <div class="col-md-2" style="font-size:20px;">
@@ -211,6 +239,16 @@
 <script src="{{ asset("assets/pages/scripts/report/SFirstStepReport.js") }}" type="text/javascript"></script>
 <script>
     $(document).ready(function() {
+    <script src="{{ asset("assets/js/axios.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/js/vue.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("dt/nv/datatables.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/js/moment/moment.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/js/moment/datetime-moment.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/pages/scripts/SGui.js") }}" type="text/javascript"></script>
+    <script src="{{ asset('select2js/js/select2.min.js') }}"></script>
+    <script>
+        var filter = 0;
+        $(document).ready(function() {
             table = $('#incidentsTable').DataTable({
                 "language": {
                     "sProcessing":     "Procesando...",
@@ -240,7 +278,7 @@
                     {
                         "targets": [0],
                         "visible": false,
-                        "searchable": false
+                        "searchable": true,
                     }
                 ],
                 "scrollX": true,
@@ -265,6 +303,99 @@
     });
 </script>
 @if (session('message'))
+
+            if(oServerData.filterEmployee == 0){
+                $('#directos').val('0').trigger('change.select2');
+                document.getElementById("filter_employees").value = 0; 
+                $('#incidentsTable_filter').prepend('<label for="directos">Empleados: </label>' +
+                        '<select id="directos" class="select2-class" style="width: 25%">' +
+                            '<option selected value="0">Todos</option>' +
+                            '<option value="1">Directos</option>' +
+                        '</select>' +
+                        '&nbsp'
+                );   
+            }else{
+                $('#directos').val('1').trigger('change.select2');
+                document.getElementById("filter_employees").value = 1;
+                $('#incidentsTable_filter').prepend('<label for="directos">Empleados: </label>' +
+                        '<select id="directos" class="select2-class" style="width: 25%">' +
+                            '<option value="0">Todos</option>' +
+                            '<option selected value="1">Directos</option>' +
+                        '</select>' +
+                        '&nbsp'
+                ); 
+            } 
+
+            $('#incidentsTable tbody').on('click', 'td', function () {
+                if ($(this).hasClass('selected')) {
+                    $(this).removeClass('selected');
+                }
+                else {
+                    if(table.cell( this ).data().length == 0 || 
+                    table.cell( this ).data() == "Falta" ||
+                    table.cell( this ).data() == "CAPACITACIÓN" ||
+                    table.cell( this ).data() == "TRABAJO FUERA PLANTA" ||
+                    table.cell( this ).data() == "DESCANSO" || 
+                    table.cell( this ).data() == "INASIST. TRABAJO FUERA DE PLANTA"){
+                        
+                        table.$('td.selected').removeClass('selected');
+                        $(this).addClass('selected');
+                        var cellIdx = table.cell( this ).index();
+                        var rowIdx = table.cell( this ).index().row;
+                        var data = table.row(rowIdx).data();
+                        var title = table.column( cellIdx.column ).header();
+                        appVue.showModal(data[0], data[2], $(title).html(), table.cell( this ).data());
+                        event.stopPropagation();
+                    }
+                }
+            });
+
+            $('body').on('click', function () {
+                table.$('td.selected').removeClass('selected');
+            });
+
+            $('.select2-class').select2();
+
+            $('#directos').on('select2:select', function (e){
+                document.getElementById("filter_employees").value = e.params.data.id;
+                if (e.params.data.id == 1) {
+                    var searchValues = "";
+                    for (let i = 0; i < oServerData.subEmployees.length; i++) {
+                        searchValues = searchValues + '^' + oServerData.subEmployees[i] + '$' + (i < (oServerData.subEmployees.length-1) ? "|" : "");
+                    }
+                    console.log(searchValues, oServerData.subEmployees);
+                    table.column(0).search("(" + searchValues + ")", true, false).draw();
+                }
+                else {
+                    table.columns().search('').draw();
+                }
+            });
+
+            if(oServerData.filterEmployee == 0){
+                table.columns().search('').draw();  
+            }else{
+                var searchValues = "";
+                    for (let i = 0; i < oServerData.subEmployees.length; i++) {
+                        searchValues = searchValues + '^' + oServerData.subEmployees[i] + '$' + (i < (oServerData.subEmployees.length-1) ? "|" : "");
+                    }
+                    console.log(searchValues, oServerData.subEmployees);
+                    table.column(0).search("(" + searchValues + ")", true, false).draw();
+            }
+        });
+       </script>
+       <script>
+        function ServerData () {
+            this.lIncidents = <?php echo json_encode($typeIncidents) ?>;
+            this.routeDelete = <?php echo json_encode($routeDelete) ?>;
+            this.routeStore = <?php echo json_encode($routeStore) ?>;
+            this.subEmployees = <?php echo json_encode($subEmployees) ?>;
+            this.filterEmployee = <?php echo json_encode($filter_employees) ?>;
+        }
+        
+        var oServerData = new ServerData();
+        var oGui = new SGui();
+    </script>
+    <script src="{{ asset("assets/pages/scripts/incidentsEmployeesView/incidentsEmployees.js") }}" type="text/javascript"></script>
     <script>
         oGui.showMessage('{{ session('tittle') }}', '{{ session('message') }}', '{{ session('icon') }}')
     </script>

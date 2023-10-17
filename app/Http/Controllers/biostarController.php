@@ -315,6 +315,7 @@ class biostarController extends Controller
         }
 
         $lRegisters = [];
+        $config = \App\SUtils\SConfiguration::getConfigurations();
         DB::beginTransaction();
         try{
             for( $i = 0 ; count($lEvents) > $i ; $i++){
@@ -353,7 +354,7 @@ class biostarController extends Controller
         DB::commit();
 
         $newDate = Carbon::now();
-        $newDate->subHour(2);
+        $newDate->subHour($config->lastEventSyncDateTime);
         \App\SUtils\SConfiguration::setConfiguration('lastEventSyncDateTime', $newDate->toDateTimeString());
         
         foreach ($lRegisters as $register) {

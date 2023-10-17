@@ -166,6 +166,7 @@
                                                 <input type="hidden" name="id_delegation" value="{{ $idDelegation }}" >
                                                 <input type="hidden" name="pay_way" value={{ $pay_way }} >
                                                 <input type="hidden" name="wizard" value={{ $wizard }} >
+                                                <input type="hidden" name="filter_employees" id="filter_employees" value=0> 
                                                 <button type="submit" class="btn btn-primary" id="guardar" >Anterior</button>
                                             </form>
                                         </div>
@@ -185,6 +186,7 @@
                                                 <input type="hidden" name="id_delegation" value="{{ $idDelegation }}" >
                                                 <input type="hidden" name="pay_way" value={{ $pay_way }} >
                                                 <input type="hidden" name="wizard" value={{ $wizard }} >
+                                                <input type="hidden" name="filter_employees" id="filter_employees1" value=0> 
                                                 <button type="submit" class="btn btn-primary" id="guardar">Siguiente</button>
                                             </form>
                                         </div>
@@ -257,7 +259,8 @@
             this.hiddenColEmId = 18;
             this.hiddenColExId = 17;
             this.hiddenCol = this.tReport == this.REP_DELAY ? 5 : 5;
-            this.toExport = this.tReport == this.REP_DELAY ? [0, 1, 2, 3, 4, 6] : [0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12,13,14,15,16];
+            this.toExport = this.tReport == this.REP_DELAY ? [0, 1, 2, 3, 4, 6] : [0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12];
+            this.filterEmployee = <?php echo json_encode($filter_employees) ?>;
         }
         
         var oData = new GlobalData();
@@ -517,14 +520,39 @@
                         '</select>' +
                         '&nbsp'
             );
-            
             $('#delays_table_filter').prepend('<label for="directos">Empleados: </label>' +
                         '<select id="directos" class="select2-class" style="width: 15%">' +
-                            '<option value="0">Todos</option>' +
+                            '<option value="0" >Todos</option>' +
                             '<option value="1">Directos</option>' +
                         '</select>' +
                         '&nbsp'
-            );
+                );
+            if(oData.filterEmployee == 0){
+                $('#directos').val('0').trigger('change.select2');  
+                document.getElementById("filter_employees").value = 0;  
+                document.getElementById("filter_employees1").value = 0; 
+
+                $('#incidentsTable_filter').prepend('<label for="directos">Empleados: </label>' +
+                        '<select id="directos" class="select2-class" style="width: 25%">' +
+                            '<option selected value="0">Todos</option>' +
+                            '<option value="1">Directos</option>' +
+                        '</select>' +
+                        '&nbsp'
+                );
+            }else{
+                $('#directos').val('1').trigger('change.select2');
+                document.getElementById("filter_employees").value = 1; 
+                document.getElementById("filter_employees1").value = 1; 
+
+                $('#incidentsTable_filter').prepend('<label for="directos">Empleados: </label>' +
+                        '<select id="directos" class="select2-class" style="width: 25%">' +
+                            '<option value="0">Todos</option>' +
+                            '<option selected value="1">Directos</option>' +
+                        '</select>' +
+                        '&nbsp'
+                );
+            }
+            
             
             $('#delays_table_filter').prepend('<label for="directos">Practicantes: </label>' +
                         '<select class="select2-class" name="sel-collaborator" id="sel-collaborator" style="width: 15%">' +
@@ -701,6 +729,8 @@
             });
 
             $('#directos').on('select2:select', function (e){
+                document.getElementById("filter_employees").value = e.params.data.id;
+                document.getElementById("filter_employees1").value = e.params.data.id;
                 if (e.params.data.id == 1) {
                     var searchValues = "";
                     for (let i = 0; i < oData.subEmployees.length; i++) {
@@ -720,6 +750,18 @@
                     elem.parentNode.removeChild(elem);
                 }
             }, 15000);
+
+            if(oData.filterEmployee == 0){
+                oTable.columns().search('').draw();  
+            }else{
+                var searchValues = "";
+                    for (let i = 0; i < oData.subEmployees.length; i++) {
+                        searchValues = searchValues + '^' + oData.subEmployees[i] + '$' + (i < (oData.subEmployees.length-1) ? "|" : "");
+                    }
+                    console.log(searchValues, oData.subEmployees);
+                    oTable.column(18).search("(" + searchValues + ")", true, false).draw();
+            }
+            
         });
     </script>
     @if($isAdmin)

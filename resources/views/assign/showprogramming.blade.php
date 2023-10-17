@@ -120,13 +120,13 @@ Plantilla horarios
                                 @if($iFilter == 1)
                                     <td></td>
                                     <td></td>
-                                    <td></td>
+                                    <td>Sin horario</td>
                                     <td></td>
                                 @else
                                     <td>@if($assign->fecha_inicio == null)
                                         N/A
                                         @else
-                                        {{\App\SUtils\SDateTimeUtils::orderDate($assign->fecha_inicio)}}
+                                            {{\App\SUtils\SDateTimeUtils::orderDate($assign->fecha_inicio)}}
                                         @endif
                                     </td>
                                     <td>@if($assign->fecha_fin == null)
