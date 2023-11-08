@@ -1543,11 +1543,15 @@ class SDataProcess {
      * @param string $outDateTime
      * @param string $outDateTimeSch
      * 
-     * @return int minutos de salida anticipada
+     * @return int|null minutos de salida anticipada
      */
     public static function getPrematureTime($outDateTime, $outDateTimeSch)
     {
-        if ($outDateTime == null || $outDateTimeSch == null) {
+        if (is_null($outDateTime) || is_null($outDateTimeSch)) {
+            return null;
+        }
+
+        if (strlen($outDateTime) == 10) {
             return null;
         }
 
