@@ -444,7 +444,7 @@ class SDataProcess {
                             $newRow->sInDate = $oFoundRegistryI->date.' '.$oFoundRegistryI->time;
                             $newRow->inDate = $oFoundRegistryI->date;
                             $newRow->inDateTime = $oFoundRegistryI->date.' '.$oFoundRegistryI->time;
-                            $newRow->isModifiedIn = $oFoundRegistryI->is_modified;
+                            $newRow->isModifiedIn = $oFoundRegistryI->is_modified || $oFoundRegistryI->form_creation_id == 2;
                             
                             $bFound = true;
                         }
@@ -453,7 +453,7 @@ class SDataProcess {
                     if (! $bFound) {
                         $newRow->inDate = $registry->date;
                         $newRow->inDateTime = $registry->date;
-                        $newRow->isModifiedIn = $registry->is_modified;
+                        $newRow->isModifiedIn = $registry->is_modified || $registry->form_creation_id == 2;
                         $date = $newRow->inDate;
                         $time = null;
                         $adjs = SPrepayrollAdjustUtils::getAdjustForCase($date, $time, 1, \SCons::PP_TYPES['JE'], $newRow->idEmployee);
@@ -563,7 +563,7 @@ class SDataProcess {
                             $newRow->sInDate = $oFoundRegistryI->date.' '.$oFoundRegistryI->time;
                             $newRow->inDate = $oFoundRegistryI->date;
                             $newRow->inDateTime = $oFoundRegistryI->date.' '.$oFoundRegistryI->time;
-                            $newRow->isModifiedIn = $oFoundRegistryI->is_modified;
+                            $newRow->isModifiedIn = $oFoundRegistryI->is_modified || $oFoundRegistryI->form_creation_id == 2;
     
                             $isNew = false;
                             $again = true;
@@ -575,7 +575,7 @@ class SDataProcess {
                         $newRow->outDate = $result->variableDateTime->toDateString();
                         $newRow->outDateTime = $result->variableDateTime->format('Y-m-d H:i:s');
                         $newRow->outDateTimeSch = $result->pinnedDateTime->format('Y-m-d H:i:s');
-                        $newRow->isModifiedOut = isset($result->registry->is_modified) ? $result->registry->is_modified : false;
+                        $newRow->isModifiedOut = isset($result->registry->is_modified) ? ($result->registry->is_modified || (isset($result->registry->form_creation_id) && $result->registry->form_creation_id == 2)) : false;
 
                         if(!is_null($result->auxScheduleDay)){
                             $newRow->scheduleText = strtoupper($result->auxScheduleDay->template_name);
@@ -614,7 +614,7 @@ class SDataProcess {
                     $newRow->sInDate = $registry->date.' '.$registry->time;
                     $newRow->inDate = $registry->date;
                     $newRow->inDateTime = $registry->date.' '.$registry->time;
-                    $newRow->isModifiedIn = $registry->is_modified;
+                    $newRow->isModifiedIn = $registry->is_modified || $registry->form_creation_id == 2;
 
                     $isNew = false;
                 }
@@ -833,7 +833,8 @@ class SDataProcess {
                 if ($result->withRegistry) {
                     $oRow->outDate = $result->variableDateTime->toDateString();
                     $oRow->outDateTime = $result->variableDateTime->toDateTimeString();
-                    $oRow->isModifiedOut = isset($result->registry->is_modified) ? $result->registry->is_modified : false;
+                    $oRow->isModifiedOut = isset($result->registry->is_modified) ? 
+                                                ($result->registry->is_modified || (isset($result->registry->form_creation_id) && $result->registry->form_creation_id == 2)) : false;
                 }
                 $oRow->comments = $oRow->comments."No laborable. ";
                 if ($comments != null) {
@@ -860,7 +861,7 @@ class SDataProcess {
             if ($result->withRegistry) {
                 $oRow->outDate = $result->variableDateTime->toDateString();
                 $oRow->outDateTime = $result->variableDateTime->toDateTimeString();
-                $oRow->isModifiedOut = isset($result->registry->is_modified) ? $result->registry->is_modified : false;
+                $oRow->isModifiedOut = isset($result->registry->is_modified) ? ($result->registry->is_modified || (isset($result->registry->form_creation_id) && $result->registry->form_creation_id == 2)) : false;
             }
     
             $oRow->cutId = SDelayReportUtils::getCutId($result);
