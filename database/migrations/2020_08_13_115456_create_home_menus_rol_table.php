@@ -18,6 +18,7 @@ class CreateHomeMenusRolTable extends Migration
             $table->integer('rol_id')->unsigned();
             $table->integer('menu_id')->unsigned();
             $table->integer('order')->nullable();
+            $table->string('icono');
             
             $table->foreign('rol_id')->references('id')->on('rol')->onDelete('cascade');
             $table->foreign('menu_id')->references('id')->on('menu')->onDelete('cascade'); 

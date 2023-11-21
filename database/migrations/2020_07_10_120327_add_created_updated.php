@@ -186,7 +186,7 @@ class AddCreatedUpdated extends Migration
             $table->dropColumn('updated_by');
         });
 
-        Schema::table('firts_day_year', function($table)
+        Schema::table('first_day_year', function($table)
         {
             $table->dropForeign(['created_by']);
             $table->dropForeign(['updated_by']);
