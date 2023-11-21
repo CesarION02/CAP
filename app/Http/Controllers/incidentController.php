@@ -618,7 +618,11 @@ class incidentController extends Controller
                     $oIncident = $this->insertIncident($jAbs, $company);
                 }
 
-                $this->saveDays($oIncident);
+                if(!is_null($jAbs->json_days)){
+                    $this->saveDaysWithlDays($oIncident, $jAbs->json_days);
+                }else{
+                    $this->saveDays($oIncident);
+                }
 
                 if ($oIncident->is_external) {
                     $aAdjustIds = adjust_link::where('incident_id', $oIncident->id)
@@ -757,6 +761,53 @@ class incidentController extends Controller
             $day->save();
             $dayCounter++;
             $oDate->addDay();
+        }
+    }
+    public function saveDaysWithlDays($oIncident, $lDays){
+        $olDays = json_decode($lDays);
+        $arrDays = collect($olDays)->where('taked', true)->pluck('date')->toArray();
+
+        incidentDay::where('incidents_id', $oIncident->id)->delete();
+
+        $lIncidents = incident::where('employee_id', $oIncident->employee_id)
+                            ->where(function($query) use($oIncident){
+                                $query->whereBetween('start_date', [$oIncident->start_date, $oIncident->end_date])
+                                    ->orWhereBetween('end_date', [$oIncident->start_date, $oIncident->end_date]);
+                            })
+                            ->where('id', '!=', $oIncident->id)
+                            ->where('is_delete', 0)
+                            ->get();
+
+        foreach($lIncidents as $oInc){
+            $arrIncDays = incidentDay::where('incidents_id', $oInc->id)->pluck('date')->toArray();
+            $result = array_intersect($arrDays, $arrIncDays);
+            if(count($result) > 0){
+                $oInc->intersect_Incidence_id = $oInc->id;
+                $oInc->intersect_days = $result;
+                \Log::error($oInc);
+            }
+        }
+
+        $days = [];
+        $dayCounter = 1;
+        foreach($arrDays as $sday){
+            $day = new incidentDay();
+            $day->incidents_id = $oIncident->id;
+            $day->date = $sday;
+            $day->num_day = $dayCounter;
+            $day->is_delete = $oIncident->is_delete;
+
+            $days[] = $day;
+            $dayCounter++;
+        }
+
+        if (sizeof($days) > 0) {
+            $oIncident->incidentDays()->saveMany($days);
+        }
+
+        if ($oIncident->cls_inc_id == \SCons::CL_VACATIONS && ! $oIncident->is_external && $oIncident->eff_days == 0) {
+            $oIncident->eff_day = $dayCounter - 1;
+            $oIncident->save();
         }
     }
 
