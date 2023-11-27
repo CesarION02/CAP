@@ -26,6 +26,10 @@ class SReportTasks {
             \DB::beginTransaction();
 
             foreach ($oReportCfg->reports as $oReport) {
+                $report_type = \SCons::TASK_TYPE_REPORT_JOURNEY;
+                if(isset($oReport->configuration->report_type)){
+                    $report_type = $oReport->configuration->report_type;
+                }
                 /**
                  * Programación de reportes quincenales
                  */
@@ -38,7 +42,7 @@ class SReportTasks {
                     $lQCuts = $lQCuts->get();
 
                     // preparar el filtro de las tareas programadas con ese ID de quincena
-                    $lProgrammedTasksQ = ProgrammedTask::where('task_type_id', \SCons::TASK_TYPE_REPORT_JOURNEY)
+                    $lProgrammedTasksQ = ProgrammedTask::where('task_type_id', $report_type)
                                             ->where('is_delete', false)
                                             ->whereRaw('SUBSTRING(reference_id, 1, 1) = "Q"')
                                             ->where('execute_on', '>=', $oReport->since_date)
@@ -64,7 +68,7 @@ class SReportTasks {
                             $oTask->reference_id = 'Q_'.$oQ->id;
                             $oTask->is_done = false;
                             $oTask->is_delete = false;
-                            $oTask->task_type_id = \SCons::TASK_TYPE_REPORT_JOURNEY;
+                            $oTask->task_type_id = $report_type;
     
                             $oTask->save();
                         }
@@ -78,7 +82,7 @@ class SReportTasks {
                     $lWCuts = week_cut::where('fin', '>=', $oReport->since_date);
 
                     // preparar el filtro de las tareas programadas con ese ID de semana
-                    $lProgrammedTasksS = ProgrammedTask::where('task_type_id', \SCons::TASK_TYPE_REPORT_JOURNEY)
+                    $lProgrammedTasksS = ProgrammedTask::where('task_type_id', $report_type)
                                             ->where('is_delete', false)
                                             ->whereRaw('SUBSTRING(reference_id, 1, 1) = "S"')
                                             ->where('execute_on', '>=', $oReport->since_date)
@@ -106,7 +110,7 @@ class SReportTasks {
                             $oTask->reference_id = 'S_'.$oS->id;
                             $oTask->is_done = false;
                             $oTask->is_delete = false;
-                            $oTask->task_type_id = \SCons::TASK_TYPE_REPORT_JOURNEY;
+                            $oTask->task_type_id = $report_type;
     
                             $oTask->save();
                         }

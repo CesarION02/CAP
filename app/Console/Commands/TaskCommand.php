@@ -8,6 +8,7 @@ use App\SReport\SJourneyReport;
 use App\STasks\SAdjustsPgh;
 use Illuminate\Console\Command;
 use Carbon\Carbon;
+use App\SUtils\SChecadorVsNominaUtils;
 
 class TaskCommand extends Command
 {
@@ -85,6 +86,10 @@ class TaskCommand extends Command
                  */
                 case \SCons::TASK_TYPE_ADJUST_PGH:
                     $response = SAdjustsPgh::processAdjustTask($oTask->cfg);
+                    break;
+
+                case \SCons::TASK_TYPE_REPORT_CHECADOR_NOMINA:
+                    $response = SChecadorVsNominaUtils::getReport($oTask->cfg, $oTask->reference_id);
                     break;
 
                 default:
