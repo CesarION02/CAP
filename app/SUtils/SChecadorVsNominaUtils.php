@@ -425,12 +425,34 @@ class SChecadorVsNominaUtils {
                             'i.nts',
                             'i.employee_id',
                             'i.type_incidents_id',
+                            'i.is_external',
                             't.name',
                             'd.incidents_id',
+                            'd.id as day_id',
                             'd.date',
                             'd.num_day',
                         )
                         ->get();
+
+        foreach($lIncidents as $inc){
+            $sameDay = $lIncidents->where('date', $inc->date);
+            if(count($sameDay) < 2){
+                
+            }else{
+                $sameDayInternal = $sameDay->where('is_external', 0);
+                $sameDayExternal = $sameDay->where('is_external', 1);
+                if(count($sameDayExternal) > 0){
+                    $registro = $sameDayExternal->where('date', $sameDayExternal->max('date'))->last();
+                }else{
+                    $registro = $sameDayInternal->where('date', $sameDayInternal->max('date'))->last();
+                }
+
+                $lDeleteDay = $sameDay->where('day_id', '!=', $registro->day_id)->keys();
+                foreach($lDeleteDay as $d){
+                    $lIncidents->forget($d);
+                }
+            }
+        }
 
         $lVacations = $lIncidents->where('type_incidents_id', 12);
         $lOnomastico = $lIncidents->where('type_incidents_id', 7);
@@ -613,8 +635,8 @@ class SChecadorVsNominaUtils {
             $lEmployeesAreas = \DB::table('employees as e')
                         ->join('departments as d', 'd.id', '=', 'e.department_id')
                         ->whereIn('d.area_id', $oCfg->areas)
-                        ->where('is_active', 1)
-                        ->where('is_delete', 0)
+                        ->where('e.is_active', 1)
+                        ->where('e.is_delete', 0)
                         ->select(
                             'e.id as employee_id',
                             'e.num_employee',
@@ -624,8 +646,8 @@ class SChecadorVsNominaUtils {
 
             $lEmployeesDepartments = \DB::table('employees as e')
                         ->whereIn('e.department_id', $oCfg->departments)
-                        ->where('is_active', 1)
-                        ->where('is_delete', 0)
+                        ->where('e.is_active', 1)
+                        ->where('e.is_delete', 0)
                         ->select(
                             'e.id as employee_id',
                             'e.num_employee',
@@ -635,8 +657,8 @@ class SChecadorVsNominaUtils {
 
             $lEmployeesEmps = \DB::table('employees as e')
                         ->whereIn('id', $oCfg->employees)
-                        ->where('is_active', 1)
-                        ->where('is_delete', 0)
+                        ->where('e.is_active', 1)
+                        ->where('e.is_delete', 0)
                         ->select(
                             'e.id as employee_id',
                             'e.num_employee',
