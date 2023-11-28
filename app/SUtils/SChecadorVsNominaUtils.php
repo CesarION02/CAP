@@ -207,10 +207,8 @@ class SChecadorVsNominaUtils {
         $tempFilePath = tempnam(sys_get_temp_dir(), 'excel');
         $writer->save($tempFilePath);
 
-        // Mail::to('cesar.orozco@swaplicado.com.mx')->send(new checadorVsNominaMail($tempFilePath));
-        Mail::to('adrian.aviles@swaplicado.com.mx')->send(new checadorVsNominaMail($tempFilePath, $start_date, $end_date));
-        // Mail::to('cesar.orozco.swaplicado@gmail.com')->send(new checadorVsNominaMail($tempFilePath));
-        Mail::to('adrian.aviles.swaplicado@gmail.com')->send(new checadorVsNominaMail($tempFilePath, $start_date, $end_date));
+        $ccs = explode(";", $mails->cco);
+        Mail::to($mails->to)->cc($ccs)->send(new checadorVsNominaMail($tempFilePath, $start_date, $end_date));
         unlink($tempFilePath);
     }
 
@@ -612,17 +610,41 @@ class SChecadorVsNominaUtils {
                                 ->value('fin');
             }
 
-            $lEmployees = \DB::table('employees')
-                        ->whereIn('id', [1349, 1350])
-                        // ->where('way_pay_id', $type_prepayroll)
+            $lEmployeesAreas = \DB::table('employees as e')
+                        ->join('departments as d', 'd.id', '=', 'e.department_id')
+                        ->whereIn('d.area_id', $oCfg->areas)
                         ->where('is_active', 1)
                         ->where('is_delete', 0)
                         ->select(
-                            'id as employee_id',
-                            'num_employee',
-                            'name'
+                            'e.id as employee_id',
+                            'e.num_employee',
+                            'e.name'
                         )
                         ->get();
+
+            $lEmployeesDepartments = \DB::table('employees as e')
+                        ->whereIn('e.department_id', $oCfg->departments)
+                        ->where('is_active', 1)
+                        ->where('is_delete', 0)
+                        ->select(
+                            'e.id as employee_id',
+                            'e.num_employee',
+                            'e.name'
+                        )
+                        ->get();
+
+            $lEmployeesEmps = \DB::table('employees as e')
+                        ->whereIn('id', $oCfg->employees)
+                        ->where('is_active', 1)
+                        ->where('is_delete', 0)
+                        ->select(
+                            'e.id as employee_id',
+                            'e.num_employee',
+                            'e.name'
+                        )
+                        ->get();
+
+            $lEmployees = $lEmployeesAreas->merge($lEmployeesDepartments)->merge($lEmployeesEmps);
 
             foreach($lEmployees as $emp){
                 $emp->ears = SChecadorVsNominaUtils::getEars($emp->employee_id, $start_date, $end_date, $type_prepayroll, $prepayroll);
