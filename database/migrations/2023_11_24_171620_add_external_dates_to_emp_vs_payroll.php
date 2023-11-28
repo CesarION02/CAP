@@ -14,6 +14,7 @@ class AddExternalDatesToEmpVsPayroll extends Migration
     public function up()
     {
         Schema::table('emp_vs_payroll', function (Blueprint $table) {
+            $table->integer('not_work')->after('num_biweek');
             $table->date('external_date_end')->after('te_total');
             $table->date('external_date_ini')->after('te_total');
         });
@@ -29,6 +30,7 @@ class AddExternalDatesToEmpVsPayroll extends Migration
         Schema::table('emp_vs_payroll', function (Blueprint $table) {
             $table->dropColumn('external_date_end');
             $table->dropColumn('external_date_ini');
+            $table->dropColumn('not_work');
         });
     }
 }
