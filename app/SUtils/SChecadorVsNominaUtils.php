@@ -9,7 +9,7 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 use App\Models\incident;
 use Carbon\Carbon;
 class SChecadorVsNominaUtils {
-    public static function sendExcel($lData, $start_date, $end_date, $mails){
+    public static function sendExcel($lData, $start_date, $end_date, $start_date_siie, $end_date_siie, $mails){
         $config = \App\SUtils\SConfiguration::getConfigurations();
 
         $documento = new Spreadsheet();
@@ -138,13 +138,18 @@ class SChecadorVsNominaUtils {
                 $hoja->setCellValueByColumnAndRow($lTitles->where('id', 25)->first()->column, ($i + 4), SChecadorVsNominaUtils::minutesToHours($ear->early_departure_original));
                 $hoja->setCellValueByColumnAndRow($lTitles->where('id', 26)->first()->column, ($i + 4), SChecadorVsNominaUtils::minutesToHours($ear->early_departure_permission));
                 $hoja->setCellValueByColumnAndRow($lTitles->where('id', 27)->first()->column, ($i + 4), SChecadorVsNominaUtils::minutesToHours($ear->te_stps));
+                $hoja->setCellValueByColumnAndRow($lTitles->where('id', 36)->first()->column, ($i + 4), SChecadorVsNominaUtils::minutesToHours($ear->te_schedule));
                 $hoja->setCellValueByColumnAndRow($lTitles->where('id', 28)->first()->column, ($i + 4), SChecadorVsNominaUtils::minutesToHours($ear->te_work));
                 $hoja->setCellValueByColumnAndRow($lTitles->where('id', 29)->first()->column, ($i + 4), SChecadorVsNominaUtils::minutesToHours($ear->te_adjust));
                 $hoja->setCellValueByColumnAndRow($lTitles->where('id', 30)->first()->column, ($i + 4), SChecadorVsNominaUtils::minutesToHours($ear->te_total));
 
                 foreach($ear->rows as $row){
                     foreach($row->column as $col){
-                        $hoja->setCellValueByColumnAndRow($col, ($i + 4), $row->tot_unt);
+                        if($row->external_id == 3){
+                            $hoja->setCellValueByColumnAndRow($col, ($i + 4), SChecadorVsNominaUtils::numToHours($row->tot_unt));
+                        }else{
+                            $hoja->setCellValueByColumnAndRow($col, ($i + 4), $row->tot_unt);
+                        }
                     }
                 }
             }
@@ -213,7 +218,7 @@ class SChecadorVsNominaUtils {
         unlink($tempFilePath);
     }
 
-    public static function downloadExcel($lData, $start_date, $end_date){
+    public static function downloadExcel($lData, $start_date, $end_date, $start_date_siie, $end_date_siie){
         $config = \App\SUtils\SConfiguration::getConfigurations();
 
         $documento = new Spreadsheet();
@@ -236,7 +241,7 @@ class SChecadorVsNominaUtils {
             if($title->id != 2 && $title->id != 5){
                 $hoja->setCellValueByColumnAndRow($title->column, $title->row, $title->value);
             }else if ($title->id == 2){
-                $hoja->setCellValueByColumnAndRow($title->column, $title->row, $start_date.' al '.$end_date);
+                $hoja->setCellValueByColumnAndRow($title->column, $title->row, $start_date_siie.' al '.$end_date_siie);
             }else if ($title->id == 5){
                 $hoja->setCellValueByColumnAndRow($title->column, $title->row, $start_date.' al '.$end_date);
             }
@@ -336,19 +341,24 @@ class SChecadorVsNominaUtils {
             foreach($lData[$i]->ears as $ear){
                 $hoja->setCellValueByColumnAndRow($lTitles->where('id', 12)->first()->column, ($i + 4), $ear->not_work);
                 $hoja->setCellValueByColumnAndRow($lTitles->where('id', 35)->first()->column, ($i + 4), $ear->have_bonus);
-                $hoja->setCellValueByColumnAndRow($lTitles->where('id', 22)->first()->column, ($i + 4), $ear->time_delay_real);
-                $hoja->setCellValueByColumnAndRow($lTitles->where('id', 23)->first()->column, ($i + 4), $ear->time_delay_justified);
-                $hoja->setCellValueByColumnAndRow($lTitles->where('id', 24)->first()->column, ($i + 4), $ear->time_delay_permission);
-                $hoja->setCellValueByColumnAndRow($lTitles->where('id', 25)->first()->column, ($i + 4), $ear->early_departure_original);
-                $hoja->setCellValueByColumnAndRow($lTitles->where('id', 26)->first()->column, ($i + 4), $ear->early_departure_permission);
-                $hoja->setCellValueByColumnAndRow($lTitles->where('id', 27)->first()->column, ($i + 4), $ear->te_stps);
-                $hoja->setCellValueByColumnAndRow($lTitles->where('id', 28)->first()->column, ($i + 4), $ear->te_work);
-                $hoja->setCellValueByColumnAndRow($lTitles->where('id', 29)->first()->column, ($i + 4), $ear->te_adjust);
-                $hoja->setCellValueByColumnAndRow($lTitles->where('id', 30)->first()->column, ($i + 4), $ear->te_total);
+                $hoja->setCellValueByColumnAndRow($lTitles->where('id', 22)->first()->column, ($i + 4), SChecadorVsNominaUtils::minutesToHours($ear->time_delay_real));
+                $hoja->setCellValueByColumnAndRow($lTitles->where('id', 23)->first()->column, ($i + 4), SChecadorVsNominaUtils::minutesToHours($ear->time_delay_justified));
+                $hoja->setCellValueByColumnAndRow($lTitles->where('id', 24)->first()->column, ($i + 4), SChecadorVsNominaUtils::minutesToHours($ear->time_delay_permission));
+                $hoja->setCellValueByColumnAndRow($lTitles->where('id', 25)->first()->column, ($i + 4), SChecadorVsNominaUtils::minutesToHours($ear->early_departure_original));
+                $hoja->setCellValueByColumnAndRow($lTitles->where('id', 26)->first()->column, ($i + 4), SChecadorVsNominaUtils::minutesToHours($ear->early_departure_permission));
+                $hoja->setCellValueByColumnAndRow($lTitles->where('id', 27)->first()->column, ($i + 4), SChecadorVsNominaUtils::minutesToHours($ear->te_stps));
+                $hoja->setCellValueByColumnAndRow($lTitles->where('id', 36)->first()->column, ($i + 4), SChecadorVsNominaUtils::minutesToHours($ear->te_schedule));
+                $hoja->setCellValueByColumnAndRow($lTitles->where('id', 28)->first()->column, ($i + 4), SChecadorVsNominaUtils::minutesToHours($ear->te_work));
+                $hoja->setCellValueByColumnAndRow($lTitles->where('id', 29)->first()->column, ($i + 4), SChecadorVsNominaUtils::minutesToHours($ear->te_adjust));
+                $hoja->setCellValueByColumnAndRow($lTitles->where('id', 30)->first()->column, ($i + 4), SChecadorVsNominaUtils::minutesToHours($ear->te_total));
 
                 foreach($ear->rows as $row){
                     foreach($row->column as $col){
-                        $hoja->setCellValueByColumnAndRow($col, ($i + 4), $row->tot_unt);
+                        if($row->external_id == 3){
+                            $hoja->setCellValueByColumnAndRow($col, ($i + 4), SChecadorVsNominaUtils::numToHours($row->tot_unt));
+                        }else{
+                            $hoja->setCellValueByColumnAndRow($col, ($i + 4), $row->tot_unt);
+                        }
                     }
                 }
             }
@@ -673,6 +683,13 @@ class SChecadorVsNominaUtils {
         return $signo.str_pad($horas, 2, "0", STR_PAD_LEFT).":".str_pad($restoMinutos, 2, "0", STR_PAD_LEFT);
     }
 
+    public static function numToHours($num){
+        $horas = floor($num);
+        $minutos = fmod($num, 1) * 60;
+
+        return str_pad($horas, 2, "0", STR_PAD_LEFT).":".str_pad($minutos, 2, "0", STR_PAD_LEFT);
+    }
+
     public static function getReport($cfg, $prepayroll){
         try {
             $oCfg = json_decode($cfg);
@@ -754,8 +771,8 @@ class SChecadorVsNominaUtils {
                 }
             }
             $lEmployees = $lEmployees->values();
-            // SChecadorVsNominaUtils::downloadExcel($lEmployees, $start_date, $end_date);
-            SChecadorVsNominaUtils::sendExcel($lEmployees, $start_date, $end_date, $oCfg->mails);
+            // SChecadorVsNominaUtils::downloadExcel($lEmployees, $start_date, $end_date, $lEmployees[0]->ears[0]->external_date_ini, $lEmployees[0]->ears[0]->external_date_end);
+            SChecadorVsNominaUtils::sendExcel($lEmployees, $start_date, $end_date, $lEmployees[0]->ears[0]->external_date_ini, $lEmployees[0]->ears[0]->external_date_end, $oCfg->mails);
         } catch (\Throwable $th) {
             \Log::error($th);
             return $th->getMessage();
