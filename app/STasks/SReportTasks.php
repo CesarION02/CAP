@@ -62,8 +62,27 @@ class SReportTasks {
 
                         if (! $isScheduled ) {
                             $oTask = new ProgrammedTask();
-                            $oTask->execute_on = Carbon::parse($oQ->dt_cut)->addDay()->toDateString();
-                            $oTask->apply_time = false;
+                            if($report_type == \SCons::TASK_TYPE_REPORT_JOURNEY){
+                                $oTask->execute_on = Carbon::parse($oQ->dt_cut)->addDay()->toDateString();
+                                $oTask->apply_time = false;
+                            }else if($report_type == \SCons::TASK_TYPE_REPORT_DG){
+                                $day =(int) Carbon::parse($oQ->dt_cut)->format('d');
+                                if($day > 15){
+                                    $oTask->execute_on = Carbon::parse($oQ->dt_cut)->endOfMonth()->toDateString();  
+                                }else{
+                                    $oTask->execute_on = Carbon::parse($oQ->dt_cut)->setDay(15)->toDateString();
+                                }
+                                $oTask->apply_time = false;  
+                            }else if($report_type == \SCons::TASK_TYPE_REPORT_CHECADOR_NOMINA){
+                                $day =(int) Carbon::parse($oQ->dt_cut)->format('d');
+                                if($day > 15){
+                                    $oTask->execute_on = Carbon::parse($oQ->dt_cut)->endOfMonth()->addDay()->toDateString();  
+                                }else{
+                                    $oTask->execute_on = Carbon::parse($oQ->dt_cut)->setDay(16)->toDateString();
+                                }
+                                $oTask->apply_time = false;
+                            }
+                            
                             $oTask->cfg = json_encode($oReport->configuration, JSON_PRETTY_PRINT);
                             $oTask->reference_id = 'Q_'.$oQ->id;
                             $oTask->is_done = false;

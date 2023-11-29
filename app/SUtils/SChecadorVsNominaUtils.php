@@ -548,7 +548,6 @@ class SChecadorVsNominaUtils {
         if(is_null($empPayroll)){
             return [];
         }
-
         $earns_payroll = \DB::table('earns_payroll as ep')
                             ->join('earnings as e', 'e.external_id', '=', 'ep.ear_id')
                             ->where('empvspayroll_id', $empPayroll->id_empvspayroll)
@@ -758,7 +757,6 @@ class SChecadorVsNominaUtils {
 
             $lEmployees = $lEmployeesAreas->merge($lEmployeesDepartments)->merge($lEmployeesEmps);
             $lEmployees = $lEmployees->unique('employee_id')->sortBy('name');
-
             foreach($lEmployees as $emp){
                 $emp->ears = SChecadorVsNominaUtils::getEars($emp->employee_id, $start_date, $end_date, $type_prepayroll, $prepayroll);
                 $emp->incidences = SChecadorVsNominaUtils::getIncidences($emp->employee_id, $start_date, $end_date, $type_prepayroll, $prepayroll);

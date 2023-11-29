@@ -12,6 +12,7 @@ use App\STasks\SReportTasks;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
+use App\SReportPayrollVSCap\SReportPVSCUtils;
 
 class TestController extends Controller
 {
@@ -173,5 +174,12 @@ class TestController extends Controller
         catch (\Throwable $th) {
             dd($th);
         }
+    }
+
+    public function testDelays(){
+        //SReportPVSCUtils::delayProcess('2023-10-05', '2023-10-19', 1, [1212], 20);
+        $config = "";
+
+        SReportPVSCUtils::manageTaskReport($config,'Q_97');
     }
 }
