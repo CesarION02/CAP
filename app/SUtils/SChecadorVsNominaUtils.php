@@ -130,6 +130,7 @@ class SChecadorVsNominaUtils {
             }
 
             foreach($lData[$i]->ears as $ear){
+                $hoja->setCellValueByColumnAndRow($lTitles->where('id', 12)->first()->column, ($i + 4), $ear->not_work);
                 $hoja->setCellValueByColumnAndRow($lTitles->where('id', 35)->first()->column, ($i + 4), $ear->have_bonus);
                 $hoja->setCellValueByColumnAndRow($lTitles->where('id', 22)->first()->column, ($i + 4), SChecadorVsNominaUtils::minutesToHours($ear->time_delay_real));
                 $hoja->setCellValueByColumnAndRow($lTitles->where('id', 23)->first()->column, ($i + 4), SChecadorVsNominaUtils::minutesToHours($ear->time_delay_justified));
@@ -333,6 +334,7 @@ class SChecadorVsNominaUtils {
             }
 
             foreach($lData[$i]->ears as $ear){
+                $hoja->setCellValueByColumnAndRow($lTitles->where('id', 12)->first()->column, ($i + 4), $ear->not_work);
                 $hoja->setCellValueByColumnAndRow($lTitles->where('id', 35)->first()->column, ($i + 4), $ear->have_bonus);
                 $hoja->setCellValueByColumnAndRow($lTitles->where('id', 22)->first()->column, ($i + 4), $ear->time_delay_real);
                 $hoja->setCellValueByColumnAndRow($lTitles->where('id', 23)->first()->column, ($i + 4), $ear->time_delay_justified);
@@ -411,6 +413,22 @@ class SChecadorVsNominaUtils {
     }
 
     public static function getIncidences($employee_id, $start_date, $end_date, $type_prepayroll = null, $prepayroll = null){
+        $lWorked = \DB::table('processed_data as p')
+                            ->where('employee_id', $employee_id)
+                            ->where('inDate', '>=', $start_date)
+                            ->where('outDate', '<=', $end_date)
+                            ->where([['hasabsence', 0], ['haschecks', 1]]);
+    
+        if(!is_null($type_prepayroll) && !is_null($prepayroll)){
+            if($type_prepayroll == 1){
+                $lWorked = $lWorked->where('biweek', $prepayroll);
+            }else{
+                $lWorked = $lWorked->where('week', $prepayroll);
+            }
+        }
+
+        $lWorked = $lWorked->get();
+
         $lIncidents = \DB::table('incidents as i')
                         ->join('incidents_day as d', 'd.incidents_id', '=', 'i.id')
                         ->join('type_incidents as t', 't.id', '=', 'i.type_incidents_id')
@@ -418,6 +436,9 @@ class SChecadorVsNominaUtils {
                         ->where('i.is_delete', 0)
                         ->where('d.is_delete', 0)
                         ->whereBetween('d.date', [$start_date, $end_date])
+                        ->whereNotIn('d.date', $lWorked->pluck('inDate')->toArray())
+                        ->whereNotIn('d.date', $lWorked->pluck('outDate')->toArray())
+                        ->whereNotIn('i.type_incidents_id', [19])
                         ->select(
                             'i.start_date',
                             'i.end_date',
@@ -463,10 +484,13 @@ class SChecadorVsNominaUtils {
 
         $lOtherIncidents = $lIncidents->whereNotIn('type_incidents_id', [12,7,3,2,1,19]);
 
+        $lAuxInc = $lIncidents->whereNotIn('type_incidents_id', [1]);
         $lFaltas = \DB::table('processed_data as p')
                         ->where('employee_id', $employee_id)
                         ->where('inDate', '>=', $start_date)
-                        ->where('outDate', '<=', $end_date);
+                        ->where('outDate', '<=', $end_date)
+                        ->whereNotIn('inDate', $lAuxInc->pluck('inDate')->toArray())
+                        ->whereNotIn('outDate', $lAuxInc->pluck('outDate')->toArray());
 
         if(!is_null($type_prepayroll) && !is_null($prepayroll)){
             if($type_prepayroll == 1){
@@ -511,8 +535,12 @@ class SChecadorVsNominaUtils {
 
         $empPayroll = $empPayroll->first();
 
+        if(is_null($empPayroll)){
+            return [];
+        }
+
         $earns_payroll = \DB::table('earns_payroll as ep')
-                            ->join('earnings as e', 'e.id_ear', '=', 'ep.ear_id')
+                            ->join('earnings as e', 'e.external_id', '=', 'ep.ear_id')
                             ->where('empvspayroll_id', $empPayroll->id_empvspayroll)
                             ->select(
                                 'ep.*',
@@ -547,35 +575,11 @@ class SChecadorVsNominaUtils {
     }
 
     public static function getWorkedDays($employee_id, $start_date, $end_date, $type_prepayroll, $prepayroll){
-        $lIncidents = \DB::table('incidents as i')
-                        ->join('incidents_day as d', 'd.incidents_id', '=', 'i.id')
-                        ->join('type_incidents as t', 't.id', '=', 'i.type_incidents_id')
-                        ->where('i.employee_id', $employee_id)
-                        ->where('i.is_delete', 0)
-                        ->where('d.is_delete', 0)
-                        ->whereBetween('d.date', [$start_date, $end_date])
-                        ->where('type_incidents_id', 19)
-                        ->select(
-                            'i.start_date',
-                            'i.end_date',
-                            'i.eff_day',
-                            'i.nts',
-                            'i.employee_id',
-                            'i.type_incidents_id',
-                            't.name',
-                            'd.incidents_id',
-                            'd.date',
-                            'd.num_day',
-                        )
-                        ->get();
-
-        $lWorked = \DB::table('processed_data as p')
+       $lWorked = \DB::table('processed_data as p')
                             ->where('employee_id', $employee_id)
                             ->where('inDate', '>=', $start_date)
                             ->where('outDate', '<=', $end_date)
-                            ->where(function($query){
-                                $query->where([['hasabsence', 0], ['haschecks', 1]])->orWhere('is_dayoff', 1);
-                            });
+                            ->where([['hasabsence', 0], ['haschecks', 1]]);
     
         if(!is_null($type_prepayroll) && !is_null($prepayroll)){
             if($type_prepayroll == 1){
@@ -587,7 +591,73 @@ class SChecadorVsNominaUtils {
 
         $lWorked = $lWorked->get();
 
-        return (count($lWorked) + count($lIncidents));
+        $lIncidents = \DB::table('incidents as i')
+                            ->join('incidents_day as d', 'd.incidents_id', '=', 'i.id')
+                            ->join('type_incidents as t', 't.id', '=', 'i.type_incidents_id')
+                            ->where('i.employee_id', $employee_id)
+                            ->where('i.is_delete', 0)
+                            ->where('d.is_delete', 0)
+                            ->whereBetween('d.date', [$start_date, $end_date])
+                            ->whereNotIn('d.date', $lWorked->pluck('inDate')->toArray())
+                            ->whereNotIn('d.date', $lWorked->pluck('outDate')->toArray())
+                            ->whereNotIn('i.type_incidents_id', [19])
+                            ->select(
+                                'i.start_date',
+                                'i.end_date',
+                                'i.eff_day',
+                                'i.nts',
+                                'i.employee_id',
+                                'i.type_incidents_id',
+                                'i.is_external',
+                                't.name',
+                                'd.incidents_id',
+                                'd.id as day_id',
+                                'd.date',
+                                'd.num_day',
+                            )
+                            ->get();
+
+        foreach($lIncidents as $inc){
+            $sameDay = $lIncidents->where('date', $inc->date);
+            if(count($sameDay) < 2){
+
+            }else{
+                $sameDayInternal = $sameDay->where('is_external', 0);
+                $sameDayExternal = $sameDay->where('is_external', 1);
+                if(count($sameDayExternal) > 0){
+                    $registro = $sameDayExternal->where('date', $sameDayExternal->max('date'))->last();
+                }else{
+                    $registro = $sameDayInternal->where('date', $sameDayInternal->max('date'))->last();
+                }
+
+                $lDeleteDay = $sameDay->where('day_id', '!=', $registro->day_id)->keys();
+                foreach($lDeleteDay as $d){
+                    $lIncidents->forget($d);
+                }
+            }
+        }
+
+        $lDayOff = \DB::table('processed_data as p')
+                            ->where('employee_id', $employee_id)
+                            ->where('inDate', '>=', $start_date)
+                            ->where('outDate', '<=', $end_date)
+                            ->whereNotIn('inDate', $lWorked->pluck('inDate')->toArray())
+                            ->whereNotIn('outDate', $lWorked->pluck('outDate')->toArray())
+                            ->whereNotIn('inDate', $lIncidents->pluck('date')->toArray())
+                            ->whereNotIn('outDate', $lIncidents->pluck('date')->toArray())
+                            ->where('is_dayoff', 1);
+    
+        if(!is_null($type_prepayroll) && !is_null($prepayroll)){
+            if($type_prepayroll == 1){
+                $lDayOff = $lDayOff->where('biweek', $prepayroll);
+            }else{
+                $lDayOff = $lDayOff->where('week', $prepayroll);
+            }
+        }
+
+        $lDayOff = $lDayOff->get();
+
+        return (count($lWorked) + count($lDayOff));
     }
 
     public static function minutesToHours($minutes){
@@ -637,6 +707,7 @@ class SChecadorVsNominaUtils {
                         ->whereIn('d.area_id', $oCfg->areas)
                         ->where('e.is_active', 1)
                         ->where('e.is_delete', 0)
+                        ->where('e.way_pay_id', $type_prepayroll)
                         ->select(
                             'e.id as employee_id',
                             'e.num_employee',
@@ -648,6 +719,7 @@ class SChecadorVsNominaUtils {
                         ->whereIn('e.department_id', $oCfg->departments)
                         ->where('e.is_active', 1)
                         ->where('e.is_delete', 0)
+                        ->where('e.way_pay_id', $type_prepayroll)
                         ->select(
                             'e.id as employee_id',
                             'e.num_employee',
@@ -659,6 +731,7 @@ class SChecadorVsNominaUtils {
                         ->whereIn('id', $oCfg->employees)
                         ->where('e.is_active', 1)
                         ->where('e.is_delete', 0)
+                        ->where('e.way_pay_id', $type_prepayroll)
                         ->select(
                             'e.id as employee_id',
                             'e.num_employee',
@@ -667,13 +740,20 @@ class SChecadorVsNominaUtils {
                         ->get();
 
             $lEmployees = $lEmployeesAreas->merge($lEmployeesDepartments)->merge($lEmployeesEmps);
+            $lEmployees = $lEmployees->unique('employee_id')->sortBy('name');
 
             foreach($lEmployees as $emp){
                 $emp->ears = SChecadorVsNominaUtils::getEars($emp->employee_id, $start_date, $end_date, $type_prepayroll, $prepayroll);
                 $emp->incidences = SChecadorVsNominaUtils::getIncidences($emp->employee_id, $start_date, $end_date, $type_prepayroll, $prepayroll);
                 $emp->workedDays = SChecadorVsNominaUtils::getWorkedDays($emp->employee_id, $start_date, $end_date, $type_prepayroll, $prepayroll);
+                if(count($emp->ears) == 0){
+                    $indexEmp = $lEmployees->where('employee_id', $emp->employee_id)->keys();
+                    foreach($indexEmp as $index){
+                        $lEmployees->forget($index);
+                    }
+                }
             }
-
+            $lEmployees = $lEmployees->values();
             // SChecadorVsNominaUtils::downloadExcel($lEmployees, $start_date, $end_date);
             SChecadorVsNominaUtils::sendExcel($lEmployees, $start_date, $end_date, $oCfg->mails);
         } catch (\Throwable $th) {
