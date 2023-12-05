@@ -14,7 +14,7 @@
     <label for="name" class="col-lg-3 control-label requerido">Empleado asociado:</label>
     <div class="col-lg-8">
         @if(isset($data))
-                <select id="employee_id" name="employee_id" class="form-control">
+                <select id="employee_id" name="employee_id" class="form-control" required>
                     <option value="0">N/A</option>
                     @foreach($employees as $employee => $index)
                         @if($data->employee_id == $index)
@@ -25,7 +25,7 @@
                     @endforeach
                 </select>   
             @else
-                <select id="employee_id" name="employee_id" class="form-control">
+                <select id="employee_id" name="employee_id" class="form-control" required>
                         <option value="0">N/A</option>
                     @foreach($employees as $employee => $index)
                         <option value="{{ $index }}" {{old('boss_id') == $index ? 'selected' : '' }} > {{$employee}}</option>

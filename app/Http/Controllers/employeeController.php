@@ -12,6 +12,7 @@ use App\Models\company;
 use App\Models\DepartmentRH;
 use App\Models\JobRH;
 use App\Models\policy_extratime;
+use GuzzleHttp\Client as GuzzleClient;
 use DB;
 
 class employeeController extends Controller
@@ -800,6 +801,7 @@ class employeeController extends Controller
     {
         $config = \App\SUtils\SConfiguration::getConfigurations();
         
+
         
         $lEmployees = DB::table('employees AS e')
                         ->leftjoin('dept_rh AS drh', 'e.dept_rh_id','=','drh.id')
@@ -813,8 +815,41 @@ class employeeController extends Controller
                         ->orderBy('e.name')
                         ->get();
 
+        $rez = biostarController::login();
+
+        if ($rez == null) {
+            return null;
+        }
+
+        $headers = [
+            'Content-Type' => 'application/json',
+            'bs-session-id' => $rez
+        ];
+
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+
+        $client = new GuzzleClient([
+            // Base URI is used with relative requests
+            'base_uri' => $config->urlBiostar."/api/",
+            // You can set any number of default request options.
+            'timeout'  => 2.0,
+            'headers' => $headers,
+            'verify' => false
+        ]);
+
+        $body = "{ }";
+        
+        $r = $client->request('GET', 'users', [
+            'body' => $body
+        ]);
+
+        $response = $r->getBody()->getContents();
+        $data = json_decode($response);
+
+        biostarController::logout($rez);
+
         return view('biostar.indexbiostarid')
-                            ->with('lEmployees', $lEmployees);
+                            ->with('lEmployees', $lEmployees)->with('users',$data->UserCollection->rows);
     }
 }
 
