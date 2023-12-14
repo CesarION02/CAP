@@ -499,8 +499,8 @@ class SChecadorVsNominaUtils {
                         ->where('employee_id', $employee_id)
                         ->where('inDate', '>=', $start_date)
                         ->where('outDate', '<=', $end_date)
-                        ->whereNotIn('inDate', $lAuxInc->pluck('inDate')->toArray())
-                        ->whereNotIn('outDate', $lAuxInc->pluck('outDate')->toArray());
+                        ->whereNotIn('inDate', $lAuxInc->pluck('date')->toArray())
+                        ->whereNotIn('outDate', $lAuxInc->pluck('date')->toArray());
 
         if(!is_null($type_prepayroll) && !is_null($prepayroll)){
             if($type_prepayroll == 1){
@@ -655,7 +655,9 @@ class SChecadorVsNominaUtils {
                             ->whereNotIn('outDate', $lWorked->pluck('outDate')->toArray())
                             ->whereNotIn('inDate', $lIncidents->pluck('date')->toArray())
                             ->whereNotIn('outDate', $lIncidents->pluck('date')->toArray())
-                            ->where('is_dayoff', 1);
+                            ->where( function($query){
+                                $query->where('is_dayoff', 1)->orWhere('is_holiday', 1);
+                            });
     
         if(!is_null($type_prepayroll) && !is_null($prepayroll)){
             if($type_prepayroll == 1){
