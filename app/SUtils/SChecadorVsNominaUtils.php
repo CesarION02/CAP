@@ -599,7 +599,8 @@ class SChecadorVsNominaUtils {
         }
 
         $lWorked = $lWorked->get();
-
+        $lWorked = $lWorked->unique('outDate');
+        
         $lIncidents = \DB::table('incidents as i')
                             ->join('incidents_day as d', 'd.incidents_id', '=', 'i.id')
                             ->join('type_incidents as t', 't.id', '=', 'i.type_incidents_id')
