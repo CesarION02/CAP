@@ -9,9 +9,14 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 use App\Models\incident;
 use Carbon\Carbon;
 class SChecadorVsNominaUtils {
+
+    /**
+     * Metodo para enviar por email el excel
+     */
     public static function sendExcel($lData, $start_date, $end_date, $start_date_siie, $end_date_siie, $mails){
         $config = \App\SUtils\SConfiguration::getConfigurations();
 
+        //Se crea el objeto documento
         $documento = new Spreadsheet();
         $documento
             ->getProperties()
@@ -23,13 +28,15 @@ class SChecadorVsNominaUtils {
             ->setKeywords('')
             ->setCategory('');
 
+        //obtenemos la hoja del excel
         $hoja = $documento->getActiveSheet();
         $hoja->setTitle("checador vs nomina");
 
+        //Se insertan los titulos de las columnas
         $lTitles = collect($config->columnTitles);
-
         foreach($lTitles as $title){
             if($title->id != 2 && $title->id != 5){
+                //inserta valor en una celda con coordenadas (columna, renglon, valor)
                 $hoja->setCellValueByColumnAndRow($title->column, $title->row, $title->value);
             }else if ($title->id == 2){
                 $hoja->setCellValueByColumnAndRow($title->column, $title->row, SDateFormatUtils::formatDate($start_date, 'D/mm/Y').' al '.SDateFormatUtils::formatDate($end_date, 'D/mm/Y'));
@@ -38,16 +45,18 @@ class SChecadorVsNominaUtils {
             }
         }
 
+        //Setear el ancho de las columnas
         $lColumnsDimensions = collect($config->excelColumnDimensions);
-
         foreach($lColumnsDimensions as $col){
             $hoja->getColumnDimension($col->columna)->setWidth($col->dimension);
         }
 
+        //Fijar renglones
         $hoja->freezePane('A1');
         $hoja->freezePane('A2');
         $hoja->freezePane('A4');
 
+        //estilos para el titulo de las columnas
         $style = [
             'font' => [
                 'bold' => true,
@@ -73,8 +82,9 @@ class SChecadorVsNominaUtils {
             ],
         ];
 
-        $hoja->getStyle('A3:AA3')->applyFromArray($style);
+        $hoja->getStyle('A3:AA3')->applyFromArray($style); //se debe modificar si se agregan columnas
 
+        //estilo para el cebra de las columnas
         $style2 = [
             'borders' => [
                 'allBorders' => [
@@ -117,10 +127,17 @@ class SChecadorVsNominaUtils {
         $black = $config->cebraReport->black;
         $white = $config->cebraReport->white;
         for($i = 0; $i < count($lData); $i++){
+            /**
+             * se inserta el valor en la celda:
+             * se saca la columna correspondiente al valor con $lTitles->where('id', 7)->first()->column
+             * para el renglon es ($i + 4) mas 4 porque se comienza en el renglon 4
+             * lData la data de los empleados que se le pasa al metodo
+             */
             $hoja->setCellValueByColumnAndRow($lTitles->where('id', 7)->first()->column, ($i + 4), $lData[$i]->num_employee);
             $hoja->setCellValueByColumnAndRow($lTitles->where('id', 8)->first()->column, ($i + 4), $lData[$i]->name);
             $hoja->setCellValueByColumnAndRow($lTitles->where('id', 9)->first()->column, ($i + 4), $lData[$i]->workedDays);
 
+            //de igual forma se insertan las incidencias
             foreach($lData[$i]->incidences as $inc){
                 $hoja->setCellValueByColumnAndRow($lTitles->where('id', 10)->first()->column, ($i + 4), $inc['otherIncidents']);
                 $hoja->setCellValueByColumnAndRow($lTitles->where('id', 11)->first()->column, ($i + 4), $inc['faltas']);
@@ -129,6 +146,7 @@ class SChecadorVsNominaUtils {
                 $hoja->setCellValueByColumnAndRow($lTitles->where('id', 17)->first()->column, ($i + 4), $inc['perConGoce']);
             }
 
+            //igualmente los ears
             foreach($lData[$i]->ears as $ear){
                 $hoja->setCellValueByColumnAndRow($lTitles->where('id', 12)->first()->column, ($i + 4), $ear->not_work);
                 $hoja->setCellValueByColumnAndRow($lTitles->where('id', 35)->first()->column, ($i + 4), $ear->have_bonus);
@@ -154,11 +172,12 @@ class SChecadorVsNominaUtils {
                 }
             }
 
+            //esto realiza el estilo cebra
             if($config->cebraReport->vertical){
                 $columnas = $hoja->getColumnIterator();
                 $alternarColor = true;
                 $contadorColumnas = 0;
-                $numeroColumnasMaximo = 27;
+                $numeroColumnasMaximo = 27; //el numero de columans del excel
                 $countBlack = 0;
                 $countWhite = 0;
                 $change = false;
@@ -218,6 +237,9 @@ class SChecadorVsNominaUtils {
         unlink($tempFilePath);
     }
 
+    /**
+     * Metodo que descarga el excel
+     */
     public static function downloadExcel($lData, $start_date, $end_date, $start_date_siie, $end_date_siie){
         $config = \App\SUtils\SConfiguration::getConfigurations();
 
@@ -422,6 +444,9 @@ class SChecadorVsNominaUtils {
         exit;
     }
 
+    /**
+     * Metodo para obtener las incidencias del empleado
+     */
     public static function getIncidences($employee_id, $start_date, $end_date, $type_prepayroll = null, $prepayroll = null){
         $lWorked = \DB::table('processed_data as p')
                             ->where('employee_id', $employee_id)
@@ -465,6 +490,7 @@ class SChecadorVsNominaUtils {
                         )
                         ->get();
 
+        //Se eliminan las incidencias que esten en el mismo dia dando peso a las externas
         foreach($lIncidents as $inc){
             $sameDay = $lIncidents->where('date', $inc->date);
             if(count($sameDay) < 2){
@@ -531,6 +557,9 @@ class SChecadorVsNominaUtils {
                 ]);
     }
 
+    /**
+     * Metodo para obtener los ears del empleado
+     */
     public static function getEars($employee_id, $start_date, $end_date, $type_prepayroll, $prepayroll){
         $config = \App\SUtils\SConfiguration::getConfigurations();
 
@@ -548,6 +577,7 @@ class SChecadorVsNominaUtils {
         if(is_null($empPayroll)){
             return [];
         }
+
         $earns_payroll = \DB::table('earns_payroll as ep')
                             ->join('earnings as e', 'e.external_id', '=', 'ep.ear_id')
                             ->where('empvspayroll_id', $empPayroll->id_empvspayroll)
@@ -560,6 +590,7 @@ class SChecadorVsNominaUtils {
                             ->groupBy(['ear_id'])
                             ->get();
 
+        //Al renglon del ear se le agrega a que numero de columna del excel corresponde
         $earVsColumns = collect($config->earVsColumns);
         foreach($earns_payroll as $ep){
             $ep->column = $earVsColumns->where('id', $ep->external_id)->first()->column;
@@ -567,6 +598,7 @@ class SChecadorVsNominaUtils {
 
         $arrIds = $earns_payroll->pluck('external_id');
 
+        //Sacamos los earnings que no estan en earns_payroll
         $lNotEmpPayroll = \DB::table('earnings')
                             ->whereNotIn('external_id', $arrIds)
                             ->get();
@@ -583,6 +615,9 @@ class SChecadorVsNominaUtils {
         return collect([$empPayroll]);
     }
 
+    /**
+     * Metodo para calcular los días laborados
+     */
     public static function getWorkedDays($employee_id, $start_date, $end_date, $type_prepayroll, $prepayroll){
        $lWorked = \DB::table('processed_data as p')
                             ->where('employee_id', $employee_id)
@@ -599,6 +634,7 @@ class SChecadorVsNominaUtils {
         }
 
         $lWorked = $lWorked->get();
+        //Unique de la coleccion de dias laborados para eliminar dias repetidos
         $lWorked = $lWorked->unique('outDate');
         
         $lIncidents = \DB::table('incidents as i')
@@ -627,11 +663,13 @@ class SChecadorVsNominaUtils {
                             )
                             ->get();
 
+        //con esto se eliminan incidencias que caigan en el mismo dia
         foreach($lIncidents as $inc){
             $sameDay = $lIncidents->where('date', $inc->date);
             if(count($sameDay) < 2){
-
+                //no es necesario poner nada aqui, era de una version anterior
             }else{
+                //sacamos si es incidencia de sistema externo o cap
                 $sameDayInternal = $sameDay->where('is_external', 0);
                 $sameDayExternal = $sameDay->where('is_external', 1);
                 if(count($sameDayExternal) > 0){
@@ -647,6 +685,7 @@ class SChecadorVsNominaUtils {
             }
         }
 
+        //Sacamos los dayoff y los festivos omitiendo los dias que estan en la coleccion de lWorked y lIncidents
         $lDayOff = \DB::table('processed_data as p')
                             ->where('employee_id', $employee_id)
                             ->where('inDate', '>=', $start_date)
@@ -692,11 +731,17 @@ class SChecadorVsNominaUtils {
         return str_pad($horas, 2, "0", STR_PAD_LEFT).":".str_pad($minutos, 2, "0", STR_PAD_LEFT);
     }
 
+    /**
+     * Metodo principal para obtener el reporte, recibe la configuracion de la task y el prepayrol
+     */
     public static function getReport($cfg, $prepayroll){
         try {
             $oCfg = json_decode($cfg);
             $type_prepayroll = $oCfg->pay_type;
 
+            /**
+             * Se obtiene la quincena o la semana
+             */
             if($type_prepayroll == \SCons::PAY_W_Q){
                 $prepayroll = str_replace('Q_', '', $prepayroll);
     
