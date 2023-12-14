@@ -74,65 +74,69 @@ var app = new Vue({
             if (this.employee != 0) {
                 if (this.date != null) {
                     if (this.time != null) {
-                        if (this.picked == "single") {
-                            let checkType = "";
-                            switch (parseInt(this.type)) {
-                                case 1:
-                                    if (this.lRegistries.length > 0) {
-                                        for (
-                                            let i = this.lRegistries.length - 1;
-                                            i >= 0;
-                                            i--
-                                        ) {
-                                            if (
-                                                this.lRegistries[i].type_id == 1
+                        if(this.comments) {
+                            if (this.picked == "single") {
+                                let checkType = "";
+                                switch (parseInt(this.type)) {
+                                    case 1:
+                                        if (this.lRegistries.length > 0) {
+                                            for (
+                                                let i = this.lRegistries.length - 1;
+                                                i >= 0;
+                                                i--
                                             ) {
-                                                checkType = "entrada";
-                                                break;
+                                                if (
+                                                    this.lRegistries[i].type_id == 1
+                                                ) {
+                                                    checkType = "entrada";
+                                                    break;
+                                                }
                                             }
                                         }
-                                    }
-                                    break;
-                                case 2:
-                                    if (this.lRegistries.length > 0) {
-                                        for (
-                                            let i = this.lRegistries.length - 1;
-                                            i >= 0;
-                                            i--
-                                        ) {
-                                            if (
-                                                this.lRegistries[i].type_id == 1
+                                        break;
+                                    case 2:
+                                        if (this.lRegistries.length > 0) {
+                                            for (
+                                                let i = this.lRegistries.length - 1;
+                                                i >= 0;
+                                                i--
                                             ) {
-                                                checkType = "salida";
-                                                break;
+                                                if (
+                                                    this.lRegistries[i].type_id == 2
+                                                ) {
+                                                    checkType = "salida";
+                                                    break;
+                                                }
                                             }
                                         }
-                                    }
-                                    break;
-                                case 0:
-                                    break;
-                                default:
-                                    break;
-                            }
-                            if (checkType != "") {
-                                (async () => {
-                                    if (
-                                        await oGui.confirm(
-                                            "Ya existe una " + checkType,
-                                            "Desea agregar una nueva?",
-                                            "warning"
-                                        )
-                                    ) {
-                                        $("#form-general").submit();
-                                    }
-                                })();
-                            } else if (parseInt(this.type) != 0) {
-                                $("#form-general").submit();
+                                        break;
+                                    case 0:
+                                        break;
+                                    default:
+                                        break;
+                                }
+                                if (checkType != "") {
+                                    (async () => {
+                                        if (
+                                            await oGui.confirm(
+                                                "Ya existe una " + checkType,
+                                                "Desea agregar una nueva?",
+                                                "warning"
+                                            )
+                                        ) {
+                                            $("#form-general").submit();
+                                        }
+                                    })();
+                                } else if (parseInt(this.type) != 0) {
+                                    $("#form-general").submit();
+                                } else {
+                                    oGui.showError("Debe seleccionar tipo checada");
+                                }
                             } else {
-                                oGui.showError("Debe seleccionar tipo checada");
+                                $("#form-general").submit();
                             }
                         } else {
-                            $("#form-general").submit();
+                            oGui.showError("Debe colocar un comentario");    
                         }
                     } else {
                         oGui.showError("Debe seleccionar una hora");

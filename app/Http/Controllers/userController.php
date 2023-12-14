@@ -17,30 +17,54 @@ class userController extends Controller
     public function index(Request $request)
     {
         $iFilter = $request->ifilter == 0 ? 1 : $request->ifilter;
+        $eFilter = $request->efilter == 0 ? 1 : $request->efilter;
 
         switch ($iFilter) {
             case 1:
-                $datas = User::where('is_delete','0')->orderBy('name')->get();
-                $datas->each(function($datas){
-                    $datas->employee;
-                });
+                if($eFilter == 1){
+                    $datas = User::where('is_delete','0')->where('employee_id','!=','null')->orderBy('name')->get();
+                    $datas->each(function($datas){
+                        $datas->employee;
+                    });
+                }else{
+                    $datas = User::where('is_delete','0')->whereNull('employee_id')->orderBy('name')->get();
+                    $datas->each(function($datas){
+                        $datas->employee;
+                    });
+                }
+                
                 break;
             case 2:
-                $datas = User::where('is_delete','1')->orderBy('name')->get();
-                $datas->each(function($datas){
-                    $datas->employee;
-                });
+                if($eFilter == 1){
+                    $datas = User::where('is_delete','1')->where('employee_id','!=','null')->orderBy('name')->get();
+                    $datas->each(function($datas){
+                        $datas->employee;
+                    });
+                }else{
+                    $datas = User::where('is_delete','1')->whereNull('employee_id')->orderBy('name')->get();
+                    $datas->each(function($datas){
+                        $datas->employee;
+                    });    
+                }
                 break;
             
             default:
-                $datas = User::orderBy('id')->get();
-                $datas->each(function($datas){
-                    $datas->employee;
-                });
+                if($eFilter == 1){
+                    $datas = User::where('employee_id','!=','null')->orderBy('id')->get();
+                    $datas->each(function($datas){
+                        $datas->employee;
+                    });
+                }else{
+                    $datas = User::whereNull('employee_id')->orderBy('id')->get();
+                    $datas->each(function($datas){
+                        $datas->employee;
+                    });    
+                }
                 break;
         }
+
         
-        return view('user.index', compact('datas'))->with('iFilter',$iFilter);
+        return view('user.index', compact('datas'))->with('iFilter',$iFilter)->with('eFilter',$eFilter);
     }
 
     /**
@@ -65,6 +89,10 @@ class userController extends Controller
     {
         if( $request->passwordnu != $request->password ){
             return \Redirect::back()->withErrors(['Error', 'Las contraseña no es igual']);
+        }
+
+        if( $request->employee_id == 0){
+            return \Redirect::back()->withErrors(['Error', 'Se debe seleccionar un empleado asociado']);    
         }
         $user = new User();
         $user->name = $request->name;

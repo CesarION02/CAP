@@ -153,6 +153,7 @@
     <script>
         function GlobalData () {
             this.lEmployees = <?php echo json_encode($lEmployees) ?>;
+            this.lUsers = <?php echo json_encode($users) ?>;
         }
         
         var oData = new GlobalData();

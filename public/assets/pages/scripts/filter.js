@@ -23,6 +23,17 @@ function filtroHuella(huella) {
     }
 }
 
+function filtroEmpleado(huella) {
+    switch (huella) {
+        case 1:
+            document.getElementById("efilter").value = 1;
+            break;
+        case 2:
+            document.getElementById("efilter").value = 2;
+            break;
+    }
+}
+
 function filtroregistros(filtro) {
     switch (filtro) {
         case 1:

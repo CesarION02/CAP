@@ -28,8 +28,9 @@ class SPrepayrollAdjustUtils {
                                     'pa.apply_to',
                                     'pat.type_code',
                                     'pat.type_name',
-                                    'pa.id'
-                                    )
+                                    'pa.id',
+                                    'pa.is_external',
+                                )
                         ->whereBetween('dt_date', [$startDate, $endDate])
                         ->where('is_delete', false)
                         ->where('pa.employee_id', $employeId);

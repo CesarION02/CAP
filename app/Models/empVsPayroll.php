@@ -15,3 +15,5 @@ class empVsPayroll extends Model
     }
 
 }
+
+?>

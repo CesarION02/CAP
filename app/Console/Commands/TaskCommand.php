@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Controllers\SyncController;
 use App\Models\ProgrammedTask;
 use App\Models\TaskLog;
 use App\SReport\SJourneyReport;
@@ -9,6 +10,7 @@ use App\STasks\SAdjustsPgh;
 use Illuminate\Console\Command;
 use Carbon\Carbon;
 use App\SUtils\SChecadorVsNominaUtils;
+use App\SReportPayrollVSCap\SReportPVSCUtils;
 
 class TaskCommand extends Command
 {
@@ -92,6 +94,12 @@ class TaskCommand extends Command
                     $response = SChecadorVsNominaUtils::getReport($oTask->cfg, $oTask->reference_id);
                     break;
 
+                /** 
+                 * Inserción de datos de reporte DG
+                */
+                case \SCons::TASK_TYPE_REPORT_DG:
+                    $response = SReportPVSCUtils::manageTaskReport($oTask->cfg, $oTask->reference_id);
+                    break;
                 default:
                     $response = "Tipo de tarea desconocido.";
                     break;

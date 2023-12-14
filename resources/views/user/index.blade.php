@@ -11,11 +11,6 @@ Usuarios
 <script src="{{asset("assets/pages/scripts/filter.js")}}" type="text/javascript"></script>
 
 
-
-
-
-
-
 <script src="{{ asset("assets/js/axios.js") }}" type="text/javascript"></script>
 <script src="{{ asset("assets/js/vue.js") }}" type="text/javascript"></script>
 <script>
@@ -150,6 +145,7 @@ Usuarios
                         <div class="row">
                             <form action="{{ route('usuario') }}">
                                 <input type="hidden" id="ifilter" name="ifilter">
+                                <input type="hidden" id="efilter" name="efilter">
                                 <div class="col-md-16">
                                     <div class="btn-group" role="group" aria-label="Basic example">
                                         @switch($iFilter)
@@ -169,6 +165,23 @@ Usuarios
                                             <button onclick="filter(3)" type="submit" class="btn btn-secondary active">Todos</button>
                                             @break
                                         @endswitch
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="btn-group" role="group" aria-label="Basic example">
+                                        @switch($eFilter)
+                                            @case(1)
+                                            <button onclick="filtroEmpleado(1)" type="submit" class="btn btn-secondary active">Con usuario</button>
+                                            <button onclick="filtroEmpleado(2)" type="submit" class="btn btn-secondary">Sin usuario</button>
+                                            
+                                            @break
+                                            @case(2)
+                                            <button onclick="filtroEmpleado(1)" type="submit" class="btn btn-secondary">Con usuario</button>
+                                            <button onclick="filtroEmpleado(2)" type="submit" class="btn btn-secondary active">Sin usuario</button>
+                                            
+                                            @break
+                                        @endswitch
+                                        
                                     </div>
                                 </div>
                             </form>

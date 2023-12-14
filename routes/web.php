@@ -17,7 +17,7 @@ Route::post('seguridad/login', 'seguridad\LoginController@login')->name('login_p
 Route::get('seguridad/logout', 'seguridad\LoginController@logout')->name('logout');
 // Route::get('password/email', 'Auth\PasswordController@getEmail')->name('reset');
 // Route::post('password/email', 'Auth\PasswordController@postEmail')->name('mandaremail');
-
+Route::get('prueba', 'TestController@testDelays')->name('prueba');
 Route::post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail')->name('password.email');
 Route::post('password/reset', 'Auth\ResetPasswordController@reset')->name('password.update');
 Route::get('password/reset', 'Auth\ForgotPasswordController@showLinkRequestForm')->name('password.request');

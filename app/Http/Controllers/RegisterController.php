@@ -27,7 +27,7 @@ class RegisterController extends Controller
             $end_date = $request->end_date;
         }
 
-        if (session()->get('rol_id') != 1){
+        if (session()->get('rol_id') != 1 && session()->get('rol_id') != 16) {
             $numero = session()->get('name');
             $usuario = DB::table('users')
                     ->where('name',$numero)
@@ -56,6 +56,23 @@ class RegisterController extends Controller
                         ->orderBy('employees.name')
                         ->select('employees.name AS nameEmployee','employees.num_employee AS numEmployee','registers.id AS id','registers.date AS date','registers.time AS time','registers.type_id AS tipo','users.name AS usuario')
                         ->get();
+        }else if(session()->get('rol_id') != 16){
+            $employees = DB::table('employees')
+                        ->join('jobs','jobs.id','=','employees.job_id')
+                        ->join('departments','departments.id','=','employees.department_id')
+                        ->join('department_group','department_group.id','=','departments.dept_group_id')
+                        ->join('registers','employees.id','=','registers.employee_id')
+                        ->join('users','registers.user_id','=','users.id')
+                        ->orderBy('employees.job_id')
+                        ->where('employees.is_delete','0')
+                        ->where('employees.is_active','1')
+                        ->where('registers.form_creation_id','2')
+                        ->where('registers.is_delete','0')
+                        ->where('user_id',session()->get('user_id'))
+                        ->whereBetween('date', [$start_date, $end_date])
+                        ->orderBy('employees.name')
+                        ->select('employees.name AS nameEmployee','employees.num_employee AS numEmployee','registers.id AS id','registers.date AS date','registers.time AS time','registers.type_id AS tipo','users.name AS usuario')
+                        ->get();      
         }else{
             $employees = DB::table('employees')
                         ->join('jobs','jobs.id','=','employees.job_id')

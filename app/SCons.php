@@ -88,6 +88,8 @@ class SCons {
    const TASK_TYPE_REPORT_OTHER = 2;
    const TASK_TYPE_ADJUST_PGH = 3;
    const TASK_TYPE_REPORT_CHECADOR_NOMINA = 4;
+
+   const TASK_TYPE_REPORT_DG = 5;
 }
 
 ?>
