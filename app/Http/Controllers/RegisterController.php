@@ -45,7 +45,8 @@ class RegisterController extends Controller
                         ->join('departments','departments.id','=','employees.department_id')
                         ->join('department_group','department_group.id','=','departments.dept_group_id')
                         ->join('registers','employees.id','=','registers.employee_id')
-                        ->join('users','registers.user_id','=','users.id')
+                        ->join('users as created','registers.user_id','=','created.id')
+                        ->leftjoin('users as updated','registers.updated_by','=','updated.id')
                         ->orderBy('employees.job_id')
                         ->where('employees.is_delete','0')
                         ->where('employees.is_active','1')
@@ -54,7 +55,7 @@ class RegisterController extends Controller
                         ->whereIn('departments.dept_group_id',$Adgu)
                         ->whereBetween('date', [$start_date, $end_date])
                         ->orderBy('employees.name')
-                        ->select('employees.name AS nameEmployee','employees.num_employee AS numEmployee','registers.id AS id','registers.date AS date','registers.time AS time','registers.type_id AS tipo','users.name AS usuario')
+                        ->select('employees.name AS nameEmployee','employees.num_employee AS numEmployee','registers.id AS id','registers.date AS date','registers.time AS time','registers.type_id AS tipo',DB::raw('COALESCE(created.name, "N/A") as usuarioCr'),DB::raw('COALESCE(updated.name, "N/A") as usuarioUp'))
                         ->get();
         }else if(session()->get('rol_id') != 16){
             $employees = DB::table('employees')
@@ -62,16 +63,16 @@ class RegisterController extends Controller
                         ->join('departments','departments.id','=','employees.department_id')
                         ->join('department_group','department_group.id','=','departments.dept_group_id')
                         ->join('registers','employees.id','=','registers.employee_id')
-                        ->join('users','registers.user_id','=','users.id')
+                        ->join('users as created','registers.user_id','=','created.id')
+                        ->leftjoin('users as updated','registers.updated_by','=','updated.id')
                         ->orderBy('employees.job_id')
                         ->where('employees.is_delete','0')
                         ->where('employees.is_active','1')
                         ->where('registers.form_creation_id','2')
                         ->where('registers.is_delete','0')
-                        ->where('user_id',session()->get('user_id'))
                         ->whereBetween('date', [$start_date, $end_date])
                         ->orderBy('employees.name')
-                        ->select('employees.name AS nameEmployee','employees.num_employee AS numEmployee','registers.id AS id','registers.date AS date','registers.time AS time','registers.type_id AS tipo','users.name AS usuario')
+                        ->select('employees.name AS nameEmployee','employees.num_employee AS numEmployee','registers.id AS id','registers.date AS date','registers.time AS time','registers.type_id AS tipo',DB::raw('COALESCE(created.name, "N/A") as usuarioCr'),DB::raw('COALESCE(updated.name, "N/A") as usuarioUp'))
                         ->get();      
         }else{
             $employees = DB::table('employees')
@@ -79,15 +80,20 @@ class RegisterController extends Controller
                         ->join('departments','departments.id','=','employees.department_id')
                         ->join('department_group','department_group.id','=','departments.dept_group_id')
                         ->join('registers','employees.id','=','registers.employee_id')
-                        ->join('users','registers.user_id','=','users.id')
+                        ->join('users as created','registers.user_id','=','created.id')
+                        ->leftjoin('users as updated','registers.updated_by','=','updated.id')
                         ->orderBy('employees.job_id')
                         ->where('employees.is_delete','0')
                         ->where('employees.is_active','1')
                         ->where('registers.form_creation_id','2')
                         ->where('registers.is_delete','0')
+                        ->where(function ($query) {
+                            $query->where('registers.user_id', session()->get('user_id'))
+                                  ->orWhere('registers.updated_by', session()->get('user_id'));
+                        })
                         ->whereBetween('date', [$start_date, $end_date])
                         ->orderBy('employees.name')
-                        ->select('employees.name AS nameEmployee','employees.num_employee AS numEmployee','registers.id AS id','registers.date AS date','registers.time AS time','registers.type_id AS tipo','users.name AS usuario')
+                        ->select('employees.name AS nameEmployee','employees.num_employee AS numEmployee','registers.id AS id','registers.date AS date','registers.time AS time','registers.type_id AS tipo',DB::raw('COALESCE(created.name, "N/A") as usuarioCr'),DB::raw('COALESCE(updated.name, "N/A") as usuarioUp'))
                         ->get();   
         }
         return view('register.index', compact('employees'))
@@ -115,7 +121,8 @@ class RegisterController extends Controller
 
     public function create()
     {
-        if (session()->get('rol_id') != 1){
+        if (session()->get('rol_id') != 1 && session()->get('rol_id') != 16){
+            $rol = session()->get('rol_id');
             $numero = session()->get('name');
             $usuario = DB::table('users')
                     ->where('name',$numero)
@@ -273,7 +280,7 @@ class RegisterController extends Controller
         $register->type_id = $request->type_id;
         $register->form_creation_id = 2;
         $register->is_modified = true;
-        $register->user_id = session()->get('user_id');
+        $register->updated_by = session()->get('user_id');
         $register->save();
 
         if (!! $request->comments) {
@@ -303,6 +310,7 @@ class RegisterController extends Controller
             $employee = register::find($id);
             $employee->is_delete = 1;
             $employee->is_modified = true;
+            $employee->updated_by = session()->get('user_id');
             $employee->save();
             $aAdjusts = DB::table('adjust_link')->where('register_id', $employee->id)
                                                         ->pluck('adjust_id')
@@ -461,7 +469,7 @@ class RegisterController extends Controller
         //$register->time = $request->time;
         $register->type_id = $request->type_id;
         $register->is_modified = true;
-        $register->user_id = session()->get('user_id');
+        $register->updated_by = session()->get('user_id');
         $register->save();
 
         if (!! $request->comments) {
@@ -487,6 +495,7 @@ class RegisterController extends Controller
             $employee = register::find($id);
             $employee->is_delete = 1;
             $employee->is_modified = true;
+            $employee->updated_by = session()->get('user_id');
             $employee->save();
 
             $aAdjusts = DB::table('adjust_link')->where('register_id', $employee->id)
@@ -521,6 +530,7 @@ class RegisterController extends Controller
             $job = register::find($id);
             $job->is_delete = 0;
             $job->is_modified = true;
+            $job->updated_by = session()->get('user_id');
             $job->save();
 
             $bitacora = new Bitacora();

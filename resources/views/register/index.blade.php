@@ -144,6 +144,7 @@ Checadas
                             <th>Hora</th>
                             <th>Tipo</th>
                             <th>Usuario que genero</th>
+                            <th>Usuario que modifico</th>
                             <th class="width70"></th>
                         </tr>
                     </thead>
@@ -159,7 +160,8 @@ Checadas
                             @else
                                 <td>SALIDA</td>
                             @endif
-                            <td>{{$employee->usuario}}</td>
+                            <td>{{$employee->usuarioCr}}</td>
+                            <td>{{$employee->usuarioUp}}</td>
                             <td>
                                 <a href="{{route('editar_checada', ['id' => $employee->id])}}" class="btn-accion-tabla tooltipsC" title="Modificar este registro">
                                     <i class="fa fa-fw fa-pencil"></i>
