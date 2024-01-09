@@ -145,6 +145,24 @@ class RegisterController extends Controller
                         ->orderBy('employees.name')
                         ->select('employees.name AS nameEmployee','employees.id AS id', 'employees.num_employee AS numEmployee')
                         ->get();
+                $dgu = DB::table('group_dept_user')
+                        ->where('user_id',$usuario[0]->id)
+                        ->select('groupdept_id AS id')
+                        ->get();
+                $Adgu = [];
+                for($i=0;count($dgu)>$i;$i++){
+                    $Adgu[$i]=$dgu[$i]->id;
+                }
+                $employees = DB::table('employees')
+                            ->join('jobs','jobs.id','=','employees.job_id')
+                            ->join('departments','departments.id','=','employees.department_id')
+                            ->join('department_group','department_group.id','=','departments.dept_group_id')
+                            ->where('employees.is_delete','0')
+                            ->where('employees.is_active','1')
+                            ->whereIn('departments.dept_group_id',$Adgu)
+                            ->orderBy('employees.name')
+                            ->select('employees.name AS nameEmployee','employees.id AS id', 'employees.num_employee AS numEmployee')
+                            ->get();
         }else{
             $employees = DB::table('employees')
                         ->join('jobs','jobs.id','=','employees.job_id')

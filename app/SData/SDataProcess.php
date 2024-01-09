@@ -48,7 +48,7 @@ class SDataProcess {
          * Guarda un objeto de la clase Logger, con esto durante el proceso se almacenarán 
          * los logs generados en el proceso de prenómina.
          */
-        $oLogger = new SLogger($sStartDate, $sEndDate, $payWay);
+        $oLogger = new SLogger($sStartDate, $sEndDate, ($payWay > 0 ? $payWay : 2));
         session(['logger' => $oLogger]);
 
         SDataProcess::checkEvents();
