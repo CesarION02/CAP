@@ -353,8 +353,10 @@ class SDateUtils {
                     ->get();
 
         if (count($biweeksQ) > 0) {
-            $dtCutPrev = Carbon::parse($biweeksQ[0]->dt_cut)->subDays(15);
+            //$dtCutPrev = Carbon::parse($biweeksQ[0]->dt_cut)->subDays(15);
             foreach ($biweeksQ as $biweek) {
+                $diferencia = SDateUtils::getDaysOfBiweek($biweek);
+                $dtCutPrev = Carbon::parse($biweek->dt_cut)->subDays($diferencia);
                 $cut = (object) [];
 
                 $cut->dt_start = $dtCutPrev->addDays(1)->toDateString();
@@ -402,6 +404,36 @@ class SDateUtils {
         $response->biweekscal = $biweeksCal;
 
         return $response;
+    }
+
+    public static function getDaysOfBiweek($biweekCut){
+        if($biweekCut->num == 1){
+            $newYear = $biweekCut->year - 1;
+            
+            $biweek = DB::table('hrs_prepay_cut')
+                        ->where('year',$newYear)
+                        ->where('is_delete',0)
+                        ->orderBy('num','desc')
+                        ->get(); 
+
+        }else{
+            $newNum = $biweekCut->num - 1;
+
+            $biweek = DB::table('hrs_prepay_cut')
+                                    ->where('year',$biweekCut->year)
+                                    ->where('num',$newNum)
+                                    ->where('is_delete',0)
+                                    ->get();
+        }  
+        
+        if(count($biweek) > 0){
+            $corteActual = Carbon::parse($biweekCut->dt_cut);
+            $corteAnterior = Carbon::parse($biweek[0]->dt_cut);
+            $diferencia = $corteActual->diffInDays($corteAnterior);
+
+            return $diferencia;
+        }
+        return 0;
     }
 
     public static function getInfoDates($ini, $fin,$typePay){
