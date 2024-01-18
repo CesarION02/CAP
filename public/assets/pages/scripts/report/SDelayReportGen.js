@@ -14,6 +14,20 @@ var app = new Vue({
         idEmployee: null,
         oDelegation: {}
     },
+    watch: {
+        iPayWay: function(val) {
+            switch (val) {
+                case "1":
+                    document.getElementById("biweek").click();
+                    break;
+                case "2":
+                    document.getElementById("week").click();
+                    break;
+                default:
+                    break;
+            }
+        }
+    },
     methods: {
         setDates(sd, ed) {
             this.startDate = sd;
