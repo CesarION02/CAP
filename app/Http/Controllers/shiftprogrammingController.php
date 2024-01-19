@@ -16,6 +16,7 @@ use App\SUtils\SDateTimeUtils;
 use DateTime;
 use DB;
 use PDF;
+use App\SUtils\SDateFormatUtils;
 
 class shiftprogrammingController extends Controller
 {
@@ -210,7 +211,35 @@ class shiftprogrammingController extends Controller
                         })
                         ->select('employees.name AS name')
                         ->get();
-        return response()->json(array($employees,$departments,$group_workshift,$vacaciones,$incapacidades));
+
+        $incidences = DB::table('incidents')
+                        ->join('class_incident as c', 'c.id', '=', 'incidents.cls_inc_id')
+                        ->join('employees','employees.id','=','incidents.employee_id')
+                        ->join('jobs','jobs.id','=','employees.job_id')
+                        ->join('departments','departments.id','=','jobs.department_id')
+                        ->join('department_group','department_group.id','=','departments.dept_group_id')
+                        ->orderBy('employees.job_id')
+                        ->where('employees.is_delete','0')
+                        ->where('employees.is_active','1')
+                        ->where('departments.dept_group_id',$request->typearea)
+                        // ->where('incidents.cls_inc_id',3)
+                        ->where(function ($query) use ($startDate, $endDate) {
+                                return $query->whereBetween('start_date', [$startDate, $endDate])
+                                    ->orwhereBetween('end_date', [$startDate, $endDate]);
+                        })
+                        ->select(
+                                    'employees.name AS name',
+                                    'c.name as incident',
+                                    'incidents.start_date',
+                                    'incidents.end_date'
+                                )
+                        ->get();
+
+        foreach ($incidences as $inc) {
+            $inc->start_date = SDateFormatUtils::formatDate($inc->start_date, 'D-m-Y');
+            $inc->end_date = SDateFormatUtils::formatDate($inc->end_date, 'D-m-Y');
+        }
+        return response()->json(array($employees,$departments,$group_workshift,$vacaciones,$incapacidades, $incidences));
 
     }
 
@@ -362,6 +391,10 @@ class shiftprogrammingController extends Controller
         $deleteFlag = 0;
         $nombrePdf = 0;
         $typearea = $request->typeArea;
+
+        $employeesWithOutAssigment = $request->lEmployeesWithOutAssigment;
+        $lIncidences = $request->lIncidences;
+
         if($request->weekFlag == 0){
             $week = new week();
         }else{
@@ -447,7 +480,11 @@ class shiftprogrammingController extends Controller
             $flagPDF = 1;
         }
         if($flagPDF == 1){
-            $this->pdf($week->id,$typearea);
+            try {
+                $this->pdf($week->id,$typearea, $request->employeesWithOutAssigment, $request->lIncidences);
+            } catch (\Throwable $th) {
+                return response()->json($th->getMessage());
+            }
             $codigo = DB::table('department_group')
                             ->where('id',$typearea)
                             ->get();
@@ -471,7 +508,7 @@ class shiftprogrammingController extends Controller
 
     }
 
-    public function pdf($id,$typearea){
+    public function pdf($id,$typearea, $employeesWithOutAssigment = null, $lIncidences = null){
         $week = week::findOrFail($id);
         $codigo = DB::table('department_group')
                             ->where('id',$typearea)
@@ -640,6 +677,41 @@ class shiftprogrammingController extends Controller
             $html = $html.$table;
         }
         $html = '<div class = "container">'.$html.'</div>';
+
+        $htmlEmployees = '<h3 style="text-align: center">Colaboradores sin turno asignado</h3>'
+                        .   '<table class = "border" style = "width: 100%;">'
+                        .       '<tbody>'
+                        .       '<tr>'
+                        .           '<th class = "border">Colaborador</th>'
+                    .           '<th class = "border"></th>'
+                        .       '</tr>';
+
+        foreach ($employeesWithOutAssigment as $emp) {
+            $htmlEmployees = $htmlEmployees . '<tr>'
+                                            .   '<td class = "border">' . $emp['name'] . '</td>'
+                                            .   '<td class = "border">Sin turno asignado</td>'
+                                            . '</tr>';
+        }
+        $htmlEmployees = $htmlEmployees . '</tbody></table>';
+
+        $htmlIncidences = '<h3 style="text-align: center">Colaboradores con incidencias</h3>'
+                        .   '<table class = "border" style = "width: 100%;">'
+                        .       '<tbody>'
+                        .       '<tr>'
+                        .           '<th class = "border">Colaborador</th>'
+                        .           '<th class = "border">Incidencia</th>'
+                        .           '<th class = "border">Fechas</th>'
+                        .       '</tr>';
+
+        foreach($lIncidences as $inc){
+            $htmlIncidences = $htmlIncidences . '<tr>'
+                            .   '<td class = "border">' . $inc['name'] . '</td>'
+                            .   '<td class = "border">' . $inc['incident'] . '</td>'
+                            .   '<td class = "border">' . $inc['start_date'] . ' a ' . $inc['end_date'] . '</td>'
+                            . '</tr>';
+        }
+        $htmlIncidences = $htmlIncidences . '</tbody></table>';
+
         $mpdf = new \Mpdf\Mpdf([
             'mode' => 'c',
             'margin_left' => 10,
@@ -661,6 +733,10 @@ class shiftprogrammingController extends Controller
         $mpdf->SetHTMLfooter($footer);
         $mpdf->WriteHTML($stylesheet, 1);
         $mpdf->WriteHTML($html,2);
+        $mpdf->AddPage();
+        $mpdf->WriteHTML($htmlEmployees);
+        $mpdf->AddPage();
+        $mpdf->WriteHTML($htmlIncidences);
         $mpdf->Output(storage_path('app/public/').$nombrePdf.'.pdf', \Mpdf\Output\Destination::FILE);
     }
 

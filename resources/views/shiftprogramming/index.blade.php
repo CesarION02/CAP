@@ -5,6 +5,9 @@ Programacion de turnos
 @endsection
 
 @section("scripts")
+<script src="{{ asset("assets/js/axios.js") }}" type="text/javascript"></script>
+<script src="{{ asset("assets/js/vue.js") }}" type="text/javascript"></script>
+<script src="{{asset("assets/pages/scripts/shiftprogramming/vue_shiftprogramming.js")}}" type="text/javascript"></script>
 
 <script src="{{asset("assets/pages/scripts/shiftprogramming/index.js")}}" type="text/javascript"></script>
 <script src="{{asset("assets/pages/scripts/shiftprogramming/past_shiftprogramming.js")}}" type="text/javascript"></script>
@@ -29,7 +32,7 @@ Programacion de turnos
 <link rel="stylesheet" href="{{asset("assets/css/tableimprimir.css")}}" media="print">
 @endsection
 @section('content')
-<div class="row">
+<div class="row" id="shiftprogrammingApp">
     <div class="col-lg-12">
         @include('includes.mensaje')
         <div class="box">
@@ -115,5 +118,13 @@ Programacion de turnos
                   </div>
                 </div>
     </div>
+    <div v-show="passCalendar">
+      <div class="row">
+        <div class="col-lg-12" id="employeesWithOutAssigment">
+          
+        </div>
+      </div>
+    </div>
 </div>
+
 @endsection

@@ -10,6 +10,7 @@ function new_shiftprogramming() {
         data: { 'typearea': typearea, 'ini': fechaini, 'fin': fechafin },
 
         success: function(data) {
+            vueApp.lIncidences = data[5];
             if (data[3].length > 0) {
                 listaEmpleados += '<table class="customers2"><tr><th>VACACIONES</th></tr>';
                 for (var i = 0; data[3].length > i; i++) {
@@ -29,6 +30,7 @@ function new_shiftprogramming() {
             var idJob = data[0][0].idJob;
             listaEmpleados += '<table class="customers"><tr><th>' + data[0][0].nameJob + '</th></tr>';
             for (var i = 0; data[0].length > i; i++) {
+                vueApp.lEmployees.push({'id': data[0][i].idEmployee, 'name': data[0][i].nameEmployee});
                 if (idJob == data[0][i].idJob) {
                     if (data[0][i].shortName != '') {
                         listaEmpleados += '<tr><td>' + data[0][i].shortName + '</td></tr>';

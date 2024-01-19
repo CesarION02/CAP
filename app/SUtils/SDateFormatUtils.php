@@ -15,31 +15,31 @@ class SDateFormatUtils {
             $oDate = Carbon::parse($sDate);
             switch ($format) {
                 case 'ddd D-M-Y':
-                    $date = dateUtils::daysMin[$oDate->dayOfWeek].' '.$oDate->format('d').'-'.dateUtils::months[$oDate->month].'-'.$oDate->format('Y');
+                    $date = SDateFormatUtils::daysMin[$oDate->dayOfWeek].' '.$oDate->format('d').'-'.SDateFormatUtils::months[$oDate->month].'-'.$oDate->format('Y');
                     break;
                 case 'ddd D-m-Y':
-                    $date = dateUtils::daysMin[$oDate->dayOfWeek].' '.$oDate->format('d').'-'.dateUtils::monthsAux[$oDate->month].'-'.$oDate->format('Y');
+                    $date = SDateFormatUtils::daysMin[$oDate->dayOfWeek].' '.$oDate->format('d').'-'.SDateFormatUtils::monthsAux[$oDate->month].'-'.$oDate->format('Y');
                     break;
                 case 'D-m-Y':
-                    $date = $oDate->format('d').'-'.dateUtils::monthsAux[$oDate->month].'-'.$oDate->format('Y');
+                    $date = $oDate->format('d').'-'.SDateFormatUtils::monthsAux[$oDate->month].'-'.$oDate->format('Y');
                     break;
                 case 'DDD D-M-Y':
-                    $date = dateUtils::days[$oDate->dayOfWeek].' '.$oDate->format('d').'-'.dateUtils::months[$oDate->month].'-'.$oDate->format('Y');
+                    $date = SDateFormatUtils::days[$oDate->dayOfWeek].' '.$oDate->format('d').'-'.SDateFormatUtils::months[$oDate->month].'-'.$oDate->format('Y');
                     break;
                 case 'DDD D-m-Y':
-                    $date = dateUtils::days[$oDate->dayOfWeek].' '.$oDate->format('d').'-'.dateUtils::monthsAux[$oDate->month].'-'.$oDate->format('Y');
+                    $date = SDateFormatUtils::days[$oDate->dayOfWeek].' '.$oDate->format('d').'-'.SDateFormatUtils::monthsAux[$oDate->month].'-'.$oDate->format('Y');
                     break;
                 case 'D/m/Y dddd':
-                    $date = $oDate->format('d').'/'.dateUtils::monthsAux[$oDate->month].'/'.$oDate->format('Y').' ('.dateUtils::daysComplete[$oDate->dayOfWeek].')';
+                    $date = $oDate->format('d').'/'.SDateFormatUtils::monthsAux[$oDate->month].'/'.$oDate->format('Y').' ('.SDateFormatUtils::daysComplete[$oDate->dayOfWeek].')';
                     break;
                 case 'D/mm/Y':
                     $date = $oDate->format('d').'/'.$oDate->format('m').'/'.$oDate->format('Y');
                     break;
                 case 'D-M-Y':
-                    $date = $oDate->format('d').'-'.dateUtils::monthsAux[$oDate->month].'-'.$oDate->format('Y');
+                    $date = $oDate->format('d').'-'.SDateFormatUtils::monthsAux[$oDate->month].'-'.$oDate->format('Y');
                     break;
                 case 'dd-M-Y':
-                    $date = $oDate->format('d').'-'.dateUtils::months[$oDate->month].'-'.$oDate->format('Y');
+                    $date = $oDate->format('d').'-'.SDateFormatUtils::months[$oDate->month].'-'.$oDate->format('Y');
                     break;
                 default:
                     $date = $oDate->format($format);
@@ -63,8 +63,8 @@ class SDateFormatUtils {
                     $oDateEnd->format('d').
                     ' de '.
                     ($format == 'M' ? 
-                        mb_strtolower(dateUtils::monthsComplete[$oDateEnd->month]) : 
-                            mb_strtolower(dateUtils::monthsAux[$oDateEnd->month])).
+                        mb_strtolower(SDateFormatUtils::monthsComplete[$oDateEnd->month]) : 
+                            mb_strtolower(SDateFormatUtils::monthsAux[$oDateEnd->month])).
                     ' de '.
                     $oDateEnd->format('Y');
 
@@ -72,14 +72,14 @@ class SDateFormatUtils {
             $sDate = $oDateIni->format('d').
                     ' de '.
                     ($format == 'M' ?
-                        mb_strtolower(dateUtils::monthsComplete[$oDateIni->month]) :
-                            mb_strtolower(dateUtils::monthsAux[$oDateIni->month])).
+                        mb_strtolower(SDateFormatUtils::monthsComplete[$oDateIni->month]) :
+                            mb_strtolower(SDateFormatUtils::monthsAux[$oDateIni->month])).
                     ' al '.
                     $oDateEnd->format('d').
                     ' de '.
                     ($format == 'M' ?
-                        mb_strtolower(dateUtils::monthsComplete[$oDateEnd->month])  :
-                            mb_strtolower(dateUtils::monthsAux[$oDateEnd->month])).
+                        mb_strtolower(SDateFormatUtils::monthsComplete[$oDateEnd->month])  :
+                            mb_strtolower(SDateFormatUtils::monthsAux[$oDateEnd->month])).
                     ' de '.
                     $oDateEnd->format('Y');
 
@@ -87,16 +87,16 @@ class SDateFormatUtils {
             $sDate = $oDateIni->format('d').
                     ' de '.
                     ($format == 'M' ?
-                        mb_strtolower(dateUtils::monthsComplete[$oDateIni->month]) :
-                            mb_strtolower(dateUtils::monthsAux[$oDateIni->month])).
+                        mb_strtolower(SDateFormatUtils::monthsComplete[$oDateIni->month]) :
+                            mb_strtolower(SDateFormatUtils::monthsAux[$oDateIni->month])).
                     ' de '.
                     $oDateIni->format('Y').
                     ' al '.
                     $oDateEnd->format('d').
                     ' de '.
                     ($format == 'M' ?
-                        mb_strtolower(dateUtils::monthsComplete[$oDateEnd->month]) :
-                            mb_strtolower(dateUtils::monthsAux[$oDateEnd->month])).
+                        mb_strtolower(SDateFormatUtils::monthsComplete[$oDateEnd->month]) :
+                            mb_strtolower(SDateFormatUtils::monthsAux[$oDateEnd->month])).
                     ' de '.
                     $oDateEnd->format('Y');
         }else{

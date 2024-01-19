@@ -215,10 +215,11 @@ function calendario() {
                 $('#calendario').append(calendario);
                 $('#botonCale').attr('disabled', true)
                 $('#botonImprimir').append('<button class="btn btn-warning" id="imprimir" name="imprimir" onclick=printDiv("turnonuevo","calendario")>Generar PDF</button>')
+                vueApp.lEmployeesAssigment = Array.from(new Set(arrValue));
+                vueApp.setlEmployeesWithOutAssigment();
             }
 
         });
-
 
 
     }

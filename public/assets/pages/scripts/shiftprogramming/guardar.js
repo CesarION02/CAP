@@ -76,11 +76,11 @@ function guardar() {
                 if (document.getElementById(cadenatabla).innerHTML == 'Descanso') {
                     arrCalendarioDias[contY - 1][contX] = 5;
                 } else if (document.getElementById(cadenatabla).innerHTML == 'VACACIONES') {
-                    arrCalendarioDias[contY - 1][contX] = 3;
+                    arrCalendarioDias[contY - 1][contX] = 1;
                 } else if (document.getElementById(cadenatabla).innerHTML == 'INCAPACIDAD') {
-                    arrCalendarioDias[contY - 1][contX] = 2;
+                    arrCalendarioDias[contY - 1][contX] = 1;
                 } else if (document.getElementById(cadenatabla).innerHTML == 'DIA FESTIVO') {
-                    arrCalendarioDias[contY - 1][contX] = 4;
+                    arrCalendarioDias[contY - 1][contX] = 1;
                 } else {
                     arrCalendarioDias[contY - 1][contX] = 1;
                 }
@@ -93,11 +93,11 @@ function guardar() {
                 if (document.getElementById(cadenatabla).innerHTML == 'Descanso') {
                     arrCalendarioDias[contY - 1][contX] = 5;
                 } else if (document.getElementById(cadenatabla).innerHTML == 'VACACIONES') {
-                    arrCalendarioDias[contY - 1][contX] = 3;
+                    arrCalendarioDias[contY - 1][contX] = 1;
                 } else if (document.getElementById(cadenatabla).innerHTML == 'INCAPACIDAD') {
-                    arrCalendarioDias[contY - 1][contX] = 2;
+                    arrCalendarioDias[contY - 1][contX] = 1;
                 } else if (document.getElementById(cadenatabla).innerHTML == 'DIA FESTIVO') {
-                    arrCalendarioDias[contY - 1][contX] = 4;
+                    arrCalendarioDias[contY - 1][contX] = 1;
                 } else {
                     arrCalendarioDias[contY - 1][contX] = 1;
                 }
@@ -121,7 +121,28 @@ function guardar() {
     $.ajax({
         type: 'post',
         url: 'guardar',
-        data: { 'ini': ini, 'fin': fin, 'semana': semana, 'departamento': departamento, 'turno': turno, 'cerrado': cerrado, 'turnoflag': turnoflag, 'nombreEmpleado': nombreEmpleado, 'Empleado': Empleado, 'arrDept': arrDept, 'arrTurno': arrTurno, 'arrJob': arrJob, 'arrCalendarioEmpleados': arrCalendarioEmpleados, 'arrCalendarioDias': arrCalendarioDias, 'weekFlag': weekFlag, 'departFlag': departFlag, 'pdfFlag': pdfFlag, 'typeArea': typeArea },
+        data: { 
+                'ini': ini, 
+                'fin': fin, 
+                'semana': semana, 
+                'departamento': departamento, 
+                'turno': turno, 
+                'cerrado': cerrado, 
+                'turnoflag': turnoflag, 
+                'nombreEmpleado': nombreEmpleado, 
+                'Empleado': Empleado, 
+                'arrDept': arrDept, 
+                'arrTurno': arrTurno, 
+                'arrJob': arrJob, 
+                'arrCalendarioEmpleados': arrCalendarioEmpleados, 
+                'arrCalendarioDias': arrCalendarioDias, 
+                'weekFlag': weekFlag, 
+                'departFlag': departFlag, 
+                'pdfFlag': pdfFlag, 
+                'typeArea': typeArea,
+                'employeesWithOutAssigment': vueApp.lEmployeesWithOutAssigment,
+                'lIncidences': vueApp.lIncidences
+            },
 
         success: function(data) {
             swal("Guadado", "La programacion se guardo con exito", "sucess");
