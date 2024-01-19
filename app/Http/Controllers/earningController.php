@@ -28,6 +28,7 @@ class earningController extends Controller
         }
         catch (\Throwable $th) {
             \Log::error($th->getMessage());
+            \Log::error($employee->id);
             return $resultado;
         }
         return $resultado;
@@ -59,7 +60,7 @@ class earningController extends Controller
                                     ->where('external_id',$ear->id_ear)
                                     ->first();
 
-                $earnVsPayroll->ear_id = $earnings->external_id;
+                $earnVsPayroll->ear_id = $earnings->id_ear;
                 $earnVsPayroll->unt = $ear->unit_ear;
                 $earnVsPayroll->save();
             }

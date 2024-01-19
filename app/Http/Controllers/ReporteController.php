@@ -880,7 +880,7 @@ class ReporteController extends Controller
     {
         $sStartDate = $request->start_date;
         $sEndDate = $request->end_date;
-        $year = Carbon::parse($sStartDate);
+        $year = Carbon::parse($sEndDate);
         $year = $year->format('Y');
         $lEmployees = [];
         /**
