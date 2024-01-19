@@ -66,7 +66,7 @@
                         <label for="comments" class="col-lg-3 control-label requerido">Comentarios:</label>
                         <div class="col-lg-8">
                             @if (isset($comments))
-                                <textarea name="comments" v-model="comments" id="comments" cols="40" rows="5">{{ $comments }}</textarea>
+                                <textarea name="comments" v-model="comments" id="comments" cols="40" rows="5" require>{{ $comments }}</textarea>
                             @else
                                 <textarea :disabled="!canCheck" v-model="comments" name="comments" id="comments" cols="40" rows="5"></textarea>
                             @endif
