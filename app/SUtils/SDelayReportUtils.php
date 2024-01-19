@@ -601,17 +601,22 @@ class SDelayReportUtils {
         $firstDate = Carbon::parse($schedules[0]->start_date);
         $secondDate = (clone $firstDate)->addDays(6);
 
-        $maxIterations = 50;
         $search = true;
+        $maxIterations = 100;
+        $it = 0;
         $i = 0;
-        while ($search && $i < $maxIterations) {
+        while ($search && $it < $maxIterations) {
             if ($oDtCompare->between($firstDate, $secondDate)) {
                 return $schedules[$i]->schedule_template_id;
             }
-            
             $firstDate = (clone $firstDate)->addDays(7);
             $secondDate = (clone $firstDate)->addDays(6);
             $i++;
+            if ($i == $count) {
+                $i = 0;
+            }
+
+            $it++;
         }
     }
 
