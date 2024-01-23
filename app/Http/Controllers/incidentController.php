@@ -678,7 +678,11 @@ class incidentController extends Controller
      */
     private function updIncident($jAbs, $id, $company)
     {
-        $is_deleted = $jAbs->b_clo || $jAbs->is_deleted;
+        if($jAbs->is_closed == true || $jAbs->is_deleted == true){
+            $is_deleted = 1;     
+        }else{
+            $is_deleted = 0;
+        }
         
         incident::where('id', $id)
                     ->update(
@@ -713,7 +717,11 @@ class incidentController extends Controller
     {
         $abs = new incident();
 
-        $is_deleted = $jAbs->b_clo || $jAbs->is_deleted;
+        if($jAbs->b_clo == 1 || $jAbs->is_deleted == 1){
+            $is_deleted = 1;     
+        }else{
+            $is_deleted = 0;
+        }
 
         $abs->is_external = true;
         $abs->num = $jAbs->num;

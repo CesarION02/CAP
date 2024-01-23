@@ -602,18 +602,21 @@ class SDelayReportUtils {
         $secondDate = (clone $firstDate)->addDays(6);
 
         $search = true;
+        $maxIterations = 100;
+        $it = 0;
         $i = 0;
-        while ($search) {
-                if ($oDtCompare->between($firstDate, $secondDate)) {
-                    return $schedules[$i]->schedule_template_id;
-                }
-                $firstDate = (clone $firstDate)->addDays(7);
-                $secondDate = (clone $firstDate)->addDays(6);
-                $i++;
-                if($i == $count){
-                    $i = 0;
-                }
-                
+        while ($search && $it < $maxIterations) {
+            if ($oDtCompare->between($firstDate, $secondDate)) {
+                return $schedules[$i]->schedule_template_id;
+            }
+            $firstDate = (clone $firstDate)->addDays(7);
+            $secondDate = (clone $firstDate)->addDays(6);
+            $i++;
+            if ($i == $count) {
+                $i = 0;
+            }
+
+            $it++;
         }
     }
 

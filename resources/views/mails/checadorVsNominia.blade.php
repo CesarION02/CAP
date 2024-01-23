@@ -10,7 +10,7 @@
 
 <body>
     <div class="container">
-        <h3>Reporte del {{$ini}} al {{$end}}</h3>
+        <h3>Reporte checador vs. nómina del {{$ini}} al {{$end}}</h3>
     </div>
 </body>
 
