@@ -42,7 +42,7 @@ class SDataProcess {
 
       * @return [SRegistryRow] (array)
       */
-    public static function process($sStartDate, $sEndDate, $payWay, $lEmployees)
+    public static function process($sStartDate, $sEndDate, $payWay, $lEmployees, $is_active = 0)
     {
         /**
          * Guarda un objeto de la clase Logger, con esto durante el proceso se almacenarán 
@@ -55,7 +55,9 @@ class SDataProcess {
         $comments = commentsControl::where('is_delete',0)->select('key_code','value')->get();
 
         // Filtrar empleados, solo aparecerán aquellos que hayan sido dados de alta antes de la fecha de inicio
-        $lEmployees = SReportsUtils::filterEmployeesByAdmissionDate($lEmployees, $sEndDate, 'id');
+        if($is_active == 0){
+            $lEmployees = SReportsUtils::filterEmployeesByAdmissionDate($lEmployees, $sEndDate, 'id');
+        }
 
         $data53 = SDataProcess::getSchedulesAndChecks($sStartDate, $sEndDate, $payWay, $lEmployees, $comments);
 

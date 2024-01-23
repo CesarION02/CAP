@@ -10,7 +10,7 @@ var app = new Vue({
         payrollNumber: 0,
         payrollYear: 0,
         idDelegation: 0,
-        picked: 'period',
+        picked: oData.picked,
         idEmployee: null,
         oDelegation: {}
     },
