@@ -24,14 +24,21 @@
                 </div>
             </div>
             <form action="{{ route(''.$sRoute.'') }}" id="theForm">
-                <div class="box-body" id="reportApp">
+                <input type="hidden" name="is_active" id="is_active" value="{{$is_active}}">
+                 <div class="box-body" id="reportApp">
                     <div class="row">
                         <div class="col-md-2 requerido">
                             Filtrar por:*
                         </div>
-                        <div class="col-md-3 col-md-offset-1">
-                            <label><input v-model="picked" v-on:change="onFilterTypeChange()" type="radio" name="optradio" value="period" onclick="chosDisable();">Periodicidad de pago</label>
-                        </div>
+                        @if($is_active == 0)
+                            <div class="col-md-3 col-md-offset-1">
+                                <label><input v-model="picked" v-on:change="onFilterTypeChange()" type="radio" name="optradio" value="period" onclick="chosDisable();">Periodicidad de pago</label>
+                            </div>
+                        @else
+                            <div class="col-md-3 col-md-offset-1">
+                                <label><input disabled v-model="picked" v-on:change="onFilterTypeChange()" type="radio" name="optradio" value="period" onclick="chosDisable();">Periodicidad de pago</label>
+                            </div>
+                        @endif
                         <div class="col-md-3">
                             <label><input v-model="picked" v-on:change="onFilterTypeChange()" type="radio" name="optradio" value="employee" onclick="chosEnable();">Empleado</label>
                         </div>
@@ -163,6 +170,7 @@
                 this.lEmployees = <?php echo json_encode($lEmployees) ?>;
                 this.lAreas = this.aData[0];
                 this.lDepts = this.aData[1];
+                this.picked = <?php echo json_encode($radioB) ?>;
             }
             var oGui = new SGui();
             var oData = new GlobalData();

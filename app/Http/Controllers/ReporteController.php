@@ -378,30 +378,44 @@ class ReporteController extends Controller
                     ->with('startOfWeek', $config->startOfWeek);
     }
 
-    public function genHrExReport()
+    public function genHrExReport($id = 0)
     {
         $config = \App\SUtils\SConfiguration::getConfigurations();
 
         $bDirect = false;
         $payType = 0;
         $bDelegation = null;
-        $subEmployees = SPrepayrollUtils::getEmployeesByUser(\Auth::user()->id, $payType, $bDirect, $bDelegation);
-        if ($subEmployees == null) {
-            $lEmployees = SGenUtils::toEmployeeIds(0, 0, []);
-        }
-        else {
-            $qEmployees = SGenUtils::toEmployeeQuery(0, 0, []);
+        if($id != 0){
+            $lEmployees = SGenUtils::toEmployeeIdsInactive(0, 0, []);
+            $sTitle = 'Reporte de tiempos extra colaboradores inactivos';
+        }else{
+            $subEmployees = SPrepayrollUtils::getEmployeesByUser(\Auth::user()->id, $payType, $bDirect, $bDelegation);
+            if ($subEmployees == null) {
+                $lEmployees = SGenUtils::toEmployeeIds(0, 0, []);
+            }
+            else {
+                $qEmployees = SGenUtils::toEmployeeQuery(0, 0, []);
 
-            $lEmployees = $qEmployees->whereIn('e.id', $subEmployees)
-                            ->orderBy('e.name', 'ASC')
-                            ->get();
+                $lEmployees = $qEmployees->whereIn('e.id', $subEmployees)
+                                ->orderBy('e.name', 'ASC')
+                                ->get();
+            }
+            $sTitle = 'Reporte de tiempos extra colaboradores activos';
+        }
+        $radioB = 'period';
+        if($id == 0){
+            $radioB = 'period';
+        }else{
+            $radioB = 'employee';
         }
 
         return view('report.reportsGen')
                     ->with('tReport', \SCons::REP_HR_EX)
-                    ->with('sTitle', 'Reporte de tiempos extra')
+                    ->with('sTitle', $sTitle)
                     ->with('sRoute', 'reportetiemposextra')
                     ->with('lEmployees', $lEmployees)
+                    ->with('is_active',$id)
+                    ->with('radioB',$radioB)
                     ->with('startOfWeek', $config->startOfWeek);
     }
 
@@ -471,7 +485,7 @@ class ReporteController extends Controller
 
             $filterType = $request->i_filter;
             $ids = $request->elems;
-            $lEmployees = SGenUtils::toEmployeeIds($payWay, $filterType, $ids, [] , $nochecan);
+                $lEmployees = SGenUtils::toEmployeeIds($payWay, $filterType, $ids, [] , $nochecan);
         }
 
         $lRows = SDataProcess::process($sStartDate, $sEndDate, $payWay, $lEmployees);
@@ -533,6 +547,7 @@ class ReporteController extends Controller
      */
     public function hrExtReport(Request $request)
     {
+        $is_active = $request->is_active;
         $sStartDate = $request->start_date;
         $sEndDate = $request->end_date;
         $iEmployee = $request->emp_id;
@@ -586,9 +601,15 @@ class ReporteController extends Controller
             }
 
             if ($request->optradio == "employee") {
+
                 if ($iEmployee > 0) {
-                    $lEmployees = SGenUtils::toEmployeeIds(0, 0, 0, [$iEmployee]);
-                    $payWay = $lEmployees[0]->way_pay_id;
+                    if($is_active == 0){
+                        $lEmployees = SGenUtils::toEmployeeIds(0, 0, 0, [$iEmployee]);
+                        $payWay = $lEmployees[0]->way_pay_id;
+                    }else{
+                        $lEmployees = SGenUtils::toEmployeeIdsInactive(0, 0, 0, [$iEmployee]);
+                        $payWay = $lEmployees[0]->way_pay_id;   
+                    }
                 }
                 else {
                     return \Redirect::back()->withErrors(['Error', 'Debe seleccionar empleado']);
@@ -604,7 +625,12 @@ class ReporteController extends Controller
 
                 $filterType = $request->i_filter;
                 $ids = $request->elems;
-                $lEmployees = SGenUtils::toEmployeeIds($payWay, $filterType, $ids);
+                if($is_active == 0){
+                    $lEmployees = SGenUtils::toEmployeeIds($payWay, $filterType, $ids);
+                }else{
+                    $lEmployees = SGenUtils::toEmployeeIdsInactive($payWay, $filterType, $ids);
+                }
+                
             }
 
             if ($bDelegation) {
@@ -651,14 +677,20 @@ class ReporteController extends Controller
                     $lEmployees = $lColEmps->whereIn('id', $subEmployees);
                 }
             }
-
-            $lEmployees = SReportsUtils::filterEmployeesByAdmissionDate($lEmployees, $sEndDate, 'id');
+            if($is_active == 0){
+                $lEmployees = SReportsUtils::filterEmployeesByAdmissionDate($lEmployees, $sEndDate, 'id');
+            }
+            
 
             /******************************************************************************************************** 
              * Proceso de prenómina
             */
-
-            $lRows = SDataProcess::process($sStartDate, $sEndDate, $payWay, $lEmployees);
+            if($is_active == 0){
+                $lRows = SDataProcess::process($sStartDate, $sEndDate, $payWay, $lEmployees);
+            }else{
+                $lRows = SDataProcess::process($sStartDate, $sEndDate, $payWay, $lEmployees,$is_active);
+            }
+            
 
             /******************************************************************************************************* */
 
@@ -809,6 +841,7 @@ class ReporteController extends Controller
                         ->with('filter_employees',$filter_employees)
                         ->with('pay_way', $request->pay_way)
                         ->with('bDelegation', $bDelegation)
+                        ->with('is_active', $is_active)
                         ->with('idDelegation', $idDelegation);
             }
             else {
@@ -867,6 +900,7 @@ class ReporteController extends Controller
                         ->with('oPrepayrollCtrl', $oPrepayrollCtrl)
                         ->with('idPreNomina', $payWay == \SCons::PAY_W_Q ? "biweek" : "week")
                         ->with('bDelegation', $bDelegation)
+                        ->with('is_active', $is_active)
                         ->with('idDelegation', $idDelegation);
             }
         }
@@ -892,6 +926,7 @@ class ReporteController extends Controller
         $payWay = $request->way_pay;
         $id = 0;
         $id = $request->vals;
+        $inactivos = 0;
         
         switch($request->reportType){
             case 1:
@@ -996,9 +1031,26 @@ class ReporteController extends Controller
                         $lEmployees[$i] = $employees[$i]->id; 
                     }
                 break;
+            case 6:
+                    $employees = DB::table('employees')
+                        ->orderBy('employees.job_id')
+                        ->where('employees.is_delete','0')
+                        ->whereIn('employees.id',$id)
+                        ->where('employees.way_pay_id',$payWay)
+                        ->get();
+    
+                        for($i = 0 ; count($employees) > $i ; $i++){
+                            $lEmployees[$i] = $employees[$i]->id; 
+                        }
+                        $inactivos = 1;
+                break;
+                
             
         }
-        $prueba = SInfoWithPolicy::preProcessInfo($sStartDate,$year,$sEndDate,$payWay,0);
+        if($inactivos == 0){
+            $prueba = SInfoWithPolicy::preProcessInfo($sStartDate,$year,$sEndDate,$payWay,0);
+        }
+        
         //SHolidayWork::holidayWorked($sStartDate,$sEndDate);
         
         //$lEmployees[0] = 32; 
@@ -1121,12 +1173,20 @@ class ReporteController extends Controller
                 $lDepts = DepartmentRH::select('id','name')->where('is_delete', false)->get();
                 break;
             case 4:
+            case 5:
                 $lEmployees = employees::select('id', 'name', 'num_employee')
                                         ->where('is_delete', false)
+                                        ->where('is_active', true)
                                         ->orderBy('name', 'ASC')
                                         ->get();
                 break;
-            
+            case 6:
+                $lEmployees = employees::select('id', 'name', 'num_employee')
+                                        ->where('is_delete', false)
+                                        ->where('is_active', false)
+                                        ->orderBy('name', 'ASC')
+                                        ->get();
+                break;
             default:
                 # code...
                 break;
