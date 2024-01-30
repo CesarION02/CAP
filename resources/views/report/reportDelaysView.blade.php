@@ -55,12 +55,12 @@
                     @if(isset($wizard))
                         @if( $wizard != 2)
                             <div class="col-md-2" style="text-align: right">
-                                <a href="{{ route('generarreportetiemposextra') }}" target="_blank" class="btn btn-success">Nuevo reporte</a>
+                                <a href="{{ route('generarreportetiemposextra',['id' => 0]) }}" target="_blank" class="btn btn-success">Nuevo reporte</a>
                             </div>
                         @endif
                     @else
                         <div class="col-md-2" style="text-align: right">
-                            <a href="{{ route('generarreportetiemposextra') }}" target="_blank" class="btn btn-success">Nuevo reporte</a>
+                            <a href="{{ route('generarreportetiemposextra', ['id' => 1]) }}" target="_blank" class="btn btn-success">Nuevo reporte</a>
                         </div>
                     @endif
                     <div class="col-md-2" style="text-align: center">
@@ -143,12 +143,12 @@
                                 @if( $wizard != 2)
                                     <button onclick="reloadFunction()" id="reloadBtn" title="Recargar reporte">Actualizar</button>
                                     <button onclick="topFunction()" id="myBtn" title="Ir arriba">Ir arriba</button>
-                                    <a href="{{ route('generarreportetiemposextra') }}" target="_blank" id="newButton" title="Nuevo reporte">Nuevo reporte</a>
+                                    <a href="{{ route('generarreportetiemposextra', ['id' => 0]) }}" target="_blank" id="newButton" title="Nuevo reporte">Nuevo reporte</a>
                                 @endif
                             @else
                                 <button onclick="reloadFunction()" id="reloadBtn" title="Recargar reporte">Actualizar</button>
                                 <button onclick="topFunction()" id="myBtn" title="Ir arriba">Ir arriba</button>
-                                <a href="{{ route('generarreportetiemposextra') }}" target="_blank" id="newButton" title="Nuevo reporte">Nuevo reporte</a>
+                                <a href="{{ route('generarreportetiemposextra', ['id' => 1]) }}" target="_blank" id="newButton" title="Nuevo reporte">Nuevo reporte</a>
                             @endif
                         </table>
                         @if( isset($wizard))
