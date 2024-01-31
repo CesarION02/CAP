@@ -409,6 +409,28 @@ class ReporteController extends Controller
             $radioB = 'employee';
         }
 
+        $isAdmin = false;
+        foreach (auth()->user()->roles()->get() as $rol) {
+            $result = in_array($rol->id, $config->rolesCanSeeAll);
+            if ($result) {
+                $isAdmin = true;
+                break;
+            }
+        }
+
+        $lSuperviser = [];
+        if($isAdmin){
+            $lSuperviser = DB::table('users')
+                        ->join('prepayroll_groups_users as pru','pru.head_user_id','=','users.id')
+                        ->select('users.id','users.name')
+                        ->where('users.is_delete', 0)
+                        ->groupBy(['users.id'])
+                        ->orderBy('users.name')
+                        ->get();
+
+            $lSuperviser->prepend(['id' => 0, 'name' => 'Todos']);
+        }
+
         return view('report.reportsGen')
                     ->with('tReport', \SCons::REP_HR_EX)
                     ->with('sTitle', $sTitle)
@@ -416,7 +438,9 @@ class ReporteController extends Controller
                     ->with('lEmployees', $lEmployees)
                     ->with('is_active',$id)
                     ->with('radioB',$radioB)
-                    ->with('startOfWeek', $config->startOfWeek);
+                    ->with('startOfWeek', $config->startOfWeek)
+                    ->with('lSuperviser',$lSuperviser)
+                    ->with('isAdmin', $isAdmin);
     }
 
     public function genHrExReportDelegations($id = 0)
@@ -554,6 +578,7 @@ class ReporteController extends Controller
         $reportMode = $request->report_mode;
         $bDelegation = $request->delegation;
         $idDelegation = $request->id_delegation;
+        $superviser = $request->superviser;
 
         if (isset($request->wizard)) {
             $wizard = $request->wizard;
@@ -670,11 +695,34 @@ class ReporteController extends Controller
             }
 
             $bDirect = false;
-            $subEmployees = SPrepayrollUtils::getEmployeesByUser(\Auth::user()->id, $payWay, $bDirect, $idDelegation);
+
+            $user_id = \Auth::user()->id;
+
+            $isAdmin = false;
+            foreach (auth()->user()->roles()->get() as $rol) {
+                $result = in_array($rol->id, $config->rolesCanSeeAll);
+                if ($result) {
+                    $isAdmin = true;
+                    break;
+                }
+            }
+            if($isAdmin){
+                if($superviser != 0){
+                    $user_id = $superviser;
+                }
+            }
+            $subEmployees = SPrepayrollUtils::getEmployeesByUser($user_id, $payWay, $bDirect, $idDelegation);
+
             if (! is_null($subEmployees) && count($subEmployees) >= 0) {
                 $lColEmps = collect($lEmployees);
                 if(!$seeAll){
                     $lEmployees = $lColEmps->whereIn('id', $subEmployees);
+                }
+
+                if($isAdmin){
+                    if($superviser != 0){
+                        $lEmployees = $lColEmps->whereIn('id', $subEmployees);
+                    }
                 }
             }
             if($is_active == 0){

@@ -26,6 +26,19 @@
             <form action="{{ route(''.$sRoute.'') }}" id="theForm">
                 <input type="hidden" name="is_active" id="is_active" value="{{$is_active}}">
                  <div class="box-body" id="reportApp">
+                    @if($isAdmin)
+                        <div class="row">
+                            <div class="col-md-2">
+                                Supervisores:
+                            </div>
+                            <div class="col-md-7 col-md-offset-1">
+                                <select name="superviser" form="theForm" id="superviser" class="form-control chosen-select" data-placeholder="Selecciona supervisor...">
+                                    <option v-for="superviser in lSuperviser" :value="superviser.id">@{{superviser.name}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <br>
+                    @endif
                     <div class="row">
                         <div class="col-md-2 requerido">
                             Filtrar por:*
@@ -171,6 +184,7 @@
                 this.lAreas = this.aData[0];
                 this.lDepts = this.aData[1];
                 this.picked = <?php echo json_encode($radioB) ?>;
+                this.lSuperviser = <?php echo json_encode($lSuperviser) ?>;
             }
             var oGui = new SGui();
             var oData = new GlobalData();

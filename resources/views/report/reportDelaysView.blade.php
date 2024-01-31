@@ -44,14 +44,6 @@
                     @endif
                         <p>Periodo: <b>{{ $sStartDate }}</b> - <b>{{ $sEndDate }}</b>. P. pago: <b>{{ $sPayWay }}</b>.</p>
                     </div>
-                    @if($isAdmin)
-                        <div class="col-md-3">
-                            <label>Supervisores: </label>
-                            <select class="select2-class" id="supervisores">
-                                <option v-for="user in lUsers" :value="user.id">@{{user.name}}</option>
-                            </select>
-                        </div>
-                    @endif
                     @if(isset($wizard))
                         @if( $wizard != 2)
                             <div class="col-md-2" style="text-align: right">

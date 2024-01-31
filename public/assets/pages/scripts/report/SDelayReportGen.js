@@ -2,6 +2,7 @@ var app = new Vue({
     el: '#reportDelayAppGen',
     data: {
         lEmps: oData.lEmployees,
+        lSuperviser: oData.lSuperviser,
         oPayrolls: oData.oPayrolls == undefined ? [] : oData.oPayrolls,
         coDates: "0_0_0_0",
         iPayWay: 2,
