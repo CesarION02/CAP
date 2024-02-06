@@ -50,7 +50,7 @@ class ExternalAdjustsController extends Controller
                 
             // sincroniza con el ERP para asegurarse de tener los datos actualizados
             $config = \App\SUtils\SConfiguration::getConfigurations();
-            $correcto = SyncController::syncronizeWithERP($config->lastSyncDateTime);
+            // $correcto = SyncController::syncronizeWithERP($config->lastSyncDateTime);
             
             // busca el empleado y en caso que no exista devuleve un error
             $oEmp = employees::where('external_id', $employee_id)->first();
@@ -339,5 +339,39 @@ class ExternalAdjustsController extends Controller
         }
 
         
+    }
+
+    public function checkAdjust(Request $request){
+        try {
+            $employee_id = $request->input('employee_id');
+            $dt_date = $request->input('dt_date');
+            $adjust_type_id = $request->input('adjust_type_id');
+
+            $oEmp = employees::where('external_id', $employee_id)->first();
+
+            $result = prepayrollAdjust::where('employee_id', $oEmp->id)
+                                        ->where('dt_date', $dt_date)
+                                        ->where('adjust_type_id', $adjust_type_id)
+                                        ->where('is_delete', 0)
+                                        ->first();
+
+            if (is_null($result)) {
+                return response()->json([
+                    'code' => 500,
+                    'message' => 'El permiso no se encontró en el sistema CAP, el proceso siguiente es rechazar el permiso, no eliminarlo',
+                ]);
+            }else{
+                return response()->json([
+                    'code' => 550,
+                    'message' => 'El permiso existé en el sistema CAP',
+                ]);
+            }
+                                        
+        } catch (\Throwable $th) {
+            return response()->json([
+                'code' => 500,
+                'message' => $th->getMessage(),
+            ]);
+        }
     }
 }

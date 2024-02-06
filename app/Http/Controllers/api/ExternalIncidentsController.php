@@ -89,7 +89,7 @@ class ExternalIncidentsController extends Controller
             
             // sincroniza con el ERP para asegurarse de tener los datos actualizados
             $config = \App\SUtils\SConfiguration::getConfigurations();
-            $correcto = SyncController::syncronizeWithERP($config->lastSyncDateTime);
+            // $correcto = SyncController::syncronizeWithERP($config->lastSyncDateTime);
             
             // busca el empleado y en caso que no exista devuleve un error
             $oEmp = employees::where('external_id', $employee_id)->first();
@@ -314,5 +314,35 @@ class ExternalIncidentsController extends Controller
         }
     }
 
-    
+    public function checkIncidence(Request $request){
+        try {
+            $ini_date = $request->input('ini_date');
+            $end_date = $request->input('end_date');
+            $employee_id = $request->input('employee_id');
+            $oEmp = employees::where('external_id', $employee_id)->first();
+
+            $oIncident = new incident();
+            $oIncident->start_date = $ini_date;
+            $oIncident->end_date = $end_date;
+
+            $resp = SIncidentValidations::validateIncidentsAndHolidays($oIncident->start_date, $oIncident->end_date, $oEmp->id, 0);
+            if ($resp['status'] != 'error') {
+                return response()->json([
+                    'code' => 500,
+                    'message' => 'La incidencia no se encontró en el sistema CAP, el proceso siguiente es rechazar el permiso, no eliminarlo',
+                ]);
+            }
+
+        } catch (\Throwable $th) {
+            return response()->json([
+                'code' => 500,
+                'message' => $th->getMessage(),
+            ]);
+        }
+
+        return response()->json([
+            'code' => 550,
+            'message' => 'La incidencia existé en el sistema CAP',
+        ]);
+    }
 }

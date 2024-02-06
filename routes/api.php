@@ -85,11 +85,29 @@ Route::group(['middleware' => 'auth:api'], function() {
         'uses' => 'api\\ExternalIncidentsController@cancelIncidents'
     ]);
 
+    /**
+     * Check incidence
+     */
+    Route::post('checkincidence', [
+        'uses' => 'api\\ExternalIncidentsController@checkIncidence'
+    ]);
+
     /*
     * cancel adjust
     **/
     Route::post('canceladjust', [
         'uses' => 'api\\ExternalAdjustsController@cancelAdjust'
+    ]);
+
+    /**
+     * Check adjust
+     */
+    Route::post('checkadjust', [
+        'uses' => 'api\\ExternalAdjustsController@checkAdjust'
+    ]);
+
+    Route::post('getListUsers', [
+        'uses' => 'api\\apiGlobalUsersController@getListUsersToGlobalUsers'
     ]);
 
 });
