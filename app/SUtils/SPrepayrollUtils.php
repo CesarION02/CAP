@@ -211,6 +211,7 @@ class SPrepayrollUtils {
     private static function getChildren($idGroup) {
         $children = \DB::table('prepayroll_groups AS pg')
                         ->where('pg.father_group_n_id', $idGroup)
+                        ->where('pg.is_delete', 0)
                         ->pluck('pg.id_group')
                         ->toArray();
 

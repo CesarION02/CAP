@@ -55,7 +55,7 @@ class SDataProcess {
         $comments = commentsControl::where('is_delete',0)->select('key_code','value')->get();
 
         // Filtrar empleados, solo aparecerán aquellos que hayan sido dados de alta antes de la fecha de inicio
-        if($is_active == 0){
+        if ($is_active == 0) {
             $lEmployees = SReportsUtils::filterEmployeesByAdmissionDate($lEmployees, $sEndDate, 'id');
         }
 
@@ -426,7 +426,7 @@ class SDataProcess {
             $result = SDelayReportUtils::getSchedule($sStartDate, $sEndDate, $idEmployee, $registry, clone $qWorkshifts, \SCons::REP_HR_EX);
 
             // no tiene horario para el día actual
-            if ($result == null) {
+            if (is_null($result)) {
                 if ($isNew) {
                     $bFound = false;
                     if ($registry->date == $sStartDate) {
@@ -440,7 +440,7 @@ class SDataProcess {
                             $entry = $oAux->entry;
                         }
                         
-                        $oFoundRegistryI = SDelayReportUtils::getRegistry($oDateAux->toDateString(), $idEmployee, \SCons::REG_IN, $entry);
+                        $oFoundRegistryI = SDelayReportUtils::getRegistry($oDateAux->toDateString(), $idEmployee, \SCons::REG_IN, $entry, null);
 
                         if ($oFoundRegistryI != null) {
                             $newRow->sInDate = $oFoundRegistryI->date.' '.$oFoundRegistryI->time;
@@ -559,7 +559,7 @@ class SDataProcess {
                         if ($oAux != null) {
                             $entry = $oAux->entry;
                         }
-                        $oFoundRegistryI = SDelayReportUtils::getRegistry($oDateAux->toDateString(), $idEmployee, \SCons::REG_IN, $entry);
+                        $oFoundRegistryI = SDelayReportUtils::getRegistry($oDateAux->toDateString(), $idEmployee, \SCons::REG_IN, $entry, null);
 
                         if ($oFoundRegistryI != null) {
                             $newRow->sInDate = $oFoundRegistryI->date.' '.$oFoundRegistryI->time;
@@ -611,8 +611,8 @@ class SDataProcess {
 
         }
         else {
-            if ($newRow->outDate == null) {
-                if ($newRow->inDate == null) {
+            if (is_null($newRow->outDate)) {
+                if (is_null($newRow->inDate)) {
                     $newRow->sInDate = $registry->date.' '.$registry->time;
                     $newRow->inDate = $registry->date;
                     $newRow->inDateTime = $registry->date.' '.$registry->time;
@@ -675,7 +675,7 @@ class SDataProcess {
                         // buscar salida un día después
                         $oDateAux = Carbon::parse($registry->date);
                         $oDateAux->addDay();
-                        $oFoundRegistry = SDelayReportUtils::getRegistry($oDateAux->toDateString(), $idEmployee, \SCons::REG_OUT);
+                        $oFoundRegistry = SDelayReportUtils::getRegistry($oDateAux->toDateString(), $idEmployee, \SCons::REG_OUT, null);
                         
                         if ($oFoundRegistry != null) {
                             $bAfterDay = true;
@@ -792,7 +792,7 @@ class SDataProcess {
      */
     private static function setDates($result = null, $oRow = null, $sDate = null, $comments = null)
     {
-        if ($result == null) {
+        if (is_null($result)) {
             $oRow->outDate = $sDate;
             $oRow->inDate = $sDate;
             // $oRow->inDateTime = $sDate.' 00:00:00';
@@ -1877,36 +1877,17 @@ class SDataProcess {
         $sdate = $oRegistry->date;
         $comparison = null;
         
-        // if ($registries[0]->type_id == \SCons::REG_OUT) {
-        //     $comparison = SDelayReportUtils::compareDates($sdate.' '.$oRegistry->time, $sdate.' 06:30:00');
-
-        //     return (abs($comparison->diffMinutes) <= $config->maxGapMinutes) ? 1 : 0;
-        // }
         if ($oRegistry->type_id == \SCons::REG_IN) {
             $comparison = SDelayReportUtils::compareDates($sdate.' '.$oRegistry->time, $sdate.' 22:30:00');
             
             if (abs($comparison->diffMinutes) <= $config->maxGapMinutes) {
                 $oDateAux = Carbon::parse($sdate);
                 $oDateAux->subDay();
-                $oFoundRegistry = SDelayReportUtils::getRegistry($oDateAux->toDateString(), $idEmployee, \SCons::REG_IN, '22:30:00');
+                $oFoundRegistry = SDelayReportUtils::getRegistry($oDateAux->toDateString(), $idEmployee, \SCons::REG_IN, '22:30:00', null);
 
                 if ($oFoundRegistry == null) {
                     return 2;
                 }
-                // else {
-                //     $comparison = SDelayReportUtils::compareDates($oFoundRegistry->date.' '.$oFoundRegistry->time, $oDateAux->toDateString().' 22:30:00');
-
-                //     if (abs($comparison->diffMinutes) <= $config->maxGapMinutes) {
-                //         if (! is_array($registries)) {
-                //             $registries = $registries->toArray();
-                //         }
-                //         array_unshift($registries, $oFoundRegistry);
-                //         return [0, $registries];
-                //     }
-                //     else {
-                //         return 2;
-                //     }
-                // }
             }
         }
 
@@ -1984,7 +1965,7 @@ class SDataProcess {
                     $oNewRow->hasCheckIn = false;
                     $oNewRow->hasCheckOut = false;
                     $oNewRow->comments = $oNewRow->comments."Sin checadas. ";
-                    if ($comments != null) {
+                    if (! is_null($comments)) {
                         if ($comments->where('key_code','hasChecks')->first()['value'] ||
                             $comments->where('key_code','hasCheckIn')->first()['value'] ||
                             $comments->where('key_code','hasCheckOut')->first()['value']) {
@@ -1996,19 +1977,48 @@ class SDataProcess {
                             }
                         }
                     }
+                    
+                    if ($sDate != $sStartDate) {
+                        $registry = (object) [
+                            'type_id' => \SCons::REG_OUT,
+                            'time' => '18:00:00',
+                            'date' => $sDate,
+                            'employee_id' => $idEmployee,
+                            'is_modified' => false
+                        ];
+    
+                        $result = SDelayReportUtils::getSchedule($sStartDate, $sEndDate, $idEmployee, $registry, clone $qWorkshifts, \SCons::REP_HR_EX);
+                        if (! is_null($result)) {
+                            $result->withRegistry = false;
+                        }
+                    }
+                    else {
+                        // Restar un día a la fecha de inicio para buscar checada de entrada un día previo
+                        $oDateAux = Carbon::parse($sStartDate);
+                        $oDateAux->subDay();
+                        $time = "18:00:00";
+                        $oFoundRegistryI = SDelayReportUtils::getRegistry($oDateAux->toDateString(), $idEmployee, \SCons::REG_IN, $time, ">=");
+                        if (! is_null($oFoundRegistryI)) {
+                            $oNewRow->inDate = $oDateAux->toDateString();
+                            $oNewRow->inDateTime = $oFoundRegistryI->date.' '.$oFoundRegistryI->time;
+                            $oNewRow->hasChecks = true;
+                            $oNewRow->hasCheckIn = true;
+                            $oNewRow->comments = str_replace("Sin checadas. ", "", $oNewRow->comments);
+                            $oNewRow->hasCheckOut = false;
+                            $oNewRow->comments = $oNewRow->comments."Sin salida. ";
+                        }
 
-                    $registry = (object) [
-                        'type_id' => \SCons::REG_OUT,
-                        'time' => '18:00:00',
-                        'date' => $sDate,
-                        'employee_id' => $idEmployee,
-                        'is_modified' => false
-                    ];
-
-                    $result = SDelayReportUtils::getSchedule($sStartDate, $sEndDate, $idEmployee, $registry, clone $qWorkshifts, \SCons::REP_HR_EX);
-
-                    if (! is_null($result)) {
-                        $result->withRegistry = false;
+                        $registry = (object) [
+                            'type_id' => \SCons::REG_OUT,
+                            'time' => '18:00:00',
+                            'date' => $sStartDate,
+                            'employee_id' => $idEmployee,
+                            'is_modified' => false
+                        ];
+                        $result = SDelayReportUtils::getSchedule($sStartDate, $sStartDate, $idEmployee, $registry, clone $qWorkshifts, \SCons::REP_HR_EX);
+                        if (! is_null($result)) {
+                            $result->withRegistry = false;
+                        }
                     }
 
                     $oNewRow = SDataProcess::setDates($result, $oNewRow, $sDate, $comments);

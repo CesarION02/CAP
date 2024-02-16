@@ -308,16 +308,7 @@ class SDelayReportUtils {
         return $registries;
     }
 
-    /**
-     * Undocumented function
-     *
-     * @param string $sDate
-     * @param int $iEmployee
-     * @param int \SCons::REG_OUT \SCons::REG_IN
-     * 
-     * @return \stdClass|null $registry
-     */
-    public static function getRegistry($sDate, $iEmployee, $iType, $time = "")
+    public static function getRegistry($sDate, $iEmployee, $iType, $time = "", $condition = "")
     {
         $registry = \DB::table('registers AS r')
                                 ->join('employees AS e', 'e.id', '=', 'r.employee_id')
@@ -328,7 +319,21 @@ class SDelayReportUtils {
                                 ->where('e.id', $iEmployee)
                                 // ->select('r.*', 'e.num_employee', 'e.name', 'e.is_overtime')
                                 // ->select('r.*', 'e.num_employee', 'e.name', 'e.policy_extratime_id', 'e.external_id');
-                                ->select('r.*', 'd.id AS dept_id', 'e.num_employee', 'e.name', 'e.policy_extratime_id', 'e.external_id', 'd.area_id AS employee_area_id');
+                                ->select('r.*', 
+                                        'd.id AS dept_id', 
+                                        'e.num_employee', 
+                                        'e.name', 
+                                        'e.policy_extratime_id', 
+                                        'e.external_id', 
+                                        'd.area_id AS employee_area_id');
+
+        $bCondition = false;
+        if (! is_null($condition) && strlen($condition) > 0) {
+            if ($condition == ">" || $condition == ">=" || $condition == "<" || $condition == "<=") {
+                $registry = $registry->where('r.time', $condition, $time);
+                $bCondition = true;
+            }
+        }
 
         if ($iType == \SCons::REG_IN) {
             $registry = $registry->orderBy('date', 'DESC')
@@ -341,7 +346,7 @@ class SDelayReportUtils {
 
         $registry = $registry->get();
 
-        if ($time != "") {
+        if ($time != "" && ! $bCondition) {
             $config = \App\SUtils\SConfiguration::getConfigurations();
 
             foreach ($registry as $reg) {

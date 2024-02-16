@@ -1056,6 +1056,7 @@ class prePayrollController extends Controller
         $groups = DB::table('prepayroll_groups AS pg')
                         ->join('prepayroll_groups_users AS pgu', 'pg.id_group', '=', 'pgu.group_id')
                         ->where('pgu.head_user_id', auth()->user()->id)
+                        ->where('pg.is_delete', 0)
                         ->pluck('pg.id_group')
                         ->toArray();
 
@@ -1069,6 +1070,7 @@ class prePayrollController extends Controller
                                     ->join('users AS u', 'pgu.head_user_id', '=', 'u.id')
                                     ->whereIn('pg.id_group', $lChildrenGroups)
                                     ->where('pgu.head_user_id', '<>', auth()->user()->id)
+                                    ->where('pg.is_delete', 0)
                                     ->select('pg.id_group','pgu.head_user_id', 'group_name', 'u.name AS user_name')
                                     ->get();
             
@@ -1078,6 +1080,7 @@ class prePayrollController extends Controller
                                 ->where('num_'.$request->idprenomina, $sectNum)
                                 ->where('user_vobo_id', $group->head_user_id)
                                 ->where('user_vobo_id', '<>', auth()->user()->id)
+                                ->where('is_delete', 0)
                                 ->where('is_required', true);
     
                 $aux = clone $is_vobo;
@@ -1102,6 +1105,7 @@ class prePayrollController extends Controller
                                 ->where('num_'.$request->idprenomina, $sectNum)
                                 ->where('order_vobo', '<', $oPpAuthCtrol->order_vobo)
                                 ->where('is_required', true)
+                                ->where('prac.is_delete', 0)
                                 ->where('is_vobo', false)
                                 ->select('is_vobo', 'u.name AS user_name')
                                 ->get();
@@ -1122,6 +1126,7 @@ class prePayrollController extends Controller
                                 ->where('order_vobo', '>=', $oPpAuthCtrol->order_vobo)
                                 ->where('user_vobo_id', '<>', auth()->user()->id)
                                 ->where('is_required', true)
+                                ->where('prac.is_delete', 0)
                                 // ->where('is_vobo', false)
                                 ->select('is_vobo', 'u.name AS user_name')
                                 ->get();
@@ -1188,7 +1193,7 @@ class prePayrollController extends Controller
 
             $res = DB::table('prepayroll_report_auth_controls')
                         ->where('id_control', $idVobo)
-                        ->where('user_vobo_id', auth()->user()->id)
+                        // ->where('user_vobo_id', auth()->user()->id)
                         ->update([
                             'is_vobo' => true, 
                             'dt_vobo' => Carbon::now()->toDateTimeString(),
