@@ -56,6 +56,13 @@ Route::group(['middleware' => 'auth:api'], function() {
     Route::get('infobyid', [
         'uses' => 'AccessControlController@getAllInfoById'
     ]);
+
+    Route::post('updateGlobal',[
+        'uses' => 'apiGlobalUsersController@update_global'
+    ]);
+    Route::get('getUserById/{id}', [
+        'uses' => 'apiGlobalUsersController@getUserById'
+    ]);
 });
 
 Route::group(['middleware' => 'auth:api'], function() {

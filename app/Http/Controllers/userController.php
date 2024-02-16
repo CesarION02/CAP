@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\SUtils\SDataShowUser;
 use Illuminate\Http\Request;
 use App\Models\Admin\rol;
 use App\Models\employees;
 use App\Models\User;
+use App\SUtils\SPghUtils;
+use GuzzleHttp\Client;
+use DB;
 
 class userController extends Controller
 {
@@ -79,6 +83,35 @@ class userController extends Controller
         return view('user.create', compact('employees'))->with('type',$type);
     }
 
+    public function create_with_global()
+    {
+        $json = '[{"id": 1,"name": "CARMONA FIGUEROA, EDWIN OMAR","num": 990,"external": 3338, "email": "cesar.i@swaplicado.com.mx", "contrasena": 1234},{"id": 2,"name": "Espinoza Lopez, Daniel","num": 326,"external": 1904, "email": "cesar.i@swaplicado.com.mx","contrasena": 1234}]';
+        $uGlobales = json_decode($json);
+        $employees = employees::orderBy('name','ASC')->where('is_active',1)->where('is_delete', 0)->pluck('num_employee','name');
+        $data = SPghUtils::loginToPGH();
+        $headers = [
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+            'Authorization' => $data->token_type.' '.$data->access_token
+        ];
+        
+        $client = new Client([
+            'base_uri' => '127.0.0.1/GHPort/public/api/',
+            'timeout' => 30.0,
+            'headers' => $headers
+        ]);   
+        $body = '{"company":"7"}';
+        $request = new \GuzzleHttp\Psr7\Request('GET', 'getPendingUser', $headers,$body);
+        $response = $client->sendAsync($request)->wait();
+        $jsonString = $response->getBody()->getContents();
+
+        $uGlobales = json_decode($jsonString);
+
+
+
+        return view('user.create_global')->with('uGlobales',$uGlobales->data)->with('employees',$employees);
+    }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -109,6 +142,68 @@ class userController extends Controller
         return redirect('user')->with('mensaje', 'Usuario creado con exito');
     }
 
+    public function save_with_global(Request $request){
+        try {
+
+
+            DB::beginTransaction();
+            $user = new User();
+            $user->name = $request->fname;
+            $user->email = $request->email;
+            $user->password = bcrypt($request->fpassword);
+            if ($request->femployee_id != 0){
+                $employee = DB::table('employees')->where('num_employee',$request->femployee_id)->first();
+                $user->employee_id = $employee->id;
+            }
+            $user->is_delete = 0;
+            $user->updated_by = session()->get('user_id');
+            $user->created_by = session()->get('user_id');
+            $user->save();
+            //DB::commit();
+
+            //enviar el id del usuario a global data
+            $data = SPghUtils::loginToPGH();
+            if($data->status == 'success'){
+                $headers = [
+                    'Content-Type' => 'application/json',
+                    'Accept' => '*/*',
+                    'Authorization' => $data->token_type.' '.$data->access_token
+                ];
+            
+                $client = new Client([
+                    'base_uri' => '127.0.0.1/GHPort/public/api/',
+                    'timeout' => 30.0,
+                    'headers' => $headers
+                ]);
+            
+                $body = json_encode(['user' => $user, 'id_global' => $request->fglobal, 'id_system' => '7']);
+                
+                $request = new \GuzzleHttp\Psr7\Request('POST', 'insertUserVsSystem', $headers, $body);
+                $response = $client->sendAsync($request)->wait();
+                $jsonString = $response->getBody()->getContents();
+                $data = json_decode($jsonString);
+
+                if($data->status == 'success'){
+                    DB::commit();
+                    return redirect('user')->with('mensaje', 'Usuario creado con exito');
+                }else{
+                    DB::rollBack();
+                    return redirect('user')->with('mensaje', 'No se pudo crear el usuario');
+                }
+
+            }else{
+                DB::rollBack();
+                return redirect('user')->with('mensaje', 'No se pudo crear el usuario');
+            }
+            
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            \Log::error($th);
+            return redirect('user')->with('mensaje', 'No se pudo crear el usuario');
+        }
+
+    }
+
     /**
      * Display the specified resource.
      *
@@ -132,6 +227,154 @@ class userController extends Controller
         $employees = employees::orderBy('id','ASC')->pluck('id','name');
         $type = 2;
         return view('user.edit', compact('data'))->with('employees',$employees)->with('type',$type);
+    }
+
+    public function editGlobal($id){
+        $data = User::findOrFail($id);
+        $employees = employees::orderBy('id','ASC')->pluck('id','name');
+        $rol = DB::table('user_rol')->where('user_id',$data->id)->first();
+        return view('user.editGlobal', compact('data'))->with('employees',$employees)->with('rol',$rol);   
+    }
+
+    public function editMyGlobal($id){
+        $data = User::findOrFail($id);
+        $employees = employees::orderBy('id','ASC')->pluck('id','name');
+        $rol = DB::table('user_rol')->where('user_id',$data->id)->first();
+        return view('user.editMyGlobal', compact('data'))->with('employees',$employees)->with('rol',$rol); 
+    }
+
+    public function updateGlobal(Request $request){
+        if (! (\Hash::check($request->prevpass, \Auth::user()->password))) {
+            return \Redirect::back()->withErrors(['Error', 'Las contraseña anterior no corresponde con nuestros registros']); 
+        }
+        if($request->newpass != $request->confirmpass){
+            return \Redirect::back()->withErrors(['Error', 'La nueva contraseña no es igual al campo confirmar contraseña']);   
+        }
+        try{
+            DB::transaction(function () use ($request) {
+                $user = User::findOrFail($request->id_user);
+                if($request->rol == 1 || $request->rol == 3 || $request->rol == 8 ){
+                    $user->email = $request->email;
+                    $user->name = $request->us;
+                    $user->password = \Hash::make($request->newpass);
+                }else{
+                    $user->password = \Hash::make($request->newpass);
+                }
+                $user->save();
+
+                if(isset($request->us)){
+                    $user->username = $request->us;
+                }else{
+                    $user->username = $user->name;
+                }
+                $user->pass = \Hash::make($request->newpass);  
+                //enviar el id del usuario a global data
+                $data = SPghUtils::loginToPGH();
+                if($data->status == 'success'){
+                    $headers = [
+                        'Content-Type' => 'application/json',
+                        'Accept' => '*/*',
+                        'Authorization' => $data->token_type.' '.$data->access_token
+                    ];
+                
+                    $client = new Client([
+                        'base_uri' => '127.0.0.1/GHPort/public/api/',
+                        'timeout' => 30.0,
+                        'headers' => $headers
+                    ]);
+                
+                    $body = json_encode(['user' => $user, 'fromSystem' => '7']);
+                    
+                    $request = new \GuzzleHttp\Psr7\Request('POST', 'UpdateGlobal', $headers, $body);
+                    $response = $client->sendAsync($request)->wait();
+                    $jsonString = $response->getBody()->getContents();
+                    $data = json_decode($jsonString);
+
+                    if($data->status == 'success'){
+                        DB::commit();
+                        return redirect('user')->with('mensaje', 'Usuario actualizado con exito');  
+                    }else{
+                        DB::rollBack();
+                        return redirect('user')->with('mensaje', 'Usuario no se puedo actualizar');  
+                    }
+                }else{
+                    DB::rollBack();
+                    return redirect('user')->with('mensaje', 'Usuario no se puedo actualizar');  
+                }
+
+            });                
+        } catch (\Throwable $th) {
+            $success = false;
+            DB::rollBack();
+            return redirect('user')->with('mensaje', 'Usuario no se puedo actualizar');  
+        }  
+            
+    }
+
+    public function updateMyGlobal(Request $request){
+        if (! (\Hash::check($request->prevpass, \Auth::user()->password))) {
+            return \Redirect::back()->withErrors(['Error', 'Las contraseña anterior no corresponde con nuestros registros']); 
+        }
+        if($request->newpass != $request->newpass1){
+            return \Redirect::back()->withErrors(['Error', 'La nueva contraseña no es igual al campo confirmar contraseña']);   
+        }
+
+        try{
+            DB::transaction(function () use ($request) {
+                $user = User::findOrFail($request->id_user);
+                if($request->rol == 1 || $request->rol == 3 || $request->rol == 8 ){
+                    $user->email = $request->email;
+                    $user->name = $request->us;
+                    $user->password = \Hash::make($request->newpass);
+                }else{
+                    $user->password = \Hash::make($request->newpass);
+                }
+                $user->save();
+                if(isset($request->us)){
+                    $user->username = $request->us;
+                }else{
+                    $user->username = $user->name;
+                }
+                $user->pass = \Hash::make($request->newpass); 
+                //DB::commit();
+                //enviar el id del usuario a global data
+                $data = SPghUtils::loginToPGH();
+                if($data->status == 'success'){
+                    $headers = [
+                        'Content-Type' => 'application/json',
+                        'Accept' => '*/*',
+                        'Authorization' => $data->token_type.' '.$data->access_token
+                    ];
+                
+                    $client = new Client([
+                        'base_uri' => '127.0.0.1/GHPort/public/api/',
+                        'timeout' => 30.0,
+                        'headers' => $headers
+                    ]);
+                
+                    $body = json_encode(['user' => $user, 'fromSystem' => '7']);
+                    
+                    $request = new \GuzzleHttp\Psr7\Request('POST', 'UpdateGlobal', $headers, $body);
+                    $response = $client->sendAsync($request)->wait();
+                    $jsonString = $response->getBody()->getContents();
+                    $data = json_decode($jsonString);
+                    if($data->status == 'success'){
+                        DB::commit();
+                        return redirect('user.editMyGlobal')->with('mensaje', 'Usuario actualizado con exito');
+                    }else{
+                        DB::rollBack();
+                        return redirect('user.editMyGlobal')->with('mensaje', 'El usuario no se puedo actualizar, trate más tarde');
+
+                    }
+                }else{
+                    DB::rollBack();
+                    return redirect('user.editMyGlobal')->with('mensaje', 'El usuario no se puedo actualizar, trate más tarde');
+                }
+            });                
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return redirect('user.editMyGlobal')->with('mensaje', 'El usuario no se puedo actualizar, trate más tarde');
+        }  
     }
 
     /**
@@ -306,4 +549,6 @@ class userController extends Controller
 
         return json_encode(['success' => true, 'message' => 'Registro copiado con exitó', 'icon' => 'success']);
     }
+
+    
 }
