@@ -285,7 +285,7 @@ class userController extends Controller
                 
                     $body = json_encode(['user' => $user, 'fromSystem' => '7']);
                     
-                    $request = new \GuzzleHttp\Psr7\Request('POST', 'UpdateGlobal', $headers, $body);
+                    $request = new \GuzzleHttp\Psr7\Request('POST', 'updateGlobal', $headers, $body);
                     $response = $client->sendAsync($request)->wait();
                     $jsonString = $response->getBody()->getContents();
                     $data = json_decode($jsonString);
@@ -315,7 +315,7 @@ class userController extends Controller
         if (! (\Hash::check($request->prevpass, \Auth::user()->password))) {
             return \Redirect::back()->withErrors(['Error', 'Las contraseña anterior no corresponde con nuestros registros']); 
         }
-        if($request->newpass != $request->newpass1){
+        if($request->newpass != $request->confirmpass){
             return \Redirect::back()->withErrors(['Error', 'La nueva contraseña no es igual al campo confirmar contraseña']);   
         }
 
@@ -324,7 +324,7 @@ class userController extends Controller
             $user = User::findOrFail($request->id_user);
             if($request->rol == 1 || $request->rol == 3 || $request->rol == 8 ){
                 $user->email = $request->email;
-                $user->name = $request->us;
+                $user->name = isset($request->us) ? $request->us : $user->name;
                 $user->password = \Hash::make($request->newpass);
             }else{
                 $user->password = \Hash::make($request->newpass);
@@ -354,25 +354,28 @@ class userController extends Controller
             
                 $body = json_encode(['user' => $user, 'fromSystem' => '7']);
                 
-                $request = new \GuzzleHttp\Psr7\Request('POST', 'UpdateGlobal', $headers, $body);
+                $request = new \GuzzleHttp\Psr7\Request('POST', 'updateGlobal', $headers, $body);
                 $response = $client->sendAsync($request)->wait();
                 $jsonString = $response->getBody()->getContents();
                 $data = json_decode($jsonString);
                 if($data->status == 'success'){
                     DB::commit();
-                    return redirect('user.editMyGlobal')->with('mensaje', 'Usuario actualizado con exito');
+                    return redirect()->route('editar_mi_usuario_global', $user->id)->with('mensaje', 'Usuario actualizado con exito');
                 }else{
                     DB::rollBack();
-                    return redirect('user.editMyGlobal')->with('mensaje', 'El usuario no se puedo actualizar, trate más tarde');
+                    // return redirect('user.editMyGlobal')->with('mensaje', 'El usuario no se puedo actualizar, trate más tarde');
+                    return \Redirect::back()->withErrors(['Error', 'El usuario no se puedo actualizar, trate más tarde']);
 
                 }
             }else{
                 DB::rollBack();
-                return redirect('user.editMyGlobal')->with('mensaje', 'El usuario no se puedo actualizar, trate más tarde');
+                // return redirect('user.editMyGlobal')->with('mensaje', 'El usuario no se puedo actualizar, trate más tarde');
+                return \Redirect::back()->withErrors(['Error', 'El usuario no se puedo actualizar, trate más tarde']);
             }               
         } catch (\Throwable $th) {
             DB::rollBack();
-            return redirect('user.editMyGlobal')->with('mensaje', 'El usuario no se puedo actualizar, trate más tarde');
+            // return redirect('user.editMyGlobal')->with('mensaje', 'El usuario no se puedo actualizar, trate más tarde');
+            return \Redirect::back()->withErrors(['Error', 'El usuario no se puedo actualizar, trate más tarde']);
         }  
     }
 
