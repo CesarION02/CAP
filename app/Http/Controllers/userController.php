@@ -320,57 +320,56 @@ class userController extends Controller
         }
 
         try{
-            DB::transaction(function () use ($request) {
-                $user = User::findOrFail($request->id_user);
-                if($request->rol == 1 || $request->rol == 3 || $request->rol == 8 ){
-                    $user->email = $request->email;
-                    $user->name = $request->us;
-                    $user->password = \Hash::make($request->newpass);
-                }else{
-                    $user->password = \Hash::make($request->newpass);
-                }
-                $user->save();
-                if(isset($request->us)){
-                    $user->username = $request->us;
-                }else{
-                    $user->username = $user->name;
-                }
-                $user->pass = \Hash::make($request->newpass); 
-                //DB::commit();
-                //enviar el id del usuario a global data
-                $data = SPghUtils::loginToPGH();
+            DB::beginTransaction();
+            $user = User::findOrFail($request->id_user);
+            if($request->rol == 1 || $request->rol == 3 || $request->rol == 8 ){
+                $user->email = $request->email;
+                $user->name = $request->us;
+                $user->password = \Hash::make($request->newpass);
+            }else{
+                $user->password = \Hash::make($request->newpass);
+            }
+            $user->save();
+            if(isset($request->us)){
+                $user->username = $request->us;
+            }else{
+                $user->username = $user->name;
+            }
+            $user->pass = \Hash::make($request->newpass); 
+            //DB::commit();
+            //enviar el id del usuario a global data
+            $data = SPghUtils::loginToPGH();
+            if($data->status == 'success'){
+                $headers = [
+                    'Content-Type' => 'application/json',
+                    'Accept' => '*/*',
+                    'Authorization' => $data->token_type.' '.$data->access_token
+                ];
+            
+                $client = new Client([
+                    'base_uri' => '127.0.0.1/GHPort/public/api/',
+                    'timeout' => 30.0,
+                    'headers' => $headers
+                ]);
+            
+                $body = json_encode(['user' => $user, 'fromSystem' => '7']);
+                
+                $request = new \GuzzleHttp\Psr7\Request('POST', 'UpdateGlobal', $headers, $body);
+                $response = $client->sendAsync($request)->wait();
+                $jsonString = $response->getBody()->getContents();
+                $data = json_decode($jsonString);
                 if($data->status == 'success'){
-                    $headers = [
-                        'Content-Type' => 'application/json',
-                        'Accept' => '*/*',
-                        'Authorization' => $data->token_type.' '.$data->access_token
-                    ];
-                
-                    $client = new Client([
-                        'base_uri' => '127.0.0.1/GHPort/public/api/',
-                        'timeout' => 30.0,
-                        'headers' => $headers
-                    ]);
-                
-                    $body = json_encode(['user' => $user, 'fromSystem' => '7']);
-                    
-                    $request = new \GuzzleHttp\Psr7\Request('POST', 'UpdateGlobal', $headers, $body);
-                    $response = $client->sendAsync($request)->wait();
-                    $jsonString = $response->getBody()->getContents();
-                    $data = json_decode($jsonString);
-                    if($data->status == 'success'){
-                        DB::commit();
-                        return redirect('user.editMyGlobal')->with('mensaje', 'Usuario actualizado con exito');
-                    }else{
-                        DB::rollBack();
-                        return redirect('user.editMyGlobal')->with('mensaje', 'El usuario no se puedo actualizar, trate más tarde');
-
-                    }
+                    DB::commit();
+                    return redirect('user.editMyGlobal')->with('mensaje', 'Usuario actualizado con exito');
                 }else{
                     DB::rollBack();
                     return redirect('user.editMyGlobal')->with('mensaje', 'El usuario no se puedo actualizar, trate más tarde');
+
                 }
-            });                
+            }else{
+                DB::rollBack();
+                return redirect('user.editMyGlobal')->with('mensaje', 'El usuario no se puedo actualizar, trate más tarde');
+            }               
         } catch (\Throwable $th) {
             DB::rollBack();
             return redirect('user.editMyGlobal')->with('mensaje', 'El usuario no se puedo actualizar, trate más tarde');
