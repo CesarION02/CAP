@@ -136,14 +136,14 @@ Usuarios
                     <div class="col-md-3 col-md-offset-9">
                         <div class="row">
                             <div class="col-md-12">
-                                <a href="{{route('crear_usuario')}}" class="btn btn-block btn-success btn-sm">
+                                <a href="{{route('global')}}" class="btn btn-block btn-success btn-sm">
                                     <i class="fa fa-fw fa-plus-circle"></i> Nuevo
                                 </a>
                             </div>
                         </div>
                         <br>
                         <div class="row">
-                            <form action="{{ route('usuario') }}">
+                            <form action="{{ route('guardar_usuario_global') }}">
                                 <input type="hidden" id="ifilter" name="ifilter">
                                 <input type="hidden" id="efilter" name="efilter">
                                 <div class="col-md-16">

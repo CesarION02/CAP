@@ -11,7 +11,7 @@
     </div>
 </div>
 <div class="form-group">
-    <label for="empleado" class="col-lg-3 control-label requerido">Empleado asociado:*</label>
+    <label for="empleado" class="col-lg-3 control-label requerido">Empleado asociado:</label>
     <div class="col-lg-8">
         <select id="employee_id" name="employee_id" class="form-control" required>
                 <option value="0">N/A</option>
@@ -22,19 +22,19 @@
     </div>
 </div>
 <div class="form-group">
-    <label for="nombre" class="col-lg-3 control-label requerido">Contraseña anterior:*</label>
+    <label for="nombre" class="col-lg-3 control-label requerido">Contraseña anterior:</label>
     <div class="col-lg-8">
     <input type="text" name="prevpass" id="prevpass" class="form-control"  required/>
     </div>
 </div>
 <div class="form-group">
-    <label for="nombre" class="col-lg-3 control-label requerido">Contraseña nueva:*</label>
+    <label for="nombre" class="col-lg-3 control-label requerido">Contraseña nueva:</label>
     <div class="col-lg-8">
     <input type="text" name="newpass" id="newpass" class="form-control" required/>
     </div>
 </div>
 <div class="form-group">
-    <label for="nombre" class="col-lg-3 control-label requerido">Confirmar contraseña nueva:*</label>
+    <label for="nombre" class="col-lg-3 control-label requerido">Confirmar contraseña nueva:</label>
     <div class="col-lg-8">
     <input type="text" name="confirmpass" id="
     " class="form-control" required/>
