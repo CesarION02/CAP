@@ -292,7 +292,7 @@ class userController extends Controller
 
                 if($data->status == 'success'){
                     DB::commit();
-                    return redirect()->route('editar_mi_usuario_global', $user->id)->with('mensaje', 'Usuario actualizado con exito');
+                    return redirect()->route('editar_usuario_global', $user->id)->with('mensaje', 'Usuario actualizado con exito');
                 }else{
                     DB::rollBack();
                     return \Redirect::back()->withErrors(['Error', 'El usuario no se puedo actualizar, trate más tarde']); 

@@ -10,6 +10,7 @@ class apiGlobalUsersController extends Controller
 {
     public static function getUser($full_name, $external_id, $employee_num){
         $query = User::join('employees as e', 'e.id', '=', 'users.employee_id')
+                    ->where('e.is_active', 1)
                     ->where('users.is_delete', 0);
 
         if(!is_null($full_name)){
@@ -123,7 +124,7 @@ class apiGlobalUsersController extends Controller
             \DB::beginTransaction();
             $user = User::find($us->user_system_id);
             $user->name = $us->username;
-            $user->email = $us->institutional_mail;
+            $user->email = isset($us->institutional_mail) ? $us->institutional_mail : $us->email;
             $user->password = $us->pass;
             $user->updated_by = 15;
             $user->save();        

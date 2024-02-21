@@ -21,6 +21,14 @@ class LoginController extends Controller
         return view('seguridad.index');
     }
 
+    public function username(){
+        return 'name';
+    }
+    
+    protected function credentials(Request $request){
+        return $request->only($this->username(), 'password');
+    }
+
     protected function authenticated(Request $request, $user)
     {
         $roles = $user->roles()->get();

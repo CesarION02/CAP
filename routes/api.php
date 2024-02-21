@@ -58,10 +58,10 @@ Route::group(['middleware' => 'auth:api'], function() {
     ]);
 
     Route::post('updateGlobal',[
-        'uses' => 'apiGlobalUsersController@update_global'
+        'uses' => 'api\\apiGlobalUsersController@updateGlobalUser'
     ]);
     Route::get('getUserById/{id}', [
-        'uses' => 'apiGlobalUsersController@getUserById'
+        'uses' => 'api\\apiGlobalUsersController@getUserById'
     ]);
 });
 

@@ -24,6 +24,7 @@
             <form action="{{route('actualizar_usuario_global', ['id' => $data->id])}}" id="form-general" class="form-horizontal" method="POST" autocomplete="off">
                 @csrf @method("put")
                 <div class="box-body">
+                    <input type="text" value="{{$data->id}}" hidden name="id_user">
                     @include('user.formEditGlobal')
                 </div>
                 <div class="box-footer">
