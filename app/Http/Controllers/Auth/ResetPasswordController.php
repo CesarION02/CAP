@@ -1,23 +1,87 @@
 <?php
 namespace App\Http\Controllers\Auth;
+
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Notifications\PasswordReset;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Foundation\Auth\ResetsPasswords;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Password;
+use App\SUtils\SPghUtils;
+use App\Providers\RouteServiceProvider;
+use App\CustomBrokers\myPasswordBroker;
+use UnexpectedValueException;
+use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+
+
 class ResetPasswordController extends Controller
 {
+    /*
+    |--------------------------------------------------------------------------
+    | Password Reset Controller
+    |--------------------------------------------------------------------------
+    |
+    | This controller is responsible for handling password reset requests
+    | and uses a simple trait to include this behavior. You're free to
+    | explore this trait and override any methods you wish to tweak.
+    |
+    */
+
     use ResetsPasswords;
+
     /**
-     * Create a new controller instance.
+     * Where to redirect users after resetting their password.
      *
-     * @return void
+     * @var string
      */
-    public function __construct()
+    protected $redirectTo = RouteServiceProvider::HOME;
+
+    /**
+     * Display the password reset view for the given token.
+     *
+     * If no token is present, display the link request form.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string|null  $token
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function showResetForm(Request $request, $token = null)
     {
-        $this->middleware('guest');
+        return view('auth.passwords.reset')->with(
+            ['token' => $token, 'email' => $request->email]
+        );
     }
+
+    /**
+     * Reset the given user's password.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
+     */
+    public function reset(Request $request)
+    {
+        $request->validate(['token' => 'required',
+        'name' => 'required',
+        'password' => 'required',], $this->validationErrorMessages());
+
+        // Here we will attempt to reset the user's password. If it is successful we
+        // will update the password on an actual user model and persist it to the
+        // database. Otherwise we will parse the error and return the response.
+        $response = $this->broker()->reset(
+            $this->credentials($request), function ($user, $password) {
+                $this->resetPassword($user, $password);
+            }
+        );
+
+        // If the password was successfully reset, we will redirect the user back to
+        // the application's home authenticated view. If there is an error we can
+        // redirect them back to where they came from with their error message.
+        return $response == Password::PASSWORD_RESET
+                    ? $this->sendResetResponse($request, $response)
+                    : $this->sendResetFailedResponse($request, $response);
+    }
+
     /**
      * Get the password reset validation rules.
      *
@@ -27,36 +91,24 @@ class ResetPasswordController extends Controller
     {
         return [
             'token' => 'required',
-            'email' => 'required|email',
-            'password' => 'required|confirmed|min:8',
+            'name' => 'required',
+            'password' => 'required',
         ];
     }
+
     /**
-     * Get the password reset validation error messages.
-     *
-     * @return array
-     */
-    protected function validationErrorMessages()
-    {
-        return [
-            'email.required' => 'El campo correo electrónico es obligatorio.',
-            'email.email' => 'El correo electrónico debe ser una dirección de correo válida.',
-            'password.required' => 'El campo contraseña es obligatorio.',
-            'password.confirmed' => 'La confirmación de contraseña no coincide.',
-            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
-        ];
-    }
-    /**
-     * Get the response for a successful password reset.
+     * Get the password reset credentials from the request.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  string  $response
-     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
+     * @return array
      */
-    protected function sendResetResponse($request, $response)
+    protected function credentials(Request $request)
     {
-        return redirect()->route('login')->with('status', trans($response));
+        return $request->only(
+            'name', 'password', 'password_confirmation', 'token'
+        );
     }
+
     /**
      * Get the response for a failed password reset.
      *
@@ -64,30 +116,62 @@ class ResetPasswordController extends Controller
      * @param  string  $response
      * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
      */
-    protected function sendResetFailedResponse($request, $response)
+    protected function sendResetFailedResponse(Request $request, $response)
     {
         return redirect()->back()
-            ->withInput($request->only('email'))
-            ->withErrors(['email' => trans($response)]);
+                    ->withInput($request->only('name'))
+                    ->withErrors(['name' => trans($response)]);
     }
 
-    public function reset(Request $request)
+    /**
+     * Reset the given user's password.
+     *
+     * @param  \Illuminate\Contracts\Auth\CanResetPassword  $user
+     * @param  string  $password
+     * @return void
+     */
+    protected function resetPassword($user, $password)
     {
-        $request->validate($this->rules(), $this->validationErrorMessages());
-        // Buscar al usuario por el email
-        $user = User::where('email', $request->email)->first();
-        if (!$user) {
-            return $this->sendResetFailedResponse($request,Password::INVALID_USER);
+        \DB::beginTransaction();
+        try {
+            $user->password = \Hash::make($password);
+            $user->setRememberToken(Str::random(60));
+            $user->save();
+            
+            $loginResult = SPghUtils::loginToPGH();
+            if($loginResult->status == 'success'){
+                $user->pass = $user->password;
+                $user->user_system_id = $user->id;
+                $user->username = $user->name;
+                $result = SPghUtils::globalUpdatePassword($loginResult->token_type, $loginResult->access_token, $user);
+                if($result->status == 'error'){
+                    \Log::error($result->message);
+                }
+            }
+
+            \DB::commit();
+        } catch (\Throwable $th) {
+            \Log::error($th);
+            \DB::rollBack();
+            throw new \Exception($th->getMessage());
         }
-        // Restablecer la contraseña del usuario
-        $user->password =  \Hash::make($request->password);
-        $user->setRememberToken(\Str::random(60));
-        $user->save();
-        // Evento de contraseña restablecida
+
         event(new PasswordReset($user));
-        // Comentar o eliminar la siguiente línea para evitar el inicio de sesión automático
-        // Auth::login($user);
-        // Redirigir al usuario a la pantalla de inicio de sesión
-        return redirect()->route('login')->with('status', trans('passwords.reset'));
+
+        // $this->guard()->login($user);
+    }
+
+    /**
+     * Get the response for a successful password reset.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string  $response
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
+     */
+    protected function sendResetResponse(Request $request, $response)
+    {
+        return redirect()->route('login')->with('status', trans($response))
+                                        ->with('success', true)
+                                        ->with('message', 'Contraseña actualizada');
     }
 }

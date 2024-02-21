@@ -10,6 +10,7 @@ class apiGlobalUsersController extends Controller
 {
     public static function getUser($full_name, $external_id, $employee_num){
         $query = User::join('employees as e', 'e.id', '=', 'users.employee_id')
+                    ->where('e.is_active', 1)
                     ->where('users.is_delete', 0);
 
         if(!is_null($full_name)){
@@ -115,4 +116,48 @@ class apiGlobalUsersController extends Controller
             'data' => $lUsersResponse
             ], 200, [], JSON_UNESCAPED_UNICODE);
     }
+
+    public function updateGlobalUser(Request $request){
+        try {
+            $Users =  json_decode($request->user);
+            $us = (object)$Users;
+            \DB::beginTransaction();
+            $user = User::find($us->user_system_id);
+            $user->name = $us->username;
+            $user->email = isset($us->institutional_mail) ? $us->institutional_mail : $us->email;
+            $user->password = $us->pass;
+            $user->updated_by = 15;
+            $user->save();        
+            \DB::commit();
+            return response()->json([
+                'status' => 'success',
+                'message' => "Se actualizo el usuario con exito",
+            ], 200, [], JSON_UNESCAPED_UNICODE);
+        }catch(\Throwable $th){
+            \DB::rollBack();
+            \Log::error($th);
+            return response()->json([
+                'status' => 'error',
+                'message' => $th->getMessage(),
+            ], 500, [], JSON_UNESCAPED_UNICODE);
+        }
+    }
+    public static function getUserById($userId){
+        try {
+            $oUser = User::findOrFail($userId);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $th->getMessage(),
+                'data' => null
+                ], 500, [], JSON_UNESCAPED_UNICODE);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Se encontró el usuario correctamente",
+            'data' => $oUser
+            ], 200, [], JSON_UNESCAPED_UNICODE);
+    }
+    
 }

@@ -33,11 +33,11 @@
             <form method="POST" action="{{ route('password.email') }}">
                 @csrf
                 <div class="form-group has-feedback">
-                    <input id="email" type="email" class="form-control{{ $errors->has('email') ? ' is-invalid' : '' }}" name="email" value="{{ old('email') }}" placeholder="Correo" required>
+                    <input id="name" type="name" class="form-control{{ $errors->has('name') ? ' is-invalid' : '' }}" name="name" value="{{ old('name') }}" placeholder="Nombre de usuario" required>
                     <span class="glyphicon glyphicon-user form-control-feedback"></span>
-                    @if ($errors->has('email'))
+                    @if ($errors->has('name'))
                         <span class="invalid-feedback" role="alert">
-                            <strong>{{ $errors->first('email') }}</strong>
+                            <strong>{{ $errors->first('name') }}</strong>
                         </span>
                     @endif
                 </div>

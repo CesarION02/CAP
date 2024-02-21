@@ -32,11 +32,11 @@
 
                 <input type="hidden" name="token" value="{{ $token }}">
                 <div class="form-group has-feedback">
-                    <input id="email" type="email" class="form-control{{ $errors->has('email') ? ' is-invalid' : '' }}" placeholder="Correo" name="email" value="{{ $email ?? old('email') }}" required autofocus>
+                    <input id="name" type="name" class="form-control{{ $errors->has('name') ? ' is-invalid' : '' }}" placeholder="Nombre de usuario" name="name" value="{{ $name ?? old('name') }}" required autofocus>
                     <span class="glyphicon glyphicon-user form-control-feedback"></span>
-                    @if ($errors->has('email'))
+                    @if ($errors->has('name'))
                         <span class="invalid-feedback" role="alert">
-                            <strong>{{ $errors->first('email') }}</strong>
+                            <strong>{{ $errors->first('name') }}</strong>
                         </span>
                     @endif
                 </div>

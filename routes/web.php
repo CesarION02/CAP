@@ -18,6 +18,13 @@ Route::get('seguridad/logout', 'seguridad\LoginController@logout')->name('logout
 // Route::get('password/email', 'Auth\PasswordController@getEmail')->name('reset');
 // Route::post('password/email', 'Auth\PasswordController@postEmail')->name('mandaremail');
 Route::get('prueba', 'TestController@testDelays')->name('prueba');
+/* Pruebas de globalUser */
+Route::get('globales', 'userController@create_with_global')->name('global');
+Route::post('globales', 'userController@save_with_global')->name('guardar_usuario_global');
+Route::get('editGlobal/{id}', 'userController@editGlobal')->name('editar_usuario_global');
+Route::get('editMyGlobal/{id}', 'userController@editMyGlobal')->name('editar_mi_usuario_global');
+Route::put('updateGlobal', 'userController@updateGlobal')->name('actualizar_usuario_global');
+Route::put('updateMyGlobal', 'userController@updateMyGlobal')->name('actualizar_mi_usuario_global');
 Route::post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail')->name('password.email');
 Route::post('password/reset', 'Auth\ResetPasswordController@reset')->name('password.update');
 Route::get('password/reset', 'Auth\ForgotPasswordController@showLinkRequestForm')->name('password.request');
@@ -522,5 +529,7 @@ Route::get('reportejornadasschedule', 'TestController@scheduleTasks')->name('tes
 Route::get('resavedays', 'TestController@reSaveDays')->name('resave_days');
 
 Route::get('testpostadj', 'TestController@testAdjustPost')->name('test_post_adj');
+
+
 
 });
