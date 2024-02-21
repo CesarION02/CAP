@@ -15,14 +15,20 @@ class SPghUtils{
             'Accept' => '*/*'
         ];
     
+        $config = \App\SUtils\SConfiguration::getConfigurations();
         $client = new Client([
-            'base_uri' => '127.0.0.1/GHPort/public/api/',
+            'base_uri' => $config->pghApiRoute,
             'timeout' => 30.0,
             'headers' => $headers,
             'verify' => false
         ]);
     
-        $body = '{"username":"admin","password":"Super2023!"}';
+        $pghUser = $config->pghUser;
+        $body = '{
+                "username": "'. $pghUser->username .'",
+                "password": "'. $pghUser->password .'"
+        }';
+        // $body = '{"username":"admin","password":"Super2023!"}';
         
         $request = new \GuzzleHttp\Psr7\Request('POST', 'login', $headers, $body);
         $response = $client->sendAsync($request)->wait();
@@ -40,13 +46,14 @@ class SPghUtils{
                 'Authorization' => $token_type.' '.$access_token
             ];
 
+            $config = \App\SUtils\SConfiguration::getConfigurations();
             $client = new Client([
-                'base_uri' => '127.0.0.1/GHPort/public/api/',
+                'base_uri' => $config->pghApiRoute,
                 'timeout' => 30.0,
                 'headers' => $headers
             ]);
     
-            $body = json_encode(['user' => $user, 'fromSystem' => '7']);
+            $body = json_encode(['user' => $user, 'fromSystem' => $config->capIdSystem]);
     
             $request = new \GuzzleHttp\Psr7\Request('POST', 'updateGlobal', $headers, $body);
             $response = $client->sendAsync($request)->wait();
