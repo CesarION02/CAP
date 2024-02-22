@@ -607,7 +607,7 @@ class SDelayReportUtils {
         $secondDate = (clone $firstDate)->addDays(6);
 
         $search = true;
-        $maxIterations = 100;
+        $maxIterations = 250;
         $it = 0;
         $i = 0;
         while ($search && $it < $maxIterations) {
