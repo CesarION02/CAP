@@ -182,13 +182,13 @@ class incidentController extends Controller
                                         ->where('is_cap_edit', true);
 
         if (session()->get('rol_id') == 16) {
-            $lIncidentTypes = $lIncidentTypes->where('id', 18);
-        }
-
-        $lIncidentTypes = $lIncidentTypes->select('id', 'name', 'has_subtypes')
+            $lIncidentTypes = $lIncidentTypes->where('id', 18)->select('id', 'name', 'has_subtypes')->get();
+        }else{
+            $lIncidentTypes = $lIncidentTypes->select('id', 'name', 'has_subtypes')
                                         ->where('id', '!=' ,18)
                                         ->where('id', '!=' ,14)
                                         ->get();
+        }
 
         $lSubTypes = \DB::table('type_sub_incidents')
                         ->where('is_delete', 0)
