@@ -186,6 +186,8 @@ class incidentController extends Controller
         }
 
         $lIncidentTypes = $lIncidentTypes->select('id', 'name', 'has_subtypes')
+                                        ->where('id', '!=' ,18)
+                                        ->where('id', '!=' ,14)
                                         ->get();
 
         $lSubTypes = \DB::table('type_sub_incidents')
