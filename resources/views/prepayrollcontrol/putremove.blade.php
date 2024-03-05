@@ -12,17 +12,9 @@
 @section("scripts")
     <script src="{{ asset("assets/js/axios.js") }}" type="text/javascript"></script>
     <script src="{{asset("assets/pages/scripts/admin/datatable/index.js")}}" type="text/javascript"></script>
-    
-    
     <script src="{{ asset("assets/js/moment/moment.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/moment/moment-with-locales.min.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/moment/datetime-moment.js") }}" type="text/javascript"></script>
-	
-	
-	
-	
-	
-    
     <script src="{{ asset("daterangepicker/daterangepicker.js") }}" type="text/javascript"></script>
     <script src="{{asset("assets/pages/scripts/SGui.js")}}" type="text/javascript"></script>
     
@@ -54,8 +46,6 @@
                         })
                         .then((acepted) => {
                             if (acepted) {
-                                let canSkipElement = document.getElementById('can_skip_id');
-                                canSkipElement.value = 1;
                                 document.getElementById('form_vobo').submit();
                             } else {
                                 swal("No se ha dado el visto bueno");
@@ -67,7 +57,7 @@
                     }
                 }
                 else {
-                    document.getElementById('form_vobo').submit();
+                    document.getElementById('form_vobo' + id).submit();
                 }
             }
         });
@@ -293,15 +283,17 @@
                                 <td>{{ $oCtrl->dt_rejected }}</td>
                                 <td>
                                         @if(! $oCtrl->is_vobo)
-                                            <form id="form_vobo" action="{{ route('dar_vobo', [$oCtrl->id_control, $idPreNomina]) }}" method="POST">
+                                            <form id="form_vobo{{$oCtrl->id_control}}" action="{{ route('dar_vobo', [$oCtrl->id_control, $idPreNomina]) }}" method="POST">
                                                 @csrf
-                                                <input type="hidden" id="can_skip_id" name="can_skip" value="0">
+                                                <input type="hidden" id="back_url" name="back_url" value="{{route('poner_quitar_vobo', [$idPreNomina])}}">
+                                                <input type="hidden" id="can_skip_id" name="can_skip" value="1">
                                                 <button onclick="checkPrevius({{$oCtrl->id_control}})" title="Visto bueno" type="button" id="btnSubmit"><i class="fa fa-check" aria-hidden="true"></i></button>
                                             </form>
                                         @endif
                                         @if(! $oCtrl->is_rejected)
                                             <form action="{{ route('quitar_vobo', [$oCtrl->id_control, $idPreNomina]) }}" method="POST">
                                                 @csrf
+                                                <input type="hidden" id="back_url" name="back_url" value="{{route('poner_quitar_vobo', [$idPreNomina])}}">
                                                 <button title="Rechazar" type="submit"><i class="fa fa-ban" aria-hidden="true"></i></button>
                                             </form>
                                         @endif
