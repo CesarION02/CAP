@@ -279,20 +279,21 @@ class SPrepayrollUtils {
         return true;
     }
 
-    public static function isAllEmployeesOk($idUser, $idVobo, $iDelegation = null)
+    public static function isAllEmployeesOk($idVobo, $iDelegation = null)
     {
         $prepayroll = \DB::table('prepayroll_report_auth_controls AS prac')
-                            ->where('prac.user_vobo_id', $idUser)
                             ->where('prac.id_control', $idVobo)
                             ->first();
 
-        if ($prepayroll == null) {
+        if (is_null($prepayroll)) {
             return false;
         }
 
         if (! env('VOBO_BY_EMP_ENABLED', true)) {
             return true;
         }
+
+        $idUser = $prepayroll->user_vobo_id;
         
         $payType = $prepayroll->is_week ? \SCons::PAY_W_S : \SCons::PAY_W_Q;
         $number = $prepayroll->is_week ? $prepayroll->num_week : $prepayroll->num_biweek;
