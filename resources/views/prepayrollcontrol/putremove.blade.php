@@ -11,213 +11,221 @@
 
 @section("scripts")
     <script src="{{ asset("assets/js/axios.js") }}" type="text/javascript"></script>
-    <script src="{{asset("assets/pages/scripts/admin/datatable/index.js")}}" type="text/javascript"></script>
-    
-    
+    <script src="{{ asset("assets/pages/scripts/admin/datatable/index.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/moment/moment.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/moment/moment-with-locales.min.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/moment/datetime-moment.js") }}" type="text/javascript"></script>
-	
-	
-	
-	
-	
-    
     <script src="{{ asset("daterangepicker/daterangepicker.js") }}" type="text/javascript"></script>
-    <script src="{{asset("assets/pages/scripts/SGui.js")}}" type="text/javascript"></script>
-    
+    <script src="{{ asset("assets/pages/scripts/SGui.js") }}" type="text/javascript"></script>
+    <script src="{{ asset("assets/pages/scripts/prepayroll/SVoBos.js") }}" type="text/javascript"></script>
 <script>
     function checkGroup(id) {
-        var value = '<?php echo $idPreNomina; ?>';
-        var text = '';
+        var value = "<?php echo $idPreNomina; ?>";
+        var text = "";
         $.ajax({
-            type:'POST',
-            url:'{{ $routeChildren }}',
-            data:{ idprenomina: value, id: id, _token: '{{csrf_token()}}' },
-            success:function(data) {
+            type: "POST",
+            url: "{{ $routeChildren }}",
+            data: { idprenomina: value, id: id, _token: "{{csrf_token()}}", isFromAdmin: true },
+            success: function (data) {
                 if (data.users.length > 0) {
                     for (var i = 0; i < data.users.length; i++) {
-                        text = text + data.users[i] + ', ';
+                        text = text + data.users[i] + ", ";
                     }
 
                     if (data.bCanSkip != undefined && data.bCanSkip) {
                         // Se comenta confirmación por solicitud de Sergio Flores: no se puede dar Vobo si los usuarios que dependen de ti no han dado vobo.
                         swal({
                             title: "¿Continuar con el visto bueno?",
-                            text: "Si se da visto bueno los usuarios: " + text + " no podrán dar visto bueno",
+                            text:
+                                "Si se da visto bueno los usuarios: " +
+                                text +
+                                " no podrán dar visto bueno",
                             icon: "warning",
                             buttons: {
-                                confirm : {text:'Continuar', className:'sweet-warning'},
-                                cancel : 'Cancelar'
+                                confirm: {
+                                    text: "Continuar",
+                                    className: "sweet-warning",
+                                },
+                                cancel: "Cancelar",
                             },
                             // dangerMode: true,
-                        })
-                        .then((acepted) => {
+                        }).then((acepted) => {
                             if (acepted) {
-                                let canSkipElement = document.getElementById('can_skip_id');
+                                let canSkipElement =
+                                    document.getElementById("can_skip_id");
                                 canSkipElement.value = 1;
-                                document.getElementById('form_vobo').submit();
+                                document.getElementById("form_vobo").submit();
                             } else {
                                 swal("No se ha dado el visto bueno");
                             }
                         });
+                    } else {
+                        swal(
+                            "¡Error!",
+                            "Los usuarios: " +
+                                text +
+                                " no han dado el visto bueno.",
+                            "error"
+                        );
                     }
-                    else {
-                        swal("¡Error!", "Los usuarios: " + text + " no han dado el visto bueno.", "error");
-                    }
+                } else {
+                    document.getElementById("form_vobo").submit();
                 }
-                else {
-                    document.getElementById('form_vobo').submit();
-                }
-            }
+            },
         });
     }
 
     function checkPrevius(id) {
         let ogui = new SGui();
         ogui.showLoading(5000);
-        var value = '<?php echo $idPreNomina; ?>';
-        var section = '';
-        if(value == "week"){
+        var value = "<?php echo $idPreNomina; ?>";
+        var section = "";
+        if (value == "week") {
             section = "semana";
-        }else if(value = "biweek"){
+        } else if ((value = "biweek")) {
             section = "quincena";
         }
         $.ajax({
-            type:'POST',
-            url:'{{ $routePrev }}',
-            data:{ idprenomina: value, id: id, _token: '{{csrf_token()}}' },
-            success:function(data) {
-                if(data.previus == 0){
+            type: "POST",
+            url: "{{ $routePrev }}",
+            data: { idprenomina: value, id: id, _token: "{{csrf_token()}}" },
+            success: function (data) {
+                if (data.previus == 0) {
                     swal({
                         title: "Continuar con visto bueno?",
-                        text: "La "+section+" anterior no tiene visto bueno",
+                        text: "La " + section + " anterior no tiene visto bueno",
                         icon: "warning",
                         buttons: {
-                            confirm : {text:'Continuar', className:'sweet-warning'},
-                            cancel : 'Cancelar'
+                            confirm: {
+                                text: "Continuar",
+                                className: "sweet-warning",
+                            },
+                            cancel: "Cancelar",
                         },
                         // dangerMode: true,
-                    })
-                    .then((acepted) => {
+                    }).then((acepted) => {
                         if (acepted) {
                             checkGroup(id);
                         } else {
                             swal("No se ha dado el visto bueno");
                         }
                     });
-                }else{
+                } else {
                     checkGroup(id);
                 }
-            }
+            },
         });
     }
 </script>
 <script>
-    $(document).ready( function () {
+    $(document).ready(function () {
         var select = document.getElementById("pay-type");
-        var value = '<?php echo $idPreNomina; ?>';
-        
+        var value = "<?php echo $idPreNomina; ?>";
+
         var columns = [];
-        if(value == "week"){
+        if (value == "week") {
             select.value = 1;
             columns = [1];
-        }else if(value == "biweek"){
+        } else if (value == "biweek") {
             select.value = 2;
             columns = [0];
         }
 
+        $.fn.dataTable.moment("DD/MM/YYYY");
 
-        $.fn.dataTable.moment('DD/MM/YYYY');
+        $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
+            // var min = parseInt( $('#min').val(), 10 );
+            let payTypeVal = parseInt($("#pay-type").val(), 10);
+            let sem = 0;
+            let qui = 0;
 
-        $.fn.dataTable.ext.search.push(
-            function( settings, data, dataIndex ) {
-                // var min = parseInt( $('#min').val(), 10 );
-                let payTypeVal = parseInt( $('#pay-type').val(), 10 );
-                let sem = 0;
-                let qui = 0;
+            switch (payTypeVal) {
+                case 3:
+                    return true;
 
-                switch (payTypeVal) {
-                    case 3:
-                        return true;
+                case 1:
+                    sem = parseInt(data[0]);
+                    return sem > 0;
 
-                    case 1:
-                        sem = parseInt( data[0] );
-                        return sem > 0;
+                case 2:
+                    qui = parseInt(data[1]);
+                    return qui > 0;
 
-                    case 2:
-                        qui = parseInt( data[1] );
-                        return qui > 0;
-
-                    default:
-                        break;
-                }
-
-                return false;
+                default:
+                    break;
             }
-        );
 
-        var vobosTable = $('#myTable').DataTable({
-            "language": {
-                "sProcessing":     "Procesando...",
-                "sLengthMenu":     "Mostrar _MENU_ registros",
-                "sZeroRecords":    "No se encontraron resultados",
-                "sEmptyTable":     "Ningún dato disponible en esta tabla",
-                "sInfo":           "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
-                "sInfoEmpty":      "Mostrando registros del 0 al 0 de un total de 0 registros",
-                "sInfoFiltered":   "(filtrado de un total de _MAX_ registros)",
-                "sInfoPostFix":    "",
-                "sSearch":         "Buscar:",
-                "sUrl":            "",
-                "sInfoThousands":  ",",
-                "sLoadingRecords": "Cargando...",
-                "oPaginate": {
-                    "sFirst":    "Primero",
-                    "sLast":     "Último",
-                    "sNext":     "Siguiente",
-                    "sPrevious": "Anterior"
-                },
-                "oAria": {
-                    "sSortAscending":  ": Activar para ordenar la columna de manera ascendente",
-                    "sSortDescending": ": Activar para ordenar la columna de manera descendente"
-                }
-            },
-            "columnDefs": [
-                {
-                    "targets": columns,
-                    "visible": false,
-                    "searchable": true
-                }
-            ],
-            "order": [[ 2, 'asc' ]],
-            "scrollX": true,
-            "colReorder": true,
-            "dom": 'Bfrtip',
-            "lengthMenu": [
-                [ 10, 25, 50, 100, -1 ],
-                [ 'Mostrar 10', 'Mostrar 25', 'Mostrar 50', 'Mostrar 100', 'Mostrar todo' ]
-            ],
-            "buttons": [
-                    'pageLength',
-                    {
-                        extend: 'copy',
-                        text: 'Copiar'
-                    }, 
-                    'csv', 
-                    'excel', 
-                    {
-                        extend: 'print',
-                        text: 'Imprimir'
-                    }
-                ],
+            return false;
         });
 
-        $('#pay-type').change( function() {
+        var vobosTable = $("#myTable").DataTable({
+            language: {
+                sProcessing: "Procesando...",
+                sLengthMenu: "Mostrar _MENU_ registros",
+                sZeroRecords: "No se encontraron resultados",
+                sEmptyTable: "Ningún dato disponible en esta tabla",
+                sInfo: "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+                sInfoEmpty:
+                    "Mostrando registros del 0 al 0 de un total de 0 registros",
+                sInfoFiltered: "(filtrado de un total de _MAX_ registros)",
+                sInfoPostFix: "",
+                sSearch: "Buscar:",
+                sUrl: "",
+                sInfoThousands: ",",
+                sLoadingRecords: "Cargando...",
+                oPaginate: {
+                    sFirst: "Primero",
+                    sLast: "Último",
+                    sNext: "Siguiente",
+                    sPrevious: "Anterior",
+                },
+                oAria: {
+                    sSortAscending:
+                        ": Activar para ordenar la columna de manera ascendente",
+                    sSortDescending:
+                        ": Activar para ordenar la columna de manera descendente",
+                },
+            },
+            columnDefs: [
+                {
+                    targets: columns,
+                    visible: false,
+                    searchable: true,
+                },
+            ],
+            order: [[2, "asc"]],
+            scrollX: true,
+            colReorder: true,
+            dom: "Bfrtip",
+            lengthMenu: [
+                [10, 25, 50, 100, -1],
+                [
+                    "Mostrar 10",
+                    "Mostrar 25",
+                    "Mostrar 50",
+                    "Mostrar 100",
+                    "Mostrar todo",
+                ],
+            ],
+            buttons: [
+                "pageLength",
+                {
+                    extend: "copy",
+                    text: "Copiar",
+                },
+                "csv",
+                "excel",
+                {
+                    extend: "print",
+                    text: "Imprimir",
+                },
+            ],
+        });
+
+        $("#pay-type").change(function () {
             vobosTable.draw();
         });
     });
-
-
 </script>
 <script>
     

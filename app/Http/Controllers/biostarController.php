@@ -358,7 +358,7 @@ class biostarController extends Controller
         
         foreach ($lRegisters as $register) {
             try {
-                // dispatch(new ProcessCheckNotification($register->employee_id, $register->date.' '.$register->time, "Biostar"));
+                dispatch(new ProcessCheckNotification($register->employee_id, $register->date.' '.$register->time, "Biostar"));
             }
             catch (\Throwable $th) {
                 \Log::error($th->getMessage());
