@@ -155,7 +155,7 @@ class AccessControlController extends Controller
 
         $this->saveAccessLog($idEmp, $dtDate.' '.$time, $minsIn, $minsOut, $sSource, $oResData->authorized, $oResData->message, $schIn, $schOut);
 
-        // dispatch(new ProcessCheckNotification($idEmp, $dtDate.' '.$time, $sSource));
+        dispatch(new ProcessCheckNotification($idEmp, $dtDate.' '.$time, $sSource));
 
         return json_encode($oResData);
     }

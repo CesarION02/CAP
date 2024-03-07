@@ -13,6 +13,7 @@ use App\Models\DepartmentRH;
 use App\Models\JobRH;
 use App\Models\policy_extratime;
 use GuzzleHttp\Client as GuzzleClient;
+use App\Models\User;
 use DB;
 
 class employeeController extends Controller
@@ -387,6 +388,7 @@ class employeeController extends Controller
         $this->rhjobs = JobRH::select('id', 'external_id')
                                 ->pluck('id', 'external_id');
 
+
         foreach ($lEmployees as $jEmployee) {
             try {
                 if (isset($lCapEmployees[$jEmployee->id_employee])) {
@@ -477,12 +479,15 @@ class employeeController extends Controller
                             ]
                         ); 
                         
-            
             DB::table('prepayroll_group_employees')
                 ->where('id', $id)
                 ->update(['group_id' => $grupoPrenomina[0]->group_id]);
             
         }
+
+        // if($jEmployee->is_active == 0 || $jEmployee->is_delete == 1){
+        //     employeeController::deactivateUser($jEmployee->num_employee);
+        // } 
         
     }
 
@@ -850,6 +855,60 @@ class employeeController extends Controller
 
         return view('biostar.indexbiostarid')
                             ->with('lEmployees', $lEmployees)->with('users',$data->UserCollection->rows);
+    }
+
+    public static function deactivateUser($num_employee){
+        $employee = employees::where('num_employee',$num_employee)->first();
+        $user = User::where('employee_id',$employee->id)->first();
+        if($user != null){
+            $user->is_delete = 1; 
+            $user->save();    
+        }
+        if($employee->biostar_id != null){
+            $data = employeeController::deactiveBiostar($employee->biostar_id);
+        }
+
+    }
+
+    public static function deactiveBiostar($id_emp){
+        $rez = biostarController::login();
+
+        if ($rez == null) {
+            return null;
+        }
+
+        $headers = [
+            'Content-Type' => 'application/json',
+            'bs-session-id' => $rez,
+            'Accept-Encoding' => 'gzip, deflate, br'
+        ];
+
+        $config = \App\SUtils\SConfiguration::getConfigurations(); 
+        
+        
+        $client = new GuzzleClient([
+            // Base URI is used with relative requests
+            'base_uri' => $config->urlBiostar."/api/",
+            // You can set any number of default request options.
+            'timeout'  => 5.0,
+            'headers' => $headers,
+            'verify' => false
+        ]);
+
+        $body = '{
+                "User": {
+                  "disabled": "true"
+                }
+              }';
+
+        $r = $client->request('PUT', 'users/'.$id_emp, [
+            'body' => $body
+        ]);
+        $response = $r;
+        $response = $r->getBody()->getContents();
+        $data = json_decode($response);
+
+        return $data;
     }
 }
 
