@@ -22,9 +22,64 @@
 @include('prepayrollcontrol.checkprevious')
 @include('report.reportRejectVoboModal')
 <script>
+    function swalUsersNotVobo(idVobo, text, textInactive){
+        swal({
+            title: "¿Continuar con el visto bueno?",
+            text: "Si se da visto bueno los usuarios: " + text + " no podrán dar visto bueno",
+            icon: "warning",
+            buttons: {
+                confirm : {text:'Continuar', className:'sweet-warning'},
+                cancel : 'Cancelar'
+            },
+        })
+        .then((acepted) => {
+            if (acepted) {
+                if(textInactive.length > 0){
+                    swalUsersNotVoboInactives(idVobo, textInactive);
+                }else{
+                    submitFormVobo(idVobo);
+                }
+            } else {
+                swal("No se ha dado el visto bueno");
+            }
+        });
+    }
+
+    function swalUsersNotVoboInactives(idVobo, textInactive){
+        swal({
+            title: "¿Continuar con el visto bueno?",
+            
+            icon: "warning",
+            buttons: {
+                confirm : {text:'Continuar', className:'sweet-warning'},
+                cancel : 'Cancelar'
+            },
+            content: {
+                element: "strong",
+                attributes: {
+                    innerHTML: "Los usuarios: " + textInactive + " están inactivos, ¿desea continuar con el visto bueno?",
+                },
+            },
+        })
+        .then((acepted) => {
+            if(acepted){
+                submitFormVobo(idVobo);
+            }else{
+                swal("No se ha dado el visto bueno");
+            }
+        })
+    }
+
+    function submitFormVobo(idVobo){
+        // let canSkipElement = document.getElementById('can_skip_id');
+        // canSkipElement.value = 1;
+        document.getElementById('form_vobo' + idVobo).submit();
+    }
+
     function checkGroup(id) {
         var value = '<?php echo $idPreNomina; ?>';
         var text = '';
+        var textInactive = '';
         $.ajax({
             type:'POST',
             url:'{{ $routeChildren }}',
@@ -32,37 +87,30 @@
             success:function(data) {
                 if (data.users.length > 0) {
                     for (var i = 0; i < data.users.length; i++) {
-                        text = text + data.users[i] + ', ';
+                        if(data.users[i].is_active == 1){
+                            text = text + data.users[i].name + ', ';
+                        }else{
+                            textInactive = textInactive + data.users[i].name + ', ';
+                        }
                     }
-
                     if (data.bCanSkip != undefined && data.bCanSkip) {
-                        // Se comenta confirmación por solicitud de Sergio Flores: no se puede dar Vobo si los usuarios que dependen de ti no han dado vobo.
-                        swal({
-                            title: "¿Continuar con el visto bueno?",
-                            text: "Si se da visto bueno los usuarios: " + text + " no podrán dar visto bueno",
-                            icon: "warning",
-                            buttons: {
-                                confirm : {text:'Continuar', className:'sweet-warning'},
-                                cancel : 'Cancelar'
-                            },
-                            // dangerMode: true,
-                        })
-                        .then((acepted) => {
-                            if (acepted) {
-                                let canSkipElement = document.getElementById('can_skip_id');
-                                canSkipElement.value = 1;
-                                document.getElementById('form_vobo').submit();
-                            } else {
-                                swal("No se ha dado el visto bueno");
-                            }
-                        });
-                    }
-                    else {
+                        if (text.length > 0) {
+                            swalUsersNotVobo(id, text, textInactive);
+                        }else if(textInactive.length > 0){
+                            swalUsersNotVoboInactives(id, textInactive);
+                        }else{
+                            submitFormVobo(id);
+                        }
+                    }else if(text.length == 0){
+                        if(textInactive.length > 0){
+                            swalUsersNotVoboInactives(id, textInactive);
+                        }
+                    }else {
                         swal("¡Error!", "Los usuarios: " + text + " no han dado el visto bueno.", "error");
                     }
                 }
                 else {
-                    document.getElementById('form_vobo').submit();
+                    document.getElementById('form_vobo' + id).submit();
                 }
             }
         });
@@ -216,9 +264,11 @@
 
 </script>
 <script type="text/javascript">
-    function onRejectSubmit(isVobo, isRejected) {
+var voboControlId = 0;
+    function onRejectSubmit(isVobo, isRejected, id) {
         if (isVobo || (!isRejected && !isVobo)) {
             $('#rejectModalId').modal('show');
+            voboControlId = id;
         }
     }
 
@@ -231,13 +281,13 @@
         $('#rejectModalId').modal('hide');
 
         // set de comentario en el formulario
-        $('#form_rej_vobo').find('#reject_reason').val(rejectReason);
+        $('#form_rej_vobo' + voboControlId).find('#reject_reason').val(rejectReason);
 
         let ogui = new SGui();
         ogui.showLoading(10000);
 
         // submit de formulario
-        $('#form_rej_vobo').submit();
+        $('#form_rej_vobo' + voboControlId).submit();
     });
 </script>
 @endsection
@@ -312,17 +362,17 @@
                                 <td>
                                     @if(\Auth::user()->id == $oCtrl->user_vobo_id)
                                         @if(! $oCtrl->is_vobo)
-                                            <form id="form_vobo" action="{{ route('dar_vobo', [$oCtrl->id_control, $idPreNomina]) }}" method="POST">
+                                            <form id="form_vobo{{$oCtrl->id_control}}" action="{{ route('dar_vobo', [$oCtrl->id_control, $idPreNomina]) }}" method="POST">
                                                 @csrf
                                                 <input type="hidden" id="can_skip_id" name="can_skip" value="0">
                                                 <button onclick="checkPrevius({{$oCtrl->id_control}})" title="Visto bueno" type="button" id="btnSubmit"><i class="fa fa-check" aria-hidden="true"></i></button>
                                             </form>
                                         @endif
                                         @if(! $oCtrl->is_rejected)
-                                            <form id="form_rej_vobo" action="{{ route('rechazar_vobo', [$oCtrl->id_control, $idPreNomina]) }}" method="POST">
+                                            <form id="form_rej_vobo{{$oCtrl->id_control}}" action="{{ route('rechazar_vobo', [$oCtrl->id_control, $idPreNomina]) }}" method="POST">
                                                 @csrf
                                                 <input type="hidden" name="reject_reason" id="reject_reason">
-                                                <button onclick="onRejectSubmit({{ $oCtrl->is_vobo }}, {{ $oCtrl->is_rejected }})" title="Rechazar" type="button"><i class="fa fa-ban" aria-hidden="true"></i></button>
+                                                <button onclick="onRejectSubmit({{ $oCtrl->is_vobo }}, {{ $oCtrl->is_rejected }}, {{$oCtrl->id_control}})" title="Rechazar" type="button"><i class="fa fa-ban" aria-hidden="true"></i></button>
                                             </form>
                                         @endif
                                     @endif

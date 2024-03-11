@@ -177,13 +177,15 @@ class prepayrollAdjustController extends Controller
             switch ($oAdjust->adjust_type_id) {
                 case \SCons::PP_TYPES['DHE']:
                 case \SCons::PP_TYPES['AHE']:
-                case \SCons::PP_TYPES['JE']:
-                case \SCons::PP_TYPES['JS']:
+                case \SCons::PP_TYPES['JSA']:
                     if (is_null($oAdjust->dt_time) || strlen($oAdjust->dt_time) == 0) {
                         return response()->json(['success' => false, 'msg' => 'No se puede aplicar el ajuste, no existe hora de aplicación.']);
                     }
                     break;
                 case \SCons::PP_TYPES['OR']:
+                    if (is_null($oAdjust->dt_time) || strlen($oAdjust->dt_time) == 0) {
+                        return response()->json(['success' => false, 'msg' => 'No se puede aplicar el ajuste, no existe hora de aplicación.']);
+                    }
                     if ($oAdjust->dt_time >= "18:30") {
                         $adjustDate = Carbon::parse($oAdjust->dt_date)->addDay()->toDateString();
                     }

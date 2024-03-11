@@ -481,7 +481,7 @@ class shiftprogrammingController extends Controller
         }
         if($flagPDF == 1){
             try {
-                $this->pdf($week->id,$typearea, $request->employeesWithOutAssigment, $request->lIncidences);
+                $this->pdf($week->id,$typearea, $request->employeesWithOutAssigment, isset($request->lIncidences) ? $request->lIncidences : []);
             } catch (\Throwable $th) {
                 return response()->json($th->getMessage());
             }
@@ -489,8 +489,8 @@ class shiftprogrammingController extends Controller
                             ->where('id',$typearea)
                             ->get();
             
-            $nombrePdf = 'RolTur'.$week->week_number.''.$week->year.''.$codigo[0]->code.'.pdf';
-            //$nombrePdf = 'RolTur'.$week->year.''.$week->week_number.''.$codigo[0]->code.'.pdf';
+            // $nombrePdf = 'RolTur'.$week->week_number.''.$week->year.''.$codigo[0]->code.'.pdf';
+            $nombrePdf = 'RolTur'.$week->year.''.$week->week_number.''.$codigo[0]->code.'.pdf';
             if($request->pdfFlag == 0){
                 $guardarPdf = new pdf_week();
                 $guardarPdf->dept_group_id = $typearea;
@@ -513,7 +513,8 @@ class shiftprogrammingController extends Controller
         $codigo = DB::table('department_group')
                             ->where('id',$typearea)
                             ->get();
-        $nombrePdf = 'RolTur'.$week->week_number.''.$week->year.''.$codigo[0]->code;
+        // $nombrePdf = 'RolTur'.$week->week_number.''.$week->year.''.$codigo[0]->code;
+        $nombrePdf = 'RolTur'.$week->year.''.$week->week_number.''.$codigo[0]->code;
         $formateoIni = explode('-',$week->start_date);
         $fechaInicio = $formateoIni[2].'-'.$formateoIni[1].'-'.$formateoIni[0];
         $dias = array('','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo');

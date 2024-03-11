@@ -1053,9 +1053,11 @@ class prePayrollController extends Controller
             $sectNum = $oPpAuthCtrol->num_biweek;
         }
 
+        $userVobo = auth()->user()->id;
+
         $groups = DB::table('prepayroll_groups AS pg')
                         ->join('prepayroll_groups_users AS pgu', 'pg.id_group', '=', 'pgu.group_id')
-                        ->where('pgu.head_user_id', auth()->user()->id)
+                        ->where('pgu.head_user_id', $userVobo)
                         ->where('pg.is_delete', 0)
                         ->pluck('pg.id_group')
                         ->toArray();
@@ -1069,7 +1071,7 @@ class prePayrollController extends Controller
                                     ->join('prepayroll_groups_users AS pgu', 'pg.id_group', '=', 'pgu.group_id')
                                     ->join('users AS u', 'pgu.head_user_id', '=', 'u.id')
                                     ->whereIn('pg.id_group', $lChildrenGroups)
-                                    ->where('pgu.head_user_id', '<>', auth()->user()->id)
+                                    ->where('pgu.head_user_id', '<>', $userVobo)
                                     ->where('pg.is_delete', 0)
                                     ->select('pg.id_group','pgu.head_user_id', 'group_name', 'u.name AS user_name')
                                     ->get();
@@ -1079,7 +1081,7 @@ class prePayrollController extends Controller
                                 ->where('year', $oPpAuthCtrol->year)
                                 ->where('num_'.$request->idprenomina, $sectNum)
                                 ->where('user_vobo_id', $group->head_user_id)
-                                ->where('user_vobo_id', '<>', auth()->user()->id)
+                                ->where('user_vobo_id', '<>', $userVobo)
                                 ->where('is_delete', 0)
                                 ->where('is_required', true);
     
@@ -1124,7 +1126,7 @@ class prePayrollController extends Controller
                                 ->where('year', $oPpAuthCtrol->year)
                                 ->where('num_'.$request->idprenomina, $sectNum)
                                 ->where('order_vobo', '>=', $oPpAuthCtrol->order_vobo)
-                                ->where('user_vobo_id', '<>', auth()->user()->id)
+                                ->where('user_vobo_id', '<>', $userVobo)
                                 ->where('is_required', true)
                                 ->where('prac.is_delete', 0)
                                 // ->where('is_vobo', false)
@@ -1155,13 +1157,13 @@ class prePayrollController extends Controller
         try {
             if (! isset($request->can_skip) || $request->can_skip == 0) {
                 /**
-                 * Determinar si ya se ha dado Vobo a los empleados directos del usuario en sesión
+                 * Determinar si ya se ha dado Vobo a los empleados directos del Vobo
                 */
-                $isAllOk = SPrepayrollUtils::isAllEmployeesOk(auth()->user()->id, $idVobo, $iDelegation);
+                $isAllOk = SPrepayrollUtils::isAllEmployeesOk($idVobo, $iDelegation);
 
                 if (! $isAllOk) {
                     $success = false;
-                    throw new \Exception('No se puede dar Vobo, no se han dado visto bueno a todos los empleados directos del usuario en sesión.');
+                    throw new \Exception('No se puede dar Vobo, no se ha dado visto bueno a todos los empleados directos del usuario de la autorización.');
                 }
 
                 //determinar si la fecha ya paso y se puede dar visto bueno
@@ -1213,12 +1215,14 @@ class prePayrollController extends Controller
             }
             $res = DB::table('prepayroll_report_auth_controls')
                         ->where('id_control', $idVobo)
-                        // ->where('user_vobo_id', auth()->user()->id)
                         ->update([
                             'is_vobo' => true, 
                             'dt_vobo' => Carbon::now()->toDateTimeString(),
                             'is_rejected' => false,
-                            'dt_rejected' => null
+                            'dt_rejected' => null,
+                            // 'user_vobo_id' => auth()->user()->id,
+                            'updated_by' => auth()->user()->id,
+                            'updated_at' => Carbon::now()->toDateTimeString()
                         ]);
         }
         catch (\Exception $e) {
@@ -1232,124 +1236,6 @@ class prePayrollController extends Controller
 
         $msg = "Se dió el visto bueno correctamente";
         $icon = "success";
-        
-        // $res = DB::table('prepayroll_report_auth_controls')
-        //             ->where('id_control', $id)
-        //             ->update([
-        //                 'is_vobo' => true, 
-        //                 'dt_vobo' => Carbon::now()->toDateTimeString(),
-        //                 'is_rejected' => false,
-        //                 'dt_rejected' => null
-        //             ]);
-        
-        // $config = \App\SUtils\SConfiguration::getConfigurations();
-        // if($config->prepayroll_policy == 2){
-        //     $nivelAprobado = DB::table('prepayroll_report_auth_controls')
-        //                         ->where('id_control',$id)
-        //                         ->select('is_week AS isWeek','is_biweek AS isBiweek','num_week AS numWeek','num_biweek AS numBiweek','user_vobo_id AS usuario','year AS anio')
-        //                         ->get();
-            
-        //     if($nivelAprobado[0]->isWeek == 1){
-        //         $tipo = 1;
-        //         $numfecha = DB::table('week_cut')
-        //                             ->where('num',$nivelAprobado[0]->numWeek)
-        //                             ->where('year',$nivelAprobado[0]->anio)
-        //                             ->select('id AS semana')
-        //                             ->get();
-        //         $fecha = $numfecha[0]->semana;
-
-        //         $nivelMaximo = DB::table('prepayroll_report_configs')
-        //                     ->where('is_required', 1)
-        //                     ->where('is_week',1)
-        //                     ->orderBy('order_vobo','desc')
-        //                     ->take(1)
-        //                     ->select('user_n_id  AS usuario')
-        //                     ->get();
-
-        //     }else{
-        //         $tipo = 2;
-
-        //         $numfecha = DB::table('hrs_prepay_cut')
-        //                             ->where('num',$nivelAprobado[0]->numBiweek)
-        //                             ->where('year',$nivelAprobado[0]->anio)
-        //                             ->select('id AS quincena')
-        //                             ->get();
-        //         $fecha = $numfecha[0]->quincena;
-                
-        //         $nivelMaximo = DB::table('prepayroll_report_configs')
-        //                     ->select('user_n_id  AS usurio')       
-        //                     ->where('is_required', 1)
-        //                     ->where('is_biweek',1)
-        //                     ->orderBy('order_vobo','desc')
-        //                     ->take(1)
-        //                     ->select('user_vobo_id  AS usuario')
-        //                     ->get();
-
-        //     }
-            
-            
-        //     if( $nivelMaximo[0]->usuario == $nivelAprobado[0]->usuario ){
-        //         if( $tipo == 1){
-        //             $prepayrollAUX = prepayroll_control::where('num_week',$fecha)->get();
-
-        //             $prepayroll = prepayroll_control::find($prepayrollAUX[0]->id);
-        //             $prepayroll->status = 2;
-        //             $prepayroll->updated_by = session()->get('user_id');
-        //             $prepayroll->save();
-        
-        //             $change = new prepayrollchange();
-        //             $change->prepayroll_id = $prepayroll->id;
-        //             $change->status = 2;
-        //             $change->created_by = session()->get('user_id');
-        //             $change->updated_by = session()->get('user_id');
-        //             $change->save();   
-        //         }else{
-        //             $prepayrollAUX  = prepayroll_control::where('num_biweekly',$fecha)->get();
-
-        //             $prepayroll = prepayroll_control::find($prepayrollAUX[0]->id);
-        //             $prepayroll->status = 2;
-        //             $prepayroll->updated_by = session()->get('user_id');
-        //             $prepayroll->save();
-
-        //             $change = new prepayrollchange();
-        //             $change->prepayroll_id = $prepayroll->id;
-        //             $change->status = 2;
-        //             $change->created_by = session()->get('user_id');
-        //             $change->updated_by = session()->get('user_id');
-        //             $change->save();
-        //         }
-        //     }else{
-        //         if( $tipo == 1){
-        //             $prepayrollAUX = prepayroll_control::where('num_week',$fecha)->get();
-
-        //             $prepayroll = prepayroll_control::find($prepayrollAUX[0]->id);
-        //             $prepayroll->status = 1;
-        //             $prepayroll->updated_by = session()->get('user_id');
-        //             $prepayroll->save();
-        
-        //             $change = new prepayrollchange();
-        //             $change->prepayroll_id = $prepayroll->id;
-        //             $change->status = 1;
-        //             $change->created_by = session()->get('user_id');
-        //             $change->updated_by = session()->get('user_id');
-        //             $change->save();   
-        //         }else{
-        //             $prepayrollAUX = prepayroll_control::where('num_biweekly',$fecha)->get();
-
-        //             $prepayroll = prepayroll_control::find($prepayrollAUX[0]->id);
-        //             $prepayroll->status = 1;
-        //             $prepayroll->updated_by = session()->get('user_id');
-        //             $prepayroll->save();
-
-        //             $change = new prepayrollchange();
-        //             $change->prepayroll_id = $prepayroll->id;
-        //             $change->status = 1;
-        //             $change->created_by = session()->get('user_id');
-        //             $change->updated_by = session()->get('user_id');
-        //             $change->save();
-        //         }   
-        //     }
-        // }
 
         if (is_null($sBackUrl)) {
             return redirect()->route('vobos',['idPreNomina' => $payType])->with(['mensaje' => $msg, 'icon' => $icon]);
@@ -1382,7 +1268,7 @@ class prePayrollController extends Controller
                         'is_rejected' => true,
                         'comments' => $rejectReason,
                         'dt_rejected' => Carbon::now()->toDateTimeString(),
-                        'updated_by' => session()->get('user_id'),
+                        'updated_by' => auth()->user()->id,
                         'updated_at' => Carbon::now()->toDateTimeString(),
                     ]);
 
