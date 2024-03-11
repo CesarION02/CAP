@@ -177,8 +177,6 @@ class prepayrollAdjustController extends Controller
             switch ($oAdjust->adjust_type_id) {
                 case \SCons::PP_TYPES['DHE']:
                 case \SCons::PP_TYPES['AHE']:
-                case \SCons::PP_TYPES['JE']:
-                case \SCons::PP_TYPES['JS']:
                     if (is_null($oAdjust->dt_time) || strlen($oAdjust->dt_time) == 0) {
                         return response()->json(['success' => false, 'msg' => 'No se puede aplicar el ajuste, no existe hora de aplicación.']);
                     }
