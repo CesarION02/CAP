@@ -26,11 +26,9 @@
             <form action="{{ route(''.$sRoute.'') }}" id="theForm">
                 <div class="box-body" id="reportApp">
                     <div class="row">
-                        <div class="col-md-2 requerido">
-                            Filtrar por:*
-                        </div>
+                       
                         <div class="col-md-3 col-md-offset-1">
-                            <label><input v-model="picked" v-on:change="onFilterTypeChange()" type="radio" name="optradio" value="period" onclick="chosDisable();">Periodicidad de pago</label>
+                            <input type="hidden" name="optradio" value="period">
                         </div>
                         @if( $wizard != 2 )
                             <div class="col-md-3">

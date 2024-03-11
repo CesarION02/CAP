@@ -1190,7 +1190,27 @@ class prePayrollController extends Controller
                     $oSkipped->save();
                 }
             }
-
+            if(!is_null($iDelegation)){
+                $empDel = DB::table('prepayroll_report_auth_controls')
+                                    ->where('id_delegation',$iDelegation)
+                                    ->first();
+                $userDel = $empDel->user_delegation_id;
+                $number = $empDel->number_prepayroll;
+                $year = $empDel->year;
+                $way_pay = $empDel->pay_way_id;
+                
+                $res = DB::table('prepayroll_report_auth_controls')
+                                ->where('number_prepayroll',$number)
+                                ->where('year',$year)
+                                ->where('pay_way_id',$way_pay)
+                                ->where('user_vobo_id',$userDel)
+                                ->update([
+                                    'is_vobo' => true, 
+                                    'dt_vobo' => Carbon::now()->toDateTimeString(),
+                                    'is_rejected' => false,
+                                    'dt_rejected' => null
+                                ]);
+            }
             $res = DB::table('prepayroll_report_auth_controls')
                         ->where('id_control', $idVobo)
                         // ->where('user_vobo_id', auth()->user()->id)

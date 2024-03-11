@@ -277,6 +277,19 @@ class specialWorkshiftController extends Controller
         }
 
         $sResponse = "";
+
+        //checar días que comprende el cambio de turno
+        $fechas = specialWorkshiftController::getIntermediateDates($startDate,$endDate);
+        if (count($fechas) > 0) {
+            $sResponse.= "Las fechas a las que se les asignará el cambio de turno son:\n";
+            foreach($fechas as $key => $fecha) {
+                $sResponse .= $fecha;
+                if ($key < (count($fechas) - 1) ){
+                    $sResponse .= ", ";    
+                }
+            }
+            $sResponse .= "\n";
+        }
         if (count($aResponse) > 0) {
             //arma el mensaje de respuesta recorriendo el array
             foreach ($aResponse as $response) {
@@ -288,6 +301,19 @@ class specialWorkshiftController extends Controller
         }
 
         return response()->json($sResponse);
+    }
+
+    public function getIntermediateDates($start,$end){
+        $fechas = [];
+        $fechaActual = Carbon::parse($start);
+        $fechaFin = Carbon::parse($end);
+    
+        while ($fechaActual->lessThanOrEqualTo($fechaFin)) {
+            $fechas[] = $fechaActual->toDateString();
+            $fechaActual->addDay();
+        }
+    
+        return $fechas;    
     }
 
     /**

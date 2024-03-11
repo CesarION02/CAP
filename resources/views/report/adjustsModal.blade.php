@@ -120,7 +120,7 @@
                   <button :disabled="isAdjustsDisabled" 
                           title="Guardar ajuste/comentario"
                           type="button" v-on:click="newAdjust()" 
-                          class="btn btn-success">Ajustar</button>
+                          class="btn btn-success">Guardar</button>
                 </div>
               </div>
             </div>
@@ -172,7 +172,7 @@
           </div>
           <div class="row">
             <div class="col-xs-3 col-xs-offset-9">
-              <button :disabled="!isModifOut && !isModifIn" type="button" class="btn btn-success" v-on:click="adjustTimes()">Ajustar</button>
+              <button :disabled="!isModifOut && !isModifIn" type="button" class="btn btn-success" v-on:click="adjustTimes()">Guardar</button>
             </div>
           </div>
         </div>
