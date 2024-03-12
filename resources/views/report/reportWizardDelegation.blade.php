@@ -78,7 +78,7 @@
     <script src="{{ asset("assets/pages/scripts/SGui.js") }}" type="text/javascript"></script>
     <script>
         var oGui = new SGui();
-        oGui.showLoading(2000);
+        oGui.showLoadingBlocked(2000);
     </script>
     <script src="{{ asset("assets/js/axios.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/chosen.jquery.min.js") }}" type="text/javascript"></script>

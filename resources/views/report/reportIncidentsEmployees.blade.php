@@ -164,7 +164,7 @@
     <script src="{{ asset("assets/pages/scripts/SGui.js") }}" type="text/javascript"></script>
     <script>
         var oGui = new SGui();
-        oGui.showLoading(2000);
+        oGui.showLoadingBlocked(2000);
     </script>
     <script>
         function chosEnable(){

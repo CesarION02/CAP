@@ -6,6 +6,14 @@ class SGui {
         });
     }
 
+    showLoadingBlocked(dTime) {
+        swal("Espere...", {
+            buttons: false,
+            timer: dTime,
+            closeOnClickOutside: false,
+        });
+    }
+
     showOk() {
         swal("Realizado", "Proceso completado con éxito", "success");
     }
