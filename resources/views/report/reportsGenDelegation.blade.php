@@ -80,6 +80,16 @@
 @endsection
 
 @section("scripts")
+    <script>
+        $(document).ready(function() {
+            $('#reportDelayAppGen :input').prop('disabled', true);
+        });
+    </script>
+    <script src="{{ asset("assets/pages/scripts/SGui.js") }}" type="text/javascript"></script>
+    <script>
+        var oGui = new SGui();
+        oGui.showLoading(2000);
+    </script>
     <script src="{{ asset("assets/js/axios.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/chosen.jquery.min.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/vue.js") }}" type="text/javascript"></script>
@@ -103,6 +113,9 @@
 
     <script>
         $(document).ready(function() {
+            $(window).on('load', function() {
+                $('#reportDelayAppGen :input').prop('disabled', false);
+            });
             $("#cbx1").click(function() {
                 if ($(this).is(":checked")){
                   doChecked(); // Función si se checkea
