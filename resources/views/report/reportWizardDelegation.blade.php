@@ -71,14 +71,12 @@
 
 @section("scripts")
     <script>
-        $(document).ready(function() {
-            $('#reportDelayAppGen :input').prop('disabled', true);
-        });
+        $('#reportDelayAppGen :input').prop('disabled', true);
     </script>
     <script src="{{ asset("assets/pages/scripts/SGui.js") }}" type="text/javascript"></script>
     <script>
         var oGui = new SGui();
-        oGui.showLoadingBlocked(2000);
+        oGui.showLoadingBlocked(4000);
     </script>
     <script src="{{ asset("assets/js/axios.js") }}" type="text/javascript"></script>
     <script src="{{ asset("assets/js/chosen.jquery.min.js") }}" type="text/javascript"></script>
