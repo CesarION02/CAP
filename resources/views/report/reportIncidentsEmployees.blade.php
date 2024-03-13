@@ -42,12 +42,14 @@
                             <div class="col-md-2">
                                 Periodicidad de pago:*
                             </div>
-                            <div class="col-md-4 col-md-offset-1">
-                                <select :disabled="picked == 'employee'" name="pay_way" id="pay_way" class="form-control" v-model="iPayWay">
-                                    <option value="2">Semana</option>
-                                    <option value="1">Quincena</option>
-                                    <option value="0">Todos</option>
-                                </select>
+                            <div class="col-md-3 col-md-offset-1">
+                                <input type="radio" id="option2" value="2" v-model="iPayWay" :disabled="picked == 'employee'" name="pay_way">
+                                <label for="option2">Semana</label>
+                            </div>
+
+                            <div class="col-md-3">
+                                <input type="radio" id="option1" value="1" v-model="iPayWay" :disabled="picked == 'employee'" name="pay_way">
+                                <label for="option1">Quincena</label>
                             </div>
                         </div>
                         <br>
@@ -154,6 +156,14 @@
 @endsection
 
 @section("scripts")
+    <script>
+        $('#reportDelayAppGen :input').prop('disabled', true);
+    </script>
+    <script src="{{ asset("assets/pages/scripts/SGui.js") }}" type="text/javascript"></script>
+    <script>
+        var oGui = new SGui();
+        oGui.showLoadingBlocked(4000);
+    </script>
     <script>
         function chosEnable(){
             $('.chosen-select').prop('disabled', false).trigger("chosen:updated");
@@ -346,6 +356,9 @@
 
     <script>
         $(document).ready(function() {
+            $(window).on('load', function() {
+                $('#reportDelayAppGen :input').prop('disabled', false);
+            });
             $("#cbx1").click(function() {
                 if ($(this).is(":checked")){
                   doChecked(); // Función si se checkea
