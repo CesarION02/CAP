@@ -63,7 +63,7 @@ class prepayrollGroupsController extends Controller
                                 ->select('pg.id_group', 'pg.group_name', 'pg.father_group_n_id', 'pgf.group_name AS father_group_name')
                                 ->selectRaw('IF (pg.father_group_n_id IS NULL, 1, 0) AS fg')
                                 ->orderBy('fg', 'DESC')
-                                ->orderBy('pg.id_group', 'ASC')
+                                ->orderBy('pg.father_group_n_id', 'ASC')
                                 ->get();
 
             foreach ($fGroup->lGroups as $group) {
