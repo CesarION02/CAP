@@ -54,7 +54,7 @@
                                 let canSkipElement =
                                     document.getElementById("can_skip_id");
                                 canSkipElement.value = 1;
-                                document.getElementById("form_vobo").submit();
+                                document.getElementById("form_vobo" + id).submit();
                             } else {
                                 swal("No se ha dado el visto bueno");
                             }
