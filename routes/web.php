@@ -128,6 +128,9 @@ Route::get('report/reportetiemposextradelegados/{id?}','ReporteController@genHrE
 Route::get('report/viewtiemposextra','ReporteController@hrExtReport')->name('reportetiemposextra');
 Route::get('report/usoPuertasDatos', 'ReporteController@reporteUsoPuertas')->name('reporteusopuertasdatos');
 Route::get('report/generarreportepuertas','ReporteController@generarReportePuertas')->name('generarreportepuertas');
+Route::get('report/datosReporteCambioHorasExtra', 'ReporteController@genChangeHrExtReport')->name('datosreportecambiohorasextra');
+Route::get('report/reportChangeHrEx', 'ReporteController@viewReportChangeHrExt')->name('viewreportchangehrext');
+
 /* Reporte incidencias */
 Route::get('report/reporteIncidencias', 'ReporteController@incidentReportView')->name('reporteIncidencias');
 Route::get('report/reporteIncidenciasGenerar', 'ReporteController@incidentReportGenerar')->name('reporteIncidenciasGenerar');

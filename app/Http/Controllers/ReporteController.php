@@ -443,6 +443,7 @@ class ReporteController extends Controller
                     ->with('isAdmin', $isAdmin);
     }
 
+
     public function genHrExReportDelegations($id = 0)
     {
         $config = \App\SUtils\SConfiguration::getConfigurations();
@@ -2880,5 +2881,353 @@ class ReporteController extends Controller
             //$orden = $request->orden;
 
             return view('report.accesoPuerta')->with('data',$data);
+        }
+
+        public function genChangeHrExtReport(){
+            $config = \App\SUtils\SConfiguration::getConfigurations();
+
+            $bDirect = false;
+            $payType = 0;
+            $sTitle = 'Reporte de modificaciones a tiempos extra';
+            $subEmployees = SPrepayrollUtils::getEmployeesByUser(\Auth::user()->id, $payType, $bDirect);
+            if ($subEmployees == null) {
+                $lEmployees = SGenUtils::toEmployeeIds(0, 0, []);
+            }
+            else {
+                $qEmployees = SGenUtils::toEmployeeQuery(0, 0, []);
+    
+                $lEmployees = $qEmployees->whereIn('e.id', $subEmployees)
+                                    ->orderBy('e.name', 'ASC')
+                                    ->get();
+            }
+        
+            $radioB = 'period';
+    
+            $isAdmin = false;
+            foreach (auth()->user()->roles()->get() as $rol) {
+                $result = in_array($rol->id, $config->rolesCanSeeAll);
+                if ($result) {
+                    $isAdmin = true;
+                    break;
+                }
+            }
+    
+            $lSuperviser = [];
+            if($isAdmin){
+                $lSuperviser = DB::table('users')
+                            ->join('prepayroll_groups_users as pru','pru.head_user_id','=','users.id')
+                            ->select('users.id','users.name')
+                            ->where('users.is_delete', 0)
+                            ->groupBy(['users.id'])
+                            ->orderBy('users.name')
+                            ->get();
+    
+                $lSuperviser->prepend(['id' => 0, 'name' => 'Todos']);
+            }
+    
+            return view('report.reportChangeHrEx')
+                        ->with('tReport', \SCons::REP_HR_EX)
+                        ->with('sTitle', $sTitle)
+                        ->with('sRoute', 'viewreportchangehrext')
+                        ->with('lEmployees', $lEmployees)
+                        ->with('radioB',$radioB)
+                        ->with('startOfWeek', $config->startOfWeek)
+                        ->with('lSuperviser',$lSuperviser)
+                        ->with('isAdmin', $isAdmin);
+        }
+
+        public function viewReportChangeHrExt(Request $request){
+            $sStartDate = $request->start_date;
+            $sEndDate = $request->end_date;
+            $superviser = $request->superviser;
+
+
+            try {
+                $lCommentsppAdjsTypes = \DB::table('prepayroll_adjusts_types')
+                                            ->select('id')
+                                            ->get();
+                $lCommentsAdjsTypes = [];
+                foreach ($lCommentsppAdjsTypes as $adjType) {
+                    $lCommentsAdjsTypes[$adjType->id] = \DB::table('prepayroll_adjusts_comments AS pac')
+                                                    ->join('comments AS c', 'pac.comment_id', '=', 'c.id')
+                                                    ->where('c.is_delete', 0)
+                                                    ->where('pac.adjust_type_id', $adjType->id)
+                                                    ->select('c.id', 'c.comment')
+                                                    ->get();
+                }
+
+                $oStartDate = Carbon::parse($sStartDate);
+                $oEndDate = Carbon::parse($sEndDate);
+
+                if (! $oStartDate->lessThanOrEqualTo($oEndDate)) {
+                    return \Redirect::back()->withErrors(['Error', 'La fecha de inicio debe ser previa a la fecha final']);
+                }
+
+                
+                $numIni = sDateUtils::getNumberOfDate($sStartDate, $request->pay_way == null ? \SCons::PAY_W_S : $request->pay_way);
+                $numFin = sDateUtils::getNumberOfDate($sEndDate, $request->pay_way == null ? \SCons::PAY_W_S : $request->pay_way);
+                if (($numIni[1] != $numFin[1]) || $numIni[0] > $numFin[0]) {
+                    return \Redirect::back()->withErrors(['Error', 'No se puede generar un reporte que abarca más de un año']);
+                }
+                /**
+                 * 1: quincena
+                 * 2: semana
+                 * 3: todos
+                 */
+                $payWay = $request->pay_way == null ? \SCons::PAY_W_S : $request->pay_way;
+
+                $filterType = $request->i_filter;
+                $ids = $request->elems;
+                $lEmployees = SGenUtils::toEmployeeIds($payWay, $filterType, $ids);
+                    
+
+                $roles = Auth()->user()->roles()->get();
+                $config = \App\SUtils\SConfiguration::getConfigurations();
+                $seeAll = false;
+                foreach ($roles as $rol) {
+                    if (in_array($rol->id, $config->rolesCanSeeAll)) {
+                        $seeAll = true;
+                        break;
+                    }
+                }
+
+                $user_id = \Auth::user()->id;
+
+                $isAdmin = false;
+                foreach (auth()->user()->roles()->get() as $rol) {
+                    $result = in_array($rol->id, $config->rolesCanSeeAll);
+                    if ($result) {
+                        $isAdmin = true;
+                        break;
+                    }
+                }
+                if($isAdmin){
+                    if($superviser != 0){
+                        $user_id = $superviser;
+                    }
+                }
+
+                $bDirect = 0;
+
+                $subEmployees = SPrepayrollUtils::getEmployeesByUser($user_id, $payWay, $bDirect);
+
+                if (! is_null($subEmployees) && count($subEmployees) >= 0) {
+                    $lColEmps = collect($lEmployees);
+                    if(!$seeAll){
+                        $lEmployees = $lColEmps->whereIn('id', $subEmployees);
+                    }
+
+                    if($isAdmin){
+                        if($superviser != 0){
+                            $lEmployees = $lColEmps->whereIn('id', $subEmployees);
+                        }
+                    }
+                }
+
+                $AEmployee = [];
+                $contador = 0;
+                foreach($lEmployees as $emp){
+                    $AEmployee[$contador] = $emp->id;
+                    $contador++;    
+                }
+                if($request->typeChange == 0){
+                    $resultados = DB::table('checador.prepayroll_adjusts')
+                                    ->select('employee_id')
+                                    ->distinct()
+                                    ->where(function ($query) {
+                                        $query->where('adjust_type_id', 5)
+                                                ->orWhere('adjust_type_id', 6);
+                                    })
+                                    ->whereIn('employee_id', $AEmployee)
+                                    ->whereBetween('dt_date', [$sStartDate, $sEndDate])
+                                    ->get();
+                }else if($request->typeChange == 1){
+                    $resultados = DB::table('checador.prepayroll_adjusts')
+                                    ->select('employee_id')
+                                    ->distinct()
+                                    ->where('adjust_type_id', 6)
+                                    ->whereIn('employee_id', $AEmployee)
+                                    ->whereBetween('dt_date', [$sStartDate, $sEndDate])
+                                    ->get();
+                }else{
+                    $resultados = DB::table('checador.prepayroll_adjusts')
+                                    ->select('employee_id')
+                                    ->distinct()
+                                    ->where('adjust_type_id', 5)
+                                    ->whereIn('employee_id', $AEmployee)
+                                    ->whereBetween('dt_date', [$sStartDate, $sEndDate])
+                                    ->get();
+                }   
+                
+                
+                $AEmployee = [];
+                $contador = 0;
+                foreach($resultados as $res){
+                    $AEmployee[$contador] = $res->employee_id;
+                    $contador++;    
+                }
+                
+                if (! is_null($AEmployee) && count($AEmployee) >= 0) {
+                    $lColEmps = collect($lEmployees); 
+                    $lEmployees = $lColEmps->whereIn('id', $AEmployee);   
+                } 
+                                            
+                
+
+                /******************************************************************************************************** 
+                 * Proceso de prenómina
+                */
+                $lRows = SDataProcess::process($sStartDate, $sEndDate, $payWay, $lEmployees);
+            
+                /******************************************************************************************************* */
+
+                $aEmployees = $lEmployees->pluck('num_employee', 'id');
+                $lEmpWrkdDays = SDelayReportUtils::getTheoreticalDaysOffBasedOnDaysWorked($lRows, $aEmployees, $sStartDate, $sEndDate);
+
+                $sPayWay = "";
+                switch ($payWay) {
+                    case \SCons::PAY_W_Q :
+                        $sPayWay = "Quincena";
+                        break;
+                    case \SCons::PAY_W_S :
+                        $sPayWay = "Semana";
+                        break;
+                }
+
+                $adjTypes = prepayrollAdjType::whereNotIn('id', [8])
+                                                ->get()
+                                                ->toArray();
+
+                $lAdjusts = DB::table('prepayroll_adjusts AS pa')
+                                ->join('prepayroll_adjusts_types AS pat', 'pa.adjust_type_id', '=', 'pat.id')
+                                ->select('pa.employee_id',
+                                            'pa.dt_date',
+                                            'pa.dt_time',
+                                            'pa.minutes',
+                                            'pa.comments',
+                                            'pa.apply_to',
+                                            'pa.adjust_type_id',
+                                            'pat.type_code',
+                                            'pat.type_name',
+                                            'pa.id',
+                                            'pa.apply_time'
+                                            )
+                                ->whereBetween('dt_date', [$sStartDate, $sEndDate])
+                                ->where('is_delete', false)
+                                ->get();
+
+                $bModify = SPermissions::hasPermission(\Auth::user()->id, 'ajustes_rep_te');
+
+                PrepayrollReportController::prepayrollReportVobos($sStartDate, $sEndDate);
+
+                $lDeptJobs = DB::table('employees AS e')
+                                ->join('departments AS d', 'e.department_id', '=', 'd.id')
+                                ->join('jobs AS j', 'e.job_id', '=', 'j.id')
+                                ->selectRaw('e.num_employee, CONCAT("DEPTO.: ", d.name, ", PUESTO: ", j.name) AS dept_job')
+                                ->pluck('dept_job', 'num_employee');
+
+                $isAdmin = false;
+                foreach (auth()->user()->roles()->get() as $rol) {
+                    $result = in_array($rol->id, $config->rolesCanSeeAll);
+                    if ($result) {
+                        $isAdmin = true;
+                        break;
+                    }
+                }
+
+                $subEmployees = [];
+                if (!$isAdmin) {
+                    $dirEmpl = SPrepayrollUtils::getEmployeesByUser(auth()->user()->id, 0, true, null);
+                    foreach ($dirEmpl as $data) {
+                        array_push($subEmployees, $data);
+                    }
+                    $lUsers = null;
+                }
+                else {
+                    $lUsers = DB::table('users')
+                        ->join('prepayroll_groups_users as pru','pru.head_user_id','=','users.id')
+                        ->select('users.id','users.name')
+                        ->orderBy('users.name')
+                        ->get();
+                }
+                
+                /**
+                 * Obtención de vobos de empleados
+                 */
+                $isPrepayrollInspection = false;
+                $lEmpVobos = [];
+                $aNumber = [];
+                if (($payWay == \SCons::PAY_W_S || $payWay == \SCons::PAY_W_Q) && env('VOBO_BY_EMP_ENABLED', true)) {
+                    $aNumber = SDateUtils::getNumberOfDate($sStartDate, $payWay);
+                    $dates = SDateUtils::getDatesOfPayrollNumber($aNumber[0], $aNumber[1], $payWay);
+                    
+                    if ($dates[0] == $sStartDate && $dates[1] == $sEndDate) {
+                        $lEmpVobos = DB::table('prepayroll_report_emp_vobos AS evb')
+                                            ->leftJoin('users AS u', 'evb.vobo_by_id', '=', 'u.id')
+                                            ->leftJoin('users AS ur', 'evb.rejected_by_id', '=', 'ur.id')
+                                            ->join('employees AS e', 'evb.employee_id', '=', 'e.id')
+                                            ->where('evb.is_delete', 0)
+                                            ->where('year', $aNumber[1])
+                                            ->select('u.name AS user_vobo_name',
+                                                    'ur.name AS user_rejected_name',
+                                                    'evb.employee_id', 
+                                                    'evb.vobo_by_id', 
+                                                    'evb.is_vobo',
+                                                    'evb.is_rejected',
+                                                    'evb.comments',
+                                                    'e.num_employee');
+
+                        if ($payWay == \SCons::PAY_W_Q) {
+                            $lEmpVobos = $lEmpVobos->where('evb.is_biweek', true)
+                                                    ->where('evb.num_biweek', $aNumber[0]);
+                        }
+                        else {
+                            $lEmpVobos = $lEmpVobos->where('evb.is_week', true)
+                                                    ->where('evb.num_week', $aNumber[0]);
+                        }
+
+                        $lEmpVobos = $lEmpVobos->get()->keyBy('num_employee')->toArray();
+
+                        $checkAbsenceAndDayOffWorked = commentsControl::where('is_delete', 0)
+                                        ->where('key_code', 'hasAbsenceAndDayOffWorked')
+                                        ->pluck('value')
+                                        ->first();
+            
+                        if ($checkAbsenceAndDayOffWorked) {
+                            $lRows = SReportsUtils::checkAbsencesAndDaysOff($lEmployees, $lRows, $sStartDate, $sEndDate, $payWay);
+                        }
+                        
+                        $isPrepayrollInspection = true;
+                    }
+                }
+
+
+                return view('report.datosReportChangeHrEx')
+                        ->with('tReport', \SCons::REP_HR_EX)
+                        ->with('sStartDate', $sStartDate)
+                        ->with('sEndDate', $sEndDate)
+                        ->with('sPayWay', $sPayWay)
+                        ->with('sTitle', 'Reporte de tiempos extra')
+                        ->with('adjTypes', $adjTypes)
+                        ->with('lAdjusts', $lAdjusts)
+                        ->with('lEmpVobos', $lEmpVobos)
+                        ->with('lDeptJobs', $lDeptJobs)
+                        ->with('isPrepayrollInspection', $isPrepayrollInspection)
+                        ->with('lEmpWrkdDays', $lEmpWrkdDays)
+                        ->with('bModify', $bModify)
+                        ->with('registriesRoute', route('registro_ajuste'))
+                        ->with('lRows', $lRows)
+                        ->with('lCommentsAdjsTypes', $lCommentsAdjsTypes)
+                        ->with('subEmployees', $subEmployees)
+                        ->with('isAdmin', $isAdmin)
+                        ->with('lUsers', $lUsers)
+                        ->with('pay_way', $request->pay_way);
+                
+                
+            }
+            catch (\Throwable $th) {
+                \Log::error($th);
+                return redirect()->route('datosreportecambiohorasextra')->withErrors(['Error', $th->getMessage()."Reporte a soporte técnico. "]);
+            }    
         }
 }
