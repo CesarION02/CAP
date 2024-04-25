@@ -300,7 +300,7 @@ class SJourneyReport
             }
 
             $text = str_replace("Revisar horario. ", "", $text);
-            $oRow->eventsText = SJourneyReport::toMayusCase(strtolower($text));
+            $oRow->eventsText = htmlspecialchars(SJourneyReport::toMayusCase(strtolower($text)));
         }
 
         return $lData;
