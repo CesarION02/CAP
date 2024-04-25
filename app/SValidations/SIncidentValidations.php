@@ -62,6 +62,70 @@ class SIncidentValidations
     }
 
     /**
+     * Valida que la incidencia no se empalme con otras incidencias o días festivos cuando viene de un sistema externo
+     * 
+     * @param string $startDate
+     * @param string $endDate
+     * @param int $idEmployee
+     * @param int $idIncident
+     * 
+     * @return array
+     */
+    public static function validateExternalIncidentsAndHolidays($startDate, $endDate, $idEmployee, $idIncident, $lDays)
+    {
+        $incidents = DB::table('incidents')
+            ->where('employee_id', '=', $idEmployee)
+            ->where(function ($query) use ($startDate, $endDate) {
+                $query->whereIn('incidents.start_date', [$startDate, $endDate])
+                    ->orwhereIn('incidents.end_date', [$startDate, $endDate]);
+            })
+            ->where('is_delete', 0);
+
+        if ($idIncident > 0) {
+            $incidents = $incidents->where('id', '!=', $idIncident);
+        }
+
+        $incidents = $incidents->get();
+
+        if (count($incidents) > 0) {
+            return [
+                'code' => 400,
+                'status' => 'error',
+                'message' => "Se agrego una incidencia después de solicitar los días.",
+            ];
+        }
+        $holidays = DB::table('holidays')
+            ->whereIn('fecha', [$startDate, $endDate])
+            ->where('is_delete', 0)
+            ->get();
+        
+        if(count($holidays) > 0){
+            for($i = 0 ; count($lDays) > $i ; $i++ ){
+                $holidays = DB::table('holidays')
+                ->where('fecha', $lDays[$i]->date)
+                ->where('is_delete', 0)
+                ->get();
+                
+                if(count($holidays) > 0){
+                    if($lDays[$i]->bussinesDay == true && $lDays[$i]->taken == true ){
+                        return [
+                            'code' => 400,
+                            'status' => 'error',
+                            'message' => "No se puede aprobar. Porque se ingreso un día festivo despues de que se ingreso la solicitud al sistema.",
+                        ];    
+                    }
+                }
+            }
+        }
+
+        return [
+            'code' => 200,
+            'status' => 'success',
+            'message' => "OK",
+        ];
+    }
+
+    /**
      * Asigna un subtipo de incidencia por defecto si no se ha seleccionado uno
      * 
      * @param incident $oIncident

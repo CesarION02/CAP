@@ -103,7 +103,9 @@ class ExternalIncidentsController extends Controller
             }
 
             // valida que los días de incidente no se solapen con otras incidencias o días festivos
-            $resp = SIncidentValidations::validateIncidentsAndHolidays($oIncident->start_date, $oIncident->end_date, $oEmp->id, 0);
+            //$resp = SIncidentValidations::validateIncidentsAndHolidays($oIncident->start_date, $oIncident->end_date, $oEmp->id, 0);
+            $lDays = collect($inc_dates);
+            $resp = SIncidentValidations::validateExternalIncidentsAndHolidays($oIncident->start_date, $oIncident->end_date, $oEmp->id, 0,$lDays);
             if ($resp['status'] == 'error') {
                 return response()->json($resp);
             }
