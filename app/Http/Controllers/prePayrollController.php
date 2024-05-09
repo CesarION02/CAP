@@ -1134,6 +1134,11 @@ class prePayrollController extends Controller
                                 ->get();
 
             $bCanSkip = count($vobosMajor) == 0;
+            if($bCanSkip == true){
+                $bCanSkip = 1;
+            }else{
+                $bCanSkip = 0;
+            }
         }
 
         return response()->json(array(

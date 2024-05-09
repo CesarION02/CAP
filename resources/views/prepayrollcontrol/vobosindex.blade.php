@@ -85,12 +85,21 @@
             url:'{{ $routeChildren }}',
             data:{ idprenomina: value, id: id, _token: '{{csrf_token()}}' },
             success:function(data) {
+                let bCanSkip = data.bCanSkip;
+                $('input[name="can_skip"]').each(function(){
+                    // Establecer el valor deseado para cada input
+                    $(this).val(bCanSkip);
+                });
                 if (data.users.length > 0) {
                     for (var i = 0; i < data.users.length; i++) {
-                        if(data.users[i].is_active == 1){
-                            text = text + data.users[i].name + ', ';
+                        if(data.users[i].is_active != undefined){
+                            if(data.users[i].is_active == 1){
+                                text = text + data.users[i] + ', ';
+                            }else{
+                                textInactive = textInactive + data.users[i] + ', ';
+                            }
                         }else{
-                            textInactive = textInactive + data.users[i].name + ', ';
+                            text = text + data.users[i] + ', ';
                         }
                     }
                     if (data.bCanSkip != undefined && data.bCanSkip) {

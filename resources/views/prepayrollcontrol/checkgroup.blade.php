@@ -65,9 +65,9 @@
                 if (data.users.length > 0) {
                     for (var i = 0; i < data.users.length; i++) {
                         if(data.users[i].is_active == 1){
-                            text = text + data.users[i].name + ', ';
+                            text = text + data.users[i] + ', ';
                         }else{
-                            textInactive = textInactive + data.users[i].name + ', ';
+                            textInactive = textInactive + data.users[i] + ', ';
                         }
                     }
                     // Se comenta confirmación por solicitud de Sergio Flores: no se puede dar Vobo si los usuarios que dependen de ti no han dado vobo.
