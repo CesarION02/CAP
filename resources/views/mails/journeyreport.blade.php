@@ -37,6 +37,7 @@
                                     <th>Salida</th>
                                     <th>T. trabajado</th>
                                     <th>T. retardo</th>
+                                    <th>T. adicional</th>
                                     <th>Incidencias</th>
                                 </tr>
                             @else
@@ -116,6 +117,13 @@
                                         @endif
                                     ">
                                         {{ \App\SUtils\SDelayReportUtils::convertToHoursMins($oRow->entryDelayMinutes) }}
+                                    </td>
+                                    <td style="text-align: right; padding-left: 8px; padding-right: 8px; 
+                                        @if ($i % 2 == 0)
+                                            background-color: rgb(217, 217, 217)
+                                        @endif
+                                    ">
+                                        {{ \App\SUtils\SDelayReportUtils::convertToHoursMins($oRow->overWorkedMins) }}
                                     </td>
                                     <td style="padding-left: 8px; padding-right: 8px; 
                                         @if ($i % 2 == 0)
@@ -207,6 +215,9 @@
                                     <td colspan="5"><b>{{ ($oEmp->numEmployee." - ".$oEmp->employee) }}</b></td>
                                     <td style="text-align: right; padding-left: 8px; padding-right: 8px; "">
                                         <b>{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($oEmp->totalDelay) }}</b>
+                                    </td>
+                                    <td style="text-align: right; padding-left: 8px; padding-right: 8px; "">
+                                        <b>{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($oEmp->totalAditional) }}</b>
                                     </td>
                                 </tr>
                             @else

@@ -250,6 +250,10 @@ class SJourneyReport
         $lWorkshifts = SDelayReportUtils::getWorkshifts($sStartDate, $sEndDate, $iPayType, $aEmps);
         $lData53_2 = SDataProcess::addEventsDaysOffAndHolidays($data53, $lWorkshifts, $comments);
         $aEmployeeOverTime = $lEmployees->pluck('policy_extratime_id', 'id');
+        // Se modifica la columna de política de tiempo extra para que el proceso lo calcule
+        $aEmployeeOverTime = $aEmployeeOverTime->map(function ($item, $key) {
+            return \SCons::ET_POL_ALWAYS;
+        });
         $lData = SDataProcess::addDelaysAndOverTime($lData53_2, $aEmployeeOverTime, $sEndDate, $comments);
         $lDataWkd = SJourneyReport::addWorkedTime($lData);
         $lDataTxts = SJourneyReport::addEventsText($lDataWkd);
@@ -337,40 +341,61 @@ class SJourneyReport
      */
     public static function groupData($lData)
     {
+        // Variables para almacenar el ID del empleado actual, la lista de empleados, y la fila del empleado actual
         $idEmployee = 0;
         $lEmpRows = [];
         $oEmpRow = null;
+
+        // Variables para almacenar el total de retrasos y tiempo adicional
         $totalDelay = 0;
+        $totalAditional = 0;
+
+        // Variable para determinar si se encontró un horario válido
         $bWithSchedule = false;
+
+        // Iterar sobre cada fila de datos
         foreach ($lData as $oRow) {
+            // Si el ID del empleado actual es diferente al anterior, procesar la fila del empleado anterior
             if ($oRow->idEmployee != $idEmployee) {
                 $idEmployee = $oRow->idEmployee;
-                if (! is_null($oEmpRow)) {
+                if ($oEmpRow !== null) {
+                    // Asignar los totales calculados a la fila del empleado
                     $oEmpRow->totalDelay = $totalDelay;
-                    $lEmpRows[] = $oEmpRow;
+                    $oEmpRow->totalAditional = $totalAditional;
+                    $lEmpRows[] = $oEmpRow; // Agregar la fila del empleado a la lista
                 }
 
-                $oEmpRow = new \stdClass();
-                $oEmpRow->idEmployee = $oRow->idEmployee;
-                $oEmpRow->numEmployee = $oRow->numEmployee;
-                $oEmpRow->employee = $oRow->employee;
-                $oEmpRow->departmentName = $oRow->departmentName;
-                $oEmpRow->lRows = [];
+                // Crear una nueva fila de empleado con los datos actuales
+                $oEmpRow = (object)[
+                    'idEmployee' => $oRow->idEmployee,
+                    'numEmployee' => $oRow->numEmployee,
+                    'employee' => $oRow->employee,
+                    'departmentName' => $oRow->departmentName,
+                    'totalAditional' => 0,
+                    'lRows' => [],
+                    'schedule' => 'Sin horario' // Inicializar el horario como 'Sin horario'
+                ];
+
+                // Reiniciar los totales y el indicador de horario
                 $totalDelay = 0;
+                $totalAditional = 0;
                 $bWithSchedule = false;
-                $oEmpRow->schedule = "Sin horario";
             }
 
+            // Agregar la fila actual a la lista de filas del empleado
             $oEmpRow->lRows[] = $oRow;
+
+            // Sumar los minutos de retraso y tiempo adicional
             $totalDelay += $oRow->entryDelayMinutes;
-            if (! $bWithSchedule && (strlen($oRow->outDateTime) > 11 || (strlen($oRow->inDateTime) == 10 && strlen($oRow->outDateTime) == 10))) {
-                $date = is_null($oRow->outDateTimeSch) ? (is_null($oRow->outDate) ? null : $oRow->outDate) : $oRow->outDateTimeSch;
-                if (! is_null($date) && $oRow->workable && SDateTimeUtils::dayOfWeek($date) != Carbon::SUNDAY && SDateTimeUtils::dayOfWeek($date) != Carbon::SATURDAY) {
-                    $pos = strpos($oRow->eventsText, "Sin horario");
-                    // Comparación especial por el tipo de retorno de la función strpos
-                    if ($pos === false) {
-                        if (! is_null($oRow->inDateTimeSch) && ! is_null($oRow->outDateTimeSch) && strlen($oRow->inDateTimeSch) > 11 && strlen($oRow->outDateTimeSch) > 11) {
-                            $oEmpRow->schedule = Carbon::parse($oRow->inDateTimeSch)->toTimeString() . " - " . Carbon::parse($oRow->outDateTimeSch)->toTimeString();
+            $totalAditional += $oRow->overWorkedMins;
+
+            // Verificar si hay un horario válido
+            if (!$bWithSchedule && (strlen($oRow->outDateTime) > 11 || (strlen($oRow->inDateTime) == 10 && strlen($oRow->outDateTime) == 10))) {
+                $date = $oRow->outDateTimeSch ?? ($oRow->outDate ?? null);
+                if ($date !== null && $oRow->workable && SDateTimeUtils::dayOfWeek($date) != Carbon::SUNDAY && SDateTimeUtils::dayOfWeek($date) != Carbon::SATURDAY) {
+                    if (strpos($oRow->eventsText, 'Sin horario') === false) {
+                        if ($oRow->inDateTimeSch !== null && $oRow->outDateTimeSch !== null && strlen($oRow->inDateTimeSch) > 11 && strlen($oRow->outDateTimeSch) > 11) {
+                            $oEmpRow->schedule = Carbon::parse($oRow->inDateTimeSch)->toTimeString() . ' - ' . Carbon::parse($oRow->outDateTimeSch)->toTimeString();
                             $bWithSchedule = true;
                         }
                     }
@@ -378,14 +403,16 @@ class SJourneyReport
             }
         }
 
-        if (! is_null($oEmpRow)) {
-            // dd($oEmpRow);
+        // Agregar la última fila del empleado a la lista, si existe
+        if ($oEmpRow !== null) {
             $oEmpRow->totalDelay = $totalDelay;
+            $oEmpRow->totalAditional = $totalAditional;
             $lEmpRows[] = $oEmpRow;
         }
 
-        return $lEmpRows;
+        return $lEmpRows; // Retornar la lista de filas de empleados agrupadas
     }
+
 
     /**
      * Pone en mayúscula la primera letra después de cada punto y quita caracteres especiales
