@@ -112,9 +112,7 @@ class SyncController extends Controller
 
             $newDate = Carbon::now('UTC');
             $newDate->tz = new \DateTimeZone('-6:00');
-            $newDate->subMinutes(30);
-
-            \App\SUtils\SConfiguration::setConfiguration('lastSyncDateTime', $newDate->toDateTimeString());
+            $newDate->subMinutes(60);
 
             /**
              * Una vez terminado el proceso libera el candado con el timestamp actual
@@ -125,7 +123,7 @@ class SyncController extends Controller
             $oNow->tz = new \DateTimeZone('-6:00');
             $oLock->released_at = $oNow->toDateTimeString();
             $oLock->save();
-
+            \App\SUtils\SConfiguration::setConfiguration('lastSyncDateTime', $newDate->toDateTimeString());
             return 1;
         }
         catch (\Exception $e) {
