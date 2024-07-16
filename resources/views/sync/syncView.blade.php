@@ -23,7 +23,7 @@ Reporte revision
                     <div class="row">
                         <div class="col-md-5 col-md-offset-1">
                             <label for="start_date">Fecha a sincronizar:</label>
-                            <input type="date" name="date" id="date">
+                            <input type="date" name="date" id="date" max={{$maxDate}} min={{$minDate}}>
                         </div>
                     </div>
                     <br>
