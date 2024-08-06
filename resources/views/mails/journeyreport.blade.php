@@ -212,25 +212,49 @@
                             @endforeach
                             @if (is_null($aColumns))
                                 <tr>
-                                    <td colspan="5"><b>{{ ($oEmp->numEmployee." - ".$oEmp->employee) }}</b></td>
-                                    <td style="text-align: right; padding-left: 8px; padding-right: 8px; "">
+                                    <td colspan="5"><b>{{ $oEmp->numEmployee." - ".$oEmp->employee }}</b></td>
+                                    <td style="text-align: right; padding-left: 8px; padding-right: 8px; 
+                                        @if ($oEmp->totalDelay > 15)
+                                            color: red;
+                                        @endif
+                                    ">
                                         <b>{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($oEmp->totalDelay) }}</b>
                                     </td>
-                                    <td style="text-align: right; padding-left: 8px; padding-right: 8px; "">
+                                    <td style="text-align: right; padding-left: 8px; padding-right: 8px;">
                                         <b>{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($oEmp->totalAditional) }}</b>
                                     </td>
                                 </tr>
+                                <tr>   
+                                    @if ($oEmp->totalDelay > 15)
+                                        <p style="color: red;">Nota: Únicamente se permiten 15 minutos acumulados de retardo en una quincena.</p>
+                                    @endif
+                                </tr>
                             @else
-                                <tr style="background-color: #acbbc9">
-                                    <td colspan="6"><b>{{ ($oEmp->numEmployee." - ".$oEmp->employee) . " / Total retardo: " . \App\SUtils\SDelayReportUtils::convertToHoursMins($oEmp->totalDelay) }}</b></td>
+                                <tr>
+                                    <td colspan="5"><b>{{ $oEmp->numEmployee." - ".$oEmp->employee }}</b></td>
+                                    <td style="text-align: right; padding-left: 8px; padding-right: 8px; 
+                                        @if ($oEmp->totalDelay > 15)
+                                            color: red;
+                                        @endif                                        
+                                    ">
+                                        <b>{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($oEmp->totalDelay) }}</b>
+                                    </td>
+                                    <td style="text-align: right; padding-left: 8px; padding-right: 8px;">
+                                        <b>{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($oEmp->totalAditional) }}</b>
+                                    </td>
+                                </tr>
+                                <tr>   
+                                    @if ($oEmp->totalDelay > 15)
+                                        <p style="color: red;">Nota: Únicamente se permiten 15 minutos acumulados de retardo en una quincena.</p>
+                                    @endif
                                 </tr>
                             @endif
                             <?php
                                 $i++;
                             ?>
                         </tbody>
-                    </table>
-                    <hr align="left" width="55%" >
+                    </table>                   
+                    <hr align="left" width="55%" >                       
             @endforeach
         @endif
     </div>
