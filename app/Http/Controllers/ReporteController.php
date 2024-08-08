@@ -380,6 +380,7 @@ class ReporteController extends Controller
 
     public function genHrExReport($id = 0)
     {
+
         $config = \App\SUtils\SConfiguration::getConfigurations();
 
         $bDirect = false;
@@ -727,6 +728,7 @@ class ReporteController extends Controller
                 }
             }
             if($is_active == 0){
+
                 $lEmployees = SReportsUtils::filterEmployeesByAdmissionDate($lEmployees, $sEndDate, 'id');
             }
             
@@ -2412,7 +2414,7 @@ class ReporteController extends Controller
 
             $bDirect = false;
             $payType = 0;
-            $subEmployees = SPrepayrollUtils::getEmployeesByUser(\Auth::user()->id, $bDirect, $payType, null);
+            $subEmployees = SPrepayrollUtils::getEmployeesByUser(\Auth::user()->id, $payType, $bDirect, null);
             if ($subEmployees == null) {
                 $lEmployees = SGenUtils::toEmployeeIds(0, 0, []);
             }
@@ -2535,7 +2537,7 @@ class ReporteController extends Controller
                 }
             }
 
-            $lEmployees = SReportsUtils::filterEmployeesByAdmissionDate($lEmployees, $sStartDate, 'id');
+            $lEmployees = SReportsUtils::filterEmployeesByAdmissionDate($lEmployees, $sEndDate, 'id');
 
             // si es parte del wizard cambia la ruta
             if ($request->wizard != 2) {
