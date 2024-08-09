@@ -248,14 +248,39 @@ class prePayrollController extends Controller
                     $lAbsences = prePayrollController::searchAbsence($idEmployee, $sDate);
                     if (sizeof($lAbsences) > 0) {
                         foreach ($lAbsences as $absence) {
-                            $key = explode("_", $absence->external_key);
-    
-                            $abs = [];
-                            $abs['id_emp'] = $key[0];
-                            $abs['id_abs'] = $key[1];
-                            $abs['nts'] = $absence->nts;
-    
-                            $day->events[] = $abs;
+                            try {
+                                if ($absence->is_external) {
+                                    $key = explode("_", $absence->external_key);
+
+                                    if (! $key[0]) {
+                                        $d = 0;
+                                    }
+                                    if (! $key[1]) {
+                                        $r = 0;
+                                    }
+                                    $abs = [];
+                                    $abs['id_emp'] = $key[0];
+                                    $abs['id_abs'] = $key[1];
+                                    $abs['nts'] = $absence->nts;
+                                }
+                                else {
+                                    $abs = [];
+                                    $abs['id_emp'] = 0;
+                                    $abs['id_abs'] = 0;
+                                    $abs['nts'] = $absence->nts;
+                                }
+        
+                                $day->events[] = $abs;
+                            }
+                            catch (\Throwable $e) {
+                                \Log::error($e);
+                                $response = (object) [
+                                    "code" => $this->ERROR,
+                                    "message" => $e->getMessage() . " / Error al obtener las incidencias del empleado"
+                                ];
+                    
+                                return json_encode($response, JSON_PRETTY_PRINT);
+                            }
                         }
                     }
                 }

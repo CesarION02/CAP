@@ -173,8 +173,8 @@ class ExternalAdjustsController extends Controller
             $oAdjust->is_external = true;
             $oAdjust->adjust_type_id = $adjust_type_id;
             $oAdjust->apply_time = $applyTime;
-            $oAdjust->created_by = auth('api')->user()->id;
-            $oAdjust->updated_by = auth('api')->user()->id;
+            $oAdjust->created_by = auth('api')->user()->id > 0 ? auth('api')->user()->id : 1;
+            $oAdjust->updated_by = auth('api')->user()->id > 0 ? auth('api')->user()->id : 1;
 
             // solo si se encontró una hora para amarrar el ajuste se guarda
             if (! $bForLater) {
