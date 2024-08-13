@@ -1,0 +1,7 @@
+-------------------------------------------------------------------------------------------------------------------------
+feat: Días para seleccionar sincronización con Biostar
+author: Cesar Orozco
+date: 2024-08-13
+description: Se modifica el número de días que puedes seleccionar para realizar la sincronización con Biostar,
+dependiendo del rol de usuario que ingrese al sistema.
+-------------------------------------------------------------------------------------------------------------------------

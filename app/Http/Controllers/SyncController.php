@@ -148,10 +148,17 @@ class SyncController extends Controller
     public function dateSyncView(){
         $now = Carbon::now();
         $maxDate = $now->toDateString();
-        if (session()->get('rol_id') == 1) {
-            $minDate = $now->subMonth()->toDateString();
-        } else { 
-            $minDate = $now->subDays(7)->toDateString();    
+        switch(session()->get('rol_id')){
+            case 1:
+                $minDate = $now->subMonths(6)->toDateString();  
+            case 3:
+            case 8:
+            case 11:
+            case 12:
+                $minDate = $now->subMonth()->toDateString();
+            default:
+                $minDate = $now->subDays(7)->toDateString();     
+             
         }
         return view('sync.syncView')->with('maxDate', $maxDate)->with('minDate', $minDate);
     }
