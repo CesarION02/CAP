@@ -143,7 +143,7 @@ Usuarios
                         </div>
                         <br>
                         <div class="row">
-                            <form action="{{ route('guardar_usuario_global') }}">
+                            <form action="{{ route('usuario') }}">
                                 <input type="hidden" id="ifilter" name="ifilter">
                                 <input type="hidden" id="efilter" name="efilter">
                                 <div class="col-md-16">
