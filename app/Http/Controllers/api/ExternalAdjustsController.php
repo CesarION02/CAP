@@ -85,13 +85,13 @@ class ExternalAdjustsController extends Controller
             $applyTo = 0;
             $applyTime = 0;
             $bForLater = false;
-            switch ($adjust_type_id) {
-                case \SCons::PP_TYPES['JE']:
-                case \SCons::PP_TYPES['JS']:
-                case \SCons::PP_TYPES['OF']:
-                case \SCons::PP_TYPES['DHE']:
-                case \SCons::PP_TYPES['AHE']:
-                case \SCons::PP_TYPES['COM']:
+            switch ((int) $adjust_type_id) {
+                case (int) \SCons::PP_TYPES['JE']:
+                case (int) \SCons::PP_TYPES['JS']:
+                case (int) \SCons::PP_TYPES['OF']:
+                case (int) \SCons::PP_TYPES['DHE']:
+                case (int) \SCons::PP_TYPES['AHE']:
+                case (int) \SCons::PP_TYPES['COM']:
                     return response()->json([
                                             'message' => "El tipo de ajuste recibido no es válido",
                                             'status' => "Error",
@@ -101,7 +101,7 @@ class ExternalAdjustsController extends Controller
                 /**
                  * Justificar retardo
                  */
-                case \SCons::PP_TYPES['OR']:
+                case (int) \SCons::PP_TYPES['OR']:
                     $lFlRows = $lRows->where('inDate', $dt_date);
                     if (count($lFlRows) > 0) {
                         $oRow = $lFlRows->first();
@@ -130,7 +130,7 @@ class ExternalAdjustsController extends Controller
                 /**
                  * Justificar salida anticipada
                  */
-                case \SCons::PP_TYPES['JSA']:
+                case (int) \SCons::PP_TYPES['JSA']:
                     $lFlRows = $lRows->where('outDate', $dt_date);
 
                     if (count($lFlRows) > 0) {
