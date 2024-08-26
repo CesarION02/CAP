@@ -174,25 +174,26 @@ class prepayrollAdjustController extends Controller
             $oEmployee = employees::find($oAdjust->employee_id);
 
             $adjustDate = $oAdjust->dt_date;
-            switch ($oAdjust->adjust_type_id) {
-                case \SCons::PP_TYPES['DHE']:
-                case \SCons::PP_TYPES['AHE']:
-                case \SCons::PP_TYPES['JSA']:
-                    if (is_null($oAdjust->dt_time) || strlen($oAdjust->dt_time) == 0) {
+            switch ((int) $oAdjust->adjust_type_id) {
+                case (int) \SCons::PP_TYPES['DHE']:
+                case (int) \SCons::PP_TYPES['AHE']:
+                case (int) \SCons::PP_TYPES['JSA']:
+                    if (empty($oAdjust->dt_time)) {
                         return response()->json(['success' => false, 'msg' => 'No se puede aplicar el ajuste, no existe hora de aplicación.']);
                     }
                     break;
-                case \SCons::PP_TYPES['OR']:
-                    if (is_null($oAdjust->dt_time) || strlen($oAdjust->dt_time) == 0) {
+                    
+                case (int) \SCons::PP_TYPES['OR']:
+                    if (empty($oAdjust->dt_time)) {
                         return response()->json(['success' => false, 'msg' => 'No se puede aplicar el ajuste, no existe hora de aplicación.']);
                     }
-                    if ($oAdjust->dt_time >= "18:30") {
+                    if (Carbon::parse($oAdjust->dt_time)->format('H:i') >= '18:30') {
                         $adjustDate = Carbon::parse($oAdjust->dt_date)->addDay()->toDateString();
                     }
                     break;
-                
+
                 default:
-                    # code...
+                    // Opcional: Manejo de casos inesperados
                     break;
             }
 
