@@ -260,7 +260,7 @@ class SJourneyReport
         $lEmpDept = $lEmployees->mapWithKeys(function ($item) {
             $jobNameDep= ucfirst(strtolower($item->department_name));
             $jobNameJob= ucfirst(strtolower($item->job_name));
-            return [$item->id => 'Departamento: ' .$jobNameDep . ' - Puesto: ' . $jobNameJob];
+            return [$item->id => htmlspecialchars('Departamento: ' .$jobNameDep . ' - Puesto: ' . $jobNameJob)];
         });
         $lDataDept = SJourneyReport::addDepartmentName($lDataTxts, $lEmpDept);
         $lDataFinal = SJourneyReport::groupData($lDataDept);
