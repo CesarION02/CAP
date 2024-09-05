@@ -81,7 +81,7 @@
 
 @section("scripts")
     <script>
-        $('#reportDelayAppGen :input').prop('disabled', true);
+        // $('#reportDelayAppGen :input').prop('disabled', true);
     </script>
     <script src="{{ asset("assets/pages/scripts/SGui.js") }}" type="text/javascript"></script>
     <script>
@@ -111,9 +111,9 @@
 
     <script>
         $(document).ready(function() {
-            $(window).on('load', function() {
-                $('#reportDelayAppGen :input').prop('disabled', false);
-            });
+            // $(window).on('load', function() {
+            //     $('#reportDelayAppGen :input').prop('disabled', false);
+            // });
             $("#cbx1").click(function() {
                 if ($(this).is(":checked")){
                   doChecked(); // Función si se checkea

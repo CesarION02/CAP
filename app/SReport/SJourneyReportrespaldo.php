@@ -257,11 +257,7 @@ class SJourneyReport
         $lData = SDataProcess::addDelaysAndOverTime($lData53_2, $aEmployeeOverTime, $sEndDate, $comments);
         $lDataWkd = SJourneyReport::addWorkedTime($lData);
         $lDataTxts = SJourneyReport::addEventsText($lDataWkd);
-        $lEmpDept = $lEmployees->mapWithKeys(function ($item) {
-            $jobNameDep= ucfirst(strtolower($item->department_name));
-            $jobNameJob= ucfirst(strtolower($item->job_name));
-            return [$item->id => 'Departamento: ' .$jobNameDep . ' - Puesto: ' . $jobNameJob];
-        });
+        $lEmpDept = $lEmployees->pluck('dept_name', 'id');
         $lDataDept = SJourneyReport::addDepartmentName($lDataTxts, $lEmpDept);
         $lDataFinal = SJourneyReport::groupData($lDataDept);
 

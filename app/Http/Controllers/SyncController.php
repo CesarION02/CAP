@@ -19,10 +19,10 @@ class SyncController extends Controller
         // \App\SUtils\SConfiguration::addConfiguration('lastSyncDateTime', '2020-04-01 00:00:00');
         $config = \App\SUtils\SConfiguration::getConfigurations();
 
-        //$correcto = SyncController::syncronizeWithERP($config->lastSyncDateTime);
-        //$resp = SCutoffDates::processCutoffDates($config->lastSyncDateTime);
-        //$sincronizado = \App\Http\Controllers\biostarController::insertEvents();
-        //$sincronizado = \App\Http\Controllers\biostarController::insertDevices();
+        $correcto = SyncController::syncronizeWithERP($config->lastSyncDateTime);
+        $resp = SCutoffDates::processCutoffDates($config->lastSyncDateTime);
+        $sincronizado = \App\Http\Controllers\biostarController::insertEvents();
+        $sincronizado = \App\Http\Controllers\biostarController::insertDevices();
 
         $sincronizado = 1;
         if ($sincronizado != 0) {
@@ -230,7 +230,7 @@ class SyncController extends Controller
         }
         
         $client = new Client([
-            'base_uri' => 'http://127.0.0.1:9001',
+            'base_uri' => 'http://192.168.1.251:9001',
             'timeout' => 30.0,
         ]);
         $jsonPrueba = json_encode($arrJson);

@@ -409,7 +409,6 @@ class shiftprogrammingController extends Controller
         $week->save();
         $data = $week->id;
         if($request->turnoflag == '0'){
-            DB::beginTransaction();
             for($i = 0 ; count($request->departamento) > $i ; $i++ ){
                 if($request->departFlag != 0 && $deleteFlag == 0  ){
                     $deletedRows = week_department::where('week_id', $week->id)->delete();
@@ -476,7 +475,6 @@ class shiftprogrammingController extends Controller
                
                 //$mod_date = strtotime($date."+ 2 days");
             }
-            DB::commit();
             $flagPDF = 1;
         }
         if($flagPDF == 1){

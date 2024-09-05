@@ -67,6 +67,11 @@ class userController extends Controller
                 break;
         }
 
+        // $datas = User::where('is_delete','0')->orderBy('name')->get();
+        //         $datas->each(function($datas){
+        //                  $datas->employee;
+        //          });
+
         
         return view('user.index', compact('datas'))->with('iFilter',$iFilter)->with('eFilter',$eFilter);
     }
@@ -85,8 +90,6 @@ class userController extends Controller
 
     public function create_with_global()
     {
-        $json = '[{"id": 1,"name": "CARMONA FIGUEROA, EDWIN OMAR","num": 990,"external": 3338, "email": "cesar.i@swaplicado.com.mx", "contrasena": 1234},{"id": 2,"name": "Espinoza Lopez, Daniel","num": 326,"external": 1904, "email": "cesar.i@swaplicado.com.mx","contrasena": 1234}]';
-        $uGlobales = json_decode($json);
         $employees = employees::orderBy('name','ASC')->where('is_active',1)->where('is_delete', 0)->pluck('num_employee','name');
         $data = SPghUtils::loginToPGH();
         $headers = [
@@ -106,9 +109,7 @@ class userController extends Controller
         $jsonString = $response->getBody()->getContents();
 
         $uGlobales = json_decode($jsonString);
-
-
-
+    
         return view('user.create_global')->with('uGlobales',$uGlobales->data)->with('employees',$employees);
     }
 
@@ -150,7 +151,7 @@ class userController extends Controller
             $user = new User();
             $user->name = $request->fname;
             $user->email = $request->email;
-            $user->password = bcrypt($request->fpassword);
+            $user->password = $request->fpassword;
             if ($request->femployee_id != 0){
                 $employee = DB::table('employees')->where('num_employee',$request->femployee_id)->first();
                 $user->employee_id = $employee->id;

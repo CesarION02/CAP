@@ -235,6 +235,7 @@ class biostarController extends Controller
             $fecha_biostar = $fecha_biostar->toISOString();
         }else{
             $fecha_biostar = Carbon::parse($config->lastEventSyncDateTime);
+            $fecha_biostar = $fecha_biostar->subHours(12);
             $fecha_biostar = $fecha_biostar->toISOString();
         }
         

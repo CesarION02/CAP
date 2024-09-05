@@ -145,11 +145,9 @@ class SGenUtils {
         $employees = \DB::table('employees AS e')
                             ->leftJoin('jobs AS j', 'j.id', '=', 'e.job_id')
                             ->leftJoin('departments AS dcap', 'dcap.id', '=', 'e.department_id')
-                            ->leftJoin('job_rh AS jrh', 'jrh.id', '=', 'e.job_rh_id')
-                            ->leftJoin('dept_rh AS drh', 'drh.id', '=', 'e.dept_rh_id')
                             ->select('e.id', 'dcap.id AS dept_id', 'e.num_employee', 'e.way_pay_id', 'dcap.name AS dept_name',
                                         // 'e.name', 'e.is_overtime', 'e.ben_pol_id', 'external_id')
-                                        'e.name', 'e.policy_extratime_id', 'e.ben_pol_id', 'e.external_id', 'dcap.area_id AS employee_area_id', 'jrh.job AS job_name',  'drh.name AS department_name')
+                                        'e.name', 'e.policy_extratime_id', 'e.ben_pol_id', 'e.external_id', 'dcap.area_id AS employee_area_id')
                             ->where('e.is_delete', false)
                             // ->where('e.id', 10)
                             ->where('e.is_active', true);
