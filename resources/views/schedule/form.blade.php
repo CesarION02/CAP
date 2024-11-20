@@ -32,7 +32,7 @@
                 <input type="time" name="lunesS" id="lunesS" class="form-control" value=<?php if(isset($datas)){ echo $datas[0]->departure;}else{echo " ";}?> >
             </div>
         <div class="col-md-2">
-            <input type="checkbox" class="check" name="checklunes" id="checklunes" value="1">Desactivar
+            <input type="checkbox" class="check" name="checklunes" id="checklunes" value="1" {{ isset($datas) && $datas[0]->is_active ? 'checked' : '' }}>Desactivar
         </div>
         
 </div>
@@ -45,7 +45,7 @@
                 <input type="time" name="martesS" id="martesS" class="form-control" value=<?php if(isset($datas)){ echo $datas[1]->departure;}else{echo " ";}?> >
             </div>
         <div class="col-md-2">
-            <input type="checkbox" class="check" name="checkmartes" id="checkmartes" value="2">Desactivar
+            <input type="checkbox" class="check" name="checkmartes" id="checkmartes" value="2" {{ isset($datas) && $datas[1]->is_active ? 'checked' : '' }}>Desactivar
         </div>
         <div class="col-md-2">
             <button type="button" class="btn btn-primary" onclick="copiar(2)"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span>Copiar Anterior</button>
@@ -60,7 +60,7 @@
             <input type="time" name="miercolesS" id="miercolesS" class="form-control" value=<?php if(isset($datas)){ echo $datas[2]->departure;}else{echo " ";}?>>
         </div>
         <div class="col-md-2">
-            <input type="checkbox" class="check" name="checkmiercoles" id="checkmiercoles" value="3">Desactivar
+            <input type="checkbox" class="check" name="checkmiercoles" id="checkmiercoles" value="3"  {{ isset($datas) && $datas[2]->is_active ? 'checked' : '' }}>Desactivar
         </div>
         <div class="col-md-2">
             <button type="button" class="btn btn-primary" onclick="copiar(3)"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span>Copiar Anterior</button>
@@ -75,7 +75,7 @@
             <input type="time" name="juevesS" id="juevesS" class="form-control" value=<?php if(isset($datas)){ echo $datas[3]->departure;}else{echo " ";}?>>
         </div>
         <div class="col-md-2">
-            <input type="checkbox" class="check" name="checkjueves" id="checkjueves" value="4">Desactivar
+            <input type="checkbox" class="check" name="checkjueves" id="checkjueves" value="4" {{ isset($datas) && $datas[3]->is_active ? 'checked' : '' }}>Desactivar
         </div>
         <div class="col-md-2">
             <button type="button"  class="btn btn-primary" onclick="copiar(4)"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span>Copiar Anterior</button>
@@ -90,7 +90,7 @@
             <input type="time" name="viernesS" id="viernesS" class="form-control" value=<?php if(isset($datas)){ echo $datas[4]->departure;}else{echo " ";}?> >
         </div>
         <div class="col-md-2">
-            <input type="checkbox" class="check" name="checkviernes" id="checkviernes" value="5">Desactivar
+            <input type="checkbox" class="check" name="checkviernes" id="checkviernes" value="5" {{ isset($datas) && $datas[4]->is_active ? 'checked' : '' }}>Desactivar
         </div>
         <div class="col-md-2">
             <button type="button" class="btn btn-primary" onclick="copiar(5)"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span>Copiar Anterior</button>
@@ -105,7 +105,7 @@
             <input type="time" name="sabadoS" id="sabadoS" class="form-control" value=<?php if(isset($datas)){ echo $datas[5]->departure;}else{echo " ";}?> >
         </div>
         <div class="col-md-2">
-            <input type="checkbox" class="check" name="checksabado" id="checksabado" value="6">Desactivar
+            <input type="checkbox" class="check" name="checksabado" id="checksabado" value="6" {{ isset($datas) && $datas[5]->is_active ? 'checked' : '' }}>Desactivar
         </div>
         <div class="col-md-2">
                 <button type="button" class="btn btn-primary" onclick="copiar(6)"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span>Copiar Anterior</button>
@@ -120,7 +120,7 @@
                 <input type="time" name="domingoS" id="domingoS" class="form-control" value=<?php if(isset($datas)){ echo $datas[6]->departure;}else{echo " ";}?> >
             </div>
         <div class="col-md-2">
-                <input type="checkbox"  class="check" name="checkdomingo" id="checkdomingo" value="7">Desactivar
+                <input type="checkbox"  class="check" name="checkdomingo" id="checkdomingo" value="7" {{ isset($datas) && $datas[6]->is_active ? 'checked' : '' }}>Desactivar
         </div>
         <div class="col-md-2">
                 <button type="button" class="btn btn-primary" onclick="copiar(7)"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span>Copiar Anterior</button>
