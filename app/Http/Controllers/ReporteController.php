@@ -957,7 +957,7 @@ class ReporteController extends Controller
         }
         catch (\Throwable $th) {
             \Log::error($th);
-            return redirect()->route('generarreportetiemposextra')->withErrors(['Error', $th->getMessage()."Reporte a soporte técnico. "]);
+            return redirect()->route('generarreportetiemposextra', 0)->withErrors(['Error', $th->getMessage()."Reporte a soporte técnico. "]);
         }
     }
 

@@ -9,10 +9,10 @@ use App\Models\TaskLog;
 use App\Models\week_cut;
 use App\SReport\SJourneyReport;
 use App\STasks\SReportTasks;
+use App\SUtils\SChecadorVsNominaUtils;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
-use App\Http\Controllers\employeeController;
 use App\SReportPayrollVSCap\SReportPVSCUtils;
 
 class TestController extends Controller
@@ -177,12 +177,25 @@ class TestController extends Controller
         }
     }
 
-    public function testDelays(){
-        //SReportPVSCUtils::delayProcess('2023-10-05', '2023-10-19', 1, [1212], 20);
-        // $config = "";
+    // public function testDelays(){
+    //     //SReportPVSCUtils::delayProcess('2023-10-05', '2023-10-19', 1, [1212], 20);
+    //     $oTask = ProgrammedTask::where('id_task', 165)->first();
+    //     \App\SUtils\SChecadorVsNominaUtils::getReport($oTask->cfg, 'Q_104');
+    //     //$config = '';
+    //     //SReportPVSCUtils::manageTaskReport($oTask->cfg, 'Q_102');
+        
+    // }
 
-        //SReportPVSCUtils::manageTaskReport($config,'Q_97');
+    public function testDelays(){
+        SReportPVSCUtils::delayProcess('2023-10-05', '2023-10-19', 1, [1212], 20);
+
+        $config = "";
+
+        SReportPVSCUtils::manageTaskReport($config,'Q_97');
 
         employeeController::deactivateUser(1020);
     }
+
+
+
 }

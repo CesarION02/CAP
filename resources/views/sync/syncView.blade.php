@@ -31,7 +31,7 @@ Reporte revision
                 <div class="box-footer">
                     <div class="col-lg-3"></div>
                     <div class="col-lg-6">
-                        <button class="btn btn-warning" id="generar" name="generar" type="submit">Generar</button>
+                        <button class="btn btn-warning" id="generar" name="generar" type="submit">Sincronizar</button>
                     </div>
                 </div>
             </form>

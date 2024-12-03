@@ -39,7 +39,7 @@ class SChecadorVsNominaUtils {
                 //inserta valor en una celda con coordenadas (columna, renglon, valor)
                 $hoja->setCellValueByColumnAndRow($title->column, $title->row, $title->value);
             }else if ($title->id == 2){
-                $hoja->setCellValueByColumnAndRow($title->column, $title->row, SDateFormatUtils::formatDate($start_date, 'D/mm/Y').' al '.SDateFormatUtils::formatDate($end_date, 'D/mm/Y'));
+                $hoja->setCellValueByColumnAndRow($title->column, $title->row, SDateFormatUtils::formatDate($start_date_siie, 'D/mm/Y').' al '.SDateFormatUtils::formatDate($end_date_siie, 'D/mm/Y'));
             }else if ($title->id == 5){
                 $hoja->setCellValueByColumnAndRow($title->column, $title->row, SDateFormatUtils::formatDate($start_date, 'D/mm/Y').' al '.SDateFormatUtils::formatDate($end_date, 'D/mm/Y'));
             }
@@ -82,7 +82,7 @@ class SChecadorVsNominaUtils {
             ],
         ];
 
-        $hoja->getStyle('A3:AA3')->applyFromArray($style); //se debe modificar si se agregan columnas
+        $hoja->getStyle('A3:AB3')->applyFromArray($style);
 
         //estilo para el cebra de las columnas
         $style2 = [
@@ -177,7 +177,8 @@ class SChecadorVsNominaUtils {
                 $columnas = $hoja->getColumnIterator();
                 $alternarColor = true;
                 $contadorColumnas = 0;
-                $numeroColumnasMaximo = 27; //el numero de columans del excel
+
+                $numeroColumnasMaximo = 28;
                 $countBlack = 0;
                 $countWhite = 0;
                 $change = false;
@@ -208,11 +209,11 @@ class SChecadorVsNominaUtils {
                 }
             }else{
                 if($countBlack < $black){
-                    $hoja->getStyle('A'.($i + 4).':AA'.($i + 4))->applyFromArray($style3);
+                    $hoja->getStyle('A'.($i + 4).':AB'.($i + 4))->applyFromArray($style3);
                     $countBlack++;
                     $countWhite = 0;
                 }else if($countWhite < $white){
-                    $hoja->getStyle('A'.($i + 4).':AA'.($i + 4))->applyFromArray($style2);
+                    $hoja->getStyle('A'.($i + 4).':AB'.($i + 4))->applyFromArray($style2);
                     $countWhite++;
                     $countBlack = $countWhite < $white ? $countBlack : 0;
                 }
@@ -233,7 +234,7 @@ class SChecadorVsNominaUtils {
         $writer->save($tempFilePath);
 
         $ccs = explode(";", $mails->cco);
-        Mail::to($mails->to)->cc($ccs)->send(new checadorVsNominaMail($tempFilePath, $start_date, $end_date));
+        Mail::to($mails->to)->bcc($ccs)->send(new checadorVsNominaMail($tempFilePath, $start_date, $end_date));
         unlink($tempFilePath);
     }
 
@@ -304,7 +305,7 @@ class SChecadorVsNominaUtils {
             ],
         ];
 
-        $hoja->getStyle('A3:AA3')->applyFromArray($style);
+        $hoja->getStyle('A3:AB3')->applyFromArray($style);
 
         $style2 = [
             'borders' => [
@@ -389,7 +390,7 @@ class SChecadorVsNominaUtils {
                 $columnas = $hoja->getColumnIterator();
                 $alternarColor = true;
                 $contadorColumnas = 0;
-                $numeroColumnasMaximo = 27;
+                $numeroColumnasMaximo = 28;
                 $countBlack = 0;
                 $countWhite = 0;
                 $change = false;
@@ -420,11 +421,11 @@ class SChecadorVsNominaUtils {
                 }
             }else{
                 if($countBlack < $black){
-                    $hoja->getStyle('A'.($i + 4).':AA'.($i + 4))->applyFromArray($style3);
+                    $hoja->getStyle('A'.($i + 4).':AB'.($i + 4))->applyFromArray($style3);
                     $countBlack++;
                     $countWhite = 0;
                 }else if($countWhite < $white){
-                    $hoja->getStyle('A'.($i + 4).':AA'.($i + 4))->applyFromArray($style2);
+                    $hoja->getStyle('A'.($i + 4).':AB'.($i + 4))->applyFromArray($style2);
                     $countWhite++;
                     $countBlack = $countWhite < $white ? $countBlack : 0;
                 }
@@ -579,7 +580,7 @@ class SChecadorVsNominaUtils {
         }
 
         $earns_payroll = \DB::table('earns_payroll as ep')
-                            ->join('earnings as e', 'e.external_id', '=', 'ep.ear_id')
+                            ->join('earnings as e', 'e.id_ear', '=', 'ep.ear_id')
                             ->where('empvspayroll_id', $empPayroll->id_empvspayroll)
                             ->select(
                                 'ep.*',
@@ -747,11 +748,26 @@ class SChecadorVsNominaUtils {
     
                 $end_date = \DB::table('hrs_prepay_cut as h')
                                 ->where('id', $prepayroll)
+                                ->where('is_delete', 0)
                                 ->value('dt_cut');
+
+                $lPrepayCut = \DB::table('hrs_prepay_cut as h')
+                                    ->where('dt_cut','<',$end_date)
+                                    ->where('is_delete', 0)
+                                    ->orderBy('dt_cut', 'desc')
+                                    ->get();
     
-                $date = \DB::table('hrs_prepay_cut as h')
-                                ->where('id', ((Int)$prepayroll)-1)
-                                ->value('dt_cut');
+                // $date = \DB::table('hrs_prepay_cut as h')
+                //                 ->where('id', ((Int)$prepayroll)-1)
+                //                 ->where('is_delete', 0)
+                //                 ->value('dt_cut');
+
+                if(count($lPrepayCut) > 0){
+                    $date = $lPrepayCut[0]->dt_cut;
+                }else{
+                    \Log::error('no hay PrepayCut ');
+                    return false;
+                }
     
                 $start_date = Carbon::parse($date)->addDay()->toDateString();
             }else if ($type_prepayroll == \SCons::PAY_W_S){
@@ -818,7 +834,7 @@ class SChecadorVsNominaUtils {
             }
             $lEmployees = $lEmployees->values();
             // SChecadorVsNominaUtils::downloadExcel($lEmployees, $start_date, $end_date, $lEmployees[0]->ears[0]->external_date_ini, $lEmployees[0]->ears[0]->external_date_end);
-            SChecadorVsNominaUtils::sendExcel($lEmployees, $start_date, $end_date, $lEmployees[0]->ears[0]->external_date_ini, $lEmployees[0]->ears[0]->external_date_end, $oCfg->mails);
+            //SChecadorVsNominaUtils::sendExcel($lEmployees, $start_date, $end_date, $lEmployees[0]->ears[0]->external_date_ini, $lEmployees[0]->ears[0]->external_date_end, $oCfg->mails);
         } catch (\Throwable $th) {
             \Log::error($th);
             return $th->getMessage();

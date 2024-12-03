@@ -34,9 +34,9 @@ class checadorVsNominaMail extends Mailable
         $this->start_date = SDateFormatUtils::formatDate($this->start_date, 'D/mm/Y');
         $this->end_date = SDateFormatUtils::formatDate($this->end_date, 'D/mm/Y');
 
-        $email = "adrian.aviles.swaplicado@gmail.com";
+        $email = "cap@aeth.mx";
         return $this->from($email)
-                        ->subject('Checador vs nomina')
+                        ->subject('[CAP] Checador vs nomina')
                         ->attach($this->file, ['as' => 'archivo.xlsx', 'mime' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'])
                         ->view('mails.checadorVsNominia')
                         ->with('ini', $this->start_date)

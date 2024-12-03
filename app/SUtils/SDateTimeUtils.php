@@ -50,7 +50,12 @@ class SDateTimeUtils {
             $oDate = Carbon::parse($date);
         }
         else {
-            $oDate = clone $date;
+            try {
+                $oDate = clone $date;
+            }
+            catch (\Throwable $e) {
+                $oDate = Carbon::parse($date);
+            }
         }
 
         // Carbon::setWeekStartsAt(Carbon::FRIDAY);

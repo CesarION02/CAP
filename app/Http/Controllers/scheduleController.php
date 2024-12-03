@@ -61,7 +61,7 @@ class scheduleController extends Controller
         $plantilla_day->day_num = 1;
         $plantilla_day->entry = $request->lunesE;
         $plantilla_day->departure = $request->lunesS;
-        if($request->lunesE == "" || $request->lunesS == ""){
+        if($request->lunesE == "" || $request->lunesS == "" || !$request->input('checklunes')){
             $plantilla_day->is_active = 0;
         }else{
             $plantilla_day->is_active = 1;
@@ -76,7 +76,7 @@ class scheduleController extends Controller
         $plantilla_day->day_num = 2;
         $plantilla_day->entry = $request->martesE;
         $plantilla_day->departure = $request->martesS;
-        if($request->martesE == "" || $request->martesS == ""){
+        if($request->martesE == "" || $request->martesS == "" || !$request->input('checkmartes')){
             $plantilla_day->is_active = 0;
         }else{
             $plantilla_day->is_active = 1;
@@ -91,7 +91,7 @@ class scheduleController extends Controller
         $plantilla_day->day_num = 3;
         $plantilla_day->entry = $request->miercolesE;
         $plantilla_day->departure = $request->miercolesS;
-        if($request->miercolesE == "" || $request->miercolesS == ""){
+        if($request->miercolesE == "" || $request->miercolesS == "" || !$request->input('checkmiercoles')){
             $plantilla_day->is_active = 0;
         }else{
             $plantilla_day->is_active = 1;
@@ -106,7 +106,7 @@ class scheduleController extends Controller
         $plantilla_day->day_num = 4;
         $plantilla_day->entry = $request->juevesE;
         $plantilla_day->departure = $request->juevesS;
-        if($request->juevesE == "" || $request->juevesS == ""){
+        if($request->juevesE == "" || $request->juevesS == "" || !$request->input('checkjueves')){
             $plantilla_day->is_active = 0;
         }else{
             $plantilla_day->is_active = 1;
@@ -121,7 +121,7 @@ class scheduleController extends Controller
         $plantilla_day->day_num = 5;
         $plantilla_day->entry = $request->viernesE;
         $plantilla_day->departure = $request->viernesS;
-        if($request->viernesE == "" || $request->viernesS == ""){
+        if($request->viernesE == "" || $request->viernesS == "" || !$request->input('checkviernes')){
             $plantilla_day->is_active = 0;
         }else{
             $plantilla_day->is_active = 1;
@@ -136,7 +136,7 @@ class scheduleController extends Controller
         $plantilla_day->day_num = 6;
         $plantilla_day->entry = $request->sabadoE;
         $plantilla_day->departure = $request->sabadoS;
-        if($request->sabadoE == "" || $request->sabadoS == ""){
+        if($request->sabadoE == "" || $request->sabadoS == "" || !$request->input('checksabado')){
             $plantilla_day->is_active = 0;
         }else{
             $plantilla_day->is_active = 1;
@@ -151,7 +151,7 @@ class scheduleController extends Controller
         $plantilla_day->day_num = 7;
         $plantilla_day->entry = $request->domingoE;
         $plantilla_day->departure = $request->domingoS;
-        if($request->domingoE == "" || $request->domingoS == ""){
+        if($request->domingoE == "" || $request->domingoS == "" || !$request->input('checkdomingo')){
             $plantilla_day->is_active = 0;
         }else{
             $plantilla_day->is_active = 1;
@@ -217,7 +217,7 @@ class scheduleController extends Controller
         $schedule = schedule_day::find($schedule_day[0]->id);
         $schedule->entry = $request->lunesE;
         $schedule->departure = $request->lunesS;
-        if($request->lunesE == '' || $request->lunesS){
+        if($request->lunesE == '' || $request->lunesS == '' || !$request->input('checklunes')){
             $schedule->is_active = 0;
         }else{
             $schedule->is_active = 1;
@@ -227,7 +227,7 @@ class scheduleController extends Controller
         $schedule = schedule_day::find($schedule_day[1]->id);
         $schedule->entry = $request->martesE;
         $schedule->departure = $request->martesS;
-        if($request->martesE == '' || $request->martesS){
+        if($request->martesE == '' || $request->martesS == '' || !$request->input('checkmartes')){
             $schedule->is_active = 0;
         }else{
             $schedule->is_active = 1;
@@ -237,7 +237,7 @@ class scheduleController extends Controller
         $schedule = schedule_day::find($schedule_day[2]->id);
         $schedule->entry = $request->miercolesE;
         $schedule->departure = $request->miercolesS;
-        if($request->miercolesE == '' || $request->miercolesS){
+        if($request->miercolesE == '' || $request->miercolesS == '' || !$request->input('checkmiercoles')){
             $schedule->is_active = 0;
         }else{
             $schedule->is_active = 1;
@@ -247,7 +247,7 @@ class scheduleController extends Controller
         $schedule = schedule_day::find($schedule_day[3]->id);
         $schedule->entry = $request->juevesE;
         $schedule->departure = $request->juevesS;
-        if($request->juevesE == '' || $request->juevesS){
+        if($request->juevesE == '' || $request->juevesS == '' || !$request->input('checkjueves')){
             $schedule->is_active = 0;
         }else{
             $schedule->is_active = 1;
@@ -257,7 +257,7 @@ class scheduleController extends Controller
         $schedule = schedule_day::find($schedule_day[4]->id);
         $schedule->entry = $request->viernesE;
         $schedule->departure = $request->viernesS;
-        if($request->viernesE == '' || $request->viernesS){
+        if($request->viernesE == '' || $request->viernesS == '' || !$request->input('checkviernes')){
             $schedule->is_active = 0;
         }else{
             $schedule->is_active = 1;
@@ -267,7 +267,7 @@ class scheduleController extends Controller
         $schedule = schedule_day::find($schedule_day[5]->id);
         $schedule->entry = $request->sabadoE;
         $schedule->departure = $request->sabadoS;
-        if($request->sabadoE == '' || $request->sabadoS){
+        if($request->sabadoE == '' || $request->sabadoS == '' || !$request->input('checksabado')){
             $schedule->is_active = 0;
         }else{
             $schedule->is_active = 1;
@@ -277,7 +277,7 @@ class scheduleController extends Controller
         $schedule = schedule_day::find($schedule_day[6]->id);
         $schedule->entry = $request->domingoE;
         $schedule->departure = $request->domingoS;
-        if($request->domingoE == '' || $request->domingoS){
+        if($request->domingoE == '' || $request->domingoS == '' || !$request->input('checkdomingo')){
             $schedule->is_active = 0;
         }else{
             $schedule->is_active = 1;

@@ -885,8 +885,8 @@ class RegisterController extends Controller
         $oAdjust->is_external = false;
         $oAdjust->adjust_type_id = \SCons::PP_TYPES['COM'];
         $oAdjust->apply_time = false;
-        $oAdjust->created_by = session()->get('user_id');
-        $oAdjust->updated_by = session()->get('user_id');
+        $oAdjust->created_by = session()->get('user_id') > 0 ? session()->get('user_id') : 1;
+        $oAdjust->updated_by = session()->get('user_id') > 0 ? session()->get('user_id') : 1;
 
         $oAdjust->save();
 

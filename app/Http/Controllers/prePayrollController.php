@@ -248,14 +248,39 @@ class prePayrollController extends Controller
                     $lAbsences = prePayrollController::searchAbsence($idEmployee, $sDate);
                     if (sizeof($lAbsences) > 0) {
                         foreach ($lAbsences as $absence) {
-                            $key = explode("_", $absence->external_key);
-    
-                            $abs = [];
-                            $abs['id_emp'] = $key[0];
-                            $abs['id_abs'] = $key[1];
-                            $abs['nts'] = $absence->nts;
-    
-                            $day->events[] = $abs;
+                            try {
+                                if ($absence->is_external) {
+                                    $key = explode("_", $absence->external_key);
+
+                                    if (! $key[0]) {
+                                        $d = 0;
+                                    }
+                                    if (! $key[1]) {
+                                        $r = 0;
+                                    }
+                                    $abs = [];
+                                    $abs['id_emp'] = $key[0];
+                                    $abs['id_abs'] = $key[1];
+                                    $abs['nts'] = $absence->nts;
+                                }
+                                else {
+                                    $abs = [];
+                                    $abs['id_emp'] = 0;
+                                    $abs['id_abs'] = 0;
+                                    $abs['nts'] = $absence->nts;
+                                }
+        
+                                $day->events[] = $abs;
+                            }
+                            catch (\Throwable $e) {
+                                \Log::error($e);
+                                $response = (object) [
+                                    "code" => $this->ERROR,
+                                    "message" => $e->getMessage() . " / Error al obtener las incidencias del empleado"
+                                ];
+                    
+                                return json_encode($response, JSON_PRETTY_PRINT);
+                            }
                         }
                     }
                 }
@@ -544,84 +569,84 @@ class prePayrollController extends Controller
         return view('prepayrollcontrol.binnacle',compact('binnacle'))->with('week',$week);                    
     } 
     
-    public function prepayrollS(Request $request){
+    // public function prepayrollS(Request $request){
 
-        $start_date = null;
-        $end_date = null;
-        if ($request->start_date == null) {
-            $now = Carbon::now();
-            $start_date = $now->startOfMonth()->toDateString();
-            $end_date = $now->endOfMonth()->toDateString();
-        }
-        else {
-            $start_date = $request->start_date;
-            $end_date = $request->end_date;
-        }
+    //     $start_date = null;
+    //     $end_date = null;
+    //     if ($request->start_date == null) {
+    //         $now = Carbon::now();
+    //         $start_date = $now->startOfMonth()->toDateString();
+    //         $end_date = $now->endOfMonth()->toDateString();
+    //     }
+    //     else {
+    //         $start_date = $request->start_date;
+    //         $end_date = $request->end_date;
+    //     }
 
 
 
-        $semana = DB::table('prepayroll_control')
-                            ->join('week_cut','prepayroll_control.num_week','=','week_cut.id')
-                            ->where('prepayroll_control.is_week',1)
-                            ->where(function($query) use ($start_date, $end_date){
-                                $query->whereBetween('week_cut.ini', [$start_date,$end_date])
-                                      ->orWhereBetween('week_cut.fin', [$start_date,$end_date]);
-                              })
-                            ->select('week_cut.year AS year','week_cut.num AS num','prepayroll_control.status AS status','prepayroll_control.updated_at AS updated_at','prepayroll_control.id AS id','week_cut.ini AS ini','week_cut.fin AS fin')
-                            ->orderBy('week_cut.ini')
-                            ->get();
-        $aFuera = [];
-        for($i = 0 ; count($semana) > $i ; $i++){
-            $cambio = DB::table('specialworkshift')->whereBetween('dateI',[$semana[$i]->ini,$semana[$i]->fin])->whereBetween('dateS',[$semana[$i]->ini,$semana[$i]->fin])->where('updated_at','>',$semana[$i]->updated_at)->get();
-            $incidencias =  DB::table('incidents')->whereBetween('end_date',[$semana[$i]->ini,$semana[$i]->fin])->whereBetween('start_date',[$semana[$i]->ini,$semana[$i]->fin])->where('updated_at','>',$semana[$i]->updated_at)->get();
-            $checadas = DB::table('registers')->whereBetween('date',[$semana[$i]->ini,$semana[$i]->fin])->where('user_id','>',1)->where('updated_at','>',$semana[$i]->updated_at)->get(); 
+    //     $semana = DB::table('prepayroll_control')
+    //                         ->join('week_cut','prepayroll_control.num_week','=','week_cut.id')
+    //                         ->where('prepayroll_control.is_week',1)
+    //                         ->where(function($query) use ($start_date, $end_date){
+    //                             $query->whereBetween('week_cut.ini', [$start_date,$end_date])
+    //                                   ->orWhereBetween('week_cut.fin', [$start_date,$end_date]);
+    //                           })
+    //                         ->select('week_cut.year AS year','week_cut.num AS num','prepayroll_control.status AS status','prepayroll_control.updated_at AS updated_at','prepayroll_control.id AS id','week_cut.ini AS ini','week_cut.fin AS fin')
+    //                         ->orderBy('week_cut.ini')
+    //                         ->get();
+    //     $aFuera = [];
+    //     for($i = 0 ; count($semana) > $i ; $i++){
+    //         $cambio = DB::table('specialworkshift')->whereBetween('dateI',[$semana[$i]->ini,$semana[$i]->fin])->whereBetween('dateS',[$semana[$i]->ini,$semana[$i]->fin])->where('updated_at','>',$semana[$i]->updated_at)->get();
+    //         $incidencias =  DB::table('incidents')->whereBetween('end_date',[$semana[$i]->ini,$semana[$i]->fin])->whereBetween('start_date',[$semana[$i]->ini,$semana[$i]->fin])->where('updated_at','>',$semana[$i]->updated_at)->get();
+    //         $checadas = DB::table('registers')->whereBetween('date',[$semana[$i]->ini,$semana[$i]->fin])->where('user_id','>',1)->where('updated_at','>',$semana[$i]->updated_at)->get(); 
             
-            if((count($cambio) > 0 || count($incidencias) > 0 || count($checadas) > 0) && $semana[$i]->status == 2){
-                $aFuera[$i] = 1;   
-            }else{
-                $aFuera[$i] = 0;
-            }
-        }
+    //         if((count($cambio) > 0 || count($incidencias) > 0 || count($checadas) > 0) && $semana[$i]->status == 2){
+    //             $aFuera[$i] = 1;   
+    //         }else{
+    //             $aFuera[$i] = 0;
+    //         }
+    //     }
 
-        return view('prepayrollcontrol.controlS',compact('semana'))->with('aFuera',$aFuera)->with('start_date',$start_date)->with('end_date',$end_date); 
-    }
+    //     return view('prepayrollcontrol.controlS',compact('semana'))->with('aFuera',$aFuera)->with('start_date',$start_date)->with('end_date',$end_date); 
+    // }
 
-    public function prepayrollQ(Request $request) {
-        $start_date = null;
-        $end_date = null;
-        if ($request->start_date == null) {
-            $now = Carbon::now();
-            $start_date = $now->startOfMonth()->toDateString();
-            $end_date = $now->endOfMonth()->toDateString();
-        }else {
-            $start_date = $request->start_date;
-            $end_date = $request->end_date;
-        }
+    // public function prepayrollQ(Request $request) {
+    //     $start_date = null;
+    //     $end_date = null;
+    //     if ($request->start_date == null) {
+    //         $now = Carbon::now();
+    //         $start_date = $now->startOfMonth()->toDateString();
+    //         $end_date = $now->endOfMonth()->toDateString();
+    //     }else {
+    //         $start_date = $request->start_date;
+    //         $end_date = $request->end_date;
+    //     }
 
-        $quincena = DB::table('prepayroll_control')
-                            ->join('hrs_prepay_cut','prepayroll_control.num_biweekly','=','hrs_prepay_cut.id')
-                            ->where('prepayroll_control.is_biweekly',1)
-                            ->where(function($query) use ($start_date, $end_date){
-                                $query->whereBetween('week_cut.ini', [$start_date,$end_date])
-                                      ->orWhereBetween('week_cut.fin', [$start_date,$end_date]);
-                              })
-                            ->orderBy('hrs_prepay_cut.dt_cut')
-                            ->get();
+    //     $quincena = DB::table('prepayroll_control')
+    //                         ->join('hrs_prepay_cut','prepayroll_control.num_biweekly','=','hrs_prepay_cut.id')
+    //                         ->where('prepayroll_control.is_biweekly',1)
+    //                         ->where(function($query) use ($start_date, $end_date){
+    //                             $query->whereBetween('week_cut.ini', [$start_date,$end_date])
+    //                                   ->orWhereBetween('week_cut.fin', [$start_date,$end_date]);
+    //                           })
+    //                         ->orderBy('hrs_prepay_cut.dt_cut')
+    //                         ->get();
                  
-        for($i = 0 ; count($semana) > $i ; $i++){
-            $cambio = DB::table('specialworkshift')->whereBetween('dateI',[$semana->ini,$semana->fin])->whereBetween('dateS',[$semana->ini,$semana->fin])->where('updated_at','>',$end_date)->get();
-            $incidencias =  DB::table('incidents')->whereBetween('end_date',[$semana->ini,$semana->fin])->whereBetween('start_date',[$semana->ini,$semana->fin])->where('updated_at','>',$end_date)->get();
-            $checadas = DB::table('registers')->whereBetween('date',[$semana->ini,$semana->fin])->where('user_id','>',1)->where('updated_at','>',$end_date)->get(); 
-            $aFuera = [];
-            if(count($cambio) > 0 || count($incidencias) > 0 || count($checadas) > 0){
-                $aFuera[$i] = 1;   
-            }else{
-                $aFuera[$i] = 0;
-            }
-        }
+    //     for($i = 0 ; count($semana) > $i ; $i++){
+    //         $cambio = DB::table('specialworkshift')->whereBetween('dateI',[$semana->ini,$semana->fin])->whereBetween('dateS',[$semana->ini,$semana->fin])->where('updated_at','>',$end_date)->get();
+    //         $incidencias =  DB::table('incidents')->whereBetween('end_date',[$semana->ini,$semana->fin])->whereBetween('start_date',[$semana->ini,$semana->fin])->where('updated_at','>',$end_date)->get();
+    //         $checadas = DB::table('registers')->whereBetween('date',[$semana->ini,$semana->fin])->where('user_id','>',1)->where('updated_at','>',$end_date)->get(); 
+    //         $aFuera = [];
+    //         if(count($cambio) > 0 || count($incidencias) > 0 || count($checadas) > 0){
+    //             $aFuera[$i] = 1;   
+    //         }else{
+    //             $aFuera[$i] = 0;
+    //         }
+    //     }
                     
-        return view('prepayroll.controlS',compact('semana'))->with('aFuera',$aFuera)->with('start_date',$start_date)->with('end_date',$end_date);
-    }
+    //     return view('prepayroll.controlS',compact('semana'))->with('aFuera',$aFuera)->with('start_date',$start_date)->with('end_date',$end_date);
+    // }
 
     public function bitacorafuera($id){
         $weekorbi = DB::table('prepayroll_control')->where('prepayroll_control.id',$id)->get();

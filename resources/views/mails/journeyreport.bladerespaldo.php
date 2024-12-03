@@ -243,7 +243,7 @@
                                 $i++;
                             ?>
                         </tbody>
-                    </table>
+                    </table>                   
                     
                     @if ($oEmp->totalDelay > 15)
                         <p style="color: red;">Nota: Únicamente se permiten 15 minutos acumulados de retardo en una quincena.</p>

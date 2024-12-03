@@ -446,8 +446,8 @@ class specialWorkshiftController extends Controller
             $adjust->is_delete = 0;
             $adjust->adjust_type_id = 7;
             $adjust->apply_time = 0;
-            $adjust->created_by = session()->get('user_id');
-            $adjust->updated_by = session()->get('user_id');
+            $adjust->created_by = session()->get('user_id') > 0 ? session()->get('user_id') : 1;
+            $adjust->updated_by = session()->get('user_id') > 0 ? session()->get('user_id') : 1;
             $adjust->save();
 
             $link = new adjust_link();
@@ -637,8 +637,8 @@ class specialWorkshiftController extends Controller
             $adjust->is_external = 0;
             $adjust->adjust_type_id = 7;
             $adjust->apply_time = 0;
-            $adjust->created_by = session()->get('user_id');
-            $adjust->updated_by = session()->get('user_id');
+            $adjust->created_by = session()->get('user_id') > 0 ? session()->get('user_id') : 1;
+            $adjust->updated_by = session()->get('user_id') > 0 ? session()->get('user_id') : 1;
             $adjust->save();
 
             $link = new adjust_link();

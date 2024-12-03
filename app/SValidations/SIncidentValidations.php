@@ -95,19 +95,19 @@ class SIncidentValidations
             ];
         }
         $holidays = DB::table('holidays')
-            ->whereIn('fecha', [$startDate, $endDate])
+            ->whereBetween('fecha', [$startDate, $endDate])
             ->where('is_delete', 0)
             ->get();
         
         if(count($holidays) > 0){
-            for($i = 0 ; count($lDays) > $i ; $i++ ){
+            foreach($lDays as $days ){
                 $holidays = DB::table('holidays')
-                ->where('fecha', $lDays[$i]->date)
+                ->where('fecha', $days['date'])
                 ->where('is_delete', 0)
                 ->get();
                 
                 if(count($holidays) > 0){
-                    if($lDays[$i]->bussinesDay == true && $lDays[$i]->taken == true ){
+                    if($days['bussinesDay'] == true && $days['taken'] == true ){
                         return [
                             'code' => 400,
                             'status' => 'error',
