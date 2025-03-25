@@ -100,6 +100,14 @@ class TaskCommand extends Command
                 case \SCons::TASK_TYPE_REPORT_DG:
                     $response = SReportPVSCUtils::manageTaskReport($oTask->cfg, $oTask->reference_id);
                     break;
+
+                /**
+                 * Reporte de resumen de incidencias
+                 */
+                case \SCons::TASK_TYPE_REPORT_INCIDENT_RESUME:
+                    $response = SReportPVSCUtils::manageTaskReport($oTask->cfg, $oTask->reference_id);
+                    break;
+                    
                 default:
                     $response = "Tipo de tarea desconocido.";
                     break;

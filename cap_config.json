@@ -21,7 +21,7 @@
     "dept_pre": 99,
     "admin_rol": 1,
     "policy_cut": 1,
-    "urlBiostar": "https://192.168.1.16:444",
+    "urlBiostar": "https://192.168.1.233:444",
     "urlSyncCAPLink": "https://192.168.1.251:9001",
     "maxOvertimeJourneyMinutes": 240,
     "absenceWithOmissionOfChecks": false,
