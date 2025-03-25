@@ -207,6 +207,14 @@ class TestController extends Controller
                                         ->orderBy('order_vobo', 'ASC')
                                         ->get();
 
+        $oConfig = \App\SUtils\SConfiguration::getConfigurations();
+        if ($oConfig->sinceDatePrepayroll) {
+            $sinceDatePrepayroll = Carbon::parse($oConfig->sinceDatePrepayroll);
+        }
+        else {
+            $sinceDatePrepayroll = Carbon::now()->subDays(1);
+        }
+
         foreach ($lReports as $oReport) {
             if ($oReport->since_date == null) {
                 continue;
@@ -221,6 +229,7 @@ class TestController extends Controller
                 }
 
                 $lQCuts = $lQCuts->where('is_delete', 0)
+                                ->where('dt_cut', '>', $sinceDatePrepayroll->toDateString())
                                 ->orderBy('dt_cut', 'ASC');
 
                 $lQCuts = $lQCuts->get();
@@ -306,7 +315,8 @@ class TestController extends Controller
                     $lWeekCuts = week_cut::whereBetween('fin', [$oReport->since_date, $oReport->until_date]);
                 }
 
-                $lWeekCuts = $lWeekCuts->orderBy('fin', 'ASC');
+                $lWeekCuts = $lWeekCuts->where('inicio', '>=', $sinceDatePrepayroll->toDateString())
+                                        ->orderBy('fin', 'ASC');
 
                 $lWeekCuts = $lWeekCuts->get();
 
