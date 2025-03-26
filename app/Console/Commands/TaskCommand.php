@@ -51,6 +51,7 @@ class TaskCommand extends Command
                                 ->where('execute_on', '<=', $oCurrentDateTime->toDateString())
                                 ->orderBy('execute_on', 'ASC')
                                 ->orderBy('execute_at', 'ASC')
+                                ->orderBy('priority', 'ASC')
                                 ->get();
 
         foreach ($lPendingTasks as $oTask) {
@@ -107,7 +108,7 @@ class TaskCommand extends Command
                 case \SCons::TASK_TYPE_REPORT_INCIDENT_RESUME:
                     $response = SReportPVSCUtils::manageTaskReport($oTask->cfg, $oTask->reference_id);
                     break;
-                    
+
                 default:
                     $response = "Tipo de tarea desconocido.";
                     break;

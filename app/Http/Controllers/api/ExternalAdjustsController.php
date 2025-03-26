@@ -202,6 +202,7 @@ class ExternalAdjustsController extends Controller
                 $oTask = new ProgrammedTask();
                 $oTask->execute_on = $dateTime->toDateString();
                 $oTask->apply_time = false;
+                $oTask->priority = 1;
                 $oTask->cfg = json_encode($oJson, JSON_PRETTY_PRINT);
                 $oTask->reference_id = $ext_key;
                 $oTask->is_done = false;
