@@ -48,9 +48,12 @@ class SReportTasks {
                 }
             }
 
+            /**
+             * ****************************************************************************************
+             * Segunda parte: Programación de reportes desde PrepayReportConfig
+             */
+            
             $aPPConfigs = self::getSpecificPrepayrollConfigs();
-
-            // Segunda parte: Programación de reportes desde PrepayReportConfig
             $lReports = PrepayReportConfig::where('is_delete', 0)
                 ->orderBy('user_n_id', 'ASC')
                 ->orderBy('order_vobo', 'ASC');
@@ -279,6 +282,7 @@ class SReportTasks {
 
         $lQCuts = $lQCuts->where('is_delete', 0)
                         ->where('dt_cut', '>', $sinceDatePrepayroll->toDateString())
+                        ->where('dt_cut', '<=', '2025-04-04')
                         ->orderBy('dt_cut', 'ASC')
                         ->get();
 
@@ -319,6 +323,7 @@ class SReportTasks {
         }
 
         $lWeekCuts = $lWeekCuts->where('ini', '>=', $sinceDatePrepayroll->toDateString())
+            ->where('fin', '<=', '2025-04-04')
             ->orderBy('fin', 'ASC')
             ->get();
 
