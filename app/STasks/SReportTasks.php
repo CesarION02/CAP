@@ -48,11 +48,17 @@ class SReportTasks {
                 }
             }
 
+            $aPPConfigs = self::getSpecificPrepayrollConfigs();
+
             // Segunda parte: Programación de reportes desde PrepayReportConfig
             $lReports = PrepayReportConfig::where('is_delete', 0)
                 ->orderBy('user_n_id', 'ASC')
-                ->orderBy('order_vobo', 'ASC')
-                ->get();
+                ->orderBy('order_vobo', 'ASC');
+            // Filtrar por configuraciones específicas
+            if (count($aPPConfigs) > 0) {
+                $lReports = $lReports->whereIn('id_configuration', $aPPConfigs);
+            }
+            $lReports = $lReports->get();
 
             $sinceDatePrepayroll = self::getSinceDatePrepayroll();
 
@@ -242,6 +248,17 @@ class SReportTasks {
         return $oConfig->sinceDatePrepayroll
             ? Carbon::parse($oConfig->sinceDatePrepayroll)
             : Carbon::now()->subDays(1);
+    }
+
+    /**
+     * Obtiene las configuraciones específicas de reportes de pre-nómina.
+     * 
+     * @return array Arreglo con los identificadores de configuración.
+     */
+    private static function getSpecificPrepayrollConfigs()
+    {
+        $oConfig = \App\SUtils\SConfiguration::getConfigurations();
+        return $oConfig->onlyPrepayrollConfigsDelayReport;
     }
 
     // Métodos auxiliares para la segunda parte
