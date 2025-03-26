@@ -26,7 +26,7 @@ class SReportTasks {
     public static function scheduleTasks()
     {
         if (config('app.env') !== 'production') {
-            // return "";
+            return "";
         }
 
         // Primera parte: Programación de reportes desde report_journey_cfg.json
