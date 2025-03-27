@@ -190,16 +190,34 @@ class TestController extends Controller
         
     // }
 
-    public function testDelays(){
-        SReportPVSCUtils::delayProcess('2023-10-05', '2023-10-19', 1, [1212], 20);
-
-        $config = "";
-
-        SReportPVSCUtils::manageTaskReport($config,'Q_97');
-
+    public function testDelays1() {
+        // SReportPVSCUtils::delayProcess('2023-10-05', '2023-10-19', 1, [1212], 20);
+        
+        // JSON configuration
+        $cfg = json_encode([
+            "areas" => [],
+            "back_prepayroll" => 0,
+            "benefit_policies" => [],
+            "companies" => [],
+            "departments_cap" => [
+                11, 14, 15, 16, 17, 105, 111, 112, 113, 114, 116, 117, 
+                118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 
+                128, 132, 134, 140, 141, 143, 146, 147, 148, 149, 155
+            ]
+        ]);
+    
+        // Assuming $config should hold the JSON string for the configuration
+        $config = $cfg;
+    
+        // Call the manage task report method with the configuration
+        SReportPVSCUtils::manageTaskReport($config, 'Q_97');
+    
+        // Deactivate a specific user (id 1020)
         employeeController::deactivateUser(1020);
     }
 
+    // public function testDelays(){
+    //     //SReportPVSCUtils::delayProcess('2023-10-05', '2023-10-19', 1, [1212], 20);
 
     public function testShedulePrepayroll(){
         $response = SReportTasks::scheduleTasks();
