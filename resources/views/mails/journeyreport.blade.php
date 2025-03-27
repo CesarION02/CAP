@@ -253,6 +253,7 @@
             @endforeach
         @endif
     </div>
+    <br>
+    @include('mails.footer')
 </body>
-
 </html>
