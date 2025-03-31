@@ -6,6 +6,7 @@ use App\Http\Controllers\SyncController;
 use App\Models\ProgrammedTask;
 use App\Models\TaskLog;
 use App\SReport\SJourneyReport;
+use App\SReport\SResumeReport;
 use App\STasks\SAdjustsPgh;
 use Illuminate\Console\Command;
 use Carbon\Carbon;
@@ -105,8 +106,8 @@ class TaskCommand extends Command
                 /**
                  * Reporte de resumen de incidencias
                  */
-                case \SCons::TASK_TYPE_REPORT_INCIDENT_RESUME:
-                    $response = SReportPVSCUtils::manageTaskReport($oTask->cfg, $oTask->reference_id);
+                case \SCons::TASK_TYPE_REPORT_PP_INCID_RESUME:
+                    $response = SResumeReport::executeResumeReport($oTask->cfg, $oTask->reference_id);
                     break;
 
                 default:
