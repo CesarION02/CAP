@@ -30,6 +30,7 @@ class SCheckDaysVobo {
             } else if ($way_pay == 1) {
                 $oCut = \DB::table('hrs_prepay_cut')
                             ->where('dt_cut', '>=',$ini_date)
+                            ->where('is_delete', 0)
                             ->orderBy('dt_cut', 'asc')
                             ->first();
     

@@ -383,7 +383,7 @@ class ExternalIncidentsController extends Controller
         
         return response()->json([
             'code' => 200,
-            'status' => $result->isInRange,
+            'result' => $result->isInRange,
             'message' => $result->message,
         ], 200);
     }
