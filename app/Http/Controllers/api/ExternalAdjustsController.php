@@ -15,6 +15,7 @@ use DB;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
+use App\SUtils\SCheckDaysVobo;
 
 class ExternalAdjustsController extends Controller
 {
@@ -43,6 +44,22 @@ class ExternalAdjustsController extends Controller
         $ext_key = $request->input('ext_key');
         $ext_sys = $request->input('ext_sys');
         $adjust_type_id = $request->input('adjust_type_id');
+
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+
+        if ($config->incidencesWithCheckVobo) {
+            $oEmployee = employees::where('external_id', $employee_id)->first();
+            $today = Carbon::now()->toDateString();
+            $result = SCheckDaysVobo::checkDays($oEmployee, $today, $dt_date);
+    
+            if (!$result->isInRange) {
+                return response()->json([
+                    'code' => 200,
+                    'status' => false,
+                    'message' => $result->message,
+                ]);
+            }
+        }
 
         try {
             // inicia transacción
