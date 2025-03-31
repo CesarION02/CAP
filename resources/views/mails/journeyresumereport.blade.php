@@ -55,7 +55,7 @@
                                         <ul style="padding-left: 20px; margin: 5px 0;">
                                             @foreach ($oResume->lDays as $oDay)
                                                 <li style="font-size: 14px; color: #555; margin-bottom: 5px;">
-                                                    {{ $oDay->date ?? '' }}
+                                                    {{ isset($oDay['date']) ? $oDay['date'] : '' }}
                                                 </li>
                                             @endforeach
                                         </ul>

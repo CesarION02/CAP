@@ -299,12 +299,15 @@ class SReportUtils
                         $oResume->text = "Vacaciones";
                         $oResume->unit = "días";
                         $qQuery = clone $allIncidentsBase;
+                        $lRows = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['VAC'])
+                                                    ->get();
                         $days = 0;
                         $oResume->lDays = [];
                         foreach ($lRows as $oRow) {
                             $lDays = incidentDay::where('incidents_id', $oRow->id)->get();
                             $days += count($lDays);
-                            $oResume->lDays[] = $lDays;
+                            // merge del array:
+                            $oResume->lDays = array_merge($oResume->lDays, $lDays->toArray());
                         }
                         $oResume->counter = $days;
                         break;
@@ -377,7 +380,8 @@ class SReportUtils
                         foreach ($lRows as $oRow) {
                             $lDays = incidentDay::where('incidents_id', $oRow->id)->get();
                             $days += count($lDays);
-                            $oResume->lDays[] = $lDays;
+                            // merge del array:
+                            $oResume->lDays = array_merge($oResume->lDays, $lDays->toArray());
                         }
                         $oResume->counter = $days;
                         break;
