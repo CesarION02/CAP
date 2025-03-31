@@ -171,6 +171,7 @@ class SReportUtils
         return $aColumns;
     }
 
+    /**
      * Agrega las incidencias de los empleados dentro del periodo configurado en report_resume_cfg.json
      * 
      * @param mixed $lDataReceived
