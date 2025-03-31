@@ -4,7 +4,8 @@ use App\Models\cutCalendarQ;
 use App\Models\week_cut;
 use Carbon\Carbon;
 use App\Models\incident;
-use App\Models\typeincident;
+use App\Models\incidentDay;
+use Log;
 
 class SReportUtils
 {
@@ -190,6 +191,11 @@ class SReportUtils
             
             foreach ($oConfiguration->incident_types as $incidentType) {
                 $oResume = new \stdClass();
+                $oResume->text = "";
+                $oResume->unit = "";
+                $oResume->counter = 0;
+                $oResume->lDays = array();
+
                 switch ($incidentType) {
                     case \SCons::INC_TYPE['INA_S_PER']:
                         $oResume->text = "Inasistencia sin permiso";
@@ -293,13 +299,12 @@ class SReportUtils
                         $oResume->text = "Vacaciones";
                         $oResume->unit = "días";
                         $qQuery = clone $allIncidentsBase;
-                        $lRows = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['VAC'])
-                                                    ->get();
                         $days = 0;
+                        $oResume->lDays = [];
                         foreach ($lRows as $oRow) {
-                            $rStartDate = Carbon::parse($oRow->start_date)->locale('es');
-                            $rEndDate = Carbon::parse($oRow->end_date)->locale('es');
-                            $days += $rStartDate->diffInDays($rEndDate) + 1;
+                            $lDays = incidentDay::where('incidents_id', $oRow->id)->get();
+                            $days += count($lDays);
+                            $oResume->lDays[] = $lDays;
                         }
                         $oResume->counter = $days;
                         break;
@@ -368,10 +373,11 @@ class SReportUtils
                         $lRows = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['VAC_CAP'])
                                                     ->get();
                         $days = 0;
+                        $oResume->lDays = [];
                         foreach ($lRows as $oRow) {
-                            $rStartDate = Carbon::parse($oRow->start_date)->locale('es');
-                            $rEndDate = Carbon::parse($oRow->end_date)->locale('es');
-                            $days += $rStartDate->diffInDays($rEndDate) + 1;
+                            $lDays = incidentDay::where('incidents_id', $oRow->id)->get();
+                            $days += count($lDays);
+                            $oResume->lDays[] = $lDays;
                         }
                         $oResume->counter = $days;
                         break;
@@ -417,14 +423,24 @@ class SReportUtils
                         $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['PERM_BY_GONE'])
                                                     ->count();
                         break;
+                    case \SCons::INC_TYPE['ELECTION_DAY_2024']:
+                        $oResume->text = "Permiso por elección 2024";
+                        $oResume->unit = "días";
+                        $qQuery = clone $allIncidentsBase;
+                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['ELECTION_DAY_2024'])
+                                                    ->count();
+                        break;
                     default:
+                        Log::warning("Tipo de incidencia no encontrado: " . $incidentType);
                         $oResume->text = "Sin definir";
                         $oResume->unit = "";
                         $oResume->counter = 0;
                         break;
                 }
 
-                $oEmpData->aIncidents[] = $oResume;
+                if ($oResume->counter > 0) {
+                    $oEmpData->aIncidents[] = $oResume;
+                }                    
             }
         }
 

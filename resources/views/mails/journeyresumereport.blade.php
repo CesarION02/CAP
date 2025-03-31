@@ -7,60 +7,70 @@
     <title>CAP Notificación</title>
 </head>
 
-{{-- <body style="font-family: 'Courier New', monospace"> --}}
-{{-- <body style="font-family: 'Georgia, serif'"> --}}
-<body style="font-family: 'Arial, Helvetica, sans-serif'">
-    <div>
-        <h1>Reporte de tiempo laboral e incidencias
-            {{-- <b>({{ $typePay }})</b> --}}
+<body style="font-family: Arial, Helvetica, sans-serif; margin: 0; padding: 0; background-color: #f9f9f9; color: #333;">
+    <div style="max-width: 600px; margin: 20px auto; background-color: #fff; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+        <h1 style="font-size: 20px; color: #0056b3; text-align: center; margin-bottom: 10px;">
+            Reporte de Tiempo Laboral e Incidencias
         </h1>
-        <h2>{{ "Período: " . $sPeriod }}</h2>
+        <h2 style="font-size: 16px; color: #333; text-align: center; margin-bottom: 20px;">
+            {{ "Período: " . $sPeriod }}
+        </h2>
 
         @if (count($lData) == 0)
-            <h3>No hay información qué mostrar.</h3>
+            <h3 style="font-size: 14px; color: #555; text-align: center;">No hay información qué mostrar.</h3>
         @else
-            <?php
-                $i = 1;
-            ?>
             @foreach ($lData as $oEmp)
-                    <div style="line-height: 75%">
-                        <h3><b>{{ ($oEmp->numEmployee." - ".$oEmp->employee) }}</b> - {{ (ucfirst($oEmp->departmentName)) }}</h4>
-                        <h4>Horario: <b>{{ $oEmp->schedule }}</b></h5>
-                    </div>
-                    <table>
-                        <tbody>
-                            <tr>
-                                <td colspan="5"><b>{{ $oEmp->numEmployee." - ".$oEmp->employee }}</b></td>
-                                <td style="text-align: right; padding-left: 8px; padding-right: 8px; 
-                                    @if ($oEmp->totalDelay > 15)
-                                        color: red;
-                                    @endif                                        
-                                ">
-                                    <b>{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($oEmp->totalDelay) }}</b>
-                                </td>
-                                <td style="text-align: right; padding-left: 8px; padding-right: 8px;">
-                                    <b>{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($oEmp->totalAditional) }}</b>
-                                </td>
-                            </tr>
-                            <?php
-                                $i++;
-                            ?>
-                        </tbody>
-                    </table>
-                    @foreach ($oEmp->aIncidents as $oResume)
-                        @if (! isset($oResume->counter) || $oResume->counter == 0)
-                            @continue
-                        @endif
-                        <label for="">{{ isset($oResume->text) ? $oResume->text : "" }}</label>
-                        <label for="">{{ isset($oResume->counter) ? $oResume->counter : "" }}</label>
-                        <label for="">{{ isset($oResume->unit) ? $oResume->unit : "" }}</label>
-                    @endforeach
-                    
-                    @if ($oEmp->totalDelay > 15)
-                        <p style="color: red;">Nota: Únicamente se permiten 15 minutos acumulados de retardo en una quincena.</p>
+                <div style="margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #ddd;">
+                    <h3 style="font-size: 16px; color: #0056b3; margin: 0;">
+                        {{ $oEmp->numEmployee . " - " . $oEmp->employee }}
+                    </h3>
+                    <p style="font-size: 14px; color: #555; margin: 5px 0;">
+                        Departamento: <b>{{ ucfirst($oEmp->departmentName) }}</b>
+                    </p>
+                    <p style="font-size: 14px; color: #555; margin: 5px 0;">
+                        Horario: <b>{{ $oEmp->schedule }}</b>
+                    </p>
+                    <p style="font-size: 14px; margin: 5px 0;">
+                        Retardo acumulado: 
+                        <b style="color: {{ $oEmp->totalDelay > 15 ? 'red' : '#333' }};">
+                            {{ \App\SUtils\SDelayReportUtils::convertToHoursMins($oEmp->totalDelay) }}
+                        </b>
+                    </p>
+                    <p style="font-size: 14px; margin: 5px 0;">
+                        Tiempo adicional: 
+                        <b>{{ \App\SUtils\SDelayReportUtils::convertToHoursMins($oEmp->totalAditional) }}</b>
+                    </p>
+
+                    @if (count($oEmp->aIncidents) > 0)
+                        <h4 style="font-size: 14px; color: #333; margin-top: 10px;">Incidencias:</h4>
+                        <ul style="padding-left: 20px; margin: 5px 0;">
+                            @foreach ($oEmp->aIncidents as $oResume)
+                                @if (!isset($oResume->counter) || $oResume->counter == 0)
+                                    @continue
+                                @endif
+                                <li style="font-size: 14px; color: #555; margin-bottom: 5px;">
+                                    {{ $oResume->text ?? '' }}: 
+                                    <b>{{ $oResume->counter ?? '' }}</b> {{ $oResume->unit ?? '' }}
+                                    @if (count($oResume->lDays) > 0)
+                                        <ul style="padding-left: 20px; margin: 5px 0;">
+                                            @foreach ($oResume->lDays as $oDay)
+                                                <li style="font-size: 14px; color: #555; margin-bottom: 5px;">
+                                                    {{ $oDay->date ?? '' }}
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    @endif
+                                </li>
+                            @endforeach
+                        </ul>
                     @endif
-                                      
-                    <hr align="left" width="55%" >                       
+
+                    @if ($oEmp->totalDelay > 15)
+                        <p style="font-size: 14px; color: red; margin-top: 10px;">
+                            Nota: Únicamente se permiten 15 minutos acumulados de retardo en una quincena.
+                        </p>
+                    @endif
+                </div>
             @endforeach
         @endif
     </div>

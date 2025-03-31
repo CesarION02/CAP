@@ -81,7 +81,8 @@ class SCons {
       'ONOM_CAP' => 23,// ONOMÁSTICO
       'PERM' => 24,// PERMISO
       'DAY_HOLIDAY' => 25,// PERMISO
-      'PERM_BY_GONE' => 26// PERMISO
+      'PERM_BY_GONE' => 26, // PERMISO
+      'ELECTION_DAY_2024' => 27// PERMISO
    ];
 
    const TASK_TYPE_REPORT_JOURNEY = 1;
