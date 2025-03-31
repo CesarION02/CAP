@@ -367,12 +367,22 @@ class ExternalIncidentsController extends Controller
 
     public function checkVoboIsOpen(Request $request) {
         try {
-            $ini_date = $request->input('ini_date');
-            $end_date = $request->input('end_date');
-            $employee_external_id = $request->employee_external_id;
-            $oEmployee = employees::where('external_id', $employee_external_id)->first();
-            $today = Carbon::now()->toDateString();
-            $result = json_decode(SCheckDaysVobo::checkDays($oEmployee, $today, $ini_date, $end_date));
+            $config = \App\SUtils\SConfiguration::getConfigurations();
+
+            if ($config->incidencesWithCheckVobo) {
+                $ini_date = $request->input('ini_date');
+                $end_date = $request->input('end_date');
+                $employee_external_id = $request->employee_external_id;
+                $oEmployee = employees::where('external_id', $employee_external_id)->first();
+                $today = Carbon::now()->toDateString();
+                $result = json_decode(SCheckDaysVobo::checkDays($oEmployee, $today, $ini_date, $end_date));
+            } else {
+                $result = (object) [
+                    'isInRange' => true,
+                    'message' => 'OK',
+                ];
+            }
+
         } catch (\Throwable $th) {
             return response()->json([
                 'code' => 500,
