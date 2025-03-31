@@ -171,7 +171,11 @@ class SReportUtils
     }
 
     public static function addIncidentsResume($lDataReceived, $oConfiguration) {
-        $lData = clone $lDataReceived;
+        // clonar o copiar arreglo de datos $lDataReceived
+        $lData = array_map(function($item) {
+            return clone $item;
+        }, $lDataReceived);
+
         $startDate = Carbon::now()->subDays($oConfiguration->days_ago)->toDateString();
         $endDate = Carbon::now()->toDateString();
 
@@ -191,63 +195,63 @@ class SReportUtils
                         $oResume->text = "Inasistencia sin permiso";
                         $oResume->unit = "días";
                         $qQuery = clone $allIncidentsBase;
-                        $oResume->counter = $qQuery->where('type_incident_id', \SCons::INC_TYPE['INA_S_PER'])
+                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['INA_S_PER'])
                                                     ->count();
                         break;
                     case \SCons::INC_TYPE['INA_C_PER_SG']:
                         $oResume->text = "Inasistencia con permiso sin goce de sueldo";
                         $oResume->unit = "días";
                         $qQuery = clone $allIncidentsBase;
-                        $oResume->counter = $qQuery->where('type_incident_id', \SCons::INC_TYPE['INA_C_PER_SG'])
+                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['INA_C_PER_SG'])
                                                     ->count();
                         break;
                     case \SCons::INC_TYPE['INA_C_PER_CG']:
                         $oResume->text = "Inasistencia con permiso con goce de sueldo";
                         $oResume->unit = "días";
                         $qQuery = clone $allIncidentsBase;
-                        $oResume->counter = $qQuery->where('type_incident_id', \SCons::INC_TYPE['INA_C_PER_CG'])
+                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['INA_C_PER_CG'])
                                                     ->count();
                         break;
                     case \SCons::INC_TYPE['INA_AD_REL_CH']:
                         $oResume->text = "Inasistencia administrativa por reloj checador";
                         $oResume->unit = "días";
                         $qQuery = clone $allIncidentsBase;
-                        $oResume->counter = $qQuery->where('type_incident_id', \SCons::INC_TYPE['INA_AD_REL_CH'])
+                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['INA_AD_REL_CH'])
                                                     ->count();
                         break;
                     case \SCons::INC_TYPE['INA_AD_SUSP']:
                         $oResume->text = "Inasistencia administrativa por suspensión";
                         $oResume->unit = "días";
                         $qQuery = clone $allIncidentsBase;
-                        $oResume->counter = $qQuery->where('type_incident_id', \SCons::INC_TYPE['INA_AD_SUSP'])
+                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['INA_AD_SUSP'])
                                                     ->count();
                         break;
                     case \SCons::INC_TYPE['INA_AD_OT']:
                         $oResume->text = "Inasistencia administrativa por otros motivos";
                         $oResume->unit = "días";
                         $qQuery = clone $allIncidentsBase;
-                        $oResume->counter = $qQuery->where('type_incident_id', \SCons::INC_TYPE['INA_AD_OT'])
+                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['INA_AD_OT'])
                                                     ->count();
                         break;
                     case \SCons::INC_TYPE['ONOM_EXT']:
                         $oResume->text = "Onomástico";
                         $oResume->unit = "días";
                         $qQuery = clone $allIncidentsBase;
-                        $oResume->counter = $qQuery->where('type_incident_id', \SCons::INC_TYPE['ONOM_EXT'])
+                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['ONOM_EXT'])
                                                     ->count();
                         break;
                     case \SCons::INC_TYPE['RIESGO']:
                         $oResume->text = "Riesgo de trabajo";
                         $oResume->unit = "días";
                         $qQuery = clone $allIncidentsBase;
-                        $oResume->counter = $qQuery->where('type_incident_id', \SCons::INC_TYPE['RIESGO'])
+                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['RIESGO'])
                                                     ->count();
                         break;
                     case \SCons::INC_TYPE['ENFERMEDAD']:
                         $oResume->text = "Enfermedad en general (Incapacidad)";
                         $oResume->unit = "días";
                         $qQuery = clone $allIncidentsBase;
-                        $lRows = $qQuery->where('type_incident_id', \SCons::INC_TYPE['ENFERMEDAD'])
+                        $lRows = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['ENFERMEDAD'])
                                                     ->get();
                         $days = 0;
                         foreach ($lRows as $oRow) {
@@ -261,7 +265,7 @@ class SReportUtils
                         $oResume->text = "Maternidad";
                         $oResume->unit = "días";
                         $qQuery = clone $allIncidentsBase;
-                        $lRows = $qQuery->where('type_incident_id', \SCons::INC_TYPE['MATER'])
+                        $lRows = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['MATER'])
                                                     ->get();
                         $days = 0;
                         foreach ($lRows as $oRow) {
@@ -275,7 +279,7 @@ class SReportUtils
                         $oResume->text = "Licencia por cuidados médicos de hijos diagnosticados con cáncer";
                         $oResume->unit = "días";
                         $qQuery = clone $allIncidentsBase;
-                        $lRows = $qQuery->where('type_incident_id', \SCons::INC_TYPE['LIC_CUIDADOS'])
+                        $lRows = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['LIC_CUIDADOS'])
                                                     ->get();
                         $days = 0;
                         foreach ($lRows as $oRow) {
@@ -289,7 +293,7 @@ class SReportUtils
                         $oResume->text = "Vacaciones";
                         $oResume->unit = "días";
                         $qQuery = clone $allIncidentsBase;
-                        $lRows = $qQuery->where('type_incident_id', \SCons::INC_TYPE['VAC'])
+                        $lRows = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['VAC'])
                                                     ->get();
                         $days = 0;
                         foreach ($lRows as $oRow) {
@@ -305,21 +309,21 @@ class SReportUtils
                         $oResume->text = "Capacitación";
                         $oResume->unit = "días";
                         $qQuery = clone $allIncidentsBase;
-                        $oResume->counter = $qQuery->where('type_incident_id', \SCons::INC_TYPE['CAPACIT'])
+                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['CAPACIT'])
                                                     ->count();
                         break;
                     case \SCons::INC_TYPE['TRAB_F_PL']:
                         $oResume->text = "Trabajo fuera de planta";
                         $oResume->unit = "días";
                         $qQuery = clone $allIncidentsBase;
-                        $oResume->counter = $qQuery->where('type_incident_id', \SCons::INC_TYPE['TRAB_F_PL'])
+                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['TRAB_F_PL'])
                                                     ->count();
                         break;
                     case \SCons::INC_TYPE['PATER']:
                         $oResume->text = "Paternidad";
                         $oResume->unit = "días";
                         $qQuery = clone $allIncidentsBase;
-                        $lRows = $qQuery->where('type_incident_id', \SCons::INC_TYPE['PATER'])
+                        $lRows = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['PATER'])
                                                     ->get();
                         $days = 0;
                         foreach ($lRows as $oRow) {
@@ -333,35 +337,35 @@ class SReportUtils
                         $oResume->text = "Día otorgado";
                         $oResume->unit = "días";
                         $qQuery = clone $allIncidentsBase;
-                        $oResume->counter = $qQuery->where('type_incident_id', \SCons::INC_TYPE['DIA_OTOR'])
+                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['DIA_OTOR'])
                                                     ->count();
                         break;
                     case \SCons::INC_TYPE['INA_PRES_MED']:
                         $oResume->text = "Inasistencia prescripción médica";
                         $oResume->unit = "días";
                         $qQuery = clone $allIncidentsBase;
-                        $oResume->counter = $qQuery->where('type_incident_id', \SCons::INC_TYPE['INA_PRES_MED'])
+                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['INA_PRES_MED'])
                                                     ->count();
                         break;
                     case \SCons::INC_TYPE['DESCANSO']:
                         $oResume->text = "Descanso";
                         $oResume->unit = "días";
                         $qQuery = clone $allIncidentsBase;
-                        $oResume->counter = $qQuery->where('type_incident_id', \SCons::INC_TYPE['DESCANSO'])
+                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['DESCANSO'])
                                                     ->count();
                         break;
                     case \SCons::INC_TYPE['INA_TR_F_PL']:
                         $oResume->text = "Inasistencia trabajo fuera de planta";
                         $oResume->unit = "días";
                         $qQuery = clone $allIncidentsBase;
-                        $oResume->counter = $qQuery->where('type_incident_id', \SCons::INC_TYPE['INA_TR_F_PL'])
+                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['INA_TR_F_PL'])
                                                     ->count();
                         break;
                     case \SCons::INC_TYPE['VAC_CAP']:
                         $oResume->text = "Vacaciones";
                         $oResume->unit = "días";
                         $qQuery = clone $allIncidentsBase;
-                        $lRows = $qQuery->where('type_incident_id', \SCons::INC_TYPE['VAC_CAP'])
+                        $lRows = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['VAC_CAP'])
                                                     ->get();
                         $days = 0;
                         foreach ($lRows as $oRow) {
@@ -375,7 +379,7 @@ class SReportUtils
                         $oResume->text = "Incapacidad";
                         $oResume->unit = "días";
                         $qQuery = clone $allIncidentsBase;
-                        $lRows = $qQuery->where('type_incident_id', \SCons::INC_TYPE['INC_CAP'])
+                        $lRows = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['INC_CAP'])
                                                     ->get();
                         $days = 0;
                         foreach ($lRows as $oRow) {
@@ -389,28 +393,28 @@ class SReportUtils
                         $oResume->text = "Onomástico";
                         $oResume->unit = "días";
                         $qQuery = clone $allIncidentsBase;
-                        $oResume->counter = $qQuery->where('type_incident_id', \SCons::INC_TYPE['ONOM_CAP'])
+                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['ONOM_CAP'])
                                                     ->count();
                         break;
                     case \SCons::INC_TYPE['PERM']:
                         $oResume->text = "Permiso";
                         $oResume->unit = "días";
                         $qQuery = clone $allIncidentsBase;
-                        $oResume->counter = $qQuery->where('type_incident_id', \SCons::INC_TYPE['PERM'])
+                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['PERM'])
                                                     ->count();
                         break;
                     case \SCons::INC_TYPE['DAY_HOLIDAY']:
                         $oResume->text = "Día feriado";
                         $oResume->unit = "días";
                         $qQuery = clone $allIncidentsBase;
-                        $oResume->counter = $qQuery->where('type_incident_id', \SCons::INC_TYPE['DAY_HOLIDAY'])
+                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['DAY_HOLIDAY'])
                                                     ->count();
                         break;
                     case \SCons::INC_TYPE['PERM_BY_GONE']:
                         $oResume->text = "Permiso por ausencia";
                         $oResume->unit = "días";
                         $qQuery = clone $allIncidentsBase;
-                        $oResume->counter = $qQuery->where('type_incident_id', \SCons::INC_TYPE['PERM_BY_GONE'])
+                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['PERM_BY_GONE'])
                                                     ->count();
                         break;
                     default:

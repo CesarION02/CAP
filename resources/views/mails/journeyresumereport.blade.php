@@ -48,9 +48,12 @@
                         </tbody>
                     </table>
                     @foreach ($oEmp->aIncidents as $oResume)
-                        <label for="">{{ $oResume->text }}</label>
-                        <label for="">{{ $oResume->counter }}</label>
-                        <label for="">{{ $oResume->unit }}</label>
+                        @if (! isset($oResume->counter) || $oResume->counter == 0)
+                            @continue
+                        @endif
+                        <label for="">{{ isset($oResume->text) ? $oResume->text : "" }}</label>
+                        <label for="">{{ isset($oResume->counter) ? $oResume->counter : "" }}</label>
+                        <label for="">{{ isset($oResume->unit) ? $oResume->unit : "" }}</label>
                     @endforeach
                     
                     @if ($oEmp->totalDelay > 15)
