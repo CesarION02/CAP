@@ -171,283 +171,216 @@ class SReportUtils
         return $aColumns;
     }
 
+     * Agrega las incidencias de los empleados dentro del periodo configurado en report_resume_cfg.json
+     * 
+     * @param mixed $lDataReceived
+     * @param mixed $oConfiguration
+     * @return mixed $lData
+     */
     public static function addIncidentsResume($lDataReceived, $oConfiguration) {
-        // clonar o copiar arreglo de datos $lDataReceived
-        $lData = array_map(function($item) {
-            return clone $item;
-        }, $lDataReceived);
-
+        // Clonar o copiar arreglo de datos $lDataReceived
+        $lData = array_map(fn($item) => clone $item, $lDataReceived);
+    
         $startDate = Carbon::now()->subDays($oConfiguration->days_ago)->toDateString();
         $endDate = Carbon::now()->toDateString();
-
+    
+        // Consultas base para las incidencias por empleado
+        $incidentBaseQuery = function ($employeeId) use ($startDate, $endDate) {
+            return incident::where('employee_id', $employeeId)
+                ->where('is_delete', 0)
+                ->where(function ($query) use ($startDate, $endDate) {
+                    $query->whereBetween('start_date', [$startDate, $endDate])
+                          ->orWhereBetween('end_date', [$startDate, $endDate]);
+                });
+        };
+    
         foreach ($lData as $oEmpData) {
-            $oEmpData->aIncidents = array();
-            $allIncidentsBase = incident::where('employee_id', $oEmpData->idEmployee)
-                                    ->where('is_delete', 0)
-                                    ->where(function ($query) use ($startDate, $endDate) {
-                                        $query->whereBetween('start_date', [$startDate, $endDate])
-                                            ->orWhereBetween('end_date', [$startDate, $endDate]);
-                                    });
-            
+            $oEmpData->aIncidents = [];
+    
+            // Pre-cargar todos los tipos de incidentes en un solo paso
+            $incidentTypes = \SCons::INC_TYPE;
+            $incidentsGrouped = [];
+    
+            foreach ($incidentTypes as $incidentTypeKey => $incidentTypeValue) {
+                // Pre-cargar todas las incidencias para el tipo de incidencia
+                $incidentsGrouped[$incidentTypeKey] = $incidentBaseQuery($oEmpData->idEmployee)
+                    ->where('type_incidents_id', $incidentTypeValue)
+                    ->get();
+            }
+    
             foreach ($oConfiguration->incident_types as $incidentType) {
                 $oResume = new \stdClass();
                 $oResume->text = "";
-                $oResume->unit = "";
+                $oResume->unit = "días";
                 $oResume->counter = 0;
-                $oResume->lDays = array();
-
+                $oResume->lDays = [];
+    
                 switch ($incidentType) {
                     case \SCons::INC_TYPE['INA_S_PER']:
                         $oResume->text = "Inasistencia sin permiso";
-                        $oResume->unit = "días";
-                        $qQuery = clone $allIncidentsBase;
-                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['INA_S_PER'])
-                                                    ->count();
+                        $oResume->counter = $incidentsGrouped['INA_S_PER']->count();
                         break;
+    
                     case \SCons::INC_TYPE['INA_C_PER_SG']:
                         $oResume->text = "Inasistencia con permiso sin goce de sueldo";
-                        $oResume->unit = "días";
-                        $qQuery = clone $allIncidentsBase;
-                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['INA_C_PER_SG'])
-                                                    ->count();
+                        $oResume->counter = $incidentsGrouped['INA_C_PER_SG']->count();
                         break;
+    
                     case \SCons::INC_TYPE['INA_C_PER_CG']:
                         $oResume->text = "Inasistencia con permiso con goce de sueldo";
-                        $oResume->unit = "días";
-                        $qQuery = clone $allIncidentsBase;
-                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['INA_C_PER_CG'])
-                                                    ->count();
+                        $oResume->counter = $incidentsGrouped['INA_C_PER_CG']->count();
                         break;
+    
                     case \SCons::INC_TYPE['INA_AD_REL_CH']:
                         $oResume->text = "Inasistencia administrativa por reloj checador";
-                        $oResume->unit = "días";
-                        $qQuery = clone $allIncidentsBase;
-                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['INA_AD_REL_CH'])
-                                                    ->count();
+                        $oResume->counter = $incidentsGrouped['INA_AD_REL_CH']->count();
                         break;
+    
                     case \SCons::INC_TYPE['INA_AD_SUSP']:
                         $oResume->text = "Inasistencia administrativa por suspensión";
-                        $oResume->unit = "días";
-                        $qQuery = clone $allIncidentsBase;
-                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['INA_AD_SUSP'])
-                                                    ->count();
+                        $oResume->counter = $incidentsGrouped['INA_AD_SUSP']->count();
                         break;
+    
                     case \SCons::INC_TYPE['INA_AD_OT']:
                         $oResume->text = "Inasistencia administrativa por otros motivos";
-                        $oResume->unit = "días";
-                        $qQuery = clone $allIncidentsBase;
-                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['INA_AD_OT'])
-                                                    ->count();
+                        $oResume->counter = $incidentsGrouped['INA_AD_OT']->count();
                         break;
+    
                     case \SCons::INC_TYPE['ONOM_EXT']:
                         $oResume->text = "Onomástico";
-                        $oResume->unit = "días";
-                        $qQuery = clone $allIncidentsBase;
-                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['ONOM_EXT'])
-                                                    ->count();
+                        $oResume->counter = $incidentsGrouped['ONOM_EXT']->count();
                         break;
+    
                     case \SCons::INC_TYPE['RIESGO']:
                         $oResume->text = "Riesgo de trabajo";
-                        $oResume->unit = "días";
-                        $qQuery = clone $allIncidentsBase;
-                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['RIESGO'])
-                                                    ->count();
+                        $oResume->counter = $incidentsGrouped['RIESGO']->count();
                         break;
+    
                     case \SCons::INC_TYPE['ENFERMEDAD']:
                         $oResume->text = "Enfermedad en general (Incapacidad)";
-                        $oResume->unit = "días";
-                        $qQuery = clone $allIncidentsBase;
-                        $lRows = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['ENFERMEDAD'])
-                                                    ->get();
-                        $days = 0;
-                        foreach ($lRows as $oRow) {
-                            $rStartDate = Carbon::parse($oRow->start_date)->locale('es');
-                            $rEndDate = Carbon::parse($oRow->end_date)->locale('es');
-                            $days += $rStartDate->diffInDays($rEndDate) + 1;
-                        }
-                        $oResume->counter = $days;
+                        $oResume->counter = self::calculateDays($incidentsGrouped['ENFERMEDAD']);
                         break;
+    
                     case \SCons::INC_TYPE['MATER']:
                         $oResume->text = "Maternidad";
-                        $oResume->unit = "días";
-                        $qQuery = clone $allIncidentsBase;
-                        $lRows = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['MATER'])
-                                                    ->get();
-                        $days = 0;
-                        foreach ($lRows as $oRow) {
-                            $rStartDate = Carbon::parse($oRow->start_date)->locale('es');
-                            $rEndDate = Carbon::parse($oRow->end_date)->locale('es');
-                            $days += $rStartDate->diffInDays($rEndDate) + 1;
-                        }
-                        $oResume->counter = $days;
+                        $oResume->counter = self::calculateDays($incidentsGrouped['MATER']);
                         break;
+    
                     case \SCons::INC_TYPE['LIC_CUIDADOS']:
                         $oResume->text = "Licencia por cuidados médicos de hijos diagnosticados con cáncer";
-                        $oResume->unit = "días";
-                        $qQuery = clone $allIncidentsBase;
-                        $lRows = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['LIC_CUIDADOS'])
-                                                    ->get();
-                        $days = 0;
-                        foreach ($lRows as $oRow) {
-                            $rStartDate = Carbon::parse($oRow->start_date)->locale('es');
-                            $rEndDate = Carbon::parse($oRow->end_date)->locale('es');
-                            $days += $rStartDate->diffInDays($rEndDate) + 1;
-                        }
-                        $oResume->counter = $days;
+                        $oResume->counter = self::calculateDays($incidentsGrouped['LIC_CUIDADOS']);
                         break;
+    
                     case \SCons::INC_TYPE['VAC']:
                         $oResume->text = "Vacaciones";
-                        $oResume->unit = "días";
-                        $qQuery = clone $allIncidentsBase;
-                        $lRows = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['VAC'])
-                                                    ->get();
-                        $days = 0;
-                        $oResume->lDays = [];
-                        foreach ($lRows as $oRow) {
-                            $lDays = incidentDay::where('incidents_id', $oRow->id)->get();
-                            $days += count($lDays);
-                            // merge del array:
-                            $oResume->lDays = array_merge($oResume->lDays, $lDays->toArray());
-                        }
-                        $oResume->counter = $days;
+                        $oResume->counter = self::calculateDaysForVacation($incidentsGrouped['VAC'])[0];
+                        $oResume->lDays = self::calculateDaysForVacation($incidentsGrouped['VAC'])[1];
                         break;
-                    case \SCons::INC_TYPE['VAC_PEND']:
-                        break;
+    
                     case \SCons::INC_TYPE['CAPACIT']:
                         $oResume->text = "Capacitación";
-                        $oResume->unit = "días";
-                        $qQuery = clone $allIncidentsBase;
-                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['CAPACIT'])
-                                                    ->count();
+                        $oResume->counter = $incidentsGrouped['CAPACIT']->count();
                         break;
+    
                     case \SCons::INC_TYPE['TRAB_F_PL']:
                         $oResume->text = "Trabajo fuera de planta";
-                        $oResume->unit = "días";
-                        $qQuery = clone $allIncidentsBase;
-                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['TRAB_F_PL'])
-                                                    ->count();
+                        $oResume->counter = $incidentsGrouped['TRAB_F_PL']->count();
                         break;
+    
                     case \SCons::INC_TYPE['PATER']:
                         $oResume->text = "Paternidad";
-                        $oResume->unit = "días";
-                        $qQuery = clone $allIncidentsBase;
-                        $lRows = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['PATER'])
-                                                    ->get();
-                        $days = 0;
-                        foreach ($lRows as $oRow) {
-                            $rStartDate = Carbon::parse($oRow->start_date)->locale('es');
-                            $rEndDate = Carbon::parse($oRow->end_date)->locale('es');
-                            $days += $rStartDate->diffInDays($rEndDate) + 1;
-                        }
-                        $oResume->counter = $days;
+                        $oResume->counter = self::calculateDays($incidentsGrouped['PATER']);
                         break;
+    
                     case \SCons::INC_TYPE['DIA_OTOR']:
                         $oResume->text = "Día otorgado";
-                        $oResume->unit = "días";
-                        $qQuery = clone $allIncidentsBase;
-                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['DIA_OTOR'])
-                                                    ->count();
+                        $oResume->counter = $incidentsGrouped['DIA_OTOR']->count();
                         break;
+    
                     case \SCons::INC_TYPE['INA_PRES_MED']:
                         $oResume->text = "Inasistencia prescripción médica";
-                        $oResume->unit = "días";
-                        $qQuery = clone $allIncidentsBase;
-                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['INA_PRES_MED'])
-                                                    ->count();
+                        $oResume->counter = $incidentsGrouped['INA_PRES_MED']->count();
                         break;
+    
                     case \SCons::INC_TYPE['DESCANSO']:
                         $oResume->text = "Descanso";
-                        $oResume->unit = "días";
-                        $qQuery = clone $allIncidentsBase;
-                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['DESCANSO'])
-                                                    ->count();
+                        $oResume->counter = $incidentsGrouped['DESCANSO']->count();
                         break;
+    
                     case \SCons::INC_TYPE['INA_TR_F_PL']:
                         $oResume->text = "Inasistencia trabajo fuera de planta";
-                        $oResume->unit = "días";
-                        $qQuery = clone $allIncidentsBase;
-                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['INA_TR_F_PL'])
-                                                    ->count();
+                        $oResume->counter = $incidentsGrouped['INA_TR_F_PL']->count();
                         break;
+    
                     case \SCons::INC_TYPE['VAC_CAP']:
                         $oResume->text = "Vacaciones";
-                        $oResume->unit = "días";
-                        $qQuery = clone $allIncidentsBase;
-                        $lRows = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['VAC_CAP'])
-                                                    ->get();
-                        $days = 0;
-                        $oResume->lDays = [];
-                        foreach ($lRows as $oRow) {
-                            $lDays = incidentDay::where('incidents_id', $oRow->id)->get();
-                            $days += count($lDays);
-                            // merge del array:
-                            $oResume->lDays = array_merge($oResume->lDays, $lDays->toArray());
-                        }
-                        $oResume->counter = $days;
+                        $oResume->counter = self::calculateDaysForVacation($incidentsGrouped['VAC_CAP'])[0];
+                        $oResume->lDays = self::calculateDaysForVacation($incidentsGrouped['VAC_CAP'])[1];
                         break;
+    
                     case \SCons::INC_TYPE['INC_CAP']:
                         $oResume->text = "Incapacidad";
-                        $oResume->unit = "días";
-                        $qQuery = clone $allIncidentsBase;
-                        $lRows = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['INC_CAP'])
-                                                    ->get();
-                        $days = 0;
-                        foreach ($lRows as $oRow) {
-                            $rStartDate = Carbon::parse($oRow->start_date)->locale('es');
-                            $rEndDate = Carbon::parse($oRow->end_date)->locale('es');
-                            $days += $rStartDate->diffInDays($rEndDate) + 1;
-                        }
-                        $oResume->counter = $days;
+                        $oResume->counter = self::calculateDays($incidentsGrouped['INC_CAP']);
                         break;
+    
                     case \SCons::INC_TYPE['ONOM_CAP']:
                         $oResume->text = "Onomástico";
-                        $oResume->unit = "días";
-                        $qQuery = clone $allIncidentsBase;
-                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['ONOM_CAP'])
-                                                    ->count();
+                        $oResume->counter = $incidentsGrouped['ONOM_CAP']->count();
                         break;
+    
                     case \SCons::INC_TYPE['PERM']:
                         $oResume->text = "Permiso";
-                        $oResume->unit = "días";
-                        $qQuery = clone $allIncidentsBase;
-                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['PERM'])
-                                                    ->count();
+                        $oResume->counter = $incidentsGrouped['PERM']->count();
                         break;
+    
                     case \SCons::INC_TYPE['DAY_HOLIDAY']:
                         $oResume->text = "Día feriado";
-                        $oResume->unit = "días";
-                        $qQuery = clone $allIncidentsBase;
-                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['DAY_HOLIDAY'])
-                                                    ->count();
+                        $oResume->counter = $incidentsGrouped['DAY_HOLIDAY']->count();
                         break;
+    
                     case \SCons::INC_TYPE['PERM_BY_GONE']:
                         $oResume->text = "Permiso por ausencia";
-                        $oResume->unit = "días";
-                        $qQuery = clone $allIncidentsBase;
-                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['PERM_BY_GONE'])
-                                                    ->count();
+                        $oResume->counter = $incidentsGrouped['PERM_BY_GONE']->count();
                         break;
+    
                     case \SCons::INC_TYPE['ELECTION_DAY_2024']:
                         $oResume->text = "Permiso por elección 2024";
-                        $oResume->unit = "días";
-                        $qQuery = clone $allIncidentsBase;
-                        $oResume->counter = $qQuery->where('type_incidents_id', \SCons::INC_TYPE['ELECTION_DAY_2024'])
-                                                    ->count();
+                        $oResume->counter = $incidentsGrouped['ELECTION_DAY_2024']->count();
                         break;
+    
                     default:
                         Log::warning("Tipo de incidencia no encontrado: " . $incidentType);
-                        $oResume->text = "Sin definir";
-                        $oResume->unit = "";
-                        $oResume->counter = 0;
-                        break;
                 }
-
+    
+                // Agregar el resumen a la lista de incidencias
                 if ($oResume->counter > 0) {
                     $oEmpData->aIncidents[] = $oResume;
-                }                    
+                }
             }
         }
 
         return $lData;
     }
+    
+    private static function calculateDays($incidentRecords) {
+        $days = 0;
+        foreach ($incidentRecords as $record) {
+            $startDate = Carbon::parse($record->start_date)->locale('es');
+            $endDate = Carbon::parse($record->end_date)->locale('es');
+            $days += $startDate->diffInDays($endDate) + 1;
+        }
+        return $days;
+    }
+    
+    private static function calculateDaysForVacation($incidentRecords) {
+        $days = 0;
+        $lDays = [];
+        foreach ($incidentRecords as $record) {
+            $incidentDays = incidentDay::where('incidents_id', $record->id)->get();
+            $days += count($incidentDays);
+            $lDays = array_merge($lDays, $incidentDays->toArray());
+        }
+        return [$days, $lDays];
+    }
+    
 }

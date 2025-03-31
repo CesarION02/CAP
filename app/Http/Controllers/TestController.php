@@ -209,7 +209,7 @@ class TestController extends Controller
     }
 
     public function testResumeReport() {
-        $oReport = PrepayReportConfig::where('id_configuration', 40)->first();
+        $oReport = PrepayReportConfig::where('id_configuration', 77)->first();
         $oReporConfigJson = SReportTasks::loadReportResumeConfig();
         $oPrepayReportConfig = SReportTasks::preparePrepayReportResumeConfig($oReport, $oReporConfigJson, \SCons::PAY_W_Q);
         $sConfiguration = json_encode($oPrepayReportConfig);

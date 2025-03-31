@@ -15,6 +15,9 @@
         <h2 style="font-size: 16px; color: #333; text-align: center; margin-bottom: 20px;">
             {{ "Período: " . $sPeriod }}
         </h2>
+        <h2 style="font-size: 16px; color: #333; text-align: center; margin-bottom: 20px;">
+            {{ "(Incidencias de los últimos 30 días)" }}
+        </h2>
 
         @if (count($lData) == 0)
             <h3 style="font-size: 14px; color: #555; text-align: center;">No hay información qué mostrar.</h3>
@@ -55,7 +58,7 @@
                                         <ul style="padding-left: 20px; margin: 5px 0;">
                                             @foreach ($oResume->lDays as $oDay)
                                                 <li style="font-size: 14px; color: #555; margin-bottom: 5px;">
-                                                    {{ isset($oDay['date']) ? $oDay['date'] : '' }}
+                                                    {{ isset($oDay['date']) ? \Carbon\Carbon::parse($oDay['date'])->isoFormat('D MMMM YYYY') : '' }}
                                                 </li>
                                             @endforeach
                                         </ul>
