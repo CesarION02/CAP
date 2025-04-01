@@ -399,7 +399,7 @@ class SReportTasks {
         foreach ($lQCuts as $oQCut) {
             if (!self::isTaskScheduled($lProgrammedTasks, $oPrepayReportConfig, 'Q_' . $oQCut->id)) {
                 $executeOn = Carbon::parse($oQCut->dt_cut)->addDay()->toDateString();
-                self::createTask(\SCons::TASK_TYPE_REPORT_JOURNEY, $executeOn, $oPrepayReportConfig, 'Q_' . $oQCut->id, $priority);
+                self::createTask($iReportType, $executeOn, $oPrepayReportConfig, 'Q_' . $oQCut->id, $priority);
                 Log::info('Tarea quincena programada: Q_' . $oQCut->id);
             }
         }
@@ -440,7 +440,7 @@ class SReportTasks {
         foreach ($lWeekCuts as $oWeekCut) {
             if (!self::isTaskScheduled($lProgrammedTasks, $oPrepayReportConfig, 'S_' . $oWeekCut->id)) {
                 $executeOn = Carbon::parse($oWeekCut->fin)->addDay()->toDateString();
-                self::createTask(\SCons::TASK_TYPE_REPORT_JOURNEY, $executeOn, $oPrepayReportConfig, 'S_' . $oWeekCut->id, $priority);
+                self::createTask($iReportType, $executeOn, $oPrepayReportConfig, 'S_' . $oWeekCut->id, $priority);
                 Log::info('Tarea semana programada: S_' . $oWeekCut->id);
             }
         }

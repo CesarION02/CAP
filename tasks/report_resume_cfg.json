@@ -1,7 +1,7 @@
 {
     "reportQ": {
         "payType": "1",
-        "sinceDate": "2023-03-01",
+        "sinceDate": "2025-03-01",
         "untilDate": "",
         "incidentTypes": [
             1,
@@ -36,7 +36,7 @@
     },
     "reportS": {
         "payType": "2",
-        "sinceDate": "2023-03-01",
+        "sinceDate": "2025-03-01",
         "untilDate": "",
         "incidentTypes": [
             1,

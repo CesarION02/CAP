@@ -14,10 +14,10 @@ class AddFlagReportPpConfig extends Migration
     public function up()
     {
         Schema::table('prepayroll_report_configs', function (Blueprint $table) {
-            $table->boolean('is_report')->default('1')->after('is_delete');
+            $table->boolean('is_report')->default(true)->after('is_delete');
         });
 
-        DB::table('prepayroll_report_configs')->where('is_delete', 1)->update(['is_report' => 0]);
+        DB::table('prepayroll_report_configs')->where('is_delete', 1)->update(['is_report' => false]);
     }
 
     /**
