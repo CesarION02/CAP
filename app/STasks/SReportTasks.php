@@ -78,6 +78,10 @@ class SReportTasks {
                 }
             }
 
+            /**
+             * ****************************************************************************************
+             * Tercera parte: Programación de reportes desde PrepayReportConfig REPORTE RESUMEN
+             */
             $aPPResumeConfigs = self::getSpecificPrepayrollResumeConfigs();
             if (count($aPPResumeConfigs) > 0) {
                 $lResumeReports = (clone $lReportsBase)->whereIn('id_configuration', $aPPResumeConfigs);
@@ -85,6 +89,18 @@ class SReportTasks {
             $lResumeReports = $lResumeReports->get();
 
             $sinceDateResumePrepayroll = self::getSinceDateResumePrepayroll();
+            $reportType = \SCons::TASK_TYPE_REPORT_PP_INCID_RESUME;
+            foreach ($lResumeReports as $oReport) {
+                if (!$oReport->since_date) {
+                    continue;
+                }
+
+                if ($oReport->is_biweek) {
+                    self::schedulePrepayBiweeklyReports($oReport, $reportType, $sinceDateResumePrepayroll);
+                } else {
+                    self::schedulePrepayWeeklyReports($oReport, $reportType, $sinceDateResumePrepayroll);
+                }
+            }
 
             DB::commit();
             return "";
