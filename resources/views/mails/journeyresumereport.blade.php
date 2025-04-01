@@ -13,7 +13,7 @@
             Reporte de Tiempo Laboral e Incidencias
         </h1>
         <h2 style="font-size: 16px; color: #333; text-align: center; margin-bottom: 20px;">
-            {{ "Período: " . $sPeriod }}
+            {{ $sPayTypeText . " del " . $sPeriod }}
         </h2>
         <h2 style="font-size: 16px; color: #333; text-align: center; margin-bottom: 20px;">
             {{ "(Incidencias de los últimos 30 días)" }}
