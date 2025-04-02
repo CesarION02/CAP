@@ -49,7 +49,7 @@ class SCheckDaysVobo {
     
             if ($oToday->gt($oDt_cut)) {
                 $isInRange = false;
-                $message = 'La prenomina esta cerrada, no se pueden enviar incidencias';
+                $message = 'La prenómina ya no se puede modificar porque ya pasó la fecha de revisión.';
             }
             
             if (!$isInRange) {
