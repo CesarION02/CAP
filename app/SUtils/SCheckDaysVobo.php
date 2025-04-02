@@ -28,6 +28,11 @@ class SCheckDaysVobo {
                 }
                 
                 $dt_cut = $arrDatesWeek[1];
+                $oCut = Carbon::parse($dt_cut);
+                if ($oCut->dayOfWeek == 5 || $oCut->dayOfWeek == 6) {
+                    $cut = Carbon::parse($dt_cut)->add('week', 1)->startOfWeek();
+                    $dt_cut = $cut->format('Y-m-d');
+                }
                 $days = $config->daysToCloseWeekVobo;
             } else if ($way_pay == 1) {
                 $arrNumberBiWeek = SDateUtils::getNumberOfDate($ini_date, $way_pay);
@@ -38,6 +43,11 @@ class SCheckDaysVobo {
                 }
     
                 $dt_cut = $arrDatesBiWeek[1];
+                $oCut = Carbon::parse($dt_cut);
+                if ($oCut->dayOfWeek == 5 || $oCut->dayOfWeek == 6) {
+                    $cut = Carbon::parse($dt_cut)->add('week', 1)->startOfWeek();
+                    $dt_cut = $cut->format('Y-m-d');
+                }
                 $days = $config->daysToCloseBiWeekVobo;
             }
     

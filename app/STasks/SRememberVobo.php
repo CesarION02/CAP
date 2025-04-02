@@ -106,8 +106,8 @@ class SRememberVobo
 
         $lastWeekCut = Carbon::parse($arrDatesLastWeek[1]);
         $lastBiWeekCut = Carbon::parse($arrDatesLastBiWeek[1]);
-        $daysToCloseWeekVobo = $config->daysToCloseWeekVobo;
-        $daysToCloseBiWeekVobo = $config->daysToCloseBiWeekVobo;
+        $daysToCloseWeekVobo = $config->daysToNotifyAfterCloseWeekVobo;
+        $daysToCloseBiWeekVobo = $config->daysToNotifyAfterCloseBiWeekVobo;
 
         $oCloseDateLastWeek = $lastWeekCut->copy()->addDays($daysToCloseWeekVobo);
         $oCloseDateLastBiWeek = $lastBiWeekCut->copy()->addDays($daysToCloseBiWeekVobo);
