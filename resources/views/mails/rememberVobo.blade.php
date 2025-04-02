@@ -7,7 +7,7 @@
 </head>
 <body>
     @if ($type == 'preClose')
-        <h2>La prenómina {{ $wayPay }} número {{ $num }} esta próxima a cerrar</h2>
+        <h2>La prenómina {{ $wayPay }} número {{ $num }} está próxima a cerrar</h2>
         <p>Quedan {{$days}} {{ $days > 1 ? ' días' : ' día' }} para la fecha de corte de la prenómina {{ $wayPay }} número {{ $num }}</p>
         <p>la fecha de corte es el {{$endDate}}</p>
     @elseif ($type == 'afterClose')
