@@ -2,6 +2,7 @@
 namespace App\SUtils;
 
 use Carbon\Carbon;
+use App\SUtils\SDateUtils;
 
 class SCheckDaysVobo {
     public static function checkDays($employee, $today, $ini_date, $end_date = null) {
@@ -10,6 +11,8 @@ class SCheckDaysVobo {
             $lDays = [];
             $message = '';
             $way_pay = $employee->way_pay_id;
+
+            $config = \App\SUtils\SConfiguration::getConfigurations();
     
             if (!$end_date) {
                 $end_date = $ini_date;
@@ -17,32 +20,26 @@ class SCheckDaysVobo {
     
             $dt_cut = '';
             if ($way_pay == 2) {
-                $oCut = \DB::table('week_cut')
-                            ->where('ini', '>=', $ini_date)
-                            ->where('fin', '<=', $ini_date)
-                            ->first();
+                $arrNumberWeek = SDateUtils::getNumberOfDate($ini_date, $way_pay);
+                $arrDatesWeek = SDateUtils::getDatesOfPayrollNumber($arrNumberWeek[0], $arrNumberWeek[1], $way_pay);
     
-                if($oCut == null){
+                if($arrDatesWeek[1] == null){
                     return json_encode(['isInRange' => true, 'days' => [], 'message' => '']);
                 }
                 
-                $dt_cut = $oCut->fin;
+                $dt_cut = $arrDatesWeek[1];
+                $days = $config->daysToCloseWeekVobo;
             } else if ($way_pay == 1) {
-                $oCut = \DB::table('hrs_prepay_cut')
-                            ->where('dt_cut', '>=',$ini_date)
-                            ->where('is_delete', 0)
-                            ->orderBy('dt_cut', 'asc')
-                            ->first();
+                $arrNumberBiWeek = SDateUtils::getNumberOfDate($ini_date, $way_pay);
+                $arrDatesBiWeek = SDateUtils::getDatesOfPayrollNumber($arrNumberBiWeek[0], $arrNumberBiWeek[1], $way_pay);
     
-                if($oCut == null){
+                if($arrDatesBiWeek[1] == null){
                     return json_encode(['isInRange' => true, 'days' => [], 'message' => '']);
                 }
     
-                $dt_cut = $oCut->dt_cut;
+                $dt_cut = $arrDatesBiWeek[1];
+                $days = $config->daysToCloseBiWeekVobo;
             }
-    
-            $config = \App\SUtils\SConfiguration::getConfigurations();
-            $days = $config->daysToCloseVobo;
     
             $oDt_cut = Carbon::parse($dt_cut)->add('day', $days)->endOfDay();
             $oToday = Carbon::parse($today)->endOfDay();
