@@ -19,6 +19,8 @@ class SCheckDaysVobo {
             }
     
             $dt_cut = '';
+            $type = '';
+            $num = '';
             if ($way_pay == 2) {
                 $arrNumberWeek = SDateUtils::getNumberOfDate($ini_date, $way_pay);
                 $arrDatesWeek = SDateUtils::getDatesOfPayrollNumber($arrNumberWeek[0], $arrNumberWeek[1], $way_pay);
@@ -34,6 +36,8 @@ class SCheckDaysVobo {
                     $dt_cut = $cut->format('Y-m-d');
                 }
                 $days = $config->daysToCloseWeekVobo;
+                $type = 'semanal';
+                $num = $arrNumberWeek[0];
             } else if ($way_pay == 1) {
                 $arrNumberBiWeek = SDateUtils::getNumberOfDate($ini_date, $way_pay);
                 $arrDatesBiWeek = SDateUtils::getDatesOfPayrollNumber($arrNumberBiWeek[0], $arrNumberBiWeek[1], $way_pay);
@@ -49,6 +53,8 @@ class SCheckDaysVobo {
                     $dt_cut = $cut->format('Y-m-d');
                 }
                 $days = $config->daysToCloseBiWeekVobo;
+                $type = 'quincenal';
+                $num = $arrNumberBiWeek[0];
             }
     
             $oDt_cut = Carbon::parse($dt_cut)->add('day', $days)->endOfDay();
@@ -56,7 +62,7 @@ class SCheckDaysVobo {
     
             if ($oToday->gt($oDt_cut)) {
                 $isInRange = false;
-                $message = 'La prenómina ya no se puede modificar porque ya pasó la fecha de revisión.';
+                $message = 'La prenómina ' . $type . ' ' . $num . ' cerró el ' . SDateFormatUtils::formatDate($dt_cut, 'ddd D-m-Y') . ' , no se puede modificar.';
             }
             
             if (!$isInRange) {
