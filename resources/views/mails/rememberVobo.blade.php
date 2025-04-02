@@ -7,14 +7,19 @@
 </head>
 <body>
     @if ($type == 'preClose')
-        <h2>La prenómina {{ $wayPay }} número {{ $num }} está próxima a cerrar</h2>
-        <p>Quedan {{$days}} {{ $days > 1 ? ' días' : ' día' }} para la fecha de corte de la prenómina {{ $wayPay }} número {{ $num }}</p>
-        <p>la fecha de corte es el {{$endDate}}</p>
+        <h2>La prenómina {{ $wayPay }} {{ $num }} cierra el {{$endDate}}</h2>
+        <p>Quedan {{$days}} {{ $days > 1 ? ' días' : ' día' }} para el cierre</p>
     @elseif ($type == 'afterClose')
-        <h2>La prenómina {{ $wayPay }} número {{ $num }} ha cerrado</h2>
-        <p>No has revisado la prenómina {{ $wayPay }} número {{ $num }}</p>
-        <p>Han transcurrido {{$days}} {{ $days > 1 ? ' días' : ' día' }} desde el corte de prenómina</p>
-        <p>la fecha de corte fue el {{$endDate}}</p>
+        <h2>Falta tu Vobo de la prenómina {{ $wayPay }} {{ $num }} que cerró el {{$endDate}}</h2>
+        <p>Han transcurrido {{$days}} {{ $days > 1 ? ' días' : ' día' }} del cierre</p>
     @endif
+
+    <div>
+        <p style="font-size: 75%; display: inline-block;">
+            Favor de no responder este mail, fue generado de forma automática.<br>
+            CAP © Software Aplicado SA de CV<br>
+            www.swaplicado.com.mx<br>
+        </p>
+    </div>
 </body>
 </html>

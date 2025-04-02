@@ -32,8 +32,16 @@ class rememberVoboMail extends Mailable
      */
     public function build()
     {
+
+        $subject = '';
+        if ($this->type == 'preClose') {
+            $subject = 'Aviso: Prenómina ' . $this->wayPay . ' ' . $this->num . ' cierra el ' . $this->endDate;
+        } elseif ($this->type == 'afterClose') {
+            $subject = 'Aviso: Falta Vobo de prenómina ' . $this->wayPay . ' ' . $this->num;
+        }
+
         return $this->from('adrian.aviles.swaplicado@gmail.com')
-                    ->subject('[CAP] Cierre prenómina ' . $this->wayPay . '  num. ' . $this->num)
+                    ->subject('[CAP] ' . $subject)
                     ->view('mails.rememberVobo')
                     ->with([
                         'wayPay' => $this->wayPay,
