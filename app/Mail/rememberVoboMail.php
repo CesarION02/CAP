@@ -40,7 +40,7 @@ class rememberVoboMail extends Mailable
             $subject = 'Aviso: Falta Vobo de prenómina ' . $this->wayPay . ' ' . $this->num;
         }
 
-        return $this->from('adrian.aviles.swaplicado@gmail.com')
+        return $this->from('cap@aeth.mx')
                     ->subject('[CAP] ' . $subject)
                     ->view('mails.rememberVobo')
                     ->with([

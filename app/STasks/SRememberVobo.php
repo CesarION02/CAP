@@ -59,9 +59,8 @@ class SRememberVobo
                 if ($oToday->equalTo($oNotifyDateWeek) && $lUsersWeek->count() > 0) {
                     $lUsersWeek->each(function ($user) use ($oEndDateWeek, $arrNumberWeek, $value) {
                         $oUser = User::find($user);
-                        // \Mail::to($oUser->email)->send(new rememberVoboMail('semanal', $oEndDateWeek->toDateString()));
                         $sDate = SDateFormatUtils::formatDate($oEndDateWeek->toDateString(), 'ddd D-m-Y');
-                        \Mail::to('adrian.aviles@swaplicado.com.mx')->send(new rememberVoboMail('semanal', $sDate, 'preClose', $arrNumberWeek[0], $value));
+                        \Mail::to($oUser->email)->send(new rememberVoboMail('semanal', $sDate, 'preClose', $arrNumberWeek[0], $value));
                     });
                 }
             }
@@ -76,9 +75,8 @@ class SRememberVobo
                 if ($oToday->equalTo($oNotifyDateBiWeek) && $lUsersBiWeek->count() > 0) {
                     $lUsersBiWeek->each(function ($user) use ($oEndDateBiWeek, $arrNumberBiWeek, $value) {
                         $oUser = User::find($user);
-                        // \Mail::to($oUser->email)->send(new rememberVoboMail('quincenal', $oEndDateBiWeek->toDateString()));
                         $sDate = SDateFormatUtils::formatDate($oEndDateBiWeek->toDateString(), 'ddd D-m-Y');
-                        \Mail::to('adrian.aviles@swaplicado.com.mx')->send(new rememberVoboMail('quincenal', $sDate, 'preClose', $arrNumberBiWeek[0], $value));
+                        \Mail::to($oUser->email)->send(new rememberVoboMail('quincenal', $sDate, 'preClose', $arrNumberBiWeek[0], $value));
                     });
                 }
             }
@@ -139,9 +137,8 @@ class SRememberVobo
                     if ($oToday->gte($lastWeekCut) && $lUsersLastWeek->count() > 0) {
                         $lUsersLastWeek->each(function ($user) use ($lastWeekCut, $numLastWeekCut, $diffInDays) {
                             $oUser = User::find($user);
-                            // \Mail::to($oUser->email)->send(new rememberVoboMail('semanal', $lastWeekCut->toDateString()));
                             $sDate = SDateFormatUtils::formatDate($lastWeekCut->toDateString(), 'ddd D-m-Y');
-                            \Mail::to('adrian.aviles@swaplicado.com.mx')->send(new rememberVoboMail('semanal', $sDate, 'afterClose', $numLastWeekCut[0], $diffInDays));
+                            \Mail::to($oUser->email)->send(new rememberVoboMail('semanal', $sDate, 'afterClose', $numLastWeekCut[0], $diffInDays));
                         });
                     }
                 }
@@ -155,9 +152,8 @@ class SRememberVobo
                     if ($oToday->gte($lastBiWeekCut) && $lUsersLastBiWeek->count() > 0) {
                         $lUsersLastBiWeek->each(function ($user) use ($lastBiWeekCut, $numLastBiWeekCut, $diffInDays) {
                             $oUser = User::find($user);
-                            // \Mail::to($oUser->email)->send(new rememberVoboMail('quincenal', $lastBiWeekCut->toDateString()));
                             $sDate = SDateFormatUtils::formatDate($lastBiWeekCut->toDateString(), 'ddd D-m-Y');
-                            \Mail::to('adrian.aviles@swaplicado.com.mx')->send(new rememberVoboMail('quincenal', $sDate, 'afterClose', $numLastBiWeekCut[0], $diffInDays));
+                            \Mail::to($oUser->email)->send(new rememberVoboMail('quincenal', $sDate, 'afterClose', $numLastBiWeekCut[0], $diffInDays));
                         });
                     }
                 }

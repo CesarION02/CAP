@@ -3,23 +3,23 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\STasks\SRememberVobo;
+use App\STasks\SRememberEmployeeNoCheck;
 
-class SendRememberVobo extends Command
+class SendRememberEmployeeNoCheck extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'send:rememberVobo';
+    protected $signature = 'send:rememberEmployeeNoCheck';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Comando para enviar el email de recordatorio de dar vobo a la prenomina';
+    protected $description = 'Comando para enviar el email de recordatorio cuando empleado no checó';
 
     /**
      * Create a new command instance.
@@ -38,6 +38,6 @@ class SendRememberVobo extends Command
      */
     public function handle()
     {
-        SRememberVobo::rememberVobo();
+        SRememberEmployeeNoCheck::rememberCheckEmployee();
     }
 }
