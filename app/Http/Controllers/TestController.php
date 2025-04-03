@@ -227,12 +227,17 @@ class TestController extends Controller
     }
 
     public function testResumeReport() {
-        $oReport = PrepayReportConfig::where('id_configuration', 23)->first();
+        $oReport = PrepayReportConfig::where('id_configuration', 40)->first();
         $oReporConfigJson = SReportTasks::loadReportResumeConfig();
-        $oPrepayReportConfig = SReportTasks::preparePrepayReportResumeConfig($oReport, $oReporConfigJson, \SCons::PAY_W_Q);
+        $oStartDate = Carbon::parse('2025-02-01');
+        $oEndDate = Carbon::parse('2025-02-28');
+        $oPrepayReportConfig = SReportTasks::preparePrepayReportResumeConfig($oReport, 
+                                                                $oReporConfigJson, 
+                                                                \SCons::PAY_W_Q, 
+                                                                $oStartDate, 
+                                                                $oEndDate);
         $sConfiguration = json_encode($oPrepayReportConfig);
-        $sReference = 'Q_133';
 
-        return SResumeReport::executeResumeReport($sConfiguration, $sReference);
+        return SResumeReport::executeResumeReport($sConfiguration);
     }
 }

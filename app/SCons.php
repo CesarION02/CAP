@@ -91,6 +91,7 @@ class SCons {
    const TASK_TYPE_REPORT_CHECADOR_NOMINA = 4;
    const TASK_TYPE_REPORT_DG = 5;
    const TASK_TYPE_REPORT_PP_INCID_RESUME = 6;
+   const TASK_TYPE_REPORT_JOURNEY_BY_PP = 7;
 }
 
 ?>

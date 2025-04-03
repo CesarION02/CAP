@@ -2,14 +2,16 @@
 
 use App\SReport\SReportUtils;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ResumeReportNotification;
 
 class SResumeReport
 {
-    public static function executeResumeReport($sConfiguration, $sReference)
+    public static function executeResumeReport($sConfiguration)
     {
         try {
             // Obtener colección con los datos del reporte
-            $lData = SReportUtils::getJourneyData($sConfiguration, $sReference);
+            $lData = SReportUtils::getJourneyDataResume($sConfiguration);
             if (is_string($lData)) {
                 return $lData;
             }
@@ -19,25 +21,26 @@ class SResumeReport
                 return $oConfiguration;
             }
 
+            $oIncidentsStartDate = Carbon::parse($oConfiguration->start_date)->subMonths($oConfiguration->months_ago);
+            $oIncidentsEndDate = Carbon::parse($oConfiguration->start_date);
+        
+            $sIncidentstartDate = $oIncidentsStartDate->toDateString();
+            $sIncidentsendDate = $oIncidentsEndDate->toDateString();
+
             // Agregar resumen de incidencias:
-            $lData = SReportUtils::addIncidentsResume($lData, $oConfiguration);
+            $lData = SReportUtils::addIncidentsResume($lData, 
+                                    $oConfiguration, 
+                                    $sIncidentstartDate, 
+                                    $sIncidentsendDate);
 
             // Obtener el tipo de pago
             $sPayTypeText = SReportUtils::getPayTypeText($oConfiguration->pay_type);
             // Obtener la fecha de inicio y fin del reporte
-            $aDates = SReportUtils::getStartAndEndDate($oConfiguration, $sReference);
-            if (is_string($aDates)) {
-                return $aDates;
-            }
-            $sStartDate = $aDates[0];
-            $sEndDate = $aDates[1];
+            $sStartDate = $oConfiguration->start_date;
+            $sEndDate = $oConfiguration->end_date;
             // Obtener la configuración de columnas
             $aColumns = SReportUtils::getColumns($oConfiguration);
 
-            /**
-             * ***********************************************************************************************************
-             * Sección para pruebas
-             */
             $oStartDate = Carbon::parse($sStartDate)->locale('es');
             $oEndDate = Carbon::parse($sEndDate)->locale('es');
             $sPeriod = "";
@@ -45,42 +48,58 @@ class SResumeReport
             if ($oStartDate->month == $oEndDate->month) {
                 $sPeriod = $oStartDate->format('d') . " al "
                                 . $oEndDate->format('d') . " "
-                                . $oStartDate->shortMonthName . ". "
+                                . $oStartDate->shortMonthName . " "
                                 . $oStartDate->year;
             }
             else {
-                $sPeriod = $oStartDate->format('d') . " " . $oStartDate->shortMonthName . ". "
+                $sPeriod = $oStartDate->format('d') . " " . $oStartDate->shortMonthName . " "
                             . $oStartDate->year. " al "
-                            . $oEndDate->format('d') . " " . $oEndDate->shortMonthName . ". "
+                            . $oEndDate->format('d') . " " . $oEndDate->shortMonthName . " "
                             . $oEndDate->year;
             }
 
-            return view('mails.journeyresumereport')->with('sStartDate', $sStartDate)
-                                            ->with('sEndDate', $sEndDate)
-                                            ->with('sPayTypeText', $sPayTypeText)
-                                            ->with('sPeriod', $sPeriod)
-                                            ->with('aColumns', $aColumns)
-                                            ->with('lData', $lData);
+             /**
+             * ***********************************************************************************************************
+             * Sección para pruebas
+             */
+
+            // return view('mails.journeyresumereport')->with('sStartDate', $sStartDate)
+            //                                 ->with('sEndDate', $sEndDate)
+            //                                 ->with('incidentsStart', $sIncidentstartDate)
+            //                                 ->with('incidentsEnd', $sIncidentsendDate)
+            //                                 ->with('monthsAgo', $oConfiguration->months_ago)
+            //                                 ->with('sPayTypeText', $sPayTypeText)
+            //                                 ->with('sPeriod', $sPeriod)
+            //                                 ->with('aColumns', $aColumns)
+            //                                 ->with('lData', $lData);
             /**
              * ***********************************************************************************************************
              */
             
-            // $tos = explode(";", $oConfiguration->mails->to);
-            // $oMail = Mail::to($tos);
+            $tos = explode(";", $oConfiguration->mails->to);
+            $oMail = Mail::to($tos);
             
-            // if (strlen($oConfiguration->mails->cc) > 0) {
-            //     $ccs = explode(";", $oConfiguration->mails->cc);
-            //     $oMail->cc($ccs);
-            // }
+            if (strlen($oConfiguration->mails->cc) > 0) {
+                $ccs = explode(";", $oConfiguration->mails->cc);
+                $oMail->cc($ccs);
+            }
             
-            // if (strlen($oConfiguration->mails->cco) > 0) {
-            //     $cco = explode(";", $oConfiguration->mails->cco);
-            //     $oMail->bcc($cco);
-            // }
+            if (strlen($oConfiguration->mails->cco) > 0) {
+                $cco = explode(";", $oConfiguration->mails->cco);
+                $oMail->bcc($cco);
+            }
 
-            // $oMail->send(new JourneyReportNotification($sStartDate, $sEndDate, $sPayTypeText, $lData, $aColumns));
+            $oMail->send(new ResumeReportNotification($sStartDate, 
+                                                        $sEndDate, 
+                                                        $sPayTypeText, 
+                                                        $lData, 
+                                                        $aColumns, 
+                                                        $oConfiguration->months_ago,
+                                                        $sIncidentstartDate,
+                                                        $sIncidentsendDate
+                                                    ));
 
-            // return "";
+            return "";
         }
         catch (\Throwable $th) {
             \Log::error($th);

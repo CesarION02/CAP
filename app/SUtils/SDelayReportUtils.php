@@ -1,6 +1,7 @@
 <?php namespace App\SUtils;
 
 use Carbon\Carbon;
+use Carbon\CarbonInterval;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 
@@ -731,6 +732,37 @@ class SDelayReportUtils {
         $minutes = ($time % 60);
 
         return sprintf($format, $hours, $minutes);
+    }
+
+    /**
+     * Convierte los minutos en entero a formato n h n m
+     *
+     * @param int $time
+     * @param string $format
+     *
+     * @return string 00:00
+     */
+    public static function convertToHoursMinsText($minutes)
+    {
+        $interval = CarbonInterval::minutes($minutes)->cascade();
+    
+        return trim(sprintf('%dh %dm', $interval->hours, $interval->minutes));
+    }
+
+
+    /**
+     * Remueve los segundos de un texto que tenga formato HH:MM:SS
+     * 
+     * @param string text
+     */
+    public static function removeSeconds($text) {
+        // Verifica si el texto contiene números antes de procesarlo
+        if (!preg_match('/\d/', $text)) {
+            return $text; // Si no hay números, devuelve el texto sin cambios
+        }
+    
+        // Reemplaza ':00' SOLO si está al final de una hora (HH:MM:SS)
+        return preg_replace('/:(\d{2}):00/', ':$1', $text);
     }
 
     /**

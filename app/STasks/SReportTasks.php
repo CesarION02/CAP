@@ -8,6 +8,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Exception;
 
 /**
  * Clase SReportTasks
@@ -38,6 +39,10 @@ class SReportTasks {
         try {
             DB::beginTransaction();
 
+            /**
+             * ****************************************************************************************
+             * Primera parte: Programación de reportes desde report_journey_cfg.json
+             */
             foreach ($oReportCfg->reports as $oReport) {
                 $reportType = $oReport->configuration->report_type ?? \SCons::TASK_TYPE_REPORT_JOURNEY;
 
@@ -50,7 +55,7 @@ class SReportTasks {
 
             /**
              * ****************************************************************************************
-             * Segunda parte: Programación de reportes desde PrepayReportConfig
+             * Segunda parte: Programación de reportes desde PrepayReportConfig (prepayroll_report_configs)
              */
             
             $aPPConfigs = self::getSpecificPrepayrollConfigs();
@@ -65,7 +70,7 @@ class SReportTasks {
             $lReports = $lReports->get();
 
             $sinceDatePrepayroll = self::getSinceDatePrepayroll();
-            $reportType = \SCons::TASK_TYPE_REPORT_JOURNEY;
+            $reportType = \SCons::TASK_TYPE_REPORT_JOURNEY_BY_PP;
             foreach ($lReports as $oReport) {
                 if (!$oReport->since_date) {
                     continue;
@@ -80,7 +85,7 @@ class SReportTasks {
 
             /**
              * ****************************************************************************************
-             * Tercera parte: Programación de reportes desde PrepayReportConfig REPORTE RESUMEN
+             * Tercera parte: Programación de reportes desde PrepayReportConfig (prepayroll_report_configs) REPORTE RESUMEN
              */
             $aPPResumeConfigs = self::getSpecificPrepayrollResumeConfigs();
             if (count($aPPResumeConfigs) > 0) {
@@ -88,18 +93,8 @@ class SReportTasks {
             }
             $lResumeReports = $lResumeReports->get();
 
-            $sinceDateResumePrepayroll = self::getSinceDateResumePrepayroll();
-            $reportType = \SCons::TASK_TYPE_REPORT_PP_INCID_RESUME;
             foreach ($lResumeReports as $oReport) {
-                if (!$oReport->since_date) {
-                    continue;
-                }
-
-                if ($oReport->is_biweek) {
-                    self::schedulePrepayBiweeklyReports($oReport, $reportType, $sinceDateResumePrepayroll);
-                } else {
-                    self::schedulePrepayWeeklyReports($oReport, $reportType, $sinceDateResumePrepayroll);
-                }
+                self::scheduleResumeReport($oReport);
             }
 
             DB::commit();
@@ -162,7 +157,7 @@ class SReportTasks {
 
         $priority = 0;
         foreach ($lQCuts as $oQ) {
-            if (!self::isTaskScheduled($lProgrammedTasks, $oReport->configuration, 'Q_' . $oQ->id)) {
+            if (!self::isTaskScheduled($lProgrammedTasks, $oReport->configuration, 'Q_' . $oQ->id, $reportType)) {
                 $executeOn = self::calculateBiweeklyExecutionDate($oQ->dt_cut, $reportType);
                 self::createTask($reportType, $executeOn, $oReport->configuration, 'Q_' . $oQ->id, $priority);
             }
@@ -185,7 +180,7 @@ class SReportTasks {
 
         $priority = 0;
         foreach ($lWCuts as $oS) {
-            if (!self::isTaskScheduled($lProgrammedTasks, $oReport->configuration, 'S_' . $oS->id)) {
+            if (!self::isTaskScheduled($lProgrammedTasks, $oReport->configuration, 'S_' . $oS->id, $reportType)) {
                 $executeOn = Carbon::parse($oS->fin)->addDay()->toDateString();
                 self::createTask($reportType, $executeOn, $oReport->configuration, 'S_' . $oS->id, $priority);
             }
@@ -202,13 +197,16 @@ class SReportTasks {
      */
     private static function getProgrammedTasks($reportType, $prefix, $sinceDate)
     {
-        return ProgrammedTask::where('task_type_id', $reportType)
-            ->where('is_delete', false)
-            ->whereRaw('SUBSTRING(reference_id, 1, 1) = ?', [$prefix])
-            ->where('execute_on', '>=', $sinceDate)
-            ->orderBy('execute_on', 'ASC')
-            ->orderBy('priority', 'ASC')
-            ->get();
+        $lTasks = ProgrammedTask::where('task_type_id', $reportType)
+                            ->where('is_delete', false)
+                            ->where('execute_on', '>=', $sinceDate)
+                            ->orderBy('execute_on', 'ASC')
+                            ->orderBy('priority', 'ASC');
+        if ($prefix) {
+            $lTasks = $lTasks->whereRaw('SUBSTRING(reference_id, 1, 1) = ?', [$prefix]);
+        }
+
+        return $lTasks->get();
     }
 
     /**
@@ -217,17 +215,59 @@ class SReportTasks {
      * @param \Illuminate\Support\Collection $lProgrammedTasks Tareas programadas existentes.
      * @param object $configuration Configuración del reporte.
      * @param string $referenceId Identificador de referencia de la tarea.
+     * @param int $taskType Tipo de tarea.
+     * 
      * @return bool True si la tarea ya está programada, false en caso contrario.
      */
-    private static function isTaskScheduled($lProgrammedTasks, $configuration, $referenceId)
+    private static function isTaskScheduled($lProgrammedTasks, $configuration, $referenceId, $taskType)
     {
-        $jsonReport = json_encode($configuration, JSON_PRETTY_PRINT);
+        // const TASK_TYPE_REPORT_JOURNEY = 1;
+        // const TASK_TYPE_REPORT_OTHER = 2;
+        // const TASK_TYPE_ADJUST_PGH = 3;
+        // const TASK_TYPE_REPORT_CHECADOR_NOMINA = 4;
+        // const TASK_TYPE_REPORT_DG = 5;
+        // const TASK_TYPE_REPORT_PP_INCID_RESUME = 6;
+        // const TASK_TYPE_REPORT_JOURNEY_BY_PP = 7;
 
-        foreach ($lProgrammedTasks as $oTask) {
-            $jsonTask = json_encode(json_decode($oTask->cfg), JSON_PRETTY_PRINT);
-            if ($jsonTask === $jsonReport && $oTask->reference_id === $referenceId) {
-                return true;
-            }
+        switch ($taskType) {
+            case \SCons::TASK_TYPE_REPORT_JOURNEY:
+            case \SCons::TASK_TYPE_REPORT_OTHER:
+            case \SCons::TASK_TYPE_ADJUST_PGH:
+            case \SCons::TASK_TYPE_REPORT_CHECADOR_NOMINA:
+            case \SCons::TASK_TYPE_REPORT_DG:
+                $jsonReport = json_encode($configuration, JSON_PRETTY_PRINT);
+
+                foreach ($lProgrammedTasks as $oTask) {
+                    $jsonTask = json_encode(json_decode($oTask->cfg), JSON_PRETTY_PRINT);
+                    if ($jsonTask === $jsonReport && $oTask->reference_id === $referenceId) {
+                        return true;
+                    }
+                }
+                break;
+
+            case \SCons::TASK_TYPE_REPORT_PP_INCID_RESUME:
+                // Validar fecha inicio, fecha fin y meses hacia atrás
+                foreach ($lProgrammedTasks as $oTask) {
+                    $oJsonTask = json_decode($oTask->cfg);
+                    if ($oJsonTask->start_date === $configuration->start_date &&
+                        $oJsonTask->end_date === $configuration->end_date &&
+                        $oJsonTask->months_ago === $configuration->months_ago &&
+                        $oJsonTask->mails->to === $configuration->mails->to) {
+                        return true;
+                    }
+                }
+            case \SCons::TASK_TYPE_REPORT_JOURNEY_BY_PP:
+                // Validar destinatario y referencia
+                foreach ($lProgrammedTasks as $oTask) {
+                    $oJsonTask = json_decode($oTask->cfg);
+                    if ($oJsonTask->mails->to === $configuration->mails->to && $oTask->reference_id === $referenceId) {
+                        return true;
+                    }
+                }
+                break;
+
+            default:
+                break;
         }
 
         return false;
@@ -296,19 +336,6 @@ class SReportTasks {
     }
 
     /**
-     * Obtiene la fecha inicial para pre-nómina desde la configuración.
-     * 
-     * @return \Carbon\Carbon Fecha inicial configurada o el día anterior a la fecha actual.
-     */
-    private static function getSinceDateResumePrepayroll()
-    {
-        $oConfig = \App\SUtils\SConfiguration::getConfigurations();
-        return $oConfig->sinceDatePrepayrollResume
-            ? Carbon::parse($oConfig->sinceDatePrepayrollResume)
-            : Carbon::now()->subDays(1);
-    }
-
-    /**
      * Obtiene las configuraciones específicas de reportes de pre-nómina.
      * 
      * @return array Arreglo con los identificadores de configuración.
@@ -349,7 +376,7 @@ class SReportTasks {
 
         $lQCutsBase = $lQCutsBase->where('is_delete', 0);
 
-        if ($iReportType == \SCons::TASK_TYPE_REPORT_JOURNEY) {
+        if ($iReportType == \SCons::TASK_TYPE_REPORT_JOURNEY_BY_PP) {
             $lQCuts = (clone $lQCutsBase)->where('dt_cut', '>', $sinceDatePrepayroll->toDateString())
                             ->where('dt_cut', '<=', '2025-04-04')
                             ->orderBy('dt_cut', 'ASC')
@@ -387,7 +414,7 @@ class SReportTasks {
                 Log::error('No se encontraron quincenas para el reporte: ' . $oReport->id_configuration);
                 return;
             }
-            $oPrepayReportConfig = self::preparePrepayReportResumeConfig($oReport, $oReporConfigJson, \SCons::PAY_W_Q);
+            $oPrepayReportConfig = self::preparePrepayReportResumeConfig($oReport, $oReporConfigJson, \SCons::PAY_W_Q, null, null);
         }
         if (!$oPrepayReportConfig) {
             Log::warning('No se pudo preparar la configuración para el reporte quincenal: ' . $oReport->id_configuration);
@@ -397,7 +424,7 @@ class SReportTasks {
 
         $priority = 2;
         foreach ($lQCuts as $oQCut) {
-            if (!self::isTaskScheduled($lProgrammedTasks, $oPrepayReportConfig, 'Q_' . $oQCut->id)) {
+            if (!self::isTaskScheduled($lProgrammedTasks, $oPrepayReportConfig, 'Q_' . $oQCut->id, $iReportType)) {
                 $executeOn = Carbon::parse($oQCut->dt_cut)->addDay()->toDateString();
                 self::createTask($iReportType, $executeOn, $oPrepayReportConfig, 'Q_' . $oQCut->id, $priority);
                 Log::info('Tarea quincena programada: Q_' . $oQCut->id);
@@ -438,10 +465,72 @@ class SReportTasks {
 
         $priority = 2;
         foreach ($lWeekCuts as $oWeekCut) {
-            if (!self::isTaskScheduled($lProgrammedTasks, $oPrepayReportConfig, 'S_' . $oWeekCut->id)) {
+            if (!self::isTaskScheduled($lProgrammedTasks, $oPrepayReportConfig, 'S_' . $oWeekCut->id, $iReportType)) {
                 $executeOn = Carbon::parse($oWeekCut->fin)->addDay()->toDateString();
                 self::createTask($iReportType, $executeOn, $oPrepayReportConfig, 'S_' . $oWeekCut->id, $priority);
                 Log::info('Tarea semana programada: S_' . $oWeekCut->id);
+            }
+        }
+    }
+
+    private static function scheduleResumeReport($oReport) {
+        $oReporConfigJson = self::loadReportResumeConfig();
+        if (!$oReporConfigJson) {
+            Log::error("Error al cargar la configuración de reportes de resumen.");
+            return;
+        }
+        $payType = $oReport->is_biweek ? \SCons::PAY_W_Q : \SCons::PAY_W_S;
+        if ($oReport->is_biweek) {
+            if (!$oReporConfigJson->reportQ) {
+                Log::error('No se encontró la configuración de reporte de resumen quincenal: ' . $oReport->id_configuration);
+                return;
+            }
+            if ($oReporConfigJson->reportQ->sinceDate > Carbon::now()->toDateString()) {
+                return;
+            }
+        }
+        else {
+            if (!$oReporConfigJson->reportS) {
+                Log::error('No se encontró la configuración de reporte de resumen semanal: ' . $oReport->id_configuration);
+                return;
+            }
+            if ($oReporConfigJson->reportS->sinceDate > Carbon::now()->toDateString()) {
+                return;
+            }
+        }
+
+        // $oDate = Carbon::now();
+        $oDate = Carbon::parse('2025-03-15');
+        $iTime = 1;
+        $lGenerateReports = array();
+        do {
+            // obtene el primer día del mes de la fecha
+            $firstDayOfMonth = (clone $oDate)->startOfMonth();
+            // obtiene el último día del mes de la fecha
+            $lastDayOfMonth = (clone $oDate)->endOfMonth();
+
+            $oPrepayReportResume = self::preparePrepayReportResumeConfig($oReport, 
+                                                                $oReporConfigJson, 
+                                                                $payType,
+                                                                $firstDayOfMonth, 
+                                                                $lastDayOfMonth);
+            if (!$oPrepayReportResume) {
+                Log::warning('No se pudo preparar la configuración para el reporte de resumen: ' . $oReport->id_configuration);
+                throw new Exception('No se pudo preparar la configuración para el reporte de resumen: ' . $oReport->id_configuration);
+            }
+            $lGenerateReports[] = $oPrepayReportResume;
+            $oDate = $oDate->addMonths($oReporConfigJson->reportQ->monthsPeriod);
+            $iTime++;
+        } while ($iTime <= $oReporConfigJson->reportQ->times);
+
+        $lProgrammedTasks = self::getProgrammedTasks( \SCons::TASK_TYPE_REPORT_PP_INCID_RESUME, null, $oReport->since_date);
+
+        $priority = 3;
+        foreach ($lGenerateReports as $oToGenReport) {
+            if (!self::isTaskScheduled($lProgrammedTasks, $oToGenReport, '', \SCons::TASK_TYPE_REPORT_PP_INCID_RESUME)) {
+                $executeOn = Carbon::parse($oToGenReport->end_date)->addDay()->toDateString();
+                self::createTask(\SCons::TASK_TYPE_REPORT_PP_INCID_RESUME, $executeOn, $oToGenReport, '', $priority);
+                Log::info('Tarea programada para la configuración: ' . $oReport->id_configuration);
             }
         }
     }
@@ -500,7 +589,7 @@ class SReportTasks {
         return $oPrepayReportConfig;
     }
 
-    public static function preparePrepayReportResumeConfig($oReportTableConfig, $oReporConfigJson, $payType)
+    public static function preparePrepayReportResumeConfig($oReportTableConfig, $oReporConfigJson, $payType, $oStartDate, $oEndDate)
     {
         $oUser = User::find($oReportTableConfig->user_n_id);
         $sMail = $oUser->email ?? null;
@@ -540,6 +629,8 @@ class SReportTasks {
         }
 
         $oPrepayReportConfig = new \stdClass();
+        $oPrepayReportConfig->start_date = $oStartDate->toDateString();
+        $oPrepayReportConfig->end_date = $oEndDate->toDateString();
         $oPrepayReportConfig->mails = (object) [
             'to' => $sMail,
             'cc' => '',
@@ -547,9 +638,16 @@ class SReportTasks {
         ];
         $oPrepayReportConfig->employees = $lEmployees;
         $oPrepayReportConfig->pay_type = $payType;
-        $oPrepayReportConfig->incident_types = $oReporConfigJson->reportQ->incidentTypes;
-        $oPrepayReportConfig->days_ago = $oReporConfigJson->reportQ->daysAgo;
-        $oPrepayReportConfig->back_prepayroll = 0;
+        if ($payType == \SCons::PAY_W_Q) {
+            $oPrepayReportConfig->incident_types = $oReporConfigJson->reportQ->incidentTypes;
+            $oPrepayReportConfig->adjust_types = $oReporConfigJson->reportQ->adjustTypes;
+            $oPrepayReportConfig->months_ago = $oReporConfigJson->reportQ->monthsAgo;
+        }
+        else {
+            $oPrepayReportConfig->incident_types = $oReporConfigJson->reportS->incidentTypes;
+            $oPrepayReportConfig->adjust_types = $oReporConfigJson->reportQ->adjustTypes;
+            $oPrepayReportConfig->months_ago = $oReporConfigJson->reportS->monthsAgo;
+        }
         $oPrepayReportConfig->companies = [];
         $oPrepayReportConfig->areas = [];
         $oPrepayReportConfig->departments_cap = [];

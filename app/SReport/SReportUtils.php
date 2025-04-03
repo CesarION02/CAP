@@ -6,6 +6,8 @@ use Carbon\Carbon;
 use App\Models\incident;
 use App\Models\incidentDay;
 use Log;
+use App\Models\prepayrollAdjust;
+use App\SUtils\SDelayReportUtils;
 
 class SReportUtils
 {
@@ -30,6 +32,32 @@ class SReportUtils
             }
             $sStartDate = $aDates[0];
             $sEndDate = $aDates[1];
+
+            $lData = SJourneyReport::getJourneyData($sStartDate, $sEndDate, $oConfiguration->pay_type, 
+                                                        $oConfiguration->companies, 
+                                                        $oConfiguration->areas, 
+                                                        $oConfiguration->departments_cap, 
+                                                        $oConfiguration->departments_siie, 
+                                                        $oConfiguration->employees, 
+                                                        $oConfiguration->benefit_policies);
+
+            
+            return $lData;
+        }
+        catch (\Exception $e) {
+            return "Error, no se pudo obtener la información del reporte programado. " . $e->getMessage();
+        }
+    }
+
+    public static function getJourneyDataResume($sConfiguration) {
+        try {
+            $oConfiguration = SReportUtils::getReportConfigObj($sConfiguration);
+            if (is_string($oConfiguration)) {
+                return $oConfiguration;
+            }
+
+            $sStartDate = $oConfiguration->start_date;
+            $sEndDate = $oConfiguration->end_date;
 
             $lData = SJourneyReport::getJourneyData($sStartDate, $sEndDate, $oConfiguration->pay_type, 
                                                         $oConfiguration->companies, 
@@ -176,14 +204,14 @@ class SReportUtils
      * 
      * @param mixed $lDataReceived
      * @param mixed $oConfiguration
+     * @param string $startDate
+     * @param string $endDate
+     * 
      * @return mixed $lData
      */
-    public static function addIncidentsResume($lDataReceived, $oConfiguration) {
+    public static function addIncidentsResume($lDataReceived, $oConfiguration, $startDate, $endDate) {
         // Clonar o copiar arreglo de datos $lDataReceived
         $lData = array_map(fn($item) => clone $item, $lDataReceived);
-    
-        $startDate = Carbon::now()->subDays($oConfiguration->days_ago)->toDateString();
-        $endDate = Carbon::now()->toDateString();
     
         // Consultas base para las incidencias por empleado
         $incidentBaseQuery = function ($employeeId) use ($startDate, $endDate) {
@@ -194,6 +222,19 @@ class SReportUtils
                           ->orWhereBetween('end_date', [$startDate, $endDate]);
                 });
         };
+
+        // Obtener el arreglo de empleados de $lData:
+        $aEmployees = array_map(fn($item) => $item->idEmployee, $lData);
+
+        prepayrollAdjust::whereIn('adjust_type_id', $oConfiguration->adjust_types)
+                            ->where('is_delete', 0)
+                            ->whereBetween('dt_date', [$startDate, $endDate])
+                            ->whereIn('employee_id', $aEmployees)
+                            ->get()
+                            ->each(function ($item) use (&$lData) {
+                                $oEmpData = array_values(array_filter($lData, fn($emp) => $emp->idEmployee == $item->employee_id))[0];
+                                $oEmpData->aAdjusts[] = $item;
+                            });
     
         foreach ($lData as $oEmpData) {
             $oEmpData->aIncidents = [];
@@ -220,133 +261,169 @@ class SReportUtils
                     case \SCons::INC_TYPE['INA_S_PER']:
                         $oResume->text = "Inasistencia sin permiso";
                         $oResume->counter = $incidentsGrouped['INA_S_PER']->count();
+                        $oResume->unit = $oResume->counter == 1 ? "día" : "días";
                         break;
     
                     case \SCons::INC_TYPE['INA_C_PER_SG']:
                         $oResume->text = "Inasistencia con permiso sin goce de sueldo";
                         $oResume->counter = $incidentsGrouped['INA_C_PER_SG']->count();
+                        $oResume->unit = $oResume->counter == 1 ? "día" : "días";
                         break;
     
                     case \SCons::INC_TYPE['INA_C_PER_CG']:
                         $oResume->text = "Inasistencia con permiso con goce de sueldo";
                         $oResume->counter = $incidentsGrouped['INA_C_PER_CG']->count();
+                        $oResume->unit = $oResume->counter == 1 ? "día" : "días";
                         break;
     
                     case \SCons::INC_TYPE['INA_AD_REL_CH']:
                         $oResume->text = "Inasistencia administrativa por reloj checador";
                         $oResume->counter = $incidentsGrouped['INA_AD_REL_CH']->count();
+                        $oResume->unit = $oResume->counter == 1 ? "día" : "días";
                         break;
     
                     case \SCons::INC_TYPE['INA_AD_SUSP']:
                         $oResume->text = "Inasistencia administrativa por suspensión";
                         $oResume->counter = $incidentsGrouped['INA_AD_SUSP']->count();
+                        $oResume->unit = $oResume->counter == 1 ? "día" : "días";
                         break;
     
                     case \SCons::INC_TYPE['INA_AD_OT']:
                         $oResume->text = "Inasistencia administrativa por otros motivos";
                         $oResume->counter = $incidentsGrouped['INA_AD_OT']->count();
+                        $oResume->unit = $oResume->counter == 1 ? "día" : "días";
                         break;
     
                     case \SCons::INC_TYPE['ONOM_EXT']:
                         $oResume->text = "Onomástico";
                         $oResume->counter = $incidentsGrouped['ONOM_EXT']->count();
+                        $oResume->unit = $oResume->counter == 1 ? "día" : "días";
                         break;
     
                     case \SCons::INC_TYPE['RIESGO']:
                         $oResume->text = "Riesgo de trabajo";
                         $oResume->counter = $incidentsGrouped['RIESGO']->count();
+                        $oResume->unit = $oResume->counter == 1 ? "día" : "días";
                         break;
     
                     case \SCons::INC_TYPE['ENFERMEDAD']:
                         $oResume->text = "Enfermedad en general (Incapacidad)";
                         $oResume->counter = self::calculateDays($incidentsGrouped['ENFERMEDAD']);
+                        $oResume->unit = $oResume->counter == 1 ? "día" : "días";
                         break;
     
                     case \SCons::INC_TYPE['MATER']:
                         $oResume->text = "Maternidad";
                         $oResume->counter = self::calculateDays($incidentsGrouped['MATER']);
+                        $oResume->unit = $oResume->counter == 1 ? "día" : "días";
                         break;
     
                     case \SCons::INC_TYPE['LIC_CUIDADOS']:
                         $oResume->text = "Licencia por cuidados médicos de hijos diagnosticados con cáncer";
                         $oResume->counter = self::calculateDays($incidentsGrouped['LIC_CUIDADOS']);
+                        $oResume->unit = $oResume->counter == 1 ? "día" : "días";
                         break;
     
                     case \SCons::INC_TYPE['VAC']:
                         $oResume->text = "Vacaciones";
                         $oResume->counter = self::calculateDaysForVacation($incidentsGrouped['VAC'])[0];
-                        $oResume->lDays = self::calculateDaysForVacation($incidentsGrouped['VAC'])[1];
+                        $lDays = self::calculateDaysForVacation($incidentsGrouped['VAC'])[1];
+                        if ($oResume->counter > 0) {
+                            $dates = collect($lDays)->pluck('date');
+                            $ranges = self::groupDateRanges($dates->toArray());
+                            $oResume->lDays = $ranges;
+                        }
+                        $oResume->unit = $oResume->counter == 1 ? "día" : "días";
                         break;
     
                     case \SCons::INC_TYPE['CAPACIT']:
                         $oResume->text = "Capacitación";
                         $oResume->counter = $incidentsGrouped['CAPACIT']->count();
+                        $oResume->unit = $oResume->counter == 1 ? "día" : "días";
                         break;
     
                     case \SCons::INC_TYPE['TRAB_F_PL']:
                         $oResume->text = "Trabajo fuera de planta";
                         $oResume->counter = $incidentsGrouped['TRAB_F_PL']->count();
+                        $oResume->unit = $oResume->counter == 1 ? "día" : "días";
                         break;
     
                     case \SCons::INC_TYPE['PATER']:
                         $oResume->text = "Paternidad";
                         $oResume->counter = self::calculateDays($incidentsGrouped['PATER']);
+                        $oResume->unit = $oResume->counter == 1 ? "día" : "días";
                         break;
     
                     case \SCons::INC_TYPE['DIA_OTOR']:
                         $oResume->text = "Día otorgado";
                         $oResume->counter = $incidentsGrouped['DIA_OTOR']->count();
+                        $oResume->unit = $oResume->counter == 1 ? "día" : "días";
                         break;
     
                     case \SCons::INC_TYPE['INA_PRES_MED']:
                         $oResume->text = "Inasistencia prescripción médica";
                         $oResume->counter = $incidentsGrouped['INA_PRES_MED']->count();
+                        $oResume->unit = $oResume->counter == 1 ? "día" : "días";
                         break;
     
                     case \SCons::INC_TYPE['DESCANSO']:
                         $oResume->text = "Descanso";
                         $oResume->counter = $incidentsGrouped['DESCANSO']->count();
+                        $oResume->unit = $oResume->counter == 1 ? "día" : "días";
                         break;
     
                     case \SCons::INC_TYPE['INA_TR_F_PL']:
                         $oResume->text = "Inasistencia trabajo fuera de planta";
                         $oResume->counter = $incidentsGrouped['INA_TR_F_PL']->count();
+                        $oResume->unit = $oResume->counter == 1 ? "día" : "días";
                         break;
     
                     case \SCons::INC_TYPE['VAC_CAP']:
                         $oResume->text = "Vacaciones";
                         $oResume->counter = self::calculateDaysForVacation($incidentsGrouped['VAC_CAP'])[0];
-                        $oResume->lDays = self::calculateDaysForVacation($incidentsGrouped['VAC_CAP'])[1];
+                        $lDays = self::calculateDaysForVacation($incidentsGrouped['VAC_CAP'])[1];
+                        if ($oResume->counter > 0) {
+                            $dates = collect($lDays)->pluck('date');
+                            $ranges = self::groupDateRanges($dates);
+                            $oResume->lDays = $ranges;
+                        }
+                        $oResume->unit = $oResume->counter == 1 ? "día" : "días";
                         break;
     
                     case \SCons::INC_TYPE['INC_CAP']:
                         $oResume->text = "Incapacidad";
                         $oResume->counter = self::calculateDays($incidentsGrouped['INC_CAP']);
+                        $oResume->unit = $oResume->counter == 1 ? "día" : "días";
                         break;
     
                     case \SCons::INC_TYPE['ONOM_CAP']:
                         $oResume->text = "Onomástico";
                         $oResume->counter = $incidentsGrouped['ONOM_CAP']->count();
+                        $oResume->unit = $oResume->counter == 1 ? "día" : "días";
                         break;
     
                     case \SCons::INC_TYPE['PERM']:
                         $oResume->text = "Permiso";
                         $oResume->counter = $incidentsGrouped['PERM']->count();
+                        $oResume->unit = "horas";
                         break;
     
                     case \SCons::INC_TYPE['DAY_HOLIDAY']:
                         $oResume->text = "Día feriado";
                         $oResume->counter = $incidentsGrouped['DAY_HOLIDAY']->count();
+                        $oResume->unit = $oResume->counter == 1 ? "día" : "días";
                         break;
     
                     case \SCons::INC_TYPE['PERM_BY_GONE']:
                         $oResume->text = "Permiso por ausencia";
                         $oResume->counter = $incidentsGrouped['PERM_BY_GONE']->count();
+                        $oResume->unit = $oResume->counter == 1 ? "día" : "días";
                         break;
     
                     case \SCons::INC_TYPE['ELECTION_DAY_2024']:
                         $oResume->text = "Permiso por elección 2024";
                         $oResume->counter = $incidentsGrouped['ELECTION_DAY_2024']->count();
+                        $oResume->unit = $oResume->counter == 1 ? "día" : "días";
                         break;
     
                     default:
@@ -356,6 +433,69 @@ class SReportUtils
                 // Agregar el resumen a la lista de incidencias
                 if ($oResume->counter > 0) {
                     $oEmpData->aIncidents[] = $oResume;
+                }
+            }
+
+            /**
+             * Procesamiento de ajustes
+             */
+            $oEmpData->lAdjusts = [];
+            if (count($oEmpData->aAdjusts) === 0) {
+                continue;
+            }
+
+            foreach ($oConfiguration->adjust_types as $iAdjustType) {
+                switch ($iAdjustType) {
+                    case \SCons::PP_TYPES['JE']:
+                        $oResume = new \stdClass();
+                        $oResume->text = "Omisión de entrada (justificada)";
+                        // filtrar ajustes del empleado por tipo:
+                        $counter = collect($oEmpData->aAdjusts)->where('adjust_type_id', \SCons::PP_TYPES['JE'])->count();
+                        $oResume->counter = $counter;
+                        $oResume->unit = $oResume->counter == 1 ? "vez" : "veces";
+                        if ($oResume->counter > 0) {
+                            $oEmpData->lAdjusts[] = $oResume;
+                        }
+                        break;
+
+                    case \SCons::PP_TYPES['JS']:
+                        $oResume = new \stdClass();
+                        $oResume->text = "Omisión de salida (justificada)";
+                        // filtrar ajustes del empleado por tipo:
+                        $counter = collect($oEmpData->aAdjusts)->where('adjust_type_id', \SCons::PP_TYPES['JS'])->count();
+                        $oResume->counter = $counter;
+                        $oResume->unit = $oResume->counter == 1 ? "vez" : "veces";
+                        if ($oResume->counter > 0) {
+                            $oEmpData->lAdjusts[] = $oResume;
+                        }
+                        break;
+
+                    case \SCons::PP_TYPES['OR']:
+                        $oResume = new \stdClass();
+                        $oResume->text = "Retardos justificados";
+                        // filtrar ajustes del empleado por tipo:
+                        $minutes = collect($oEmpData->aAdjusts)->where('adjust_type_id', \SCons::PP_TYPES['OR'])->sum('minutes');
+                        $oResume->counter = SDelayReportUtils::convertToHoursMinsText($minutes);
+                        $oResume->unit = '';
+                        if ($oResume->counter > 0) {
+                            $oEmpData->lAdjusts[] = $oResume;
+                        }
+                        break;
+
+                    case \SCons::PP_TYPES['JSA']:
+                        $oResume = new \stdClass();
+                        $oResume->text = "Salidas anticipadas";
+                        // filtrar ajustes del empleado por tipo:
+                        $minutes = collect($oEmpData->aAdjusts)->where('adjust_type_id', \SCons::PP_TYPES['JSA'])->sum('minutes');
+                        $oResume->counter = SDelayReportUtils::convertToHoursMinsText($minutes);
+                        $oResume->unit = '';
+                        if ($oResume->counter > 0) {
+                            $oEmpData->lAdjusts[] = $oResume;
+                        }
+                        break;
+
+                    default:
+                        Log::warning("Tipo de ajuste no encontrado: " . $iAdjustType);
                 }
             }
         }
@@ -382,6 +522,66 @@ class SReportUtils
             $lDays = array_merge($lDays, $incidentDays->toArray());
         }
         return [$days, $lDays];
+    }
+
+    private static function groupDateRanges($dates) {
+        if (empty($dates)) return [];
+    
+        // Ordenar las fechas
+        sort($dates);
+    
+        $ranges = [];
+        $start = $dates[0];
+        $prev = $start;
+    
+        foreach (array_slice($dates, 1) as $date) {
+            // Si la fecha actual no es consecutiva a la anterior
+            if ((new \DateTime($date))->diff(new \DateTime($prev))->days > 1) {
+                $ranges[] = self::formatRange($start, $prev);
+                $start = $date;
+            }
+            $prev = $date;
+        }
+        
+        // Agregar el último rango
+        $ranges[] = self::formatRange($start, $prev);
+    
+        return $ranges;
+    }
+    
+    public static function formatRange($start, $end) {
+        // Convertir fechas a objetos \DateTime
+        $startDate = new \DateTime($start);
+        $endDate = new \DateTime($end);
+    
+        // Formatos necesarios
+        $monthNames = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+    
+        $startDay = $startDate->format('d');
+        $startMonth = $monthNames[$startDate->format('n') - 1];
+        $startYear = $startDate->format('Y');
+    
+        $endDay = $endDate->format('d');
+        $endMonth = $monthNames[$endDate->format('n') - 1];
+        $endYear = $endDate->format('Y');
+    
+        // Si el rango es de un solo día
+        if ($start === $end) {
+            return "$startDay $startMonth $startYear";
+        }
+    
+        // Si el mismo mes y año
+        if ($startMonth === $endMonth && $startYear === $endYear) {
+            return "$startDay al $endDay $startMonth $startYear";
+        }
+    
+        // Si el mismo año, pero diferente mes
+        if ($startYear === $endYear) {
+            return "$startDay $startMonth al $endDay $endMonth $startYear";
+        }
+    
+        // Si el rango abarca diferentes años
+        return "$startDay $startMonth $startYear al $endDay $endMonth $endYear";
     }
     
 }
