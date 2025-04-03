@@ -16,6 +16,7 @@ use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\SUtils\SCheckDaysVobo;
 
 class ExternalIncidentsController extends Controller
 {
@@ -64,6 +65,22 @@ class ExternalIncidentsController extends Controller
         $sup_comments = !!$request->input('sup_comments') ? $request->input('sup_comments') : "";
         $employee_id = $request->input('employee_id');
         $inc_dates = $request->input('inc_dates');
+
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+
+        if ($config->incidencesWithCheckVobo) {
+            $oEmployee = employees::where('external_id', $employee_id)->first();
+            $today = Carbon::now()->toDateString();
+            $result = json_decode(SCheckDaysVobo::checkDays($oEmployee, $today, $ini_date, $end_date));
+    
+            if (!$result->isInRange) {
+                return response()->json([
+                    'code' => 200,
+                    'status' => false,
+                    'message' => $result->message,
+                ]);
+            }
+        }
 
         $oIncident = new incident();
         $oIncident->is_external = true;
@@ -346,5 +363,38 @@ class ExternalIncidentsController extends Controller
             'code' => 550,
             'message' => 'La incidencia existé en el sistema CAP',
         ]);
+    }
+
+    public function checkVoboIsOpen(Request $request) {
+        try {
+            $config = \App\SUtils\SConfiguration::getConfigurations();
+
+            if ($config->incidencesWithCheckVobo) {
+                $ini_date = $request->input('ini_date');
+                $end_date = $request->input('end_date');
+                $employee_external_id = $request->employee_external_id;
+                $oEmployee = employees::where('external_id', $employee_external_id)->first();
+                $today = Carbon::now()->toDateString();
+                $result = json_decode(SCheckDaysVobo::checkDays($oEmployee, $today, $ini_date, $end_date));
+            } else {
+                $result = (object) [
+                    'isInRange' => true,
+                    'message' => 'OK',
+                ];
+            }
+
+        } catch (\Throwable $th) {
+            return response()->json([
+                'code' => 500,
+                'result' => false,
+                'message' => $th->getMessage(),
+            ], 500);
+        }
+        
+        return response()->json([
+            'code' => 200,
+            'result' => $result->isInRange,
+            'message' => $result->message,
+        ], 200);
     }
 }

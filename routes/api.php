@@ -116,6 +116,9 @@ Route::group(['middleware' => 'auth:api'], function() {
     Route::post('getListUsers', [
         'uses' => 'api\\apiGlobalUsersController@getListUsersToGlobalUsers'
     ]);
-
+    
+    Route::post('checkVoboIsOpen', [
+        'uses' => 'api\\ExternalIncidentsController@checkVoboIsOpen'
+    ]);
 });
 
