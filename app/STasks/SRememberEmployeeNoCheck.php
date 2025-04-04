@@ -37,6 +37,9 @@ class SRememberEmployeeNoCheck
 
             if ($rememberCheckEmployeeBiWeek) {
                 $lEmployeesBiWeek = SGenUtils::toEmployeeIds($biWeekId, 0, [], [], 0);
+                $lEmployeesBiWeek = $lEmployeesBiWeek->filter(function ($item) {
+                    return $item->ben_pol_id == 1;
+                });
 
                 foreach ($lEmployeesBiWeek as $emp) {
                     try {
@@ -118,6 +121,9 @@ class SRememberEmployeeNoCheck
 
             if ($rememberCheckEmployeeWeek) {
                 $lEmployeesWeek = SGenUtils::toEmployeeIds($weekId, 0, [], [], 0);
+                $lEmployeesWeek = $lEmployeesWeek->filter(function ($item) {
+                    return $item->ben_pol_id == 1;
+                });
 
                 foreach ($lEmployeesWeek as $emp) {
                     try {
