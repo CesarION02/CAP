@@ -45,7 +45,8 @@ class SCons {
                      'DHE' => 5,
                      'AHE' => 6,
                      'COM' => 7,
-                     'JSA' => 8
+                     'JSA' => 8,
+                     'DUMMY' => 99
                   ];
 
    const FROM_ASSIGN = 2;

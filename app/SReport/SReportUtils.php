@@ -235,6 +235,24 @@ class SReportUtils
                                 $oEmpData = array_values(array_filter($lData, fn($emp) => $emp->idEmployee == $item->employee_id))[0];
                                 $oEmpData->aAdjusts[] = $item;
                             });
+
+        \DB::connection('mysql-pgh')
+                            ->table('ghportal.hours_leave as hl')
+                            ->join('ghportal.users as u', 'hl.user_id', '=', 'u.id')
+                            ->join('checador.employees as e', 'u.external_id_n', '=', 'e.external_id')
+                            ->where('hl.type_permission_id', 3)
+                            ->whereBetween('start_date', [$startDate, $endDate])
+                            ->whereIn('e.id', $aEmployees)
+                            ->where('hl.is_deleted', 0)
+                            ->select('hl.*', 'e.id') // Para traer solo las columnas de hours_leave
+                            ->get()
+                            ->each(function ($item) use (&$lData) {
+                                $oEmpData = array_values(array_filter($lData, fn($emp) => $emp->idEmployee == $item->id))[0];
+                                // diferencia entre intermediate_out (HH:MM:ss) y intermediate_return (HH:MM:ss)
+                                $item->minutes = Carbon::parse($item->intermediate_out)->diffInMinutes(Carbon::parse($item->intermediate_return));
+                                $item->adjust_type_id = \SCons::PP_TYPES['DUMMY']; // Ajuste de salida
+                                $oEmpData->aAdjusts[] = $item;
+                            });
     
         foreach ($lData as $oEmpData) {
             $oEmpData->aIncidents = [];
@@ -487,6 +505,18 @@ class SReportUtils
                         $oResume->text = "Salidas anticipadas";
                         // filtrar ajustes del empleado por tipo:
                         $minutes = collect($oEmpData->aAdjusts)->where('adjust_type_id', \SCons::PP_TYPES['JSA'])->sum('minutes');
+                        $oResume->counter = SDelayReportUtils::convertToHoursMinsText($minutes);
+                        $oResume->unit = '';
+                        if ($oResume->counter > 0) {
+                            $oEmpData->lAdjusts[] = $oResume;
+                        }
+                        break;
+
+                    case \SCons::PP_TYPES['DUMMY']:
+                        $oResume = new \stdClass();
+                        $oResume->text = "Permisos intermedios";
+                        // filtrar ajustes del empleado por tipo:
+                        $minutes = collect($oEmpData->aAdjusts)->where('adjust_type_id', \SCons::PP_TYPES['DUMMY'])->sum('minutes');
                         $oResume->counter = SDelayReportUtils::convertToHoursMinsText($minutes);
                         $oResume->unit = '';
                         if ($oResume->counter > 0) {
