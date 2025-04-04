@@ -10,6 +10,10 @@ function new_shiftprogramming() {
         data: { 'typearea': typearea, 'ini': fechaini, 'fin': fechafin },
 
         success: function(data) {
+            if(data[0] == 'cerrado'){
+                swal("Error", "La prenómina ya no se puede modificar porque ya pasó la fecha de revisión.", "warning");
+                return;
+            }
             vueApp.lIncidences = data[5];
             if (data[3].length > 0) {
                 listaEmpleados += '<table class="customers2"><tr><th>VACACIONES</th></tr>';

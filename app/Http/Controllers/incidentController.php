@@ -18,6 +18,7 @@ use App\SValidations\SIncidentValidations;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
+use App\SUtils\SCheckDaysVobo;
 
 class incidentController extends Controller
 {
@@ -953,6 +954,19 @@ class incidentController extends Controller
      * @return \Illuminate\Http\RedirectResponse
      */
     public function reportIncidentsEmployeesStore(Request $request) {
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+        $idEmployee = intval($request->employee_id);
+
+        if ($config->incidencesWithCheckVobo){
+            $oEmployee = employees::where('id', intval($request->employee_id))->first();
+            $today = Carbon::now()->toDateString();
+            $result = json_decode(SCheckDaysVobo::checkDays($oEmployee, $today, $request->date, $request->date));
+    
+            if (!$result->isInRange) {
+                return redirect()->back()->with(['tittle' => 'Error', 'message' => $result->message, 'icon' => 'error']);
+            }
+        }
+
         $incident = null;
         if (isset($request->id_incident) && $request->id_incident > 0) {
             $incident = incident::find($request->id_incident);

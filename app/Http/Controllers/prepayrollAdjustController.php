@@ -6,7 +6,7 @@ use App\SUtils\SDateUtils;
 use Illuminate\Http\Request;
 
 use Carbon\Carbon;
-
+use App\SUtils\SCheckDaysVobo;
 use App\Models\prepayrollAdjust;
 use App\Models\prepayrollAuthControl;
 use App\Models\employees;
@@ -161,7 +161,15 @@ class prepayrollAdjustController extends Controller
     public function storeAdjust(Request $request)
     {
         $config = \App\SUtils\SConfiguration::getConfigurations();
-
+        if ($config->incidencesWithCheckVobo && $request->adjust_type_id != 7){
+            $oEmployee = employees::where('id', intval($request->employee_id))->first();
+            $today = Carbon::now()->toDateString();
+            $result = json_decode(SCheckDaysVobo::checkDays($oEmployee, $today, $request->dt_date, $request->dt_date));
+    
+            if (!$result->isInRange) {
+                return response()->json(['success' => false, 'msg' => $result->message]);
+            }
+        }
         // Si la categoría del ajuste es diferente a ajuste para múltiples días
         if ((int) $request->adjCategory != 3) {
             $oAdjust = new prepayrollAdjust($request->all());

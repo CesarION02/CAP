@@ -45,7 +45,8 @@ class SCons {
                      'DHE' => 5,
                      'AHE' => 6,
                      'COM' => 7,
-                     'JSA' => 8
+                     'JSA' => 8,
+                     'DUMMY' => 99
                   ];
 
    const FROM_ASSIGN = 2;
@@ -81,7 +82,8 @@ class SCons {
       'ONOM_CAP' => 23,// ONOMÁSTICO
       'PERM' => 24,// PERMISO
       'DAY_HOLIDAY' => 25,// PERMISO
-      'PERM_BY_GONE' => 26// PERMISO
+      'PERM_BY_GONE' => 26, // PERMISO
+      'ELECTION_DAY_2024' => 27// PERMISO
    ];
 
    const TASK_TYPE_REPORT_JOURNEY = 1;
@@ -89,7 +91,8 @@ class SCons {
    const TASK_TYPE_ADJUST_PGH = 3;
    const TASK_TYPE_REPORT_CHECADOR_NOMINA = 4;
    const TASK_TYPE_REPORT_DG = 5;
-   const TASK_TYPE_REPORT_INCIDENT_RESUME = 6;
+   const TASK_TYPE_REPORT_PP_INCID_RESUME = 6;
+   const TASK_TYPE_REPORT_JOURNEY_BY_PP = 7;
 }
 
 ?>

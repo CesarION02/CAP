@@ -14,7 +14,7 @@
         <h1>Reporte de entradas y salidas
             {{-- <b>({{ $typePay }})</b> --}}
         </h1>
-        <h2>{{ "Período: " . $sPeriod }}</h2>
+        <h2>{{ $sPayTypeText . " del " . $sPeriod }}</h2>
 
         @if (count($lData) == 0)
             <h3>No hay información qué mostrar.</h3>

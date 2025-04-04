@@ -17,6 +17,7 @@ use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use App\SReportPayrollVSCap\SReportPVSCUtils;
+use App\SReport\SResumeReport;
 use Log;
 
 class TestController extends Controller
@@ -223,5 +224,20 @@ class TestController extends Controller
         $response = SReportTasks::scheduleTasks();
 
         dd("respuesta:", $response);
+    }
+
+    public function testResumeReport() {
+        $oReport = PrepayReportConfig::where('id_configuration', 40)->first();
+        $oReporConfigJson = SReportTasks::loadReportResumeConfig();
+        $oStartDate = Carbon::parse('2025-02-01');
+        $oEndDate = Carbon::parse('2025-02-28');
+        $oPrepayReportConfig = SReportTasks::preparePrepayReportResumeConfig($oReport, 
+                                                                $oReporConfigJson, 
+                                                                \SCons::PAY_W_Q, 
+                                                                $oStartDate, 
+                                                                $oEndDate);
+        $sConfiguration = json_encode($oPrepayReportConfig);
+
+        return SResumeReport::executeResumeReport($sConfiguration);
     }
 }

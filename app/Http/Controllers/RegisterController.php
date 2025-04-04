@@ -10,6 +10,8 @@ use App\Models\Dateregister;
 use Carbon\Carbon;
 use DB;
 use App\Models\Bitacora;
+use App\SUtils\SCheckDaysVobo;
+use App\Models\employees;
 
 class RegisterController extends Controller
 {
@@ -180,6 +182,19 @@ class RegisterController extends Controller
 
     public function store(Request $request)
     {
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+        $idEmployee = intval($request->employee_id);
+
+        if ($config->incidencesWithCheckVobo){
+            $oEmployee = employees::where('id', intval($request->employee_id))->first();
+            $today = Carbon::now()->toDateString();
+            $result = json_decode(SCheckDaysVobo::checkDays($oEmployee, $today, $request->date, $request->date));
+    
+            if (!$result->isInRange) {
+                return redirect()->back()->withErrors($result->message);
+            }
+        }
+        
         $register = new register();
 
         $register->employee_id = $request->employee_id;
@@ -291,6 +306,20 @@ class RegisterController extends Controller
 
     public function update(Request $request, $id)
     {
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+        $idEmployee = intval($request->employee_id);
+
+        if ($config->incidencesWithCheckVobo){
+            $oEmployee = employees::where('id', intval($request->employee_id))->first();
+            $today = Carbon::now()->toDateString();
+            $result = json_decode(SCheckDaysVobo::checkDays($oEmployee, $today, $request->date, $request->date));
+    
+            if (!$result->isInRange) {
+                return redirect()->back()->withErrors($result->message);
+            }
+        }
+        
+        
         $register = register::findOrFail($id);
         $register->employee_id = $request->employee_id;
         $register->date = $request->date;
@@ -482,6 +511,19 @@ class RegisterController extends Controller
     }
 
     public function registerUpdate(Request $request, $id){
+
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+        $idEmployee = intval($request->employee_id);
+
+        if ($config->incidencesWithCheckVobo){
+            $oEmployee = employees::where('id', intval($request->id))->first();
+            $today = Carbon::now()->toDateString();
+            $result = json_decode(SCheckDaysVobo::checkDays($oEmployee, $today, $request->date, $request->date));
+    
+            if (!$result->isInRange) {
+                return redirect()->back()->withErrors($result->message);
+            }
+        }
         $register = register::findOrFail($id);
         //$register->date = $request->date;
         //$register->time = $request->time;
@@ -511,6 +553,19 @@ class RegisterController extends Controller
     public function registerDesactivar(Request $request,$id){
         if ($request->ajax()) {
             $employee = register::find($id);
+
+            $config = \App\SUtils\SConfiguration::getConfigurations();
+
+            if ($config->incidencesWithCheckVobo){
+                $oEmployee = employees::where('id', intval($employee->employee_id))->first();
+                $today = Carbon::now()->toDateString();
+                $result = json_decode(SCheckDaysVobo::checkDays($oEmployee, $today, $employee->date, $employee->date));
+        
+                if (!$result->isInRange) {
+                    return response()->json(['mensaje' => 'cerrado']);
+                }
+            }
+
             $employee->is_delete = 1;
             $employee->is_modified = true;
             $employee->updated_by = session()->get('user_id');
@@ -546,6 +601,20 @@ class RegisterController extends Controller
     public function activar(Request $request,$id){
         if ($request->ajax()) {
             $job = register::find($id);
+
+            
+            $config = \App\SUtils\SConfiguration::getConfigurations();
+
+            if ($config->incidencesWithCheckVobo){
+                $oEmployee = employees::where('id', intval($job ->employee_id))->first();
+                $today = Carbon::now()->toDateString();
+                $result = json_decode(SCheckDaysVobo::checkDays($oEmployee, $today, $job->date, $job->date));
+        
+                if (!$result->isInRange) {
+                    return response()->json(['mensaje' => 'cerrado']);
+                }
+            }
+
             $job->is_delete = 0;
             $job->is_modified = true;
             $job->updated_by = session()->get('user_id');

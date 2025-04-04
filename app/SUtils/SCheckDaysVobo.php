@@ -2,6 +2,7 @@
 namespace App\SUtils;
 
 use Carbon\Carbon;
+use App\SUtils\SDateUtils;
 
 class SCheckDaysVobo {
     public static function checkDays($employee, $today, $ini_date, $end_date = null) {
@@ -10,46 +11,58 @@ class SCheckDaysVobo {
             $lDays = [];
             $message = '';
             $way_pay = $employee->way_pay_id;
+
+            $config = \App\SUtils\SConfiguration::getConfigurations();
     
             if (!$end_date) {
                 $end_date = $ini_date;
             }
     
             $dt_cut = '';
+            $type = '';
+            $num = '';
             if ($way_pay == 2) {
-                $oCut = \DB::table('week_cut')
-                            ->where('ini', '>=', $ini_date)
-                            ->where('fin', '<=', $ini_date)
-                            ->first();
+                $arrNumberWeek = SDateUtils::getNumberOfDate($ini_date, $way_pay);
+                $arrDatesWeek = SDateUtils::getDatesOfPayrollNumber($arrNumberWeek[0], $arrNumberWeek[1], $way_pay);
     
-                if($oCut == null){
+                if($arrDatesWeek[1] == null){
                     return json_encode(['isInRange' => true, 'days' => [], 'message' => '']);
                 }
                 
-                $dt_cut = $oCut->fin;
+                $dt_cut = $arrDatesWeek[1];
+                $oCut = Carbon::parse($dt_cut);
+                if ($oCut->dayOfWeek == 5 || $oCut->dayOfWeek == 6) {
+                    $cut = Carbon::parse($dt_cut)->add('week', 1)->startOfWeek();
+                    $dt_cut = $cut->format('Y-m-d');
+                }
+                $days = $config->daysToCloseWeekVobo;
+                $type = 'semanal';
+                $num = $arrNumberWeek[0];
             } else if ($way_pay == 1) {
-                $oCut = \DB::table('hrs_prepay_cut')
-                            ->where('dt_cut', '>=',$ini_date)
-                            ->where('is_delete', 0)
-                            ->orderBy('dt_cut', 'asc')
-                            ->first();
+                $arrNumberBiWeek = SDateUtils::getNumberOfDate($ini_date, $way_pay);
+                $arrDatesBiWeek = SDateUtils::getDatesOfPayrollNumber($arrNumberBiWeek[0], $arrNumberBiWeek[1], $way_pay);
     
-                if($oCut == null){
+                if($arrDatesBiWeek[1] == null){
                     return json_encode(['isInRange' => true, 'days' => [], 'message' => '']);
                 }
     
-                $dt_cut = $oCut->dt_cut;
+                $dt_cut = $arrDatesBiWeek[1];
+                $oCut = Carbon::parse($dt_cut);
+                if ($oCut->dayOfWeek == 5 || $oCut->dayOfWeek == 6) {
+                    $cut = Carbon::parse($dt_cut)->add('week', 1)->startOfWeek();
+                    $dt_cut = $cut->format('Y-m-d');
+                }
+                $days = $config->daysToCloseBiWeekVobo;
+                $type = 'quincenal';
+                $num = $arrNumberBiWeek[0];
             }
-    
-            $config = \App\SUtils\SConfiguration::getConfigurations();
-            $days = $config->daysToCloseVobo;
     
             $oDt_cut = Carbon::parse($dt_cut)->add('day', $days)->endOfDay();
             $oToday = Carbon::parse($today)->endOfDay();
     
             if ($oToday->gt($oDt_cut)) {
                 $isInRange = false;
-                $message = 'La prenomina esta cerrada, no se pueden enviar incidencias';
+                $message = 'La prenómina ' . $type . ' ' . $num . ' cerró el ' . SDateFormatUtils::formatDate($dt_cut, 'ddd D-m-Y') . ' , no se puede modificar.';
             }
             
             if (!$isInRange) {

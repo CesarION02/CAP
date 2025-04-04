@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\workshift;
 use App\Models\job;
 use App\Models\employee;
+use App\Models\employees;
 use App\Models\week;
 use App\Models\week_department;
 use App\Models\week_department_day;
@@ -17,6 +18,8 @@ use DateTime;
 use DB;
 use PDF;
 use App\SUtils\SDateFormatUtils;
+use App\SUtils\SCheckDaysVobo;
+use Carbon\Carbon;
 
 class shiftprogrammingController extends Controller
 {
@@ -173,6 +176,18 @@ class shiftprogrammingController extends Controller
                         ->where('departments.dept_group_id',$request->typearea)
                         ->select('jobs.id AS idJob','jobs.name AS nameJob','employees.name AS nameEmployee','employees.short_name AS shortName','employees.id AS idEmployee')
                         ->get();
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+        foreach ($employees as $employee) {
+            if ($config->incidencesWithCheckVobo){
+                $oEmployee = employees::where('id', intval($employee->idEmployee))->first();
+                $today = Carbon::now()->toDateString();
+                $result = json_decode(SCheckDaysVobo::checkDays($oEmployee, $today, $request->ini, $request->fin));
+        
+                if (!$result->isInRange) {
+                    return response()->json(array('cerrado'));
+                }
+            }    
+        }
         $group_workshift = DB::table('group_workshifts')
                         ->where('group_workshifts.is_delete','0')
                         ->select('group_workshifts.id AS idShift','group_workshifts.name AS nameShift')

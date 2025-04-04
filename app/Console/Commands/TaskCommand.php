@@ -6,6 +6,7 @@ use App\Http\Controllers\SyncController;
 use App\Models\ProgrammedTask;
 use App\Models\TaskLog;
 use App\SReport\SJourneyReport;
+use App\SReport\SResumeReport;
 use App\STasks\SAdjustsPgh;
 use Illuminate\Console\Command;
 use Carbon\Carbon;
@@ -78,9 +79,16 @@ class TaskCommand extends Command
 
             switch ($oTask->task_type_id) {
                 /**
-                 * Reportes programados de prenómina
+                 * Reportes programados de prenómina desde report_journey_cfg.json
                  */
                 case \SCons::TASK_TYPE_REPORT_JOURNEY:
+                    $response = SJourneyReport::manageTaskReport($oTask->cfg, $oTask->reference_id);
+                    break;
+
+                /**
+                 * Reportes programados de prenómina desde prepayroll_report_configs
+                 */
+                case \SCons::TASK_TYPE_REPORT_JOURNEY_BY_PP:
                     $response = SJourneyReport::manageTaskReport($oTask->cfg, $oTask->reference_id);
                     break;
 
@@ -105,8 +113,8 @@ class TaskCommand extends Command
                 /**
                  * Reporte de resumen de incidencias
                  */
-                case \SCons::TASK_TYPE_REPORT_INCIDENT_RESUME:
-                    $response = SReportPVSCUtils::manageTaskReport($oTask->cfg, $oTask->reference_id);
+                case \SCons::TASK_TYPE_REPORT_PP_INCID_RESUME:
+                    $response = SResumeReport::executeResumeReport($oTask->cfg);
                     break;
 
                 default:

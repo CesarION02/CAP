@@ -535,4 +535,6 @@ Route::get('testpostadj', 'TestController@testAdjustPost')->name('test_post_adj'
 
 Route::get('testpp', 'TestController@testShedulePrepayroll')->name('test_pp');
 
+Route::get('test-resume', 'TestController@testResumeReport');
+
 });

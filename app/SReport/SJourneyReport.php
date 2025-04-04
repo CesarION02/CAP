@@ -99,87 +99,28 @@ class SJourneyReport
      */
     public static function manageTaskReport($sConfiguration, $sReference)
     {
-        // Validar si la cadena recibida es un JSON
-        if (! SJourneyReport::isJson($sConfiguration)) {
-            return "Error, la configuración recibida no es un string JSON.";
-        }
-
-        $oConfiguration = json_decode($sConfiguration);
-
-        // Si la configuración de tipo de pago no es correcta, retorna error
-        if ($oConfiguration->pay_type == 0 || $oConfiguration->pay_type == "") {
-            return "Error, el tipo de pago en la configuración no es válido.";
-        }
-
-        if (strlen($oConfiguration->mails->to) == 0) {
-            return "Error, los destinarios para el correo no son válidos.";
-        }
-
-        $sStartDate = "";
-        $sEndDate = "";
-        $sPayTypeText = "";
         try {
-            // La referencia es un string con el tipo de pago _ id de corte (Ejem: Q_456)
-            $numPP = substr($sReference, 2);
-            if ($oConfiguration->pay_type == \SCons::PAY_W_Q) {
-                $oCut = cutCalendarQ::find($numPP);
-                if (is_null($oCut)) {
-                    return "Error, no se encontró fecha de corte con la referencia: " . $sReference;
-                }
-                $oDate = Carbon::parse($oCut->dt_cut);
-                if ($oConfiguration->back_prepayroll > 0) {
-                    $oDate->subDays(15 * $oConfiguration->back_prepayroll);
-                }
-
-                $lCuts = cutCalendarQ::where('dt_cut', '<=', $oDate->toDateString())
-                                        ->where('is_delete', 0)
-                                        ->orderBy('dt_cut', 'DESC')
-                                        ->limit(2)
-                                        ->get();
-
-                if (count($lCuts) < 2) {
-                    return "Error, no se encontró fecha de corte para el reporte programado.";
-                }
-
-                $sEndDate = $lCuts[0]->dt_cut;
-                $sStartDate = Carbon::parse($lCuts[1]->dt_cut)->addDay()->toDateString();
-                $sPayTypeText = "Quincena";
+            // Obtener colección con los datos del reporte
+            $lData = SReportUtils::getJourneyData($sConfiguration, $sReference);
+            if (is_string($lData)) {
+                return $lData;
             }
-            else {
-                $oCut = week_cut::find($numPP);
-                if (is_null($oCut)) {
-                    return "Error, no se encontró fecha de corte con la referencia: " . $sReference;
-                }
-                $oDate = Carbon::parse($oCut->fin);
-                if ($oConfiguration->back_prepayroll > 0) {
-                    $oDate->subDays(7 * $oConfiguration->back_prepayroll);
-                }
-
-                $oCut = week_cut::where('fin', '<=', $oDate->toDateString())
-                            ->orderBy('fin', 'DESC')
-                            ->first();
-
-                if (is_null($oCut)) {
-                    return "Error, no se encontró fecha de corte para el reporte programado.";
-                }
-
-                $sStartDate = $oCut->ini;
-                $sEndDate = $oCut->fin;
-                $sPayTypeText = "Semana";
+            // Obtener objeto de configuración
+            $oConfiguration = SReportUtils::getReportConfigObj($sConfiguration);
+            if (is_string($oConfiguration)) {
+                return $oConfiguration;
             }
-
-            $aColumns = null;
-            if (isset($oConfiguration->order_columns)) {
-                $aColumns = $oConfiguration->order_columns;
+            // Obtener el tipo de pago
+            $sPayTypeText = SReportUtils::getPayTypeText($oConfiguration->pay_type);
+            // Obtener la fecha de inicio y fin del reporte
+            $aDates = SReportUtils::getStartAndEndDate($oConfiguration, $sReference);
+            if (is_string($aDates)) {
+                return $aDates;
             }
-
-            $lData = SJourneyReport::getJourneyData($sStartDate, $sEndDate, $oConfiguration->pay_type, 
-                                                    $oConfiguration->companies, 
-                                                    $oConfiguration->areas, 
-                                                    $oConfiguration->departments_cap, 
-                                                    $oConfiguration->departments_siie, 
-                                                    $oConfiguration->employees, 
-                                                    $oConfiguration->benefit_policies);
+            $sStartDate = $aDates[0];
+            $sEndDate = $aDates[1];
+            // Obtener la configuración de columnas
+            $aColumns = SReportUtils::getColumns($oConfiguration);
 
             /**
              * ***********************************************************************************************************
@@ -240,7 +181,7 @@ class SJourneyReport
         return json_last_error() === JSON_ERROR_NONE;
     }
 
-    private static function getJourneyData($sStartDate, $sEndDate, $iPayType, $aCompanies, $aAreas, $aDeptosCap, $aDeptosSiie, $aEmployees, $aBenPolicy)
+    public static function getJourneyData($sStartDate, $sEndDate, $iPayType, $aCompanies, $aAreas, $aDeptosCap, $aDeptosSiie, $aEmployees, $aBenPolicy)
     {
         $lEmployees = SGenUtils::getEmployeesByCfg($iPayType, $aCompanies, $aAreas, $aDeptosCap, $aDeptosSiie, $aEmployees, $aBenPolicy);
         $lEmployees = SReportsUtils::filterEmployeesByAdmissionDate($lEmployees, $sEndDate, 'id');
@@ -267,7 +208,7 @@ class SJourneyReport
         $lDataDept = SJourneyReport::addDepartmentName($lDataTxts, $lEmpDept);
         $lDataFinal = SJourneyReport::groupData($lDataDept);
 
-        // dd($lData);
+        // dd($lDataFinal);
         return $lDataFinal;
     }
 

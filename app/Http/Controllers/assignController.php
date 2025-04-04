@@ -20,6 +20,7 @@ use DateTime;
 use DB;
 use DatePeriod;
 use DateInterval;
+use App\SUtils\SCheckDaysVobo;
 
 class assignController extends Controller
 {
@@ -690,6 +691,17 @@ class assignController extends Controller
             return redirect()->back()->withErrors('Debe seleccionar una fecha inicial');
         }
         
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+
+        if ($config->incidencesWithCheckVobo){
+            $oEmployee = employees::where('id', intval($request->empleado))->first();
+            $today = Carbon::now()->toDateString();
+            $result = json_decode(SCheckDaysVobo::checkDays($oEmployee, $today, $start, $start));
+    
+            if (!$result->isInRange) {
+                return redirect()->back()->withErrors($result->message);
+            }
+        }
         if($request->contador > 1){
             $group = new groupSchedule();
             $group->name = $request->nameGroup;
@@ -720,6 +732,7 @@ class assignController extends Controller
     }
 
     public function guardarDayprogram(Request $request){
+
         $start = null;
         $end = null;
         $orden = null;
@@ -728,6 +741,18 @@ class assignController extends Controller
         if($request->start_date != ''){
             $start = $request->start_date;
             $end = $request->end_date;
+        }
+
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+
+        if ($config->incidencesWithCheckVobo){
+            $oEmployee = employees::where('id', intval($request->empleado))->first();
+            $today = Carbon::now()->toDateString();
+            $result = json_decode(SCheckDaysVobo::checkDays($oEmployee, $today, $start, $start));
+    
+            if (!$result->isInRange) {
+                return redirect()->back()->withErrors($result->message);
+            }
         }
             
         $asignacion = new assign_schedule();
