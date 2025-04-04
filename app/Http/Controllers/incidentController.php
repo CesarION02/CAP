@@ -594,7 +594,7 @@ class incidentController extends Controller
                                 '1_10' => '20',
                                 '1_11' => '26'
                             ];
-
+                          
         foreach ($lAbsences as $jAbs) {
             $this->employees = employees::select('id', 'external_id')
                                         ->pluck('id', 'external_id');
@@ -605,7 +605,7 @@ class incidentController extends Controller
                                 ->where('companies.db_name', $jAbs->company)
                                 ->where('iesl.external_system', 'siie')
                                 ->get();
-
+            
             try {
                 if (count($lCapAbss) >= 1) {
                     $id = $lCapAbss[0]->idincident;
@@ -719,9 +719,9 @@ class incidentController extends Controller
     {
         $abs = new incident();
 
-        if($jAbs->b_clo == 1 || $jAbs->is_deleted == 1){
+        if ((isset($jAbs->b_clo) && $jAbs->b_clo == 1) || $jAbs->is_deleted == 1) {
             $is_deleted = 1;     
-        }else{
+        } else {
             $is_deleted = 0;
         }
 
