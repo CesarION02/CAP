@@ -89,6 +89,11 @@ return [
             'driver' => 'errorlog',
             'level' => 'debug',
         ],
+        'rememberEmployeeCheck_log' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/rememberEmployeeCheck_log.log'),
+            'level' => 'debug',
+        ],
     ],
 
 ];
