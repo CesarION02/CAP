@@ -26,8 +26,15 @@ $(document).ready(function() {
                 if (respuesta.mensaje == "ok") {
                     form.parents('tr').remove();
                     Checador.notificaciones('El registro fue eliminado correctamente', 'Checador', 'success');
+                }  else if (respuesta.mensaje == "cerrado") {
+                    swal({
+                        title: 'Aviso',
+                        text: 'El registro no se puede eliminar porque la nómina esta cerrada.',
+                        icon: 'info',
+                        confirmButtonText: 'Aceptar'
+                    })    
                 } else {
-                    Checador.notificaciones('El registro no pudo ser eliminado, hay recursos usandolo', 'Checador', 'error');
+                    Checador.notificaciones('El registro no pudo ser eliminado', 'Checador', 'error');
                 }
             },
             error: function() {
@@ -65,8 +72,15 @@ $(document).ready(function() {
                 if (respuesta.mensaje == "ok") {
                     form.parents('tr').remove();
                     Checador.notificaciones('El registro fue eliminado correctamente', 'Checador', 'success');
+                }  else if (respuesta.mensaje == "cerrado") {
+                    swal({
+                        title: 'Aviso',
+                        text: 'El registro no se puede activar porque la nómina esta cerrada.',
+                        icon: 'info',
+                        confirmButtonText: 'Aceptar'
+                    })    
                 } else {
-                    Checador.notificaciones('El registro no pudo ser eliminado, hay recursos usandolo', 'Checador', 'error');
+                    Checador.notificaciones('El registro no pudo ser eliminado', 'Checador', 'error');
                 }
             },
             error: function() {

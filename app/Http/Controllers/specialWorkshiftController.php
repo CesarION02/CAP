@@ -21,6 +21,7 @@ use DateTime;
 use DB;
 use Illuminate\Http\Request;
 use PDF;
+use App\SUtils\SCheckDaysVobo;
 
 
 class specialWorkshiftController extends Controller
@@ -381,6 +382,7 @@ class specialWorkshiftController extends Controller
      */
     public function store(Request $request)
     {
+        $config = \App\SUtils\SConfiguration::getConfigurations();
         foreach ($request->all() as $elem) {
             if (is_null($elem)) {
                 return redirect()->back()->withErrors('Debe llenar todos los campos del formulario');
@@ -392,8 +394,20 @@ class specialWorkshiftController extends Controller
         if ($request->workshift_id == 0) {
             return redirect()->back()->withErrors('Debe seleccionar un turno');
         }
+
         $dateI = Carbon::parse($request->datei);
         $dateS = Carbon::parse($request->dates);
+        $idEmployee = intval($request->employee_id);
+
+        if ($config->incidencesWithCheckVobo){
+            $oEmployee = employees::where('id', intval($request->employee_id))->first();
+            $today = Carbon::now()->toDateString();
+            $result = json_decode(SCheckDaysVobo::checkDays($oEmployee, $today, $request->datei, $request->dates));
+    
+            if (!$result->isInRange) {
+                return redirect()->back()->withErrors($result->message);
+            }
+        }
 
         $cerrado = DB::table('prepayroll_control');
 
@@ -556,6 +570,7 @@ class specialWorkshiftController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $config = \App\SUtils\SConfiguration::getConfigurations();
         foreach ($request->all() as $elem) {
             if (is_null($elem)) {
                 return redirect()->back()->withErrors('Debe llenar todos los campos del formulario');
@@ -567,6 +582,19 @@ class specialWorkshiftController extends Controller
         if ($request->workshift_id == 0) {
             return redirect()->back()->withErrors('Debe seleccionar un turno');
         }
+
+        $idEmployee = intval($request->employee_id);
+
+        if ($config->incidencesWithCheckVobo){
+            $oEmployee = employees::where('id', intval($request->employee_id))->first();
+            $today = Carbon::now()->toDateString();
+            $result = json_decode(SCheckDaysVobo::checkDays($oEmployee, $today, $request->datei, $request->dates));
+    
+            if (!$result->isInRange) {
+                return redirect()->back()->withErrors($result->message);
+            }
+        }
+
         $specialworkshift = specialworkshift::findOrFail($id);
 
         $dateI = Carbon::parse($request->datei);
