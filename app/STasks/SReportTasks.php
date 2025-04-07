@@ -80,9 +80,9 @@ class SReportTasks {
                 }
 
                 if ($oReport->is_biweek) {
-                    self::schedulePrepayBiweeklyReports($oReport, $reportType, $sinceDatePrepayroll);
+                    // self::schedulePrepayBiweeklyReports($oReport, $reportType, $sinceDatePrepayroll);
                 } else {
-                    self::schedulePrepayWeeklyReports($oReport, $reportType, $sinceDatePrepayroll);
+                    // self::schedulePrepayWeeklyReports($oReport, $reportType, $sinceDatePrepayroll);
                 }
             }
 
