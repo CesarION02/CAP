@@ -21,11 +21,38 @@ class SResumeReport
                 return $oConfiguration;
             }
 
-            $oIncidentsStartDate = Carbon::parse($oConfiguration->start_date)->subMonths($oConfiguration->months_ago);
-            $oIncidentsEndDate = Carbon::parse($oConfiguration->start_date);
+            /**
+             * Dividir los 12 meses el año entre months_ago, para obtener fecha de inicio y fecha final de incidencias,
+             * por ejemplo, si months_ago es 6, se dividirá el 12 / 6, obteniendo 2, lo que significa que se dividirá
+             * el año en 2 periodos, y se obtendrá la fecha de inicio y fin de incidencias para cada periodo, determinar a qué periodo
+             * corresponde start_date:
+             */
+            $oStartDate = Carbon::parse($oConfiguration->start_date);
+
+            // Fecha de inicio del año correspondiente a start_date
+            $oPeriodStart = Carbon::create($oStartDate->year, 1, 1);
+
+            // Cantidad de meses a avanzar en cada iteración
+            $monthsStep = $oConfiguration->months_ago;
+
+            // Calculamos la fecha final del primer periodo
+            $oPeriodEnd = $oPeriodStart->copy()->addMonths($monthsStep);
+
+            // Número máximo de iteraciones para cubrir el año
+            $maxIterations = intdiv(12, $monthsStep);
+
+            for ($i = 0; $i < $maxIterations; $i++) {
+                if ($oStartDate->between($oPeriodStart, $oPeriodEnd)) {
+                    break;
+                }
+
+                // Avanzamos al siguiente período
+                $oPeriodStart = $oPeriodEnd->copy();
+                $oPeriodEnd = $oPeriodEnd->copy()->addMonths($monthsStep);
+            }
         
-            $sIncidentstartDate = $oIncidentsStartDate->toDateString();
-            $sIncidentsendDate = $oIncidentsEndDate->toDateString();
+            $sIncidentstartDate = $oPeriodStart->toDateString();
+            $sIncidentsendDate = $oPeriodEnd->toDateString();
 
             // Agregar resumen de incidencias:
             $lData = SReportUtils::addIncidentsResume($lData, 
@@ -63,15 +90,15 @@ class SResumeReport
              * Sección para pruebas
              */
 
-            // return view('mails.journeyresumereport')->with('sStartDate', $sStartDate)
-            //                                 ->with('sEndDate', $sEndDate)
-            //                                 ->with('incidentsStart', $sIncidentstartDate)
-            //                                 ->with('incidentsEnd', $sIncidentsendDate)
-            //                                 ->with('monthsAgo', $oConfiguration->months_ago)
-            //                                 ->with('sPayTypeText', $sPayTypeText)
-            //                                 ->with('sPeriod', $sPeriod)
-            //                                 ->with('aColumns', $aColumns)
-            //                                 ->with('lData', $lData);
+            return view('mails.journeyresumereport')->with('sStartDate', $sStartDate)
+                                            ->with('sEndDate', $sEndDate)
+                                            ->with('incidentsStart', $sIncidentstartDate)
+                                            ->with('incidentsEnd', $sIncidentsendDate)
+                                            ->with('monthsAgo', $oConfiguration->months_ago)
+                                            ->with('sPayTypeText', $sPayTypeText)
+                                            ->with('sPeriod', $sPeriod)
+                                            ->with('aColumns', $aColumns)
+                                            ->with('lData', $lData);
             /**
              * ***********************************************************************************************************
              */

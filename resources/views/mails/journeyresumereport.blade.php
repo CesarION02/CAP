@@ -24,7 +24,7 @@
             {{ "Incidencias del " }}
             <br>
             <b style="font-size: 16px; color: #214cda; margin: 5px 0; text-align: center;">
-                {{ (\App\SReport\SReportUtils::formatRange($incidentsStart, $incidentsEnd)) . " (últimos " . $monthsAgo . " meses)" }}
+                {{ (\App\SReport\SReportUtils::formatRange($incidentsStart, $incidentsEnd)) . "" }}
             </b>
         </h3>
         <br>
