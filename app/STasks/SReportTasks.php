@@ -522,7 +522,7 @@ class SReportTasks {
                                                                 $lastDayOfMonth);
             if (!$oPrepayReportResume) {
                 Log::warning('No se pudo preparar la configuración para el reporte de resumen: ' . $oReport->id_configuration);
-                throw new Exception('No se pudo preparar la configuración para el reporte de resumen: ' . $oReport->id_configuration);
+                return;
             }
             $lGenerateReports[] = $oPrepayReportResume;
             $oDate = $oDate->addMonths($oReporConfigJson->reportQ->monthsPeriod);
