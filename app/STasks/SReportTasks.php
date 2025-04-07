@@ -67,6 +67,9 @@ class SReportTasks {
             if (count($aPPConfigs) > 0) {
                 $lReports = (clone $lReportsBase)->whereIn('id_configuration', $aPPConfigs);
             }
+            else {
+                $lReports = (clone $lReportsBase);
+            }
             $lReports = $lReports->get();
 
             $sinceDatePrepayroll = self::getSinceDatePrepayroll();
@@ -90,6 +93,9 @@ class SReportTasks {
             $aPPResumeConfigs = self::getSpecificPrepayrollResumeConfigs();
             if (count($aPPResumeConfigs) > 0) {
                 $lResumeReports = (clone $lReportsBase)->whereIn('id_configuration', $aPPResumeConfigs);
+            }
+            else {
+                $lResumeReports = (clone $lReportsBase);
             }
             $lResumeReports = $lResumeReports->get();
 
