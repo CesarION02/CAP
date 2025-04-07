@@ -8,10 +8,14 @@
 <body>
     @if ($type == 'preClose')
         <h2>La prenómina {{ $wayPay }} {{ $num }} cierra el {{$endDate}}</h2>
-        <p>Quedan {{$days}} {{ $days > 1 ? ' días' : ' día' }} para el cierre</p>
+        <p>{{ $days > 1 ? 'Quedan ' : 'Queda ' }} {{$days}} {{ $days > 1 ? ' días' : ' día' }} para el cierre</p>
     @elseif ($type == 'afterClose')
-        <h2>Falta tu Vobo de la prenómina {{ $wayPay }} {{ $num }} que cerró el {{$endDate}}</h2>
-        <p>Han transcurrido {{$days}} {{ $days > 1 ? ' días' : ' día' }} del cierre</p>
+        @if ($days > 1)
+            <h2>Te recordamos dar tu Vobo de la prenómina {{ $wayPay }} {{ $num }} que cerró el {{$endDate}}</h2>
+            <p>Han transcurrido {{$days}} {{ $days > 1 ? ' días' : ' día' }} del cierre</p>
+        @elseif ($days == 1)
+            <h2>Te recordamos dar tu Vobo de la prenómina {{ $wayPay }} {{ $num }} que cerró ayer</h2>
+        @endif
     @endif
     <div style="border: solid 1px gray; width: 100%;"></div>
     <div>
