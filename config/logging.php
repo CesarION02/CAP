@@ -94,6 +94,11 @@ return [
             'path' => storage_path('logs/rememberEmployeeCheck_log.log'),
             'level' => 'debug',
         ],
+        'rememberVobo_log' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/rememberVobo_log.log'),
+            'level' => 'debug',
+        ],
     ],
 
 ];

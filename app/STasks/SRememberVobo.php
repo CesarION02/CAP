@@ -60,7 +60,26 @@ class SRememberVobo
                     $lUsersWeek->each(function ($user) use ($oEndDateWeek, $arrNumberWeek, $value) {
                         $oUser = User::find($user);
                         $sDate = SDateFormatUtils::formatDate($oEndDateWeek->toDateString(), 'ddd D-m-Y');
+
+                        $wayPay = 'semanal';
+                        $type = 'preClose';
+                        $num = $arrNumberWeek[0];
+                        $days = $value;
                         \Mail::to($oUser->email)->send(new rememberVoboMail('semanal', $sDate, 'preClose', $arrNumberWeek[0], $value));
+                        
+                        $log = 'usuario: ' . $oUser->name . ', email: ' . $oUser->email;
+                        if ($type == 'preClose') {
+                            $log = $log . ', La prenómina ' . $wayPay . $num . ' cierra el ' . $sDate .
+                            ' Quedan ' . $days . ($days > 1 ? ' días' : ' día') . ' . para el cierre';
+                        }
+                        else if ($type == 'afterClose') {
+                            $log = $log . ', Falta tu Vobo de la prenómina' . $wayPay . $num . ' que cerró el  ' . $sDate .
+                            ' Han transcurrido ' . $days . ($days > 1 ? ' días' : ' día' ) . ' del cierre';
+                        }
+                        
+
+                        \Log::channel('rememberVobo_log')
+                            ->info($log);
                     });
                 }
             }
@@ -76,7 +95,25 @@ class SRememberVobo
                     $lUsersBiWeek->each(function ($user) use ($oEndDateBiWeek, $arrNumberBiWeek, $value) {
                         $oUser = User::find($user);
                         $sDate = SDateFormatUtils::formatDate($oEndDateBiWeek->toDateString(), 'ddd D-m-Y');
+
+                        $wayPay = 'quincenal';
+                        $type = 'preClose';
+                        $num = $arrNumberBiWeek[0];
+                        $days = $value;
                         \Mail::to($oUser->email)->send(new rememberVoboMail('quincenal', $sDate, 'preClose', $arrNumberBiWeek[0], $value));
+
+                        $log = 'usuario: ' . $oUser->name . ', email: ' . $oUser->email;
+                        if ($type == 'preClose') {
+                            $log = $log . ', La prenómina ' . $wayPay . $num . ' cierra el ' . $sDate .
+                            ' Quedan ' . $days . ($days > 1 ? ' días' : ' día') . ' . para el cierre';
+                        }
+                        else if ($type == 'afterClose') {
+                            $log = $log . ', Falta tu Vobo de la prenómina' . $wayPay . $num . ' que cerró el  ' . $sDate .
+                            ' Han transcurrido ' . $days . ($days > 1 ? ' días' : ' día' ) . ' del cierre';
+                        }
+
+                        \Log::channel('rememberVobo_log')
+                            ->info($log);
                     });
                 }
             }
@@ -138,7 +175,25 @@ class SRememberVobo
                         $lUsersLastWeek->each(function ($user) use ($lastWeekCut, $numLastWeekCut, $diffInDays) {
                             $oUser = User::find($user);
                             $sDate = SDateFormatUtils::formatDate($lastWeekCut->toDateString(), 'ddd D-m-Y');
+
+                            $wayPay = 'semanal';
+                            $type = 'afterClose';
+                            $num = $numLastWeekCut[0];
+                            $days = $diffInDays;
                             \Mail::to($oUser->email)->send(new rememberVoboMail('semanal', $sDate, 'afterClose', $numLastWeekCut[0], $diffInDays));
+
+                            $log = 'usuario: ' . $oUser->name . ', email: ' . $oUser->email;
+                            if ($type == 'preClose') {
+                                $log = $log . ', La prenómina ' . $wayPay . $num . ' cierra el ' . $sDate .
+                                ' Quedan ' . $days . ($days > 1 ? ' días' : ' día') . ' . para el cierre';
+                            }
+                            else if ($type == 'afterClose') {
+                                $log = $log . ', Falta tu Vobo de la prenómina' . $wayPay . $num . ' que cerró el  ' . $sDate .
+                                ' Han transcurrido ' . $days . ($days > 1 ? ' días' : ' día' ) . ' del cierre';
+                            }
+
+                            \Log::channel('rememberVobo_log')
+                                ->info($log);
                         });
                     }
                 }
@@ -153,7 +208,25 @@ class SRememberVobo
                         $lUsersLastBiWeek->each(function ($user) use ($lastBiWeekCut, $numLastBiWeekCut, $diffInDays) {
                             $oUser = User::find($user);
                             $sDate = SDateFormatUtils::formatDate($lastBiWeekCut->toDateString(), 'ddd D-m-Y');
+
+                            $wayPay = 'quincenal';
+                            $type = 'afterClose';
+                            $num = $numLastBiWeekCut[0];
+                            $days = $diffInDays;
                             \Mail::to($oUser->email)->send(new rememberVoboMail('quincenal', $sDate, 'afterClose', $numLastBiWeekCut[0], $diffInDays));
+
+                            $log = 'usuario: ' . $oUser->name . ', email: ' . $oUser->email;
+                            if ($type == 'preClose') {
+                                $log = $log . ', La prenómina ' . $wayPay . $num . ' cierra el ' . $sDate .
+                                ' Quedan ' . $days . ($days > 1 ? ' días' : ' día') . ' . para el cierre';
+                            }
+                            else if ($type == 'afterClose') {
+                                $log = $log . ', Falta tu Vobo de la prenómina' . $wayPay . $num . ' que cerró el  ' . $sDate .
+                                ' Han transcurrido ' . $days . ($days > 1 ? ' días' : ' día' ) . ' del cierre';
+                            }
+
+                            \Log::channel('rememberVobo_log')
+                                ->info($log);
                         });
                     }
                 }
