@@ -256,6 +256,9 @@ class SReportUtils
     
         foreach ($lData as $oEmpData) {
             $oEmpData->aIncidents = [];
+            if (! isset($oEmpData->aAdjusts)) {
+                $oEmpData->aAdjusts = [];
+            }
     
             // Pre-cargar todos los tipos de incidentes en un solo paso
             $incidentTypes = \SCons::INC_TYPE;
