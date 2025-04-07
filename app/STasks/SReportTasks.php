@@ -384,7 +384,6 @@ class SReportTasks {
 
         if ($iReportType == \SCons::TASK_TYPE_REPORT_JOURNEY_BY_PP) {
             $lQCuts = (clone $lQCutsBase)->where('dt_cut', '>', $sinceDatePrepayroll->toDateString())
-                            ->where('dt_cut', '<=', '2025-04-04')
                             ->orderBy('dt_cut', 'ASC')
                             ->get();
     
@@ -412,7 +411,6 @@ class SReportTasks {
             }
             else {
                 $lQCuts = (clone $lQCutsBase)->where('dt_cut', '>=', $oReporConfigJson->reportQ->sinceDate)
-                            ->where('dt_cut', '<=', '2025-04-04')
                             ->orderBy('dt_cut', 'ASC')
                             ->get();
             }
@@ -453,7 +451,6 @@ class SReportTasks {
         }
 
         $lWeekCuts = $lWeekCuts->where('ini', '>=', $sinceDatePrepayroll->toDateString())
-            ->where('fin', '<=', '2025-04-04')
             ->orderBy('fin', 'ASC')
             ->get();
 
