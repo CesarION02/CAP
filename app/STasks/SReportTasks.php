@@ -427,7 +427,7 @@ class SReportTasks {
         $lProgrammedTasks = self::getProgrammedTasks($iReportType, 'Q', $oReport->since_date);
 
         $priority = 2;
-        $limitDate = Carbon::now()->addMonth(); // Fecha límite
+        $limitDate = Carbon::now()->addDays(15); // Fecha límite
         foreach ($lQCuts as $oQCut) {
             $cutDate = Carbon::parse($oQCut->dt_cut);
             if ($cutDate->greaterThan($limitDate)) {
@@ -473,7 +473,7 @@ class SReportTasks {
         $lProgrammedTasks = self::getProgrammedTasks($iReportType, 'S', $oReport->since_date);
 
         $priority = 2;
-        $limitDate = Carbon::now()->addMonth(); // Fecha límite
+        $limitDate = Carbon::now()->addDays(15); // Fecha límite
         foreach ($lWeekCuts as $oWeekCut) {
             $cutDate = Carbon::parse($oWeekCut->fin);
             if ($cutDate->greaterThan($limitDate)) {
