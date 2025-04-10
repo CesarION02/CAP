@@ -226,11 +226,21 @@ class TestController extends Controller
         dd("respuesta:", $response);
     }
 
+    public function testJourneyByPP() {
+        $oReport = PrepayReportConfig::where('id_configuration', 40)->first();
+        $oPrepayReportConfig = SReportTasks::preparePrepayReportConfig($oReport, \SCons::PAY_W_Q);
+        
+        $sConfiguration = json_encode($oPrepayReportConfig);
+        $response = SJourneyReport::manageTaskReport($sConfiguration, 'Q_134');
+
+        return $response;
+    }
+
     public function testResumeReport() {
         $oReport = PrepayReportConfig::where('id_configuration', 40)->first();
         $oReporConfigJson = SReportTasks::loadReportResumeConfig();
-        $oStartDate = Carbon::parse('2025-02-01');
-        $oEndDate = Carbon::parse('2025-02-28');
+        $oStartDate = Carbon::parse('2025-03-01');
+        $oEndDate = Carbon::parse('2025-03-31');
         $oPrepayReportConfig = SReportTasks::preparePrepayReportResumeConfig($oReport, 
                                                                 $oReporConfigJson, 
                                                                 \SCons::PAY_W_Q, 

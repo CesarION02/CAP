@@ -537,4 +537,6 @@ Route::get('testpp', 'TestController@testShedulePrepayroll')->name('test_pp');
 
 Route::get('test-resume', 'TestController@testResumeReport');
 
+Route::get('test-journey-pp', 'TestController@testJourneyByPP');
+
 });
