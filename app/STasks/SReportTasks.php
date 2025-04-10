@@ -427,7 +427,13 @@ class SReportTasks {
         $lProgrammedTasks = self::getProgrammedTasks($iReportType, 'Q', $oReport->since_date);
 
         $priority = 2;
+        $limitDate = Carbon::now()->addMonth(); // Fecha límite
         foreach ($lQCuts as $oQCut) {
+            $cutDate = Carbon::parse($oQCut->dt_cut);
+            if ($cutDate->greaterThan($limitDate)) {
+                break; // Ya no queremos programar más allá de un mes
+            }
+
             if (!self::isTaskScheduled($lProgrammedTasks, $oPrepayReportConfig, 'Q_' . $oQCut->id, $iReportType)) {
                 $executeOn = Carbon::parse($oQCut->dt_cut)->addDay()->toDateString();
                 self::createTask($iReportType, $executeOn, $oPrepayReportConfig, 'Q_' . $oQCut->id, $priority);
@@ -467,7 +473,12 @@ class SReportTasks {
         $lProgrammedTasks = self::getProgrammedTasks($iReportType, 'S', $oReport->since_date);
 
         $priority = 2;
+        $limitDate = Carbon::now()->addMonth(); // Fecha límite
         foreach ($lWeekCuts as $oWeekCut) {
+            $cutDate = Carbon::parse($oWeekCut->fin);
+            if ($cutDate->greaterThan($limitDate)) {
+                break;
+            }
             if (!self::isTaskScheduled($lProgrammedTasks, $oPrepayReportConfig, 'S_' . $oWeekCut->id, $iReportType)) {
                 $executeOn = Carbon::parse($oWeekCut->fin)->addDay()->toDateString();
                 self::createTask($iReportType, $executeOn, $oPrepayReportConfig, 'S_' . $oWeekCut->id, $priority);
