@@ -510,6 +510,13 @@ class PrepayrollReportController extends Controller
                     ->where('user_n_id', $idUser)
                     ->where('group_n_id', $idGroup)
                     ->get();
+                    
+        if (count($cfgs) == 0) {
+            $cfgs = \DB::table('prepayroll_report_configs AS prc')
+                        ->where('is_delete', false)
+                        ->where('user_n_id', $idUser)
+                        ->get();
+        }
 
         return json_encode(count($cfgs) > 0 ? $cfgs : []);
     }
