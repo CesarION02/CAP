@@ -59,13 +59,17 @@ class SRememberVobo
                 if ($oToday->equalTo($oNotifyDateWeek) && $lUsersWeek->count() > 0) {
                     $lUsersWeek->each(function ($user) use ($oEndDateWeek, $arrNumberWeek, $value) {
                         $oUser = User::find($user);
-                        $sDate = SDateFormatUtils::formatDate($oEndDateWeek->toDateString(), 'ddd D-m-Y');
+
+                        $sEndDate = $oEndDateWeek->toDateString();
+
+                        $sDate = SDateFormatUtils::formatDate($sEndDate, 'ddd D-m-Y');
+                        $sDateToSubjectMail = SDateFormatUtils::formatDate($sEndDate, 'D-m-Y');
 
                         $wayPay = 'semanal';
                         $type = 'preClose';
                         $num = $arrNumberWeek[0];
                         $days = $value;
-                        \Mail::to($oUser->email)->send(new rememberVoboMail('semanal', $sDate, 'preClose', $arrNumberWeek[0], $value));
+                        \Mail::to($oUser->email)->send(new rememberVoboMail('semanal', $sDate, 'preClose', $arrNumberWeek[0], $value, $sDateToSubjectMail));
                         
                         $log = 'usuario: ' . $oUser->name . ', email: ' . $oUser->email;
                         if ($type == 'preClose') {
@@ -94,13 +98,15 @@ class SRememberVobo
                 if ($oToday->equalTo($oNotifyDateBiWeek) && $lUsersBiWeek->count() > 0) {
                     $lUsersBiWeek->each(function ($user) use ($oEndDateBiWeek, $arrNumberBiWeek, $value) {
                         $oUser = User::find($user);
-                        $sDate = SDateFormatUtils::formatDate($oEndDateBiWeek->toDateString(), 'ddd D-m-Y');
+                        $sEndDate = $oEndDateBiWeek->toDateString();
+                        $sDate = SDateFormatUtils::formatDate($sEndDate, 'ddd D-m-Y');
+                        $sDateToSubjectMail = SDateFormatUtils::formatDate($sEndDate, 'D-m-Y');
 
                         $wayPay = 'quincenal';
                         $type = 'preClose';
                         $num = $arrNumberBiWeek[0];
                         $days = $value;
-                        \Mail::to($oUser->email)->send(new rememberVoboMail('quincenal', $sDate, 'preClose', $arrNumberBiWeek[0], $value));
+                        \Mail::to($oUser->email)->send(new rememberVoboMail('quincenal', $sDate, 'preClose', $arrNumberBiWeek[0], $value, $sDateToSubjectMail));
 
                         $log = 'usuario: ' . $oUser->name . ', email: ' . $oUser->email;
                         if ($type == 'preClose') {
@@ -174,13 +180,15 @@ class SRememberVobo
                     if ($oToday->gte($lastWeekCut) && $lUsersLastWeek->count() > 0) {
                         $lUsersLastWeek->each(function ($user) use ($lastWeekCut, $numLastWeekCut, $diffInDays) {
                             $oUser = User::find($user);
-                            $sDate = SDateFormatUtils::formatDate($lastWeekCut->toDateString(), 'ddd D-m-Y');
+                            $sEndDate = $lastWeekCut->toDateString();
+                            $sDate = SDateFormatUtils::formatDate($sEndDate, 'ddd D-m-Y');
+                            $sDateToSubjectMail = SDateFormatUtils::formatDate($sEndDate, 'D-m-Y');
 
                             $wayPay = 'semanal';
                             $type = 'afterClose';
                             $num = $numLastWeekCut[0];
                             $days = $diffInDays;
-                            \Mail::to($oUser->email)->send(new rememberVoboMail('semanal', $sDate, 'afterClose', $numLastWeekCut[0], $diffInDays));
+                            \Mail::to($oUser->email)->send(new rememberVoboMail('semanal', $sDate, 'afterClose', $numLastWeekCut[0], $diffInDays, $sDateToSubjectMail));
 
                             $log = 'usuario: ' . $oUser->name . ', email: ' . $oUser->email;
                             if ($type == 'preClose') {
@@ -207,13 +215,15 @@ class SRememberVobo
                     if ($oToday->gte($lastBiWeekCut) && $lUsersLastBiWeek->count() > 0) {
                         $lUsersLastBiWeek->each(function ($user) use ($lastBiWeekCut, $numLastBiWeekCut, $diffInDays) {
                             $oUser = User::find($user);
-                            $sDate = SDateFormatUtils::formatDate($lastBiWeekCut->toDateString(), 'ddd D-m-Y');
+                            $sEndDate = $lastBiWeekCut->toDateString();
+                            $sDate = SDateFormatUtils::formatDate($sEndDate, 'ddd D-m-Y');
+                            $sDateToSubjectMail = SDateFormatUtils::formatDate($sEndDate, 'D-m-Y');
 
                             $wayPay = 'quincenal';
                             $type = 'afterClose';
                             $num = $numLastBiWeekCut[0];
                             $days = $diffInDays;
-                            \Mail::to($oUser->email)->send(new rememberVoboMail('quincenal', $sDate, 'afterClose', $numLastBiWeekCut[0], $diffInDays));
+                            \Mail::to($oUser->email)->send(new rememberVoboMail('quincenal', $sDate, 'afterClose', $numLastBiWeekCut[0], $diffInDays, $sDateToSubjectMail));
 
                             $log = 'usuario: ' . $oUser->name . ', email: ' . $oUser->email;
                             if ($type == 'preClose') {

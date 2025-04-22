@@ -7,17 +7,19 @@
 </head>
 <body>
     @if ($type == 'preClose')
-        <h2>La prenómina {{ $wayPay }} {{ $num }} cierra el {{$endDate}}</h2>
-        <p>{{ $days > 1 ? 'Quedan ' : 'Queda ' }} {{$days}} {{ $days > 1 ? ' días' : ' día' }} para el cierre</p>
+        <h2>La fecha de corte de la prenómina {{ $wayPay }} #{{ $num }} es el: {{$endDate}}</h2>
+        <p>{{ $days > 1 ? 'Quedan ' : 'Queda ' }} {{$days}} {{ $days > 1 ? ' días' : ' día' }} para el corte.</p>
     @elseif ($type == 'afterClose')
         @if ($days > 1)
-            <h2>Te recordamos dar tu Vobo de la prenómina {{ $wayPay }} {{ $num }} que cerró el {{$endDate}}</h2>
-            <p>Han transcurrido {{$days}} {{ $days > 1 ? ' días' : ' día' }} del cierre</p>
+            <h2>Te recordamos dar tu Vobo de la prenómina {{ $wayPay }} {{ $num }} que cortó el {{$endDate}}</h2>
+            <p>Han transcurrido {{$days}} {{ $days > 1 ? ' días' : ' día' }} del corte</p>
         @elseif ($days == 1)
-            <h2>Te recordamos dar tu Vobo de la prenómina {{ $wayPay }} {{ $num }} que cerró ayer</h2>
+            <h2>Te recordamos dar tu Vobo de la prenómina {{ $wayPay }} {{ $num }} que cortó ayer</h2>
         @endif
     @endif
+
     <div style="border: solid 1px gray; width: 100%;"></div>
+
     <div>
         <p style="font-size: 75%; display: inline-block;">
             Favor de no responder este mail, fue generado de forma automática.<br>
