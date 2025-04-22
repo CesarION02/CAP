@@ -746,7 +746,7 @@ class SDelayReportUtils {
     {
         $interval = CarbonInterval::minutes($minutes)->cascade();
     
-        return trim(sprintf('%dhrs %dmin', $interval->hours, $interval->minutes));
+        return trim(sprintf('%d hrs %d min', $interval->hours, $interval->minutes));
     }
 
 

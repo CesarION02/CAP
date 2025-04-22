@@ -80,9 +80,9 @@ class SReportTasks {
                 }
 
                 if ($oReport->is_biweek) {
-                    // self::schedulePrepayBiweeklyReports($oReport, $reportType, $sinceDatePrepayroll);
+                    self::schedulePrepayBiweeklyReports($oReport, $reportType, $sinceDatePrepayroll);
                 } else {
-                    // self::schedulePrepayWeeklyReports($oReport, $reportType, $sinceDatePrepayroll);
+                    self::schedulePrepayWeeklyReports($oReport, $reportType, $sinceDatePrepayroll);
                 }
             }
 
@@ -427,7 +427,13 @@ class SReportTasks {
         $lProgrammedTasks = self::getProgrammedTasks($iReportType, 'Q', $oReport->since_date);
 
         $priority = 2;
+        $limitDate = Carbon::now()->addDays(15); // Fecha límite
         foreach ($lQCuts as $oQCut) {
+            $cutDate = Carbon::parse($oQCut->dt_cut);
+            if ($cutDate->greaterThan($limitDate)) {
+                break; // Ya no queremos programar más allá de un mes
+            }
+
             if (!self::isTaskScheduled($lProgrammedTasks, $oPrepayReportConfig, 'Q_' . $oQCut->id, $iReportType)) {
                 $executeOn = Carbon::parse($oQCut->dt_cut)->addDay()->toDateString();
                 self::createTask($iReportType, $executeOn, $oPrepayReportConfig, 'Q_' . $oQCut->id, $priority);
@@ -467,7 +473,12 @@ class SReportTasks {
         $lProgrammedTasks = self::getProgrammedTasks($iReportType, 'S', $oReport->since_date);
 
         $priority = 2;
+        $limitDate = Carbon::now()->addDays(15); // Fecha límite
         foreach ($lWeekCuts as $oWeekCut) {
+            $cutDate = Carbon::parse($oWeekCut->fin);
+            if ($cutDate->greaterThan($limitDate)) {
+                break;
+            }
             if (!self::isTaskScheduled($lProgrammedTasks, $oPrepayReportConfig, 'S_' . $oWeekCut->id, $iReportType)) {
                 $executeOn = Carbon::parse($oWeekCut->fin)->addDay()->toDateString();
                 self::createTask($iReportType, $executeOn, $oPrepayReportConfig, 'S_' . $oWeekCut->id, $priority);
@@ -502,8 +513,7 @@ class SReportTasks {
             }
         }
 
-        // $oDate = Carbon::now();
-        $oDate = Carbon::parse('2025-03-15');
+        $oDate = Carbon::now();
         $iTime = 1;
         $lGenerateReports = array();
         do {
@@ -545,7 +555,7 @@ class SReportTasks {
      * @param int $payType Tipo de pago (quincenal o semanal).
      * @return object|null Configuración del reporte preparada o null si ocurre un error.
      */
-    private static function preparePrepayReportConfig($oReport, $payType)
+    public static function preparePrepayReportConfig($oReport, $payType)
     {
         $oUser = User::find($oReport->user_n_id);
         $sMail = $oUser->email ?? null;

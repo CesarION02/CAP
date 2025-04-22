@@ -90,15 +90,15 @@ class SResumeReport
              * Sección para pruebas
              */
 
-            return view('mails.journeyresumereport')->with('sStartDate', $sStartDate)
-                                            ->with('sEndDate', $sEndDate)
-                                            ->with('incidentsStart', $sIncidentstartDate)
-                                            ->with('incidentsEnd', $sIncidentsendDate)
-                                            ->with('monthsAgo', $oConfiguration->months_ago)
-                                            ->with('sPayTypeText', $sPayTypeText)
-                                            ->with('sPeriod', $sPeriod)
-                                            ->with('aColumns', $aColumns)
-                                            ->with('lData', $lData);
+            // return view('mails.journeyresumereport')->with('sStartDate', $sStartDate)
+            //                                 ->with('sEndDate', $sEndDate)
+            //                                 ->with('incidentsStart', $sIncidentstartDate)
+            //                                 ->with('incidentsEnd', $sIncidentsendDate)
+            //                                 ->with('monthsAgo', $oConfiguration->months_ago)
+            //                                 ->with('sPayTypeText', $sPayTypeText)
+            //                                 ->with('sPeriod', $sPeriod)
+            //                                 ->with('aColumns', $aColumns)
+            //                                 ->with('lData', $lData);
             /**
              * ***********************************************************************************************************
              */

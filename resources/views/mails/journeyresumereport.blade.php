@@ -47,7 +47,7 @@
                         </tr>
                         <tr style="font-size: 14px; margin: 5px 0;">
                             <td>Retardo acumulado:</td>
-                            <td style="color: {{ $oEmp->totalDelay > 15 ? 'red' : '#333' }};">
+                            <td style="color: {{ $oEmp->totalDelay > 30 ? 'red' : '#333' }};">
                                 <b>{{ \App\SUtils\SDelayReportUtils::convertToHoursMinsText($oEmp->totalDelay) }}</b>
                             </td>
                         </tr>
@@ -58,9 +58,9 @@
                             </td>
                         </tr>
                     </table>
-                    @if ($oEmp->totalDelay > 15)
+                    @if ($oEmp->totalDelay > 30)
                         <p style="font-size: 14px; color: red; margin-top: 10px;">
-                            Nota: Únicamente se permiten 15 minutos acumulados de retardo en una quincena.
+                            Nota: Únicamente se permiten 30 minutos acumulados de retardo en un mes.
                         </p>
                     @endif
                     @if (count($oEmp->aIncidents) > 0)
