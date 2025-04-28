@@ -9,6 +9,7 @@ use App\Models\employees;
 use App\Models\User;
 use App\SUtils\SPghUtils;
 use GuzzleHttp\Client;
+use App\SUtils\SAssignGroups;
 use DB;
 
 class userController extends Controller
@@ -186,6 +187,7 @@ class userController extends Controller
                 $data = json_decode($jsonString);
 
                 if($data->status == 'success'){
+                    SAssignGroups::newAssignGroup($user->id);
                     DB::commit();
                     return redirect('user')->with('mensaje', 'Usuario creado con exito');
                 }else{

@@ -786,13 +786,21 @@ class ReporteController extends Controller
             $bModify = SPermissions::hasPermission(\Auth::user()->id, 'ajustes_rep_te');
 
             PrepayrollReportController::prepayrollReportVobos($sStartDate, $sEndDate);
+            $employeeIds = $lEmployees->pluck('id')->all();
+            // $lDeptJobs = DB::table('employees AS e')
+            //                 ->join('departments AS d', 'e.department_id', '=', 'd.id')
+            //                 ->join('jobs AS j', 'e.job_id', '=', 'j.id')
+            //                 ->selectRaw('e.num_employee, CONCAT("DEPTO.: ", d.name, ", PUESTO: ", j.name) AS dept_job')
+            //                 ->pluck('dept_job', 'num_employee');
 
             $lDeptJobs = DB::table('employees AS e')
-                            ->join('departments AS d', 'e.department_id', '=', 'd.id')
-                            ->join('jobs AS j', 'e.job_id', '=', 'j.id')
-                            ->selectRaw('e.num_employee, CONCAT("DEPTO.: ", d.name, ", PUESTO: ", j.name) AS dept_job')
+                            ->join('dept_rh AS d', 'e.dept_rh_id', '=', 'd.id')
+                            ->join('job_rh AS j', 'e.job_rh_id', '=', 'j.id')
+                            ->whereIn('e.id', $employeeIds)
+                            ->selectRaw('e.num_employee, CONCAT("DEPTO.: ", d.name, ", PUESTO: ", j.job) AS dept_job')
                             ->pluck('dept_job', 'num_employee');
 
+            
             $isAdmin = false;
             foreach (auth()->user()->roles()->get() as $rol) {
                 $result = in_array($rol->id, $config->rolesCanSeeAll);

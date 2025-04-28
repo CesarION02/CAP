@@ -409,6 +409,12 @@ Route::delete('job/{id}', 'jobController@destroy')->name('eliminar_puesto');
 Route::delete('job/disable/{id}', 'jobController@activar')->name('activar_puesto');
 /* RUTAS PUESTOS NOMINAS*/
 Route::get('jobRH', 'jobRHController@index')->name('puesto_rh');
+Route::get('jobRH/{id}/edit', 'JobRhController@edit')->name('editar_puesto_rh');
+Route::put('jobRH/{id}', 'JobRhController@update')->name('actualizar_puesto_rh');
+
+Route::get('showPositions', 'jobRHController@showPositions')->name('mostrar_posiciones');
+Route::get('editPositions/{id}', 'jobRHController@editPositions')->name('editar_puestos_nomina');
+Route::put('editPositions/{id}', 'jobRHController@updatePositions')->name('actualizar_puestos_nomina');
 
 /* RUTAS CAPTURA INCIDENTES */
 Route::get('incidents/massive', 'incidentController@massiveCreate')->name('masiva');

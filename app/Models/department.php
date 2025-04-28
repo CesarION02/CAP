@@ -49,4 +49,8 @@ class department extends Model
         return $this->belongsTo('App\Models\policyHoliday','policy_holiday_id');
     }
 
+    public function jobRH(){
+        return $this->hasMany('App\Models\jobRH');
+    }
+
 }

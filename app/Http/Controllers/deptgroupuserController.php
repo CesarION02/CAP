@@ -110,8 +110,8 @@ class deptgroupuserController extends Controller
             $dgu = new group_dept_user();
             $dgu->user_id = $request->usuario;
             $dgu->groupdept_id = $request->dgu[$i];
-            $dgu->created_by = 1;
-            $dgu->updated_by = 1;
+            $dgu->created_by = auth()->user()->id;
+            $dgu->updated_by = auth()->user()->id;
             $dgu->is_delete = 0;
             $dgu->save();
         }
@@ -180,8 +180,8 @@ class deptgroupuserController extends Controller
             $dgu = new group_dept_user();
             $dgu->user_id = $id;
             $dgu->groupdept_id = $request->dgu[$i];
-            $dgu->created_by = 1;
-            $dgu->updated_by = 1;
+            $dgu->created_by = auth()->user()->id;
+            $dgu->updated_by = auth()->user()->id;
             $dgu->is_delete = 0;
             $dgu->save();
         }

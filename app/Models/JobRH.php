@@ -44,4 +44,14 @@ class JobRH extends Model
     {
         return $this->belongsTo('App\Models\DepartmentRH', 'dept_rh_id');
     }
+
+    /**
+     * Obtiene el objeto departamento asociado al puesto
+     *
+     * @return Models/department
+     */
+    public function department()
+    {
+        return $this->belongsTo('App\Models\department', 'department_id');
+    }
 }

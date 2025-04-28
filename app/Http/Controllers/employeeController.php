@@ -421,15 +421,16 @@ class employeeController extends Controller
         //}else{
             //$dept = $config->dept_pre;
         //}
-
-        $department = DepartmentRH::where('id',$jEmployee->dept_rh_id)->get();
+        //aqui se haría la modificación
+        //$department = DepartmentRH::where('id',$jEmployee->dept_rh_id)->get();
+        $department = JobRH::where('id',$jEmployee->job_rh_id)->get();
         $dept = 0;
-        if($department[0]->default_dept_id != null){
-            $dept = $department[0]->default_dept_id;
+        if($department[0]->department_id != null){
+            $dept = $department[0]->department_id;
         }else{
             $dept = $config->dept_pre;
         }
-        $grupoPrenomina = DB::table('prepayroll_group_deptos')->where('department_id',$dept)->get();
+        $grupoPrenomina = DB::table('prepayroll_group_deptos')->where('department_id',$department[0]->department_id)->get();
         $oldEmp = employees::find($id);
 
         if( $oldEmp->dept_rh_id == $jEmployee->dept_rh_id || $oldEmp->lock_depto == 1 ){
@@ -479,9 +480,11 @@ class employeeController extends Controller
                             ]
                         ); 
                         
-            DB::table('prepayroll_group_employees')
-                ->where('id', $id)
-                ->update(['group_id' => $grupoPrenomina[0]->group_id]);
+            if ($grupoPrenomina->isNotEmpty()) {
+                DB::table('prepayroll_group_employees')
+                    ->where('id', $id)
+                    ->update(['group_id' => $grupoPrenomina[0]->group_id]);
+            }
             
         }
 
@@ -501,9 +504,12 @@ class employeeController extends Controller
     {
         $config = \App\SUtils\SConfiguration::getConfigurations();
 
-        $department = DepartmentRH::where('id',$jEmployee->dept_rh_id)->get();
+        //$department = DepartmentRH::where('id',$jEmployee->dept_rh_id)->get();
+        $puesto = JobRH::where('id',$jEmployee->job_rh_id)->get();
         
-        $grupoPrenomina = DB::table('prepayroll_group_deptos')->where('department_id',$department[0]->id)->get();
+        //checar si el departamento rh tiene departamento predeterminado para asignar al empleado
+        // aqui se haria la modifición si se implementa lo de puestos
+        $grupoPrenomina = DB::table('prepayroll_group_deptos')->where('department_id',$puesto[0]->job_rh_id)->get();
 
         $emp = new employees();
 
@@ -523,9 +529,10 @@ class employeeController extends Controller
         $emp->company_id = $this->companies[$jEmployee->company_id];
         $emp->dept_rh_id = $this->rhdepartments[$jEmployee->dept_rh_id];
         $emp->job_rh_id = $this->rhjobs[$jEmployee->siie_job_id];
-        $department = DepartmentRH::where('id',$jEmployee->dept_rh_id)->get();
-        if($department[0]->default_dept_id != null){
-            $emp->department_id = $department[0]->default_dept_id;
+        //$department = DepartmentRH::where('id',$jEmployee->dept_rh_id)->get();
+        $puesto = JobRH::where('id',$jEmployee->job_rh_id)->get();
+        if($puesto[0]->department_id != null){
+            $emp->department_id = $puesto[0]->department_id;
         }else{
             $emp->department_id = $config->dept_pre;
         }
