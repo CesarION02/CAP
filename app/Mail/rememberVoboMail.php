@@ -38,7 +38,7 @@ class rememberVoboMail extends Mailable
         if ($this->type == 'preClose') {
             $subject = 'Aviso: Corte prenómina ' . $this->wayPay . ' #' . $this->num . ': ' . $this->sDateSubject;
         } elseif ($this->type == 'afterClose') {
-            $subject = 'Aviso: Falta Vobo de prenómina ' . $this->wayPay . ' #' . $this->num;
+            $subject = 'Aviso: Falta Vobo prenómina ' . $this->wayPay . ' #' . $this->num;
         }
 
         return $this->from('cap@aeth.mx')

@@ -16,10 +16,10 @@
         @endif
     @elseif ($type == 'afterClose')
         @if ($days > 1)
-            <h2>Te recordamos dar tu Vobo de la prenómina {{ $wayPay }} {{ $num }} que cortó el {{$endDate}}.</h2>
+            <h2>Falta dar tu VoBo a la prenómina {{ $wayPay }} #{{ $num }} que cortó el {{$endDate}}.</h2>
             <p>Han transcurrido {{$days}} {{ $days > 1 ? ' días' : ' día' }} del corte.</p>
         @elseif ($days == 1)
-            <h2>Te recordamos dar tu Vobo de la prenómina {{ $wayPay }} {{ $num }} que cortó ayer.</h2>
+            <h2>Falta dar tu VoBo a la prenómina {{ $wayPay }} #{{ $num }} que cortó ayer.</h2>
         @endif
     @endif
 
