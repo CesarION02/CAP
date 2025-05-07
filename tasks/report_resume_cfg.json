@@ -1,7 +1,7 @@
 {
     "reportQ": {
         "payType": "1",
-        "sinceDate": "2025-03-01",
+        "sinceDate": "2025-05-08",
         "monthsPeriod": 1,
         "times": 2,
         "incidentTypes": [
@@ -13,7 +13,7 @@
     },
     "reportS": {
         "payType": "2",
-        "sinceDate": "2025-03-01",
+        "sinceDate": "2025-05-08",
         "monthsPeriod": 1,
         "times": 2,
         "incidentTypes": [

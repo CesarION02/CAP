@@ -588,7 +588,7 @@ class SReportTasks {
         $oPrepayReportConfig->mails = (object) [
             'to' => $sMail,
             'cc' => '',
-            'cco' => 'edwin.carmona@swaplicado.com.mx'
+            'cco' => ''
         ];
         $oPrepayReportConfig->employees = $lEmployees;
         $oPrepayReportConfig->pay_type = $payType;
@@ -647,7 +647,7 @@ class SReportTasks {
         $oPrepayReportConfig->mails = (object) [
             'to' => $sMail,
             'cc' => '',
-            'cco' => 'edwin.carmona@swaplicado.com.mx'
+            'cco' => ''
         ];
         $oPrepayReportConfig->employees = $lEmployees;
         $oPrepayReportConfig->pay_type = $payType;
