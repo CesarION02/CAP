@@ -47,20 +47,25 @@ class SRememberEmployeeNoCheck
                         $oEmp = SGenUtils::toEmployeeIds($biWeekId, 0, [], [$emp->id], 0);
                         $lRowsBiWeek = SDataProcess::process($sDate, $sDate, $biWeekId, $oEmp);
 
+                        $row = $lRowsBiWeek->first();
+                        if ($row->scheduleText == "Sin horario" || $row->scheduleText == "") {
+                            continue;
+                        }
+
                         $timeIn = "";
                         $lFlRowsIn = $lRowsBiWeek->filter(function ($item) use ($sDate) {
-                            return Carbon::parse($item->inDateTime)->isSameDay($sDate);
+                            return Carbon::parse($item->outDateTime)->isSameDay($sDate);
                         });
                         if (count($lFlRowsIn) > 0) {
                             $oRow = $lFlRowsIn->first();
                             if (strpos($oRow->comments, 'Sin entrada') === false) {
-                                $timeIn = Carbon::parse($oRow->inDateTime)->toTimeString();
+                                $timeIn = Carbon::parse($oRow->outDateTime)->toTimeString();
                             }
                         }
 
                         $timeOut = "";
                         $lFlRowsOut = $lRowsBiWeek->filter(function ($item) use ($sDate) {
-                            return Carbon::parse($item->inDateTime)->isSameDay($sDate);
+                            return Carbon::parse($item->outDateTime)->isSameDay($sDate);
                         });
                         if (count($lFlRowsOut) > 0) {
                             $oRow = $lFlRowsOut->first();
@@ -75,6 +80,8 @@ class SRememberEmployeeNoCheck
                         });
                         if (count($lFlRowsOut) > 0) {
                             $oRow = $lFlRowsOut->first();
+                            $scheduleIn = $oRow->inDateTimeSch;
+                            $scheduleOut = $oRow->outDateTimeSch;
                             if (strpos($oRow->comments, 'Sin checadas') === false) {
                                 $time = Carbon::parse($oRow->outDateTime)->toTimeString();
                             }
@@ -91,6 +98,49 @@ class SRememberEmployeeNoCheck
                         }
 
                         if ($type != 0) {
+                            $nextUser = false;
+                            switch ($type) {
+                                case 1:
+                                    if ($scheduleIn != "" && $scheduleIn != null) {
+                                        $oScheduleIn = Carbon::parse($scheduleIn);
+                                        if ($oScheduleIn->gt($dayToCheck)) {
+                                            $nextUser = true;
+                                        }
+                                    } else {
+                                        $nextUser = true;
+                                    }
+
+                                    break;
+                                case 2:
+                                    if ($scheduleOut != "" && $scheduleOut != null) {
+                                        $oScheduleOut = Carbon::parse($scheduleOut);
+                                        if ($oScheduleOut->gt($dayToCheck)) {
+                                            $nextUser = true;
+                                        }
+                                    } else {
+                                        $nextUser = true;
+                                    }
+                                    break;
+                                case 3:
+                                    if ($scheduleIn != "" && $scheduleIn != null && $scheduleOut != "" && $scheduleOut != null) {
+                                        $oScheduleIn = Carbon::parse($scheduleIn);
+                                        $oScheduleOut = Carbon::parse($scheduleOut);
+                                        if ($oScheduleIn->gt($dayToCheck) || $oScheduleOut->gt($dayToCheck)) {
+                                            $nextUser = true;
+                                        }
+                                    } else {
+                                        $nextUser = true;
+                                    }
+                                    break;
+                                default:
+                                    # code...
+                                    break;
+                            }
+
+                            if ($nextUser) {
+                                continue;
+                            }
+
                             $oUser = \DB::connection('mysqlGlobalUsers')
                                 ->table('global_users')
                                 ->where('external_id', $emp->external_id)
