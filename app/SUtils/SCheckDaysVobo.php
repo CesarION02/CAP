@@ -28,6 +28,26 @@ class SCheckDaysVobo {
                 if($arrDatesWeek[1] == null){
                     return json_encode(['isInRange' => true, 'days' => [], 'message' => '']);
                 }
+
+                $week = \DB::table('week_cut')
+                                ->where('num', $arrNumberWeek[0])
+                                ->where('year', $arrNumberWeek[1])
+                                ->first();
+
+                $config_close = \DB::table('payroll_closing_days')
+                                    ->where('is_week', 1)
+                                    ->where('week_id', $week->id)
+                                    ->first();
+
+                if (!is_null($config_close)) {
+                    if ($config_close->applies) {
+                        return json_encode(['isInRange' => true, 'days' => [], 'message' => '']);
+                    } else {
+                        $days = $config_close->days;
+                    }
+                } else {
+                    $days = $config->daysToCloseBiWeekVobo;
+                }
                 
                 $dt_cut = $arrDatesWeek[1];
                 $oCut = Carbon::parse($dt_cut);
@@ -35,7 +55,7 @@ class SCheckDaysVobo {
                     $cut = Carbon::parse($dt_cut)->add('week', 1)->startOfWeek();
                     $dt_cut = $cut->format('Y-m-d');
                 }
-                $days = $config->daysToCloseWeekVobo;
+                
                 $type = 'semanal';
                 $num = $arrNumberWeek[0];
             } else if ($way_pay == 1) {
@@ -45,6 +65,27 @@ class SCheckDaysVobo {
                 if($arrDatesBiWeek[1] == null){
                     return json_encode(['isInRange' => true, 'days' => [], 'message' => '']);
                 }
+
+                $biWeek = \DB::table('hrs_prepay_cut')
+                                ->where('num', $arrNumberBiWeek[0])
+                                ->where('year', $arrNumberBiWeek[1])
+                                ->where('is_delete', 0)
+                                ->first();
+
+                $config_close = \DB::table('payroll_closing_days')
+                                    ->where('is_biweek', 1)
+                                    ->where('biweek_id', $biWeek->id)
+                                    ->first();
+
+                if (!is_null($config_close)) {
+                    if ($config_close->applies) {
+                        return json_encode(['isInRange' => true, 'days' => [], 'message' => '']);
+                    } else {
+                        $days = $config_close->days;
+                    }
+                } else {
+                    $days = $config->daysToCloseBiWeekVobo;
+                }
     
                 $dt_cut = $arrDatesBiWeek[1];
                 $oCut = Carbon::parse($dt_cut);
@@ -52,12 +93,19 @@ class SCheckDaysVobo {
                     $cut = Carbon::parse($dt_cut)->add('week', 1)->startOfWeek();
                     $dt_cut = $cut->format('Y-m-d');
                 }
-                $days = $config->daysToCloseBiWeekVobo;
+                
                 $type = 'quincenal';
                 $num = $arrNumberBiWeek[0];
             }
+
+            foreach ($days as $day) {
+                $oDt_cut = Carbon::parse($dt_cut)->add('day', 1)->endOfDay();
+                if ($oCut->dayOfWeek == 5 || $oCut->dayOfWeek == 6) {
+                    $cut = Carbon::parse($dt_cut)->add('week', 1)->startOfWeek();
+                    $dt_cut = $cut->format('Y-m-d');
+                }
+            }
     
-            $oDt_cut = Carbon::parse($dt_cut)->add('day', $days)->endOfDay();
             $oToday = Carbon::parse($today)->endOfDay();
     
             if ($oToday->gt($oDt_cut)) {
