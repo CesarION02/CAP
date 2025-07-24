@@ -43,10 +43,10 @@ class SCheckDaysVobo {
                     if ($config_close->applies) {
                         return json_encode(['isInRange' => true, 'days' => [], 'message' => '']);
                     } else {
-                        $days = $config_close->days;
+                        $days = $config_close->days + $config->daysToCloseWeekVobo;
                     }
                 } else {
-                    $days = $config->daysToCloseBiWeekVobo;
+                    $days = $config->daysToCloseWeekVobo;
                 }
                 
                 $dt_cut = $arrDatesWeek[1];
@@ -81,7 +81,7 @@ class SCheckDaysVobo {
                     if ($config_close->applies) {
                         return json_encode(['isInRange' => true, 'days' => [], 'message' => '']);
                     } else {
-                        $days = $config_close->days;
+                        $days = $config_close->days + $config->daysToCloseBiWeekVobo;
                     }
                 } else {
                     $days = $config->daysToCloseBiWeekVobo;
@@ -98,11 +98,11 @@ class SCheckDaysVobo {
                 $num = $arrNumberBiWeek[0];
             }
 
-            foreach ($days as $day) {
-                $oDt_cut = Carbon::parse($dt_cut)->add('day', 1)->endOfDay();
-                if ($oCut->dayOfWeek == 5 || $oCut->dayOfWeek == 6) {
-                    $cut = Carbon::parse($dt_cut)->add('week', 1)->startOfWeek();
-                    $dt_cut = $cut->format('Y-m-d');
+            $oDt_cut = Carbon::parse($dt_cut);
+            for ($i = 0; $i < $days; $i++) {
+                $oDt_cut = $oDt_cut->add('day', 1)->endOfDay();
+                if ($oDt_cut->dayOfWeek == 5 || $oDt_cut->dayOfWeek == 6) {
+                    $oDt_cut = Carbon::parse($dt_cut)->add('week', 1)->startOfWeek();
                 }
             }
     
