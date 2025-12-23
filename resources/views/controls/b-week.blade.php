@@ -99,7 +99,7 @@ Ejemplo de implementación:
             let biweeksCal = [];
 
             let pType = $('input[name=options]:checked').val();
-   
+
             axios.get(route, {
                 params: {
                     "year" : dtDate.get('year')
@@ -129,6 +129,9 @@ Ejemplo de implementación:
                         [moment(b.dt_start), moment(b.dt_end)];
                 }
 
+                // AGREGAR ESTA LÍNEA: Destruir instancia anterior
+                $('#daterange-b-week').data('daterangepicker').remove();
+
                 $('#daterange-b-week').daterangepicker({
                     autoApply: true,
                     startDate: start,
@@ -156,6 +159,10 @@ Ejemplo de implementación:
 
         $('input[type=radio][name=options]').on('change', function() {
             let start = moment(end);
+            
+            // AGREGAR ESTA LÍNEA: Destruir instancia anterior
+            $('#daterange-b-week').data('daterangepicker').remove();
+            
             switch ($(this).val()) {
                 case 'week':
                         start.subtract(6, 'days');
