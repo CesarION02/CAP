@@ -128,22 +128,23 @@ Ejemplo de implementación:
                         [moment(b.dt_start), moment(b.dt_end)];
                 }
 
-                // Destruir instancia anterior
                 if ($('#daterange-b-week').data('daterangepicker')) {
                     $('#daterange-b-week').data('daterangepicker').remove();
                 }
+
+                // CAMBIO: Calcular maxDate basado en el año seleccionado
+                let maxDateForYear = moment(dtDate.get('year') + '-12-31');
 
                 $('#daterange-b-week').daterangepicker({
                     autoApply: true,
                     startDate: start,
                     endDate: end,
                     alwaysShowCalendars: true,
-                    maxDate: moment().add(1, 'days'),
+                    maxDate: maxDateForYear,  // Usa el último día del año seleccionado
                     ranges: pType == "week" ? weekCuts : pType == "biweek" ?  biweekCuts : biweekCalCuts,
                     drops: "auto"
                 }, cb);
 
-                // AGREGAR AQUÍ: Llamar a cb DESPUÉS de inicializar el daterangepicker
                 cb(start, end);
             })
             .catch(function(error) {
