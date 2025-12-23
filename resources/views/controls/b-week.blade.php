@@ -89,7 +89,6 @@ Ejemplo de implementación:
             }
 
             setRanges(start, start, end);
-            cb(start, end);
         });
 
         function setRanges(dtDate, start, end) {
@@ -129,8 +128,10 @@ Ejemplo de implementación:
                         [moment(b.dt_start), moment(b.dt_end)];
                 }
 
-                // AGREGAR ESTA LÍNEA: Destruir instancia anterior
-                $('#daterange-b-week').data('daterangepicker').remove();
+                // Destruir instancia anterior
+                if ($('#daterange-b-week').data('daterangepicker')) {
+                    $('#daterange-b-week').data('daterangepicker').remove();
+                }
 
                 $('#daterange-b-week').daterangepicker({
                     autoApply: true,
@@ -141,6 +142,9 @@ Ejemplo de implementación:
                     ranges: pType == "week" ? weekCuts : pType == "biweek" ?  biweekCuts : biweekCalCuts,
                     drops: "auto"
                 }, cb);
+
+                // AGREGAR AQUÍ: Llamar a cb DESPUÉS de inicializar el daterangepicker
+                cb(start, end);
             })
             .catch(function(error) {
                 console.log(error);
