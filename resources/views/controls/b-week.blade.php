@@ -129,15 +129,32 @@ Ejemplo de implementación:
                         [moment(b.dt_start), moment(b.dt_end)];
                 }
 
+                // elegir rango por defecto desde la primera semana devuelta (si existe)
+                let defaultStart = start;
+                let defaultEnd = end;
+                if (weeks && weeks.length > 0) {
+                    defaultStart = moment(weeks[0].dt_start);
+                    defaultEnd   = moment(weeks[0].dt_end);
+                }
+
+                // remover instancia previa del daterangepicker (si existe) antes de re-inicializar
+                let prev = $('#daterange-b-week').data('daterangepicker');
+                if (prev) {
+                    prev.remove();
+                }
+
                 $('#daterange-b-week').daterangepicker({
                     autoApply: true,
-                    startDate: start,
-                    endDate: end,
+                    startDate: defaultStart,
+                    endDate: defaultEnd,
                     alwaysShowCalendars: true,
                     maxDate: moment().add(1, 'days'),
                     ranges: pType == "week" ? weekCuts : pType == "biweek" ?  biweekCuts : biweekCalCuts,
                     drops: "auto"
                 }, cb);
+
+                // actualizar los inputs / vista con el rango por defecto
+                cb(defaultStart, defaultEnd);
             })
             .catch(function(error) {
                 console.log(error);
