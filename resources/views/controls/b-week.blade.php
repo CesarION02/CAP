@@ -161,58 +161,23 @@ Ejemplo de implementación:
             });
         }
 
-        $('#daterange-b-week').daterangepicker({
-                    alwaysShowCalendars: true,
-                    autoApply: true,
-                    maxDate: moment().add(1, 'days'),
-                    startDate: start,
-                    endDate: end,
-                    ranges: $(this).val() == "week" ? weekCuts : $(this).val() == "biweek" ? biweekCuts : biweekCalCuts,
-                    drops: "auto"
-                }, cb);
+        // --- REMOVED: duplicate initial daterangepicker initialization ---
+        // $('#daterange-b-week').daterangepicker({
+        //             alwaysShowCalendars: true,
+        //             autoApply: true,
+        //             maxDate: moment().add(1, 'days'),
+        //             startDate: start,
+        //             endDate: end,
+        //             ranges: $(this).val() == "week" ? weekCuts : $(this).val() == "biweek" ? biweekCuts : biweekCalCuts,
+        //             drops: "auto"
+        //         }, cb);
 
+        // Reemplazar el handler de cambio de radio para pedir ranges actualizadas
         $('input[type=radio][name=options]').on('change', function() {
-            let start = moment(end);
-            switch ($(this).val()) {
-                case 'week':
-                        start.subtract(6, 'days');
-                        $('#daterange-b-week').daterangepicker({
-                            alwaysShowCalendars: true,
-                            autoApply: true,
-                            maxDate: moment().add(1, 'days'),
-                            startDate: start,
-                            endDate: end,
-                            ranges: weekCuts,
-                            drops: "auto"
-                        }, cb);
-                break;
-                case 'biweek':
-                        start.subtract(13, 'days');
-                        $('#daterange-b-week').daterangepicker({
-                            alwaysShowCalendars: true,
-                            autoApply: true,
-                            maxDate: moment().add(1, 'days'),
-                            startDate: start,
-                            endDate: end,
-                            ranges: biweekCuts,
-                            drops: "auto"
-                        }, cb);
-                break;
-                case 'biweekcal':
-                        start.subtract(14, 'days');
-                        $('#daterange-b-week').daterangepicker({
-                            alwaysShowCalendars: true,
-                            autoApply: true,
-                            maxDate: moment().add(1, 'days'),
-                            startDate: start,
-                            endDate: end,
-                            ranges: biweekCalCuts,
-                            drops: "auto"
-                        }, cb);
-                break;
-            }
-
-            cb(start, end);
+            let year = document.getElementById("year_id").value || start.format('YYYY');
+            let dtDate = moment(year + '-01-01');
+            // volver a cargar ranges desde el servidor y reinit picker
+            setRanges(dtDate, moment(dtDate), moment(dtDate).add($(this).val() == 'week' ? 6 : $(this).val() == 'biweek' ? 13 : 14, 'days'));
         });
     });
 </script>
