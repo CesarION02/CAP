@@ -70,8 +70,7 @@ Ejemplo de implementación:
             year_d.setAttribute('value', start.format('YYYY'));
         }
 
-        $('input[type=number][name=year]').on('change input', function() {
-            // uso 'input' además de 'change' por si el usuario no pierde foco
+        $('input[type=number][name=year]').on('change', function() {
             let year = document.getElementById("year_id").value;
             let start = moment(year + '-01-01');
             let end = moment(year + '-01-01');
@@ -100,21 +99,16 @@ Ejemplo de implementación:
             let biweeksCal = [];
 
             let pType = $('input[name=options]:checked').val();
-
-            console.log('[setRanges] solicitando cortes para año:', dtDate.year(), 'pType:', pType);
-
+   
             axios.get(route, {
                 params: {
-                    "year" : dtDate.year() // uso .year() para mayor claridad
+                    "year" : dtDate.get('year')
                 }
             })
             .then(res => {
-                console.log('[setRanges] respuesta getcuts:', res.data);
-
-                // usar slice().reverse() para no mutar el array original por si se reutiliza
-                weeks = (res.data.weeks || []).slice().reverse();
-                biweeks = (res.data.biweeks || []).slice().reverse();
-                biweeksCal = (res.data.biweekscal || []).slice().reverse();
+                weeks = res.data.weeks.reverse();
+                biweeks = res.data.biweeks.reverse();
+                biweeksCal = res.data.biweekscal.reverse();
 
                 weekCuts = {};
                 biweekCuts = {};
@@ -135,12 +129,6 @@ Ejemplo de implementación:
                         [moment(b.dt_start), moment(b.dt_end)];
                 }
 
-                // remover instancia previa del daterangepicker si existe (evita problemas de no actualizar)
-                const dr = $('#daterange-b-week').data('daterangepicker');
-                if (dr) {
-                    try { dr.remove(); } catch (e) { console.warn('No se pudo remover daterangepicker previo', e); }
-                }
-
                 $('#daterange-b-week').daterangepicker({
                     autoApply: true,
                     startDate: start,
@@ -152,15 +140,10 @@ Ejemplo de implementación:
                 }, cb);
             })
             .catch(function(error) {
-                console.log('[setRanges] error getcuts:', error);
+                console.log(error);
             });
         }
 
-        // inicialización segura del picker si quedó sin setRanges
-        const drInit = $('#daterange-b-week').data('daterangepicker');
-        if (drInit) {
-            try { drInit.remove(); } catch(e) {}
-        }
         $('#daterange-b-week').daterangepicker({
                     alwaysShowCalendars: true,
                     autoApply: true,
