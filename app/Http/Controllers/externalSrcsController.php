@@ -70,9 +70,6 @@ class externalSrcsController extends Controller
 
         $lEmployees = SGenUtils::toEmployeeIds($payType, 0, null, $lCapEmployees);
 
-        // $lRows = SDataProcess::process($startDate, $endDate, $payType, $lEmployees);
-        // $cReport = collect($lRows);
-
         $oDate = Carbon::parse($startDate);
 
          /**
@@ -91,19 +88,26 @@ class externalSrcsController extends Controller
 
         $oHeader = new SDataHeader();
 
-        $cData = clone $cReport;
-        $lGrouped = $cData->groupBy('employee_id')->map(function ($row) {
-                                $registry = (object) [
-                                    'totalDelayMins' => $row->sum('delayMins'),
-                                ];
+        $config = \App\SUtils\SConfiguration::getConfigurations();
+        $minutesToPrematureOutBonus = $config->minutesToPrematureOutBonus ?? 0;
 
-                        return $registry;
-                    });
+        $cData = clone $cReport;
+        $lGrouped = $cData->groupBy('employee_id')->map(function ($row) use ($minutesToPrematureOutBonus) {
+            $registry = (object) [
+                'totalDelayMins' => $row->sum('delayMins'),
+                'totalPrematureDays' => $row->filter(function ($item) use ($minutesToPrematureOutBonus) {
+                    return (int) $item->prematureout > $minutesToPrematureOutBonus;
+                })->count(),
+            ];
+
+            return $registry;
+        });
 
         foreach ($lEmployees as $oEmployee) {
             $oRow = new SDataRow();
             $oRow->idEmployee = $oEmployee->external_id;
-
+            $oRow->lostBonus = false;
+            
             if ($oEmployee->ben_pol_id == \SCons::BEN_POL_FREE) {
                 $oHeader->rows[] = $oRow;
                 continue;
@@ -112,6 +116,12 @@ class externalSrcsController extends Controller
             if (sizeof($lGrouped) > 0) {
                 if (isset($lGrouped[$oEmployee->id])) {
                     $oRow->delayMins = $lGrouped[$oEmployee->id]->totalDelayMins;
+                    if ($lGrouped[$oEmployee->id]->totalPrematureDays > 0) {
+                        $oRow->prematureOut = $lGrouped[$oEmployee->id]->totalPrematureDays;
+
+                        // Con 1 día pierde bono
+                        $oRow->lostBonus = true;
+                    }
                 }
             }
 
@@ -126,14 +136,14 @@ class externalSrcsController extends Controller
 
             $lAuxReport = clone $cReport;
             $lColRep = collect($lAuxReport);
-                        $lColRep = $lColRep->where('employee_id', $oEmployee->id);
-                        $lColRep = $lColRep->filter(function ($item) {
-                                            return (stristr($item->comments, 'Sin entrada') || stristr($item->comments, 'Sin salida'))
-                                                    && (! stristr($item->comments, 'Sin horario'));
-                                        });
-                        // $lColRep = $lColRep->filter(function ($item) {
-                        //                 return (! $item->hasCheckOut || ! $item->hasCheckIn);
-                        //             });
+            $lColRep = $lColRep->where('employee_id', $oEmployee->id);
+            $lColRep = $lColRep->filter(function ($item) {
+                return (stristr($item->comments, 'Sin entrada') || stristr($item->comments, 'Sin salida'))
+                        && (! stristr($item->comments, 'Sin horario'));
+            });
+            // $lColRep = $lColRep->filter(function ($item) {
+            //                 return (! $item->hasCheckOut || ! $item->hasCheckIn);
+            //             });
 
             if (sizeof($lColRep) > 0) {
                 $oRow->hasNoChecks = true;

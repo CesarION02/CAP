@@ -11,3 +11,9 @@ author: Cesar Orozco
 date: 2024-08-13
 description: Los filtros en la vista de usuarios no funcionaban, se corrige, cambiando la ruta a la que apuntan.
 -------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------
+feat: Modificación de funcionalidad que recupera bonos para que recupere si se pasa de minutos de salida anticipada
+author: Cesar Orozco
+date: 2026-04-09
+description: Modificación de funcionalidad que recupera bonos para que recupere si se pasa de minutos de salida anticipada.
+-------------------------------------------------------------------------------------------------------------------------
