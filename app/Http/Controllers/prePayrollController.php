@@ -158,7 +158,27 @@ class prePayrollController extends Controller
         /**
          * Obtiene el reporte de horas extra, que contiene también domingos y festivos.
          */
-        $info = SInfoWithPolicy::preProcessInfo($startDate, $oStartDate->year, $endDate, $payType);
+        $info = SInfoWithPolicy::preProcessInfo($startDate, $oEndDate->year, $endDate, $payType);
+
+        if ($payType == 2){
+            $periodProcessed = DB::table('period_processed')
+                ->join('week_cut', 'week_cut.id', '=', 'period_processed.num_week')
+                ->where('week_cut.ini', $startDate)
+                ->where('week_cut.fin', $endDate)
+                ->where('period_processed.is_week', 1)
+                ->orderByDesc('period_processed.id')
+                ->select('period_processed.id AS id')
+                ->first();    
+        }else{
+            $periodProcessed = DB::table('period_processed')
+                ->join('hrs_prepay_cut', 'hrs_prepay_cut.id', '=', 'period_processed.num_biweekly')
+                ->where('hrs_prepay_cut.dt_cut', $endDate)
+                ->where('period_processed.is_biweekly', 1)
+                ->orderByDesc('period_processed.id')
+                ->select('period_processed.id AS id')
+                ->first();    
+        } 
+
         $lExtras = DB::table('processed_data')
                                 ->join('employees','employees.id','=','processed_data.employee_id')
                                 ->whereIn('employees.id', $lCapEmployees)
@@ -325,7 +345,25 @@ class prePayrollController extends Controller
 
             $prePayroll->rows[] = $row;
         }
+        
+        $prePayroll->processing_errors = collect();
 
+        if ($periodProcessed) {
+
+            $processingErrors = DB::table('period_processing_errors')
+                ->join('employees', 'employees.id', '=', 'period_processing_errors.employee_id')
+                ->where('period_processed_id', $periodProcessed->id)
+                ->whereIn('employees.id', $lCapEmployees)
+                ->select(
+                    'employees.external_id AS employee_id',
+                    'employees.name AS employee_name',
+                    'period_processing_errors.errors AS error'
+                )
+                ->get();
+
+            $prePayroll->processing_errors = $processingErrors;
+        }
+        
         return $prePayroll;
     }
 

@@ -10,6 +10,7 @@ use App\SUtils\SDateUtils;
 use App\Models\processed_data;
 use App\Models\period_processed;
 use App\Models\prepayrollchange;
+use App\PeriodProcessingError;
 
 class SInfoWithPolicy{
 /**
@@ -2830,115 +2831,163 @@ class SInfoWithPolicy{
         }
         
         if($pendientesProcesar[0] != 0){
-        switch($sTypePay){
-             case 2:
-                $empleados = DB::table('employees')
-                                ->where('is_active','=',1)
-                                ->where('way_pay_id','=',2)
-                                // ->where('id','!=',1977)
-                                // ->where('id','!=',2060)
-                                ->orderBy('id')
-                                ->select('id AS id','policy_extratime_id AS extratime')
-                                ->get();
-                $num_empleados = count($empleados);
-                $semanas = DB::table('week_cut')
-                                ->whereIn('num',$pendientesProcesar)
-                                ->where('year',$iYear)
-                                ->select('ini AS inicio','fin AS final','id AS id')
-                                ->get();
-                $num_semanas = count($semanas);
+            switch($sTypePay){
+                case 2:
+                    $empleados = DB::table('employees')
+                                    ->where('is_active','=',1)
+                                    ->where('way_pay_id','=',2)
+                                    // ->where('id','!=',1977)
+                                    // ->where('id','!=',2060)
+                                    ->orderBy('id')
+                                    ->select('id AS id','policy_extratime_id AS extratime')
+                                    ->get();
+                    $num_empleados = count($empleados);
+                    $semanas = DB::table('week_cut')
+                                    ->whereIn('num',$pendientesProcesar)
+                                    ->where('year',$iYear)
+                                    ->select('ini AS inicio','fin AS final','id AS id')
+                                    ->get();
+                    $num_semanas = count($semanas);
 
-                for ( $i = 0 ; $num_semanas > $i ; $i++ ){
-                    $cerrado = 1;
-                    for( $j = 0 ; $num_empleados > $j ; $j++ ){
+                    for ( $i = 0 ; $num_semanas > $i ; $i++ ){
                         $inicio = Carbon::parse($semanas[$i]->inicio);
-                        $fin = Carbon::parse($semanas[$i]->final);
-                        $diferencia = ($inicio->diffInDays($fin))+1;
-                        $empl[0] = $empleados[$j]->id;
-                        $extratime = $empleados[$j]->extratime;
-                        $lRows = SInfoWithPolicy::standardization($semanas[$i]->inicio,$semanas[$i]->final,$sTypePay,$empl);
-                        $lRows = SInfoWithPolicy::handlingHours($lRows,$diferencia,$extratime);
-                        $lRows = SInfoWithPolicy::restDay($lRows,$diferencia);
+                        $periodProcessed = SInfoWithPolicy::closePeriod(
+                            $semanas[$i]->id,
+                            $sTypePay,
+                            $inicio->year
+                        );
 
-                        SInfoWithPolicy::guardarProcesamiento($empleados[$j]->id,$lRows,$semanas[$i]->id,$iYear,2);
-                        
-                    }
+                        $cerrado = 1;
+                        for( $j = 0 ; $num_empleados > $j ; $j++ ){
+                            try{
+                                $fin = Carbon::parse($semanas[$i]->final);
+                                $diferencia = ($inicio->diffInDays($fin))+1;
+                                $empl[0] = $empleados[$j]->id;
+                                $extratime = $empleados[$j]->extratime;
+                                $lRows = SInfoWithPolicy::standardization($semanas[$i]->inicio,$semanas[$i]->final,$sTypePay,$empl);
+                                $lRows = SInfoWithPolicy::handlingHours($lRows,$diferencia,$extratime);
+                                $lRows = SInfoWithPolicy::restDay($lRows,$diferencia);
 
-                    SInfoWithPolicy::closePeriod( $semanas[$i]->id, $sTypePay, $inicio->year);
-                        
-                }
-            break;
-            case 1:
-                $contador[0] = 0;
-                $contador[1] = 0;
-                $contador[2] = 0;
-                $config = \App\SUtils\SConfiguration::getConfigurations();
-                $empleados = DB::table('employees')
-                                ->where('is_active','=',1)
-                                ->where('way_pay_id','=',1)
-                                //->where('id',37)
-                                ->where('department_id','!=',$config->dept_foraneo)
-                                ->orderBy('id')
-                                ->select('id AS id','policy_extratime_id AS extratime')
-                                ->get();
-                $num_empleados = count($empleados);
-                $quincenas = DB::table('hrs_prepay_cut')
-                                ->whereIn('id',$pendientesProcesar)
-                                ->select('dt_cut AS cut', 'num AS num', 'year AS year','id AS id')
-                                ->get();
-                $num_semanas = count($quincenas);
-                for( $j = 0 ; count($quincenas) > $j ; $j++ ){                
-                    if($quincenas[$j]->num > 1){
-                        $inicioAux = DB::table('hrs_prepay_cut')
-                        ->where('year', $quincenas[$j]->year)
-                        ->where('num', ($quincenas[$j]->num)-1)
-                        ->select('dt_cut AS cut')
-                        ->get(); 
-        
-                        $inicio = Carbon::parse($inicioAux[0]->cut);
-                        $inicio->addDay();
-                        $quincenasInicio[$j] = $inicio->format('Y-m-d');
-                    }else{
-                        $inicioAux = DB::table('hrs_prepay_cut')
-                        ->where('year',($quincenas[$j]->year)-1)
-                        ->orderBy('num','DESC')
-                        ->select('dt_cut AS cut')
-                        ->get();
-                        
-                        $inicio = Carbon::parse($inicioAux[0]->cut);
-                        $inicio->addDay();
-                        $quincenasInicio[$j] = $inicio->format('Y-m-d');
-                    } 
-                }
-                for ( $i = 0 ; $num_semanas > $i ; $i++ ){
-                    for( $j = 0 ; $num_empleados > $j ; $j++ ){
-                        $inicio = Carbon::parse($quincenasInicio[$i]);
-                        $fin = Carbon::parse($quincenas[$i]->cut);
-                        $diferencia = ($inicio->diffInDays($fin))+1;
-                        $empl[0] = $empleados[$j]->id;
-                        $extratime = $empleados[$j]->extratime;
-                        $lRows = SInfoWithPolicy::standardization($quincenasInicio[$i],$quincenas[$i]->cut,$sTypePay,$empl);
-                        if(count($lRows) != 0){
-                            $lRows = SInfoWithPolicy::handlingHours($lRows,$diferencia,$extratime);
-                            //$lRows = SInfoWithPolicy::restDay($lRows,$diferencia);
-                            $semanas = SDateUtils::separateBiweekly($quincenas[$i]->id);
-                            for ( $x = 0 ; count($semanas) > $x ; $x++ ){
-                                $contador = SInfoWithPolicy::restDayBi($lRows,$quincenasInicio[$i],$quincenas[$i]->cut,$semanas[$x],$iYear,$empl[0],$contador);
+                                SInfoWithPolicy::guardarProcesamiento($empleados[$j]->id,$lRows,$semanas[$i]->id,$iYear,2);
+                            }catch(\Throwable $e){
+                                \Log::error('Error procesando empleado en preProcesoInfo', [
+                                    'employee_id' => $empleados[$j]->id,
+                                    'semana_id' => $semanas[$i]->id,
+                                    'year' => $iYear,
+                                    'tipo_pago' => $sTypePay,
+                                    'error' => $e->getMessage(),
+                                    'linea' => $e->getLine(),
+                                    'archivo' => $e->getFile()
+                                ]);
+
+                                PeriodProcessingError::create([
+                                    'period_processed_id' => $periodProcessed->id,
+                                    'employee_id' => $empleados[$j]->id,
+                                    'errors' => $e->getMessage(),
+                                    'trace' => $e->getTraceAsString()
+                                ]);
+
+                                continue;    
                             }
-                            $contador[0] = 0;
-                            $contador[1] = 0;
-                            $contador[2] = 0;
-                            SInfoWithPolicy::guardarProcesamiento($empleados[$j]->id,$lRows,$quincenas[$i]->id,$iYear,1);
+                            
+                        }      
+                    }
+                break;
+                case 1:
+                    $contador[0] = 0;
+                    $contador[1] = 0;
+                    $contador[2] = 0;
+                    $config = \App\SUtils\SConfiguration::getConfigurations();
+                    $empleados = DB::table('employees')
+                                    ->where('is_active','=',1)
+                                    ->where('way_pay_id','=',1)
+                                    //->where('id',37)
+                                    ->where('department_id','!=',$config->dept_foraneo)
+                                    ->orderBy('id')
+                                    ->select('id AS id','policy_extratime_id AS extratime')
+                                    ->get();
+                    $num_empleados = count($empleados);
+                    $quincenas = DB::table('hrs_prepay_cut')
+                                    ->whereIn('id',$pendientesProcesar)
+                                    ->select('dt_cut AS cut', 'num AS num', 'year AS year','id AS id')
+                                    ->get();
+                    $num_semanas = count($quincenas);
+                    for( $j = 0 ; count($quincenas) > $j ; $j++ ){                
+                        if($quincenas[$j]->num > 1){
+                            $inicioAux = DB::table('hrs_prepay_cut')
+                            ->where('year', $quincenas[$j]->year)
+                            ->where('num', ($quincenas[$j]->num)-1)
+                            ->select('dt_cut AS cut')
+                            ->get(); 
+            
+                            $inicio = Carbon::parse($inicioAux[0]->cut);
+                            $inicio->addDay();
+                            $quincenasInicio[$j] = $inicio->format('Y-m-d');
+                        }else{
+                            $inicioAux = DB::table('hrs_prepay_cut')
+                            ->where('year',($quincenas[$j]->year)-1)
+                            ->orderBy('num','DESC')
+                            ->select('dt_cut AS cut')
+                            ->get();
+                            
+                            $inicio = Carbon::parse($inicioAux[0]->cut);
+                            $inicio->addDay();
+                            $quincenasInicio[$j] = $inicio->format('Y-m-d');
+                        } 
+                    }
+                    for ( $i = 0 ; $num_semanas > $i ; $i++ ){
+
+                        $inicio = Carbon::parse($quincenasInicio[$i]);
+
+                        $periodProcessed = SInfoWithPolicy::closePeriod(
+                            $quincenas[$i]->id,
+                            $sTypePay,
+                            $inicio->year
+                        );          
+
+                        for( $j = 0 ; $num_empleados > $j ; $j++ ){
+                            try{
+                                $fin = Carbon::parse($quincenas[$i]->cut);
+                                $diferencia = ($inicio->diffInDays($fin))+1;
+                                $empl[0] = $empleados[$j]->id;
+                                $extratime = $empleados[$j]->extratime;
+                                $lRows = SInfoWithPolicy::standardization($quincenasInicio[$i],$quincenas[$i]->cut,$sTypePay,$empl);
+                                if(count($lRows) != 0){
+                                    $lRows = SInfoWithPolicy::handlingHours($lRows,$diferencia,$extratime);
+                                    //$lRows = SInfoWithPolicy::restDay($lRows,$diferencia);
+                                    $semanas = SDateUtils::separateBiweekly($quincenas[$i]->id);
+                                    for ( $x = 0 ; count($semanas) > $x ; $x++ ){
+                                        $contador = SInfoWithPolicy::restDayBi($lRows,$quincenasInicio[$i],$quincenas[$i]->cut,$semanas[$x],$iYear,$empl[0],$contador);
+                                    }
+                                    $contador[0] = 0;
+                                    $contador[1] = 0;
+                                    $contador[2] = 0;
+                                    SInfoWithPolicy::guardarProcesamiento($empleados[$j]->id,$lRows,$quincenas[$i]->id,$iYear,1);
+                                }
+                            }catch(\Throwable $e){
+                                \Log::error('Error procesando empleado en preProcesoInfo quincenal', [
+                                    'employee_id' => $empleados[$j]->id,
+                                    'quincena_id' => $quincenas[$i]->id,
+                                    'year' => $iYear,
+                                    'tipo_pago' => $sTypePay,
+                                    'error' => $e->getMessage(),
+                                    'linea' => $e->getLine(),
+                                    'archivo' => $e->getFile()
+                                ]);
+
+                                PeriodProcessingError::create([
+                                    'period_processed_id' => $periodProcessed->id,
+                                    'employee_id' => $empleados[$j]->id,
+                                    'errors' => $e->getMessage(),
+                                    'trace' => $e->getTraceAsString()
+                                ]);
+
+                                continue;
+                            }
                         }
                     }
-
-                    SInfoWithPolicy::closePeriod( $quincenas[$i]->id, $sTypePay, $inicio->year);    
-                }
-                
-            break;
-        }
-        }else{
-
+                break;
+            }
         }
          
       }
@@ -3008,6 +3057,7 @@ class SInfoWithPolicy{
             $period_processed->updated_by = session()->get('user_id'); 
             $period_processed->save();
 
+            return $period_processed;
         }else if( $type == 1 ){
             $period_processed = new period_processed();
             $period_processed->num_biweekly = $num_period;
@@ -3017,6 +3067,7 @@ class SInfoWithPolicy{
             $period_processed->updated_by = session()->get('user_id');
             $period_processed->save();
 
+            return $period_processed;
         }
       }
 

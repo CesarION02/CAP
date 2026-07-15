@@ -23,3 +23,9 @@ author: Cesar Orozco
 date: 2026-07-07
 description: Se implementa funcionalidad que envie información de turnos, a human cuando se genere la programación de turnos.
 -------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------
+feat: Proceso de prenómina continua a pesar de errores y se coloca un log para indicar lo que falla.
+author: Cesar Orozco
+date: 2026-07-07
+description: Proceso de prenómina continua a pesar de errores y se coloca un log para indicar lo que falla.
+-------------------------------------------------------------------------------------------------------------------------
