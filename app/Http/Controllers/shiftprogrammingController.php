@@ -20,6 +20,7 @@ use PDF;
 use App\SUtils\SDateFormatUtils;
 use App\SUtils\SCheckDaysVobo;
 use Carbon\Carbon;
+use App\SUtils\SHumanUtils;
 
 class shiftprogrammingController extends Controller
 {
@@ -516,6 +517,19 @@ class shiftprogrammingController extends Controller
             $guardarPdf->is_delete = 0;
             $guardarPdf->save();
             
+        }
+
+        try {
+
+            SHumanUtils::sendShiftsToHuman(
+                $request->ini,
+                $request->fin,
+                $request->Empleado
+            );
+
+        } catch (\Throwable $th) {
+
+            \Log::error($th->getMessage());
         }
         return response()->json(array($data,$nombrePdf));
 

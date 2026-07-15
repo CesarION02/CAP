@@ -17,3 +17,9 @@ author: Cesar Orozco
 date: 2026-04-09
 description: Modificación de funcionalidad que recupera bonos para que recupere si se pasa de minutos de salida anticipada.
 -------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------
+feat: Envio de información de turnos a Human
+author: Cesar Orozco
+date: 2026-07-07
+description: Se implementa funcionalidad que envie información de turnos, a human cuando se genere la programación de turnos.
+-------------------------------------------------------------------------------------------------------------------------
