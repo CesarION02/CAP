@@ -145,7 +145,7 @@ class SJourneyReport
 
             // return view('mails.journeyreport')->with('sStartDate', $sStartDate)
             //                                 ->with('sEndDate', $sEndDate)
-            //                                 ->with('sPayTypeText', $sPayTypeText)
+            //                                 ->with('typePay', $sPayTypeText)
             //                                 ->with('sPeriod', $sPeriod)
             //                                 ->with('aColumns', $aColumns)
             //                                 ->with('lData', $lData);
@@ -252,6 +252,18 @@ class SJourneyReport
 
             $text = str_replace("Revisar horario. ", "", $text);
             $oRow->eventsText = htmlspecialchars(SJourneyReport::toMayusCase(strtolower($text)));
+
+            $comments = [];
+            foreach ($oRow->events as $event) {
+                if (isset($event['adj_comments']) && trim($event['adj_comments']) !== '') {
+                    $comments[] = '' . trim($event['adj_comments']);
+                }
+            }
+            // Quitar comentario: "Sistema externo":
+            $comments = array_filter($comments, function ($comment) {
+                return trim($comment) !== 'Sistema externo';
+            });
+            $oRow->commentsText = implode(' | ', $comments);
         }
 
         return $lData;

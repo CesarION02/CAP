@@ -39,6 +39,7 @@
                                     <th>T. retardo</th>
                                     <th>T. adicional</th>
                                     <th>Incidencias</th>
+                                    <th>Comentarios</th>
                                 </tr>
                             @else
                                 <tr>
@@ -69,6 +70,7 @@
                                                 @break
                                         @endswitch
                                     @endforeach
+                                    <th>Comentarios</th>
                                 </tr>
                             @endif
                         </thead>
@@ -131,6 +133,13 @@
                                         @endif
                                     ">
                                         {{ $oRow->eventsText }}
+                                    </td>
+                                    <td style="padding-left: 8px; padding-right: 8px;
+                                        @if ($i % 2 == 0)
+                                            background-color: rgb(217, 217, 217)
+                                        @endif
+                                    ">
+                                        {{ $oRow->commentsText }}
                                     </td>
                                 </tr>
                             @else
@@ -204,6 +213,13 @@
                                             @break
                                     @endswitch
                                 @endforeach
+                                    <td style="padding-left: 8px; padding-right: 8px;
+                                        @if ($i % 2 == 0)
+                                            background-color: rgb(217, 217, 217)
+                                        @endif
+                                    ">
+                                        {{ $oRow->commentsText }}
+                                    </td>
                                 </tr>
                             @endif
                                 <?php
