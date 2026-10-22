@@ -2,7 +2,9 @@
 @section('title')
     Panel de control de comentarios
 @endsection
-
+@section('styles1')
+    <link rel="stylesheet" href="{{asset("assets/css/chosen.min.css")}}">
+@endsection
 @section('content')
 <div class="row" id="comments">
     @include('comments.modal')
@@ -47,6 +49,7 @@
                     <thead>
                         <tr>
                             <th>Comentario</th>
+                            <th>Tipo de ajuste</th>
                             <th>Estado</th>
                             <th>Creado por</th>
                             <th>Editado por</th>
@@ -57,10 +60,11 @@
                     <tbody>
                         <tr v-for="comment in lComments">
                             <td>@{{comment.comment}}</td>
+                            <td>@{{comment.adjust_types}}</td>
                             <td>@{{comment.is_delete ? 'Inactivo' : 'Activo'}}</td>
-                            <td>@{{comment.user_created.name}}</td>
-                            <td>@{{comment.user_edited.name}}</td>
-                            <td><button class="btn btn-warning" v-on:click="editComment(comment.id, comment.comment, '{{route('comments_update', ':id')}}')"><span class="glyphicon glyphicon-pencil"></span></button></td>
+                            <td>@{{comment.created_by_user}}</td>
+                            <td>@{{comment.updated_by_user}}</td>
+                            <td><button class="btn btn-warning" v-on:click="editComment(comment.id, comment.comment, '{{route('comments_update', ':id')}}',comment.adjust_type_ids)"><span class="glyphicon glyphicon-pencil"></span></button></td>
                             <td>
                                 <button v-if="comment.is_delete == 0" class="btn btn-danger" v-on:click="deleteComment(comment.id, comment.comment,'{{route('comments_destroy', ':id')}}')"><span class="glyphicon glyphicon-trash"></span></button>
                                 <button v-if="comment.is_delete == 1" class="btn btn-info" v-on:click="recoverComment(comment.id, comment.comment,'{{route('comments_recover', ':id')}}')"><span class="glyphicon glyphicon-open"></span></button>
@@ -79,9 +83,11 @@
 <script src="{{ asset("assets/js/vue.js") }}" type="text/javascript"></script>
 <script src="{{asset("assets/pages/scripts/filter.js")}}" type="text/javascript"></script>
 <script src="{{ asset("assets/pages/scripts/SGui.js") }}" type="text/javascript"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.0.12/dist/js/select2.min.js"></script>
 <script>
     function ServerData () {
         this.lComments = <?php echo json_encode($lComments) ?>;
+        this.adjustTypes = <?php echo json_encode($adjustTypes) ?>;
     }
     
     var oServerData = new ServerData();
@@ -146,4 +152,10 @@
     reloadTable();
     
 </script>
+<script src="{{ asset("assets/js/chosen.jquery.min.js") }}" type="text/javascript"></script>
+    <script>
+        $(document).ready(function() {
+            $('.js-example-basic-multiple').select2();
+        });
+    </script>
 @endsection

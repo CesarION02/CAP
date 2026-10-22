@@ -6,17 +6,37 @@ var app = new Vue({
       comment: null,
       route: null,
       modalDisabled: false,
+      selectedAdjustTypes: [],
+      lAdjustTypes: []
     },
     mounted(){
         this.lComments = this.vueData.lComments;
+        this.lAdjustTypes = this.vueData.adjustTypes;
+        this.initSelect2();
     },
     methods: {
+        initSelect2() {
+            let vm = this;
+        
+            this.$nextTick(() => {
+              $('.js-example-basic-multiple').select2({
+                width: 'resolve'
+              });
+        
+              // Sincroniza select2 con Vue
+              $('.js-example-basic-multiple').on('change', function () {
+                vm.selectedAdjustTypes = $(this).val().map(Number); // ← convierte a números si los IDs son enteros
+              });
+            });
+          },
+
         showModal(ruta){
             this.route = ruta;
             $('#commentModal').modal('show');
         },
         addNewComment(ruta){
             this.comment = null;
+            this.selectedAdjustTypes = [];
             this.showModal(ruta);
         },
         storeComment(){
@@ -24,7 +44,8 @@ var app = new Vue({
             var route = this.route;
             if(this.comment != null && this.comment != ''){
                 axios.post(route, {
-                    comment: this.comment
+                    comment: this.comment,
+                    types: this.selectedAdjustTypes
                 })
                 .then(response => {
                     if(response.data.success){
@@ -44,10 +65,19 @@ var app = new Vue({
                 oGui.showError('Debe ingresar un comentario');
             }
         },
-        editComment(id, comment, ruta){
+        editComment(id, comment, ruta, types){
             this.comment = comment;
+            this.selectedAdjustTypes = types;
             var route = ruta.replace(':id', id);
-            this.showModal(route);
+            this.$nextTick(() => {
+                // Seleccionamos los valores y activamos el plugin select2
+                $('.js-example-basic-multiple')
+                    .val(this.selectedAdjustTypes)
+                    .trigger('change');
+        
+                // Abrimos el modal
+                this.showModal(route);
+            });
         },
         deleteComment(id, comment, ruta){
             var route = ruta.replace(':id', id);

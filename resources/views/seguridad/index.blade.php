@@ -28,6 +28,9 @@
 </head>
 
 <body class="hold-transition login-page">
+    <img src="{{ asset('images/aeth_logo.png') }}" 
+        alt="Logo Cliente"
+        style="position: fixed; top: 10px; right: 10px; width: 80px; height: auto; z-index: 999;">
     <div class="login-box">
         <div class="login-logo">
             <a href="{{route('inicio')}}">Control de Acceso y Prenómina</a>
@@ -49,11 +52,17 @@
                 @csrf
                 <div class="form-group has-feedback">
                     <input type="text" name="name" class="form-control" value="{{old('name')}}" placeholder="Nombre de usuario">
-                    <span class="glyphicon glyphicon-user form-control-feedback"></span>
                 </div>
                 <div class="form-group has-feedback">
-                    <input type="password" name="password" class="form-control" placeholder="Contraseña">
-                    <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+                    <div class="input-group">
+                        <input id="password" type="password" name="password" class="form-control" placeholder="Contraseña">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" type="button" id="togglePassword">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                        </span>
+                    </div>
+                    
                 </div>
                 <div class="row">
                     <div class="col-xs-8"></div>
@@ -76,8 +85,22 @@
     <!-- Bootstrap 3.3.7 -->
     <script src="{{asset("assets/$theme/bower_components/bootstrap/dist/js/bootstrap.min.js")}}"></script>
 </body>
-<footer>
-    <center><strong>Copyright &copy; Software Aplicado.</strong> Todos los derechos reservados.</center>
+<script>
+    $(document).ready(function () {
+        $('#togglePassword').on('click', function () {
+            const input = $('#password');
+            const icon = $(this).find('i');
+            const type = input.attr('type') === 'password' ? 'text' : 'password';
+            input.attr('type', type);
+            icon.toggleClass('fa-eye fa-eye-slash');
+        });
+    });
+</script>
+<footer style="text-align: center; padding: 20px;">
+    <div>
+        Creado por:<br>
+        <img src="{{ asset('images/swap_logo.jpg') }}" alt="Logo SWAP" style="margin-top: 10px; width: 120px; height: auto;">
+    </div>
 </footer>
 
 </html>

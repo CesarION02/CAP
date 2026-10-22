@@ -89,7 +89,7 @@ class SCheckDaysVobo {
     
                 $dt_cut = $arrDatesBiWeek[1];
                 $oCut = Carbon::parse($dt_cut);
-                if ($oCut->dayOfWeek == 5 || $oCut->dayOfWeek == 6) {
+                if ($oCut->dayOfWeek == 6 || $oCut->dayOfWeek == 0) {
                     $cut = Carbon::parse($dt_cut)->add('week', 1)->startOfWeek();
                     $dt_cut = $cut->format('Y-m-d');
                 }
@@ -101,8 +101,8 @@ class SCheckDaysVobo {
             $oDt_cut = Carbon::parse($dt_cut);
             for ($i = 0; $i < $days; $i++) {
                 $oDt_cut = $oDt_cut->add('day', 1)->endOfDay();
-                if ($oDt_cut->dayOfWeek == 5 || $oDt_cut->dayOfWeek == 6) {
-                    $oDt_cut = Carbon::parse($dt_cut)->add('week', 1)->startOfWeek();
+                if ($oDt_cut->dayOfWeek == 6 || $oDt_cut->dayOfWeek == 0) {
+                    $oDt_cut = Carbon::parse($oDt_cut)->add('week', 1)->startOfWeek();
                 }
             }
     

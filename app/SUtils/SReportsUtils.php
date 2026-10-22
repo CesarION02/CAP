@@ -8,15 +8,17 @@ use Carbon\Carbon;
 class SReportsUtils {
 
     public static function setAbsencesAndHolidays(int $idEmployee, string $date, $oRow) {
+        \Log::error($idEmployee);  
+        \Log::error($date);  
         $lAbsences = prePayrollController::searchAbsence($idEmployee, $date);
-                
+        \Log::error($lAbsences);        
         if (sizeof($lAbsences) > 0) {
             foreach ($lAbsences as $absence) {
                 $key = explode("_", $absence->external_key);
-
+                \Log::error($key); 
                 $abs = [];
                 $abs['id_emp'] = $key[0];
-                $abs['id_abs'] = $key[1];
+                $abs['id_abs'] = isset($key[1]) ? $key[1] : null;
                 $abs['nts'] = $absence->nts;
                 $abs['type_name'] = $absence->type_name;
                 $oRow->others = (isset($oRow->others) ? $oRow->others : "")."".$absence->type_name.". ";

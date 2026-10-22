@@ -213,8 +213,10 @@ class SDateUtils {
             $contadorFinal = $ultimaSemana[0]->num;
             $contadorAux = 0;
             for($contadorInicial ; $contadorFinal >= $contadorInicial ; $contadorInicial ++){
-                $semanas[$contadorAux] = $contadorInicial;
-                $contadorAux ++;
+                if($contadorInicial != 314){
+                    $semanas[$contadorAux] = $contadorInicial;
+                    $contadorAux ++;
+                } 
             }
 
             return $semanas;

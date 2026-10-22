@@ -2836,8 +2836,8 @@ class SInfoWithPolicy{
                     $empleados = DB::table('employees')
                                     ->where('is_active','=',1)
                                     ->where('way_pay_id','=',2)
-                                    // ->where('id','!=',1977)
-                                    // ->where('id','!=',2060)
+                                    //->whereIn('id',[2213,1843])
+                                    //->where('id','=',1843)
                                     ->orderBy('id')
                                     ->select('id AS id','policy_extratime_id AS extratime')
                                     ->get();
@@ -2851,6 +2851,9 @@ class SInfoWithPolicy{
 
                     for ( $i = 0 ; $num_semanas > $i ; $i++ ){
                         $inicio = Carbon::parse($semanas[$i]->inicio);
+                        $fin = Carbon::parse($semanas[$i]->final);
+                        $diferencia = ($inicio->diffInDays($fin));
+                        $diferenciaReal = $diferencia + 1;
                         $periodProcessed = SInfoWithPolicy::closePeriod(
                             $semanas[$i]->id,
                             $sTypePay,
@@ -2860,13 +2863,12 @@ class SInfoWithPolicy{
                         $cerrado = 1;
                         for( $j = 0 ; $num_empleados > $j ; $j++ ){
                             try{
-                                $fin = Carbon::parse($semanas[$i]->final);
-                                $diferencia = ($inicio->diffInDays($fin))+1;
+                                
                                 $empl[0] = $empleados[$j]->id;
                                 $extratime = $empleados[$j]->extratime;
                                 $lRows = SInfoWithPolicy::standardization($semanas[$i]->inicio,$semanas[$i]->final,$sTypePay,$empl);
-                                $lRows = SInfoWithPolicy::handlingHours($lRows,$diferencia,$extratime);
-                                $lRows = SInfoWithPolicy::restDay($lRows,$diferencia);
+                                $lRows = SInfoWithPolicy::handlingHours($lRows,$diferenciaReal,$extratime);
+                                $lRows = SInfoWithPolicy::restDay($lRows,$diferenciaReal);
 
                                 SInfoWithPolicy::guardarProcesamiento($empleados[$j]->id,$lRows,$semanas[$i]->id,$iYear,2);
                             }catch(\Throwable $e){
@@ -2938,6 +2940,8 @@ class SInfoWithPolicy{
                     for ( $i = 0 ; $num_semanas > $i ; $i++ ){
 
                         $inicio = Carbon::parse($quincenasInicio[$i]);
+                        $fin = Carbon::parse($quincenas[$i]->cut);
+                        $diferencia = ($inicio->diffInDays($fin))+1;
 
                         $periodProcessed = SInfoWithPolicy::closePeriod(
                             $quincenas[$i]->id,
@@ -2947,8 +2951,6 @@ class SInfoWithPolicy{
 
                         for( $j = 0 ; $num_empleados > $j ; $j++ ){
                             try{
-                                $fin = Carbon::parse($quincenas[$i]->cut);
-                                $diferencia = ($inicio->diffInDays($fin))+1;
                                 $empl[0] = $empleados[$j]->id;
                                 $extratime = $empleados[$j]->extratime;
                                 $lRows = SInfoWithPolicy::standardization($quincenasInicio[$i],$quincenas[$i]->cut,$sTypePay,$empl);

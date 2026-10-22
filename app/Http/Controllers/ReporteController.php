@@ -369,13 +369,27 @@ class ReporteController extends Controller
         $config = \App\SUtils\SConfiguration::getConfigurations();
 
         $lEmployees = SGenUtils::toEmployeeIds(0, 0, []);
+        $lSuperviser = [];
+            $lSuperviser = DB::table('users')
+                        ->join('prepayroll_groups_users as pru','pru.head_user_id','=','users.id')
+                        ->select('users.id','users.name')
+                        ->where('users.is_delete', 0)
+                        ->groupBy(['users.id'])
+                        ->orderBy('users.name')
+                        ->get();
+
+            $lSuperviser->prepend(['id' => 0, 'name' => 'Todos']);
         
         return view('report.reportsGen')
                     ->with('tReport', \SCons::REP_DELAY)
                     ->with('sTitle', 'Reporte de Retardos')
                     ->with('sRoute', 'reporteRetardos')
                     ->with('lEmployees', $lEmployees)
-                    ->with('startOfWeek', $config->startOfWeek);
+                    ->with('startOfWeek', $config->startOfWeek)
+                    ->with('is_active', 1)
+                    ->with('isAdmin', 0)
+                    ->with('radioB',1)
+                    ->with('lSuperviser', $lSuperviser);
     }
 
     public function genHrExReport($id = 0)
@@ -511,7 +525,7 @@ class ReporteController extends Controller
 
             $filterType = $request->i_filter;
             $ids = $request->elems;
-                $lEmployees = SGenUtils::toEmployeeIds($payWay, $filterType, $ids, [] , $nochecan);
+            $lEmployees = SGenUtils::toEmployeeIds($payWay, $filterType, $ids, [] , $nochecan);
         }
 
         $lRows = SDataProcess::process($sStartDate, $sEndDate, $payWay, $lEmployees);
@@ -2181,7 +2195,7 @@ class ReporteController extends Controller
                       "column": "event_type_id.code",
                       "operator": 2,
                       "values": [
-                        "4865"
+                        "4865,4867"
                       ]
                     },
                     {
@@ -2724,6 +2738,7 @@ class ReporteController extends Controller
             // Incidencias permitidas en CAP
             $lTypeCapIncidents = \DB::table('type_incidents')
                                         ->where('is_cap_edit', true)
+                                        ->where('id', '!=',18)
                                         ->orderBy('name', 'ASC')
                                         ->get();
 

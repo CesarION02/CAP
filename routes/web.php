@@ -528,6 +528,12 @@ Route::get('uservsdevice/{id}/edit', 'userVsDevicesController@edit')->name('edit
 Route::put('uservsdevice/{id}', 'userVsDevicesController@update')->name('actualizar_usuariosvsdispositivos');
 Route::delete('uservsdevice/{id}', 'userVsDevicesController@destroy')->name('eliminar_usuariosvsdispositivos');
 
+Route::get('modifyClose','prepayrollController@changeCloseVobo')->name('modificarcierreprenomina');
+Route::get('modifyClose/create', 'prepayrollController@createCloseVobo')->name('crear_modificarcierreprenomina');
+Route::post('modifyClose/store', 'prepayrollController@storeCloseVobo')->name('guardar_modificarcierreprenomina');
+Route::get('modifyClose/{id}/edit', 'prepayrollController@editCloseVobo')->name('editar_modificarcierreprenomina');
+Route::put('modifyClose/{id}', 'prepayrollController@updateCloseVobo')->name('actualizar_modificarcierreprenomina');
+Route::get('modifyClose/eliminar/{id}', 'prepayrollController@deleteCloseVobo')->name('eliminar_modificarcierreprenomina');
 /* Reporte de accesos por dispositivo asignado */
 Route::get('reportaccessdata', 'ReporteController@AccesoPuertasDatos')->name('accesopuertasdatos');
 Route::get('accessdatatrigger', 'ReporteController@AccesoPuertasGenerar')->name('accesopuertasgenerar');

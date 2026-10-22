@@ -20,23 +20,77 @@ class commentsController extends Controller
 
         switch ($iFilter) {
             case 1:
-                $comments = comments::where('is_delete', 0)->get();
+                $comments = DB::table('comments as c')
+                            ->select(
+                                'c.id',
+                                'c.comment',
+                                DB::raw("GROUP_CONCAT(DISTINCT at.type_name ORDER BY pac.sort_number SEPARATOR ', ') as adjust_types"),
+                                'u1.name as created_by_user',
+                                'u2.name as updated_by_user',
+                                'c.is_delete as is_delete'
+                            )
+                            ->leftJoin('prepayroll_adjusts_comments as pac', 'c.id', '=', 'pac.comment_id')
+                            ->leftJoin('prepayroll_adjusts_types as at', 'pac.adjust_type_id', '=', 'at.id')
+                            ->Join('users as u1', 'c.created_by', '=', 'u1.id')
+                            ->Join('users as u2', 'c.updated_by', '=', 'u2.id')
+                            ->where('c.is_delete', 0)
+                            ->groupBy('c.id', 'c.comment', 'u1.username', 'u2.username')
+                            ->orderBy('c.id')
+                            ->get();
                 break;
             case 2:
-                $comments = comments::where('is_delete', 1)->get();
+                $comments = DB::table('comments as c')
+                            ->select(
+                                'c.id',
+                                'c.comment',
+                                DB::raw("GROUP_CONCAT(DISTINCT at.type_name ORDER BY pac.sort_number SEPARATOR ', ') as adjust_types"),
+                                'u1.name as created_by_user',
+                                'u2.name as updated_by_user',
+                                'c.is_delete as is_delete'
+                            )
+                            ->leftJoin('prepayroll_adjusts_comments as pac', 'c.id', '=', 'pac.comment_id')
+                            ->leftJoin('prepayroll_adjusts_types as at', 'pac.adjust_type_id', '=', 'at.id')
+                            ->Join('users as u1', 'c.created_by', '=', 'u1.id')
+                            ->Join('users as u2', 'c.updated_by', '=', 'u2.id')
+                            ->where('c.is_delete', 1)
+                            ->groupBy('c.id', 'c.comment', 'u1.username', 'u2.username')
+                            ->orderBy('c.id')
+                            ->get();
                 break;
-            
+                
             default:
-                $comments = comments::get();
+            $comments = DB::table('comments as c')
+                            ->select(
+                                'c.id',
+                                'c.comment',
+                                DB::raw("GROUP_CONCAT(DISTINCT at.type_name ORDER BY pac.sort_number SEPARATOR ', ') as adjust_types"),
+                                'u1.name as created_by_user',
+                                'u2.name as updated_by_user',
+                                'c.is_delete as is_delete'
+                            )
+                            ->leftJoin('prepayroll_adjusts_comments as pac', 'c.id', '=', 'pac.comment_id')
+                            ->leftJoin('prepayroll_adjusts_types as at', 'pac.adjust_type_id', '=', 'at.id')
+                            ->Join('users as u1', 'c.created_by', '=', 'u1.id')
+                            ->Join('users as u2', 'c.updated_by', '=', 'u2.id')
+                            ->groupBy('c.id', 'c.comment', 'u1.username', 'u2.username')
+                            ->orderBy('c.id')
+                            ->get();
                 break;
         }
+        foreach ($comments as $comment) {
+            $adjustTypeIds = DB::table('prepayroll_adjusts_comments')
+                                ->where('comment_id', $comment->id)
+                                ->pluck('adjust_type_id');
+        
+            $comment->adjust_type_ids = $adjustTypeIds;
+        }
+        $adjustTypes = DB::table('prepayroll_adjusts_types')->select('id', 'type_name')->get();
 
-        $comments->each(function ($data) {
-            $data->userCreated;
-            $data->userEdited;
-        });
-
-        return view('comments.index', ['lComments' => $comments, 'iFilter' => $iFilter]);
+        return view('comments.index', [
+            'lComments' => $comments, 
+            'iFilter' => $iFilter,
+            'adjustTypes' => $adjustTypes
+        ]);
     }
 
     /**
@@ -67,6 +121,7 @@ class commentsController extends Controller
                 ]);
             }
         }
+
         $comment = null;
         try {
             $comment = Comments::create([
@@ -75,6 +130,19 @@ class commentsController extends Controller
                 'created_by' => auth()->user()->id,
                 'updated_by' => auth()->user()->id
             ]);
+
+            $inserts = [];
+            $sort = 1;
+
+            foreach ($request->types as $typeId) {
+                $inserts[] = [
+                    'sort_number' => $sort++,
+                    'comment_id' => $comment->id,
+                    'adjust_type_id' => $typeId,
+                ];
+            }
+
+            DB::table('prepayroll_adjusts_comments')->insert($inserts);
         } catch (QueryException $e) {
             return response()->json([
                 'success' => false,
@@ -140,6 +208,25 @@ class commentsController extends Controller
                 $comment->is_delete = 0;
                 $comment->updated_by = auth()->user()->id;
                 $comment->update();
+
+                // 2. Eliminar los ajustes anteriores
+                DB::table('prepayroll_adjusts_comments')
+                    ->where('comment_id', $comment->id)
+                    ->delete();
+
+                // 3. Insertar los nuevos ajustes
+                $inserts = [];
+                $sort = 1;
+
+                foreach ($request->types as $typeId) {
+                    $inserts[] = [
+                        'sort_number' => $sort++,
+                        'comment_id' => $comment->id,
+                        'adjust_type_id' => $typeId,
+                    ];
+                }
+
+                DB::table('prepayroll_adjusts_comments')->insert($inserts);
             });
         } catch (QueryException $e) {
             return response()->json([

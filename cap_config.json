@@ -1,7 +1,7 @@
 {
     "company": "AETH",
-    "lastSyncDateTime": "2025-03-26 15:43:00",
-    "lastEventSyncDateTime": "2025-03-27 07:00:18",
+    "lastSyncDateTime": "2026-10-22 15:26:10",
+    "lastEventSyncDateTime": "2026-10-22 15:26:11",
     "startOfWeek": 1,
     "policy": "1",
     "enabledAdjAuths": false,
@@ -21,16 +21,11 @@
     "dept_pre": 99,
     "admin_rol": 1,
     "policy_cut": 1,
-    "sinceDatePrepayroll": "2025-03-07",
-    "onlyPrepayrollConfigsDelayReport": [
-        40,
-        39,
-        9,
-        19,
-        41
-    ],
+    "sinceDatePrepayroll": "2025-04-01",
+    "onlyPrepayrollConfigsDelayReport": [],
+    "onlyPrepayrollConfigsResumeReport": [],
     "urlBiostar": "https://192.168.1.251:444",
-    "urlSyncCAPLink": "https://192.168.1.251:9001",
+    "urlSyncCAPLink": "http://192.168.1.251:9001",
     "maxOvertimeJourneyMinutes": 240,
     "absenceWithOmissionOfChecks": false,
     "absenceWithOmissionOfChecksAreas": [],
@@ -734,5 +729,23 @@
     "pghUser": {
         "username": "admin",
         "password": "Super2023!"
-    }
+    },
+    "daysToCloseVobo": 2,
+    "incidencesWithCheckVobo": true,
+    "daysToCloseWeekVobo": 2,
+    "daysToCloseBiWeekVobo": 2,
+    "withNotificationToWeekVobo": false,
+    "withNotificationToBiWeekVobo": true,
+    "notifyDaysToCloseWeekVobo": [],
+    "notifyDaysToCloseBiWeekVobo": [
+        5,
+        3,
+        1,
+        0
+    ],
+    "daysToNotifyAfterCloseWeekVobo": 0,
+    "daysToNotifyAfterCloseBiWeekVobo": 1,
+    "rememberCheckEmployeeWeek": true,
+    "rememberCheckEmployeeBiWeek": true,
+    "minutesToPrematureOutBonus": 30
 }

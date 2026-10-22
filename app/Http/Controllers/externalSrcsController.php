@@ -70,7 +70,10 @@ class externalSrcsController extends Controller
 
         $lEmployees = SGenUtils::toEmployeeIds($payType, 0, null, $lCapEmployees);
 
-        $oDate = Carbon::parse($startDate);
+        // $lRows = SDataProcess::process($startDate, $endDate, $payType, $lEmployees);
+        // $cReport = collect($lRows);
+
+        $oDate = Carbon::parse($endDate);
 
          /**
          * Obtiene el reporte de horas extra, que contiene también domingos y festivos.

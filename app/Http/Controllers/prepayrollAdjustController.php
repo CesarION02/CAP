@@ -208,7 +208,8 @@ class prepayrollAdjustController extends Controller
             $aNumPp = SDateUtils::getNumberOfDate($adjustDate, $oEmployee->way_pay_id);
             $isClosed = PrepayrollReportController::prepayrollIsClosed($aNumPp[0], $aNumPp[1], $oEmployee->way_pay_id);
             if ($isClosed) {
-                return response()->json(['success' => false, 'msg' => 'No se puede aplicar el ajuste, la prenómina está cerrada.']);
+                $fecha = \Carbon\Carbon::parse($adjustDate)->format('d/m/Y');
+                return response()->json(['success' => false, 'msg' => "No se puede aplicar el ajuste, la prenómina del día $fecha está cerrada."]);
             }
 
             $canMakeAdjust = PrepayrollReportController::canMakeAdjust($adjustDate, $oEmployee->way_pay_id);

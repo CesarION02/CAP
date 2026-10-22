@@ -423,7 +423,7 @@ class employeeController extends Controller
         //}
         //aqui se haría la modificación
         //$department = DepartmentRH::where('id',$jEmployee->dept_rh_id)->get();
-        $department = JobRH::where('id',$jEmployee->job_rh_id)->get();
+        $department = JobRH::where('id',$jEmployee->siie_job_id)->get();
         $dept = 0;
         if($department[0]->department_id != null){
             $dept = $department[0]->department_id;
@@ -505,7 +505,7 @@ class employeeController extends Controller
         $config = \App\SUtils\SConfiguration::getConfigurations();
 
         //$department = DepartmentRH::where('id',$jEmployee->dept_rh_id)->get();
-        $puesto = JobRH::where('id',$jEmployee->job_rh_id)->get();
+        $puesto = JobRH::where('id',$jEmployee->siie_job_id)->get();
         
         //checar si el departamento rh tiene departamento predeterminado para asignar al empleado
         // aqui se haria la modifición si se implementa lo de puestos
@@ -530,7 +530,7 @@ class employeeController extends Controller
         $emp->dept_rh_id = $this->rhdepartments[$jEmployee->dept_rh_id];
         $emp->job_rh_id = $this->rhjobs[$jEmployee->siie_job_id];
         //$department = DepartmentRH::where('id',$jEmployee->dept_rh_id)->get();
-        $puesto = JobRH::where('id',$jEmployee->job_rh_id)->get();
+        $puesto = JobRH::where('id',$jEmployee->siie_job_id)->get();
         if($puesto[0]->department_id != null){
             $emp->department_id = $puesto[0]->department_id;
         }else{
@@ -844,7 +844,7 @@ class employeeController extends Controller
             // Base URI is used with relative requests
             'base_uri' => $config->urlBiostar."/api/",
             // You can set any number of default request options.
-            'timeout'  => 2.0,
+            'timeout'  => 10.0,
             'headers' => $headers,
             'verify' => false
         ]);

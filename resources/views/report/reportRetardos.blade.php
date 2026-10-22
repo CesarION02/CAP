@@ -38,9 +38,6 @@
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <a href="{{ route('generarreportetiemposextra') }}" target="_blank" class="btn btn-success">Nuevo reporte</a>
-                    </div>
-                    <div class="col-md-2">
                         <div id="wrapper">
                             <button class="btn btn-info" id="button-a">Crear Excel</button>
                         </div>
@@ -102,8 +99,6 @@
                                     <td>@{{ row.external_id }}</td>
                                 </tr>
                             </tbody>
-                            <button onclick="topFunction()" id="myBtn" title="Ir arriba">Ir arriba</button>
-                            <a href="{{ route('generarreportetiemposextra') }}" target="_blank" id="newButton" title="Nuevo reporte">Nuevo reporte</a>
                         </table>
                     </div>
                 </div>

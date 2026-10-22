@@ -45,8 +45,13 @@
                                 @if ($data->EventCollection->rows != "")
                                     @foreach($data->EventCollection->rows as $info)
                                     <?php 
-                                        $fecha = \Carbon\Carbon::parse($info->datetime);
-                                        $fecha->setTimezone('America/Mexico_City');
+                                        $fecha = \Carbon\Carbon::parse($info->datetime, 'UTC');
+                                        if($info->timezone->negative == 1){
+                                            $timezone = '-'.$info->timezone->hour;
+                                        }else{
+                                            $timezone = $info->timezone->hour;   
+                                        }
+                                        $fecha->tz = new \DateTimeZone($timezone);    
                                         $date = \Carbon\Carbon::parse($fecha)->toDateString();
                                         $time = \Carbon\Carbon::parse($fecha)->toTimeString();
                                     ?>

@@ -6,6 +6,7 @@ use App\Http\Controllers\PrepayrollReportController;
 use App\Http\Controllers\SyncController;
 use App\Models\cutCalendarQ;
 use App\Models\employees;
+use App\Models\PayrollClosingDay;
 use App\Models\PrepayReportControl;
 use App\Models\prepayrollchange;
 use App\Models\prepayrollVoboSkipped;
@@ -21,6 +22,8 @@ use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Mpdf\Tag\Pre;
 use Validator;
+use Log;
+
 class prePayrollController extends Controller
 {
     private $OK;
@@ -269,18 +272,21 @@ class prePayrollController extends Controller
                     if (sizeof($lAbsences) > 0) {
                         foreach ($lAbsences as $absence) {
                             try {
-                                if ($absence->is_external) {
+                                if (!!$absence->is_external) {
                                     $key = explode("_", $absence->external_key);
-
+                                    Log::info($key);
                                     if (! $key[0]) {
                                         $d = 0;
                                     }
-                                    if (! $key[1]) {
-                                        $r = 0;
-                                    }
                                     $abs = [];
-                                    $abs['id_emp'] = $key[0];
-                                    $abs['id_abs'] = $key[1];
+                                    if (isset($key[1])) {
+                                        $abs['id_emp'] = $key[0];
+                                        $abs['id_abs'] = $key[1];
+                                    }
+                                    else {
+                                        $abs['id_abs'] = $key[0];
+                                    }
+                                    
                                     $abs['nts'] = $absence->nts;
                                 }
                                 else {
@@ -1450,5 +1456,241 @@ class prePayrollController extends Controller
         else {
             return redirect($sBackUrl);
         }
+    }
+
+    public function changeCloseVobo(Request $request){
+        $iFilter = $request->ifilter == 0 ? 1 : $request->ifilter;
+
+        $start_date = null;
+        $end_date = null;
+
+        if($request->start_date == null){
+            $now = Carbon::now();
+    
+            // Primer día del año pasado
+            $start_date = $now->copy()->subYear()->startOfYear()->toDateString();
+            
+            // Último día del año en curso
+            $end_date = $now->copy()->endOfYear()->toDateString();
+        }
+        else{
+            $start_date = $request->start_date;
+            $end_date = $request->end_date;    
+        }
+        $weeks = DB::table('payroll_closing_days')
+            ->join('week_cut', 'week_cut.id', '=', 'payroll_closing_days.week_id')
+            ->where(function ($query) use ($start_date, $end_date) {
+                $query->whereBetween('week_cut.ini', [$start_date, $end_date])
+                      ->orWhereBetween('week_cut.fin', [$start_date, $end_date]);
+            })
+            ->where('is_week', 1)
+            ->select(
+                'payroll_closing_days.id_payroll_closing_days AS idPayroll', 
+                'week_cut.year AS year',
+                'week_cut.num AS num', 
+                'week_cut.ini AS ini', 
+                'week_cut.fin AS fin', 
+                'payroll_closing_days.days AS day', 
+                'payroll_closing_days.applies AS applies',
+                'payroll_closing_days.is_week AS week'
+            );
+
+        $quincenas = DB::table('payroll_closing_days')
+            ->join('hrs_prepay_cut', 'hrs_prepay_cut.id', '=', 'payroll_closing_days.biweek_id')
+            ->whereBetween('hrs_prepay_cut.dt_cut', [$start_date, $end_date])
+            ->where('payroll_closing_days.is_week', 0)
+            ->where('hrs_prepay_cut.is_delete', 0)
+            ->select(
+                'payroll_closing_days.id_payroll_closing_days AS idPayroll',
+                'hrs_prepay_cut.year AS year',
+                'hrs_prepay_cut.num AS num',
+                'hrs_prepay_cut.dt_cut AS ini',
+                'hrs_prepay_cut.dt_cut AS fin',
+                'payroll_closing_days.days AS day',
+                'payroll_closing_days.applies AS applies',
+                'payroll_closing_days.is_week AS week'
+            );
+
+        $modify = $weeks->union($quincenas)->get();
+
+        return view('prepayroll.modify', ['modify' => $modify, 'start_date' => $start_date, 'end_date' => $end_date, 'iFilter' => $iFilter]);
+    }
+
+    public function createCloseVobo(){
+
+        $currentYear = now()->year;
+        $lastYear = $currentYear - 1;
+        $years = [$lastYear, $currentYear];
+
+        $weekLastYear = DB::table('week_cut')
+                            ->where('year',$lastYear)
+                            ->select('id AS id','num AS num', 'ini AS ini', 'fin AS fin')
+                            ->get();
+        $weekCurrentYear = DB::table('week_cut')
+                            ->where('year',$currentYear)
+                            ->select('id AS id', 'num AS num', 'ini AS ini', 'fin AS fin')
+                            ->get();
+        $quincenaLastYear = DB::table('hrs_prepay_cut')
+                            ->where('year',$lastYear)
+                            ->select('id AS id', 'num AS num', 'dt_cut AS ini', 'dt_cut AS fin')
+                            ->get();
+        $quincenaCurrentYear = DB::table('hrs_prepay_cut')
+                            ->where('year',$currentYear)
+                            ->select('id AS id', 'num AS num', 'dt_cut AS ini', 'dt_cut AS fin')
+                            ->get();
+
+    // Simulamos los períodos para este ejemplo. Tú cargarás esto desde tus tablas.
+        $periods = [
+            'week' => [
+                (string)$lastYear => $weekLastYear,
+                (string)$currentYear => $weekCurrentYear,
+            ],
+            'quincena' => [
+                (string)$lastYear => $quincenaLastYear,
+                (string)$currentYear => $quincenaCurrentYear,
+            ],
+        ];
+
+        return view('prepayroll.create', compact('years', 'periods'));   
+    }
+
+    public function storeCloseVobo(Request $request){
+        $closing = new PayrollClosingDay();
+        switch ($request->type) {
+            case 'week':
+                $week = DB::table('payroll_closing_days')
+                            ->where('week_id',$request->num)
+                            ->count();
+                
+                if($week > 0){
+                    DB::table('payroll_closing_days')
+                            ->where('week_id', $request->num)
+                            ->delete();
+                }
+                $closing->is_week = 1;
+                $closing->is_biweek = 0;
+                $closing->week_id = $request->num;
+                $closing->biweek_id = null;
+                $closing->applies = $request->deactivate === 'no' ? 0 : 1;
+                $closing->days = $request->deactivate === 'no' ? $request->postpone_days : 0;
+                break;
+            case 'quincena':
+                $week = DB::table('payroll_closing_days')
+                            ->where('week_id',$request->num)
+                            ->count();
+                
+                if($week > 0){
+                    DB::table('payroll_closing_days')
+                            ->where('biweek_id', $request->num)
+                            ->delete();
+                }
+                $closing->is_week = 0;
+                $closing->is_biweek = 1;
+                $closing->week_id = null;
+                $closing->biweek_id = $request->num;
+                $closing->applies = $request->deactivate === 'no' ? 0 : 1;
+                $closing->days = $request->deactivate === 'no' ? $request->postpone_days : 0;
+                break;
+        }
+
+        $closing->save();
+
+        return redirect('modifyClose')->with('mensaje','Modificación a cierre de prenómina creada con éxito');
+         
+    }
+
+    public function editCloseVobo($id){
+        $datas = PayrollClosingDay::findOrFail($id);
+
+        $currentYear = now()->year;
+        $lastYear = $currentYear - 1;
+        $years = [$lastYear, $currentYear];
+
+        $weekLastYear = DB::table('week_cut')
+                            ->where('year',$lastYear)
+                            ->select('id AS id','num AS num', 'ini AS ini', 'fin AS fin')
+                            ->get();
+        $weekCurrentYear = DB::table('week_cut')
+                            ->where('year',$currentYear)
+                            ->select('id AS id', 'num AS num', 'ini AS ini', 'fin AS fin')
+                            ->get();
+        $quincenaLastYear = DB::table('hrs_prepay_cut')
+                            ->where('year',$lastYear)
+                            ->select('id AS id', 'num AS num', 'dt_cut AS ini', 'dt_cut AS fin')
+                            ->get();
+        $quincenaCurrentYear = DB::table('hrs_prepay_cut')
+                            ->where('year',$currentYear)
+                            ->select('id AS id', 'num AS num', 'dt_cut AS ini', 'dt_cut AS fin')
+                            ->get();
+
+    // Simulamos los períodos para este ejemplo. Tú cargarás esto desde tus tablas.
+        $periods = [
+            'week' => [
+                (string)$lastYear => $weekLastYear,
+                (string)$currentYear => $weekCurrentYear,
+            ],
+            'quincena' => [
+                (string)$lastYear => $quincenaLastYear,
+                (string)$currentYear => $quincenaCurrentYear,
+            ],
+        ];
+
+        return view('prepayroll.edit', compact('datas','years', 'periods'));
+    }
+
+    public function updateCloseVobo(Request $request){
+        $closing = new PayrollClosingDay();
+        DB::table('payroll_closing_days')
+                            ->where('id_payroll_closing_days', $request->id)
+                            ->delete();
+        switch ($request->type) {
+            case 'week':
+                $week = DB::table('payroll_closing_days')
+                            ->where('week_id',$request->num)
+                            ->count();
+                
+                if($week > 0){
+                    DB::table('payroll_closing_days')
+                            ->where('week_id', $request->num)
+                            ->delete();
+                }
+                $closing->is_week = 1;
+                $closing->is_biweek = 0;
+                $closing->week_id = $request->num;
+                $closing->biweek_id = null;
+                $closing->applies = $request->deactivate === 'no' ? 0 : 1;
+                $closing->days = $request->deactivate === 'no' ? $request->postpone_days : 0;
+                break;
+            case 'quincena':
+                $week = DB::table('payroll_closing_days')
+                            ->where('week_id',$request->num)
+                            ->count();
+                
+                if($week > 0){
+                    DB::table('payroll_closing_days')
+                            ->where('biweek_id', $request->num)
+                            ->delete();
+                }
+                $closing->is_week = 0;
+                $closing->is_biweek = 1;
+                $closing->week_id = null;
+                $closing->biweek_id = $request->num;
+                $closing->applies = $request->deactivate === 'no' ? 0 : 1;
+                $closing->days = $request->deactivate === 'no' ? $request->postpone_days : 0;
+                break;
+        }
+
+        $closing->save();
+
+        return redirect('modifyClose')->with('mensaje','Modificación a cierre de prenómina con éxito');
+         
+    }
+
+    public function deleteCloseVobo($id){
+        DB::table('payroll_closing_days')
+                            ->where('id_payroll_closing_days', $id)
+                            ->delete();
+        
+        return redirect('modifyClose')->with('mensaje','Se elimino con éxito');
     }
 }

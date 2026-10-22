@@ -50,7 +50,7 @@ class ExternalAdjustsController extends Controller
         if ($config->incidencesWithCheckVobo) {
             $oEmployee = employees::where('external_id', $employee_id)->first();
             $today = Carbon::now()->toDateString();
-            $result = SCheckDaysVobo::checkDays($oEmployee, $today, $dt_date);
+            $result = json_decode(SCheckDaysVobo::checkDays($oEmployee, $today, $dt_date));
     
             if (!$result->isInRange) {
                 return response()->json([
