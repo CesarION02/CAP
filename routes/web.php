@@ -21,6 +21,8 @@ Route::get('prueba', 'TestController@testDelays')->name('prueba');
 Route::get('test-human', 'humanController@testHuman')->name('test-human');
 Route::get('prueba-descargar-checador', 'TestController@testDownloadChecadorNomina')
     ->name('prueba-descargar-checador');
+Route::get('prueba-manage-task-report', 'TestController@testManageTaskReport')
+    ->name('prueba-manage-task-report');
 /* Pruebas de globalUser */
 Route::get('globales', 'userController@create_with_global')->name('global');
 Route::post('globales', 'userController@save_with_global')->name('guardar_usuario_global');
