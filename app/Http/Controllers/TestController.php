@@ -250,4 +250,34 @@ class TestController extends Controller
 
         return SResumeReport::executeResumeReport($sConfiguration);
     }
+    public function testDownloadChecadorNomina($id = 104)
+{
+    $cfg = [
+        'pay_type' => 1,
+        'report_type' => 4,
+        'back_prepayroll' => 0,
+        'companies' => [],
+        'areas' => [],
+        'departments' => [
+            11, 14, 15, 16, 17, 105, 111, 112, 113,
+            114, 116, 117, 118, 119, 120, 121, 122,
+            123, 124, 125, 126, 127, 128, 132, 134,
+            140, 141, 143, 146, 147
+        ],
+        'departments_cap' => [],
+        'departments_siie' => [],
+        'employees' => [],
+        'benefit_policies' => [],
+        'mails' => [
+            'to' => 'gortiz@aeth.mx',
+            'cc' => '',
+            'cco' => ''
+        ],
+    ];
+
+    return SChecadorVsNominaUtils::getReport(
+        json_encode($cfg),
+        'Q_171'
+    );
+}
 }

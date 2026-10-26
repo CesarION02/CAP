@@ -833,7 +833,7 @@ class SChecadorVsNominaUtils {
                 }
             }
             $lEmployees = $lEmployees->values();
-            // SChecadorVsNominaUtils::downloadExcel($lEmployees, $start_date, $end_date, $lEmployees[0]->ears[0]->external_date_ini, $lEmployees[0]->ears[0]->external_date_end);
+            SChecadorVsNominaUtils::downloadExcel($lEmployees, $start_date, $end_date, $lEmployees[0]->ears[0]->external_date_ini, $lEmployees[0]->ears[0]->external_date_end);
             //SChecadorVsNominaUtils::sendExcel($lEmployees, $start_date, $end_date, $lEmployees[0]->ears[0]->external_date_ini, $lEmployees[0]->ears[0]->external_date_end, $oCfg->mails);
         } catch (\Throwable $th) {
             \Log::error($th);

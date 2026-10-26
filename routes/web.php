@@ -18,6 +18,9 @@ Route::get('seguridad/logout', 'seguridad\LoginController@logout')->name('logout
 // Route::get('password/email', 'Auth\PasswordController@getEmail')->name('reset');
 // Route::post('password/email', 'Auth\PasswordController@postEmail')->name('mandaremail');
 Route::get('prueba', 'TestController@testDelays')->name('prueba');
+Route::get('test-human', 'humanController@testHuman')->name('test-human');
+Route::get('prueba-descargar-checador', 'TestController@testDownloadChecadorNomina')
+    ->name('prueba-descargar-checador');
 /* Pruebas de globalUser */
 Route::get('globales', 'userController@create_with_global')->name('global');
 Route::post('globales', 'userController@save_with_global')->name('guardar_usuario_global');
