@@ -445,184 +445,290 @@ class SChecadorVsNominaUtils {
         exit;
     }
 
-    public static function downloadExcelSimplificado($lData, $start_date, $end_date, $start_date_siie, $end_date_siie) {
-        $documento = new Spreadsheet();
+    public static function downloadExcelSimplificado(
+    $lData,
+    $start_date,
+    $end_date,
+    $start_date_siie,
+    $end_date_siie
+) {
+    $documento = new Spreadsheet();
 
-        $documento->getProperties()
-            ->setCreator('CAP')
-            ->setLastModifiedBy('CAP')
-            ->setTitle('Reporte simplificado checador vs nomina')
-            ->setSubject('Reporte simplificado checador vs nomina')
-            ->setDescription('Reporte generado por CAP');
+    $documento->getProperties()
+        ->setCreator('CAP')
+        ->setLastModifiedBy('CAP')
+        ->setTitle('Reporte simplificado checador vs nomina')
+        ->setSubject('Reporte simplificado checador vs nomina')
+        ->setDescription('Reporte generado por CAP');
 
-        $hoja = $documento->getActiveSheet();
-        $hoja->setTitle('Checador vs nomina');
+    $hoja = $documento->getActiveSheet();
+    $hoja->setTitle('Checador vs nomina');
 
-        // Título y periodo
-        $hoja->setCellValue('A1', 'Reporte checador vs nómina');
-        $hoja->setCellValue(
-            'A2',
-            $start_date . ' al ' . $end_date
+    // ==========================================
+    // TÍTULO Y PERIODOS
+    // ==========================================
+
+    $hoja->mergeCells('A1:I1');
+    $hoja->setCellValue('A1', 'REPORTE CHECADOR VS NÓMINA');
+
+    $hoja->mergeCells('A2:I2');
+    $hoja->setCellValue(
+        'A2',
+        'Periodo CAP: ' . $start_date . ' al ' . $end_date
+    );
+
+    $hoja->mergeCells('A3:I3');
+    $hoja->setCellValue(
+        'A3',
+        'Periodo SIIE: ' . $start_date_siie . ' al ' . $end_date_siie
+    );
+
+    // ==========================================
+    // ENCABEZADOS
+    // ==========================================
+
+    $headers = [
+        'Número de empleado',
+        'Nombre',
+        'Días no laborados CAP',
+        'Días no laborados SIIE',
+        'Retardos reales',
+        'Retardos justificados',
+        'Retardos por permiso',
+        'Retardo restante',
+        'Ganó bono',
+    ];
+
+    foreach ($headers as $index => $header) {
+        $hoja->setCellValueByColumnAndRow(
+            $index + 1,
+            5,
+            $header
         );
+    }
 
-        // Encabezados
-        $headers = [
-            'Número empleado',
-            'Nombre',
-            'Días no laborados CAP',
-            'Días no laborados SIIE',
-            'Retardos reales',
-            'Retardos justificados',
-            'Retardos por permiso',
-            'Salidas anticipadas',
-            'Salidas anticipadas por permiso',
-            'Ganó bono',
+    // ==========================================
+    // ESTILOS
+    // ==========================================
+
+    $hoja->getStyle('A1:I1')->applyFromArray([
+        'font' => [
+            'bold' => true,
+            'size' => 16,
+            'color' => ['argb' => 'FFFFFFFF'],
+        ],
+        'fill' => [
+            'fillType' => Fill::FILL_SOLID,
+            'startColor' => ['argb' => 'FF1F4E78'],
+        ],
+        'alignment' => [
+            'horizontal' =>
+                \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+            'vertical' =>
+                \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+        ],
+    ]);
+
+    $hoja->getStyle('A2:I3')->applyFromArray([
+        'font' => [
+            'bold' => true,
+            'size' => 11,
+            'color' => ['argb' => 'FF1F1F1F'],
+        ],
+        'fill' => [
+            'fillType' => Fill::FILL_SOLID,
+            'startColor' => ['argb' => 'FFD9EAF7'],
+        ],
+        'alignment' => [
+            'horizontal' =>
+                \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT,
+            'vertical' =>
+                \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+        ],
+    ]);
+
+    $hoja->getStyle('A5:I5')->applyFromArray([
+        'font' => [
+            'bold' => true,
+            'color' => ['argb' => 'FF000000'],
+        ],
+        'fill' => [
+            'fillType' => Fill::FILL_SOLID,
+            'startColor' => ['argb' => 'FF8EE78D'],
+        ],
+        'borders' => [
+            'allBorders' => [
+                'borderStyle' =>
+                    \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                'color' => ['argb' => 'FF808080'],
+            ],
+        ],
+        'alignment' => [
+            'horizontal' =>
+                \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+            'vertical' =>
+                \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+            'wrapText' => true,
+        ],
+    ]);
+
+    $hoja->getRowDimension(1)->setRowHeight(30);
+    $hoja->getRowDimension(2)->setRowHeight(22);
+    $hoja->getRowDimension(3)->setRowHeight(22);
+    $hoja->getRowDimension(5)->setRowHeight(38);
+
+    // Mantener visibles los encabezados al desplazarse.
+    $hoja->freezePane('A6');
+
+    // ==========================================
+    // INFORMACIÓN DE LOS EMPLEADOS
+    // ==========================================
+
+    $fila = 6;
+
+    foreach ($lData as $employee) {
+        // Faltas registradas en CAP.
+        // Confirmar que "faltas" representa días completos.
+        $faltasCap = 0;
+
+        foreach (($employee->incidences ?? []) as $inc) {
+            $faltasCap += (float) ($inc['faltas'] ?? 0);
+        }
+
+        // Primer registro EARS del empleado.
+        $ear = collect($employee->ears ?? [])->first();
+
+        $diasNoLaboradosSiie = $ear->not_work ?? 0;
+
+        // Mantener los valores en minutos para hacer la resta.
+        $retardosReales = (float) ($ear->time_delay_real ?? 0);
+        $retardosJustificados =
+            (float) ($ear->time_delay_justified ?? 0);
+        $retardosPermiso =
+            (float) ($ear->time_delay_permission ?? 0);
+
+        // Retardo restante = reales - justificados - permisos.
+        $retardoRestante =
+            $retardosReales
+            - $retardosJustificados
+            - $retardosPermiso;
+
+        $datos = [
+            $employee->num_employee ?? '',
+            $employee->name ?? '',
+            $faltasCap,
+            $diasNoLaboradosSiie,
+
+            SChecadorVsNominaUtils::minutesToHours(
+                $retardosReales
+            ),
+
+            SChecadorVsNominaUtils::minutesToHours(
+                $retardosJustificados
+            ),
+
+            SChecadorVsNominaUtils::minutesToHours(
+                $retardosPermiso
+            ),
+
+            SChecadorVsNominaUtils::minutesToHours(
+                $retardoRestante
+            ),
+
+            !empty($ear->have_bonus) ? 'Sí' : 'No',
         ];
 
-        foreach ($headers as $index => $header) {
+        foreach ($datos as $index => $valor) {
             $hoja->setCellValueByColumnAndRow(
                 $index + 1,
-                4,
-                $header
+                $fila,
+                $valor
             );
         }
 
-        $lastColumn = $hoja->getHighestColumn();
-
-        // Estilo de encabezados
-        $headerStyle = [
-            'font' => [
-                'bold' => true,
-            ],
-            'fill' => [
-                'fillType' => Fill::FILL_SOLID,
-                'startColor' => [
-                    'argb' => '8EE78D',
-                ],
-            ],
+        // Bordes y alineación de los datos.
+        $hoja->getStyle("A{$fila}:I{$fila}")->applyFromArray([
             'borders' => [
                 'allBorders' => [
-                    'borderStyle' => Border::BORDER_THIN,
-                    'color' => [
-                        'argb' => 'FF000000',
-                    ],
+                    'borderStyle' =>
+                        \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['argb' => 'FFD9D9D9'],
                 ],
             ],
             'alignment' => [
-                'horizontal' =>
-                    \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
                 'vertical' =>
                     \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
-                'wrapText' => true,
             ],
-        ];
+        ]);
 
-        $hoja->getStyle("A4:{$lastColumn}4")
-            ->applyFromArray($headerStyle);
+        // Alternar el color de las filas para facilitar la lectura.
+        if ($fila % 2 === 0) {
+            $hoja->getStyle("A{$fila}:I{$fila}")
+                ->getFill()
+                ->setFillType(Fill::FILL_SOLID);
 
-        $hoja->freezePane('A5');
-
-        $fila = 5;
-
-        foreach ($lData as $employee) {
-            /*
-            * Días no laborados en CAP.
-            * Se utiliza incidences['faltas'] como referencia provisional.
-            */
-            $faltasCap = 0;
-
-            foreach (($employee->incidences ?? []) as $inc) {
-                $faltasCap += (float) ($inc['faltas'] ?? 0);
-            }
-
-            /*
-            * Se toma el primer registro EARS del empleado.
-            * Confirmar si not_work corresponde a los días no laborados en SIIE.
-            */
-            $ear = collect($employee->ears ?? [])->first();
-
-            $diasNoLaboradosSiie = $ear->not_work ?? 0;
-
-            // Datos de la fila
-            $datos = [
-                $employee->num_employee ?? '',
-                $employee->name ?? '',
-                $faltasCap,
-                $diasNoLaboradosSiie,
-
-                SChecadorVsNominaUtils::minutesToHours(
-                    $ear->time_delay_real ?? 0
-                ),
-
-                SChecadorVsNominaUtils::minutesToHours(
-                    $ear->time_delay_justified ?? 0
-                ),
-
-                SChecadorVsNominaUtils::minutesToHours(
-                    $ear->time_delay_permission ?? 0
-                ),
-
-                SChecadorVsNominaUtils::minutesToHours(
-                    $ear->early_departure_original ?? 0
-                ),
-
-                SChecadorVsNominaUtils::minutesToHours(
-                    $ear->early_departure_permission ?? 0
-                ),
-
-                !empty($ear->have_bonus) ? 'Sí' : 'No',
-            ];
-
-            foreach ($datos as $index => $valor) {
-                $hoja->setCellValueByColumnAndRow(
-                    $index + 1,
-                    $fila,
-                    $valor
-                );
-            }
-
-            // Bordes de la fila
-            $hoja->getStyle("A{$fila}:{$lastColumn}{$fila}")
-                ->getBorders()
-                ->getAllBorders()
-                ->setBorderStyle(
-                    \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN
-                );
-
-            $fila++;
+            $hoja->getStyle("A{$fila}:I{$fila}")
+                ->getFill()
+                ->getStartColor()
+                ->setARGB('FFF2F6FA');
         }
 
-        // Ajustar ancho de las columnas
-        foreach (range('A', $hoja->getHighestColumn()) as $columna) {
-            $hoja->getColumnDimension($columna)->setAutoSize(true);
-        }
+        // Destacar el resultado del retardo restante.
+        $hoja->getStyle("H{$fila}")->getFont()->setBold(true);
 
-        // Alineación
-        $hoja->getStyle(
-            'A4:' . $lastColumn . max(4, $fila - 1)
-        )->getAlignment()->setVertical(
-            \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER
-        );
+        // Centrar los datos numéricos y el indicador de bono.
+        $hoja->getStyle("C{$fila}:I{$fila}")
+            ->getAlignment()
+            ->setHorizontal(
+                \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER
+            );
 
-        // Descargar Excel
-        $nombreDelDocumento = 'checadorVsNominaSimplificado.xlsx';
+        $hoja->getRowDimension($fila)->setRowHeight(22);
 
-        header(
-            'Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        );
-
-        header(
-            'Content-Disposition: attachment; filename="' .
-            $nombreDelDocumento . '"'
-        );
-
-        header('Cache-Control: max-age=0');
-
-        $writer = IOFactory::createWriter($documento, 'Xlsx');
-        $writer->save('php://output');
-
-        exit;
+        $fila++;
     }
+
+    // ==========================================
+    // AJUSTES FINALES
+    // ==========================================
+
+    // Anchos sugeridos para una lectura más cómoda.
+    $hoja->getColumnDimension('A')->setWidth(20);
+    $hoja->getColumnDimension('B')->setWidth(32);
+    $hoja->getColumnDimension('C')->setWidth(22);
+    $hoja->getColumnDimension('D')->setWidth(22);
+    $hoja->getColumnDimension('E')->setWidth(18);
+    $hoja->getColumnDimension('F')->setWidth(22);
+    $hoja->getColumnDimension('G')->setWidth(20);
+    $hoja->getColumnDimension('H')->setWidth(18);
+    $hoja->getColumnDimension('I')->setWidth(14);
+
+    // Filtro para poder buscar y ordenar empleados.
+    $ultimaFila = max(5, $fila - 1);
+    $hoja->setAutoFilter("A5:I{$ultimaFila}");
+
+    // ==========================================
+    // DESCARGA
+    // ==========================================
+
+    $nombreDelDocumento = 'checadorVsNominaSimplificado.xlsx';
+
+    header(
+        'Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    );
+
+    header(
+        'Content-Disposition: attachment; filename="' .
+        $nombreDelDocumento . '"'
+    );
+
+    header('Cache-Control: max-age=0');
+
+    $writer = IOFactory::createWriter($documento, 'Xlsx');
+    $writer->save('php://output');
+
+    exit;
+}
 
     /**
      * Metodo para obtener las incidencias del empleado
