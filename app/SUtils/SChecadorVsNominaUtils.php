@@ -445,6 +445,185 @@ class SChecadorVsNominaUtils {
         exit;
     }
 
+    public static function downloadExcelSimplificado($lData, $start_date, $end_date, $start_date_siie, $end_date_siie) {
+        $documento = new Spreadsheet();
+
+        $documento->getProperties()
+            ->setCreator('CAP')
+            ->setLastModifiedBy('CAP')
+            ->setTitle('Reporte simplificado checador vs nomina')
+            ->setSubject('Reporte simplificado checador vs nomina')
+            ->setDescription('Reporte generado por CAP');
+
+        $hoja = $documento->getActiveSheet();
+        $hoja->setTitle('Checador vs nomina');
+
+        // Título y periodo
+        $hoja->setCellValue('A1', 'Reporte checador vs nómina');
+        $hoja->setCellValue(
+            'A2',
+            $start_date . ' al ' . $end_date
+        );
+
+        // Encabezados
+        $headers = [
+            'Número empleado',
+            'Nombre',
+            'Días no laborados CAP',
+            'Días no laborados SIIE',
+            'Retardos reales',
+            'Retardos justificados',
+            'Retardos por permiso',
+            'Salidas anticipadas',
+            'Salidas anticipadas por permiso',
+            'Ganó bono',
+        ];
+
+        foreach ($headers as $index => $header) {
+            $hoja->setCellValueByColumnAndRow(
+                $index + 1,
+                4,
+                $header
+            );
+        }
+
+        $lastColumn = $hoja->getHighestColumn();
+
+        // Estilo de encabezados
+        $headerStyle = [
+            'font' => [
+                'bold' => true,
+            ],
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => [
+                    'argb' => '8EE78D',
+                ],
+            ],
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => [
+                        'argb' => 'FF000000',
+                    ],
+                ],
+            ],
+            'alignment' => [
+                'horizontal' =>
+                    \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                'vertical' =>
+                    \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                'wrapText' => true,
+            ],
+        ];
+
+        $hoja->getStyle("A4:{$lastColumn}4")
+            ->applyFromArray($headerStyle);
+
+        $hoja->freezePane('A5');
+
+        $fila = 5;
+
+        foreach ($lData as $employee) {
+            /*
+            * Días no laborados en CAP.
+            * Se utiliza incidences['faltas'] como referencia provisional.
+            */
+            $faltasCap = 0;
+
+            foreach (($employee->incidences ?? []) as $inc) {
+                $faltasCap += (float) ($inc['faltas'] ?? 0);
+            }
+
+            /*
+            * Se toma el primer registro EARS del empleado.
+            * Confirmar si not_work corresponde a los días no laborados en SIIE.
+            */
+            $ear = collect($employee->ears ?? [])->first();
+
+            $diasNoLaboradosSiie = $ear->not_work ?? 0;
+
+            // Datos de la fila
+            $datos = [
+                $employee->num_employee ?? '',
+                $employee->name ?? '',
+                $faltasCap,
+                $diasNoLaboradosSiie,
+
+                SChecadorVsNominaUtils::minutesToHours(
+                    $ear->time_delay_real ?? 0
+                ),
+
+                SChecadorVsNominaUtils::minutesToHours(
+                    $ear->time_delay_justified ?? 0
+                ),
+
+                SChecadorVsNominaUtils::minutesToHours(
+                    $ear->time_delay_permission ?? 0
+                ),
+
+                SChecadorVsNominaUtils::minutesToHours(
+                    $ear->early_departure_original ?? 0
+                ),
+
+                SChecadorVsNominaUtils::minutesToHours(
+                    $ear->early_departure_permission ?? 0
+                ),
+
+                !empty($ear->have_bonus) ? 'Sí' : 'No',
+            ];
+
+            foreach ($datos as $index => $valor) {
+                $hoja->setCellValueByColumnAndRow(
+                    $index + 1,
+                    $fila,
+                    $valor
+                );
+            }
+
+            // Bordes de la fila
+            $hoja->getStyle("A{$fila}:{$lastColumn}{$fila}")
+                ->getBorders()
+                ->getAllBorders()
+                ->setBorderStyle(
+                    \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN
+                );
+
+            $fila++;
+        }
+
+        // Ajustar ancho de las columnas
+        foreach (range('A', $hoja->getHighestColumn()) as $columna) {
+            $hoja->getColumnDimension($columna)->setAutoSize(true);
+        }
+
+        // Alineación
+        $hoja->getStyle(
+            'A4:' . $lastColumn . max(4, $fila - 1)
+        )->getAlignment()->setVertical(
+            \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER
+        );
+
+        // Descargar Excel
+        $nombreDelDocumento = 'checadorVsNominaSimplificado.xlsx';
+
+        header(
+            'Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        );
+
+        header(
+            'Content-Disposition: attachment; filename="' .
+            $nombreDelDocumento . '"'
+        );
+
+        header('Cache-Control: max-age=0');
+
+        $writer = IOFactory::createWriter($documento, 'Xlsx');
+        $writer->save('php://output');
+
+        exit;
+    }
+
     /**
      * Metodo para obtener las incidencias del empleado
      */
@@ -833,9 +1012,10 @@ class SChecadorVsNominaUtils {
                 }
             }
             $lEmployees = $lEmployees->values();
-            SChecadorVsNominaUtils::downloadExcel($lEmployees, $start_date, $end_date, $lEmployees[0]->ears[0]->external_date_ini, $lEmployees[0]->ears[0]->external_date_end);
+            //SChecadorVsNominaUtils::downloadExcel($lEmployees, $start_date, $end_date, $lEmployees[0]->ears[0]->external_date_ini, $lEmployees[0]->ears[0]->external_date_end);
             //SChecadorVsNominaUtils::sendExcel($lEmployees, $start_date, $end_date, $lEmployees[0]->ears[0]->external_date_ini, $lEmployees[0]->ears[0]->external_date_end, $oCfg->mails);
-        } catch (\Throwable $th) {
+            SChecadorVsNominaUtils::downloadExcelSimplificado($lEmployees, $start_date, $end_date, $lEmployees[0]->ears[0]->external_date_ini, $lEmployees[0]->ears[0]->external_date_end);
+            } catch (\Throwable $th) {
             \Log::error($th);
             return $th->getMessage();
         }
