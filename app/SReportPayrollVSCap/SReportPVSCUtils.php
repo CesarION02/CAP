@@ -776,7 +776,21 @@ class SReportPVSCUtils{
             $lData = SyncController::syncronizeWithPayroll($numPP, $oConfiguration->pay_type,$sConfiguration);
             $insertado = earningController::saveEarningFromJSON($lData,$numPP);
             if ($insertado) {
-                $lEmployee = employees::whereIn('id', $oConfiguration->employees)->get();
+                if (empty($oConfiguration->employees)){
+                    $lEmployeesDepartments = DB::table('employees as e')
+                    ->whereIn('e.department_id', $oConfiguration->departments)
+                    ->where('e.is_active', 1)
+                    ->where('e.is_delete', 0)
+                    ->select('id')
+                    ->get();
+
+                    $lEmployee = $lEmployeesDepartments->unique('id');
+
+                }
+                else{
+                    $lEmployee = employees::whereIn('id', $oConfiguration->employees)->get();
+                }
+                
                 SReportPVSCUtils::delayProcess($sStartDate, $sEndDate, $oConfiguration->pay_type, $lEmployee, $numPP);
             }
 
