@@ -445,51 +445,54 @@ class SChecadorVsNominaUtils {
         exit;
     }
 
+    
     public static function downloadExcelSimplificado(
-    $lData,
-    $start_date,
-    $end_date,
-    $start_date_siie,
-    $end_date_siie
+        $lData,
+        $start_date,
+        $end_date,
+        $start_date_siie,
+        $end_date_siie
     ) {
         $documento = new Spreadsheet();
-    
+
         $documento->getProperties()
             ->setCreator('CAP')
             ->setLastModifiedBy('CAP')
             ->setTitle('Reporte simplificado checador vs nomina')
             ->setSubject('Reporte simplificado checador vs nomina')
             ->setDescription('Reporte generado por CAP');
-    
+
         $hoja = $documento->getActiveSheet();
         $hoja->setTitle('Checador vs nomina');
-    
+
         // ==========================================
         // TÍTULO Y PERIODOS
         // ==========================================
-    
-        $hoja->mergeCells('A1:K1');
+
+        $hoja->mergeCells('A1:M1');
         $hoja->setCellValue('A1', 'REPORTE CHECADOR VS NÓMINA');
-    
-        $hoja->mergeCells('A2:K2');
+
+        $hoja->mergeCells('A2:M2');
         $hoja->setCellValue(
             'A2',
             'Periodo CAP: ' . $start_date . ' al ' . $end_date
         );
-    
-        $hoja->mergeCells('A3:K3');
+
+        $hoja->mergeCells('A3:M3');
         $hoja->setCellValue(
             'A3',
             'Periodo SIIE: ' . $start_date_siie . ' al ' . $end_date_siie
         );
-    
+
         // ==========================================
         // ENCABEZADOS
         // ==========================================
-    
+
         $headers = [
             'Número de empleado',
             'Nombre',
+            'Departamento',
+            'Puesto',
             'Faltas CAP',
             'Faltas justificadas CAP',
             'Faltas reales CAP',
@@ -500,7 +503,7 @@ class SChecadorVsNominaUtils {
             'Retardo restante',
             'Ganó bono',
         ];
-    
+
         foreach ($headers as $index => $header) {
             $hoja->setCellValueByColumnAndRow(
                 $index + 1,
@@ -508,12 +511,12 @@ class SChecadorVsNominaUtils {
                 $header
             );
         }
-    
+
         // ==========================================
-        // ESTILOS
+        // ESTILOS DEL TÍTULO
         // ==========================================
-    
-        $hoja->getStyle('A1:K1')->applyFromArray([
+
+        $hoja->getStyle('A1:M1')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'size' => 16,
@@ -530,8 +533,8 @@ class SChecadorVsNominaUtils {
                     \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
             ],
         ]);
-    
-        $hoja->getStyle('A2:K3')->applyFromArray([
+
+        $hoja->getStyle('A2:M3')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'size' => 11,
@@ -548,8 +551,12 @@ class SChecadorVsNominaUtils {
                     \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
             ],
         ]);
-    
-        $hoja->getStyle('A5:K5')->applyFromArray([
+
+        // ==========================================
+        // ESTILOS DE ENCABEZADOS
+        // ==========================================
+
+        $hoja->getStyle('A5:M5')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['argb' => 'FF000000'],
@@ -573,100 +580,94 @@ class SChecadorVsNominaUtils {
                 'wrapText' => true,
             ],
         ]);
-    
+
         $hoja->getRowDimension(1)->setRowHeight(30);
         $hoja->getRowDimension(2)->setRowHeight(22);
         $hoja->getRowDimension(3)->setRowHeight(22);
         $hoja->getRowDimension(5)->setRowHeight(38);
-    
+
         // Mantener visibles los encabezados al desplazarse.
         $hoja->freezePane('A6');
-    
+
         // ==========================================
         // INFORMACIÓN DE LOS EMPLEADOS
         // ==========================================
-    
+
         $fila = 6;
-    
+
         foreach ($lData as $employee) {
-    
+
             // ------------------------------------------
             // FALTAS CAP
             // ------------------------------------------
-    
+
             $faltasCap = 0;
             $faltasJustificadasCap = 0;
-    
+
             foreach (($employee->incidences ?? []) as $inc) {
                 $faltasCap += (float) ($inc['faltas'] ?? 0);
-            
+
                 $faltasJustificadasCap += (float) (
                     $inc['faltasJustificadas'] ?? 0
                 );
             }
-    
+
             // Faltas reales CAP = faltas CAP - faltas justificadas.
             $faltasRealesCap = $faltasCap - $faltasJustificadasCap;
-    
+
             // ------------------------------------------
             // INFORMACIÓN SIIE
             // ------------------------------------------
-    
+
             // Primer registro EARS del empleado.
             $ear = collect($employee->ears ?? [])->first();
-    
+
             $diasNoLaboradosSiie = $ear->not_work ?? 0;
-    
+
             // Mantener los valores en minutos para hacer la resta.
             $retardosReales = (float) ($ear->time_delay_real ?? 0);
-    
+
             $retardosJustificados = (float) (
                 $ear->time_delay_justified ?? 0
             );
-    
+
             $retardosPermiso = (float) (
                 $ear->time_delay_permission ?? 0
             );
-    
+
             // Retardo restante = reales - justificados - permisos.
             $retardoRestante =
                 $retardosReales
                 - $retardosJustificados
                 - $retardosPermiso;
-    
+
+            // ------------------------------------------
+            // DEPARTAMENTO Y PUESTO
+            // ------------------------------------------
+
+            $departamento = $employee->department_name ?? '';
+            $puesto = $employee->position_name ?? '';
+
             // ------------------------------------------
             // DATOS DE LA FILA
             // ------------------------------------------
-    
+
             $datos = [
                 $employee->num_employee ?? '',
                 $employee->name ?? '',
-    
+                $departamento,
+                $puesto,
                 $faltasCap,
                 $faltasJustificadasCap,
                 $faltasRealesCap,
-    
                 $diasNoLaboradosSiie,
-    
-                SChecadorVsNominaUtils::minutesToHours(
-                    $retardosReales
-                ),
-    
-                SChecadorVsNominaUtils::minutesToHours(
-                    $retardosJustificados
-                ),
-    
-                SChecadorVsNominaUtils::minutesToHours(
-                    $retardosPermiso
-                ),
-    
-                SChecadorVsNominaUtils::minutesToHours(
-                    $retardoRestante
-                ),
-    
+                SChecadorVsNominaUtils::minutesToHours($retardosReales),
+                SChecadorVsNominaUtils::minutesToHours($retardosJustificados),
+                SChecadorVsNominaUtils::minutesToHours($retardosPermiso),
+                SChecadorVsNominaUtils::minutesToHours($retardoRestante),
                 !empty($ear->have_bonus) ? 'Sí' : 'No',
             ];
-    
+
             foreach ($datos as $index => $valor) {
                 $hoja->setCellValueByColumnAndRow(
                     $index + 1,
@@ -674,12 +675,12 @@ class SChecadorVsNominaUtils {
                     $valor
                 );
             }
-    
+
             // ------------------------------------------
             // ESTILOS DE LA FILA
             // ------------------------------------------
-    
-            $hoja->getStyle("A{$fila}:K{$fila}")->applyFromArray([
+
+            $hoja->getStyle("A{$fila}:M{$fila}")->applyFromArray([
                 'borders' => [
                     'allBorders' => [
                         'borderStyle' =>
@@ -692,75 +693,77 @@ class SChecadorVsNominaUtils {
                         \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
                 ],
             ]);
-    
+
             // Alternar el color de las filas para facilitar la lectura.
             if ($fila % 2 === 0) {
-                $hoja->getStyle("A{$fila}:K{$fila}")
+                $hoja->getStyle("A{$fila}:M{$fila}")
                     ->getFill()
                     ->setFillType(Fill::FILL_SOLID);
-    
-                $hoja->getStyle("A{$fila}:K{$fila}")
+
+                $hoja->getStyle("A{$fila}:M{$fila}")
                     ->getFill()
                     ->getStartColor()
                     ->setARGB('FFF2F6FA');
             }
-    
-            // Destacar el resultado del retardo restante.
-            $hoja->getStyle("J{$fila}")->getFont()->setBold(true);
-    
+
+            // Destacar el resultado del retardo restante (columna L).
+            $hoja->getStyle("L{$fila}")->getFont()->setBold(true);
+
             // Centrar los datos numéricos y el indicador de bono.
-            $hoja->getStyle("C{$fila}:K{$fila}")
+            $hoja->getStyle("E{$fila}:M{$fila}")
                 ->getAlignment()
                 ->setHorizontal(
                     \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER
                 );
-    
+
             $hoja->getRowDimension($fila)->setRowHeight(22);
-    
+
             $fila++;
         }
-    
+
         // ==========================================
         // AJUSTES FINALES
         // ==========================================
-    
+
         // Anchos de columnas.
         $hoja->getColumnDimension('A')->setWidth(20);
         $hoja->getColumnDimension('B')->setWidth(32);
-        $hoja->getColumnDimension('C')->setWidth(16);
-        $hoja->getColumnDimension('D')->setWidth(24);
-        $hoja->getColumnDimension('E')->setWidth(18);
-        $hoja->getColumnDimension('F')->setWidth(22);
+        $hoja->getColumnDimension('C')->setWidth(28);
+        $hoja->getColumnDimension('D')->setWidth(28);
+        $hoja->getColumnDimension('E')->setWidth(14);
+        $hoja->getColumnDimension('F')->setWidth(24);
         $hoja->getColumnDimension('G')->setWidth(18);
         $hoja->getColumnDimension('H')->setWidth(22);
-        $hoja->getColumnDimension('I')->setWidth(20);
-        $hoja->getColumnDimension('J')->setWidth(18);
-        $hoja->getColumnDimension('K')->setWidth(14);
-    
+        $hoja->getColumnDimension('I')->setWidth(18);
+        $hoja->getColumnDimension('J')->setWidth(22);
+        $hoja->getColumnDimension('K')->setWidth(20);
+        $hoja->getColumnDimension('L')->setWidth(18);
+        $hoja->getColumnDimension('M')->setWidth(14);
+
         // Filtro para buscar y ordenar empleados.
         $ultimaFila = max(5, $fila - 1);
-        $hoja->setAutoFilter("A5:K{$ultimaFila}");
-    
+        $hoja->setAutoFilter("A5:M{$ultimaFila}");
+
         // ==========================================
         // DESCARGA
         // ==========================================
-    
+
         $nombreDelDocumento = 'checadorVsNominaSimplificado.xlsx';
-    
+
         header(
             'Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         );
-    
+
         header(
             'Content-Disposition: attachment; filename="' .
             $nombreDelDocumento . '"'
         );
-    
+
         header('Cache-Control: max-age=0');
-    
+
         $writer = IOFactory::createWriter($documento, 'Xlsx');
         $writer->save('php://output');
-    
+
         exit;
     }
 
@@ -1138,6 +1141,8 @@ class SChecadorVsNominaUtils {
                         ->get();
 
             $lEmployeesDepartments = \DB::table('employees as e')
+                        ->join('departments as d', 'd.id', '=', 'e.department_id')
+                        ->join('jobs as j', 'j.id', '=', 'e.job_id')
                         ->whereIn('e.department_id', $oCfg->departments)
                         ->where('e.is_active', 1)
                         ->where('e.is_delete', 0)
@@ -1145,7 +1150,9 @@ class SChecadorVsNominaUtils {
                         ->select(
                             'e.id as employee_id',
                             'e.num_employee',
-                            'e.name'
+                            'e.name',
+                            'd.name as department_name',
+                            'j.name as position_name'
                         )
                         ->get();
 
