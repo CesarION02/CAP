@@ -1147,6 +1147,7 @@ class SChecadorVsNominaUtils {
                         ->where('e.is_active', 1)
                         ->where('e.is_delete', 0)
                         ->where('e.way_pay_id', $type_prepayroll)
+                        ->where('e.admission_date', '<',$start_date)
                         ->select(
                             'e.id as employee_id',
                             'e.num_employee',
