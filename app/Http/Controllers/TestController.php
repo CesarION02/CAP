@@ -260,11 +260,11 @@ class TestController extends Controller
             'companies' => [],
             'areas' => [],
             'departments' => [
-                11, 14, 15, 16, 17, 105, 111, 112, 113,
-                114, 116, 117, 118, 119, 120, 121, 122,
-                123, 124, 125, 126, 127, 128, 132, 134,
-                140, 141, 143, 146, 147
-            ],
+            1, 7, 8, 9, 11, 12, 14, 15, 16, 105,106, 111, 112, 113,
+            116, 117, 118, 119, 120, 121, 122,
+            123, 124, 125, 128, 132, 137,138,139,
+            140, 143, 145, 147,148,149,152,153,155,157,160,162
+        ],
             'departments_cap' => [],
             'departments_siie' => [],
             'employees' => [],
@@ -278,7 +278,7 @@ class TestController extends Controller
 
         return SChecadorVsNominaUtils::getReport(
             json_encode($cfg),
-            'Q_169'
+            'Q_170'
         );
     }
     public function testManageTaskReport($id = 104)
@@ -290,10 +290,10 @@ class TestController extends Controller
         'companies' => [],
         'areas' => [],
         'departments' => [
-            11, 14, 15, 16, 17, 105, 111, 112, 113,
-            114, 116, 117, 118, 119, 120, 121, 122,
-            123, 124, 125, 126, 127, 128, 132, 134,
-            140, 141, 143, 146, 147
+            1, 7, 8, 9, 11, 12, 14, 15, 16, 105,106, 111, 112, 113,
+            116, 117, 118, 119, 120, 121, 122,
+            123, 124, 125, 128, 132, 137,138,139,
+            140, 143, 145, 147,148,149,152,153,155,157,160,162
         ],
         'departments_cap' => [],
         'departments_siie' => [],
@@ -302,7 +302,7 @@ class TestController extends Controller
 
     return SReportPVSCUtils::manageTaskReport(
         json_encode($cfg),
-        'Q_171'
+        'Q_170'
     );
 }
 }
