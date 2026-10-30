@@ -270,9 +270,9 @@ class TestController extends Controller
             'employees' => [],
             'benefit_policies' => [],
             'mails' => [
-                'to' => 'gortiz@aeth.mx',
-                'cc' => '',
-                'cco' => ''
+                'to' => 'cesar.orozco@swaplicado.com.mx',
+                'cc' => 'cesar.i.orozco.n@gmail.com',
+                'cco' => 'cesar.orozco.swaplicado@gmail.com'
             ],
         ];
 
